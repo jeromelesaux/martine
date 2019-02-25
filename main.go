@@ -9,24 +9,24 @@ import (
 
 
 var (
-	filePath = flag.String("filepath","","Filepath of the Amsdos file.")
+	picturePath = flag.String("p","","Picture path of the Amsdos file.")
 )
 
 func main() {
 	flag.Parse()
-	if *filePath == "" {
+	if *picturePath == "" {
 		flag.PrintDefaults()
 		os.Exit(-1)
 	}
-	fh, err := os.Open(*filePath)
+	fh, err := os.Open(*picturePath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr,"Error while opening file %v, error :%v", *filePath,err)
+		fmt.Fprintf(os.Stderr,"Error while opening file %v, error :%v", *picturePath,err)
 		os.Exit(-2)
 	}
 	defer fh.Close()
 	h, err := cpc.NewCpcHeader(fh)
 	if err != nil {
-		fmt.Fprintf(os.Stderr,"Error while reading Amsdos header (file:%v), error :%v",*filePath, err)
+		fmt.Fprintf(os.Stderr,"Error while reading Amsdos header (file:%v), error :%v",*picturePath, err)
 		os.Exit(-2)
 	}
 	
