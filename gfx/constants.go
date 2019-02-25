@@ -57,7 +57,7 @@ var (
 	PastelBlue    = CpcColor{HardwareNumber: 31, FirmwareNumber: 14, HardwareValues: []int16{0x5F}, Color: color.RGBA{A: 1, R:0x7F, G:0x7F, B:0xFF}}
 )
 
-var CpcOldPalette = []color.Color{White.Color,
+var CpcOldPalette = color.Palette{White.Color,
 	SeaGreen.Color,
 	PastelYellow.Color,
 	Blue.Color,
