@@ -82,31 +82,32 @@ func main() {
 	}
 	out := convert.Resize(in, size)
 	fmt.Fprintf(os.Stdout,"Saving resized image into (%s)\n", *picturePath+"_resized.png")
-	fw,err := os.Create(*picturePath+"_resized.jpg")
+	fwr,err := os.Create(*picturePath+"_resized.png")
 	if err != nil {
 		fmt.Fprintf(os.Stderr,"Cannot create new image (%s) error %v\n",*picturePath+"_resized.png",err)
 		os.Exit(-2)
 	}
-	if err := png.Encode(fw,out); err != nil {
+	if err := png.Encode(fwr,out); err != nil {
 		fmt.Fprintf(os.Stderr,"Cannot create new image (%s) as png error %v\n",*picturePath+"_resized.png",err)
-		fw.Close()
+		fwr.Close()
 		os.Exit(-2)
 	}
-	fw.Close()
+	fwr.Close()
+
 	downgraded := convert.DowngradingPalette(out,size)
 	fmt.Fprintf(os.Stdout,"Saving downgraded image into (%s)\n", *picturePath+"_down.png")
-	fw,err = os.Create(*picturePath+"_down.jpg")
+	fwd,err:= os.Create(*picturePath+"_down.png")
 	if err != nil {
-		fw.Close()
 		fmt.Fprintf(os.Stderr,"Cannot create new image (%s) error %v\n",*picturePath+"_down.png",err)
 		os.Exit(-2)
 	}
-	fw.Close()
-	if err := png.Encode(fw,downgraded); err != nil {
-		fw.Close()
+	
+	if err := png.Encode(fwd,downgraded); err != nil {
+		fwd.Close()
 		fmt.Fprintf(os.Stderr,"Cannot create new image (%s) as png error %v\n",*picturePath+"_down.png",err)
 		os.Exit(-2)
 	}
-	
+	fwd.Close()
+
 
 }
