@@ -30,8 +30,8 @@ func (s *Size) ToString() string {
 }
 
 var (
-	Mode0    = Size{Width: 160, Height: 200, LinesNumber: 200, ColumnsNumber: 80, ColorsAvailable: 16}
-	Mode1    = Size{Width: 320, Height: 200, LinesNumber: 200, ColumnsNumber: 80, ColorsAvailable: 4}
+	Mode0    = Size{Width: 160, Height: 200, LinesNumber: 200, ColumnsNumber: 20, ColorsAvailable: 16}
+	Mode1    = Size{Width: 320, Height: 200, LinesNumber: 200, ColumnsNumber: 40, ColorsAvailable: 4}
 	Mode2    = Size{Width: 640, Height: 200, LinesNumber: 200, ColumnsNumber: 80, ColorsAvailable: 2}
 	Overscan = Size{Width: 640, Height: 400, LinesNumber: 272, ColumnsNumber: 96, ColorsAvailable: 16}
 	SelfMode = Size{}

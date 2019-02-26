@@ -94,7 +94,7 @@ func main() {
 	}
 	fwr.Close()
 
-	downgraded := convert.DowngradingPalette(out,size)
+	newPalette, downgraded := convert.DowngradingPalette(out,size)
 	fmt.Fprintf(os.Stdout,"Saving downgraded image into (%s)\n", *picturePath+"_down.png")
 	fwd,err:= os.Create(*picturePath+"_down.png")
 	if err != nil {
@@ -109,5 +109,6 @@ func main() {
 	}
 	fwd.Close()
 
+	
 
 }

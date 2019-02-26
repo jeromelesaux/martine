@@ -14,7 +14,7 @@ func Resize(in image.Image, size gfx.Size) *image.NRGBA {
 	return imaging.Resize(in, size.Width, size.Height, imaging.Lanczos)
 }
 
-func DowngradingPalette(in *image.NRGBA, size gfx.Size)  *image.NRGBA {
+func DowngradingPalette(in *image.NRGBA, size gfx.Size)  (color.Palette,*image.NRGBA) {
 	fmt.Fprintf(os.Stdout, "* Step 2 * Downgrading palette image\n")
 	p,out := downgrade(in)
 	fmt.Fprintf(os.Stdout,"Downgraded palette contains (%d) colors\n",len(p))
@@ -30,7 +30,7 @@ func DowngradingPalette(in *image.NRGBA, size gfx.Size)  *image.NRGBA {
 			phasis++
 		}
 	}
-	return out
+	return p,out
 }
 
 func downgrade(in *image.NRGBA) (color.Palette,*image.NRGBA) {
