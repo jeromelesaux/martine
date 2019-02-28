@@ -2,11 +2,13 @@ package gfx
 
 import (
 	"path/filepath"
+	"encoding/binary"
 	"image"
 	"image/color"
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"github.com/jeromelesaux/m4client/cpc"
 )
 
@@ -68,18 +70,23 @@ func TransformMode0(in *image.NRGBA, p color.Palette, filePath string) error {
 	header := cpc.CpcHead{}
 
 	filename := filepath.Base(filePath)
-	cpcFilename := filename[0:8] + ".SCR"
-	header.Filename = []byte(cpcFilename)[0:15]
+	extension := filepath.Ext(filename)
+	cpcFilename := strings.Replace(filename,extension, ".SCR",-1)
+	copy(header.Filename[:],cpcFilename)
 	header.Type = 1
 	header.User = 0
 	header.Address = 0x4000
-
+	header.Size = 0x4000
+	header.Size2 = 0x400
+	header.Checksum = int16(header.ComputedChecksum16())
 	fw, err := os.Create(cpcFilename)
 	if err != nil {
 		fmt.Fprintf(os.Stderr,"Error while creating file (%s) error :%s",cpcFilename,err)
 		return err
 	}
-	
+	binary.Write(fw,binary.LittleEndian,header)
+	fw.Write(bw)
+	fw.Close()
 
 	return nil
 }
