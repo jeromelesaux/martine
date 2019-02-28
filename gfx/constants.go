@@ -1,13 +1,14 @@
 package gfx
 
 import (
+	"errors"
 	"fmt"
 	"image/color"
 )
 
 type Size struct {
 	Width           int
-	Height            int
+	Height          int
 	LinesNumber     int
 	ColumnsNumber   int
 	ColorsAvailable int
@@ -35,6 +36,9 @@ var (
 	Mode2    = Size{Width: 640, Height: 200, LinesNumber: 200, ColumnsNumber: 80, ColorsAvailable: 2}
 	Overscan = Size{Width: 640, Height: 400, LinesNumber: 272, ColumnsNumber: 96, ColorsAvailable: 16}
 	SelfMode = Size{}
+)
+var (
+	CpcColorNotFound = errors.New("Cpc color not found")
 )
 
 // values 50% RGB = 0x7F
@@ -96,4 +100,99 @@ var CpcOldPalette = color.Palette{White.Color,
 	Mauve.Color,
 	Yellow.Color,
 	PastelBlue.Color,
+}
+
+func ColorsAreEquals(c1, c2 color.Color) bool {
+	r1, g1, b1, a1 := c1.RGBA()
+	r2, g2, b2, a2 := c2.RGBA()
+	if r1 == r2 && g1 == g2 && b1 == b2 && a1 == a2 {
+		return true
+	}
+	return false
+}
+
+func FirmwareNumber(c color.Color) (int, error) {
+	if ColorsAreEquals(White.Color, c) {
+		return White.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(SeaGreen.Color, c) {
+		return SeaGreen.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(PastelYellow.Color, c) {
+		return PastelYellow.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(Blue.Color, c) {
+		return Blue.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(Purple.Color, c) {
+		return Purple.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(Cyan.Color, c) {
+		return Cyan.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(Pink.Color, c) {
+		return Pink.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(BrightYellow.Color, c) {
+		return BrightYellow.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(BrightWhite.Color, c) {
+		return BrightWhite.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(BrightRed.Color, c) {
+		return BrightRed.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(BrightMagenta.Color, c) {
+		return BrightMagenta.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(Orange.Color, c) {
+		return Orange.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(PastelMagenta.Color, c) {
+		return PastelMagenta.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(BrightGreen.Color, c) {
+		return BrightGreen.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(BrightCyan.Color, c) {
+		return BrightCyan.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(Black.Color, c) {
+		return Black.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(BrightBlue.Color, c) {
+		return BrightBlue.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(Green.Color, c) {
+		return Green.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(SkyBlue.Color, c) {
+		return SkyBlue.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(Magenta.Color, c) {
+		return Magenta.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(PastelGreen.Color, c) {
+		return PastelGreen.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(Lime.Color, c) {
+		return Lime.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(PastelCyan.Color, c) {
+		return PastelCyan.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(Red.Color, c) {
+		return Red.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(Mauve.Color, c) {
+		return Mauve.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(Yellow.Color, c) {
+		return Yellow.FirmwareNumber, nil
+	}
+	if ColorsAreEquals(PastelBlue.Color, c) {
+		return PastelBlue.FirmwareNumber, nil
+	}
+	return -1, CpcColorNotFound
+
 }

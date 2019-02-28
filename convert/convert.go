@@ -9,6 +9,10 @@ import (
 	"os"
 )
 
+func FirmwareNumber(c color.Color) (int,error) {
+	return gfx.FirmwareNumber(c)
+}
+
 func Resize(in image.Image, size gfx.Size) *image.NRGBA {
 	fmt.Fprintf(os.Stdout, "* Step 1 * Resizing image to width %d pixels heigh %d\n", size.Width, size.Height)
 	return imaging.Resize(in, size.Width, size.Height, imaging.Lanczos)
