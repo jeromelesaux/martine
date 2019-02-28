@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"path/filepath"
 	"fmt"
 	"github.com/jeromelesaux/screenverter/convert"
 	"github.com/jeromelesaux/screenverter/gfx"
@@ -22,12 +23,16 @@ var (
 
 func main() {
 	var size gfx.Size
+	var filename, extension string 
 	flag.Parse()
 	// picture path to convert
 	if *picturePath == "" {
 		flag.PrintDefaults()
 		os.Exit(-1)
 	}
+	filename = filepath.Base(*picturePath)
+	extension = filepath.Ext(*picturePath)
+
 	// output directory to store results
 	if *output != "" {
 		fi, err := os.Stat(*output)
@@ -80,6 +85,9 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Cannot decode the image %s error %v", *picturePath, err)
 		os.Exit(-2)
 	}
+
+	fmt.Fprintf(os.Stderr,"Filename :%s, extension:%s\n",filename, extension)
+
 	out := convert.Resize(in, size)
 	fmt.Fprintf(os.Stdout,"Saving resized image into (%s)\n", *picturePath+"_resized.png")
 	fwr,err := os.Create(*picturePath+"_resized.png")
@@ -109,6 +117,5 @@ func main() {
 	}
 	fwd.Close()
 
-	
-
+	gfx.Transform(downgraded,newPalette,size, *picturePath)
 }
