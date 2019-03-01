@@ -45,10 +45,14 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath string
 	firmwareColorUsed := make(map[int]int, 0)
 	fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
 	fmt.Println(in.Bounds())
+	offset := 8
+	y:=0
 
-		for j := 0; j < 8; j++ {
-			for y:= in.Bounds().Min.Y + j; y < in.Bounds().Max.Y; y+=8 {
-			for x := 0; x < in.Bounds().Max.X; x += 2 {
+	for j := 0; j < in.Bounds().Max.Y/offset -1; j++ {
+		
+		for y = in.Bounds().Min.Y+j; y < in.Bounds().Max.Y; y += in.Bounds().Max.Y / offset -1{ 
+			for  x:=0; x < in.Bounds().Max.X; x+=2 {
+				
 				c1 := in.At(x, y)
 				pp1, err := PalettePosition(c1, p)
 				if err != nil {
@@ -63,7 +67,7 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath string
 					fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 					pp2 = 0
 				}
-
+	
 				firmwareColorUsed[pp2]++
 
 				//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x+1, y+j, c1, pp2)
@@ -97,34 +101,35 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath string
 				if uint8(pp2)&8 == 8 {
 					pixel++
 				}
-				fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
+				//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 				// MACRO PIXM0 COL2,COL1
 				// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 				//	MEND
 				//pixel = (uint8(pp1)&8)/8 | ((uint8(pp1)&4)*4) | ((uint8(pp1)&2)*2) | ((uint8(pp1)&1)*64) | ((uint8(pp2)&8)/4) | ((uint8(pp2)&4)*8) | ((uint8(pp2)&2)*4) | ((uint8(pp2)&1)*128)
 				//pixel = (uint8(pp2) & 128)>>7  + (uint8(pp1) & 32)>>4  + (uint8(pp2) & 8)>>1 + (uint8(pp1) & 2)<<2 +
 				// (uint8(pp2) & 64 )>>6 + (uint8(pp1) & 16)>>3  + (uint8(pp2) & 4) + (uint8(pp1) & 1)<<3
-				bw = append(bw, pixel)
+				bw = append(bw, pixel)				
 			}
-
+			fmt.Fprintf(os.Stdout,"y:%d\n",y)
 		}
 	}
+
 	fmt.Println(firmwareColorUsed)
-	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x4000, Exec: 0xC000, Size: 0x4000, Size2: 0x4000}
+	header := cpc.CpcHead{Type: 2, User: 0, Address: 0xc000, Exec: 0xC7D0,
+		 Size: uint16(binary.Size(bw)), Size2: uint16(binary.Size(bw)),LogicalSize:uint16(binary.Size(bw))}
 	filename := filepath.Base(filePath)
 	extension := filepath.Ext(filename)
 	cpcFilename := strings.ToUpper(strings.Replace(filename, extension, ".SCR", -1))
-	copy(header.Filename[:], cpcFilename)
+	copy(header.Filename[:], strings.Replace(cpcFilename,".","",-1))
 	header.Checksum = uint16(header.ComputedChecksum16())
-	fmt.Fprintf(os.Stderr, "Header lenght %d", binary.Size(header))
+	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
 	fw, err := os.Create(cpcFilename)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s", cpcFilename, err)
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
 		return err
 	}
 	binary.Write(fw, binary.LittleEndian, header)
 	binary.Write(fw, binary.LittleEndian, bw)
-	//fw.Write(bw)
 	fw.Close()
 
 	return nil
