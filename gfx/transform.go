@@ -42,29 +42,30 @@ func PalettePosition(c color.Color, p color.Palette) (int, error) {
 
 func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath string) error {
 	bw := make([]byte, 0)
-	firmwareColorUsed := make(map[int]int,0)
+	firmwareColorUsed := make(map[int]int, 0)
 	fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
 	fmt.Println(in.Bounds())
-	for j := 0; j < 8; j++ {
-	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y/8; y ++ {
-			for x := in.Bounds().Min.X; x+2 < in.Bounds().Max.X; x += 2 {
-				c1 := in.At(x, y+j)
-				pp1, err := PalettePosition(c1,p)
+
+		for j := 0; j < 8; j++ {
+			for y:= in.Bounds().Min.Y + j; y < in.Bounds().Max.Y; y+=8 {
+			for x := 0; x < in.Bounds().Max.X; x += 2 {
+				c1 := in.At(x, y)
+				pp1, err := PalettePosition(c1, p)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y+j)
-					continue
+					fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+					pp1 = 0
 				}
 				firmwareColorUsed[pp1]++
 				//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
-				c2 := in.At(x+1, y+j)
-				pp2, err := PalettePosition(c2,p)
+				c2 := in.At(x+1, y)
+				pp2, err := PalettePosition(c2, p)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in paletqte\n", c2, x+1, y+j)
-					continue
+					fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+					pp2 = 0
 				}
-				
+
 				firmwareColorUsed[pp2]++
-				
+
 				//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x+1, y+j, c1, pp2)
 				var pixel byte
 				//fmt.Fprintf(os.Stderr,"1:(%.8b)2:(%.8b)4:(%.8b)8:(%.8b)\n",1,2,4,8)
@@ -96,7 +97,7 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath string
 				if uint8(pp2)&8 == 8 {
 					pixel++
 				}
-				fmt.Fprintf(os.Stderr, "pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", pp1, pp2, pixel, pixel, pixel)
+				fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 				// MACRO PIXM0 COL2,COL1
 				// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 				//	MEND
@@ -105,6 +106,7 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath string
 				// (uint8(pp2) & 64 )>>6 + (uint8(pp1) & 16)>>3  + (uint8(pp2) & 4) + (uint8(pp1) & 1)<<3
 				bw = append(bw, pixel)
 			}
+
 		}
 	}
 	fmt.Println(firmwareColorUsed)
