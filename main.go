@@ -19,6 +19,7 @@ var (
 	height      = flag.Int("h", -1, "Custom output height in pixels.")
 	mode        = flag.String("m", "", "Output mode to use (mode0,mode1,mode2 or overscan available).")
 	output      = flag.String("o", "", "Output directory")
+	overscan    = flag.String("os","","Overscan mode")
 )
 
 func main() {
@@ -63,8 +64,6 @@ func main() {
 			size = gfx.Mode1
 		case "mode2":
 			size = gfx.Mode2
-		case "overscan":
-			size = gfx.Overscan
 		default:
 			fmt.Fprintf(os.Stderr, "mode %s not defined\n", *mode)
 			flag.PrintDefaults()
@@ -102,7 +101,11 @@ func main() {
 	}
 	fwr.Close()
 
-	newPalette, downgraded := convert.DowngradingPalette(out,size)
+	newPalette, downgraded, err := convert.DowngradingPalette(out,size)
+	if err != nil {
+		fmt.Fprintf(os.Stderr,"Cannot downgrade colors palette for this image %s\n",*picturePath)
+	}
+	
 	fmt.Fprintf(os.Stdout,"Saving downgraded image into (%s)\n", *picturePath+"_down.png")
 	fwd,err:= os.Create(*picturePath+"_down.png")
 	if err != nil {

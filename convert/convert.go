@@ -2,12 +2,15 @@ package convert
 
 import (
 	"fmt"
+	"errors"
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/screenverter/gfx"
 	"image"
 	"image/color"
 	"os"
 )
+
+var ErrorCannotDowngradePalette = errors.New("Cannot Downgrade colors palette.")
 
 func FirmwareNumber(c color.Color) (int,error) {
 	return gfx.FirmwareNumber(c)
@@ -18,23 +21,29 @@ func Resize(in image.Image, size gfx.Size) *image.NRGBA {
 	return imaging.Resize(in, size.Width, size.Height, imaging.Lanczos)
 }
 
-func DowngradingPalette(in *image.NRGBA, size gfx.Size)  (color.Palette,*image.NRGBA) {
+
+func DowngradingPalette(in *image.NRGBA, size gfx.Size)  (color.Palette,*image.NRGBA,error) {
 	fmt.Fprintf(os.Stdout, "* Step 2 * Downgrading palette image\n")
 	p,out := downgrade(in)
 	fmt.Fprintf(os.Stdout,"Downgraded palette contains (%d) colors\n",len(p))
+	colorsNumber := len(p)
+
 	if len(p) > size.ColorsAvailable {
 		fmt.Fprintf(os.Stderr,"Downgraded palette size (%d) is greater than the available colors in this mode (%d)\n",len(p),size.ColorsAvailable)
 		phasis := 1
 		for {
-			fmt.Fprintf(os.Stderr,"Phasis (%d) downgrade colors palette\n",phasis)
+			fmt.Fprintf(os.Stderr,"Phasis (%d) downgrade colors palette palette (%d)\n",phasis,len(p))
 			p, out = downgrade(out)
 			if len(p) <= size.ColorsAvailable {
 				break
 			}
 			phasis++
+			if colorsNumber >= len(p) {
+				return p, in,ErrorCannotDowngradePalette
+			}
 		}
 	}
-	return p,out
+	return p,out,nil
 }
 
 func downgrade(in *image.NRGBA) (color.Palette,*image.NRGBA) {
