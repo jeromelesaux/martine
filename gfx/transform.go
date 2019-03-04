@@ -1,7 +1,6 @@
 package gfx
 
 import (
-	"github.com/jeromelesaux/screenverter/export"
 	"errors"
 	"fmt"
 	"image"
@@ -122,7 +121,11 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath string
 	}
 
 	fmt.Println(firmwareColorUsed)
-	return export.Scr(filePath,bw)
+	if err := Scr(filePath,bw); err != nil {
+		fmt.Fprintf(os.Stderr,"Error while saving file %s error :%v",filePath,err)
+		return err
+	}
+	return Pal(filePath,p,0)
 }
 
 func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath string, overscan bool) error {
@@ -213,7 +216,11 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath string
 	}
 
 	fmt.Println(firmwareColorUsed)
-	return export.Scr(filePath, bw)
+	if err := Scr(filePath,bw); err != nil {
+		fmt.Fprintf(os.Stderr,"Error while saving file %s error :%v",filePath,err)
+		return err
+	}
+	return Pal(filePath,p,1)
 }
 
 func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath string, overscan bool) error {
@@ -333,5 +340,9 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath string
 	}
 
 	fmt.Println(firmwareColorUsed)
-	return export.Scr(filePath,bw)
+	if err := Scr(filePath,bw); err != nil {
+		fmt.Fprintf(os.Stderr,"Error while saving file %s error :%v",filePath,err)
+		return err
+	}
+	return Pal(filePath,p,2)
 }
