@@ -34,7 +34,7 @@ var (
 	Mode0         = Size{Width: 160, Height: 200, LinesNumber: 200, ColumnsNumber: 20, ColorsAvailable: 16}
 	Mode1         = Size{Width: 320, Height: 200, LinesNumber: 200, ColumnsNumber: 40, ColorsAvailable: 4}
 	Mode2         = Size{Width: 640, Height: 200, LinesNumber: 200, ColumnsNumber: 80, ColorsAvailable: 2}
-	OverscanMode0 = Size{Width: 192, Height: 232, LinesNumber: 272, ColumnsNumber: 96, ColorsAvailable: 16}
+	OverscanMode0 = Size{Width: 192, Height: 272, LinesNumber: 272, ColumnsNumber: 96, ColorsAvailable: 16}
 	OverscanMode1 = Size{Width: 384, Height: 272, LinesNumber: 272, ColumnsNumber: 96, ColorsAvailable: 4}
 	OverscanMode2 = Size{Width: 768, Height: 272, LinesNumber: 272, ColumnsNumber: 96, ColorsAvailable: 2}
 	SelfMode      = Size{}

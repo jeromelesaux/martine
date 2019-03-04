@@ -1,15 +1,12 @@
 package gfx
 
 import (
-	"encoding/binary"
+	"github.com/jeromelesaux/screenverter/export"
 	"errors"
 	"fmt"
-	"github.com/jeromelesaux/m4client/cpc"
 	"image"
 	"image/color"
 	"os"
-	"path/filepath"
-	"strings"
 )
 
 var (
@@ -125,24 +122,7 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath string
 	}
 
 	fmt.Println(firmwareColorUsed)
-	header := cpc.CpcHead{Type: 2, User: 0, Address: 0xc000, Exec: 0xC7D0,
-		Size: uint16(binary.Size(bw)), Size2: uint16(binary.Size(bw)), LogicalSize: uint16(binary.Size(bw))}
-	filename := filepath.Base(filePath)
-	extension := filepath.Ext(filename)
-	cpcFilename := strings.ToUpper(strings.Replace(filename, extension, ".SCR", -1))
-	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
-	header.Checksum = uint16(header.ComputedChecksum16())
-	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
-	fw, err := os.Create(cpcFilename)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
-		return err
-	}
-	binary.Write(fw, binary.LittleEndian, header)
-	binary.Write(fw, binary.LittleEndian, bw)
-	fw.Close()
-
-	return nil
+	return export.Scr(filePath,bw)
 }
 
 func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath string, overscan bool) error {
@@ -233,25 +213,7 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath string
 	}
 
 	fmt.Println(firmwareColorUsed)
-	header := cpc.CpcHead{Type: 2, User: 0, Address: 0xc000, Exec: 0xC7D0,
-		Size: uint16(binary.Size(bw)), Size2: uint16(binary.Size(bw)), LogicalSize: uint16(binary.Size(bw))}
-	filename := filepath.Base(filePath)
-	extension := filepath.Ext(filename)
-	cpcFilename := strings.ToUpper(strings.Replace(filename, extension, ".SCR", -1))
-
-	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
-	header.Checksum = uint16(header.ComputedChecksum16())
-	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
-	fw, err := os.Create(cpcFilename)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
-		return err
-	}
-	binary.Write(fw, binary.LittleEndian, header)
-	binary.Write(fw, binary.LittleEndian, bw)
-	fw.Close()
-
-	return nil
+	return export.Scr(filePath, bw)
 }
 
 func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath string, overscan bool) error {
@@ -371,22 +333,5 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath string
 	}
 
 	fmt.Println(firmwareColorUsed)
-	header := cpc.CpcHead{Type: 2, User: 0, Address: 0xc000, Exec: 0xC7D0,
-		Size: uint16(binary.Size(bw)), Size2: uint16(binary.Size(bw)), LogicalSize: uint16(binary.Size(bw))}
-	filename := filepath.Base(filePath)
-	extension := filepath.Ext(filename)
-	cpcFilename := strings.ToUpper(strings.Replace(filename[:8], extension, ".SCR", -1))
-	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
-	header.Checksum = uint16(header.ComputedChecksum16())
-	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
-	fw, err := os.Create(cpcFilename)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
-		return err
-	}
-	binary.Write(fw, binary.LittleEndian, header)
-	binary.Write(fw, binary.LittleEndian, bw)
-	fw.Close()
-
-	return nil
+	return export.Scr(filePath,bw)
 }
