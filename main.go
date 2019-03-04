@@ -19,7 +19,7 @@ var (
 	height      = flag.Int("h", -1, "Custom output height in pixels.")
 	mode        = flag.String("m", "", "Output mode to use (mode0,mode1,mode2 or overscan available).")
 	output      = flag.String("o", "", "Output directory")
-	overscan    = flag.String("os","","Overscan mode")
+	overscan    = flag.Bool("f",false,"Overscan mode (default no overscan")
 )
 
 func main() {
@@ -60,10 +60,20 @@ func main() {
 		switch strings.ToLower(*mode) {
 		case "mode0":
 			size = gfx.Mode0
+			if *overscan {
+				size =gfx.OverscanMode0
+			}
+			
 		case "mode1":
 			size = gfx.Mode1
+			if *overscan {
+				size =gfx.OverscanMode1
+			}
 		case "mode2":
 			size = gfx.Mode2
+			if *overscan {
+				size =gfx.OverscanMode2
+			}
 		default:
 			fmt.Fprintf(os.Stderr, "mode %s not defined\n", *mode)
 			flag.PrintDefaults()
