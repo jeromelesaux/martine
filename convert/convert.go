@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/disintegration/imaging"
-	"github.com/jeromelesaux/screenverter/gfx"
+	"github.com/jeromelesaux/martine/gfx"
 	"image"
 	"image/color"
 	"os"
