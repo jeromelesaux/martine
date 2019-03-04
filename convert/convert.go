@@ -14,9 +14,9 @@ import (
 var ErrorCannotDowngradePalette = errors.New("Cannot Downgrade colors palette.")
 
 
-func Resize(in image.Image, size gfx.Size) *image.NRGBA {
+func Resize(in image.Image, size gfx.Size, algo imaging.ResampleFilter) *image.NRGBA {
 	fmt.Fprintf(os.Stdout, "* Step 1 * Resizing image to width %d pixels heigh %d\n", size.Width, size.Height)
-	return imaging.Resize(in, size.Width, size.Height, imaging.NearestNeighbor)
+	return imaging.Resize(in, size.Width, size.Height, algo)
 }
 
 func DowngradingPalette(in *image.NRGBA, size gfx.Size) (color.Palette, *image.NRGBA, error) {
