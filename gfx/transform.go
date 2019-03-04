@@ -179,11 +179,11 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath string
 				pixel += 8
 			}
 			//fmt.Fprintf(os.Stderr,"uint8(pp1)&4:%.8b\n",uint8(pp1)&4)
-			if uint8(pp2)&4 == 4 {
+			if uint8(pp2)&1 == 1 {
 				pixel += 32
 			}
 			//fmt.Fprintf(os.Stderr,"uint8(pp1)&8:%.8b\n",uint8(pp1)&8)
-			if uint8(pp2)&8 == 8 {
+			if uint8(pp2)&2 == 2 {
 				pixel += 2
 			}
 			if uint8(pp3)&1 == 1 {
@@ -192,10 +192,10 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath string
 			if uint8(pp3)&2 == 2 {
 				pixel += 4
 			}
-			if uint8(pp4)&4 == 4 {
+			if uint8(pp4)&1 == 1 {
 				pixel += 16
 			}
-			if uint8(pp4)&8 == 8 {
+			if uint8(pp4)&2 == 2 {
 				pixel++
 			}
 			//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
@@ -295,27 +295,27 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath string
 				pixel += 128
 			}
 			//fmt.Fprintf(os.Stderr,"uint8(pp1)&2:%.8b\n",uint8(pp1)&2)
-			if uint8(pp2)&2 == 2 {
+			if uint8(pp2)&1 == 1 {
 				pixel += 64
 			}
 			//fmt.Fprintf(os.Stderr,"uint8(pp1)&4:%.8b\n",uint8(pp1)&4)
-			if uint8(pp3)&4 == 4 {
+			if uint8(pp3)&1 == 1 {
 				pixel += 32
 			}
 			//fmt.Fprintf(os.Stderr,"uint8(pp1)&8:%.8b\n",uint8(pp1)&8)
-			if uint8(pp4)&8 == 8 {
+			if uint8(pp4)&1 == 1 {
 				pixel += 16
 			}
-			if uint8(pp5)&16 == 16 {
+			if uint8(pp5)&1 == 1 {
 				pixel += 8
 			}
-			if uint8(pp6)&32 == 32 {
+			if uint8(pp6)&1 == 1 {
 				pixel += 4
 			}
-			if uint8(pp7)&64 == 64 {
+			if uint8(pp7)&1 == 1 {
 				pixel += 2
 			}
-			if uint8(pp8)&128 == 128 {
+			if uint8(pp8)&1 == 1 {
 				pixel++
 			}
 			//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
