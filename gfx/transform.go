@@ -13,24 +13,23 @@ var (
 	NotYetImplemented = errors.New("Function is not yet implemented")
 )
 
-func Transform(in *image.NRGBA, p color.Palette, size Size, filepath string) error {
+func Transform(in *image.NRGBA, p color.Palette, size Size, filepath, dirpath string, noAmsdosHeader bool) error {
 	switch size {
 	case Mode0:
-		return TransformMode0(in, p, size, filepath, false)
+		return TransformMode0(in, p, size, filepath, dirpath, false, noAmsdosHeader)
 	case Mode1:
-		return TransformMode1(in, p, size, filepath, false)
+		return TransformMode1(in, p, size, filepath, dirpath, false, noAmsdosHeader)
 	case Mode2:
-		return TransformMode2(in, p, size, filepath, false)
+		return TransformMode2(in, p, size, filepath, dirpath, false, noAmsdosHeader)
 	case OverscanMode0:
-		return TransformMode0(in, p, size, filepath, true)
+		return TransformMode0(in, p, size, filepath, dirpath, true, noAmsdosHeader)
 	case OverscanMode1:
-		return TransformMode1(in, p, size, filepath, true)
+		return TransformMode1(in, p, size, filepath, dirpath, true, noAmsdosHeader)
 	case OverscanMode2:
-		return TransformMode2(in, p, size, filepath, true)
+		return TransformMode2(in, p, size, filepath, dirpath, true, noAmsdosHeader)
 	default:
 		return NotYetImplemented
 	}
-	return nil
 }
 
 func PalettePosition(c color.Color, p color.Palette) (int, error) {
@@ -46,7 +45,7 @@ func PalettePosition(c color.Color, p color.Palette) (int, error) {
 	return -1, ColorNotFound
 }
 
-func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath string, overscan bool) error {
+func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath, dirPath string, overscan, noAmsdosHeader bool) error {
 	bw := make([]byte, 0x4000)
 	if overscan {
 		bw = make([]byte, 0x8000)
@@ -121,18 +120,18 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath string
 	}
 
 	fmt.Println(firmwareColorUsed)
-	if err := Scr(filePath,bw); err != nil {
-		fmt.Fprintf(os.Stderr,"Error while saving file %s error :%v",filePath,err)
+	if err := Scr(filePath, dirPath, bw, noAmsdosHeader); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 		return err
 	}
-	if err := Pal(filePath,p,0); err != nil {
-		fmt.Fprintf(os.Stderr,"Error while saving file %s error :%v",filePath,err)
+	if err := Pal(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 		return err
 	}
-	return Ascii(filePath,bw)
+	return Ascii(filePath, dirPath, bw, noAmsdosHeader)
 }
 
-func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath string, overscan bool) error {
+func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath, dirPath string, overscan, noAmsdosHeader bool) error {
 	bw := make([]byte, 0x4000)
 	if overscan {
 		bw = make([]byte, 0x8000)
@@ -220,18 +219,18 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath string
 	}
 
 	fmt.Println(firmwareColorUsed)
-	if err := Scr(filePath,bw); err != nil {
-		fmt.Fprintf(os.Stderr,"Error while saving file %s error :%v",filePath,err)
+	if err := Scr(filePath, dirPath, bw, noAmsdosHeader); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 		return err
 	}
-	if err := Pal(filePath,p,1); err != nil {
-		fmt.Fprintf(os.Stderr,"Error while saving file %s error :%v",filePath,err)
+	if err := Pal(filePath, dirPath, p, 1, noAmsdosHeader); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 		return err
 	}
-	return Ascii(filePath,bw)
+	return Ascii(filePath, dirPath, bw, noAmsdosHeader)
 }
 
-func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath string, overscan bool) error {
+func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath, dirPath string, overscan, noAmsdosHeader bool) error {
 	bw := make([]byte, 0x4000)
 	if overscan {
 		bw = make([]byte, 0x8000)
@@ -348,13 +347,13 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath string
 	}
 
 	fmt.Println(firmwareColorUsed)
-	if err := Scr(filePath,bw); err != nil {
-		fmt.Fprintf(os.Stderr,"Error while saving file %s error :%v",filePath,err)
+	if err := Scr(filePath, dirPath, bw, noAmsdosHeader); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 		return err
 	}
-	if err := Pal(filePath,p,2); err != nil {
-		fmt.Fprintf(os.Stderr,"Error while saving file %s error :%v",filePath,err)
+	if err := Pal(filePath, dirPath, p, 2, noAmsdosHeader); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 		return err
 	}
-	return Ascii(filePath,bw)
+	return Ascii(filePath, dirPath, bw, noAmsdosHeader)
 }

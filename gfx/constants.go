@@ -195,7 +195,7 @@ func HardwareValues(c color.Color) ([]uint8, error) {
 	if ColorsAreEquals(PastelBlue.Color, c) {
 		return PastelBlue.HardwareValues, nil
 	}
-	return nil,CpcColorNotFound
+	return nil, CpcColorNotFound
 
 }
 

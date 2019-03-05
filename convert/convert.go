@@ -13,7 +13,6 @@ import (
 
 var ErrorCannotDowngradePalette = errors.New("Cannot Downgrade colors palette.")
 
-
 func Resize(in image.Image, size gfx.Size, algo imaging.ResampleFilter) *image.NRGBA {
 	fmt.Fprintf(os.Stdout, "* Step 1 * Resizing image to width %d pixels heigh %d\n", size.Width, size.Height)
 	return imaging.Resize(in, size.Width, size.Height, algo)
@@ -48,7 +47,7 @@ func DowngradingPalette(in *image.NRGBA, size gfx.Size) (color.Palette, *image.N
 		}
 
 		fmt.Fprintf(os.Stderr, "Phasis downgrade colors palette palette (%d)\n", len(newPalette))
-		return newPalette, downgradeWithPalette(out,newPalette), nil
+		return newPalette, downgradeWithPalette(out, newPalette), nil
 
 	}
 	return p, out, nil
@@ -69,7 +68,7 @@ func downgradeWithPalette(in *image.NRGBA, p color.Palette) *image.NRGBA {
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
 			c := in.At(x, y)
-			cPalette :=p.Convert(c)
+			cPalette := p.Convert(c)
 			in.Set(x, y, cPalette)
 		}
 	}

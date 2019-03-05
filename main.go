@@ -6,6 +6,7 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/gfx"
+	"golang.org/x/text/width"
 	"image"
 	_ "image/jpeg"
 	"image/png"
@@ -15,14 +16,16 @@ import (
 )
 
 var (
-	picturePath     = flag.String("p", "", "Picture path of the Amsdos file.")
+	picturePath     = flag.String("p", "", "Picture path of the input file.")
 	width           = flag.Int("w", -1, "Custom output width in pixels.")
 	height          = flag.Int("h", -1, "Custom output height in pixels.")
 	mode            = flag.String("m", "", "Output mode to use (mode0,mode1,mode2 or overscan available).")
 	output          = flag.String("o", "", "Output directory")
 	overscan        = flag.Bool("f", false, "Overscan mode (default no overscan)")
 	resizeAlgorithm = flag.Int("a", 1, "Algorithm to resize the image (available 1: NearestNeighbor (default), 2: CatmullRom, 3: Lanczos, 4: Linear)")
-	version         = "0.1Beta"
+	help            = flag.Bool("help", false, "Display help message")
+	noAmsdosHeader  = flag.Bool("n", false, "no amsdos header for all files (default amsdos header added).")
+	version         = "0.11.Beta"
 )
 
 func usage() {
@@ -37,6 +40,11 @@ func main() {
 	var size gfx.Size
 	var filename, extension string
 	flag.Parse()
+
+	if *help {
+		usage()
+	}
+
 	// picture path to convert
 	if *picturePath == "" {
 		usage()
@@ -57,35 +65,48 @@ func main() {
 			*output = "./"
 		}
 	}
-	if *height != -1 && *width != -1 {
-		fmt.Fprintf(os.Stderr, "Use the custom informations (width:%d, height:%d)\n", *width, *height)
-		size.Height = *height
-		size.Width = *width
-	} else {
-		if *mode == "" {
-			fmt.Fprintf(os.Stderr, "No output mode defined can not choose. Quiting\n")
+
+	if *mode == "" {
+		fmt.Fprintf(os.Stderr, "No output mode defined can not choose. Quiting\n")
+		usage()
+	}
+	switch strings.ToLower(*mode) {
+	case "mode0":
+		size = gfx.Mode0
+		if *overscan {
+			size = gfx.OverscanMode0
+		}
+
+	case "mode1":
+		size = gfx.Mode1
+		if *overscan {
+			size = gfx.OverscanMode1
+		}
+	case "mode2":
+		size = gfx.Mode2
+		if *overscan {
+			size = gfx.OverscanMode2
+		}
+	default:
+		if *height == -1 && *width == -1 {
+			fmt.Fprintf(os.Stderr, "mode %s not defined and no custom width or height\n", *mode)
 			usage()
 		}
-		switch strings.ToLower(*mode) {
-		case "mode0":
-			size = gfx.Mode0
-			if *overscan {
-				size = gfx.OverscanMode0
-			}
-
-		case "mode1":
-			size = gfx.Mode1
-			if *overscan {
-				size = gfx.OverscanMode1
-			}
-		case "mode2":
-			size = gfx.Mode2
-			if *overscan {
-				size = gfx.OverscanMode2
-			}
-		default:
-			fmt.Fprintf(os.Stderr, "mode %s not defined\n", *mode)
-			usage()
+	}
+	if *height != -1 {
+		size.Height = *height
+		if *width != -1 {
+			size.Width = *width
+		} else {
+			size.Width = 0
+		}
+	}
+	if *width != -1 {
+		size.Width = *width
+		if *height != -1 {
+			size.Height = *height
+		} else {
+			size.Height = 0
 		}
 	}
 
@@ -121,7 +142,7 @@ func main() {
 
 	out := convert.Resize(in, size, resizeAlgo)
 	fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", *picturePath+"_resized.png")
-	fwr, err := os.Create(*picturePath + "_resized.png")
+	fwr, err := os.Create(*output + string(filepath.Separator) + *picturePath + "_resized.png")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot create new image (%s) error %v\n", *picturePath+"_resized.png", err)
 		os.Exit(-2)
@@ -139,7 +160,7 @@ func main() {
 	}
 
 	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", *picturePath+"_down.png")
-	fwd, err := os.Create(*picturePath + "_down.png")
+	fwd, err := os.Create(*output + string(filepath.Separator) + *picturePath + "_down.png")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot create new image (%s) error %v\n", *picturePath+"_down.png", err)
 		os.Exit(-2)
@@ -152,5 +173,5 @@ func main() {
 	}
 	fwd.Close()
 
-	gfx.Transform(downgraded, newPalette, size, *picturePath)
+	gfx.Transform(downgraded, newPalette, size, *picturePath, *output, *noAmsdosHeader)
 }
