@@ -125,7 +125,11 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath string
 		fmt.Fprintf(os.Stderr,"Error while saving file %s error :%v",filePath,err)
 		return err
 	}
-	return Pal(filePath,p,0)
+	if err := Pal(filePath,p,0); err != nil {
+		fmt.Fprintf(os.Stderr,"Error while saving file %s error :%v",filePath,err)
+		return err
+	}
+	return Ascii(filePath,bw)
 }
 
 func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath string, overscan bool) error {
@@ -220,7 +224,11 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath string
 		fmt.Fprintf(os.Stderr,"Error while saving file %s error :%v",filePath,err)
 		return err
 	}
-	return Pal(filePath,p,1)
+	if err := Pal(filePath,p,1); err != nil {
+		fmt.Fprintf(os.Stderr,"Error while saving file %s error :%v",filePath,err)
+		return err
+	}
+	return Ascii(filePath,bw)
 }
 
 func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath string, overscan bool) error {
@@ -344,5 +352,9 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath string
 		fmt.Fprintf(os.Stderr,"Error while saving file %s error :%v",filePath,err)
 		return err
 	}
-	return Pal(filePath,p,2)
+	if err := Pal(filePath,p,2); err != nil {
+		fmt.Fprintf(os.Stderr,"Error while saving file %s error :%v",filePath,err)
+		return err
+	}
+	return Ascii(filePath,bw)
 }
