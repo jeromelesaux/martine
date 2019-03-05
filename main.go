@@ -6,7 +6,6 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/gfx"
-	"golang.org/x/text/width"
 	"image"
 	_ "image/jpeg"
 	"image/png"
@@ -39,6 +38,8 @@ func usage() {
 func main() {
 	var size gfx.Size
 	var filename, extension string
+	var customDimension bool 
+	var screenMode uint8
 	flag.Parse()
 
 	if *help {
@@ -73,16 +74,19 @@ func main() {
 	switch strings.ToLower(*mode) {
 	case "mode0":
 		size = gfx.Mode0
+		screenMode = 0 
 		if *overscan {
 			size = gfx.OverscanMode0
 		}
 
 	case "mode1":
 		size = gfx.Mode1
+		screenMode = 1 
 		if *overscan {
 			size = gfx.OverscanMode1
 		}
 	case "mode2":
+		screenMode = 2 
 		size = gfx.Mode2
 		if *overscan {
 			size = gfx.OverscanMode2
@@ -94,6 +98,7 @@ func main() {
 		}
 	}
 	if *height != -1 {
+		customDimension = true
 		size.Height = *height
 		if *width != -1 {
 			size.Width = *width
@@ -102,6 +107,7 @@ func main() {
 		}
 	}
 	if *width != -1 {
+		customDimension = true
 		size.Width = *width
 		if *height != -1 {
 			size.Height = *height
@@ -172,6 +178,9 @@ func main() {
 		os.Exit(-2)
 	}
 	fwd.Close()
-
-	gfx.Transform(downgraded, newPalette, size, *picturePath, *output, *noAmsdosHeader)
+	if ! customDimension {
+		gfx.Transform(downgraded, newPalette, size, *picturePath, *output, *noAmsdosHeader)
+	} else {
+		gfx.SpriteTransform(downgraded,newPalette,size,screenMode,*picturePath,*output,*noAmsdosHeader)
+	}
 }
