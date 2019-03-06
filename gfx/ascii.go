@@ -4,28 +4,48 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/jeromelesaux/m4client/cpc"
+	"image/color"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-func Ascii(filePath, dirPath string, data []byte, noAmsdosHeader bool) error {
+func Ascii(filePath, dirPath string, data []byte, p color.Palette, noAmsdosHeader bool) error {
 	fmt.Fprintf(os.Stdout, "Writing ascii file (%s) data length (%d)\n", filePath, len(data))
 	var out string
 	var i int
+	filename := filepath.Base(filePath)
+	extension := filepath.Ext(filename)
+	cpcFilename := strings.ToUpper(strings.Replace(filename, extension, ".TXT", -1))
+	out += "# Screen " + cpcFilename + "\n.screen:\n"
 	for i = 0; i < len(data); i += 8 {
 		out += fmt.Sprintf("BYTE #%0.2x, #%0.2x, #%0.2x, #%0.2x, #%0.2x, #%0.2x, #%0.2x, #%0.2x\n",
 			data[i], data[i+1], data[i+2], data[i+3],
 			data[i+4], data[i+5], data[i+6], data[i+7])
+	}
+	out += "# Palette " + cpcFilename + "\n.palette:\nBYTE "
+
+	for i := 0; i < len(p); i++ {
+		v, err := HardwareValues(p[i])
+		if err == nil {
+			out += fmt.Sprintf("#%0.2x", v[0])
+			if (i+1)%8 == 0 && i+1 < len(p) {
+				out += "\nBYTE "
+			} else {
+				if i+1 < len(p) {
+					out += ", "
+				}
+			}
+		} else {
+			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
+		}
 	}
 	//fmt.Fprintf(os.Stdout,"%s",out)
 	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x0, Exec: 0x0,
 		Size:        uint16(len(out)),
 		Size2:       uint16(len(out)),
 		LogicalSize: uint16(len(out))}
-	filename := filepath.Base(filePath)
-	extension := filepath.Ext(filename)
-	cpcFilename := strings.ToUpper(strings.Replace(filename, extension, ".TXT", -1))
+
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))

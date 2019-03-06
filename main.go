@@ -38,7 +38,7 @@ func usage() {
 func main() {
 	var size gfx.Size
 	var filename, extension string
-	var customDimension bool 
+	var customDimension bool
 	var screenMode uint8
 	flag.Parse()
 
@@ -65,6 +65,8 @@ func main() {
 			fmt.Fprintf(os.Stderr, "%s is not a directory will store in current directory\n", *output)
 			*output = "./"
 		}
+	} else {
+		*output = "./"
 	}
 
 	if *mode == "" {
@@ -74,19 +76,19 @@ func main() {
 	switch strings.ToLower(*mode) {
 	case "mode0":
 		size = gfx.Mode0
-		screenMode = 0 
+		screenMode = 0
 		if *overscan {
 			size = gfx.OverscanMode0
 		}
 
 	case "mode1":
 		size = gfx.Mode1
-		screenMode = 1 
+		screenMode = 1
 		if *overscan {
 			size = gfx.OverscanMode1
 		}
 	case "mode2":
-		screenMode = 2 
+		screenMode = 2
 		size = gfx.Mode2
 		if *overscan {
 			size = gfx.OverscanMode2
@@ -178,9 +180,9 @@ func main() {
 		os.Exit(-2)
 	}
 	fwd.Close()
-	if ! customDimension {
+	if !customDimension {
 		gfx.Transform(downgraded, newPalette, size, *picturePath, *output, *noAmsdosHeader)
 	} else {
-		gfx.SpriteTransform(downgraded,newPalette,size,screenMode,*picturePath,*output,*noAmsdosHeader)
+		gfx.SpriteTransform(downgraded, newPalette, size, screenMode, *picturePath, *output, *noAmsdosHeader)
 	}
 }
