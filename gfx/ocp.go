@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	
 )
 
 var OverscanBoot = [...]byte{0x0e, 0x00, 0x0a, 0x00, 0x01, 0xc0, 0x20, 0x69, 0x4d, 0x50, 0x20, 0x76, 0x32, 0x00, 0x0d,
@@ -23,13 +22,12 @@ var OverscanBoot = [...]byte{0x0e, 0x00, 0x0a, 0x00, 0x01, 0xc0, 0x20, 0x69, 0x4
 	0x00, 0xc3, 0xc6, 0xba, 0xc3, 0xc1, 0xb9, 0x00, 0x00, 0xc3, 0x35, 0xba, 0x00, 0xed, 0x49, 0xd9,
 	0xfb, 0xc3, 0x00, 0xbe, 0x2b, 0x00, 0x71, 0x18, 0x08, 0xc3, 0x41, 0xb9, 0xc9, 0x00, 0x00, 0x00}
 
-
-	type CpcPlusColor struct {
-		G      byte
-		R      byte
-		B      byte
-		Unused byte
-	}
+type CpcPlusColor struct {
+	G      byte
+	R      byte
+	B      byte
+	Unused byte
+}
 
 type InkPalette struct {
 	Colors [16]CpcPlusColor
@@ -61,10 +59,10 @@ func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode
 	//o[(0x1ac-0x1ad)] = 0 // cpc old
 	// affectation de la palette CPC old
 	switch isCpcPlus {
-	case true :
-		o[(0x1ac-0x170)] = 1
+	case true:
+		o[(0x1ac - 0x170)] = 1
 	case false:
-		o[(0x1ac-0x170)] = 0
+		o[(0x1ac - 0x170)] = 0
 	}
 	switch screenMode {
 	case 0:
@@ -75,12 +73,12 @@ func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode
 		o[0x184-0x170] = 0x10
 	}
 	if isCpcPlus {
-		for i := 0; i < len(p); i+=2 {
-			r,g,b,_ := p[i].RGBA()
-			cp := CpcPlusColor{G:byte(g),R:byte(r),B:byte(b)}
-			o[(0x800-0x170)+i] = cp.G   +128
-			o[(0x800-0x170)+i] = cp.R
-			o[(0x800-0x170)+i] = cp.B 		
+		for i := 0; i < len(p); i += 2 {
+			r, g, b, _ := p[i].RGBA()
+			cp := CpcPlusColor{G: byte(g), R: byte(r), B: byte(b)}
+			o[(0x800-0x170)+i] = cp.G
+			o[(0x800-0x170)+i] = cp.R + 128
+			o[(0x800-0x170)+i+1] = cp.B + 128
 		}
 	} else {
 		for i := 0; i < len(p); i++ {
@@ -204,17 +202,17 @@ func Pal(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHe
 	return nil
 }
 
-type OcpWin struct  {
-	Data []byte
-	Width uint8
+type OcpWin struct {
+	Data   []byte
+	Width  uint8
 	Height byte
 }
 
 func Win(filePath, dirPath string, data []byte, screenMode uint8, width, height int, noAmsdosHeader bool) error {
 	fmt.Fprintf(os.Stdout, "Saving WIN file (%s)\n", filePath)
-	win := OcpWin{Data:data}
+	win := OcpWin{Data: data}
 	switch screenMode {
-	case 0 :
+	case 0:
 		win.Width = uint8(width / 4)
 		win.Height = byte(height / 2)
 	case 1:
@@ -223,7 +221,8 @@ func Win(filePath, dirPath string, data []byte, screenMode uint8, width, height 
 	case 2:
 		win.Width = uint8(width)
 		win.Height = uint8(height / 2)
-	default: fmt.Fprintf(os.Stderr,"Win export screen mode not supported. %d\n",screenMode)
+	default:
+		fmt.Fprintf(os.Stderr, "Win export screen mode not supported. %d\n", screenMode)
 	}
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x4000, Exec: 0x4000,
 		Size:        uint16(binary.Size(win)),

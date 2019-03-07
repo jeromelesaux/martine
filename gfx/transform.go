@@ -17,23 +17,23 @@ var (
 func Transform(in *image.NRGBA, p color.Palette, size Size, filepath, dirpath string, noAmsdosHeader, isCpcPlus bool) error {
 	switch size {
 	case Mode0:
-		return TransformMode0(in, p, size, filepath, dirpath, false, noAmsdosHeader,isCpcPlus)
+		return TransformMode0(in, p, size, filepath, dirpath, false, noAmsdosHeader, isCpcPlus)
 	case Mode1:
-		return TransformMode1(in, p, size, filepath, dirpath, false, noAmsdosHeader,isCpcPlus)
+		return TransformMode1(in, p, size, filepath, dirpath, false, noAmsdosHeader, isCpcPlus)
 	case Mode2:
-		return TransformMode2(in, p, size, filepath, dirpath, false, noAmsdosHeader,isCpcPlus)
+		return TransformMode2(in, p, size, filepath, dirpath, false, noAmsdosHeader, isCpcPlus)
 	case OverscanMode0:
-		return TransformMode0(in, p, size, filepath, dirpath, true, noAmsdosHeader,isCpcPlus)
+		return TransformMode0(in, p, size, filepath, dirpath, true, noAmsdosHeader, isCpcPlus)
 	case OverscanMode1:
-		return TransformMode1(in, p, size, filepath, dirpath, true, noAmsdosHeader,isCpcPlus)
+		return TransformMode1(in, p, size, filepath, dirpath, true, noAmsdosHeader, isCpcPlus)
 	case OverscanMode2:
-		return TransformMode2(in, p, size, filepath, dirpath, true, noAmsdosHeader,isCpcPlus)
+		return TransformMode2(in, p, size, filepath, dirpath, true, noAmsdosHeader, isCpcPlus)
 	default:
 		return ErrorNotYetImplemented
 	}
 }
 
-func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, filePath, dirPath string, noAmsdosHeader bool) error {
+func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, filePath, dirPath string, noAmsdosHeader, isCpcPlus bool) error {
 	var data []byte
 	firmwareColorUsed := make(map[int]int, 0)
 	if mode == 2 {
@@ -189,7 +189,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 		}
 	}
 	fmt.Println(firmwareColorUsed)
-	if err := Win(filePath, dirPath, data,mode,size.Width,size.Height, noAmsdosHeader); err != nil {
+	if err := Win(filePath, dirPath, data, mode, size.Width, size.Height, noAmsdosHeader); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 		return err
 	}
@@ -197,7 +197,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 		return err
 	}
-	return Ascii(filePath, dirPath, data, p, noAmsdosHeader)
+	return Ascii(filePath, dirPath, data, p, noAmsdosHeader, isCpcPlus)
 }
 
 func PalettePosition(c color.Color, p color.Palette) (int, error) {
@@ -315,7 +315,7 @@ func pixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) byte {
 	return pixel
 }
 
-func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath, dirPath string, overscan, noAmsdosHeader,isCpcPlus bool) error {
+func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath, dirPath string, overscan, noAmsdosHeader, isCpcPlus bool) error {
 	var bw []byte
 	if overscan {
 		bw = make([]byte, 0x8000)
@@ -368,7 +368,7 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 
 	fmt.Println(firmwareColorUsed)
 	if overscan {
-		if err := Overscan(filePath, dirPath, bw, p, 0, noAmsdosHeader,isCpcPlus); err != nil {
+		if err := Overscan(filePath, dirPath, bw, p, 0, noAmsdosHeader, isCpcPlus); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
@@ -378,7 +378,7 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 			return err
 		}
 		if isCpcPlus {
-			if err := Ink(filePath,dirPath,p,0,noAmsdosHeader); err != nil {
+			if err := Ink(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
 				fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 				return err
 			}
@@ -389,10 +389,10 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 			}
 		}
 	}
-	return Ascii(filePath, dirPath, bw, p, noAmsdosHeader)
+	return Ascii(filePath, dirPath, bw, p, noAmsdosHeader, isCpcPlus)
 }
 
-func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath, dirPath string, overscan, noAmsdosHeader,isCpcPlus bool) error {
+func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath, dirPath string, overscan, noAmsdosHeader, isCpcPlus bool) error {
 	var bw []byte
 	if overscan {
 		bw = make([]byte, 0x8000)
@@ -468,9 +468,9 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
-	
+
 		if isCpcPlus {
-			if err := Ink(filePath,dirPath,p,0,noAmsdosHeader); err != nil {
+			if err := Ink(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
 				fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 				return err
 			}
@@ -481,10 +481,10 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 			}
 		}
 	}
-	return Ascii(filePath, dirPath, bw, p, noAmsdosHeader)
+	return Ascii(filePath, dirPath, bw, p, noAmsdosHeader, isCpcPlus)
 }
 
-func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath, dirPath string, overscan, noAmsdosHeader,isCpcPlus bool) error {
+func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath, dirPath string, overscan, noAmsdosHeader, isCpcPlus bool) error {
 	var bw []byte
 
 	if overscan {
@@ -592,7 +592,7 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 			return err
 		}
 		if isCpcPlus {
-			if err := Ink(filePath,dirPath,p,0,noAmsdosHeader); err != nil {
+			if err := Ink(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
 				fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 				return err
 			}
@@ -603,5 +603,5 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 			}
 		}
 	}
-	return Ascii(filePath, dirPath, bw, p, noAmsdosHeader)
+	return Ascii(filePath, dirPath, bw, p, noAmsdosHeader, isCpcPlus)
 }
