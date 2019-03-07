@@ -36,11 +36,11 @@ examples :
 * convert samples/Batman-Neal-Adams.jpg 
 
   * in mode 0 
-```martine -p samples/Batman-Neal-Adams.jpg -m mode0```
+```martine -p samples/Batman-Neal-Adams.jpg -m 0```
   * in mode 1 
-```martine -p samples/Batman-Neal-Adams.jpg -m mode1```
+```martine -p samples/Batman-Neal-Adams.jpg -m 1```
   * in mode 2 
-```martine -p samples/Batman-Neal-Adams.jpg -m mode2```
+```martine -p samples/Batman-Neal-Adams.jpg -m 2```
   * in mode 0 in overscan : 
-```martine -p samples/Batman-Neal-Adams.jpg -m mode0 -f```
+```martine -p samples/Batman-Neal-Adams.jpg -m 0 -f```
 
