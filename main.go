@@ -96,7 +96,7 @@ func main() {
 		}
 	default:
 		if *height == -1 && *width == -1 {
-			fmt.Fprintf(os.Stderr, "mode %s not defined and no custom width or height\n", *mode)
+			fmt.Fprintf(os.Stderr, "mode %d not defined and no custom width or height\n", *mode)
 			usage()
 		}
 	}

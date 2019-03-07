@@ -76,9 +76,9 @@ func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode
 		for i := 0; i < len(p); i += 2 {
 			r, g, b, _ := p[i].RGBA()
 			cp := CpcPlusColor{G: byte(g), R: byte(r), B: byte(b)}
-			o[(0x800-0x170)+i] = cp.G
-			o[(0x800-0x170)+i] = cp.R + 128
-			o[(0x800-0x170)+i+1] = cp.B + 128
+			o[(0x800-0x170)+i] = cp.G +128
+			o[(0x800-0x170)+i+1] = cp.R +128
+			o[(0x800-0x170)+i+1] = cp.B
 		}
 	} else {
 		for i := 0; i < len(p); i++ {

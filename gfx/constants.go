@@ -81,7 +81,7 @@ func NewCpcPlusPalette() color.Palette {
 	for g = 0; g < 0x10; g++ {
 		for r = 0; r < 0x10; r++ {
 			for b = 0; b < 0x10; b++ {
-				plusPalette = append(plusPalette, color.RGBA{R: r*2, B: b*2, G: g*2, A: 0xFF})
+				plusPalette = append(plusPalette, color.RGBA{R: r*14, B: b*14, G: g*14, A: 0xFF})
 			}
 		}
 	}

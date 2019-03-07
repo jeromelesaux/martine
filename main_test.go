@@ -22,4 +22,5 @@ func TestMainBit(t *testing.T) {
 	t.Logf("3rd :%b & %b = %b", 6, 0x0D, (6 & 4)) // 3rd bit
 	t.Logf("2nd :%b & %b = %b", 6, 0x0B, (6 & 2)) // 2nd bit
 	t.Logf("1st :%b & %b = %b", 6, 7, (6 & 1))    // 1st bit
+	t.Logf("%b : decalage de 4 :%b",0xa3,(0xA3 & 0xf0 >>4))
 }
