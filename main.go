@@ -11,24 +11,24 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 var (
+	byteStatement   = flag.String("s","", "Byte statement to replace in ascii export (default is BYTE), you can replace or instance by defb")
 	picturePath     = flag.String("p", "", "Picture path of the input file.")
 	width           = flag.Int("w", -1, "Custom output width in pixels.")
 	height          = flag.Int("h", -1, "Custom output height in pixels.")
-	mode            = flag.String("m", "", "Output mode to use (mode0,mode1,mode2 or overscan available).")
+	mode            = flag.Int("m", -1, "Output mode to use (0 for mode0, 1 for mode1, 2 for mode2 and add -f option for overscan export).")
 	output          = flag.String("o", "", "Output directory")
 	overscan        = flag.Bool("f", false, "Overscan mode (default no overscan)")
 	resizeAlgorithm = flag.Int("a", 1, "Algorithm to resize the image (available 1: NearestNeighbor (default), 2: CatmullRom, 3: Lanczos, 4: Linear)")
 	help            = flag.Bool("help", false, "Display help message")
 	noAmsdosHeader  = flag.Bool("n", false, "no amsdos header for all files (default amsdos header added).")
-	version         = "0.11.Beta"
+	version         = "0.1.Alpha"
 )
 
 func usage() {
-	fmt.Fprintf(os.Stdout, "martine to convert image to Amstrad cpc screen (even overscan)\n")
+	fmt.Fprintf(os.Stdout, "martine convert (jpeg, png format) image to Amstrad cpc screen (even overscan)\n")
 	fmt.Fprintf(os.Stdout, "By Impact Sid (Version:%s)\n", version)
 	fmt.Fprintf(os.Stdout, "usage :\n\n")
 	flag.PrintDefaults()
@@ -69,25 +69,25 @@ func main() {
 		*output = "./"
 	}
 
-	if *mode == "" {
+	if *mode == -1 {
 		fmt.Fprintf(os.Stderr, "No output mode defined can not choose. Quiting\n")
 		usage()
 	}
-	switch strings.ToLower(*mode) {
-	case "mode0":
+	switch *mode {
+	case 0:
 		size = gfx.Mode0
 		screenMode = 0
 		if *overscan {
 			size = gfx.OverscanMode0
 		}
 
-	case "mode1":
+	case 1:
 		size = gfx.Mode1
 		screenMode = 1
 		if *overscan {
 			size = gfx.OverscanMode1
 		}
-	case "mode2":
+	case 2:
 		screenMode = 2
 		size = gfx.Mode2
 		if *overscan {
@@ -116,6 +116,10 @@ func main() {
 		} else {
 			size.Height = 0
 		}
+	}
+
+	if *byteStatement != "" {
+		gfx.ByteToken = *byteStatement
 	}
 
 	fmt.Fprintf(os.Stdout, "Informations :\n%s", size.ToString())

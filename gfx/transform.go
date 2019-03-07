@@ -189,7 +189,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 		}
 	}
 	fmt.Println(firmwareColorUsed)
-	if err := Scr(filePath, dirPath, data, noAmsdosHeader); err != nil {
+	if err := Win(filePath, dirPath, data,mode,size.Width,size.Height, noAmsdosHeader); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 		return err
 	}

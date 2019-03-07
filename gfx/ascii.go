@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+var ByteToken = "BYTE"
+
 func Ascii(filePath, dirPath string, data []byte, p color.Palette, noAmsdosHeader bool) error {
 	fmt.Fprintf(os.Stdout, "Writing ascii file (%s) data length (%d)\n", filePath, len(data))
 	var out string
@@ -19,18 +21,18 @@ func Ascii(filePath, dirPath string, data []byte, p color.Palette, noAmsdosHeade
 	cpcFilename := strings.ToUpper(strings.Replace(filename, extension, ".TXT", -1))
 	out += "# Screen " + cpcFilename + "\n.screen:\n"
 	for i = 0; i < len(data); i += 8 {
-		out += fmt.Sprintf("BYTE #%0.2x, #%0.2x, #%0.2x, #%0.2x, #%0.2x, #%0.2x, #%0.2x, #%0.2x\n",
+		out += fmt.Sprintf("%s #%0.2x, #%0.2x, #%0.2x, #%0.2x, #%0.2x, #%0.2x, #%0.2x, #%0.2x\n",ByteToken,
 			data[i], data[i+1], data[i+2], data[i+3],
 			data[i+4], data[i+5], data[i+6], data[i+7])
 	}
-	out += "# Palette " + cpcFilename + "\n.palette:\nBYTE "
+	out += "# Palette " + cpcFilename + "\n.palette:\n" + ByteToken + " "
 
 	for i := 0; i < len(p); i++ {
 		v, err := HardwareValues(p[i])
 		if err == nil {
 			out += fmt.Sprintf("#%0.2x", v[0])
 			if (i+1)%8 == 0 && i+1 < len(p) {
-				out += "\nBYTE "
+				out += "\n" + ByteToken + " "
 			} else {
 				if i+1 < len(p) {
 					out += ", "
