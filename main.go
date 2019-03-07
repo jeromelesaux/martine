@@ -15,7 +15,7 @@ import (
 
 var (
 	byteStatement   = flag.String("s","", "Byte statement to replace in ascii export (default is BYTE), you can replace or instance by defb")
-	picturePath     = flag.String("p", "", "Picture path of the input file.")
+	picturePath     = flag.String("i", "", "Picture path of the input file.")
 	width           = flag.Int("w", -1, "Custom output width in pixels.")
 	height          = flag.Int("h", -1, "Custom output height in pixels.")
 	mode            = flag.Int("m", -1, "Output mode to use (0 for mode0, 1 for mode1, 2 for mode2 and add -f option for overscan export).")
@@ -24,6 +24,7 @@ var (
 	resizeAlgorithm = flag.Int("a", 1, "Algorithm to resize the image (available 1: NearestNeighbor (default), 2: CatmullRom, 3: Lanczos, 4: Linear)")
 	help            = flag.Bool("help", false, "Display help message")
 	noAmsdosHeader  = flag.Bool("n", false, "no amsdos header for all files (default amsdos header added).")
+	plusMode		= flag.Bool("p",false,"Plus mode (means generate an image for CPC Plus Screen)")
 	version         = "0.1.Alpha"
 )
 
@@ -166,7 +167,7 @@ func main() {
 	}
 	fwr.Close()
 
-	newPalette, downgraded, err := convert.DowngradingPalette(out, size)
+	newPalette, downgraded, err := convert.DowngradingPalette(out, size,*plusMode)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
 	}
@@ -185,7 +186,7 @@ func main() {
 	}
 	fwd.Close()
 	if !customDimension {
-		gfx.Transform(downgraded, newPalette, size, *picturePath, *output, *noAmsdosHeader)
+		gfx.Transform(downgraded, newPalette, size, *picturePath, *output, *noAmsdosHeader,*plusMode)
 	} else {
 		gfx.SpriteTransform(downgraded, newPalette, size, screenMode, *picturePath, *output, *noAmsdosHeader)
 	}

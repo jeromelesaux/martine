@@ -21,12 +21,6 @@ type CpcColor struct {
 	Color          color.RGBA
 }
 
-type CpcPlusColor struct {
-	G      uint8
-	R      uint8
-	B      uint8
-	Unused uint8
-}
 
 func (s *Size) ToString() string {
 	return fmt.Sprintf("Size:\nWidth (%d) pixels\nHigh (%d) pixels\nNumber of lines (%d)\nNumber of columns (%d)\nColors available in this mode (%d)\n",
@@ -82,18 +76,20 @@ var (
 	PastelBlue    = CpcColor{HardwareNumber: 31, FirmwareNumber: 14, HardwareValues: []uint8{0x5F}, Color: color.RGBA{A: 0xFF, R: 0x7F, G: 0x7F, B: 0xFF}}
 )
 
-func CpcPlusPalette() color.Palette {
+func NewCpcPlusPalette() color.Palette {
 	plusPalette := color.Palette{}
-	var r, g, b uint16
-	for g = 0; g < 0x1000; g++ {
-		for r = 0; r < 0x1000; r++ {
-			for b = 0; b < 0x1000; b++ {
-				plusPalette = append(plusPalette, color.RGBA64{R: r, B: b, G: g, A: 0xFFF})
+	var r, g, b uint8
+	for g = 0; g < 0x10; g++ {
+		for r = 0; r < 0x10; r++ {
+			for b = 0; b < 0x10; b++ {
+				plusPalette = append(plusPalette, color.RGBA{R: r, B: b, G: g, A: 0xFF})
 			}
 		}
 	}
 	return plusPalette
 }
+
+var CpcPlusPalette = NewCpcPlusPalette()
 
 var CpcOldPalette = color.Palette{White.Color,
 	SeaGreen.Color,

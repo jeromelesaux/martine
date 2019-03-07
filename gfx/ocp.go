@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	
 )
 
 var OverscanBoot = [...]byte{0x0e, 0x00, 0x0a, 0x00, 0x01, 0xc0, 0x20, 0x69, 0x4d, 0x50, 0x20, 0x76, 0x32, 0x00, 0x0d,
@@ -22,7 +23,19 @@ var OverscanBoot = [...]byte{0x0e, 0x00, 0x0a, 0x00, 0x01, 0xc0, 0x20, 0x69, 0x4
 	0x00, 0xc3, 0xc6, 0xba, 0xc3, 0xc1, 0xb9, 0x00, 0x00, 0xc3, 0x35, 0xba, 0x00, 0xed, 0x49, 0xd9,
 	0xfb, 0xc3, 0x00, 0xbe, 0x2b, 0x00, 0x71, 0x18, 0x08, 0xc3, 0x41, 0xb9, 0xc9, 0x00, 0x00, 0x00}
 
-func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode uint8, noAmsdosHeader bool) error {
+
+	type CpcPlusColor struct {
+		G      byte
+		R      byte
+		B      byte
+		Unused byte
+	}
+
+type InkPalette struct {
+	Colors [16]CpcPlusColor
+}
+
+func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode uint8, noAmsdosHeader, isCpcPlus bool) error {
 	o := make([]byte, 0x7e90-0x80)
 	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", filePath)
 	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x170, Exec: 0x0,
@@ -47,6 +60,12 @@ func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode
 	copy(o[0x200-0x170:], data[:])
 	//o[(0x1ac-0x1ad)] = 0 // cpc old
 	// affectation de la palette CPC old
+	switch isCpcPlus {
+	case true :
+		o[(0x1ac-0x170)] = 1
+	case false:
+		o[(0x1ac-0x170)] = 0
+	}
 	switch screenMode {
 	case 0:
 		o[0x184-0x170] = 0x0e
@@ -55,15 +74,61 @@ func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode
 	case 2:
 		o[0x184-0x170] = 0x10
 	}
+	if isCpcPlus {
+		for i := 0; i < len(p); i+=2 {
+			r,g,b,_ := p[i].RGBA()
+			cp := CpcPlusColor{G:byte(g),R:byte(r),B:byte(b)}
+			o[(0x800-0x170)+i] = cp.G   +128
+			o[(0x800-0x170)+i] = cp.R
+			o[(0x800-0x170)+i] = cp.B 		
+		}
+	} else {
+		for i := 0; i < len(p); i++ {
+			v, err := HardwareValues(p[i])
+			if err == nil {
+				o[(0x7f00-0x170)+i] = v[0]
+			} else {
+				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
+			}
+		}
+	}
+	binary.Write(fw, binary.LittleEndian, o)
+	fw.Close()
+	return nil
+}
+
+func Ink(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHeader bool) error {
+	fmt.Fprintf(os.Stdout, "Saving PAL file (%s)\n", filePath)
+	data := OcpPalette{ScreenMode: screenMode, ColorAnimation: 0, ColorAnimationDelay: 0}
 	for i := 0; i < len(p); i++ {
 		v, err := HardwareValues(p[i])
 		if err == nil {
-			o[(0x7f00-0x170)+i] = v[0]
+			for j := 0; j < 12; j++ {
+				data.PaletteColors[i][j] = v[0]
+			}
 		} else {
 			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
 		}
 	}
-	binary.Write(fw, binary.LittleEndian, o)
+	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x8809, Exec: 0x8809,
+		Size:        uint16(binary.Size(data)),
+		Size2:       uint16(binary.Size(data)),
+		LogicalSize: uint16(binary.Size(data))}
+	filename := filepath.Base(filePath)
+	extension := filepath.Ext(filename)
+	cpcFilename := strings.ToUpper(strings.Replace(filename, extension, ".PAL", -1))
+	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
+	header.Checksum = uint16(header.ComputedChecksum16())
+	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
+	fw, err := os.Create(dirPath + string(filepath.Separator) + cpcFilename)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
+		return err
+	}
+	if !noAmsdosHeader {
+		binary.Write(fw, binary.LittleEndian, header)
+	}
+	binary.Write(fw, binary.LittleEndian, data)
 	fw.Close()
 	return nil
 }

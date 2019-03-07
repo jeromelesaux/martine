@@ -18,9 +18,9 @@ func Resize(in image.Image, size gfx.Size, algo imaging.ResampleFilter) *image.N
 	return imaging.Resize(in, size.Width, size.Height, algo)
 }
 
-func DowngradingPalette(in *image.NRGBA, size gfx.Size) (color.Palette, *image.NRGBA, error) {
+func DowngradingPalette(in *image.NRGBA, size gfx.Size, isCpcPlus bool) (color.Palette, *image.NRGBA, error) {
 	fmt.Fprintf(os.Stdout, "* Step 2 * Downgrading palette image\n")
-	p, out := downgrade(in)
+	p, out := downgrade(in, isCpcPlus)
 	fmt.Fprintf(os.Stdout, "Downgraded palette contains (%d) colors\n", len(p))
 	if len(p) > size.ColorsAvailable {
 		fmt.Fprintf(os.Stderr, "Downgraded palette size (%d) is greater than the available colors in this mode (%d)\n", len(p), size.ColorsAvailable)
@@ -75,15 +75,17 @@ func downgradeWithPalette(in *image.NRGBA, p color.Palette) *image.NRGBA {
 	return in
 }
 
-func downgrade(in *image.NRGBA) (color.Palette, *image.NRGBA) {
+func downgrade(in *image.NRGBA, isCpcPlus bool) (color.Palette, *image.NRGBA) {
 	p := color.Palette{}
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
 			c := in.At(x, y)
-			//r0,g0,b0,a0 := c.RGBA()
-			cPalette := gfx.CpcOldPalette.Convert(c)
-			//r,g,b,a := cPalette.RGBA()
-			//fmt.Fprintf(os.Stderr,"(%d,%d) pixel R(%d)G(%d)B(%d)A(%d) => R(%d)G(%d)B(%d)A(%d)\n",x,y,r0,g0,b0,a0,r,g,b,a)
+			var cPalette color.Color
+			if isCpcPlus {
+				cPalette = gfx.CpcPlusPalette.Convert(c)
+			} else {
+				cPalette = gfx.CpcOldPalette.Convert(c)
+			}
 			in.Set(x, y, cPalette)
 			if !paletteContains(p, cPalette) {
 				p = append(p, cPalette)
