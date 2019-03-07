@@ -32,7 +32,22 @@ func Ascii(filePath, dirPath string, data []byte, p color.Palette, noAmsdosHeade
 			r, g, b, _ := p[i].RGBA()
 			cp := CpcPlusColor{G: byte(g), R: byte(r), B: byte(b)}
 			out += fmt.Sprintf("#%.2x", cp.G+(cp.R+128))
+			if (i+1)%8 == 0 && i+1 < len(p) {
+				out += "\n" + ByteToken + " "
+			} else {
+				if i+1 < len(p) {
+					out += ", "
+				}
+			}
 			out += fmt.Sprintf("#%.2x", cp.B)
+			
+			if (i+2)%8 == 0 && i+2< len(p) {
+				out += "\n" + ByteToken + " "
+			} else {
+				if i+2 < len(p) {
+					out += ", "
+				}
+			}
 		}
 	} else {
 		for i := 0; i < len(p); i++ {
