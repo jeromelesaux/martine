@@ -377,6 +377,7 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
+	}
 		if isCpcPlus {
 			if err := Ink(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
 				fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
@@ -388,7 +389,7 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 				return err
 			}
 		}
-	}
+	
 	return Ascii(filePath, dirPath, bw, p, noAmsdosHeader, isCpcPlus)
 }
 
@@ -468,7 +469,7 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
-
+	}
 		if isCpcPlus {
 			if err := Ink(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
 				fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
@@ -480,7 +481,7 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 				return err
 			}
 		}
-	}
+	
 	return Ascii(filePath, dirPath, bw, p, noAmsdosHeader, isCpcPlus)
 }
 
@@ -591,6 +592,7 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
+	}
 		if isCpcPlus {
 			if err := Ink(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
 				fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
@@ -602,6 +604,6 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 				return err
 			}
 		}
-	}
+	
 	return Ascii(filePath, dirPath, bw, p, noAmsdosHeader, isCpcPlus)
 }

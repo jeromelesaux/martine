@@ -29,6 +29,10 @@ type CpcPlusColor struct {
 	Unused byte
 }
 
+func (c *CpcPlusColor)Value() uint16 {
+	return uint16(c.B*128) + uint16(c.R*64) + uint16(c.G)
+}
+
 func NewCpcPlusColor( c color.Color) CpcPlusColor {
 	r,g,b, _ := c.RGBA()
 	return CpcPlusColor{G:byte(g/64),R:byte(r/64),B:byte(b/64)}
@@ -82,9 +86,10 @@ func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode
 		for i := 0; i < len(p); i++ {
 			cp := NewCpcPlusColor(p[i])
 			fmt.Fprintf(os.Stderr,"i:%d,r:%d,g:%d,b:%d\n",i,cp.R,cp.G,cp.B)
-			o[(0x800-0x170)+offset] = cp.G <<2
+			v := cp.Value()
+			o[(0x800-0x170)+offset] = byte(v)
 			offset++
-			o[(0x800-0x170)+offset] = (cp.R) & (cp.B <<2)
+			o[(0x800-0x170)+offset] = byte(v>>8)
 			offset++
 		}
 	} else {
@@ -103,17 +108,11 @@ func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode
 }
 
 func Ink(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHeader bool) error {
-	fmt.Fprintf(os.Stdout, "Saving PAL file (%s)\n", filePath)
-	data := OcpPalette{ScreenMode: screenMode, ColorAnimation: 0, ColorAnimationDelay: 0}
+	fmt.Fprintf(os.Stdout, "Saving INK file (%s)\n", filePath)
+	data := [16]uint16{}
 	for i := 0; i < len(p); i++ {
-		v, err := HardwareValues(p[i])
-		if err == nil {
-			for j := 0; j < 12; j++ {
-				data.PaletteColors[i][j] = v[0]
-			}
-		} else {
-			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
-		}
+		cp := NewCpcPlusColor(p[i])
+		data[i] = cp.Value()
 	}
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x8809, Exec: 0x8809,
 		Size:        uint16(binary.Size(data)),
@@ -121,7 +120,7 @@ func Ink(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHe
 		LogicalSize: uint16(binary.Size(data))}
 	filename := filepath.Base(filePath)
 	extension := filepath.Ext(filename)
-	cpcFilename := strings.ToUpper(strings.Replace(filename, extension, ".PAL", -1))
+	cpcFilename := strings.ToUpper(strings.Replace(filename, extension, ".INK", -1))
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
