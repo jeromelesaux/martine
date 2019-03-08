@@ -30,7 +30,7 @@ type CpcPlusColor struct {
 }
 
 func (c *CpcPlusColor) Value() uint16 {
-	return uint16(c.B*128) + uint16(c.R*64) + uint16(c.G)
+	return uint16(c.B<<8) + uint16(c.R<<4) + uint16(c.G)
 }
 
 func NewCpcPlusColor(c color.Color) CpcPlusColor {
