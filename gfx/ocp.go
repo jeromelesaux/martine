@@ -29,13 +29,13 @@ type CpcPlusColor struct {
 	Unused byte
 }
 
-func (c *CpcPlusColor)Value() uint16 {
+func (c *CpcPlusColor) Value() uint16 {
 	return uint16(c.B*128) + uint16(c.R*64) + uint16(c.G)
 }
 
-func NewCpcPlusColor( c color.Color) CpcPlusColor {
-	r,g,b, _ := c.RGBA()
-	return CpcPlusColor{G:byte(g/64),R:byte(r/64),B:byte(b/64)}
+func NewCpcPlusColor(c color.Color) CpcPlusColor {
+	r, g, b, _ := c.RGBA()
+	return CpcPlusColor{G: byte(g / 64), R: byte(r / 64), B: byte(b / 64)}
 }
 
 type InkPalette struct {
@@ -82,14 +82,14 @@ func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode
 		o[0x184-0x170] = 0x10
 	}
 	if isCpcPlus {
-		offset :=0
+		offset := 0
 		for i := 0; i < len(p); i++ {
 			cp := NewCpcPlusColor(p[i])
-			fmt.Fprintf(os.Stderr,"i:%d,r:%d,g:%d,b:%d\n",i,cp.R,cp.G,cp.B)
+			fmt.Fprintf(os.Stderr, "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
 			v := cp.Value()
 			o[(0x800-0x170)+offset] = byte(v)
 			offset++
-			o[(0x800-0x170)+offset] = byte(v>>8)
+			o[(0x800-0x170)+offset] = byte(v >> 8)
 			offset++
 		}
 	} else {

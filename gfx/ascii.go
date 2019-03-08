@@ -28,23 +28,14 @@ func Ascii(filePath, dirPath string, data []byte, p color.Palette, noAmsdosHeade
 	out += "# Palette " + cpcFilename + "\n.palette:\n" + ByteToken + " "
 
 	if isCpcPlus {
-		for i := 0; i < len(p); i += 2 {
-			r, g, b, _ := p[i].RGBA()
-			cp := CpcPlusColor{G: byte(g), R: byte(r), B: byte(b)}
-			out += fmt.Sprintf("#%.2x", cp.G+(cp.R+128))
+		for i := 0; i < len(p); i++ {
+			cp := NewCpcPlusColor(p[i])
+			v := cp.Value()
+			out += fmt.Sprintf("#%.2x, #%.2x", byte(v), byte(v>>8))
 			if (i+1)%8 == 0 && i+1 < len(p) {
 				out += "\n" + ByteToken + " "
 			} else {
 				if i+1 < len(p) {
-					out += ", "
-				}
-			}
-			out += fmt.Sprintf("#%.2x", cp.B)
-			
-			if (i+2)%8 == 0 && i+2< len(p) {
-				out += "\n" + ByteToken + " "
-			} else {
-				if i+2 < len(p) {
 					out += ", "
 				}
 			}

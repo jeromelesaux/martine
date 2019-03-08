@@ -378,18 +378,18 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 			return err
 		}
 	}
-		if isCpcPlus {
-			if err := Ink(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
-				fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-				return err
-			}
-		} else {
-			if err := Pal(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
-				fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-				return err
-			}
+	if isCpcPlus {
+		if err := Ink(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			return err
 		}
-	
+	} else {
+		if err := Pal(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			return err
+		}
+	}
+
 	return Ascii(filePath, dirPath, bw, p, noAmsdosHeader, isCpcPlus)
 }
 
@@ -470,18 +470,18 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 			return err
 		}
 	}
-		if isCpcPlus {
-			if err := Ink(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
-				fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-				return err
-			}
-		} else {
-			if err := Pal(filePath, dirPath, p, 1, noAmsdosHeader); err != nil {
-				fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-				return err
-			}
+	if isCpcPlus {
+		if err := Ink(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			return err
 		}
-	
+	} else {
+		if err := Pal(filePath, dirPath, p, 1, noAmsdosHeader); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			return err
+		}
+	}
+
 	return Ascii(filePath, dirPath, bw, p, noAmsdosHeader, isCpcPlus)
 }
 
@@ -593,17 +593,17 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 			return err
 		}
 	}
-		if isCpcPlus {
-			if err := Ink(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
-				fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-				return err
-			}
-		} else {
-			if err := Pal(filePath, dirPath, p, 2, noAmsdosHeader); err != nil {
-				fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-				return err
-			}
+	if isCpcPlus {
+		if err := Ink(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			return err
 		}
-	
+	} else {
+		if err := Pal(filePath, dirPath, p, 2, noAmsdosHeader); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			return err
+		}
+	}
+
 	return Ascii(filePath, dirPath, bw, p, noAmsdosHeader, isCpcPlus)
 }

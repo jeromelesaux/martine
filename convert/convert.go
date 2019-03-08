@@ -76,7 +76,7 @@ func downgradeWithPalette(in *image.NRGBA, p color.Palette) *image.NRGBA {
 }
 
 func downgrade(in *image.NRGBA, isCpcPlus bool) (color.Palette, *image.NRGBA) {
-	fmt.Fprintf(os.Stderr,"Plus palette :%d\n",len(gfx.CpcPlusPalette))
+	fmt.Fprintf(os.Stderr, "Plus palette :%d\n", len(gfx.CpcPlusPalette))
 	p := color.Palette{}
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
