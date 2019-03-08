@@ -29,6 +29,11 @@ type CpcPlusColor struct {
 	Unused byte
 }
 
+func NewCpcPlusColor( c color.Color) CpcPlusColor {
+	r,g,b, _ := c.RGBA()
+	return CpcPlusColor{G:byte(g/64),R:byte(r/64),B:byte(b/64)}
+}
+
 type InkPalette struct {
 	Colors [16]CpcPlusColor
 }
@@ -75,12 +80,11 @@ func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode
 	if isCpcPlus {
 		offset :=0
 		for i := 0; i < len(p); i++ {
-			r, g, b, _ := p[i].RGBA()
-			cp := CpcPlusColor{G: byte(g), R: byte(r), B: byte(b)}
+			cp := NewCpcPlusColor(p[i])
+			fmt.Fprintf(os.Stderr,"i:%d,r:%d,g:%d,b:%d\n",i,cp.R,cp.G,cp.B)
 			o[(0x800-0x170)+offset] = cp.G <<2
 			offset++
 			o[(0x800-0x170)+offset] = (cp.R) & (cp.B <<2)
-			//o[(0x800-0x170)+offset] += cp.B 
 			offset++
 		}
 	} else {
