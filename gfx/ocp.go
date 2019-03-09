@@ -30,7 +30,7 @@ type CpcPlusColor struct {
 }
 
 func (c *CpcPlusColor) Value() uint16 {
-	return uint16(c.B<<8) + uint16(c.R<<4) + uint16(c.G)
+	return uint16(c.B) + uint16(c.R<<4) + uint16(c.G<<16)
 }
 
 func NewCpcPlusColor(c color.Color) CpcPlusColor {
@@ -65,8 +65,7 @@ func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode
 	}
 	copy(o, OverscanBoot[:])
 	copy(o[0x200-0x170:], data[:])
-	//o[(0x1ac-0x1ad)] = 0 // cpc old
-	// affectation de la palette CPC old
+	//o[(0x1ac-0x170)] = 0 // cpc old
 	switch isCpcPlus {
 	case true:
 		o[(0x1ac - 0x170)] = 1
@@ -81,15 +80,16 @@ func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode
 	case 2:
 		o[0x184-0x170] = 0x10
 	}
+	// affectation de la palette CPC old
 	if isCpcPlus {
 		offset := 0
 		for i := 0; i < len(p); i++ {
 			cp := NewCpcPlusColor(p[i])
 			fmt.Fprintf(os.Stderr, "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
 			v := cp.Value()
-			o[(0x800-0x170)+offset] = byte(v)
-			offset++
 			o[(0x800-0x170)+offset] = byte(v >> 8)
+			offset++
+			o[(0x800-0x170)+offset] = byte(v)
 			offset++
 		}
 	} else {
@@ -175,6 +175,11 @@ type OcpPalette struct {
 func Pal(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHeader bool) error {
 	fmt.Fprintf(os.Stdout, "Saving PAL file (%s)\n", filePath)
 	data := OcpPalette{ScreenMode: screenMode, ColorAnimation: 0, ColorAnimationDelay: 0}
+	for i := 0; i < 16 ; i++ {
+		for j := 0; j< 12; j++ {
+			data.PaletteColors[i][j] = 54
+		}
+	}
 	for i := 0; i < len(p); i++ {
 		v, err := HardwareValues(p[i])
 		if err == nil {
@@ -184,7 +189,7 @@ func Pal(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHe
 		} else {
 			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
 		}
-	}
+	} 
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x8809, Exec: 0x8809,
 		Size:        uint16(binary.Size(data)),
 		Size2:       uint16(binary.Size(data)),
