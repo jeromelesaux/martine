@@ -30,12 +30,13 @@ type CpcPlusColor struct {
 }
 
 func (c *CpcPlusColor) Value() uint16 {
-	return uint16(c.B) + uint16(c.R<<4) + uint16(c.G<<16)
+	return uint16(c.B<<4 | c.R<< 2 | c.G)
 }
 
 func NewCpcPlusColor(c color.Color) CpcPlusColor {
 	r, g, b, _ := c.RGBA()
-	return CpcPlusColor{G: byte(g / 64), R: byte(r / 64), B: byte(b / 64)}
+	fmt.Fprintf(os.Stderr,"original colors r:%d,g:%d,b:%d\n",r,g,b)
+	return CpcPlusColor{G: byte(g / 4096), R: byte(r / 4096), B: byte(b / 4096)}
 }
 
 type InkPalette struct {
