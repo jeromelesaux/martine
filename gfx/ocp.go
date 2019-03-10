@@ -23,20 +23,28 @@ var OverscanBoot = [...]byte{0x0e, 0x00, 0x0a, 0x00, 0x01, 0xc0, 0x20, 0x69, 0x4
 	0xfb, 0xc3, 0x00, 0xbe, 0x2b, 0x00, 0x71, 0x18, 0x08, 0xc3, 0x41, 0xb9, 0xc9, 0x00, 0x00, 0x00}
 
 type CpcPlusColor struct {
-	G      byte
-	R      byte
-	B      byte
-	Unused byte
+	G      uint16
+	R      uint16
+	B      uint16
 }
 
 func (c *CpcPlusColor) Value() uint16 {
-	return uint16(c.B | c.R << 4 | c.G << 8)
+	fmt.Fprintf(os.Stderr,"value(%d,%d,%d) #%.4x : %d\n",c.R,c.G,c.B,
+	c.B | c.R << 4 | c.G << 8,
+	c.B + c.R *16 +  c.G * 256 )
+	return uint16(c.B + c.R * 16 +  c.G * 256 )
+}
+func (c *CpcPlusColor)Bytes() []byte {
+	buf := make([]byte,2)
+	binary.LittleEndian.PutUint16(buf,c.Value())
+	fmt.Fprintf(os.Stderr,"%b\n",buf)
+	return buf
 }
 
 func NewCpcPlusColor(c color.Color) CpcPlusColor {
 	r, g, b, _ := c.RGBA()
-	fmt.Fprintf(os.Stderr,"original colors r:%d,g:%d,b:%d\n",r,g,b)
-	return CpcPlusColor{G: byte(g / 4096), R: byte(r / 4096), B: byte(b / 4096)}
+//	fmt.Fprintf(os.Stderr,"original colors r:%d,g:%d,b:%d\n",r,g,b)
+	return CpcPlusColor{G: uint16(g / 4096), R: uint16(r / 4096), B: uint16(b / 4096)}
 }
 
 type InkPalette struct {
@@ -87,11 +95,12 @@ func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode
 		for i := 0; i < len(p); i++ {
 			cp := NewCpcPlusColor(p[i])
 			fmt.Fprintf(os.Stderr, "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
-			v := cp.Value()
-			o[(0x800-0x170)+offset] = byte(v >> 8)
-			offset++
-			o[(0x800-0x170)+offset] = byte(v)
-			offset++
+			v := cp.Bytes()
+			copy(o[(0x800-0x170)+offset:],v[:])
+			//o[(0x800-0x170)+offset] = byte(v  >> 8)
+			//offset++
+			//o[(0x800-0x170)+offset] = byte(v)
+			offset+=2
 		}
 	} else {
 		for i := 0; i < len(p); i++ {
