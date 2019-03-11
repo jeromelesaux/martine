@@ -40,7 +40,7 @@ var (
 	SelfMode      = Size{}
 )
 var (
-	CpcColorNotFound = errors.New("Cpc color not found")
+	ErrorCpcColorNotFound = errors.New("Cpc color not found")
 )
 
 // values 50% RGB = 0x7F
@@ -211,7 +211,7 @@ func HardwareValues(c color.Color) ([]uint8, error) {
 	if ColorsAreEquals(PastelBlue.Color, c) {
 		return PastelBlue.HardwareValues, nil
 	}
-	return nil, CpcColorNotFound
+	return nil, ErrorCpcColorNotFound
 
 }
 
@@ -297,6 +297,6 @@ func FirmwareNumber(c color.Color) (int, error) {
 	if ColorsAreEquals(PastelBlue.Color, c) {
 		return PastelBlue.FirmwareNumber, nil
 	}
-	return -1, CpcColorNotFound
+	return -1, ErrorCpcColorNotFound
 
 }
