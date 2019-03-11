@@ -40,7 +40,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 	size.Width = in.Bounds().Max.X
 
 	if mode == 0 {
-		data = make([]byte, (size.Height * (size.Width / 2)))
+		data = make([]byte, (size.Height * (size.Width/2)))
 		offset := 0
 		for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 			for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
@@ -70,7 +70,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 		}
 	} else {
 		if mode == 1 {
-			data = make([]byte, (size.Height * size.Width / 4))
+			data = make([]byte, (size.Height * size.Width))
 			offset := 0
 			for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 				for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 4 {
@@ -112,12 +112,12 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 					//	MEND
 
 					data[offset] = pixel
-					offset++
+					offset+=4
 				}
 			}
 		} else {
 			if mode == 2 {
-				data = make([]byte, (size.Height * size.Width / 8))
+				data = make([]byte, (size.Height * size.Width))
 				offset := 0
 				for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 					for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 8 {
@@ -187,7 +187,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 						// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 						//	MEND
 						data[offset] = pixel
-						offset++
+						offset+=8
 					}
 				}
 			} else {
