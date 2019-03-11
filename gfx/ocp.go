@@ -23,27 +23,27 @@ var OverscanBoot = [...]byte{0x0e, 0x00, 0x0a, 0x00, 0x01, 0xc0, 0x20, 0x69, 0x4
 	0xfb, 0xc3, 0x00, 0xbe, 0x2b, 0x00, 0x71, 0x18, 0x08, 0xc3, 0x41, 0xb9, 0xc9, 0x00, 0x00, 0x00}
 
 type CpcPlusColor struct {
-	G      uint16
-	R      uint16
-	B      uint16
+	G uint16
+	R uint16
+	B uint16
 }
 
 func (c *CpcPlusColor) Value() uint16 {
-	fmt.Fprintf(os.Stderr,"value(%d,%d,%d) #%.4x : %d\n",c.R,c.G,c.B,
-	c.B | c.R << 4 | c.G << 8,
-	c.B + c.R *16 +  c.G * 256 )
-	return uint16(c.B + c.R * 16 +  c.G * 256 )
+	fmt.Fprintf(os.Stderr, "value(%d,%d,%d) #%.4x : %d\n", c.R, c.G, c.B,
+		c.B|c.R<<4|c.G<<8,
+		c.B+c.R*16+c.G*256)
+	return uint16(c.B + c.R*16 + c.G*256)
 }
-func (c *CpcPlusColor)Bytes() []byte {
-	buf := make([]byte,2)
-	binary.LittleEndian.PutUint16(buf,c.Value())
-	fmt.Fprintf(os.Stderr,"%b\n",buf)
+func (c *CpcPlusColor) Bytes() []byte {
+	buf := make([]byte, 2)
+	binary.LittleEndian.PutUint16(buf, c.Value())
+	fmt.Fprintf(os.Stderr, "%b\n", buf)
 	return buf
 }
 
 func NewCpcPlusColor(c color.Color) CpcPlusColor {
 	r, g, b, _ := c.RGBA()
-//	fmt.Fprintf(os.Stderr,"original colors r:%d,g:%d,b:%d\n",r,g,b)
+	//	fmt.Fprintf(os.Stderr,"original colors r:%d,g:%d,b:%d\n",r,g,b)
 	return CpcPlusColor{G: uint16(g / 4096), R: uint16(r / 4096), B: uint16(b / 4096)}
 }
 
@@ -96,8 +96,8 @@ func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode
 			cp := NewCpcPlusColor(p[i])
 			fmt.Fprintf(os.Stderr, "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
 			v := cp.Bytes()
-			copy(o[(0x801-0x170)+offset:],v[:])
-			offset+=2
+			copy(o[(0x801-0x170)+offset:], v[:])
+			offset += 2
 		}
 	} else {
 		for i := 0; i < len(p); i++ {
@@ -183,8 +183,8 @@ type OcpPalette struct {
 func Pal(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHeader bool) error {
 	fmt.Fprintf(os.Stdout, "Saving PAL file (%s)\n", filePath)
 	data := OcpPalette{ScreenMode: screenMode, ColorAnimation: 0, ColorAnimationDelay: 0}
-	for i := 0; i < 16 ; i++ {
-		for j := 0; j< 12; j++ {
+	for i := 0; i < 16; i++ {
+		for j := 0; j < 12; j++ {
 			data.PaletteColors[i][j] = 54
 		}
 	}
@@ -197,7 +197,7 @@ func Pal(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHe
 		} else {
 			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
 		}
-	} 
+	}
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x8809, Exec: 0x8809,
 		Size:        uint16(binary.Size(data)),
 		Size2:       uint16(binary.Size(data)),
@@ -223,27 +223,27 @@ func Pal(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHe
 
 type OcpWin struct {
 	Data   []byte
-	Width  byte
+	Width  uint16
 	Height byte
 }
 
 func Win(filePath, dirPath string, data []byte, screenMode uint8, width, height int, noAmsdosHeader bool) error {
-	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", filePath,screenMode, width,height)
+	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", filePath, screenMode, width, height)
 	win := OcpWin{Data: data}
 	switch screenMode {
 	case 0:
-		win.Width = byte(width / 4)
+		win.Width = uint16(width / 4)
 		win.Height = byte(height / 2)
 	case 1:
-		win.Width = byte(width / 2)
+		win.Width = uint16(width / 2)
 		win.Height = byte(height / 2)
 	case 2:
-		win.Width = byte(width)
+		win.Width = uint16(width)
 		win.Height = byte(height / 2)
 	default:
 		fmt.Fprintf(os.Stderr, "Win export screen mode not supported. %d\n", screenMode)
 	}
-    filesize := binary.Size(win.Data) + binary.Size(win.Width) + binary.Size(win.Height)
+	filesize := binary.Size(win.Data) + binary.Size(win.Width) + binary.Size(win.Height)
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x4000, Exec: 0x4000,
 		Size:        uint16(filesize),
 		Size2:       uint16(filesize),
@@ -263,8 +263,9 @@ func Win(filePath, dirPath string, data []byte, screenMode uint8, width, height 
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	binary.Write(fw, binary.LittleEndian, win.Data)
-	binary.Write(fw,binary.LittleEndian,win.Width)
-	binary.Write(fw, binary.LittleEndian,win.Height)
+	binary.Write(fw, binary.LittleEndian, win.Width)
+	binary.Write(fw, binary.LittleEndian, win.Height)
+	binary.Write(fw, binary.LittleEndian, byte(0))
 	fw.Close()
 	return nil
 

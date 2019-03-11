@@ -22,29 +22,29 @@ func Ascii(filePath, dirPath string, data []byte, p color.Palette, noAmsdosHeade
 	out += "# Screen " + cpcFilename + "\n.screen:\n"
 	for i = 0; i < len(data); i += 8 {
 		out += fmt.Sprintf("%s ", ByteToken)
-		if i <len(data) {
-			out += fmt.Sprintf("#%0.2x",data[i])
+		if i < len(data) {
+			out += fmt.Sprintf("#%0.2x", data[i])
 		}
 		if i+1 < len(data) {
-			out += fmt.Sprintf(", #%0.2x",data[i+1])
+			out += fmt.Sprintf(", #%0.2x", data[i+1])
 		}
 		if i+2 < len(data) {
-			out += fmt.Sprintf(", #%0.2x",data[i+2])
+			out += fmt.Sprintf(", #%0.2x", data[i+2])
 		}
 		if i+3 < len(data) {
-			out += fmt.Sprintf(", #%0.2x",data[i+3])
+			out += fmt.Sprintf(", #%0.2x", data[i+3])
 		}
 		if i+4 < len(data) {
-			out += fmt.Sprintf(", #%0.2x",data[i+4])
+			out += fmt.Sprintf(", #%0.2x", data[i+4])
 		}
 		if i+5 < len(data) {
-			out += fmt.Sprintf(", #%0.2x",data[i+5])
+			out += fmt.Sprintf(", #%0.2x", data[i+5])
 		}
 		if i+6 < len(data) {
-			out += fmt.Sprintf(", #%0.2x",data[i+6])
+			out += fmt.Sprintf(", #%0.2x", data[i+6])
 		}
 		if i+7 < len(data) {
-			out += fmt.Sprintf(", #%0.2x",data[i+7])
+			out += fmt.Sprintf(", #%0.2x", data[i+7])
 		}
 		out += fmt.Sprintf("\n")
 	}
