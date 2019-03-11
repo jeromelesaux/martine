@@ -36,7 +36,10 @@ func Transform(in *image.NRGBA, p color.Palette, size Size, filepath, dirpath st
 func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, filePath, dirPath string, noAmsdosHeader, isCpcPlus bool) error {
 	var data []byte
 	firmwareColorUsed := make(map[int]int, 0)
-	if mode == 2 {
+	size.Height = in.Bounds().Max.Y
+	size.Width = in.Bounds().Max.X
+
+	if mode == 0 {
 		data = make([]byte, (size.Height * size.Width / 2))
 		lineLength := size.Width / 2
 		for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {

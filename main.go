@@ -188,6 +188,7 @@ func main() {
 	if !customDimension {
 		gfx.Transform(downgraded, newPalette, size, *picturePath, *output, *noAmsdosHeader, *plusMode)
 	} else {
+		fmt.Fprintf(os.Stdout,"Transform image in sprite.\n")
 		gfx.SpriteTransform(downgraded, newPalette, size, screenMode, *picturePath, *output, *noAmsdosHeader, *plusMode)
 	}
 }
