@@ -40,8 +40,8 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 	size.Width = in.Bounds().Max.X
 
 	if mode == 0 {
-		data = make([]byte, (size.Height * size.Width / 2))
-		lineLength := size.Width / 2
+		data = make([]byte, (size.Height * (size.Width / 2)))
+		offset := 0
 		for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 			for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
 
@@ -63,13 +63,15 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 				firmwareColorUsed[pp2]++
 
 				pixel := pixelMode0(pp1, pp2)
-				data[(y%8)+(lineLength*(y/8))+((x+1)/2)] = pixel
+				//fmt.Fprintf(os.Stderr,"(%d,%d)[#%.2x]:#%.2x\n",y,x,offset,pixel)
+				data[offset] = pixel
+				offset++
 			}
 		}
 	} else {
 		if mode == 1 {
 			data = make([]byte, (size.Height * size.Width / 4))
-			lineLength := size.Width / 4
+			offset := 0
 			for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 				for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 4 {
 
@@ -109,13 +111,14 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 					// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 					//	MEND
 
-					data[(y%8)+(lineLength*(y/8))+((x+1)/4)] = pixel
+					data[offset] = pixel
+					offset++
 				}
 			}
 		} else {
 			if mode == 2 {
 				data = make([]byte, (size.Height * size.Width / 8))
-				lineLength := size.Width / 8
+				offset := 0
 				for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 					for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 8 {
 
@@ -183,7 +186,8 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 						// MACRO PIXM0 COL2,COL1
 						// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 						//	MEND
-						data[(y%8)+(lineLength*(y/8))+((x+1)/8)] = pixel
+						data[offset] = pixel
+						offset++
 					}
 				}
 			} else {

@@ -117,7 +117,7 @@ func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode
 func Ink(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHeader bool) error {
 	fmt.Fprintf(os.Stdout, "Saving INK file (%s)\n", filePath)
 	data := [16]uint16{}
-	
+
 	for i := 0; i < len(p); i++ {
 		cp := NewCpcPlusColor(p[i])
 		data[i] = cp.Value()
@@ -223,30 +223,31 @@ func Pal(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHe
 
 type OcpWin struct {
 	Data   []byte
-	Width  uint8
+	Width  byte
 	Height byte
 }
 
 func Win(filePath, dirPath string, data []byte, screenMode uint8, width, height int, noAmsdosHeader bool) error {
-	fmt.Fprintf(os.Stdout, "Saving WIN file (%s)\n", filePath)
+	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", filePath,screenMode, width,height)
 	win := OcpWin{Data: data}
 	switch screenMode {
 	case 0:
-		win.Width = uint8(width / 4)
+		win.Width = byte(width / 4)
 		win.Height = byte(height / 2)
 	case 1:
-		win.Width = uint8(width / 2)
-		win.Height = uint8(height / 2)
+		win.Width = byte(width / 2)
+		win.Height = byte(height / 2)
 	case 2:
-		win.Width = uint8(width)
-		win.Height = uint8(height / 2)
+		win.Width = byte(width)
+		win.Height = byte(height / 2)
 	default:
 		fmt.Fprintf(os.Stderr, "Win export screen mode not supported. %d\n", screenMode)
 	}
+    filesize := binary.Size(win.Data) + binary.Size(win.Width) + binary.Size(win.Height)
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x4000, Exec: 0x4000,
-		Size:        uint16(binary.Size(win)),
-		Size2:       uint16(binary.Size(win)),
-		LogicalSize: uint16(binary.Size(win))}
+		Size:        uint16(filesize),
+		Size2:       uint16(filesize),
+		LogicalSize: uint16(filesize)}
 	filename := filepath.Base(filePath)
 	extension := filepath.Ext(filename)
 	cpcFilename := strings.ToUpper(strings.Replace(filename, extension, ".WIN", -1))
@@ -261,7 +262,9 @@ func Win(filePath, dirPath string, data []byte, screenMode uint8, width, height 
 	if !noAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
-	binary.Write(fw, binary.LittleEndian, win)
+	binary.Write(fw, binary.LittleEndian, win.Data)
+	binary.Write(fw,binary.LittleEndian,win.Width)
+	binary.Write(fw, binary.LittleEndian,win.Height)
 	fw.Close()
 	return nil
 
