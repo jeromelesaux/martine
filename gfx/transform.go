@@ -267,17 +267,17 @@ func pixelMode1(pp1, pp2, pp3, pp4 int) byte {
 	}
 	//fmt.Fprintf(os.Stderr,"uint8(pp1)&4:%.8b\n",uint8(pp1)&4)
 	if uint8(pp2)&1 == 1 {
-		pixel += 32
+		pixel += 64
 	}
 	//fmt.Fprintf(os.Stderr,"uint8(pp1)&8:%.8b\n",uint8(pp1)&8)
 	if uint8(pp2)&2 == 2 {
-		pixel += 2
+		pixel += 4
 	}
 	if uint8(pp3)&1 == 1 {
-		pixel += 64
+		pixel += 32
 	}
 	if uint8(pp3)&2 == 2 {
-		pixel += 4
+		pixel += 2
 	}
 	if uint8(pp4)&1 == 1 {
 		pixel += 16
