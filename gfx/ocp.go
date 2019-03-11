@@ -96,10 +96,7 @@ func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode
 			cp := NewCpcPlusColor(p[i])
 			fmt.Fprintf(os.Stderr, "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
 			v := cp.Bytes()
-			copy(o[(0x800-0x170)+offset:],v[:])
-			//o[(0x800-0x170)+offset] = byte(v  >> 8)
-			//offset++
-			//o[(0x800-0x170)+offset] = byte(v)
+			copy(o[(0x801-0x170)+offset:],v[:])
 			offset+=2
 		}
 	} else {
@@ -120,6 +117,7 @@ func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode
 func Ink(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHeader bool) error {
 	fmt.Fprintf(os.Stdout, "Saving INK file (%s)\n", filePath)
 	data := [16]uint16{}
+	
 	for i := 0; i < len(p); i++ {
 		cp := NewCpcPlusColor(p[i])
 		data[i] = cp.Value()
