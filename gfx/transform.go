@@ -42,10 +42,8 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 	if mode == 0 {
 		data = make([]byte, (size.Height * (size.Width/2)))
 		fmt.Fprintf(os.Stderr,"Length #%.2x\n",(size.Height * (size.Width/2)))
-		offset := 0
 		for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 			for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
-
 				c1 := in.At(x, y)
 				pp1, err := PalettePosition(c1, p)
 				if err != nil {
@@ -57,16 +55,13 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 				c2 := in.At(x+1, y)
 				pp2, err := PalettePosition(c2, p)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+					fmt.Fprintf(os.Stdout, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 					pp2 = 0
 				}
-
 				firmwareColorUsed[pp2]++
-
 				pixel := pixelMode0(pp1, pp2)
-				//fmt.Fprintf(os.Stderr,"(%d,%d)[#%.2x]:#%.2x\n",y,x,offset,pixel)
-				data[offset] = pixel
-				offset++
+				fmt.Fprintf(os.Stderr,"(%d,%d)[#%.2x]:#%.2x\n",y,x,(0x800*(y%8))+(0x50*(y/8))+((x+1)/2),pixel)
+				data[((y%8))+(0x50*(y/8))+((x+1)/2)] = pixel
 			}
 		}
 	} else {

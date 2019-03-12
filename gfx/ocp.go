@@ -188,6 +188,7 @@ func Pal(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHe
 			data.PaletteColors[i][j] = 54
 		}
 	}
+	fmt.Fprintf(os.Stdout,"Palette size %d\n",len(p))
 	for i := 0; i < len(p); i++ {
 		v, err := HardwareValues(p[i])
 		if err == nil {
@@ -223,18 +224,22 @@ func Pal(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHe
 
 type OcpWin struct {
 	Data   []uint8
+	Unused2 uint8
 	Width  uint16
 	Height uint8
-	Unused uint8
+	Unused uint8 
 }
+ func (o *OcpWin) ToString() string {
+	 return fmt.Sprintf("Width:%d,Height:%d,Unused:%d",o.Width,o.Height,o.Unused)
+ }
 
 func Win(filePath, dirPath string, data []byte, screenMode uint8, width, height int, noAmsdosHeader bool) error {
 	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", filePath, screenMode, width, height)
-	win := OcpWin{Data: data}
+	win := OcpWin{Data: data,Unused:3}
 	switch screenMode {
 	case 0:
-		win.Width = uint16(width / 4)
-		win.Height = byte(height / 2)
+		win.Width = uint16(width/2)
+		win.Height = byte(height)
 	case 1:
 		win.Width = uint16(width / 2)
 		win.Height = byte(height / 2)
@@ -260,13 +265,15 @@ func Win(filePath, dirPath string, data []byte, screenMode uint8, width, height 
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
 		return err
 	}
+	fmt.Fprintf(os.Stdout,"%s, data size :%d\n",win.ToString(),len(data))
 	if !noAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	binary.Write(fw, binary.LittleEndian, win.Data)
+	binary.Write(fw, binary.LittleEndian, win.Unused2)
 	binary.Write(fw, binary.LittleEndian, win.Width)
 	binary.Write(fw, binary.LittleEndian, win.Height)
-	binary.Write(fw,binary.LittleEndian,win.Unused)
+	binary.Write(fw, binary.LittleEndian, win.Unused)
 	fw.Close()
 	return nil
 

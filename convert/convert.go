@@ -38,10 +38,10 @@ func DowngradingPalette(in *image.NRGBA, size gfx.Size, isCpcPlus bool) (color.P
 		newPalette := []color.Color{}
 		sort.Sort(sort.Reverse(sort.IntSlice(a)))
 		for _, k := range a {
-			if len(newPalette) >= size.ColorsAvailable {
-				break
-			}
 			for _, s := range n[k] {
+				if len(newPalette) >= size.ColorsAvailable {
+					break
+				}
 				newPalette = append(newPalette, s)
 			}
 		}
