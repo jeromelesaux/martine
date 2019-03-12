@@ -222,9 +222,10 @@ func Pal(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHe
 }
 
 type OcpWin struct {
-	Data   []byte
+	Data   []uint8
 	Width  uint16
-	Height byte
+	Height uint8
+	Unused uint8
 }
 
 func Win(filePath, dirPath string, data []byte, screenMode uint8, width, height int, noAmsdosHeader bool) error {
@@ -232,7 +233,7 @@ func Win(filePath, dirPath string, data []byte, screenMode uint8, width, height 
 	win := OcpWin{Data: data}
 	switch screenMode {
 	case 0:
-		win.Width = uint16(width / 16)
+		win.Width = uint16(width / 4)
 		win.Height = byte(height / 2)
 	case 1:
 		win.Width = uint16(width / 2)
@@ -265,6 +266,7 @@ func Win(filePath, dirPath string, data []byte, screenMode uint8, width, height 
 	binary.Write(fw, binary.LittleEndian, win.Data)
 	binary.Write(fw, binary.LittleEndian, win.Width)
 	binary.Write(fw, binary.LittleEndian, win.Height)
+	binary.Write(fw,binary.LittleEndian,win.Unused)
 	fw.Close()
 	return nil
 

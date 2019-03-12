@@ -41,6 +41,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 
 	if mode == 0 {
 		data = make([]byte, (size.Height * (size.Width/2)))
+		fmt.Fprintf(os.Stderr,"Length #%.2x\n",(size.Height * (size.Width/2)))
 		offset := 0
 		for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 			for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
