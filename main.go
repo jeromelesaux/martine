@@ -149,9 +149,9 @@ func main() {
 		resizeAlgo = imaging.Lanczos
 	case 4:
 		resizeAlgo = imaging.Linear
-	case 5: 
+	case 5:
 		resizeAlgo = imaging.Box
-	case 6: 
+	case 6:
 		resizeAlgo = imaging.Hermite
 	case 7:
 		resizeAlgo = imaging.BSpline

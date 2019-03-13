@@ -38,11 +38,13 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 	firmwareColorUsed := make(map[int]int, 0)
 	size.Height = in.Bounds().Max.Y
 	size.Width = in.Bounds().Max.X
-
+	var lineSize int
 	if mode == 0 {
-		data = make([]byte, size.Height *(0x800) +(size.Width/2))
-		size := 0
-		//fmt.Fprintf(os.Stderr,"Length #%.2x\n",(size.Height * (size.Width/2)*0x800))
+		lineSize = size.Width / 2
+		if size.Width%2 != 0 {
+			lineSize++
+		}
+		data = make([]byte, size.Height*lineSize)
 		for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 			for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
 				c1 := in.At(x, y)
@@ -61,14 +63,10 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 				}
 				firmwareColorUsed[pp2]++
 				pixel := pixelMode0(pp1, pp2)
-				fmt.Fprintf(os.Stderr,"(%d,%d)[#%.2x]:#%.2x\n",y,x,(0x800*(y%8))+(0x50*(y/8))+((x+1)/2),pixel)
-				if size < (0x800*(y%8))+(0x50*(y/8))+((x+1)/2) {
-					size = (0x800*(y%8))+(0x50*(y/8))+((x+1)/2)
-				}
-				data[(0x800*(y%8))+(0x50*(y/8))+((x+1)/2)] = pixel
+				fmt.Fprintf(os.Stderr, "(%d,%d)[#%.2x]:#%.2x\n", y, x, (lineSize*(y%8))+(lineSize*(y/8))+((x+1)/2), pixel)
+				data[(lineSize*(y%8))+(lineSize*(y/8))+((x+1)/2)] = pixel
 			}
 		}
-		fmt.Fprintf(os.Stderr,"size :#%.2x\n",size)
 	} else {
 		if mode == 1 {
 			data = make([]byte, (size.Height * size.Width))
@@ -113,7 +111,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 					//	MEND
 
 					data[offset] = pixel
-					offset+=4
+					offset += 4
 				}
 			}
 		} else {
@@ -188,7 +186,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 						// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 						//	MEND
 						data[offset] = pixel
-						offset+=8
+						offset += 8
 					}
 				}
 			} else {
@@ -197,7 +195,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 		}
 	}
 	fmt.Println(firmwareColorUsed)
-	if err := Win(filePath, dirPath, data, mode, size.Width, size.Height, noAmsdosHeader); err != nil {
+	if err := Win(filePath, dirPath, data, mode, lineSize, size.Height, noAmsdosHeader); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 		return err
 	}
