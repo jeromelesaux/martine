@@ -12,21 +12,45 @@ go build
 ```
 Usage and options : 
 
-```martine to convert image to Amstrad cpc screen (even overscan)
-By Impact Sid (Version:0.1Beta)
+```martine convert (jpeg, png format) image to Amstrad cpc screen (even overscan)
+By Impact Sid (Version:0.1.Alpha)
 usage :
 
   -a int
-    	Algorithm to resize the image (available 1: NearestNeighbor (default), 2: CatmullRom, 3: Lanczos, 4: Linear) (default 1)
+    	Algorithm to resize the image (available :
+    		1: NearestNeighbor (default)
+    		2: CatmullRom
+    		3: Lanczos,
+    		4: Linear
+    		5: Box
+    		6: Hermite
+    		7: BSpline
+    		8: Hamming
+    		9: Hann
+    		10: Gaussian
+    		11: Blackman
+    		12: Bartlett
+    		13: Welch
+    		14: Cosine (default 1)
   -f	Overscan mode (default no overscan)
   -h int
     	Custom output height in pixels. (default -1)
-  -m string
-    	Output mode to use (mode0,mode1,mode2 or overscan available).
+  -help
+    	Display help message
+  -i string
+    	Picture path of the input file.
+  -m int
+    	Output mode to use :
+    		0 for mode0
+    		1 for mode1
+    		2 for mode2
+    		and add -f option for overscan export. (default -1)
+  -n	no amsdos header for all files (default amsdos header added).
   -o string
     	Output directory
-  -p string
-    	Picture path of the Amsdos file.
+  -p	Plus mode (means generate an image for CPC Plus Screen)
+  -s string
+    	Byte statement to replace in ascii export (default is BYTE), you can replace or instance by defb
   -w int
     	Custom output width in pixels. (default -1)
 ```
