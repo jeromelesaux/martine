@@ -21,7 +21,7 @@ var (
 	mode            = flag.Int("m", -1, "Output mode to use (0 for mode0, 1 for mode1, 2 for mode2 and add -f option for overscan export).")
 	output          = flag.String("o", "", "Output directory")
 	overscan        = flag.Bool("f", false, "Overscan mode (default no overscan)")
-	resizeAlgorithm = flag.Int("a", 1, "Algorithm to resize the image (available 1: NearestNeighbor (default), 2: CatmullRom, 3: Lanczos, 4: Linear)")
+	resizeAlgorithm = flag.Int("a", 1, "Algorithm to resize the image (available 1: NearestNeighbor (default), 2: CatmullRom, 3: Lanczos, 4: Linear, 5: Box, 6: Hermite, 7: BSpline, 8: Hamming, 9: Hann, 10: Gaussian, 11: Blackman, 12: Bartlett, 13: Welch, 14: Cosine)")
 	help            = flag.Bool("help", false, "Display help message")
 	noAmsdosHeader  = flag.Bool("n", false, "no amsdos header for all files (default amsdos header added).")
 	plusMode        = flag.Bool("p", false, "Plus mode (means generate an image for CPC Plus Screen)")
@@ -149,6 +149,26 @@ func main() {
 		resizeAlgo = imaging.Lanczos
 	case 4:
 		resizeAlgo = imaging.Linear
+	case 5: 
+		resizeAlgo = imaging.Box
+	case 6: 
+		resizeAlgo = imaging.Hermite
+	case 7:
+		resizeAlgo = imaging.BSpline
+	case 8:
+		resizeAlgo = imaging.Hamming
+	case 9:
+		resizeAlgo = imaging.Hann
+	case 10:
+		resizeAlgo = imaging.Gaussian
+	case 11:
+		resizeAlgo = imaging.Blackman
+	case 12:
+		resizeAlgo = imaging.Bartlett
+	case 13:
+		resizeAlgo = imaging.Welch
+	case 14:
+		resizeAlgo = imaging.Cosine
 	default:
 		resizeAlgo = imaging.NearestNeighbor
 	}

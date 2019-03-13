@@ -37,7 +37,7 @@ func (c *CpcPlusColor) Value() uint16 {
 func (c *CpcPlusColor) Bytes() []byte {
 	buf := make([]byte, 2)
 	binary.LittleEndian.PutUint16(buf, c.Value())
-	fmt.Fprintf(os.Stderr, "%b\n", buf)
+//	fmt.Fprintf(os.Stderr, "%b\n", buf)
 	return buf
 }
 

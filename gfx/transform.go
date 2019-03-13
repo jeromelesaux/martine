@@ -40,8 +40,9 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 	size.Width = in.Bounds().Max.X
 
 	if mode == 0 {
-		data = make([]byte, (size.Height * (size.Width/2)))
-		fmt.Fprintf(os.Stderr,"Length #%.2x\n",(size.Height * (size.Width/2)))
+		data = make([]byte, size.Height *(0x800) +(size.Width/2))
+		size := 0
+		//fmt.Fprintf(os.Stderr,"Length #%.2x\n",(size.Height * (size.Width/2)*0x800))
 		for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 			for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
 				c1 := in.At(x, y)
@@ -61,9 +62,13 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 				firmwareColorUsed[pp2]++
 				pixel := pixelMode0(pp1, pp2)
 				fmt.Fprintf(os.Stderr,"(%d,%d)[#%.2x]:#%.2x\n",y,x,(0x800*(y%8))+(0x50*(y/8))+((x+1)/2),pixel)
-				data[((y%8))+(0x50*(y/8))+((x+1)/2)] = pixel
+				if size < (0x800*(y%8))+(0x50*(y/8))+((x+1)/2) {
+					size = (0x800*(y%8))+(0x50*(y/8))+((x+1)/2)
+				}
+				data[(0x800*(y%8))+(0x50*(y/8))+((x+1)/2)] = pixel
 			}
 		}
+		fmt.Fprintf(os.Stderr,"size :#%.2x\n",size)
 	} else {
 		if mode == 1 {
 			data = make([]byte, (size.Height * size.Width))
