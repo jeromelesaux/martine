@@ -41,30 +41,32 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 	var lineSize int
 	if mode == 0 {
 		lineSize = size.Width / 2
-		if size.Width%2 != 0 {
-			lineSize++
-		}
 		data = make([]byte, size.Height*lineSize)
-		for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
-			for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
-				c1 := in.At(x, y)
-				pp1, err := PalettePosition(c1, p)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
-					pp1 = 0
+		offset := 0
+		for yModulo := 0; yModulo < (in.Bounds().Max.Y % 8); yModulo ++ {
+			for y := yModulo + in.Bounds().Min.Y; y < in.Bounds().Max.Y; y+=8 {
+				for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
+					c1 := in.At(x, y)
+					pp1, err := PalettePosition(c1, p)
+					if err != nil {
+						fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+						pp1 = 0
+					}
+					firmwareColorUsed[pp1]++
+					//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
+					c2 := in.At(x+1, y)
+					pp2, err := PalettePosition(c2, p)
+					if err != nil {
+						fmt.Fprintf(os.Stdout, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+						pp2 = 0
+					}
+					firmwareColorUsed[pp2]++
+					pixel := pixelMode0(pp1, pp2)
+				
+					data[offset] = pixel
+					offset++
 				}
-				firmwareColorUsed[pp1]++
-				//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
-				c2 := in.At(x+1, y)
-				pp2, err := PalettePosition(c2, p)
-				if err != nil {
-					fmt.Fprintf(os.Stdout, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
-					pp2 = 0
-				}
-				firmwareColorUsed[pp2]++
-				pixel := pixelMode0(pp1, pp2)
-				fmt.Fprintf(os.Stderr, "(%d,%d)[#%.2x]:#%.2x\n", y, x, (lineSize*(y%8))+(lineSize*(y/8))+((x+1)/2), pixel)
-				data[(lineSize*(y%8))+(lineSize*(y/8))+((x+1)/2)] = pixel
+				fmt.Fprintf(os.Stderr, "(y:%d,x:%d)[#%.2x]\n", y, in.Bounds().Max.X -1, offset)
 			}
 		}
 	} else {

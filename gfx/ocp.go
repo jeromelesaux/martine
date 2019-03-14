@@ -222,35 +222,21 @@ func Pal(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHe
 	return nil
 }
 
-type OcpWin struct {
-	Data    []uint8
-	Unused2 uint8
+type OcpWinFooter struct {
+	Unused2 byte
 	Width   uint16
-	Height  uint8
-	Unused  uint8
+	Height  byte
+	Unused  byte
 }
 
-func (o *OcpWin) ToString() string {
+func (o *OcpWinFooter) ToString() string {
 	return fmt.Sprintf("Width:%d,Height:%d,Unused:%d", o.Width, o.Height, o.Unused)
 }
 
 func Win(filePath, dirPath string, data []byte, screenMode uint8, width, height int, noAmsdosHeader bool) error {
 	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", filePath, screenMode, width, height)
-	win := OcpWin{Data: data, Unused: 3}
-	switch screenMode {
-	case 0:
-		win.Width = uint16(width)
-		win.Height = byte(height)
-	case 1:
-		win.Width = uint16(width / 2)
-		win.Height = byte(height / 2)
-	case 2:
-		win.Width = uint16(width)
-		win.Height = byte(height / 2)
-	default:
-		fmt.Fprintf(os.Stderr, "Win export screen mode not supported. %d\n", screenMode)
-	}
-	filesize := binary.Size(win.Data) + binary.Size(win.Width) + binary.Size(win.Height)
+	win := OcpWinFooter{Unused: 3, Height:byte(height),Unused2:0,Width:uint16(width*8)}
+	filesize := binary.Size(data) + binary.Size(win)
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x4000, Exec: 0x4000,
 		Size:        uint16(filesize),
 		Size2:       uint16(filesize),
@@ -260,7 +246,10 @@ func Win(filePath, dirPath string, data []byte, screenMode uint8, width, height 
 	cpcFilename := strings.ToUpper(strings.Replace(filename, extension, ".WIN", -1))
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
-	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
+	fmt.Fprintf(os.Stderr,"filesize:%d,#%.2x\n",filesize,filesize)
+	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
+	fmt.Fprintf(os.Stderr,"Data length %d\n", binary.Size(data))
+	fmt.Fprintf(os.Stderr,"Footer length %d\n",binary.Size(win))
 	fw, err := os.Create(dirPath + string(filepath.Separator) + cpcFilename)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
@@ -270,11 +259,8 @@ func Win(filePath, dirPath string, data []byte, screenMode uint8, width, height 
 	if !noAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
-	binary.Write(fw, binary.LittleEndian, win.Data)
-	binary.Write(fw, binary.LittleEndian, win.Unused2)
-	binary.Write(fw, binary.LittleEndian, win.Width)
-	binary.Write(fw, binary.LittleEndian, win.Height)
-	binary.Write(fw, binary.LittleEndian, win.Unused)
+	binary.Write(fw, binary.LittleEndian, data)
+	binary.Write(fw, binary.LittleEndian, win)
 	fw.Close()
 	return nil
 
