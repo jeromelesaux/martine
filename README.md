@@ -69,3 +69,5 @@ examples :
 ```martine -i samples/Batman-Neal-Adams.jpg -m 0 -f```
   * in mode 0 overscan for Plus series :
 ```martine -i samples/Batman-Neal-Adams.jpg -m 0 -f -p```
+  * to get sprites (40 pixels wide)
+```martine -i samples/Batman-Neal-Adams.jpg -m 0 -w 40```	

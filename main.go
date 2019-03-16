@@ -25,12 +25,13 @@ var (
 	help            = flag.Bool("help", false, "Display help message")
 	noAmsdosHeader  = flag.Bool("n", false, "no amsdos header for all files (default amsdos header added).")
 	plusMode        = flag.Bool("p", false, "Plus mode (means generate an image for CPC Plus Screen)")
-	version         = "0.1.Alpha"
+	version         = "0.1"
 )
 
 func usage() {
 	fmt.Fprintf(os.Stdout, "martine convert (jpeg, png format) image to Amstrad cpc screen (even overscan)\n")
 	fmt.Fprintf(os.Stdout, "By Impact Sid (Version:%s)\n", version)
+	fmt.Fprintf(os.Stdout,"Special thanks to @Ast (for his support), @Siko and @Tronic for ideas\n")
 	fmt.Fprintf(os.Stdout, "usage :\n\n")
 	flag.PrintDefaults()
 	os.Exit(-1)
