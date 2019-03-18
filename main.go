@@ -11,6 +11,7 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 var (
@@ -25,7 +26,7 @@ var (
 	help            = flag.Bool("help", false, "Display help message")
 	noAmsdosHeader  = flag.Bool("n", false, "no amsdos header for all files (default amsdos header added).")
 	plusMode        = flag.Bool("p", false, "Plus mode (means generate an image for CPC Plus Screen)")
-	tileMode        = flag.Bool("t", false, "Tile mode allow to walk into the input file.")
+	tileMode        = flag.Bool("tile", false, "Tile mode allow to walk into the input file.")
 	iterations      = flag.Int("iter", -1, "Iterations number to walk in tile mode")
 	rra             = flag.Int("rra", -1, "bit rotation on the right")
 	rla             = flag.Int("rla", -1, "bit rotation on the left")
@@ -209,10 +210,48 @@ func main() {
 	}
 	fwd.Close()
 
-	if *tileMode {
+	if *tileMode  {
 		// create downgraded palette image with rra pixels rotated
 		// and call n iterations spritetransform with this input generated image
 		// save the rotated image as png 
+		if *rra != -1 {
+			for i := 0 ; i < *iterations; i++ {
+				nbPixels := (*rra *(1+i))
+				im := image.NewNRGBA(image.Rectangle{image.Point{0,0}, image.Point{downgraded.Bounds().Max.X,downgraded.Bounds().Max.Y}})
+				y2 := 0
+				x2 := 0
+				for y:=downgraded.Bounds().Min.Y+nbPixels; y < downgraded.Bounds().Max.Y; y++ {
+					for x := downgraded.Bounds().Min.X+nbPixels; x < downgraded.Bounds().Max.X; x++ {
+						im.Set(x2,y2,downgraded.At(x,y))
+						x2++
+					}
+					y2++ 	
+				}
+				for y := downgraded.Bounds().Min.Y; y < nbPixels; y++ {
+					for x := downgraded.Bounds().Min.X ; x <nbPixels ; x++ {
+						im.Set(x2,y2,downgraded.At(x,y))
+						x2++
+					}
+					y2++
+				}
+				newFilename := strconv.Itoa(i) + filename + "_down.png"
+				fmt.Fprintf(os.Stdout, "Saving downgraded image iteration (%d) into (%s)\n",i, newFilename)
+				fwd, err := os.Create(*output + string(filepath.Separator) + newFilename)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Cannot create new image (%s) error %v\n", *output+string(filepath.Separator)+newFilename, err)
+					os.Exit(-2)
+				}
+			
+				if err := png.Encode(fwd, im); err != nil {
+					fwd.Close()
+					fmt.Fprintf(os.Stderr, "Cannot create new image (%s) as png error %v\n", newFilename, err)
+					os.Exit(-2)
+				}
+				fwd.Close() 
+				fmt.Fprintf(os.Stdout,"Tranform image in sprite iteration (%d)\n",i)
+				gfx.SpriteTransform(im,newPalette,size,screenMode,newFilename,*output,*noAmsdosHeader,*plusMode)	
+			}
+		} 
 	} else {
 		if !customDimension {
 			gfx.Transform(downgraded, newPalette, size, *picturePath, *output, *noAmsdosHeader, *plusMode)
