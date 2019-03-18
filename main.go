@@ -18,14 +18,18 @@ var (
 	picturePath     = flag.String("i", "", "Picture path of the input file.")
 	width           = flag.Int("w", -1, "Custom output width in pixels.")
 	height          = flag.Int("h", -1, "Custom output height in pixels.")
-	mode            = flag.Int("m", -1, "Output mode to use :\n\t0 for mode0\n\t1 for mode1\n\t2 for mode2\n\tand add -f option for overscan export.")
+	mode            = flag.Int("m", -1, "Output mode to use :\n\t0 for mode0\n\t1 for mode1\n\t2 for mode2\n\tand add -f option for overscan export.\n\t")
 	output          = flag.String("o", "", "Output directory")
 	overscan        = flag.Bool("f", false, "Overscan mode (default no overscan)")
-	resizeAlgorithm = flag.Int("a", 1, "Algorithm to resize the image (available : \n\t1: NearestNeighbor (default)\n\t2: CatmullRom\n\t3: Lanczos\n\t4: Linear\n\t5: Box\n\t6: Hermite\n\t7: BSpline\n\t8: Hamming\n\t9: Hann\n\t10: Gaussian\n\t11: Blackman\n\t12: Bartlett\n\t13: Welch\n\t14: Cosine")
+	resizeAlgorithm = flag.Int("a", 1, "Algorithm to resize the image (available : \n\t1: NearestNeighbor (default)\n\t2: CatmullRom\n\t3: Lanczos\n\t4: Linear\n\t5: Box\n\t6: Hermite\n\t7: BSpline\n\t8: Hamming\n\t9: Hann\n\t10: Gaussian\n\t11: Blackman\n\t12: Bartlett\n\t13: Welch\n\t14: Cosine\n\t")
 	help            = flag.Bool("help", false, "Display help message")
 	noAmsdosHeader  = flag.Bool("n", false, "no amsdos header for all files (default amsdos header added).")
 	plusMode        = flag.Bool("p", false, "Plus mode (means generate an image for CPC Plus Screen)")
-	version         = "0.2"
+	tileMode        = flag.Bool("t", false, "Tile mode allow to walk into the input file.")
+	iterations      = flag.Int("iter", -1, "Iterations number to walk in tile mode")
+	rra             = flag.Int("rra", -1, "bit rotation on the right")
+	rla             = flag.Int("rla", -1, "bit rotation on the left")
+	version         = "0.2Alpha"
 )
 
 func usage() {
@@ -82,7 +86,6 @@ func main() {
 		if *overscan {
 			size = gfx.OverscanMode0
 		}
-
 	case 1:
 		size = gfx.Mode1
 		screenMode = 1
@@ -187,7 +190,6 @@ func main() {
 		os.Exit(-2)
 	}
 	fwr.Close()
-
 	newPalette, downgraded, err := convert.DowngradingPalette(out, size, *plusMode)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
@@ -206,10 +208,17 @@ func main() {
 		os.Exit(-2)
 	}
 	fwd.Close()
-	if !customDimension {
-		gfx.Transform(downgraded, newPalette, size, *picturePath, *output, *noAmsdosHeader, *plusMode)
+
+	if *tileMode {
+		// create downgraded palette image with rra pixels rotated
+		// and call n iterations spritetransform with this input generated image
+		// save the rotated image as png 
 	} else {
-		fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
-		gfx.SpriteTransform(downgraded, newPalette, size, screenMode, *picturePath, *output, *noAmsdosHeader, *plusMode)
+		if !customDimension {
+			gfx.Transform(downgraded, newPalette, size, *picturePath, *output, *noAmsdosHeader, *plusMode)
+		} else {
+			fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
+			gfx.SpriteTransform(downgraded, newPalette, size, screenMode, filename, *output, *noAmsdosHeader, *plusMode)
+		}
 	}
 }
