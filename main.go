@@ -25,13 +25,13 @@ var (
 	help            = flag.Bool("help", false, "Display help message")
 	noAmsdosHeader  = flag.Bool("n", false, "no amsdos header for all files (default amsdos header added).")
 	plusMode        = flag.Bool("p", false, "Plus mode (means generate an image for CPC Plus Screen)")
-	version         = "0.1"
+	version         = "0.2"
 )
 
 func usage() {
 	fmt.Fprintf(os.Stdout, "martine convert (jpeg, png format) image to Amstrad cpc screen (even overscan)\n")
 	fmt.Fprintf(os.Stdout, "By Impact Sid (Version:%s)\n", version)
-	fmt.Fprintf(os.Stdout,"Special thanks to @Ast (for his support), @Siko and @Tronic for ideas\n")
+	fmt.Fprintf(os.Stdout, "Special thanks to @Ast (for his support), @Siko and @Tronic for ideas\n")
 	fmt.Fprintf(os.Stdout, "usage :\n\n")
 	flag.PrintDefaults()
 	os.Exit(-1)
@@ -175,14 +175,14 @@ func main() {
 	}
 
 	out := convert.Resize(in, size, resizeAlgo)
-	fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", *picturePath+"_resized.png")
-	fwr, err := os.Create(*output + string(filepath.Separator) + *picturePath + "_resized.png")
+	fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
+	fwr, err := os.Create(*output + string(filepath.Separator) + filename + "_resized.png")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot create new image (%s) error %v\n", *picturePath+"_resized.png", err)
+		fmt.Fprintf(os.Stderr, "Cannot create new image (%s) error %v\n", *output+string(filepath.Separator)+filename+"_resized.png", err)
 		os.Exit(-2)
 	}
 	if err := png.Encode(fwr, out); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot create new image (%s) as png error %v\n", *picturePath+"_resized.png", err)
+		fmt.Fprintf(os.Stderr, "Cannot create new image (%s) as png error %v\n", filename+"_resized.png", err)
 		fwr.Close()
 		os.Exit(-2)
 	}
@@ -193,10 +193,10 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
 	}
 
-	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", *picturePath+"_down.png")
-	fwd, err := os.Create(*output + string(filepath.Separator) + *picturePath + "_down.png")
+	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
+	fwd, err := os.Create(*output + string(filepath.Separator) + filename + "_down.png")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot create new image (%s) error %v\n", *picturePath+"_down.png", err)
+		fmt.Fprintf(os.Stderr, "Cannot create new image (%s) error %v\n", *output+string(filepath.Separator)+filename+"_down.png", err)
 		os.Exit(-2)
 	}
 

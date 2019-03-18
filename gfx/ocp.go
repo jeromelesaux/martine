@@ -235,7 +235,7 @@ func (o *OcpWinFooter) ToString() string {
 
 func Win(filePath, dirPath string, data []byte, screenMode uint8, width, height int, noAmsdosHeader bool) error {
 	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", filePath, screenMode, width, height)
-	win := OcpWinFooter{Unused: 3, Height:byte(height),Unused2:0,Width:uint16(width*8)}
+	win := OcpWinFooter{Unused: 3, Height: byte(height), Unused2: 0, Width: uint16(width * 8)}
 	filesize := binary.Size(data) + binary.Size(win)
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x4000, Exec: 0x4000,
 		Size:        uint16(filesize),
@@ -246,10 +246,10 @@ func Win(filePath, dirPath string, data []byte, screenMode uint8, width, height 
 	cpcFilename := strings.ToUpper(strings.Replace(filename, extension, ".WIN", -1))
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
-	fmt.Fprintf(os.Stderr,"filesize:%d,#%.2x\n",filesize,filesize)
+	fmt.Fprintf(os.Stderr, "filesize:%d,#%.2x\n", filesize, filesize)
 	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
-	fmt.Fprintf(os.Stderr,"Data length %d\n", binary.Size(data))
-	fmt.Fprintf(os.Stderr,"Footer length %d\n",binary.Size(win))
+	fmt.Fprintf(os.Stderr, "Data length %d\n", binary.Size(data))
+	fmt.Fprintf(os.Stderr, "Footer length %d\n", binary.Size(win))
 	fw, err := os.Create(dirPath + string(filepath.Separator) + cpcFilename)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
