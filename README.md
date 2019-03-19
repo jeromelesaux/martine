@@ -3,6 +3,7 @@
 After Claudia from Eliot a long time ago, here is coming Martine.
 A cli which converts JPEG or PNG image file into  SCR/PAL or Overscan  Amstrad CPC file screen.
 Multi os, you can convert any pictures to Amstrad CPC Screen.
+The files generated (.win, .scr, .ink) are compatible with [OCP art studio](http://www.cpc-power.com/index.php?page=detail&num=4963) and Impdraw V2 [i2](http://amstradplus.forumforever.com/t462-iMPdraw-v2-0.htm)
 
 To Install and compile
 ```go get github.com/jeromelesaux/martine
