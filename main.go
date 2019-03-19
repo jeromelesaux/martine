@@ -34,6 +34,10 @@ var (
 	rla             = flag.Int("rla", -1, "bit rotation on the left and keep pixels")
 	sra             = flag.Int("sra", -1, "bit rotation on the right and lost pixels")
 	sla             = flag.Int("sla", -1, "bit rotation on the left and lost pixels")
+	losthigh        = flag.Int("losthigh", -1, "bit rotation on the top and lost pixels")
+	lostlow         = flag.Int("lostlow", -1, "bit rotation on the bottom and lost pixels")
+	keephigh        = flag.Int("keephigh", -1, "bit rotation on the top and keep pixels")
+	keeplow         = flag.Int("keeplow", -1, "bit rotation on the bottom and keep pixels")
 	version         = "0.2Alpha"
 )
 
@@ -184,17 +188,17 @@ func main() {
 
 	out := convert.Resize(in, size, resizeAlgo)
 	fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
-	if err := gfx.Png(*output + string(filepath.Separator) + filename + "_resized.png", out); err != nil {
+	if err := gfx.Png(*output+string(filepath.Separator)+filename+"_resized.png", out); err != nil {
 		os.Exit(-2)
 	}
-	
+
 	newPalette, downgraded, err := convert.DowngradingPalette(out, size, *plusMode)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
 	}
 
 	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
-	if err := gfx.Png(*output + string(filepath.Separator) + filename + "_down.png", downgraded); err != nil {
+	if err := gfx.Png(*output+string(filepath.Separator)+filename+"_down.png", downgraded); err != nil {
 		os.Exit(-2)
 	}
 
@@ -203,9 +207,9 @@ func main() {
 		// and call n iterations spritetransform with this input generated image
 		// save the rotated image as png
 		if *rra != -1 || *sra != -1 {
-			fmt.Fprintf(os.Stdout, "RRA: Iterations (%d)\n", *iterations)
+			fmt.Fprintf(os.Stdout, "RRA/SRA: Iterations (%d)\n", *iterations)
 			for i := 0; i < *iterations; i++ {
-				nbPixels := 0 
+				nbPixels := 0
 				if *rra != -1 {
 					nbPixels = (*rra * (1 + i))
 				} else {
@@ -236,15 +240,15 @@ func main() {
 				}
 				newFilename := strconv.Itoa(i) + strings.TrimSuffix(filename, path.Ext(filename)) + ".png"
 				fmt.Fprintf(os.Stdout, "Saving downgraded image iteration (%d) into (%s)\n", i, newFilename)
-				gfx.Png(*output + string(filepath.Separator) + newFilename, im)
+				gfx.Png(*output+string(filepath.Separator)+newFilename, im)
 				fmt.Fprintf(os.Stdout, "Tranform image in sprite iteration (%d)\n", i)
 				gfx.SpriteTransform(im, newPalette, size, screenMode, newFilename, *output, *noAmsdosHeader, *plusMode)
 			}
 		} else {
 			if *rla != -1 || *sla != -1 {
-				fmt.Fprintf(os.Stdout, "RLA: Iterations (%d)\n", *iterations)
+				fmt.Fprintf(os.Stdout, "RLA/SLA: Iterations (%d)\n", *iterations)
 				for i := 0; i < *iterations; i++ {
-					nbPixels := 0 
+					nbPixels := 0
 					if *rla != -1 {
 						nbPixels = (*rla * (1 + i))
 					} else {
@@ -275,10 +279,88 @@ func main() {
 					}
 					newFilename := strconv.Itoa(i) + strings.TrimSuffix(filename, path.Ext(filename)) + ".png"
 					fmt.Fprintf(os.Stdout, "Saving downgraded image iteration (%d) into (%s)\n", i, newFilename)
-					gfx.Png(*output + string(filepath.Separator) + newFilename, im)
+					gfx.Png(*output+string(filepath.Separator)+newFilename, im)
 					fmt.Fprintf(os.Stdout, "Tranform image in sprite iteration (%d)\n", i)
 					gfx.SpriteTransform(im, newPalette, size, screenMode, newFilename, *output, *noAmsdosHeader, *plusMode)
 				}
+			}
+		}
+		if *keephigh != -1 || *losthigh != -1 {
+			fmt.Fprintf(os.Stdout, "keephigh/losthigh: Iterations (%d)\n", *iterations)
+			for i := 0; i < *iterations; i++ {
+				nbPixels := 0
+				if *keephigh != -1 {
+					nbPixels = (*keephigh * (1 + i))
+				} else {
+					if *losthigh != -1 {
+						nbPixels = (*losthigh * (1 + i))
+					}
+				}
+				im := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{downgraded.Bounds().Max.X, downgraded.Bounds().Max.Y}})
+				y2 := 0
+				for y := downgraded.Bounds().Min.Y + nbPixels; y < downgraded.Bounds().Max.Y; y++ {
+					x2 :=0
+					for x := downgraded.Bounds().Min.X; x < downgraded.Bounds().Max.X; x++ {
+						im.Set(x2, y2, downgraded.At(x, y))
+						x2++
+					}
+					y2++
+				}
+				if *keephigh != -1 {
+					for y := downgraded.Bounds().Min.Y  ; y < nbPixels; y++ {
+						x2 := 0
+						for x := downgraded.Bounds().Min.X; x < downgraded.Bounds().Max.X; x++ {
+							im.Set(x2, y2, downgraded.At(x, y))
+							x2++
+						}
+						y2++
+					}
+				}
+				newFilename := strconv.Itoa(i) + strings.TrimSuffix(filename, path.Ext(filename)) + ".png"
+				fmt.Fprintf(os.Stdout, "Saving downgraded image iteration (%d) into (%s)\n", i, newFilename)
+				gfx.Png(*output+string(filepath.Separator)+newFilename, im)
+				fmt.Fprintf(os.Stdout, "Tranform image in sprite iteration (%d)\n", i)
+				gfx.SpriteTransform(im, newPalette, size, screenMode, newFilename, *output, *noAmsdosHeader, *plusMode)
+			} 
+		}else {
+			if *keeplow != -1 || *lostlow != -1 {
+				fmt.Fprintf(os.Stdout, "keeplow/lostlow: Iterations (%d)\n", *iterations)
+				for i := 0; i < *iterations; i++ {
+					nbPixels := 0
+					if *keeplow != -1 {
+						nbPixels = (*keeplow * (1 + i))
+					} else {
+						if *lostlow != -1 {
+							nbPixels = (*lostlow * (1 + i))
+						}
+					}
+					im := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{downgraded.Bounds().Max.X, downgraded.Bounds().Max.Y}})
+					y2 := downgraded.Bounds().Max.Y
+					for y := downgraded.Bounds().Max.Y - nbPixels; y > downgraded.Bounds().Min.Y -nbPixels ; y-- {
+						x2 :=0
+						for x := downgraded.Bounds().Min.X; x < downgraded.Bounds().Max.X; x++ {
+							im.Set(x2, y2, downgraded.At(x, y))
+							x2++
+						}
+						y2--
+					}
+					if *keeplow != -1 {	
+						y2 := nbPixels 
+						for y := downgraded.Bounds().Max.Y ; y >= downgraded.Bounds().Max.Y - nbPixels ; y-- {
+							x2 := 0
+							for x := downgraded.Bounds().Min.X; x < downgraded.Bounds().Max.X; x++ {
+								im.Set(x2, y2, downgraded.At(x, y))
+								x2++
+							}
+							y2--
+						}
+					} 
+					newFilename := strconv.Itoa(i) + strings.TrimSuffix(filename, path.Ext(filename)) + ".png"
+					fmt.Fprintf(os.Stdout, "Saving downgraded image iteration (%d) into (%s)\n", i, newFilename)
+					gfx.Png(*output+string(filepath.Separator)+newFilename, im)
+					fmt.Fprintf(os.Stdout, "Tranform image in sprite iteration (%d)\n", i)
+					gfx.SpriteTransform(im, newPalette, size, screenMode, newFilename, *output, *noAmsdosHeader, *plusMode)
+				} 
 			}
 		}
 	} else {
