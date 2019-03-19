@@ -95,6 +95,7 @@ func Ascii(filePath, dirPath string, data []byte, p color.Palette, noAmsdosHeade
 				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
 			}
 		}
+		out += "\n"
 	}
 	//fmt.Fprintf(os.Stdout,"%s",out)
 	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x0, Exec: 0x0,
