@@ -28,7 +28,7 @@ var (
 	help            = flag.Bool("help", false, "Display help message")
 	noAmsdosHeader  = flag.Bool("n", false, "no amsdos header for all files (default amsdos header added).")
 	plusMode        = flag.Bool("p", false, "Plus mode (means generate an image for CPC Plus Screen)")
-	tileMode        = flag.Bool("tile", false, "Tile mode allow to walk into the input file.")
+	rollMode        = flag.Bool("roll", false, "Roll mode allow to walk and walk into the input file.")
 	iterations      = flag.Int("iter", -1, "Iterations number to walk in tile mode")
 	rra             = flag.Int("rra", -1, "bit rotation on the right and keep pixels")
 	rla             = flag.Int("rla", -1, "bit rotation on the left and keep pixels")
@@ -38,7 +38,7 @@ var (
 	lostlow         = flag.Int("lostlow", -1, "bit rotation on the bottom and lost pixels")
 	keephigh        = flag.Int("keephigh", -1, "bit rotation on the top and keep pixels")
 	keeplow         = flag.Int("keeplow", -1, "bit rotation on the bottom and keep pixels")
-	version         = "0.2Alpha"
+	version         = "0.3"
 )
 
 func usage() {
@@ -202,7 +202,7 @@ func main() {
 		os.Exit(-2)
 	}
 
-	if *tileMode {
+	if *rollMode {
 		// create downgraded palette image with rra pixels rotated
 		// and call n iterations spritetransform with this input generated image
 		// save the rotated image as png
