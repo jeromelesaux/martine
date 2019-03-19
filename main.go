@@ -335,8 +335,8 @@ func main() {
 						}
 					}
 					im := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{downgraded.Bounds().Max.X, downgraded.Bounds().Max.Y}})
-					y2 := downgraded.Bounds().Max.Y
-					for y := downgraded.Bounds().Max.Y - nbPixels; y > downgraded.Bounds().Min.Y -nbPixels ; y-- {
+					y2 := downgraded.Bounds().Max.Y - 1
+					for y := downgraded.Bounds().Max.Y - nbPixels; y >= downgraded.Bounds().Min.Y ; y-- {
 						x2 :=0
 						for x := downgraded.Bounds().Min.X; x < downgraded.Bounds().Max.X; x++ {
 							im.Set(x2, y2, downgraded.At(x, y))
@@ -345,8 +345,7 @@ func main() {
 						y2--
 					}
 					if *keeplow != -1 {	
-						y2 := nbPixels 
-						for y := downgraded.Bounds().Max.Y ; y >= downgraded.Bounds().Max.Y - nbPixels ; y-- {
+						for y := downgraded.Bounds().Max.Y - 1 ; y >= downgraded.Bounds().Max.Y - nbPixels ; y-- {
 							x2 := 0
 							for x := downgraded.Bounds().Min.X; x < downgraded.Bounds().Max.X; x++ {
 								im.Set(x2, y2, downgraded.At(x, y))
