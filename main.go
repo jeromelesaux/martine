@@ -38,7 +38,7 @@ var (
 	lostlow         = flag.Int("lostlow", -1, "bit rotation on the bottom and lost pixels")
 	keephigh        = flag.Int("keephigh", -1, "bit rotation on the top and keep pixels")
 	keeplow         = flag.Int("keeplow", -1, "bit rotation on the bottom and keep pixels")
-	version         = "0.3"
+	version         = "0.5"
 )
 
 func usage() {
