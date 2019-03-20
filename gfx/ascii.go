@@ -19,11 +19,11 @@ func Ascii(filePath, dirPath string, data []byte, p color.Palette, noAmsdosHeade
 	filename := filepath.Base(filePath)
 	extension := filepath.Ext(filename)
 	cpcFilename := strings.ToUpper(strings.Replace(filename, extension, ".TXT", -1))
-	out += "# Screen " + cpcFilename + "\n.screen:\n"
+	out += "; Screen " + cpcFilename + "\n.screen:\n"
 	for i = 0; i < len(data); i += 8 {
 		out += fmt.Sprintf("%s ", ByteToken)
 		if i < len(data) {
-			out += fmt.Sprintf("#%0.2x", data[i])
+			out += fmt.Sprintf("%0.2x", data[i])
 		}
 		if i+1 < len(data) {
 			out += fmt.Sprintf(", #%0.2x", data[i+1])
@@ -48,7 +48,7 @@ func Ascii(filePath, dirPath string, data []byte, p color.Palette, noAmsdosHeade
 		}
 		out += fmt.Sprintf("\n")
 	}
-	out += "# Palette " + cpcFilename + "\n.palette:\n" + ByteToken + " "
+	out += "; Palette " + cpcFilename + "\n.palette:\n" + ByteToken + " "
 
 	if isCpcPlus {
 		for i := 0; i < len(p); i++ {
@@ -79,7 +79,7 @@ func Ascii(filePath, dirPath string, data []byte, p color.Palette, noAmsdosHeade
 				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
 			}
 		}
-		out += "\n# Basic Palette " + cpcFilename + "\n#.basic_palette:\n#" + ByteToken + " "
+		out += "\n; Basic Palette " + cpcFilename + "\n.basic_palette:\n#" + ByteToken + " "
 		for i := 0; i < len(p); i++ {
 			v, err := FirmwareNumber(p[i])
 			if err == nil {
