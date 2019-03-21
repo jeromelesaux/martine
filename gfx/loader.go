@@ -7,6 +7,7 @@ import (
 	"image/color"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 var (
@@ -45,10 +46,17 @@ func Loader(filePath, dirPath string, p color.Palette, noAmsdosHeader bool) erro
 
 	var loader []byte
 	loader = BasicLoader
+	var filenameSize uint8
+	
 	copy(loader[startPaletteValues:], out[0:len(out)-1])
-	filename := filepath.Base(filePath)
-	copy(loader[startPaletteName:], filename[0:8])
-	copy(loader[startScreenName:], filename[0:8])
+	filename := strings.TrimSuffix(filePath, filepath.Ext(filePath)) 
+	if len(filename) > 8 {
+		filenameSize = 8
+	} else {
+		filenameSize = uint8(len(filename))
+	}
+	copy(loader[startPaletteName:], filename[0:filenameSize])
+	copy(loader[startScreenName:], filename[0:filenameSize])
 	fmt.Println(loader)
 	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x170, Exec: 0x0,
 		Size:        uint16(binary.Size(loader)),
