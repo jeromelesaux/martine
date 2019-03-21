@@ -371,4 +371,5 @@ func main() {
 			gfx.SpriteTransform(downgraded, newPalette, size, screenMode, filename, *output, *noAmsdosHeader, *plusMode)
 		}
 	}
+	os.Exit(0)
 }

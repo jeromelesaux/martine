@@ -112,7 +112,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 					//	MEND
 
 					data[offset] = pixel
-					offset += 4
+					offset ++
 				}
 			}
 		} else {
@@ -188,7 +188,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 						// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 						//	MEND
 						data[offset] = pixel
-						offset += 8
+						offset++
 					}
 				}
 			} else {
