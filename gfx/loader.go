@@ -63,11 +63,11 @@ func Loader(filePath, dirPath string, p color.Palette, noAmsdosHeader bool) erro
 		Size:        uint16(binary.Size(loader)),
 		Size2:       uint16(binary.Size(loader)),
 		LogicalSize: uint16(binary.Size(loader))}
-	copy(header.Filename[:], "DISC.BAS")
+	copy(header.Filename[:], filename[0:filenameSize] +".BAS")
 	header.Checksum = uint16(header.ComputedChecksum16())
-	fw, err := os.Create(dirPath + string(filepath.Separator) + "DISC.BAS")
+	fw, err := os.Create(dirPath + string(filepath.Separator) + filename[0:filenameSize] +".BAS")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (DISC.BAS) error :%s\n", err)
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s.BAS) error :%s\n",filename[0:filenameSize], err)
 		return err
 	}
 	if !noAmsdosHeader {
