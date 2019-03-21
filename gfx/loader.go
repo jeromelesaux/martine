@@ -49,7 +49,8 @@ func Loader(filePath, dirPath string, p color.Palette, noAmsdosHeader bool) erro
 	var filenameSize uint8
 	
 	copy(loader[startPaletteValues:], out[0:len(out)-1])
-	filename := strings.TrimSuffix(filePath, filepath.Ext(filePath)) 
+	file := filepath.Base(filePath)
+	filename := strings.TrimSuffix(file, filepath.Ext(file)) 
 	if len(filename) > 8 {
 		filenameSize = 8
 	} else {

@@ -84,13 +84,13 @@ func Ascii(filePath, dirPath string, data []byte, p color.Palette, noAmsdosHeade
 				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
 			}
 		}
-		out += eol + "; Basic Palette " + cpcFilename + eol + ".basic_palette:" + eol + ";" + ByteToken + " "
+		out += eol + "; Basic Palette " + cpcFilename + eol + ".basic_palette:" + eol + ByteToken + " "
 		for i := 0; i < len(p); i++ {
 			v, err := FirmwareNumber(p[i])
 			if err == nil {
 				out += fmt.Sprintf("%0.2d", v)
 				if (i+1)%8 == 0 && i+1 < len(p) {
-					out += eol + ";" + ByteToken + " "
+					out += eol + ByteToken + " "
 				} else {
 					if i+1 < len(p) {
 						out += ", "
