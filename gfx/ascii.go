@@ -28,7 +28,7 @@ func Ascii(filePath, dirPath string, data []byte, p color.Palette, noAmsdosHeade
 	for i = 0; i < len(data); i += 8 {
 		out += fmt.Sprintf("%s ", ByteToken)
 		if i < len(data) {
-			out += fmt.Sprintf("%0.2x", data[i])
+			out += fmt.Sprintf("#%0.2x", data[i])
 		}
 		if i+1 < len(data) {
 			out += fmt.Sprintf(", #%0.2x", data[i+1])
@@ -90,7 +90,7 @@ func Ascii(filePath, dirPath string, data []byte, p color.Palette, noAmsdosHeade
 			if err == nil {
 				out += fmt.Sprintf("%0.2d", v)
 				if (i+1)%8 == 0 && i+1 < len(p) {
-					out += eol + "#" + ByteToken + " "
+					out += eol + ";" + ByteToken + " "
 				} else {
 					if i+1 < len(p) {
 						out += ", "
