@@ -112,7 +112,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 					//	MEND
 
 					data[offset] = pixel
-					offset ++
+					offset++
 				}
 			}
 		} else {
@@ -385,6 +385,10 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
+		if err := Loader(filePath, dirPath, p, noAmsdosHeader); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving the loader %s with error %v\n", filePath, err)
+			return err
+		}
 	}
 	if isCpcPlus {
 		if err := Ink(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
@@ -475,6 +479,10 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 	} else {
 		if err := Scr(filePath, dirPath, bw, noAmsdosHeader); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			return err
+		}
+		if err := Loader(filePath, dirPath, p, noAmsdosHeader); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving the loader %s with error %v\n", filePath, err)
 			return err
 		}
 	}
@@ -598,6 +606,10 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 	} else {
 		if err := Scr(filePath, dirPath, bw, noAmsdosHeader); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			return err
+		}
+		if err := Loader(filePath, dirPath, p, noAmsdosHeader); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving the loader %s with error %v\n", filePath, err)
 			return err
 		}
 	}
