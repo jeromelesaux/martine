@@ -180,6 +180,36 @@ type OcpPalette struct {
 	Protected           [16]uint8
 }
 
+func OpenPal(filePath string) (color.Palette, error) {
+	fr, err := os.Open(filePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
+		return color.Palette{}, err
+	}
+	header := &cpc.CpcHead{}
+	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
+		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+	}
+
+	ocpPalette := &OcpPalette{}
+	if err := binary.Read(fr, binary.LittleEndian, ocpPalette); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while reading Ocp Palette from file (%s) error %v\n", filePath, err)
+		return color.Palette{}, err
+	}
+
+	p := color.Palette{}
+	for _, v := range ocpPalette.PaletteColors {
+		c, err := ColorFromHardware(v[0])
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Hardware color value %.2x is not recognized error :%v\n", v[0], err)
+		} else {
+			p = append(p, c)
+		}
+	}
+
+	return p, nil
+}
+
 func Pal(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHeader bool) error {
 	fmt.Fprintf(os.Stdout, "Saving PAL file (%s)\n", filePath)
 	data := OcpPalette{ScreenMode: screenMode, ColorAnimation: 0, ColorAnimationDelay: 0}

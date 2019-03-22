@@ -18,6 +18,11 @@ func Resize(in image.Image, size gfx.Size, algo imaging.ResampleFilter) *image.N
 	return imaging.Resize(in, size.Width, size.Height, algo)
 }
 
+func DowngradingWithPalette(in *image.NRGBA, p color.Palette) (color.Palette, *image.NRGBA) {
+	fmt.Fprintf(os.Stdout, "Downgrading image with input palette %d\n", len(p))
+	return p, downgradeWithPalette(in, p)
+}
+
 func DowngradingPalette(in *image.NRGBA, size gfx.Size, isCpcPlus bool) (color.Palette, *image.NRGBA, error) {
 	fmt.Fprintf(os.Stdout, "* Step 2 * Downgrading palette image\n")
 	p, out := downgrade(in, isCpcPlus)

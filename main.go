@@ -7,6 +7,7 @@ import (
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/gfx"
 	"image"
+	"image/color"
 	_ "image/jpeg"
 	_ "image/png"
 	"os"
@@ -38,6 +39,7 @@ var (
 	lostlow         = flag.Int("lostlow", -1, "bit rotation on the bottom and lost pixels")
 	keephigh        = flag.Int("keephigh", -1, "bit rotation on the top and keep pixels")
 	keeplow         = flag.Int("keeplow", -1, "bit rotation on the bottom and keep pixels")
+	palettePath     = flag.String("pal", "", "Apply the input palette to the image")
 	version         = "0.5"
 )
 
@@ -55,6 +57,7 @@ func main() {
 	var filename, extension string
 	var customDimension bool
 	var screenMode uint8
+	var palette color.Palette
 	flag.Parse()
 
 	if *help {
@@ -186,17 +189,33 @@ func main() {
 		resizeAlgo = imaging.NearestNeighbor
 	}
 
+	if *palettePath != "" {
+		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", *palettePath)
+		palette, err = gfx.OpenPal(*palettePath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *palettePath)
+		} else {
+			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
+		}
+	}
+
 	out := convert.Resize(in, size, resizeAlgo)
 	fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
 	if err := gfx.Png(*output+string(filepath.Separator)+filename+"_resized.png", out); err != nil {
 		os.Exit(-2)
 	}
 
-	newPalette, downgraded, err := convert.DowngradingPalette(out, size, *plusMode)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
-	}
+	var newPalette color.Palette
+	var downgraded *image.NRGBA
+	if len(palette) > 0 {
+		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
+	} else {
+		newPalette, downgraded, err = convert.DowngradingPalette(out, size, *plusMode)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
+		}
 
+	}
 	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
 	if err := gfx.Png(*output+string(filepath.Separator)+filename+"_down.png", downgraded); err != nil {
 		os.Exit(-2)
