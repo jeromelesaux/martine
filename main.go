@@ -26,7 +26,7 @@ var (
 	help            = flag.Bool("help", false, "Display help message")
 	noAmsdosHeader  = flag.Bool("n", false, "no amsdos header for all files (default amsdos header added).")
 	plusMode        = flag.Bool("p", false, "Plus mode (means generate an image for CPC Plus Screen)")
-	rollMode        = flag.Bool("roll", false, "Roll mode allow to walk and walk into the input file.")
+	rollMode        = flag.Bool("roll", false, "Roll mode allow to walk and walk into the input file, associated with rla,rra,sra,sla, keephigh, keeplow, losthigh or lostlow options.")
 	iterations      = flag.Int("iter", -1, "Iterations number to walk in tile mode")
 	rra             = flag.Int("rra", -1, "bit rotation on the right and keep pixels")
 	rla             = flag.Int("rla", -1, "bit rotation on the left and keep pixels")
@@ -37,6 +37,8 @@ var (
 	keephigh        = flag.Int("keephigh", -1, "bit rotation on the top and keep pixels")
 	keeplow         = flag.Int("keeplow", -1, "bit rotation on the bottom and keep pixels")
 	palettePath     = flag.String("pal", "", "Apply the input palette to the image")
+	info            = flag.Bool("info", false, "Return the information of the file, associated with -pal and -win options")
+	winPath         = flag.String("win", "", "Filepath of the ocp win file")
 	version         = "0.5"
 )
 
@@ -59,6 +61,16 @@ func main() {
 
 	if *help {
 		usage()
+	}
+
+	if *info {
+		if *palettePath != "" {
+			gfx.PalInformation(*palettePath)
+		}
+		if *winPath != "" {
+			gfx.WinInformation(*winPath)
+		}
+		os.Exit(0)
 	}
 
 	// picture path to convert
@@ -186,9 +198,11 @@ func main() {
 		resizeAlgo = imaging.NearestNeighbor
 	}
 
+	
+
 	if *palettePath != "" {
 		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", *palettePath)
-		palette, err = gfx.OpenPal(*palettePath)
+		palette, _, err = gfx.OpenPal(*palettePath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *palettePath)
 		} else {
@@ -220,18 +234,18 @@ func main() {
 
 	if *rollMode {
 		if *rla != -1 || *sla != -1 {
-			gfx.RollLeft(*rla, *sla, *iterations,screenMode,size, downgraded,newPalette, filename,*output,*noAmsdosHeader,*plusMode)
+			gfx.RollLeft(*rla, *sla, *iterations, screenMode, size, downgraded, newPalette, filename, *output, *noAmsdosHeader, *plusMode)
 		} else {
 			if *rra != -1 || *sra != -1 {
-				gfx.RollRight(*rra, *sra, *iterations,screenMode,size, downgraded,newPalette, filename,*output,*noAmsdosHeader,*plusMode)
+				gfx.RollRight(*rra, *sra, *iterations, screenMode, size, downgraded, newPalette, filename, *output, *noAmsdosHeader, *plusMode)
 			}
 		}
 		if *keephigh != -1 || *losthigh != -1 {
-			gfx.RollUp(*keephigh, *losthigh, *iterations,screenMode,size, downgraded,newPalette, filename,*output,*noAmsdosHeader,*plusMode)
+			gfx.RollUp(*keephigh, *losthigh, *iterations, screenMode, size, downgraded, newPalette, filename, *output, *noAmsdosHeader, *plusMode)
 		} else {
 			if *keeplow != -1 || *lostlow != -1 {
-				gfx.RollLow(*keeplow, *lostlow, *iterations,screenMode,size, downgraded,newPalette, filename,*output,*noAmsdosHeader,*plusMode)
-			}	
+				gfx.RollLow(*keeplow, *lostlow, *iterations, screenMode, size, downgraded, newPalette, filename, *output, *noAmsdosHeader, *plusMode)
+			}
 		}
 	} else {
 		if !customDimension {

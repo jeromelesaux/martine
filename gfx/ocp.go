@@ -180,11 +180,24 @@ type OcpPalette struct {
 	Protected           [16]uint8
 }
 
-func OpenPal(filePath string) (color.Palette, error) {
+func (o *OcpPalette)ToString() string {
+	out := fmt.Sprintf("Mode:(%d)\n",o.ScreenMode)
+	out += fmt.Sprintf("Color Animation:(%d)\n",o.ColorAnimation)
+	out += fmt.Sprintf("Color Animation delay :(%d)\n",o.ColorAnimationDelay)
+	for index, v := range o.PaletteColors {
+		out += fmt.Sprintf("Color (%d) : value (%d)(%.2x)\n", index, v[0], v[0])
+	}
+	for index, v := range o.BorderColor {
+		out += fmt.Sprintf("Color border (%d) : value (%d)(%.2x)\n", index, v, v)
+	}
+	return out
+}
+
+func OpenPal(filePath string) (color.Palette, *OcpPalette , error) {
 	fr, err := os.Open(filePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
-		return color.Palette{}, err
+		return color.Palette{}, &OcpPalette{}, err
 	}
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
@@ -194,7 +207,7 @@ func OpenPal(filePath string) (color.Palette, error) {
 	ocpPalette := &OcpPalette{}
 	if err := binary.Read(fr, binary.LittleEndian, ocpPalette); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while reading Ocp Palette from file (%s) error %v\n", filePath, err)
-		return color.Palette{}, err
+		return color.Palette{}, ocpPalette, err
 	}
 
 	p := color.Palette{}
@@ -207,7 +220,7 @@ func OpenPal(filePath string) (color.Palette, error) {
 		}
 	}
 
-	return p, nil
+	return p, ocpPalette, nil
 }
 
 func Pal(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHeader bool) error {
@@ -260,7 +273,27 @@ type OcpWinFooter struct {
 }
 
 func (o *OcpWinFooter) ToString() string {
-	return fmt.Sprintf("Width:%d,Height:%d,Unused:%d", o.Width, o.Height, o.Unused)
+	return fmt.Sprintf("Width:(%d)\nHeight:(%d)\n", o.Width, o.Height)
+}
+
+func OpenWin(filePath string) (*OcpWinFooter, error)  {
+	fr, err := os.Open(filePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
+		return &OcpWinFooter{}, err
+	}
+	header := &cpc.CpcHead{}
+	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
+		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+	}
+
+	fr.Seek(5, 2)
+	ocpWinFooter := &OcpWinFooter{}
+	if err := binary.Read(fr, binary.LittleEndian, ocpWinFooter); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while reading Ocp Win from file (%s) error %v\n", filePath, err)
+		return ocpWinFooter, err
+	}
+	return ocpWinFooter,nil
 }
 
 func Win(filePath, dirPath string, data []byte, screenMode uint8, width, height int, noAmsdosHeader bool) error {
