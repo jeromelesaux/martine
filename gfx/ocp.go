@@ -6,6 +6,7 @@ import (
 	"github.com/jeromelesaux/m4client/cpc"
 	"image/color"
 	"os"
+	"io"
 	"path/filepath"
 	"strings"
 )
@@ -287,8 +288,13 @@ func OpenWin(filePath string) (*OcpWinFooter, error)  {
 		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 	}
 
-	fr.Seek(5, 2)
 	ocpWinFooter := &OcpWinFooter{}
+	_, err = fr.Seek(-5, io.SeekEnd)
+	if err != nil {
+		fmt.Fprintf(os.Stderr,"Error while seek in the file (%s) with error %v\n", filePath,err)
+		return &OcpWinFooter{}, err
+	}
+	
 	if err := binary.Read(fr, binary.LittleEndian, ocpWinFooter); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while reading Ocp Win from file (%s) error %v\n", filePath, err)
 		return ocpWinFooter, err
