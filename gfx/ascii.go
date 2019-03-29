@@ -110,9 +110,9 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *ExportType
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
-	fw, err := os.Create(exportType.OutputPath + string(filepath.Separator) + cpcFilename)
+	fw, err := os.Create(exportType.OutputPath + string(filepath.Separator) + exportType.OsFilename(".TXT"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", exportType.OsFilename(".TXT"), err)
 		return err
 	}
 	if !exportType.NoAmsdosHeader {

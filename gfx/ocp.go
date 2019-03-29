@@ -60,7 +60,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, e
 		Size2:       uint16(binary.Size(o)),
 		LogicalSize: uint16(binary.Size(o))}
 
-	cpcFilename := string(exportType.AmsdosFilename()) + ".SCR"
+	cpcFilename := exportType.OsFilename(".SCR")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
@@ -127,7 +127,7 @@ func Ink(filePath string, p color.Palette, screenMode uint8, exportType *ExportT
 		Size2:       uint16(binary.Size(data)),
 		LogicalSize: uint16(binary.Size(data))}
 
-	cpcFilename := string(exportType.AmsdosFilename()) + ".INK"
+	cpcFilename := exportType.OsFilename(".INK")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
@@ -151,7 +151,7 @@ func Scr(filePath string, data []byte, exportType *ExportType) error {
 		Size2:       uint16(binary.Size(data)),
 		LogicalSize: uint16(binary.Size(data))}
 
-	cpcFilename := string(exportType.AmsdosFilename()) + ".SCR"
+	cpcFilename := exportType.OsFilename(".SCR")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
@@ -245,7 +245,7 @@ func Pal(filePath string, p color.Palette, screenMode uint8, exportType *ExportT
 		Size2:       uint16(binary.Size(data)),
 		LogicalSize: uint16(binary.Size(data))}
 
-	cpcFilename := string(exportType.AmsdosFilename()) + ".PAL"
+	cpcFilename := exportType.OsFilename(".PAL")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
@@ -307,7 +307,7 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, expo
 		Size2:       uint16(filesize),
 		LogicalSize: uint16(filesize)}
 
-	cpcFilename := exportType.TransformToAmsdosFile(filePath) + ".WIN"
+	cpcFilename := exportType.OsFilename(".WIN")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "filesize:%d,#%.2x\n", filesize, filesize)

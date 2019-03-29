@@ -49,7 +49,7 @@ func (e *ExportType) Filename() string {
 }
 
 func (e *ExportType) Fullpath(ext string) string {
-	return e.OutputPath + string(filepath.Separator) + e.Filename() + ext
+	return e.OutputPath + string(filepath.Separator) + e.OsFilename(ext)
 }
 
 func (e *ExportType) TransformToAmsdosFile(filePath string) string {
@@ -63,4 +63,17 @@ func (e *ExportType) TransformToAmsdosFile(filePath string) string {
 	copy(amsdosFile[:], file[0:filenameSize])
 	return string(amsdosFile)
 
+}
+
+
+func (e *ExportType)OsFilename(ext string) string {
+	file := strings.ToUpper(filepath.Base(e.InputPath))
+	filename := strings.TrimSuffix(file, filepath.Ext(file))
+	filenameSize := len(filename)
+	if filenameSize > 8 {
+		filenameSize = 8
+	}
+	osFile := make([]byte,filenameSize)
+	copy(osFile,filename[0:filenameSize])
+	return string(osFile) + ext
 }
