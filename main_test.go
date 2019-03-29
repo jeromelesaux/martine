@@ -49,6 +49,14 @@ func TestNormalScreenMode1(t *testing.T) {
 	}
 }
 
+func TestNormalScreenMode1Dsk(t *testing.T) {
+	args := []string{"run", "main.go", "-i", "samples/Batman-Neal-Adams.jpg", "-m", "1", "-o", "test" ,"-dsk"}
+	cmd := exec.Command("go", args...)
+	err := cmd.Run()
+	if err != nil {
+		t.Fatalf("Expected no error and gets :%v", err)
+	}
+}
 func TestNormalScreenMode2(t *testing.T) {
 	args := []string{"run", "main.go", "-i", "samples/Batman-Neal-Adams.jpg", "-m", "2", "-o", "test"}
 	cmd := exec.Command("go", args...)
