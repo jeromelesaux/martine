@@ -35,6 +35,9 @@ func NewExportType(input, output string) *ExportType {
 func (e *ExportType) AmsdosFilename() []byte {
 	amsdosFilenameOnce.Do(
 		func() {
+			for i:=0; i < 8 ; i++ {
+				e.amsdosFilename[i] =' '
+			}
 			file := strings.ToUpper(filepath.Base(e.InputPath))
 			filename := strings.TrimSuffix(file, filepath.Ext(file))
 			filenameSize := len(filename)
