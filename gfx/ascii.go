@@ -120,5 +120,24 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *ExportType
 	}
 	binary.Write(fw, binary.LittleEndian, []byte(out))
 	fw.Close()
+
+	if exportType.Json {
+		palette := make([]string, len(p))
+		for i := 0; i < len(p); i++ {
+			v, err := FirmwareNumber(p[i])
+			if err == nil {
+				palette[i] = fmt.Sprintf("%.2d", v)
+			} else {
+				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
+			}
+		}
+		screen := make([]string, len(data))
+		for i := 0; i < len(data); i++ {
+			screen[i] = fmt.Sprintf("0x%.2x", data[i])
+		}
+		j := NewJson(exportType.Filename(), exportType.Width, exportType.Height, screen, palette)
+		return j.Save(exportType.OutputPath + string(filepath.Separator) + exportType.OsFilename(".json"))
+
+	}
 	return nil
 }

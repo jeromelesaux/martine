@@ -23,6 +23,8 @@ type ExportType struct {
 	Json           bool
 	Ascii          bool
 	CpcPlus        bool
+	Width          int
+	Height         int
 	amsdosFilename []byte
 }
 
@@ -65,15 +67,14 @@ func (e *ExportType) TransformToAmsdosFile(filePath string) string {
 
 }
 
-
-func (e *ExportType)OsFilename(ext string) string {
+func (e *ExportType) OsFilename(ext string) string {
 	file := strings.ToUpper(filepath.Base(e.InputPath))
 	filename := strings.TrimSuffix(file, filepath.Ext(file))
 	filenameSize := len(filename)
 	if filenameSize > 8 {
 		filenameSize = 8
 	}
-	osFile := make([]byte,filenameSize)
-	copy(osFile,filename[0:filenameSize])
+	osFile := make([]byte, filenameSize)
+	copy(osFile, filename[0:filenameSize])
 	return string(osFile) + ext
 }
