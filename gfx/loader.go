@@ -7,14 +7,13 @@ import (
 	"image/color"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 var (
 	BasicLoader = []byte{
-		0x31, 0x00, 0x05, 0x00, 0x8c, 0x20, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 
+		0x31, 0x00, 0x05, 0x00, 0x8c, 0x20, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30,
 		0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30,
-		0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 
+		0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c,
 		0x30, 0x30, 0x2c, 0x30, 0x30, 0x00, 0x0e, 0x00, 0x0a, 0x00, 0xaa, 0x20, 0x1c, 0x00, 0x40, 0x20,
 		0xf5, 0x20, 0x0f, 0x00, 0x18, 0x00, 0x14, 0x00, 0xa8, 0x22, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
 		0x20, 0x20, 0x2e, 0x70, 0x61, 0x6c, 0x22, 0x2c, 0x1c, 0x00, 0x40, 0x00, 0x0e, 0x00, 0x1e, 0x00,
@@ -29,7 +28,7 @@ var (
 	startScreenName    = 149 + 16
 )
 
-func Loader(filePath, dirPath string, p color.Palette, noAmsdosHeader bool) error {
+func Loader(filePath string, p color.Palette, exportType *ExportType) error {
 	var out string
 	for i := 0; i < len(p); i++ {
 		v, err := FirmwareNumber(p[i])
@@ -47,30 +46,25 @@ func Loader(filePath, dirPath string, p color.Palette, noAmsdosHeader bool) erro
 	var loader []byte
 	loader = BasicLoader
 	var filenameSize uint8
-	
+
 	copy(loader[startPaletteValues:], out[0:len(out)-1])
-	file := filepath.Base(filePath)
-	filename := strings.TrimSuffix(file, filepath.Ext(file)) 
-	if len(filename) > 8 {
-		filenameSize = 8
-	} else {
-		filenameSize = uint8(len(filename))
-	}
-	copy(loader[startPaletteName:], filename[0:filenameSize])
-	copy(loader[startScreenName:], filename[0:filenameSize])
+	filename := exportType.AmsdosFilename()
+	copy(loader[startPaletteName:], filename[:])
+	copy(loader[startScreenName:], filename[:])
 	fmt.Println(loader)
 	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x170, Exec: 0x0,
 		Size:        uint16(binary.Size(loader)),
 		Size2:       uint16(binary.Size(loader)),
 		LogicalSize: uint16(binary.Size(loader))}
-	copy(header.Filename[:], filename[0:filenameSize] +".BAS")
+	file := string(filename) + ".BAS"
+	copy(header.Filename[:], file)
 	header.Checksum = uint16(header.ComputedChecksum16())
-	fw, err := os.Create(dirPath + string(filepath.Separator) + filename[0:filenameSize] +".BAS")
+	fw, err := os.Create(exportType.OutputPath + string(filepath.Separator) + string(filename) + ".BAS")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s.BAS) error :%s\n",filename[0:filenameSize], err)
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s.BAS) error :%s\n", filename[0:filenameSize], err)
 		return err
 	}
-	if !noAmsdosHeader {
+	if !exportType.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	binary.Write(fw, binary.LittleEndian, loader)

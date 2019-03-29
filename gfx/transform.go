@@ -14,26 +14,26 @@ var (
 	ErrorModeNotFound      = errors.New("Mode not found or not implemented.")
 )
 
-func Transform(in *image.NRGBA, p color.Palette, size Size, filepath, dirpath string, noAmsdosHeader, isCpcPlus bool) error {
+func Transform(in *image.NRGBA, p color.Palette, size Size, filepath string, exportType *ExportType) error {
 	switch size {
 	case Mode0:
-		return TransformMode0(in, p, size, filepath, dirpath, false, noAmsdosHeader, isCpcPlus)
+		return TransformMode0(in, p, size, filepath, exportType)
 	case Mode1:
-		return TransformMode1(in, p, size, filepath, dirpath, false, noAmsdosHeader, isCpcPlus)
+		return TransformMode1(in, p, size, filepath, exportType)
 	case Mode2:
-		return TransformMode2(in, p, size, filepath, dirpath, false, noAmsdosHeader, isCpcPlus)
+		return TransformMode2(in, p, size, filepath, exportType)
 	case OverscanMode0:
-		return TransformMode0(in, p, size, filepath, dirpath, true, noAmsdosHeader, isCpcPlus)
+		return TransformMode0(in, p, size, filepath, exportType)
 	case OverscanMode1:
-		return TransformMode1(in, p, size, filepath, dirpath, true, noAmsdosHeader, isCpcPlus)
+		return TransformMode1(in, p, size, filepath, exportType)
 	case OverscanMode2:
-		return TransformMode2(in, p, size, filepath, dirpath, true, noAmsdosHeader, isCpcPlus)
+		return TransformMode2(in, p, size, filepath, exportType)
 	default:
 		return ErrorNotYetImplemented
 	}
 }
 
-func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, filename, dirPath string, noAmsdosHeader, isCpcPlus bool) error {
+func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, filename string, exportType *ExportType) error {
 	var data []byte
 	firmwareColorUsed := make(map[int]int, 0)
 	size.Height = in.Bounds().Max.Y
@@ -197,15 +197,15 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, fi
 		}
 	}
 	fmt.Println(firmwareColorUsed)
-	if err := Win(filename, dirPath, data, mode, lineSize, size.Height, noAmsdosHeader); err != nil {
+	if err := Win(filename, data, mode, lineSize, size.Height, exportType); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 		return err
 	}
-	if err := Pal(filename, dirPath, p, mode, noAmsdosHeader); err != nil {
+	if err := Pal(filename, p, mode, exportType); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 		return err
 	}
-	return Ascii(filename, dirPath, data, p, noAmsdosHeader, isCpcPlus)
+	return Ascii(filename, data, p, exportType)
 }
 
 func PalettePosition(c color.Color, p color.Palette) (int, error) {
@@ -323,9 +323,9 @@ func pixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) byte {
 	return pixel
 }
 
-func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath, dirPath string, overscan, noAmsdosHeader, isCpcPlus bool) error {
+func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath string, exportType *ExportType) error {
 	var bw []byte
-	if overscan {
+	if exportType.Overscan {
 		bw = make([]byte, 0x8000)
 	} else {
 		bw = make([]byte, 0x4000)
@@ -359,7 +359,7 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			if overscan {
+			if exportType.Overscan {
 				var addr int
 				if y > 127 {
 					addr = (0x800 * (y % 8)) + (0x60 * (y / 8)) + ((x + 1) / 2) + (0x3800)
@@ -375,39 +375,39 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 	}
 
 	fmt.Println(firmwareColorUsed)
-	if overscan {
-		if err := Overscan(filePath, dirPath, bw, p, 0, noAmsdosHeader, isCpcPlus); err != nil {
+	if exportType.Overscan {
+		if err := Overscan(filePath, bw, p, 0, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	} else {
-		if err := Scr(filePath, dirPath, bw, noAmsdosHeader); err != nil {
+		if err := Scr(filePath, bw, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
-		if err := Loader(filePath, dirPath, p, noAmsdosHeader); err != nil {
+		if err := Loader(filePath, p, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving the loader %s with error %v\n", filePath, err)
 			return err
 		}
 	}
-	if isCpcPlus {
-		if err := Ink(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
+	if exportType.CpcPlus {
+		if err := Ink(filePath, p, 0, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	} else {
-		if err := Pal(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
+		if err := Pal(filePath, p, 0, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	}
 
-	return Ascii(filePath, dirPath, bw, p, noAmsdosHeader, isCpcPlus)
+	return Ascii(filePath, bw, p, exportType)
 }
 
-func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath, dirPath string, overscan, noAmsdosHeader, isCpcPlus bool) error {
+func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath string, exportType *ExportType) error {
 	var bw []byte
-	if overscan {
+	if exportType.Overscan {
 		bw = make([]byte, 0x8000)
 	} else {
 		bw = make([]byte, 0x4000)
@@ -455,7 +455,7 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			if overscan {
+			if exportType.Overscan {
 				var addr int
 				if y > 127 {
 					addr = (0x800 * (y % 8)) + (0x60 * (y / 8)) + ((x + 1) / 4) + (0x3800)
@@ -471,40 +471,40 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 	}
 
 	fmt.Println(firmwareColorUsed)
-	if overscan {
-		if err := Overscan(filePath, dirPath, bw, p, 1, noAmsdosHeader, isCpcPlus); err != nil {
+	if exportType.Overscan {
+		if err := Overscan(filePath, bw, p, 1, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	} else {
-		if err := Scr(filePath, dirPath, bw, noAmsdosHeader); err != nil {
+		if err := Scr(filePath, bw, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
-		if err := Loader(filePath, dirPath, p, noAmsdosHeader); err != nil {
+		if err := Loader(filePath, p, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving the loader %s with error %v\n", filePath, err)
 			return err
 		}
 	}
-	if isCpcPlus {
-		if err := Ink(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
+	if exportType.CpcPlus {
+		if err := Ink(filePath, p, 0, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	} else {
-		if err := Pal(filePath, dirPath, p, 1, noAmsdosHeader); err != nil {
+		if err := Pal(filePath, p, 1, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	}
 
-	return Ascii(filePath, dirPath, bw, p, noAmsdosHeader, isCpcPlus)
+	return Ascii(filePath, bw, p, exportType)
 }
 
-func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath, dirPath string, overscan, noAmsdosHeader, isCpcPlus bool) error {
+func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath string, exportType *ExportType) error {
 	var bw []byte
 
-	if overscan {
+	if exportType.Overscan {
 		bw = make([]byte, 0x8000)
 	} else {
 		bw = make([]byte, 0x4000)
@@ -580,7 +580,7 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			if overscan {
+			if exportType.Overscan {
 				var addr int
 				if y > 127 {
 					addr = (0x800 * (y % 8)) + (0x60 * (y / 8)) + ((x + 1) / 8) + (0x3800)
@@ -598,32 +598,32 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath, dirPa
 	}
 
 	fmt.Println(firmwareColorUsed)
-	if overscan {
-		if err := Overscan(filePath, dirPath, bw, p, 2, noAmsdosHeader, isCpcPlus); err != nil {
+	if exportType.Overscan {
+		if err := Overscan(filePath, bw, p, 2, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	} else {
-		if err := Scr(filePath, dirPath, bw, noAmsdosHeader); err != nil {
+		if err := Scr(filePath, bw, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
-		if err := Loader(filePath, dirPath, p, noAmsdosHeader); err != nil {
+		if err := Loader(filePath, p, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving the loader %s with error %v\n", filePath, err)
 			return err
 		}
 	}
-	if isCpcPlus {
-		if err := Ink(filePath, dirPath, p, 0, noAmsdosHeader); err != nil {
+	if exportType.CpcPlus {
+		if err := Ink(filePath, p, 0, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	} else {
-		if err := Pal(filePath, dirPath, p, 2, noAmsdosHeader); err != nil {
+		if err := Pal(filePath, p, 2, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	}
 
-	return Ascii(filePath, dirPath, bw, p, noAmsdosHeader, isCpcPlus)
+	return Ascii(filePath, bw, p, exportType)
 }

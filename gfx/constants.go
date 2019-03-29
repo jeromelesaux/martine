@@ -138,8 +138,8 @@ func HardwareValueAreEquals(hv []uint8, val uint8) bool {
 	return false
 }
 
-func ColorFromHardware(c uint8) (color.Color,error) {
-	if HardwareValueAreEquals(White.HardwareValues,c) {
+func ColorFromHardware(c uint8) (color.Color, error) {
+	if HardwareValueAreEquals(White.HardwareValues, c) {
 		return White.Color, nil
 	}
 	if HardwareValueAreEquals(SeaGreen.HardwareValues, c) {

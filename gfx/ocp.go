@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/jeromelesaux/m4client/cpc"
 	"image/color"
-	"os"
 	"io"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -52,31 +52,30 @@ type InkPalette struct {
 	Colors [16]CpcPlusColor
 }
 
-func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode uint8, noAmsdosHeader, isCpcPlus bool) error {
+func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, exportType *ExportType) error {
 	o := make([]byte, 0x7e90-0x80)
 	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", filePath)
 	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x170, Exec: 0x0,
 		Size:        uint16(binary.Size(o)),
 		Size2:       uint16(binary.Size(o)),
 		LogicalSize: uint16(binary.Size(o))}
-	filename := filepath.Base(filePath)
-	extension := filepath.Ext(filename)
-	cpcFilename := strings.ToUpper(strings.Replace(filename, extension, ".SCR", -1))
+
+	cpcFilename := string(exportType.AmsdosFilename()) + ".SCR"
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
-	fw, err := os.Create(dirPath + string(filepath.Separator) + cpcFilename)
+	fw, err := os.Create(exportType.OutputPath + string(filepath.Separator) + cpcFilename)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
 		return err
 	}
-	if !noAmsdosHeader {
+	if !exportType.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	copy(o, OverscanBoot[:])
 	copy(o[0x200-0x170:], data[:])
 	//o[(0x1ac-0x170)] = 0 // cpc old
-	switch isCpcPlus {
+	switch exportType.CpcPlus {
 	case true:
 		o[(0x1ac - 0x170)] = 1
 	case false:
@@ -91,7 +90,7 @@ func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode
 		o[0x184-0x170] = 0x10
 	}
 	// affectation de la palette CPC old
-	if isCpcPlus {
+	if exportType.CpcPlus {
 		offset := 0
 		for i := 0; i < len(p); i++ {
 			cp := NewCpcPlusColor(p[i])
@@ -115,7 +114,7 @@ func Overscan(filePath, dirPath string, data []byte, p color.Palette, screenMode
 	return nil
 }
 
-func Ink(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHeader bool) error {
+func Ink(filePath string, p color.Palette, screenMode uint8, exportType *ExportType) error {
 	fmt.Fprintf(os.Stdout, "Saving INK file (%s)\n", filePath)
 	data := [16]uint16{}
 
@@ -127,18 +126,17 @@ func Ink(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHe
 		Size:        uint16(binary.Size(data)),
 		Size2:       uint16(binary.Size(data)),
 		LogicalSize: uint16(binary.Size(data))}
-	filename := filepath.Base(filePath)
-	extension := filepath.Ext(filename)
-	cpcFilename := strings.ToUpper(strings.Replace(filename, extension, ".INK", -1))
+
+	cpcFilename := string(exportType.AmsdosFilename()) + ".INK"
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
-	fw, err := os.Create(dirPath + string(filepath.Separator) + cpcFilename)
+	fw, err := os.Create(exportType.OutputPath + string(filepath.Separator) + cpcFilename)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
 		return err
 	}
-	if !noAmsdosHeader {
+	if !exportType.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	binary.Write(fw, binary.LittleEndian, data)
@@ -146,24 +144,23 @@ func Ink(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHe
 	return nil
 }
 
-func Scr(filePath, dirPath string, data []byte, noAmsdosHeader bool) error {
+func Scr(filePath string, data []byte, exportType *ExportType) error {
 	fmt.Fprintf(os.Stdout, "Saving SCR file (%s)\n", filePath)
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0xc000, Exec: 0xC7D0,
 		Size:        uint16(binary.Size(data)),
 		Size2:       uint16(binary.Size(data)),
 		LogicalSize: uint16(binary.Size(data))}
-	filename := filepath.Base(filePath)
-	extension := filepath.Ext(filename)
-	cpcFilename := strings.ToUpper(strings.Replace(filename, extension, ".SCR", -1))
+
+	cpcFilename := string(exportType.AmsdosFilename()) + ".SCR"
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
-	fw, err := os.Create(dirPath + string(filepath.Separator) + cpcFilename)
+	fw, err := os.Create(exportType.OutputPath + string(filepath.Separator) + cpcFilename)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
 		return err
 	}
-	if !noAmsdosHeader {
+	if !exportType.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	binary.Write(fw, binary.LittleEndian, data)
@@ -181,10 +178,10 @@ type OcpPalette struct {
 	Protected           [16]uint8
 }
 
-func (o *OcpPalette)ToString() string {
-	out := fmt.Sprintf("Mode:(%d)\n",o.ScreenMode)
-	out += fmt.Sprintf("Color Animation:(%d)\n",o.ColorAnimation)
-	out += fmt.Sprintf("Color Animation delay :(%d)\n",o.ColorAnimationDelay)
+func (o *OcpPalette) ToString() string {
+	out := fmt.Sprintf("Mode:(%d)\n", o.ScreenMode)
+	out += fmt.Sprintf("Color Animation:(%d)\n", o.ColorAnimation)
+	out += fmt.Sprintf("Color Animation delay :(%d)\n", o.ColorAnimationDelay)
 	for index, v := range o.PaletteColors {
 		out += fmt.Sprintf("Color (%d) : value (%d)(%.2x)\n", index, v[0], v[0])
 	}
@@ -194,7 +191,7 @@ func (o *OcpPalette)ToString() string {
 	return out
 }
 
-func OpenPal(filePath string) (color.Palette, *OcpPalette , error) {
+func OpenPal(filePath string) (color.Palette, *OcpPalette, error) {
 	fr, err := os.Open(filePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
@@ -224,7 +221,7 @@ func OpenPal(filePath string) (color.Palette, *OcpPalette , error) {
 	return p, ocpPalette, nil
 }
 
-func Pal(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHeader bool) error {
+func Pal(filePath string, p color.Palette, screenMode uint8, exportType *ExportType) error {
 	fmt.Fprintf(os.Stdout, "Saving PAL file (%s)\n", filePath)
 	data := OcpPalette{ScreenMode: screenMode, ColorAnimation: 0, ColorAnimationDelay: 0}
 	for i := 0; i < 16; i++ {
@@ -247,18 +244,17 @@ func Pal(filePath, dirPath string, p color.Palette, screenMode uint8, noAmsdosHe
 		Size:        uint16(binary.Size(data)),
 		Size2:       uint16(binary.Size(data)),
 		LogicalSize: uint16(binary.Size(data))}
-	filename := filepath.Base(filePath)
-	extension := filepath.Ext(filename)
-	cpcFilename := strings.ToUpper(strings.Replace(filename, extension, ".PAL", -1))
+
+	cpcFilename := string(exportType.AmsdosFilename()) + ".PAL"
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
-	fw, err := os.Create(dirPath + string(filepath.Separator) + cpcFilename)
+	fw, err := os.Create(exportType.OutputPath + string(filepath.Separator) + cpcFilename)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
 		return err
 	}
-	if !noAmsdosHeader {
+	if !exportType.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	binary.Write(fw, binary.LittleEndian, data)
@@ -277,7 +273,7 @@ func (o *OcpWinFooter) ToString() string {
 	return fmt.Sprintf("Width:(%d)\nHeight:(%d)\n", o.Width, o.Height)
 }
 
-func OpenWin(filePath string) (*OcpWinFooter, error)  {
+func OpenWin(filePath string) (*OcpWinFooter, error) {
 	fr, err := os.Open(filePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
@@ -291,18 +287,18 @@ func OpenWin(filePath string) (*OcpWinFooter, error)  {
 	ocpWinFooter := &OcpWinFooter{}
 	_, err = fr.Seek(-5, io.SeekEnd)
 	if err != nil {
-		fmt.Fprintf(os.Stderr,"Error while seek in the file (%s) with error %v\n", filePath,err)
+		fmt.Fprintf(os.Stderr, "Error while seek in the file (%s) with error %v\n", filePath, err)
 		return &OcpWinFooter{}, err
 	}
-	
+
 	if err := binary.Read(fr, binary.LittleEndian, ocpWinFooter); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while reading Ocp Win from file (%s) error %v\n", filePath, err)
 		return ocpWinFooter, err
 	}
-	return ocpWinFooter,nil
+	return ocpWinFooter, nil
 }
 
-func Win(filePath, dirPath string, data []byte, screenMode uint8, width, height int, noAmsdosHeader bool) error {
+func Win(filePath string, data []byte, screenMode uint8, width, height int, exportType *ExportType) error {
 	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", filePath, screenMode, width, height)
 	win := OcpWinFooter{Unused: 3, Height: byte(height), Unused2: 0, Width: uint16(width * 8)}
 	filesize := binary.Size(data) + binary.Size(win)
@@ -310,22 +306,21 @@ func Win(filePath, dirPath string, data []byte, screenMode uint8, width, height 
 		Size:        uint16(filesize),
 		Size2:       uint16(filesize),
 		LogicalSize: uint16(filesize)}
-	filename := filepath.Base(filePath)
-	extension := filepath.Ext(filename)
-	cpcFilename := strings.ToUpper(strings.Replace(filename, extension, ".WIN", -1))
+
+	cpcFilename := exportType.TransformToAmsdosFile(filePath) + ".WIN"
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "filesize:%d,#%.2x\n", filesize, filesize)
 	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	fmt.Fprintf(os.Stderr, "Data length %d\n", binary.Size(data))
 	fmt.Fprintf(os.Stderr, "Footer length %d\n", binary.Size(win))
-	fw, err := os.Create(dirPath + string(filepath.Separator) + cpcFilename)
+	fw, err := os.Create(exportType.OutputPath + string(filepath.Separator) + cpcFilename)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
 		return err
 	}
 	fmt.Fprintf(os.Stdout, "%s, data size :%d\n", win.ToString(), len(data))
-	if !noAmsdosHeader {
+	if !exportType.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	binary.Write(fw, binary.LittleEndian, data)

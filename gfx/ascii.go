@@ -13,7 +13,7 @@ import (
 
 var ByteToken = "BYTE"
 
-func Ascii(filePath, dirPath string, data []byte, p color.Palette, noAmsdosHeader, isCpcPlus bool) error {
+func Ascii(filePath string, data []byte, p color.Palette, exportType *ExportType) error {
 	eol := "\n"
 	if runtime.GOOS == "windows" {
 		eol = "\r\n"
@@ -21,9 +21,8 @@ func Ascii(filePath, dirPath string, data []byte, p color.Palette, noAmsdosHeade
 	fmt.Fprintf(os.Stdout, "Writing ascii file (%s) data length (%d)\n", filePath, len(data))
 	var out string
 	var i int
-	filename := filepath.Base(filePath)
-	extension := filepath.Ext(filename)
-	cpcFilename := strings.ToUpper(strings.Replace(filename, extension, ".TXT", -1))
+
+	cpcFilename := string(exportType.AmsdosFilename()) + ".TXT"
 	out += "; Screen " + cpcFilename + eol + ".screen:" + eol
 	for i = 0; i < len(data); i += 8 {
 		out += fmt.Sprintf("%s ", ByteToken)
@@ -55,7 +54,7 @@ func Ascii(filePath, dirPath string, data []byte, p color.Palette, noAmsdosHeade
 	}
 	out += "; Palette " + cpcFilename + eol + ".palette:" + eol + ByteToken + " "
 
-	if isCpcPlus {
+	if exportType.CpcPlus {
 		for i := 0; i < len(p); i++ {
 			cp := NewCpcPlusColor(p[i])
 			v := cp.Value()
@@ -111,12 +110,12 @@ func Ascii(filePath, dirPath string, data []byte, p color.Palette, noAmsdosHeade
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
-	fw, err := os.Create(dirPath + string(filepath.Separator) + cpcFilename)
+	fw, err := os.Create(exportType.OutputPath + string(filepath.Separator) + cpcFilename)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
 		return err
 	}
-	if !noAmsdosHeader {
+	if !exportType.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	binary.Write(fw, binary.LittleEndian, []byte(out))

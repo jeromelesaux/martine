@@ -39,7 +39,8 @@ var (
 	palettePath     = flag.String("pal", "", "Apply the input palette to the image")
 	info            = flag.Bool("info", false, "Return the information of the file, associated with -pal and -win options")
 	winPath         = flag.String("win", "", "Filepath of the ocp win file")
-	version         = "0.5"
+	dsk             = flag.Bool("dsk", false, "Copy files in a new CPC image Dsk.")
+	version         = "0.6Alpha"
 )
 
 func usage() {
@@ -96,6 +97,8 @@ func main() {
 		*output = "./"
 	}
 
+	exportType := gfx.NewExportType(*picturePath, *output)
+
 	if *mode == -1 {
 		fmt.Fprintf(os.Stderr, "No output mode defined can not choose. Quiting\n")
 		usage()
@@ -127,6 +130,7 @@ func main() {
 	}
 	if *height != -1 {
 		customDimension = true
+		exportType.Win = true
 		size.Height = *height
 		if *width != -1 {
 			size.Width = *width
@@ -135,6 +139,7 @@ func main() {
 		}
 	}
 	if *width != -1 {
+		exportType.Win = true
 		customDimension = true
 		size.Width = *width
 		if *height != -1 {
@@ -147,6 +152,20 @@ func main() {
 	if *byteStatement != "" {
 		gfx.ByteToken = *byteStatement
 	}
+	exportType.RollMode = *rollMode
+	exportType.RollIteration = *iterations
+	exportType.NoAmsdosHeader = *noAmsdosHeader
+	exportType.CpcPlus = *plusMode
+	if exportType.CpcPlus {
+		exportType.Ink = true
+		exportType.Pal = false
+	}
+	exportType.Overscan = *overscan
+	if exportType.Overscan {
+		exportType.Scr = false
+		exportType.Ink = true
+	}
+	exportType.Dsk = *dsk
 
 	fmt.Fprintf(os.Stdout, "Informations :\n%s", size.ToString())
 
@@ -198,8 +217,6 @@ func main() {
 		resizeAlgo = imaging.NearestNeighbor
 	}
 
-	
-
 	if *palettePath != "" {
 		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", *palettePath)
 		palette, _, err = gfx.OpenPal(*palettePath)
@@ -212,7 +229,7 @@ func main() {
 
 	out := convert.Resize(in, size, resizeAlgo)
 	fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
-	if err := gfx.Png(*output+string(filepath.Separator)+filename+"_resized.png", out); err != nil {
+	if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_resized.png", out); err != nil {
 		os.Exit(-2)
 	}
 
@@ -228,31 +245,36 @@ func main() {
 
 	}
 	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
-	if err := gfx.Png(*output+string(filepath.Separator)+filename+"_down.png", downgraded); err != nil {
+	if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_down.png", downgraded); err != nil {
 		os.Exit(-2)
 	}
 
 	if *rollMode {
 		if *rla != -1 || *sla != -1 {
-			gfx.RollLeft(*rla, *sla, *iterations, screenMode, size, downgraded, newPalette, filename, *output, *noAmsdosHeader, *plusMode)
+			gfx.RollLeft(*rla, *sla, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
 		} else {
 			if *rra != -1 || *sra != -1 {
-				gfx.RollRight(*rra, *sra, *iterations, screenMode, size, downgraded, newPalette, filename, *output, *noAmsdosHeader, *plusMode)
+				gfx.RollRight(*rra, *sra, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
 			}
 		}
 		if *keephigh != -1 || *losthigh != -1 {
-			gfx.RollUp(*keephigh, *losthigh, *iterations, screenMode, size, downgraded, newPalette, filename, *output, *noAmsdosHeader, *plusMode)
+			gfx.RollUp(*keephigh, *losthigh, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
 		} else {
 			if *keeplow != -1 || *lostlow != -1 {
-				gfx.RollLow(*keeplow, *lostlow, *iterations, screenMode, size, downgraded, newPalette, filename, *output, *noAmsdosHeader, *plusMode)
+				gfx.RollLow(*keeplow, *lostlow, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
 			}
 		}
 	} else {
 		if !customDimension {
-			gfx.Transform(downgraded, newPalette, size, *picturePath, *output, *noAmsdosHeader, *plusMode)
+			gfx.Transform(downgraded, newPalette, size, *picturePath, exportType)
 		} else {
 			fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
-			gfx.SpriteTransform(downgraded, newPalette, size, screenMode, filename, *output, *noAmsdosHeader, *plusMode)
+			gfx.SpriteTransform(downgraded, newPalette, size, screenMode, filename, exportType)
+		}
+	}
+	if exportType.Dsk {
+		if err := gfx.ImportInDsk(exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Cannot create or write into dsk file error :%v\n", err)
 		}
 	}
 	os.Exit(0)

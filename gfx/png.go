@@ -3,12 +3,12 @@ package gfx
 import (
 	"fmt"
 	"image"
-	"os"
 	"image/png"
+	"os"
 )
 
 func Png(filePath string, im *image.NRGBA) error {
-    fwd, err := os.Create(filePath)
+	fwd, err := os.Create(filePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot create new image (%s) error %v\n", filePath, err)
 		return err
