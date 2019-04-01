@@ -98,6 +98,10 @@ func (e *ExportType) OsFilename(ext string) string {
 
 func (e *ExportType) OsFullPath(filePath string, newExtension string) string {
 	filename := filepath.Base(filePath)
-	newFilename := strings.TrimSuffix(filename, filepath.Ext(filename)) + newExtension
+	length := 8
+	if len(filename) < 8 {
+		length = len(filename)
+	}
+	newFilename := strings.TrimSuffix(filename, filepath.Ext(filename))[0:length] + newExtension
 	return e.OutputPath + string(filepath.Separator) + strings.ToUpper(newFilename)
 }
