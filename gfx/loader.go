@@ -57,7 +57,7 @@ func Loader(filePath string, p color.Palette, exportType *ExportType) error {
 	file := string(filename) + ".BAS"
 	copy(header.Filename[:], file)
 	header.Checksum = uint16(header.ComputedChecksum16())
-	osFilepath := exportType.OsFullPath(filePath, ".BAS")
+	osFilepath := exportType.AmsdosFullPath(filePath, ".BAS")
 	fw, err := os.Create(osFilepath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)

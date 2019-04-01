@@ -54,7 +54,7 @@ type InkPalette struct {
 
 func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, exportType *ExportType) error {
 	o := make([]byte, 0x7e90-0x80)
-	osFilepath := exportType.OsFullPath(filePath, ".SCR")
+	osFilepath := exportType.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", osFilepath)
 	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x170, Exec: 0x0,
 		Size:        uint16(binary.Size(o)),
@@ -116,7 +116,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, e
 }
 
 func Ink(filePath string, p color.Palette, screenMode uint8, exportType *ExportType) error {
-	osFilepath := exportType.OsFullPath(filePath, ".INK")
+	osFilepath := exportType.AmsdosFullPath(filePath, ".INK")
 	fmt.Fprintf(os.Stdout, "Saving INK file (%s)\n", osFilepath)
 	data := [16]uint16{}
 
@@ -147,7 +147,7 @@ func Ink(filePath string, p color.Palette, screenMode uint8, exportType *ExportT
 }
 
 func Scr(filePath string, data []byte, exportType *ExportType) error {
-	osFilepath := exportType.OsFullPath(filePath, ".SCR")
+	osFilepath := exportType.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving SCR file (%s)\n", osFilepath)
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0xc000, Exec: 0xC7D0,
 		Size:        uint16(binary.Size(data)),
@@ -252,7 +252,7 @@ func Pal(filePath string, p color.Palette, screenMode uint8, exportType *ExportT
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
-	osFilepath := exportType.OsFullPath(filePath, ".PAL")
+	osFilepath := exportType.AmsdosFullPath(filePath, ".PAL")
 	fw, err := os.Create(osFilepath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
@@ -304,7 +304,7 @@ func OpenWin(filePath string) (*OcpWinFooter, error) {
 }
 
 func Win(filePath string, data []byte, screenMode uint8, width, height int, exportType *ExportType) error {
-	osFilepath := exportType.OsFullPath(filePath, ".WIN")
+	osFilepath := exportType.AmsdosFullPath(filePath, ".WIN")
 	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", osFilepath, screenMode, width, height)
 	win := OcpWinFooter{Unused: 3, Height: byte(height), Unused2: 0, Width: uint16(width * 8)}
 	filesize := binary.Size(data) + binary.Size(win)

@@ -35,6 +35,8 @@ func TileMode(exportType *ExportType, mode uint8, iteration int, algo imaging.Re
 
 	if factorX != factorY {
 		fmt.Fprintf(os.Stdout, "factor x (%d) differs from factor y (%d)\n", factorX, factorY)
+	}
+	if factorY == 0 {
 		factorY = height
 	}
 	index := 0
@@ -67,6 +69,8 @@ func TileMode(exportType *ExportType, mode uint8, iteration int, algo imaging.Re
 				fmt.Fprintf(os.Stderr, "Cannot not downgrad image, error %v\n", err)
 			}
 			ext = strconv.Itoa(index) + ".png"
+			exportType.Size.Width = resized.Bounds().Max.X
+			exportType.Size.Height = resized.Bounds().Max.Y
 			if err := SpriteTransform(downgraded, p, exportType.Size, mode, exportType.OsFilename(ext), exportType); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot create sprite from image, error :%v\n", err)
 			}

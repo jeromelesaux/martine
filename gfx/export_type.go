@@ -96,7 +96,7 @@ func (e *ExportType) OsFilename(ext string) string {
 	return string(osFile) + ext
 }
 
-func (e *ExportType) OsFullPath(filePath string, newExtension string) string {
+func (e *ExportType) AmsdosFullPath(filePath string, newExtension string) string {
 	filename := filepath.Base(filePath)
 	file := strings.TrimSuffix(filename, filepath.Ext(filename))
 	length := 8
@@ -105,4 +105,11 @@ func (e *ExportType) OsFullPath(filePath string, newExtension string) string {
 	}
 	newFilename := file[0:length] + newExtension
 	return e.OutputPath + string(filepath.Separator) + strings.ToUpper(newFilename)
+}
+
+func (e *ExportType) OsFullPath(filePath string, newExtension string) string {
+	filename := filepath.Base(filePath)
+	file := strings.TrimSuffix(filename, filepath.Ext(filename))
+	newFilename := file + newExtension
+	return e.OutputPath + string(filepath.Separator) + newFilename
 }

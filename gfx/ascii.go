@@ -23,7 +23,7 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *ExportType
 	var i int
 
 	cpcFilename := string(exportType.AmsdosFilename()) + ".TXT"
-	osFilepath := exportType.OsFullPath(filePath, ".TXT")
+	osFilepath := exportType.AmsdosFullPath(filePath, ".TXT")
 	fmt.Fprintf(os.Stdout, "Writing ascii file (%s) data length (%d)\n", osFilepath, len(data))
 	out += "; Screen " + cpcFilename + eol + ".screen:" + eol
 	for i = 0; i < len(data); i += 8 {
@@ -138,7 +138,8 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *ExportType
 		for i := 0; i < len(data); i++ {
 			screen[i] = fmt.Sprintf("0x%.2x", data[i])
 		}
-		j := NewJson(exportType.Filename(), exportType.Width, exportType.Height, screen, palette)
+		j := NewJson(exportType.Filename(), exportType.Size.Width, exportType.Size.Height, screen, palette)
+		fmt.Fprintf(os.Stdout, "Filepath:%s\n", filePath)
 		return j.Save(exportType.OsFullPath(filePath, ".json"))
 
 	}
