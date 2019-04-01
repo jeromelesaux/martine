@@ -8,7 +8,6 @@ import (
 	"image/color"
 	"io"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -55,7 +54,8 @@ type InkPalette struct {
 
 func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, exportType *ExportType) error {
 	o := make([]byte, 0x7e90-0x80)
-	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", filePath)
+	osFilepath := exportType.OsFullPath(filePath, ".SCR")
+	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", osFilepath)
 	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x170, Exec: 0x0,
 		Size:        uint16(binary.Size(o)),
 		Size2:       uint16(binary.Size(o)),
@@ -65,9 +65,9 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, e
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
-	fw, err := os.Create(exportType.OutputPath + string(filepath.Separator) + cpcFilename)
+	fw, err := os.Create(osFilepath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
 		return err
 	}
 	if !exportType.NoAmsdosHeader {
@@ -116,7 +116,8 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, e
 }
 
 func Ink(filePath string, p color.Palette, screenMode uint8, exportType *ExportType) error {
-	fmt.Fprintf(os.Stdout, "Saving INK file (%s)\n", filePath)
+	osFilepath := exportType.OsFullPath(filePath, ".INK")
+	fmt.Fprintf(os.Stdout, "Saving INK file (%s)\n", osFilepath)
 	data := [16]uint16{}
 
 	for i := 0; i < len(p); i++ {
@@ -132,9 +133,9 @@ func Ink(filePath string, p color.Palette, screenMode uint8, exportType *ExportT
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
-	fw, err := os.Create(exportType.OutputPath + string(filepath.Separator) + cpcFilename)
+	fw, err := os.Create(osFilepath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
 		return err
 	}
 	if !exportType.NoAmsdosHeader {
@@ -146,7 +147,8 @@ func Ink(filePath string, p color.Palette, screenMode uint8, exportType *ExportT
 }
 
 func Scr(filePath string, data []byte, exportType *ExportType) error {
-	fmt.Fprintf(os.Stdout, "Saving SCR file (%s)\n", filePath)
+	osFilepath := exportType.OsFullPath(filePath, ".SCR")
+	fmt.Fprintf(os.Stdout, "Saving SCR file (%s)\n", osFilepath)
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0xc000, Exec: 0xC7D0,
 		Size:        uint16(binary.Size(data)),
 		Size2:       uint16(binary.Size(data)),
@@ -156,9 +158,9 @@ func Scr(filePath string, data []byte, exportType *ExportType) error {
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
-	fw, err := os.Create(exportType.OutputPath + string(filepath.Separator) + cpcFilename)
+	fw, err := os.Create(osFilepath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
 		return err
 	}
 	if !exportType.NoAmsdosHeader {
