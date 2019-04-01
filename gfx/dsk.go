@@ -2,7 +2,7 @@ package gfx
 
 import (
 	"github.com/jeromelesaux/dsk"
-	"strconv"
+	"path/filepath"
 )
 
 func ImportInDsk(exportType *ExportType) error {
@@ -28,12 +28,13 @@ func ImportInDsk(exportType *ExportType) error {
 	if exportType.Ascii {
 		floppy.PutFile(exportType.Fullpath(".TXT"), dsk.MODE_ASCII, 0, 0, 0, false, false)
 	}
-	if exportType.RollMode {
-		for i := 0; i < exportType.RollIteration; i++ {
-			ext := strconv.Itoa(i) + ".WIN"
-			floppy.PutFile(exportType.Fullpath(ext), dsk.MODE_BINAIRE, 0, 0, 0, false, false)
-			ext = strconv.Itoa(i) + ".PAL"
-			floppy.PutFile(exportType.Fullpath(ext), dsk.MODE_BINAIRE, 0, 0, 0, false, false)
+	if exportType.RollMode || exportType.TileMode {
+		for _, v := range exportType.DskFiles {
+			if filepath.Ext(v) == ".TXT" {
+				floppy.PutFile(v, dsk.MODE_ASCII, 0, 0, 0, false, false)
+			} else {
+				floppy.PutFile(v, dsk.MODE_BINAIRE, 0, 0, 0, false, false)
+			}
 		}
 	}
 

@@ -7,7 +7,6 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"image/color"
 	"os"
-	"path/filepath"
 )
 
 var (
@@ -46,8 +45,6 @@ func Loader(filePath string, p color.Palette, exportType *ExportType) error {
 
 	var loader []byte
 	loader = BasicLoader
-	var filenameSize uint8
-
 	copy(loader[startPaletteValues:], out[0:len(out)-1])
 	filename := exportType.AmsdosFilename()
 	copy(loader[startPaletteName:], filename[:])
@@ -60,9 +57,10 @@ func Loader(filePath string, p color.Palette, exportType *ExportType) error {
 	file := string(filename) + ".BAS"
 	copy(header.Filename[:], file)
 	header.Checksum = uint16(header.ComputedChecksum16())
-	fw, err := os.Create(exportType.OutputPath + string(filepath.Separator) + exportType.OsFilename(".BAS"))
+	osFilepath := exportType.OsFullPath(filePath, ".BAS")
+	fw, err := os.Create(osFilepath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s.BAS) error :%s\n", filename[0:filenameSize], err)
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
 		return err
 	}
 	if !exportType.NoAmsdosHeader {
@@ -71,5 +69,6 @@ func Loader(filePath string, p color.Palette, exportType *ExportType) error {
 	binary.Write(fw, binary.LittleEndian, loader)
 	fw.Close()
 
+	exportType.AddFile(osFilepath)
 	return nil
 }

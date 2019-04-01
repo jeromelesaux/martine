@@ -29,10 +29,23 @@ type ExportType struct {
 	Width          int
 	Height         int
 	amsdosFilename []byte
+	DskFiles       []string
 }
 
 func NewExportType(input, output string) *ExportType {
-	return &ExportType{Json: true, Ascii: true, Scr: true, Pal: true, InputPath: input, OutputPath: output, amsdosFilename: make([]byte, 8)}
+	return &ExportType{
+		Json:           true,
+		Ascii:          true,
+		Scr:            true,
+		Pal:            true,
+		InputPath:      input,
+		OutputPath:     output,
+		amsdosFilename: make([]byte, 8),
+		DskFiles:       make([]string, 0)}
+}
+
+func (e *ExportType) AddFile(file string) {
+	e.DskFiles = append(e.DskFiles, file)
 }
 
 func (e *ExportType) AmsdosFilename() []byte {
@@ -86,5 +99,5 @@ func (e *ExportType) OsFilename(ext string) string {
 func (e *ExportType) OsFullPath(filePath string, newExtension string) string {
 	filename := filepath.Base(filePath)
 	newFilename := strings.TrimSuffix(filename, filepath.Ext(filename)) + newExtension
-	return e.OutputPath + string(filepath.Separator) + newFilename
+	return e.OutputPath + string(filepath.Separator) + strings.ToUpper(newFilename)
 }

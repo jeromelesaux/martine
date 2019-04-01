@@ -122,6 +122,7 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *ExportType
 	}
 	binary.Write(fw, binary.LittleEndian, []byte(out))
 	fw.Close()
+	exportType.AddFile(osFilepath)
 
 	if exportType.Json {
 		palette := make([]string, len(p))

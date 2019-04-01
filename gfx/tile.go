@@ -37,7 +37,7 @@ func TileMode(exportType *ExportType, mode uint8, iteration int, algo imaging.Re
 		fmt.Fprintf(os.Stdout, "factor x (%d) differs from factor y (%d)\n", factorX, factorY)
 		factorY = height
 	}
-
+	index := 0
 	for i := 0; i < in.Bounds().Max.X; i += factorX {
 		for y := 0; y < in.Bounds().Max.Y; y += factorY {
 			cropped, err := cutter.Crop(in, cutter.Config{
@@ -52,7 +52,7 @@ func TileMode(exportType *ExportType, mode uint8, iteration int, algo imaging.Re
 			}
 
 			resized := convert.Resize(cropped, exportType.Size, algo)
-			ext := "_resized_" + strconv.Itoa(i) + "_" + strconv.Itoa(y) + ".png"
+			ext := "_resized_" + strconv.Itoa(index) + ".png"
 			filePath := exportType.OutputPath + string(filepath.Separator) + exportType.OsFilename(ext)
 			if err := Png(filePath, resized); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot not resized image, error %v\n", err)
@@ -61,15 +61,16 @@ func TileMode(exportType *ExportType, mode uint8, iteration int, algo imaging.Re
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot downgrad the palette, error :%v\n", err)
 			}
-			ext = "_downgraded_" + strconv.Itoa(i) + "_" + strconv.Itoa(y) + ".png"
+			ext = "_downgraded_" + strconv.Itoa(index) + ".png"
 			filePath = exportType.OutputPath + string(filepath.Separator) + exportType.OsFilename(ext)
 			if err := Png(filePath, downgraded); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot not downgrad image, error %v\n", err)
 			}
-			ext = strconv.Itoa(i) + strconv.Itoa(y) + ".png"
+			ext = strconv.Itoa(index) + ".png"
 			if err := SpriteTransform(downgraded, p, exportType.Size, mode, exportType.OsFilename(ext), exportType); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot create sprite from image, error :%v\n", err)
 			}
+			index++
 		}
 	}
 

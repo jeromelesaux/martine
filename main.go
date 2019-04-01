@@ -229,62 +229,62 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Tile mode on error : error :%v\n", err)
 			os.Exit(-1)
 		}
-		os.Exit(0)
-	}
-
-	if *palettePath != "" {
-		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", *palettePath)
-		palette, _, err = gfx.OpenPal(*palettePath)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *palettePath)
-		} else {
-			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
-		}
-	}
-
-	out := convert.Resize(in, size, resizeAlgo)
-	fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
-	if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_resized.png", out); err != nil {
-		os.Exit(-2)
-	}
-
-	var newPalette color.Palette
-	var downgraded *image.NRGBA
-	if len(palette) > 0 {
-		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
 	} else {
-		newPalette, downgraded, err = convert.DowngradingPalette(out, size, exportType.CpcPlus)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
-		}
 
-	}
-	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
-	if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_down.png", downgraded); err != nil {
-		os.Exit(-2)
-	}
-
-	if *rollMode {
-		if *rla != -1 || *sla != -1 {
-			gfx.RollLeft(*rla, *sla, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
-		} else {
-			if *rra != -1 || *sra != -1 {
-				gfx.RollRight(*rra, *sra, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
+		if *palettePath != "" {
+			fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", *palettePath)
+			palette, _, err = gfx.OpenPal(*palettePath)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *palettePath)
+			} else {
+				fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
 			}
 		}
-		if *keephigh != -1 || *losthigh != -1 {
-			gfx.RollUp(*keephigh, *losthigh, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
-		} else {
-			if *keeplow != -1 || *lostlow != -1 {
-				gfx.RollLow(*keeplow, *lostlow, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
-			}
+
+		out := convert.Resize(in, size, resizeAlgo)
+		fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
+		if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_resized.png", out); err != nil {
+			os.Exit(-2)
 		}
-	} else {
-		if !customDimension {
-			gfx.Transform(downgraded, newPalette, size, *picturePath, exportType)
+
+		var newPalette color.Palette
+		var downgraded *image.NRGBA
+		if len(palette) > 0 {
+			newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
 		} else {
-			fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
-			gfx.SpriteTransform(downgraded, newPalette, size, screenMode, filename, exportType)
+			newPalette, downgraded, err = convert.DowngradingPalette(out, size, exportType.CpcPlus)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
+			}
+
+		}
+		fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
+		if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_down.png", downgraded); err != nil {
+			os.Exit(-2)
+		}
+
+		if exportType.RollMode {
+			if *rla != -1 || *sla != -1 {
+				gfx.RollLeft(*rla, *sla, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
+			} else {
+				if *rra != -1 || *sra != -1 {
+					gfx.RollRight(*rra, *sra, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
+				}
+			}
+			if *keephigh != -1 || *losthigh != -1 {
+				gfx.RollUp(*keephigh, *losthigh, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
+			} else {
+				if *keeplow != -1 || *lostlow != -1 {
+					gfx.RollLow(*keeplow, *lostlow, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
+				}
+			}
+		} else {
+			if !customDimension {
+				gfx.Transform(downgraded, newPalette, size, *picturePath, exportType)
+			} else {
+				fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
+				gfx.SpriteTransform(downgraded, newPalette, size, screenMode, filename, exportType)
+			}
 		}
 	}
 	if exportType.Dsk {

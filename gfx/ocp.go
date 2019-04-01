@@ -250,7 +250,8 @@ func Pal(filePath string, p color.Palette, screenMode uint8, exportType *ExportT
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
-	fw, err := os.Create(exportType.OutputPath + string(filepath.Separator) + cpcFilename)
+	osFilepath := exportType.OsFullPath(filePath, ".PAL")
+	fw, err := os.Create(osFilepath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
 		return err
@@ -260,6 +261,7 @@ func Pal(filePath string, p color.Palette, screenMode uint8, exportType *ExportT
 	}
 	binary.Write(fw, binary.LittleEndian, data)
 	fw.Close()
+	exportType.AddFile(osFilepath)
 	return nil
 }
 
@@ -329,6 +331,7 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, expo
 	binary.Write(fw, binary.LittleEndian, data)
 	binary.Write(fw, binary.LittleEndian, win)
 	fw.Close()
+	exportType.AddFile(osFilepath)
 	return nil
 
 }
