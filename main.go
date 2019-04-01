@@ -44,7 +44,7 @@ var (
 	tileMode        = flag.Bool("tile", false, "Tile mode to create multiples sprites from a same image.")
 	tileIterationX = flag.Int("iterx",-1,"Number of tiles on a row in the input image.")
 	tileIterationY = flag.Int("itery",-1,"Number of tiles on a column in the input image.")
-	version         = "0.6Alpha"
+	version         = "0.6"
 )
 
 func usage() {
