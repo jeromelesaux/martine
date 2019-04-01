@@ -6,10 +6,12 @@ Multi os, you can convert any pictures to Amstrad CPC Screen.
 The files generated (.win, .scr, .ink) are compatible with [OCP art studio](http://www.cpc-power.com/index.php?page=detail&num=4963) and Impdraw V2 [i2](http://amstradplus.forumforever.com/t462-iMPdraw-v2-0.htm)
 
 To Install and compile
-```go get github.com/jeromelesaux/martine
+```
+go get github.com/jeromelesaux/martine
 cd $GOPATH/src/github.com/jeromelesaux/martine
 go get 
-go build```
+go build
+```
 
 To get binary : 
 [https//github.com/jeromelesaux/martine/releases](https//github.com/jeromelesaux/martine/releases)
@@ -17,70 +19,82 @@ To get binary :
 
 Usage and options : 
 
-```martine convert (jpeg, png format) image to Amstrad cpc screen (even overscan)
-By Impact Sid (Version:0.3)
+```
+./martine 
+martine convert (jpeg, png format) image to Amstrad cpc screen (even overscan)
+By Impact Sid (Version:0.6Alpha)
 Special thanks to @Ast (for his support), @Siko and @Tronic for ideas
 usage :
 
   -a int
-        Algorithm to resize the image (available : 
-                1: NearestNeighbor (default)
-                2: CatmullRom
-                3: Lanczos
-                4: Linear
-                5: Box
-                6: Hermite
-                7: BSpline
-                8: Hamming
-                9: Hann
-                10: Gaussian
-                11: Blackman
-                12: Bartlett
-                13: Welch
-                14: Cosine
-                 (default 1)
-  -f    Overscan mode (default no overscan)
+    	Algorithm to resize the image (available : 
+    		1: NearestNeighbor (default)
+    		2: CatmullRom
+    		3: Lanczos
+    		4: Linear
+    		5: Box
+    		6: Hermite
+    		7: BSpline
+    		8: Hamming
+    		9: Hann
+    		10: Gaussian
+    		11: Blackman
+    		12: Bartlett
+    		13: Welch
+    		14: Cosine
+    		 (default 1)
+  -dsk
+    	Copy files in a new CPC image Dsk.
+  -f	Overscan mode (default no overscan)
   -h int
-        Custom output height in pixels. (default -1)
+    	Custom output height in pixels. (default -1)
   -help
-        Display help message
+    	Display help message
   -i string
-        Picture path of the input file.
+    	Picture path of the input file.
+  -info
+    	Return the information of the file, associated with -pal and -win options
   -iter int
-        Iterations number to walk in tile mode (default -1)
+    	Iterations number to walk in tile mode (default -1)
   -keephigh int
-        bit rotation on the top and keep pixels (default -1)
+    	bit rotation on the top and keep pixels (default -1)
   -keeplow int
-        bit rotation on the bottom and keep pixels (default -1)
+    	bit rotation on the bottom and keep pixels (default -1)
   -losthigh int
-        bit rotation on the top and lost pixels (default -1)
+    	bit rotation on the top and lost pixels (default -1)
   -lostlow int
-        bit rotation on the bottom and lost pixels (default -1)
+    	bit rotation on the bottom and lost pixels (default -1)
   -m int
-        Output mode to use :
-                0 for mode0
-                1 for mode1
-                2 for mode2
-                and add -f option for overscan export.
-                 (default -1)
-  -n    no amsdos header for all files (default amsdos header added).
+    	Output mode to use :
+    		0 for mode0
+    		1 for mode1
+    		2 for mode2
+    		and add -f option for overscan export.
+    		 (default -1)
+  -n	no amsdos header for all files (default amsdos header added).
   -o string
-        Output directory
-  -p    Plus mode (means generate an image for CPC Plus Screen)
+    	Output directory
+  -p	Plus mode (means generate an image for CPC Plus Screen)
+  -pal string
+    	Apply the input palette to the image
   -rla int
-        bit rotation on the left and keep pixels (default -1)
+    	bit rotation on the left and keep pixels (default -1)
   -roll
-        Roll mode allow to walk and walk into the input file.
+    	Roll mode allow to walk and walk into the input file, associated with rla,rra,sra,sla, keephigh, keeplow, losthigh or lostlow options.
   -rra int
-        bit rotation on the right and keep pixels (default -1)
+    	bit rotation on the right and keep pixels (default -1)
   -s string
-        Byte statement to replace in ascii export (default is BYTE), you can replace or instance by defb
+    	Byte statement to replace in ascii export (default is BYTE), you can replace or instance by defb
   -sla int
-        bit rotation on the left and lost pixels (default -1)
+    	bit rotation on the left and lost pixels (default -1)
   -sra int
-        bit rotation on the right and lost pixels (default -1)
+    	bit rotation on the right and lost pixels (default -1)
+  -tile
+    	Tile mode to create multiples sprites from a same image.
   -w int
-        Custom output width in pixels. (default -1)
+    	Custom output width in pixels. (default -1)
+  -win string
+    	Filepath of the ocp win file
 ```
 
 examples :
