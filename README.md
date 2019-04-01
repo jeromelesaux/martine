@@ -9,8 +9,7 @@ To Install and compile
 ```go get github.com/jeromelesaux/martine
 cd $GOPATH/src/github.com/jeromelesaux/martine
 go get 
-go build
-```
+go build```
 
 To get binary : 
 [https//github.com/jeromelesaux/martine/releases](https//github.com/jeromelesaux/martine/releases)
