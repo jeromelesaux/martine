@@ -13,7 +13,7 @@ import (
 	"strconv"
 )
 
-func TileMode(exportType *ExportType, mode uint8, iteration int, algo imaging.ResampleFilter) error {
+func TileMode(exportType *ExportType, mode uint8, iterationX, iterationY int, algo imaging.ResampleFilter) error {
 	fr, err := os.Open(exportType.InputPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot open (%s),error :%v\n", exportType.InputPath, err)
@@ -30,8 +30,8 @@ func TileMode(exportType *ExportType, mode uint8, iteration int, algo imaging.Re
 	width := in.Bounds().Max.X
 	height := in.Bounds().Max.Y
 
-	factorX := width / iteration
-	factorY := height / iteration
+	factorX := width / iterationX + 1
+	factorY := height / iterationY + 1
 
 	if factorX != factorY {
 		fmt.Fprintf(os.Stdout, "factor x (%d) differs from factor y (%d)\n", factorX, factorY)
@@ -78,5 +78,6 @@ func TileMode(exportType *ExportType, mode uint8, iteration int, algo imaging.Re
 		}
 	}
 
-	return nil
+
+	return exportType.Tiles.Save(exportType.Fullpath(".json"))
 }

@@ -28,7 +28,7 @@ var (
 	noAmsdosHeader  = flag.Bool("n", false, "no amsdos header for all files (default amsdos header added).")
 	plusMode        = flag.Bool("p", false, "Plus mode (means generate an image for CPC Plus Screen)")
 	rollMode        = flag.Bool("roll", false, "Roll mode allow to walk and walk into the input file, associated with rla,rra,sra,sla, keephigh, keeplow, losthigh or lostlow options.")
-	iterations      = flag.Int("iter", -1, "Iterations number to walk in tile mode")
+	iterations      = flag.Int("iter", -1, "Iterations number to walk in roll mode")
 	rra             = flag.Int("rra", -1, "bit rotation on the right and keep pixels")
 	rla             = flag.Int("rla", -1, "bit rotation on the left and keep pixels")
 	sra             = flag.Int("sra", -1, "bit rotation on the right and lost pixels")
@@ -42,6 +42,8 @@ var (
 	winPath         = flag.String("win", "", "Filepath of the ocp win file")
 	dsk             = flag.Bool("dsk", false, "Copy files in a new CPC image Dsk.")
 	tileMode        = flag.Bool("tile", false, "Tile mode to create multiples sprites from a same image.")
+	tileIterationX = flag.Int("iterx",-1,"Number of tiles on a row in the input image.")
+	tileIterationY = flag.Int("itery",-1,"Number of tiles on a column in the input image.")
 	version         = "0.6Alpha"
 )
 
@@ -160,6 +162,8 @@ func main() {
 	exportType.RollIteration = *iterations
 	exportType.NoAmsdosHeader = *noAmsdosHeader
 	exportType.CpcPlus = *plusMode
+	exportType.TileIterationX = *tileIterationX
+	exportType.TileIterationY = *tileIterationY
 	if exportType.CpcPlus {
 		exportType.Ink = true
 		exportType.Pal = false
@@ -222,7 +226,12 @@ func main() {
 	}
 
 	if exportType.TileMode {
-		err := gfx.TileMode(exportType, uint8(*mode), *iterations, resizeAlgo)
+		if exportType.TileIterationX == -1 || exportType.TileIterationY == -1 {
+			fmt.Fprintf(os.Stderr,"missing arguments iterx and itery to use with tile mode.\n")
+			usage()
+			os.Exit(-1)
+		}
+		err := gfx.TileMode(exportType, uint8(*mode), exportType.TileIterationX, exportType.TileIterationY, resizeAlgo)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Tile mode on error : error :%v\n", err)
 			os.Exit(-1)

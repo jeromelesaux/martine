@@ -17,6 +17,8 @@ type ExportType struct {
 	TileMode       bool
 	RollMode       bool
 	RollIteration  int
+	TileIterationX int
+	TileIterationY int
 	Dsk            bool
 	Ink            bool
 	Pal            bool
@@ -28,6 +30,7 @@ type ExportType struct {
 	CpcPlus        bool
 	amsdosFilename []byte
 	DskFiles       []string
+	Tiles *JsonSlice 
 }
 
 func NewExportType(input, output string) *ExportType {
@@ -39,7 +42,8 @@ func NewExportType(input, output string) *ExportType {
 		InputPath:      input,
 		OutputPath:     output,
 		amsdosFilename: make([]byte, 8),
-		DskFiles:       make([]string, 0)}
+		DskFiles:       make([]string, 0),
+		Tiles: NewJsonSlice()}
 }
 
 func (e *ExportType) AddFile(file string) {
