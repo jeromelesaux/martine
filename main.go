@@ -170,8 +170,6 @@ func main() {
 		exportType.Ink = true
 	}
 	exportType.Dsk = *dsk
-	exportType.Width = size.Width
-	exportType.Height = size.Height
 
 	fmt.Fprintf(os.Stdout, "Informations :\n%s", size.ToString())
 

@@ -26,8 +26,6 @@ type ExportType struct {
 	Json           bool
 	Ascii          bool
 	CpcPlus        bool
-	Width          int
-	Height         int
 	amsdosFilename []byte
 	DskFiles       []string
 }
