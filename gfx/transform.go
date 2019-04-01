@@ -3,6 +3,7 @@ package gfx
 import (
 	"errors"
 	"fmt"
+	"github.com/jeromelesaux/martine/constants"
 	"image"
 	"image/color"
 	"os"
@@ -14,26 +15,26 @@ var (
 	ErrorModeNotFound      = errors.New("Mode not found or not implemented.")
 )
 
-func Transform(in *image.NRGBA, p color.Palette, size Size, filepath string, exportType *ExportType) error {
+func Transform(in *image.NRGBA, p color.Palette, size constants.Size, filepath string, exportType *ExportType) error {
 	switch size {
-	case Mode0:
+	case constants.Mode0:
 		return TransformMode0(in, p, size, filepath, exportType)
-	case Mode1:
+	case constants.Mode1:
 		return TransformMode1(in, p, size, filepath, exportType)
-	case Mode2:
+	case constants.Mode2:
 		return TransformMode2(in, p, size, filepath, exportType)
-	case OverscanMode0:
+	case constants.OverscanMode0:
 		return TransformMode0(in, p, size, filepath, exportType)
-	case OverscanMode1:
+	case constants.OverscanMode1:
 		return TransformMode1(in, p, size, filepath, exportType)
-	case OverscanMode2:
+	case constants.OverscanMode2:
 		return TransformMode2(in, p, size, filepath, exportType)
 	default:
 		return ErrorNotYetImplemented
 	}
 }
 
-func SpriteTransform(in *image.NRGBA, p color.Palette, size Size, mode uint8, filename string, exportType *ExportType) error {
+func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, exportType *ExportType) error {
 	var data []byte
 	firmwareColorUsed := make(map[int]int, 0)
 	size.Height = in.Bounds().Max.Y
@@ -323,7 +324,7 @@ func pixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) byte {
 	return pixel
 }
 
-func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath string, exportType *ExportType) error {
+func TransformMode0(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *ExportType) error {
 	var bw []byte
 	if exportType.Overscan {
 		bw = make([]byte, 0x8000)
@@ -405,7 +406,7 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size Size, filePath string
 	return Ascii(filePath, bw, p, exportType)
 }
 
-func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath string, exportType *ExportType) error {
+func TransformMode1(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *ExportType) error {
 	var bw []byte
 	if exportType.Overscan {
 		bw = make([]byte, 0x8000)
@@ -501,7 +502,7 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size Size, filePath string
 	return Ascii(filePath, bw, p, exportType)
 }
 
-func TransformMode2(in *image.NRGBA, p color.Palette, size Size, filePath string, exportType *ExportType) error {
+func TransformMode2(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *ExportType) error {
 	var bw []byte
 
 	if exportType.Overscan {

@@ -2,6 +2,7 @@ package gfx
 
 import (
 	"fmt"
+	"github.com/jeromelesaux/martine/constants"
 	"image"
 	"image/color"
 	"os"
@@ -11,7 +12,7 @@ import (
 	"strings"
 )
 
-func RollLeft(rla, sla, iterations int, screenMode uint8, size Size, downgraded *image.NRGBA, newPalette color.Palette, filename string, exportType *ExportType) {
+func RollLeft(rla, sla, iterations int, screenMode uint8, size constants.Size, downgraded *image.NRGBA, newPalette color.Palette, filename string, exportType *ExportType) {
 
 	// create downgraded palette image with rra pixels rotated
 	// and call n iterations spritetransform with this input generated image
@@ -56,7 +57,7 @@ func RollLeft(rla, sla, iterations int, screenMode uint8, size Size, downgraded 
 		}
 	}
 }
-func RollRight(rra, sra, iterations int, screenMode uint8, size Size, downgraded *image.NRGBA, newPalette color.Palette, filename string, exportType *ExportType) {
+func RollRight(rra, sra, iterations int, screenMode uint8, size constants.Size, downgraded *image.NRGBA, newPalette color.Palette, filename string, exportType *ExportType) {
 	if rra != -1 || sra != -1 {
 		fmt.Fprintf(os.Stdout, "RRA/SRA: Iterations (%d)\n", iterations)
 
@@ -99,7 +100,7 @@ func RollRight(rra, sra, iterations int, screenMode uint8, size Size, downgraded
 	}
 }
 
-func RollUp(keephigh, losthigh, iterations int, screenMode uint8, size Size, downgraded *image.NRGBA, newPalette color.Palette, filename string, exportType *ExportType) {
+func RollUp(keephigh, losthigh, iterations int, screenMode uint8, size constants.Size, downgraded *image.NRGBA, newPalette color.Palette, filename string, exportType *ExportType) {
 	if keephigh != -1 || losthigh != -1 {
 		fmt.Fprintf(os.Stdout, "keephigh/losthigh: Iterations (%d)\n", iterations)
 		for i := 0; i < iterations; i++ {
@@ -140,7 +141,7 @@ func RollUp(keephigh, losthigh, iterations int, screenMode uint8, size Size, dow
 	}
 }
 
-func RollLow(keeplow, lostlow, iterations int, screenMode uint8, size Size, downgraded *image.NRGBA, newPalette color.Palette, filename string, exportType *ExportType) {
+func RollLow(keeplow, lostlow, iterations int, screenMode uint8, size constants.Size, downgraded *image.NRGBA, newPalette color.Palette, filename string, exportType *ExportType) {
 	if keeplow != -1 || lostlow != -1 {
 		fmt.Fprintf(os.Stdout, "keeplow/lostlow: Iterations (%d)\n", iterations)
 		for i := 0; i < iterations; i++ {

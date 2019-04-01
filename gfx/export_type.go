@@ -1,6 +1,7 @@
 package gfx
 
 import (
+	"github.com/jeromelesaux/martine/constants"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -11,7 +12,9 @@ var amsdosFilenameOnce sync.Once
 type ExportType struct {
 	InputPath      string
 	OutputPath     string
+	Size           constants.Size
 	NoAmsdosHeader bool
+	TileMode       bool
 	RollMode       bool
 	RollIteration  int
 	Dsk            bool
@@ -33,19 +36,17 @@ func NewExportType(input, output string) *ExportType {
 }
 
 func (e *ExportType) AmsdosFilename() []byte {
-	amsdosFilenameOnce.Do(
-		func() {
-			for i:=0; i < 8 ; i++ {
-				e.amsdosFilename[i] =' '
-			}
-			file := strings.ToUpper(filepath.Base(e.InputPath))
-			filename := strings.TrimSuffix(file, filepath.Ext(file))
-			filenameSize := len(filename)
-			if filenameSize > 8 {
-				filenameSize = 8
-			}
-			copy(e.amsdosFilename[:], file[0:filenameSize])
-		})
+	for i := 0; i < 8; i++ {
+		e.amsdosFilename[i] = ' '
+	}
+	file := strings.ToUpper(filepath.Base(e.InputPath))
+	filename := strings.TrimSuffix(file, filepath.Ext(file))
+	filenameSize := len(filename)
+	if filenameSize > 8 {
+		filenameSize = 8
+	}
+	copy(e.amsdosFilename[:], file[0:filenameSize])
+
 	return e.amsdosFilename
 }
 
@@ -80,4 +81,10 @@ func (e *ExportType) OsFilename(ext string) string {
 	osFile := make([]byte, filenameSize)
 	copy(osFile, filename[0:filenameSize])
 	return string(osFile) + ext
+}
+
+func (e *ExportType) OsFullPath(filePath string, newExtension string) string {
+	filename := filepath.Base(filePath)
+	newFilename := strings.TrimSuffix(filename, filepath.Ext(filename)) + newExtension
+	return e.OutputPath + string(filepath.Separator) + newFilename
 }

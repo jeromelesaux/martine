@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/jeromelesaux/m4client/cpc"
+	"github.com/jeromelesaux/martine/constants"
 	"image/color"
 	"io"
 	"os"
@@ -101,7 +102,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, e
 		}
 	} else {
 		for i := 0; i < len(p); i++ {
-			v, err := HardwareValues(p[i])
+			v, err := constants.HardwareValues(p[i])
 			if err == nil {
 				o[(0x7f00-0x170)+i] = v[0]
 			} else {
@@ -210,7 +211,7 @@ func OpenPal(filePath string) (color.Palette, *OcpPalette, error) {
 
 	p := color.Palette{}
 	for _, v := range ocpPalette.PaletteColors {
-		c, err := ColorFromHardware(v[0])
+		c, err := constants.ColorFromHardware(v[0])
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Hardware color value %.2x is not recognized error :%v\n", v[0], err)
 		} else {
@@ -231,7 +232,7 @@ func Pal(filePath string, p color.Palette, screenMode uint8, exportType *ExportT
 	}
 	fmt.Fprintf(os.Stdout, "Palette size %d\n", len(p))
 	for i := 0; i < len(p); i++ {
-		v, err := HardwareValues(p[i])
+		v, err := constants.HardwareValues(p[i])
 		if err == nil {
 			for j := 0; j < 12; j++ {
 				data.PaletteColors[i][j] = v[0]
@@ -299,7 +300,8 @@ func OpenWin(filePath string) (*OcpWinFooter, error) {
 }
 
 func Win(filePath string, data []byte, screenMode uint8, width, height int, exportType *ExportType) error {
-	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", filePath, screenMode, width, height)
+	osFilepath := exportType.OsFullPath(filePath, ".WIN")
+	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", osFilepath, screenMode, width, height)
 	win := OcpWinFooter{Unused: 3, Height: byte(height), Unused2: 0, Width: uint16(width * 8)}
 	filesize := binary.Size(data) + binary.Size(win)
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x4000, Exec: 0x4000,
@@ -314,9 +316,10 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, expo
 	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	fmt.Fprintf(os.Stderr, "Data length %d\n", binary.Size(data))
 	fmt.Fprintf(os.Stderr, "Footer length %d\n", binary.Size(win))
-	fw, err := os.Create(exportType.OutputPath + string(filepath.Separator) + cpcFilename)
+	osFilename := exportType.Fullpath(".WIN")
+	fw, err := os.Create(osFilepath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilename, err)
 		return err
 	}
 	fmt.Fprintf(os.Stdout, "%s, data size :%d\n", win.ToString(), len(data))

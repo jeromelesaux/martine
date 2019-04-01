@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/jeromelesaux/m4client/cpc"
+	"github.com/jeromelesaux/martine/constants"
 	"image/color"
 	"os"
 	"path/filepath"
@@ -31,7 +32,7 @@ var (
 func Loader(filePath string, p color.Palette, exportType *ExportType) error {
 	var out string
 	for i := 0; i < len(p); i++ {
-		v, err := FirmwareNumber(p[i])
+		v, err := constants.FirmwareNumber(p[i])
 		if err == nil {
 			out += fmt.Sprintf("%0.2d", v)
 		} else {

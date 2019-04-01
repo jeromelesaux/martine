@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/disintegration/imaging"
+	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/gfx"
 	"image"
@@ -40,6 +41,7 @@ var (
 	info            = flag.Bool("info", false, "Return the information of the file, associated with -pal and -win options")
 	winPath         = flag.String("win", "", "Filepath of the ocp win file")
 	dsk             = flag.Bool("dsk", false, "Copy files in a new CPC image Dsk.")
+	tileMode        = flag.Bool("tile", false, "Tile mode to create multiples sprites from a same image.")
 	version         = "0.6Alpha"
 )
 
@@ -53,7 +55,7 @@ func usage() {
 }
 
 func main() {
-	var size gfx.Size
+	var size constants.Size
 	var filename, extension string
 	var customDimension bool
 	var screenMode uint8
@@ -105,22 +107,22 @@ func main() {
 	}
 	switch *mode {
 	case 0:
-		size = gfx.Mode0
+		size = constants.Mode0
 		screenMode = 0
 		if *overscan {
-			size = gfx.OverscanMode0
+			size = constants.OverscanMode0
 		}
 	case 1:
-		size = gfx.Mode1
+		size = constants.Mode1
 		screenMode = 1
 		if *overscan {
-			size = gfx.OverscanMode1
+			size = constants.OverscanMode1
 		}
 	case 2:
 		screenMode = 2
-		size = gfx.Mode2
+		size = constants.Mode2
 		if *overscan {
-			size = gfx.OverscanMode2
+			size = constants.OverscanMode2
 		}
 	default:
 		if *height == -1 && *width == -1 {
@@ -152,6 +154,8 @@ func main() {
 	if *byteStatement != "" {
 		gfx.ByteToken = *byteStatement
 	}
+	exportType.Size = size
+	exportType.TileMode = *tileMode
 	exportType.RollMode = *rollMode
 	exportType.RollIteration = *iterations
 	exportType.NoAmsdosHeader = *noAmsdosHeader
@@ -219,6 +223,15 @@ func main() {
 		resizeAlgo = imaging.NearestNeighbor
 	}
 
+	if exportType.TileMode {
+		err := gfx.TileMode(exportType, uint8(*mode), *iterations, resizeAlgo)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Tile mode on error : error :%v\n", err)
+			os.Exit(-1)
+		}
+		os.Exit(0)
+	}
+
 	if *palettePath != "" {
 		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", *palettePath)
 		palette, _, err = gfx.OpenPal(*palettePath)
@@ -240,7 +253,7 @@ func main() {
 	if len(palette) > 0 {
 		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
 	} else {
-		newPalette, downgraded, err = convert.DowngradingPalette(out, size, *plusMode)
+		newPalette, downgraded, err = convert.DowngradingPalette(out, size, exportType.CpcPlus)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
 		}
