@@ -20,9 +20,8 @@ To get binary :
 Usage and options : 
 
 ```
-./martine 
 martine convert (jpeg, png format) image to Amstrad cpc screen (even overscan)
-By Impact Sid (Version:0.6Alpha)
+By Impact Sid (Version:0.6)
 Special thanks to @Ast (for his support), @Siko and @Tronic for ideas
 usage :
 
@@ -55,7 +54,11 @@ usage :
   -info
     	Return the information of the file, associated with -pal and -win options
   -iter int
-    	Iterations number to walk in tile mode (default -1)
+    	Iterations number to walk in roll mode (default -1)
+  -iterx int
+    	Number of tiles on a row in the input image. (default -1)
+  -itery int
+    	Number of tiles on a column in the input image. (default -1)
   -keephigh int
     	bit rotation on the top and keep pixels (default -1)
   -keeplow int
@@ -97,8 +100,14 @@ usage :
     	Filepath of the ocp win file
 ```
 
-examples :
+Principles : 
+Martine can be used in 3 modes : 
+ * first mode : conversion of an input image into sprite (file .win), cpc screen (file .scr) and overscan screen (larger file .scr)
+ * second mode : rotate line or column pixels of an input image (option -roll)
+ * bulk conversion of a tiles page : each sprites of the same width and height will be converted to sprites (files .win, option -tile)
 
+examples :
+## 1. Screen conversion :
 * convert samples/Batman-Neal-Adams.jpg 
 
   * in mode 0 
@@ -133,8 +142,28 @@ input ![samples/Batman-Neal-Adams.jpg](samples/Batman-Neal-Adams.jpg)
 
  ![result](samples/overscan-batman.png)
 
+ files generated : 
+ * .win or .scr sprite or screen files
+ * .pal or .ink palette file (.ink will be generated if the -p option is set)
+ * .txt ascii file with palettes values (firmware values and basic values), and screen byte values
+ * .json json file with palettes values (firmware values and basic values), and screen byte values
+ * .bas launch to test the screen load on classic .scr 17ko 
+ * _resized.png images files to ensure the resize action
+ * _downgraded.ong images files to ensure the downgraded palette action
 
-Samples roll usage : 
+additionnals options available : 
+* -dsk will generate a dsk file and add all amsdos files will be added.
+* -n will remove amsdos headers from the amsdos files
+* -f will generate overscan screen amsdos file
+* -p will generate a CPC plus screen amsdos file
+* -h will generate sprite of x pixel high
+* -w will generate sprite of x pixel wide
+* -s to define the byte token will be replace the byte token in the ascii files
+* -a to set the algorithm to downsize the image
+* -m to define the screen mode 0,1,2
+* -o to set the output directory
+
+## 2. Samples roll usage : 
 
 ```martine -i samples/rotate.png -m 0 -w 16 -h 16 -roll -rra 1 -iter 16```
 
@@ -160,3 +189,57 @@ after rotate the first pixels' column in 16 differents images :
  ![13rotate.png](samples/13rotate.png)
  ![14rotate.png](samples/14rotate.png)
  ![15rotate.png](samples/15rotate.png)
+
+ with the same image, to rotate the pixels line : 
+
+ ```martine -i samples/rotate.png -m 0 -w 16 -h 16 -roll -keephigh 2 -iter 16 ```
+
+ will produce images : 
+
+  ![0rotate.png](samples/0rotate_keephigh.png)
+ ![1rotate.png](samples/1rotate_keephigh.png)
+ ![2rotate.png](samples/2rotate_keephigh.png)
+ ![3rotate.png](samples/3rotate_keephigh.png)
+ ![4rotate.png](samples/4rotate_keephigh.png)
+ ![5rotate.png](samples/5rotate_keephigh.png)
+ ![6rotate.png](samples/6rotate_keephigh.png)
+ ![7rotate.png](samples/7rotate_keephigh.png)
+ ![8rotate.png](samples/8rotate_keephigh.png)
+ ![9rotate.png](samples/9rotate_keephigh.png)
+ ![10rotate.png](samples/10rotate_keephigh.png)
+ ![11rotate.png](samples/11rotate_keephigh.png)
+ ![12rotate.png](samples/12rotate_keephigh.png)
+ ![13rotate.png](samples/13rotate_keephigh.png)
+ ![14rotate.png](samples/14rotate_keephigh.png)
+ ![15rotate.png](samples/15rotate_keephigh.png)
+
+ files generated : 
+ * .win sprite files
+ * .pal or .ink palette file (.ink will be generated if the -p option is set)
+ * .txt ascii file with palettes values (firmware values and basic values), and screen byte values
+ * .json json file with palettes values (firmware values and basic values), and screen byte values
+*  _resized.png images files to ensure the resize action
+ * _downgraded.ong images files to ensure the downgraded palette action
+
+additionnals options available : 
+* -dsk will generate a dsk file and add all amsdos files will be added.
+* -n will remove amsdos headers from the amsdos files
+* -f will generate overscan screen amsdos file
+* -p will generate a CPC plus screen amsdos file
+* -h will generate sprite of x pixel high
+* -w will generate sprite of x pixel wide
+* -m to define the screen mode 0,1,2
+* -o to set the output directory
+* -sla will rotate x column pixels from the left, those columns will be discarded  
+* -sra will rotate x column pixels from the right, those columns will be discarded  
+* -rra will rotate x column pixels from the right
+* -rla will rotate x column pixels from the left
+* -keephigh will rotate x line pixels to the top
+* -keeplow will rotate x line pixels to the bottom
+* -losthigh will rotate x line pixels to the top, those lines will be discarded 
+* -lostlow will rotate x line pixels to the bottom, those lines will be discarded
+* -s to define the byte token will be replace the byte token in the ascii files
+* -a to set the algorithm to downsize the image
+
+## 3. tile option :
+
