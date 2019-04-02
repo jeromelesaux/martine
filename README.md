@@ -218,7 +218,7 @@ after rotate the first pixels' column in 16 differents images :
  * .pal or .ink palette file (.ink will be generated if the -p option is set)
  * .txt ascii file with palettes values (firmware values and basic values), and screen byte values
  * .json json file with palettes values (firmware values and basic values), and screen byte values
-*  _resized.png images files to ensure the resize action
+ *  _resized.png images files to ensure the resize action
  * _downgraded.ong images files to ensure the downgraded palette action
 
 additionnals options available : 
@@ -243,3 +243,53 @@ additionnals options available :
 
 ## 3. tile option :
 
+this option will extract all the tiles from an image and generate the sprites files. 
+sample usage : 
+```martine -i samples/tiles.png -tile -w 64 -iterx 14 -itery 7 -m 0 ```
+
+input ![samples/rotate.png](samples/tiles.png)
+
+This command will generate 14*7 sprites of 64 pixels large.
+Warn, all sprite must have the same size.
+
+ ![0rotate.png](samples/TILES_resized_0.png)
+ ![1rotate.png](samples/TILES_resized_1.png)
+ ![2rotate.png](samples/TILES_resized_2.png)
+ ![3rotate.png](samples/TILES_resized_3.png)
+ ![4rotate.png](samples/TILES_resized_4.png)
+ ![5rotate.png](samples/TILES_resized_5.png)
+ ![6rotate.png](samples/TILES_resized_6.png)
+ ![7rotate.png](samples/TILES_resized_7.png)
+ ![8rotate.png](samples/TILES_resized_8.png)
+ ![9rotate.png](samples/TILES_resized_9.png)
+ ![10rotate.png](samples/TILES_resized_10.png)
+ ![11rotate.png](samples/TILES_resized_11.png)
+ ![12rotate.png](samples/TILES_resized_12.png)
+ ![13rotate.png](samples/TILES_resized_13.png)
+ ![14rotate.png](samples/TILES_resized_14.png)
+ ![15rotate.png](samples/TILES_resized_15.png)
+ ![10rotate.png](samples/TILES_resized_16.png)
+ ![11rotate.png](samples/TILES_resized_17.png)
+ ![12rotate.png](samples/TILES_resized_18.png)
+ ![13rotate.png](samples/TILES_resized_19.png)
+ ![14rotate.png](samples/TILES_resized_20.png)
+
+  files generated : 
+ * .win sprite files
+ * .pal or .ink palette file (.ink will be generated if the -p option is set)
+ * .txt ascii file with palettes values (firmware values and basic values), and screen byte values
+ * .json json file with palettes values (firmware values and basic values), and screen byte values
+ *  _resized.png images files to ensure the resize action
+ * _downgraded.ong images files to ensure the downgraded palette action
+
+additionnals options available : 
+* -dsk will generate a dsk file and add all amsdos files will be added.
+* -n will remove amsdos headers from the amsdos files
+* -f will generate overscan screen amsdos file
+* -p will generate a CPC plus screen amsdos file
+* -h will generate sprite of x pixel high
+* -w will generate sprite of x pixel wide
+* -m to define the screen mode 0,1,2
+* -o to set the output directory
+* -s to define the byte token will be replace the byte token in the ascii files
+* -a to set the algorithm to downsize the image
