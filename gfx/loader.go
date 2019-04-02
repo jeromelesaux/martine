@@ -45,7 +45,7 @@ func Loader(filePath string, p color.Palette, exportType *ExportType) error {
 
 	var loader []byte
 	loader = BasicLoader
-	copy(loader[startPaletteValues:], out[0:len(out)-1])
+	copy(loader[startPaletteValues:], out[0:len(out)])
 	filename := exportType.AmsdosFilename()
 	copy(loader[startPaletteName:], filename[:])
 	copy(loader[startScreenName:], filename[:])
