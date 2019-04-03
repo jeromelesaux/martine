@@ -30,8 +30,8 @@ func TileMode(exportType *ExportType, mode uint8, iterationX, iterationY int, al
 	width := in.Bounds().Max.X
 	height := in.Bounds().Max.Y
 
-	factorX := width / iterationX + 1
-	factorY := height / iterationY + 1
+	factorX := width/iterationX + 1
+	factorY := height/iterationY + 1
 
 	if factorX != factorY {
 		fmt.Fprintf(os.Stdout, "factor x (%d) differs from factor y (%d)\n", factorX, factorY)
@@ -77,7 +77,6 @@ func TileMode(exportType *ExportType, mode uint8, iterationX, iterationY int, al
 			index++
 		}
 	}
-
 
 	return exportType.Tiles.Save(exportType.Fullpath(".json"))
 }

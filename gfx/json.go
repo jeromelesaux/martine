@@ -28,7 +28,7 @@ func NewJson(label string, width int, height int, screen []string, palette []str
 }
 
 func NewJsonSlice() *JsonSlice {
-	return &JsonSlice{Sprites:make([]*Json,0)}
+	return &JsonSlice{Sprites: make([]*Json, 0)}
 }
 
 func (j *Json) Save(file string) error {
@@ -40,7 +40,7 @@ func (j *Json) Save(file string) error {
 	return json.NewEncoder(fw).Encode(j)
 }
 
-func (j *JsonSlice)Save(file string) error {
+func (j *JsonSlice) Save(file string) error {
 	fw, err := os.Create(file)
 	if err != nil {
 		return err

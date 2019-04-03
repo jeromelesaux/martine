@@ -44,6 +44,7 @@ var (
 	tileMode        = flag.Bool("tile", false, "Tile mode to create multiples sprites from a same image.")
 	tileIterationX = flag.Int("iterx",-1,"Number of tiles on a row in the input image.")
 	tileIterationY = flag.Int("itery",-1,"Number of tiles on a column in the input image.")
+	compress =flag.Int("z",-1,"Compression algorithm : \n1: rle (default)\n")
 	version         = "0.7"
 )
 
@@ -164,6 +165,7 @@ func main() {
 	exportType.CpcPlus = *plusMode
 	exportType.TileIterationX = *tileIterationX
 	exportType.TileIterationY = *tileIterationY
+	exportType.Compression = *compress
 	if exportType.CpcPlus {
 		exportType.Ink = true
 		exportType.Pal = false

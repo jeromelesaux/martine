@@ -21,6 +21,10 @@ type CpcColor struct {
 	Color          color.RGBA
 }
 
+const (
+	Rle = iota
+)
+
 func (s *Size) ToString() string {
 	return fmt.Sprintf("Size:\nWidth (%d) pixels\nHigh (%d) pixels\nNumber of lines (%d)\nNumber of columns (%d)\nColors available in this mode (%d)\n",
 		s.Width,

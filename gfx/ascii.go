@@ -141,7 +141,7 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *ExportType
 		j := NewJson(exportType.Filename(), exportType.Size.Width, exportType.Size.Height, screen, palette)
 		fmt.Fprintf(os.Stdout, "Filepath:%s\n", filePath)
 		if exportType.TileMode {
-			exportType.Tiles.Sprites = append(exportType.Tiles.Sprites,j)
+			exportType.Tiles.Sprites = append(exportType.Tiles.Sprites, j)
 			return nil
 		} else {
 			return j.Save(exportType.OsFullPath(filePath, ".json"))

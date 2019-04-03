@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/rle"
 	"image/color"
 	"io"
 	"os"
@@ -149,6 +150,9 @@ func Ink(filePath string, p color.Palette, screenMode uint8, exportType *ExportT
 func Scr(filePath string, data []byte, exportType *ExportType) error {
 	osFilepath := exportType.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving SCR file (%s)\n", osFilepath)
+	if exportType.Compression != -1 {
+		data = rle.Encode(data)
+	}
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0xc000, Exec: 0xC7D0,
 		Size:        uint16(binary.Size(data)),
 		Size2:       uint16(binary.Size(data)),
