@@ -149,3 +149,120 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *ExportType
 	}
 	return nil
 }
+
+func AsciiByColumn(filePath string, data []byte, p color.Palette, exportType *ExportType) error {
+	eol := "\n"
+	if runtime.GOOS == "windows" {
+		eol = "\r\n"
+	}
+
+	var out string
+	var i int
+
+	cpcFilename := string(exportType.AmsdosFilename()) + "C.TXT"
+	osFilepath := exportType.AmsdosFullPath(filePath, "C.TXT")
+	fmt.Fprintf(os.Stdout, "Writing ascii file (%s) values by columns data length (%d)\n", osFilepath, len(data))
+	out += "; Screen by column " + cpcFilename + eol + ".screen:" + eol
+	pas := exportType.Size.Width
+	h := 0
+	nbValues := 1
+	octetsRead := 0
+	for {
+
+		if nbValues == 1 {
+			out += fmt.Sprintf("%s ", ByteToken)
+		}
+		out += fmt.Sprintf("#%0.2x", data[i])
+		nbValues++
+
+		i += pas
+		octetsRead++
+		if nbValues < 8 && octetsRead != len(data) {
+			out += " ,"
+		}
+		if octetsRead == len(data) {
+			break
+		}
+
+		if i >= len(data) {
+			h++
+			i = h
+		}
+
+		if nbValues == 8 {
+			out += eol
+			nbValues = 1
+		}
+	}
+	out += eol
+	out += "; Palette " + cpcFilename + eol + ".palette:" + eol + ByteToken + " "
+
+	if exportType.CpcPlus {
+		for i := 0; i < len(p); i++ {
+			cp := NewCpcPlusColor(p[i])
+			v := cp.Value()
+			out += fmt.Sprintf("#%.2x, #%.2x", byte(v), byte(v>>8))
+			if (i+1)%8 == 0 && i+1 < len(p) {
+				out += eol + ByteToken + " "
+			} else {
+				if i+1 < len(p) {
+					out += ", "
+				}
+			}
+		}
+	} else {
+		for i := 0; i < len(p); i++ {
+			v, err := constants.HardwareValues(p[i])
+			if err == nil {
+				out += fmt.Sprintf("#%0.2x", v[0])
+				if (i+1)%8 == 0 && i+1 < len(p) {
+					out += eol + ByteToken + " "
+				} else {
+					if i+1 < len(p) {
+						out += ", "
+					}
+				}
+			} else {
+				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
+			}
+		}
+		out += eol + "; Basic Palette " + cpcFilename + eol + ".basic_palette:" + eol + ByteToken + " "
+		for i := 0; i < len(p); i++ {
+			v, err := constants.FirmwareNumber(p[i])
+			if err == nil {
+				out += fmt.Sprintf("%0.2d", v)
+				if (i+1)%8 == 0 && i+1 < len(p) {
+					out += eol + ByteToken + " "
+				} else {
+					if i+1 < len(p) {
+						out += ", "
+					}
+				}
+			} else {
+				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
+			}
+		}
+		out += eol
+	}
+	//fmt.Fprintf(os.Stdout,"%s",out)
+	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x0, Exec: 0x0,
+		Size:        uint16(len(out)),
+		Size2:       uint16(len(out)),
+		LogicalSize: uint16(len(out))}
+
+	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
+	header.Checksum = uint16(header.ComputedChecksum16())
+	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
+	fw, err := os.Create(osFilepath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
+		return err
+	}
+	if !exportType.NoAmsdosHeader {
+		binary.Write(fw, binary.LittleEndian, header)
+	}
+	binary.Write(fw, binary.LittleEndian, []byte(out))
+	fw.Close()
+	exportType.AddFile(osFilepath)
+	return nil
+}

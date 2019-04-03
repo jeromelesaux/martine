@@ -206,7 +206,10 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 		return err
 	}
-	return Ascii(filename, data, p, exportType)
+	if err := Ascii(filename, data, p, exportType); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while saving ascii file for (%s) error :%v\n", filename, err)
+	}
+	return AsciiByColumn(filename, data, p, exportType)
 }
 
 func PalettePosition(c color.Color, p color.Palette) (int, error) {

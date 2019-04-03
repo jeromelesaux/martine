@@ -151,6 +151,7 @@ func Scr(filePath string, data []byte, exportType *ExportType) error {
 	osFilepath := exportType.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving SCR file (%s)\n", osFilepath)
 	if exportType.Compression != -1 {
+		fmt.Fprintf(os.Stdout, "Using RLE compression\n")
 		data = rle.Encode(data)
 	}
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0xc000, Exec: 0xC7D0,
