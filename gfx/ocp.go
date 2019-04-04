@@ -30,6 +30,20 @@ type CpcPlusColor struct {
 	B uint16
 }
 
+func NewRawCpcPlusColor( v uint16) *CpcPlusColor {
+	c := &CpcPlusColor{}
+	c.B = v & 0xf   //1111
+	c.R = (v - c.B) / 16
+	c.G = v - c.B / 256
+	
+	
+	return c
+}
+
+func (c *CpcPlusColor)ToString() string {
+	return fmt.Sprintf("R:%.2b,G:%.2b,B:%.2b",c.R,c.G,c.B)
+}
+
 func (c *CpcPlusColor) Value() uint16 {
 	fmt.Fprintf(os.Stderr, "value(%d,%d,%d) #%.4x : %d\n", c.R, c.G, c.B,
 		c.B|c.R<<4|c.G<<8,
