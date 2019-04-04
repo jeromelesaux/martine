@@ -155,7 +155,7 @@ input ![samples/Batman-Neal-Adams.jpg](samples/Batman-Neal-Adams.jpg)
  * .json json file with palettes values (firmware values and basic values), and screen byte values
  * .bas launch to test the screen load on classic .scr 17ko 
  * _resized.png images files to ensure the resize action
- * _downgraded.ong images files to ensure the downgraded palette action
+ * _downgraded.png images files to ensure the downgraded palette action
 
 additionnals options available : 
 * -dsk will generate a dsk file and add all amsdos files will be added.
@@ -168,7 +168,7 @@ additionnals options available :
 * -a to set the algorithm to downsize the image
 * -m to define the screen mode 0,1,2
 * -o to set the output directory
-* -z compress the image .scr (not overscan) using the algorithm
+* -z compress the image .scr / .win (not overscan) using the algorithm
 
 ## 2. Samples roll usage : 
 
@@ -227,7 +227,7 @@ after rotate the first pixels' column in 16 differents images :
  *  c.txt ascii file with palettes values (firmware values and basic values), and screen byte values by column
  * .json json file with palettes values (firmware values and basic values), and screen byte values
  *  _resized.png images files to ensure the resize action
- * _downgraded.ong images files to ensure the downgraded palette action
+ * _downgraded.png images files to ensure the downgraded palette action
 
 additionnals options available : 
 * -dsk will generate a dsk file and add all amsdos files will be added.
@@ -248,7 +248,7 @@ additionnals options available :
 * -lostlow will rotate x line pixels to the bottom, those lines will be discarded
 * -s to define the byte token will be replace the byte token in the ascii files
 * -a to set the algorithm to downsize the image
-* -z compress the image .scr (not overscan) using the algorithm
+* -z compress the image .scr / .win (not overscan) using the algorithm
 
 ## 3. tile option :
 
@@ -290,7 +290,7 @@ Warn, all sprite must have the same size.
  *  c.txt ascii file with palettes values (firmware values and basic values), and screen byte values by column
  * .json json file with palettes values (firmware values and basic values), and screen byte values
  *  _resized.png images files to ensure the resize action
- * _downgraded.ong images files to ensure the downgraded palette action
+ * _downgraded.png images files to ensure the downgraded palette action
 
 additionnals options available : 
 * -dsk will generate a dsk file and add all amsdos files will be added.
@@ -303,4 +303,4 @@ additionnals options available :
 * -o to set the output directory
 * -s to define the byte token will be replace the byte token in the ascii files
 * -a to set the algorithm to downsize the image
-* -z compress the image .scr (not overscan) using the algorithm
+* -z compress the image .scr / .win (not overscan) using the algorithm
