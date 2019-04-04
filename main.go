@@ -3,16 +3,17 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/disintegration/imaging"
-	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
-	"github.com/jeromelesaux/martine/gfx"
 	"image"
 	"image/color"
 	_ "image/jpeg"
 	_ "image/png"
 	"os"
 	"path/filepath"
+
+	"github.com/disintegration/imaging"
+	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/convert"
+	"github.com/jeromelesaux/martine/gfx"
 )
 
 var (
@@ -45,7 +46,7 @@ var (
 	tileIterationX  = flag.Int("iterx", -1, "Number of tiles on a row in the input image.")
 	tileIterationY  = flag.Int("itery", -1, "Number of tiles on a column in the input image.")
 	compress        = flag.Int("z", -1, "Compression algorithm : \n\t1: rle (default)\n\t2: rle 16bits\n")
-	version         = "0.9"
+	version         = "0.10"
 )
 
 func usage() {
