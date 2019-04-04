@@ -23,8 +23,14 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *ExportType
 	var out string
 	var i int
 	if exportType.Compression != -1 {
-		fmt.Fprintf(os.Stdout, "Using RLE compression\n")
-		data = rle.Encode(data)
+		switch exportType.Compression {
+		case 1:
+			fmt.Fprintf(os.Stdout, "Using RLE compression\n")
+			data = rle.Encode(data)
+		case 2:
+			fmt.Fprintf(os.Stdout, "Using RLE 16 bits compression\n")
+			data = rle.Encode16(data)
+		}
 	}
 	cpcFilename := string(exportType.AmsdosFilename()) + ".TXT"
 	osFilepath := exportType.AmsdosFullPath(filePath, ".TXT")

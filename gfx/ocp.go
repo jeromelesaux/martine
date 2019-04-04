@@ -151,8 +151,14 @@ func Scr(filePath string, data []byte, exportType *ExportType) error {
 	osFilepath := exportType.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving SCR file (%s)\n", osFilepath)
 	if exportType.Compression != -1 {
-		fmt.Fprintf(os.Stdout, "Using RLE compression\n")
-		data = rle.Encode(data)
+		switch exportType.Compression {
+		case 1:
+			fmt.Fprintf(os.Stdout, "Using RLE compression\n")
+			data = rle.Encode(data)
+		case 2:
+			fmt.Fprintf(os.Stdout, "Using RLE 16 bits compression\n")
+			data = rle.Encode16(data)
+		}
 	}
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0xc000, Exec: 0xC7D0,
 		Size:        uint16(binary.Size(data)),
@@ -313,8 +319,14 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, expo
 	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", osFilepath, screenMode, width, height)
 	win := OcpWinFooter{Unused: 3, Height: byte(height), Unused2: 0, Width: uint16(width * 8)}
 	if exportType.Compression != -1 {
-		fmt.Fprintf(os.Stdout, "Using RLE compression\n")
-		data = rle.Encode(data)
+		switch exportType.Compression {
+		case 1:
+			fmt.Fprintf(os.Stdout, "Using RLE compression\n")
+			data = rle.Encode(data)
+		case 2:
+			fmt.Fprintf(os.Stdout, "Using RLE 16 bits compression\n")
+			data = rle.Encode16(data)
+		}
 	}
 	filesize := binary.Size(data) + binary.Size(win)
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x4000, Exec: 0x4000,

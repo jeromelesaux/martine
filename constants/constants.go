@@ -23,6 +23,7 @@ type CpcColor struct {
 
 const (
 	Rle = iota
+	Rle16
 )
 
 func (s *Size) ToString() string {
