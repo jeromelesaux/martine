@@ -2,9 +2,9 @@ package rle
 
 import (
 	"bytes"
+	"encoding/binary"
 	"fmt"
 	"os"
-	"encoding/binary"
 )
 
 func Encode(in []byte) []byte {
@@ -16,7 +16,23 @@ func Encode(in []byte) []byte {
 		d = in[i]
 		switch {
 		case d != c: // valeurs differentes
-			if nb > 1 {
+
+			if nb > 255 {
+				for j := 0; j < (nb / 255); j++ {
+					out = append(out, 255)
+					out = append(out, c)
+				}
+				out = append(out, uint8(nb%255))
+				out = append(out, c)
+			} else {
+				out = append(out, uint8(nb))
+				out = append(out, c)
+			}
+
+			nb = 1
+			c = d
+			if i+1 == binary.Size(in) {
+
 				if nb > 255 {
 					for j := 0; j < (nb / 255); j++ {
 						out = append(out, 255)
@@ -28,23 +44,7 @@ func Encode(in []byte) []byte {
 					out = append(out, uint8(nb))
 					out = append(out, c)
 				}
-			}
-			nb = 1
-			c = d
-			if i+1 == binary.Size(in) {
-				if nb > 1 {
-					if nb > 255 {
-						for j := 0; j < (nb / 255); j++ {
-							out = append(out, 255)
-							out = append(out, c)
-						}
-						out = append(out, uint8(nb%255))
-						out = append(out, c)
-					} else {
-						out = append(out, uint8(nb))
-						out = append(out, c)
-					}
-				}
+
 			}
 		default:
 			nb++
@@ -78,8 +78,8 @@ func Encode16(in []byte) []byte {
 		case d != c: // valeurs differentes
 
 			buf := new(bytes.Buffer)
-			if err:=binary.Write(buf, binary.LittleEndian, nb); err != nil {
-				fmt.Fprintf(os.Stderr,"Error while copying in byte buffer error :%v\n",err)
+			if err := binary.Write(buf, binary.LittleEndian, nb); err != nil {
+				fmt.Fprintf(os.Stderr, "Error while copying in byte buffer error :%v\n", err)
 			}
 			out = append(out, buf.Bytes()...)
 			out = append(out, c)
@@ -88,8 +88,8 @@ func Encode16(in []byte) []byte {
 			c = d
 			if i+1 == binary.Size(in) {
 				buf := new(bytes.Buffer)
-				if err:=binary.Write(buf, binary.LittleEndian, nb); err != nil {
-					fmt.Fprintf(os.Stderr,"Error while copying in byte buffer error :%v\n",err)
+				if err := binary.Write(buf, binary.LittleEndian, nb); err != nil {
+					fmt.Fprintf(os.Stderr, "Error while copying in byte buffer error :%v\n", err)
 				}
 				out = append(out, buf.Bytes()...)
 				out = append(out, c)
@@ -101,8 +101,8 @@ func Encode16(in []byte) []byte {
 	}
 	if nb > 1 {
 		buf := new(bytes.Buffer)
-		if err:=binary.Write(buf, binary.LittleEndian, nb); err != nil {
-			fmt.Fprintf(os.Stderr,"Error while copying in byte buffer error :%v\n",err)
+		if err := binary.Write(buf, binary.LittleEndian, nb); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while copying in byte buffer error :%v\n", err)
 		}
 		out = append(out, buf.Bytes()...)
 		out = append(out, c)

@@ -23,5 +23,8 @@ func TestRleEncode(t *testing.T) {
 		0x50,
 		0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30}
 	out = Encode(in)
+	if len(out) != 12 {
+		t.Fatalf("Expected 12 elements and gets %d\n", len(out))
+	}
 	t.Log(out)
 }

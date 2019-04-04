@@ -3,6 +3,7 @@ package gfx
 import (
 	"github.com/jeromelesaux/martine/constants"
 	"testing"
+	"os"
 )
 
 func TestAsciiByColumn(t *testing.T) {
@@ -16,5 +17,9 @@ func TestAsciiByColumn(t *testing.T) {
 	e := NewExportType("input.bin", "./")
 	e.Size.Height = 5
 	e.Size.Width = 5
-	AsciiByColumn("test.bin", data, constants.CpcOldPalette, e)
+	err := AsciiByColumn("test.bin", data, constants.CpcOldPalette, e)
+	if err != nil {
+		t.Fatalf("expected no error and gets :%v",err)
+	}
+	os.Remove("TESTC.TXT")
 }
