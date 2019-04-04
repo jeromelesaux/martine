@@ -42,10 +42,10 @@ var (
 	winPath         = flag.String("win", "", "Filepath of the ocp win file")
 	dsk             = flag.Bool("dsk", false, "Copy files in a new CPC image Dsk.")
 	tileMode        = flag.Bool("tile", false, "Tile mode to create multiples sprites from a same image.")
-	tileIterationX = flag.Int("iterx",-1,"Number of tiles on a row in the input image.")
-	tileIterationY = flag.Int("itery",-1,"Number of tiles on a column in the input image.")
-	compress =flag.Int("z",-1,"Compression algorithm : \n\t1: rle (default)\n\t2: rle 16bits\n")
-	version         = "0.7"
+	tileIterationX  = flag.Int("iterx", -1, "Number of tiles on a row in the input image.")
+	tileIterationY  = flag.Int("itery", -1, "Number of tiles on a column in the input image.")
+	compress        = flag.Int("z", -1, "Compression algorithm : \n\t1: rle (default)\n\t2: rle 16bits\n")
+	version         = "0.8"
 )
 
 func usage() {
@@ -229,7 +229,7 @@ func main() {
 
 	if exportType.TileMode {
 		if exportType.TileIterationX == -1 || exportType.TileIterationY == -1 {
-			fmt.Fprintf(os.Stderr,"missing arguments iterx and itery to use with tile mode.\n")
+			fmt.Fprintf(os.Stderr, "missing arguments iterx and itery to use with tile mode.\n")
 			usage()
 			os.Exit(-1)
 		}

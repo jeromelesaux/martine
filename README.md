@@ -21,7 +21,7 @@ Usage and options :
 
 ```
 martine convert (jpeg, png format) image to Amstrad cpc screen (even overscan)
-By Impact Sid (Version:0.6)
+By Impact Sid (Version:0.8)
 Special thanks to @Ast (for his support), @Siko and @Tronic for ideas
 usage :
 
@@ -98,6 +98,11 @@ usage :
     	Custom output width in pixels. (default -1)
   -win string
     	Filepath of the ocp win file
+  -z int
+    	Compression algorithm : 
+    		1: rle (default)
+    		2: rle 16bits
+    	 (default -1)
 ```
 
 Principles : 
@@ -146,6 +151,7 @@ input ![samples/Batman-Neal-Adams.jpg](samples/Batman-Neal-Adams.jpg)
  * .win or .scr sprite or screen files
  * .pal or .ink palette file (.ink will be generated if the -p option is set)
  * .txt ascii file with palettes values (firmware values and basic values), and screen byte values
+ *  c.txt ascii file with palettes values (firmware values and basic values), and screen byte values by column
  * .json json file with palettes values (firmware values and basic values), and screen byte values
  * .bas launch to test the screen load on classic .scr 17ko 
  * _resized.png images files to ensure the resize action
@@ -162,6 +168,7 @@ additionnals options available :
 * -a to set the algorithm to downsize the image
 * -m to define the screen mode 0,1,2
 * -o to set the output directory
+* -z compress the image .scr (not overscan) using the algorithm
 
 ## 2. Samples roll usage : 
 
@@ -196,7 +203,7 @@ after rotate the first pixels' column in 16 differents images :
 
  will produce images : 
 
-  ![0rotate.png](samples/0rotate_keephigh.png)
+ ![0rotate.png](samples/0rotate_keephigh.png)
  ![1rotate.png](samples/1rotate_keephigh.png)
  ![2rotate.png](samples/2rotate_keephigh.png)
  ![3rotate.png](samples/3rotate_keephigh.png)
@@ -217,6 +224,7 @@ after rotate the first pixels' column in 16 differents images :
  * .win sprite files
  * .pal or .ink palette file (.ink will be generated if the -p option is set)
  * .txt ascii file with palettes values (firmware values and basic values), and screen byte values
+ *  c.txt ascii file with palettes values (firmware values and basic values), and screen byte values by column
  * .json json file with palettes values (firmware values and basic values), and screen byte values
  *  _resized.png images files to ensure the resize action
  * _downgraded.ong images files to ensure the downgraded palette action
@@ -240,6 +248,7 @@ additionnals options available :
 * -lostlow will rotate x line pixels to the bottom, those lines will be discarded
 * -s to define the byte token will be replace the byte token in the ascii files
 * -a to set the algorithm to downsize the image
+* -z compress the image .scr (not overscan) using the algorithm
 
 ## 3. tile option :
 
@@ -278,6 +287,7 @@ Warn, all sprite must have the same size.
  * .win sprite files
  * .pal or .ink palette file (.ink will be generated if the -p option is set)
  * .txt ascii file with palettes values (firmware values and basic values), and screen byte values
+ *  c.txt ascii file with palettes values (firmware values and basic values), and screen byte values by column
  * .json json file with palettes values (firmware values and basic values), and screen byte values
  *  _resized.png images files to ensure the resize action
  * _downgraded.ong images files to ensure the downgraded palette action
@@ -293,3 +303,4 @@ additionnals options available :
 * -o to set the output directory
 * -s to define the byte token will be replace the byte token in the ascii files
 * -a to set the algorithm to downsize the image
+* -z compress the image .scr (not overscan) using the algorithm
