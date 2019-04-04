@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/rle"
 	"image/color"
 	"os"
 	"runtime"
@@ -21,7 +22,10 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *ExportType
 
 	var out string
 	var i int
-
+	if exportType.Compression != -1 {
+		fmt.Fprintf(os.Stdout, "Using RLE compression\n")
+		data = rle.Encode(data)
+	}
 	cpcFilename := string(exportType.AmsdosFilename()) + ".TXT"
 	osFilepath := exportType.AmsdosFullPath(filePath, ".TXT")
 	fmt.Fprintf(os.Stdout, "Writing ascii file (%s) data length (%d)\n", osFilepath, len(data))

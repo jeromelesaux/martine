@@ -312,6 +312,10 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, expo
 	osFilepath := exportType.AmsdosFullPath(filePath, ".WIN")
 	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", osFilepath, screenMode, width, height)
 	win := OcpWinFooter{Unused: 3, Height: byte(height), Unused2: 0, Width: uint16(width * 8)}
+	if exportType.Compression != -1 {
+		fmt.Fprintf(os.Stdout, "Using RLE compression\n")
+		data = rle.Encode(data)
+	}
 	filesize := binary.Size(data) + binary.Size(win)
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x4000, Exec: 0x4000,
 		Size:        uint16(filesize),
