@@ -35,7 +35,7 @@ func Loader(filePath string, p color.Palette, exportType *ExportType) error {
 		if err == nil {
 			out += fmt.Sprintf("%0.2d", v)
 		} else {
-			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
+			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 		if i+1 < len(p) {
 			out += ","

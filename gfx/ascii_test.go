@@ -2,8 +2,8 @@ package gfx
 
 import (
 	"github.com/jeromelesaux/martine/constants"
-	"testing"
 	"os"
+	"testing"
 )
 
 func TestAsciiByColumn(t *testing.T) {
@@ -19,7 +19,7 @@ func TestAsciiByColumn(t *testing.T) {
 	e.Size.Width = 5
 	err := AsciiByColumn("test.bin", data, constants.CpcOldPalette, e)
 	if err != nil {
-		t.Fatalf("expected no error and gets :%v",err)
+		t.Fatalf("expected no error and gets :%v", err)
 	}
 	os.Remove("TESTC.TXT")
 }

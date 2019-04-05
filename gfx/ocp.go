@@ -30,22 +30,22 @@ type CpcPlusColor struct {
 	B uint16
 }
 
-func NewRawCpcPlusColor( v uint16) *CpcPlusColor {
+func NewRawCpcPlusColor(v uint16) *CpcPlusColor {
 	c := &CpcPlusColor{}
-	c.B = v  & 0xf//1111
+	c.B = v & 0xf //1111
 	c.R = v >> 4 & 0xf
 	c.G = v >> 8 & 0xf
 	return c
 }
 
-func (c *CpcPlusColor)ToString() string {
-	return fmt.Sprintf("R:%.2b(%d),G:%.2b(%d),B:%.2b(%d)",c.R,c.R,c.G,c.G,c.B,c.B)
+func (c *CpcPlusColor) ToString() string {
+	return fmt.Sprintf("R:%.2b(%d),G:%.2b(%d),B:%.2b(%d)", c.R, c.R, c.G, c.G, c.B, c.B)
 }
 
 func (c *CpcPlusColor) Value() uint16 {
-	v := c.B | c.R<<4 | c.G <<8
-	fmt.Fprintf(os.Stderr, "value(%d,%d,%d)(%b,%b,%b) #%.4x (%.b): %d\n", c.R, c.G, c.B,c.R, c.G, c.B,
-	v,v,c.B+(c.R*16)+c.G*256)
+	v := c.B | c.R<<4 | c.G<<8
+	fmt.Fprintf(os.Stderr, "value(%d,%d,%d)(%b,%b,%b) #%.4x (%.b): %d\n", c.R, c.G, c.B, c.R, c.G, c.B,
+		v, v, c.B+(c.R*16)+c.G*256)
 	return v
 }
 func (c *CpcPlusColor) Bytes() []byte {
@@ -63,6 +63,14 @@ func NewCpcPlusColor(c color.Color) CpcPlusColor {
 
 type InkPalette struct {
 	Colors [16]CpcPlusColor
+}
+
+func (i *InkPalette) ToString() string {
+	var out string
+	for _, v := range i.Colors {
+		out += v.ToString() + "\n"
+	}
+	return out
 }
 
 func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, exportType *ExportType) error {
@@ -119,13 +127,48 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, e
 			if err == nil {
 				o[(0x7f00-0x170)+i] = v[0]
 			} else {
-				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
+				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 	}
 	binary.Write(fw, binary.LittleEndian, o)
 	fw.Close()
 	return nil
+}
+
+func OpenInk(filePath string) (color.Palette, *InkPalette, error) {
+	fmt.Fprintf(os.Stdout, "Opening (%s) file\n", filePath)
+	fr, err := os.Open(filePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
+		return color.Palette{}, &InkPalette{}, err
+	}
+	header := &cpc.CpcHead{}
+	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
+		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(0, 0)
+	}
+
+	inkPalette := &InkPalette{}
+	buf := make([]uint16, 16)
+	if err := binary.Read(fr, binary.LittleEndian, buf); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while reading Ocp Palette from file (%s) error %v\n", filePath, err)
+		return color.Palette{}, inkPalette, err
+	}
+	for i, v := range buf {
+		c := NewRawCpcPlusColor(v)
+		c.B *= 30
+		c.R *= 30
+		c.G *= 30
+		inkPalette.Colors[i] = *c
+	}
+
+	p := color.Palette{}
+	for _, v := range inkPalette.Colors {
+		c := constants.CpcPlusPalette.Convert(color.RGBA{R: uint8(v.R), B: uint8(v.B), G: uint8(v.G), A: 0xFF})
+		p = append(p, c)
+	}
+	return p, inkPalette, nil
 }
 
 func Ink(filePath string, p color.Palette, screenMode uint8, exportType *ExportType) error {
@@ -226,6 +269,7 @@ func OpenPal(filePath string) (color.Palette, *OcpPalette, error) {
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(0, 0)
 	}
 
 	ocpPalette := &OcpPalette{}
@@ -263,7 +307,7 @@ func Pal(filePath string, p color.Palette, screenMode uint8, exportType *ExportT
 				data.PaletteColors[i][j] = v[0]
 			}
 		} else {
-			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
+			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x8809, Exec: 0x8809,

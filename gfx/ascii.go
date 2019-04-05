@@ -92,7 +92,7 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *ExportType
 					}
 				}
 			} else {
-				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
+				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 		out += eol + "; Basic Palette " + cpcFilename + eol + ".basic_palette:" + eol + ByteToken + " "
@@ -108,7 +108,7 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *ExportType
 					}
 				}
 			} else {
-				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
+				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 		out += eol
@@ -141,7 +141,7 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *ExportType
 			if err == nil {
 				palette[i] = fmt.Sprintf("%.2d", v)
 			} else {
-				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
+				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 		screen := make([]string, len(data))
@@ -233,7 +233,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, exportType *Ex
 					}
 				}
 			} else {
-				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
+				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 		out += eol + "; Basic Palette " + cpcFilename + eol + ".basic_palette:" + eol + ByteToken + " "
@@ -249,7 +249,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, exportType *Ex
 					}
 				}
 			} else {
-				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%d\n", p[0], err)
+				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 		out += eol

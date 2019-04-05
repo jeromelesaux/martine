@@ -46,6 +46,7 @@ var (
 	tileIterationX  = flag.Int("iterx", -1, "Number of tiles on a row in the input image.")
 	tileIterationY  = flag.Int("itery", -1, "Number of tiles on a column in the input image.")
 	compress        = flag.Int("z", -1, "Compression algorithm : \n\t1: rle (default)\n\t2: rle 16bits\n")
+	inkPath         = flag.String("ink", "", "Path of the palette Cpc plus ink file.")
 	version         = "0.10"
 )
 
@@ -76,6 +77,9 @@ func main() {
 		}
 		if *winPath != "" {
 			gfx.WinInformation(*winPath)
+		}
+		if *inkPath != "" {
+			gfx.InkInformation(*inkPath)
 		}
 		os.Exit(0)
 	}
@@ -244,6 +248,15 @@ func main() {
 		if *palettePath != "" {
 			fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", *palettePath)
 			palette, _, err = gfx.OpenPal(*palettePath)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *palettePath)
+			} else {
+				fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
+			}
+		}
+		if *inkPath != "" {
+			fmt.Fprintf(os.Stdout, "Input plus palette to apply : (%s)\n", *inkPath)
+			palette, _, err = gfx.OpenInk(*inkPath)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *palettePath)
 			} else {

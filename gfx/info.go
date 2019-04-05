@@ -24,3 +24,13 @@ func WinInformation(filePath string) {
 		fmt.Fprintf(os.Stdout, "Window from file %s\n %s", filePath, win.ToString())
 	}
 }
+
+func InkInformation(filePath string) {
+	fmt.Fprintf(os.Stdout, "Input ink palette to open : (%s)\n", filePath)
+	_, palette, err := OpenInk(filePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", filePath)
+	} else {
+		fmt.Fprintf(os.Stdout, "Palette from file %s\n %s", filePath, palette.ToString())
+	}
+}
