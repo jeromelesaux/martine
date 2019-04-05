@@ -47,7 +47,7 @@ var (
 	tileIterationY  = flag.Int("itery", -1, "Number of tiles on a column in the input image.")
 	compress        = flag.Int("z", -1, "Compression algorithm : \n\t1: rle (default)\n\t2: rle 16bits\n")
 	inkPath         = flag.String("ink", "", "Path of the palette Cpc plus ink file.")
-	version         = "0.10"
+	version         = "0.11"
 )
 
 func usage() {
