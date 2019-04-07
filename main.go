@@ -45,10 +45,10 @@ var (
 	tileMode        = flag.Bool("tile", false, "Tile mode to create multiples sprites from a same image.")
 	tileIterationX  = flag.Int("iterx", -1, "Number of tiles on a row in the input image.")
 	tileIterationY  = flag.Int("itery", -1, "Number of tiles on a column in the input image.")
-	compress        = flag.Int("z", -1, "Compression algorithm : \n\t1: rle (default)\n\t2: rle 16bits\n")
+	compress        = flag.Int("z", -1, "Compression algorithm : \n\t1: rle (default)\n\t2: rle 16bits\n\t3: Lz4\n")
 	kitPath         = flag.String("kit", "", "Path of the palette Cpc plus Kit file.")
 	inkPath         = flag.String("ink", "", "Path of the palette Cpc ink file.")
-	version         = "0.11"
+	version         = "0.12"
 )
 
 func usage() {

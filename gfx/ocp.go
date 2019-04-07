@@ -6,6 +6,7 @@ import (
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/rle"
+	lz4 "github.com/bkaradzic/go-lz4"
 	"image/color"
 	"io"
 	"os"
@@ -304,6 +305,14 @@ func Scr(filePath string, data []byte, exportType *ExportType) error {
 		case 2:
 			fmt.Fprintf(os.Stdout, "Using RLE 16 bits compression\n")
 			data = rle.Encode16(data)
+		case 3:
+			fmt.Fprintf(os.Stdout,"Using LZ4 compression\n")	
+			var dst []byte
+			dst,err := lz4.Encode(dst,data)
+			if err != nil {
+				fmt.Fprintf(os.Stderr,"Error while encoding into LZ4 : %v\n",err)
+			}
+			data = dst
 		}
 	}
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0xc000, Exec: 0xC7D0,
@@ -473,6 +482,14 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, expo
 		case 2:
 			fmt.Fprintf(os.Stdout, "Using RLE 16 bits compression\n")
 			data = rle.Encode16(data)
+		case 3:
+			fmt.Fprintf(os.Stdout,"Using LZ4 compression\n")	
+			var dst []byte
+			dst,err := lz4.Encode(dst,data)
+			if err != nil {
+				fmt.Fprintf(os.Stderr,"Error while encoding into LZ4 : %v\n",err)
+			}
+			data = dst
 		}
 	}
 	filesize := binary.Size(data) + binary.Size(win)
