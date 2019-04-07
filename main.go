@@ -46,7 +46,8 @@ var (
 	tileIterationX  = flag.Int("iterx", -1, "Number of tiles on a row in the input image.")
 	tileIterationY  = flag.Int("itery", -1, "Number of tiles on a column in the input image.")
 	compress        = flag.Int("z", -1, "Compression algorithm : \n\t1: rle (default)\n\t2: rle 16bits\n")
-	inkPath         = flag.String("ink", "", "Path of the palette Cpc plus ink file.")
+	kitPath         = flag.String("kit", "", "Path of the palette Cpc plus Kit file.")
+	inkPath         = flag.String("ink", "", "Path of the palette Cpc ink file.")
 	version         = "0.11"
 )
 
@@ -77,6 +78,9 @@ func main() {
 		}
 		if *winPath != "" {
 			gfx.WinInformation(*winPath)
+		}
+		if *kitPath != "" {
+			gfx.KitInformation(*kitPath)
 		}
 		if *inkPath != "" {
 			gfx.InkInformation(*inkPath)
@@ -172,13 +176,13 @@ func main() {
 	exportType.TileIterationY = *tileIterationY
 	exportType.Compression = *compress
 	if exportType.CpcPlus {
-		exportType.Ink = true
+		exportType.Kit = true
 		exportType.Pal = false
 	}
 	exportType.Overscan = *overscan
 	if exportType.Overscan {
 		exportType.Scr = false
-		exportType.Ink = true
+		exportType.Kit = true
 	}
 	exportType.Dsk = *dsk
 
@@ -255,8 +259,17 @@ func main() {
 			}
 		}
 		if *inkPath != "" {
-			fmt.Fprintf(os.Stdout, "Input plus palette to apply : (%s)\n", *inkPath)
+			fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", *inkPath)
 			palette, _, err = gfx.OpenInk(*inkPath)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *inkPath)
+			} else {
+				fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
+			}
+		}
+		if *kitPath != "" {
+			fmt.Fprintf(os.Stdout, "Input plus palette to apply : (%s)\n", *kitPath)
+			palette, _, err = gfx.OpenKit(*kitPath)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *palettePath)
 			} else {

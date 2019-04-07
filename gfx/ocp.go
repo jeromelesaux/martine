@@ -61,8 +61,20 @@ func NewCpcPlusColor(c color.Color) CpcPlusColor {
 	return CpcPlusColor{G: uint16(g / 4096), R: uint16(r / 4096), B: uint16(b / 4096)}
 }
 
-type InkPalette struct {
+type KitPalette struct {
 	Colors [16]CpcPlusColor
+}
+
+func (i *KitPalette) ToString() string {
+	var out string
+	for _, v := range i.Colors {
+		out += v.ToString() + "\n"
+	}
+	return out
+}
+
+type InkPalette struct {
+	Colors [16]constants.CpcColor
 }
 
 func (i *InkPalette) ToString() string {
@@ -71,6 +83,85 @@ func (i *InkPalette) ToString() string {
 		out += v.ToString() + "\n"
 	}
 	return out
+}
+
+
+func Ink(filePath string, p color.Palette, screenMode uint8, exportType *ExportType) error {
+	fmt.Fprintf(os.Stdout, "Saving INK file (%s)\n", filePath)
+	data := make([]uint8,16)
+	fmt.Fprintf(os.Stdout, "Palette size %d\n", len(p))
+	for i := 0; i < len(p); i++ {
+		v, err := constants.HardwareValues(p[i])
+		if err == nil {
+			for j := 0; j < 12; j++ {
+				data[i] = v[0]
+			}
+		} else {
+			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+		}
+	}
+	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x8809, Exec: 0x8809,
+		Size:        uint16(binary.Size(data)),
+		Size2:       uint16(binary.Size(data)),
+		LogicalSize: uint16(binary.Size(data))}
+
+	cpcFilename := exportType.OsFilename(".INK")
+	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
+	header.Checksum = uint16(header.ComputedChecksum16())
+	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
+	osFilepath := exportType.AmsdosFullPath(filePath, ".INK")
+	fw, err := os.Create(osFilepath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
+		return err
+	}
+	if !exportType.NoAmsdosHeader {
+		binary.Write(fw, binary.LittleEndian, header)
+	}
+	binary.Write(fw, binary.LittleEndian, data)
+	fw.Close()
+	exportType.AddFile(osFilepath)
+	return nil
+}
+
+func OpenInk(filePath string) (color.Palette, *InkPalette, error) {
+	fmt.Fprintf(os.Stdout, "Opening (%s) file\n", filePath)
+	fr, err := os.Open(filePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
+		return color.Palette{}, &InkPalette{}, err
+	}
+	header := &cpc.CpcHead{}
+	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
+		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(0, 0)
+	}
+
+	inkPalette := &InkPalette{}
+	buf := make([]uint8, 16)
+	if err := binary.Read(fr, binary.LittleEndian, buf); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while reading Ocp Palette from file (%s) error %v\n", filePath, err)
+		return color.Palette{}, &InkPalette{}, err
+	}
+	for i, v := range buf {
+		c, err := constants.CpcColorFromHardware(v)
+		if err != nil {
+			fmt.Fprintf(os.Stderr,"Color error :%v\n",err)
+		} else {
+			inkPalette.Colors[i] = c
+		}
+	}
+
+	p := color.Palette{}
+	for _, v := range inkPalette.Colors {
+		c, err  := constants.ColorFromHardware(uint8(v.HardwareNumber))
+		if err != nil {
+			fmt.Fprintf(os.Stderr,"Color error :%v\n",err)
+		} else {
+			p = append(p, c)
+		}
+	}
+	return p, inkPalette, nil
 }
 
 func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, exportType *ExportType) error {
@@ -136,12 +227,12 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, e
 	return nil
 }
 
-func OpenInk(filePath string) (color.Palette, *InkPalette, error) {
+func OpenKit(filePath string) (color.Palette, *KitPalette, error) {
 	fmt.Fprintf(os.Stdout, "Opening (%s) file\n", filePath)
 	fr, err := os.Open(filePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
-		return color.Palette{}, &InkPalette{}, err
+		return color.Palette{}, &KitPalette{}, err
 	}
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
@@ -149,31 +240,31 @@ func OpenInk(filePath string) (color.Palette, *InkPalette, error) {
 		fr.Seek(0, 0)
 	}
 
-	inkPalette := &InkPalette{}
+	KitPalette := &KitPalette{}
 	buf := make([]uint16, 16)
 	if err := binary.Read(fr, binary.LittleEndian, buf); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while reading Ocp Palette from file (%s) error %v\n", filePath, err)
-		return color.Palette{}, inkPalette, err
+		return color.Palette{}, KitPalette, err
 	}
 	for i, v := range buf {
 		c := NewRawCpcPlusColor(v)
 		c.B *= 30
 		c.R *= 30
 		c.G *= 30
-		inkPalette.Colors[i] = *c
+		KitPalette.Colors[i] = *c
 	}
 
 	p := color.Palette{}
-	for _, v := range inkPalette.Colors {
+	for _, v := range KitPalette.Colors {
 		c := constants.CpcPlusPalette.Convert(color.RGBA{R: uint8(v.R), B: uint8(v.B), G: uint8(v.G), A: 0xFF})
 		p = append(p, c)
 	}
-	return p, inkPalette, nil
+	return p, KitPalette, nil
 }
 
-func Ink(filePath string, p color.Palette, screenMode uint8, exportType *ExportType) error {
-	osFilepath := exportType.AmsdosFullPath(filePath, ".INK")
-	fmt.Fprintf(os.Stdout, "Saving INK file (%s)\n", osFilepath)
+func Kit(filePath string, p color.Palette, screenMode uint8, exportType *ExportType) error {
+	osFilepath := exportType.AmsdosFullPath(filePath, ".Kit")
+	fmt.Fprintf(os.Stdout, "Saving Kit file (%s)\n", osFilepath)
 	data := [16]uint16{}
 
 	for i := 0; i < len(p); i++ {
@@ -185,7 +276,7 @@ func Ink(filePath string, p color.Palette, screenMode uint8, exportType *ExportT
 		Size2:       uint16(binary.Size(data)),
 		LogicalSize: uint16(binary.Size(data))}
 
-	cpcFilename := exportType.OsFilename(".INK")
+	cpcFilename := exportType.OsFilename(".KIT")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))

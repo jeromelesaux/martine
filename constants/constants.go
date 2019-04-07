@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"image/color"
+	"strconv"
 )
 
 type Size struct {
@@ -19,6 +20,10 @@ type CpcColor struct {
 	HardwareValues []uint8
 	FirmwareNumber int
 	Color          color.RGBA
+}
+
+func (c *CpcColor)ToString() string {
+	return strconv.Itoa(c.HardwareNumber) + " firmware color :" +strconv.Itoa(c.FirmwareNumber) + " firmware value :" +strconv.Itoa(int(c.HardwareValues[uint8(0)]))
 }
 
 const (
@@ -141,6 +146,91 @@ func HardwareValueAreEquals(hv []uint8, val uint8) bool {
 		}
 	}
 	return false
+}
+
+func CpcColorFromHardware(c uint8) (CpcColor, error) {
+	if HardwareValueAreEquals(White.HardwareValues, c) {
+		return White, nil
+	}
+	if HardwareValueAreEquals(SeaGreen.HardwareValues, c) {
+		return SeaGreen, nil
+	}
+	if HardwareValueAreEquals(PastelYellow.HardwareValues, c) {
+		return PastelYellow, nil
+	}
+	if HardwareValueAreEquals(Blue.HardwareValues, c) {
+		return Blue, nil
+	}
+	if HardwareValueAreEquals(Purple.HardwareValues, c) {
+		return Purple, nil
+	}
+	if HardwareValueAreEquals(Cyan.HardwareValues, c) {
+		return Cyan, nil
+	}
+	if HardwareValueAreEquals(Pink.HardwareValues, c) {
+		return Pink, nil
+	}
+	if HardwareValueAreEquals(BrightYellow.HardwareValues, c) {
+		return BrightYellow, nil
+	}
+	if HardwareValueAreEquals(BrightWhite.HardwareValues, c) {
+		return BrightWhite, nil
+	}
+	if HardwareValueAreEquals(BrightRed.HardwareValues, c) {
+		return BrightRed, nil
+	}
+	if HardwareValueAreEquals(BrightMagenta.HardwareValues, c) {
+		return BrightMagenta, nil
+	}
+	if HardwareValueAreEquals(Orange.HardwareValues, c) {
+		return Orange, nil
+	}
+	if HardwareValueAreEquals(PastelMagenta.HardwareValues, c) {
+		return PastelMagenta, nil
+	}
+	if HardwareValueAreEquals(BrightGreen.HardwareValues, c) {
+		return BrightGreen, nil
+	}
+	if HardwareValueAreEquals(BrightCyan.HardwareValues, c) {
+		return BrightCyan, nil
+	}
+	if HardwareValueAreEquals(Black.HardwareValues, c) {
+		return Black, nil
+	}
+	if HardwareValueAreEquals(BrightBlue.HardwareValues, c) {
+		return BrightBlue, nil
+	}
+	if HardwareValueAreEquals(Green.HardwareValues, c) {
+		return Green, nil
+	}
+	if HardwareValueAreEquals(SkyBlue.HardwareValues, c) {
+		return SkyBlue, nil
+	}
+	if HardwareValueAreEquals(Magenta.HardwareValues, c) {
+		return Magenta, nil
+	}
+	if HardwareValueAreEquals(PastelGreen.HardwareValues, c) {
+		return PastelGreen, nil
+	}
+	if HardwareValueAreEquals(Lime.HardwareValues, c) {
+		return Lime, nil
+	}
+	if HardwareValueAreEquals(PastelCyan.HardwareValues, c) {
+		return PastelCyan, nil
+	}
+	if HardwareValueAreEquals(Red.HardwareValues, c) {
+		return Red, nil
+	}
+	if HardwareValueAreEquals(Mauve.HardwareValues, c) {
+		return Mauve, nil
+	}
+	if HardwareValueAreEquals(Yellow.HardwareValues, c) {
+		return Yellow, nil
+	}
+	if HardwareValueAreEquals(PastelBlue.HardwareValues, c) {
+		return PastelBlue, nil
+	}
+	return CpcColor{HardwareNumber:-1}, ErrorCpcColorNotFound
 }
 
 func ColorFromHardware(c uint8) (color.Color, error) {

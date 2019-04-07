@@ -206,6 +206,10 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 		return err
 	}
+	if err := Ink(filename, p, 2, exportType); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+		return err
+	}
 	if err := Ascii(filename, data, p, exportType); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving ascii file for (%s) error :%v\n", filename, err)
 	}
@@ -395,12 +399,16 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 		}
 	}
 	if exportType.CpcPlus {
-		if err := Ink(filePath, p, 0, exportType); err != nil {
+		if err := Kit(filePath, p, 0, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	} else {
 		if err := Pal(filePath, p, 0, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			return err
+		}
+		if err := Ink(filePath, p, 2, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
@@ -491,12 +499,16 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 		}
 	}
 	if exportType.CpcPlus {
-		if err := Ink(filePath, p, 0, exportType); err != nil {
+		if err := Kit(filePath, p, 0, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	} else {
 		if err := Pal(filePath, p, 1, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			return err
+		}
+		if err := Ink(filePath, p, 2, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
@@ -618,12 +630,16 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 		}
 	}
 	if exportType.CpcPlus {
-		if err := Ink(filePath, p, 0, exportType); err != nil {
+		if err := Kit(filePath, p, 0, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	} else {
 		if err := Pal(filePath, p, 2, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			return err
+		}
+		if err := Ink(filePath, p, 2, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}

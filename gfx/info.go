@@ -25,8 +25,18 @@ func WinInformation(filePath string) {
 	}
 }
 
+func KitInformation(filePath string) {
+	fmt.Fprintf(os.Stdout, "Input kit palette to open : (%s)\n", filePath)
+	_, palette, err := OpenKit(filePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", filePath)
+	} else {
+		fmt.Fprintf(os.Stdout, "Palette from file %s\n %s", filePath, palette.ToString())
+	}
+}
+
 func InkInformation(filePath string) {
-	fmt.Fprintf(os.Stdout, "Input ink palette to open : (%s)\n", filePath)
+	fmt.Fprintf(os.Stdout, "Input kit palette to open : (%s)\n", filePath)
 	_, palette, err := OpenInk(filePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", filePath)

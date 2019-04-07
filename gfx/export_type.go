@@ -22,6 +22,7 @@ type ExportType struct {
 	TileIterationY int
 	Dsk            bool
 	Ink            bool
+	Kit            bool
 	Pal            bool
 	Scr            bool
 	Win            bool
@@ -40,6 +41,7 @@ func NewExportType(input, output string) *ExportType {
 		Ascii:          true,
 		Scr:            true,
 		Pal:            true,
+		Ink:            true,
 		InputPath:      input,
 		OutputPath:     output,
 		amsdosFilename: make([]byte, 8),
