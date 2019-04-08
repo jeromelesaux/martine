@@ -21,12 +21,12 @@ Usage and options :
 
 ```
 martine convert (jpeg, png format) image to Amstrad cpc screen (even overscan)
-By Impact Sid (Version:0.8)
+By Impact Sid (Version:0.12)
 Special thanks to @Ast (for his support), @Siko and @Tronic for ideas
 usage :
 
   -a int
-    	Algorithm to resize the image (available : 
+    	Algorithm to resize the image (available :
     		1: NearestNeighbor (default)
     		2: CatmullRom
     		3: Lanczos
@@ -53,8 +53,10 @@ usage :
     	Picture path of the input file.
   -info
     	Return the information of the file, associated with -pal and -win options
+  -ink string
+    	Path of the palette Cpc ink file.
   -iter int
-    	Iterations number to walk in roll mode (default -1)
+    	Iterations number to walk in roll mode, or number of images to generate in rotation mode. (default -1)
   -iterx int
     	Number of tiles on a row in the input image. (default -1)
   -itery int
@@ -63,6 +65,8 @@ usage :
     	bit rotation on the top and keep pixels (default -1)
   -keeplow int
     	bit rotation on the bottom and keep pixels (default -1)
+  -kit string
+    	Path of the palette Cpc plus Kit file.
   -losthigh int
     	bit rotation on the top and lost pixels (default -1)
   -lostlow int
@@ -84,6 +88,8 @@ usage :
     	bit rotation on the left and keep pixels (default -1)
   -roll
     	Roll mode allow to walk and walk into the input file, associated with rla,rra,sra,sla, keephigh, keeplow, losthigh or lostlow options.
+  -rotate
+    	Allow rotation on the input image, the input image must be a square (width equals height)
   -rra int
     	bit rotation on the right and keep pixels (default -1)
   -s string
@@ -99,17 +105,20 @@ usage :
   -win string
     	Filepath of the ocp win file
   -z int
-    	Compression algorithm : 
+    	Compression algorithm :
     		1: rle (default)
     		2: rle 16bits
+    		3: Lz4 Classic
+    		4: Lz4 Raw
     	 (default -1)
 ```
 
 Principles : 
-Martine can be used in 3 modes : 
+Martine can be used in 4 modes : 
  * first mode : conversion of an input image into sprite (file .win), cpc screen (file .scr) and overscan screen (larger file .scr)
  * second mode : rotate line or column pixels of an input image (option -roll)
  * bulk conversion of a tiles page : each sprites of the same width and height will be converted to sprites (files .win, option -tile)
+ * last mode, rotate an existing image, will produce images rotated
 
 examples :
 ## 1. Screen conversion :
