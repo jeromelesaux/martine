@@ -320,7 +320,7 @@ func Scr(filePath string, data []byte, exportType *ExportType) error {
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
 			}
-			copy(data, dst[4:])
+			data = dst[4:]
 		}
 	}
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0xc000, Exec: 0xC7D0,
@@ -505,7 +505,7 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, expo
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
 			}
-			copy(data, dst[4:])
+			data = dst[4:]
 		}
 	}
 	filesize := binary.Size(data) + binary.Size(win)
