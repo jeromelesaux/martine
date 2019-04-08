@@ -3,9 +3,10 @@ package gfx
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/jeromelesaux/martine/lz4"
+	rawlz4 "github.com/bkaradzic/go-lz4"
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/lz4"
 	"github.com/jeromelesaux/martine/rle"
 	"image/color"
 	"io"
@@ -305,13 +306,21 @@ func Scr(filePath string, data []byte, exportType *ExportType) error {
 			fmt.Fprintf(os.Stdout, "Using RLE 16 bits compression\n")
 			data = rle.Encode16(data)
 		case 3:
-			fmt.Fprintf(os.Stdout, "Using LZ4 compression\n")
+			fmt.Fprintf(os.Stdout, "Using LZ4-classic compression\n")
 			var dst []byte
 			dst, err := lz4.Encode(dst, data)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
 			}
 			data = dst
+		case 4:
+			fmt.Fprintf(os.Stdout, "Using LZ4-Raw compression\n")
+			var dst []byte
+			dst, err := rawlz4.Encode(dst, data)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
+			}
+			copy(data, dst[4:])
 		}
 	}
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0xc000, Exec: 0xC7D0,
@@ -489,6 +498,14 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, expo
 				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
 			}
 			data = dst
+		case 4:
+			fmt.Fprintf(os.Stdout, "Using LZ4-Raw compression\n")
+			var dst []byte
+			dst, err := rawlz4.Encode(dst, data)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
+			}
+			copy(data, dst[4:])
 		}
 	}
 	filesize := binary.Size(data) + binary.Size(win)
