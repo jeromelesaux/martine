@@ -3,7 +3,7 @@ package gfx
 import (
 	"encoding/binary"
 	"fmt"
-	lz4 "github.com/bkaradzic/go-lz4"
+	"github.com/jeromelesaux/martine/lz4"
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/rle"
