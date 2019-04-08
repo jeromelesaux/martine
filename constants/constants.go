@@ -22,8 +22,8 @@ type CpcColor struct {
 	Color          color.RGBA
 }
 
-func (c *CpcColor)ToString() string {
-	return strconv.Itoa(c.HardwareNumber) + " firmware color :" +strconv.Itoa(c.FirmwareNumber) + " firmware value :" +strconv.Itoa(int(c.HardwareValues[uint8(0)]))
+func (c *CpcColor) ToString() string {
+	return strconv.Itoa(c.HardwareNumber) + " firmware color :" + strconv.Itoa(c.FirmwareNumber) + " firmware value :" + strconv.Itoa(int(c.HardwareValues[uint8(0)]))
 }
 
 const (
@@ -152,7 +152,7 @@ func CpcColorFromHardwareNumber(c int) (CpcColor, error) {
 	if White.HardwareNumber == c {
 		return White, nil
 	}
-	if  SeaGreen.HardwareNumber == c {
+	if SeaGreen.HardwareNumber == c {
 		return SeaGreen, nil
 	}
 	if PastelYellow.HardwareNumber == c {
@@ -221,7 +221,7 @@ func CpcColorFromHardwareNumber(c int) (CpcColor, error) {
 	if Red.HardwareNumber == c {
 		return Red, nil
 	}
-	if Mauve.HardwareNumber  == c {
+	if Mauve.HardwareNumber == c {
 		return Mauve, nil
 	}
 	if Yellow.HardwareNumber == c {
@@ -230,7 +230,7 @@ func CpcColorFromHardwareNumber(c int) (CpcColor, error) {
 	if PastelBlue.HardwareNumber == c {
 		return PastelBlue, nil
 	}
-	return CpcColor{HardwareNumber:-1}, ErrorCpcColorNotFound
+	return CpcColor{HardwareNumber: -1}, ErrorCpcColorNotFound
 }
 
 func ColorFromHardware(c uint8) (color.Color, error) {

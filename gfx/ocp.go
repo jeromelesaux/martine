@@ -3,10 +3,10 @@ package gfx
 import (
 	"encoding/binary"
 	"fmt"
+	lz4 "github.com/bkaradzic/go-lz4"
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/rle"
-	lz4 "github.com/bkaradzic/go-lz4"
 	"image/color"
 	"io"
 	"os"
@@ -86,10 +86,9 @@ func (i *InkPalette) ToString() string {
 	return out
 }
 
-
 func Ink(filePath string, p color.Palette, screenMode uint8, exportType *ExportType) error {
 	fmt.Fprintf(os.Stdout, "Saving INK file (%s)\n", filePath)
-	data := make([]uint8,16)
+	data := make([]uint8, 16)
 	fmt.Fprintf(os.Stdout, "Palette size %d\n", len(p))
 	for i := 0; i < len(p); i++ {
 		v, err := constants.HardwareNumber(p[i])
@@ -147,7 +146,7 @@ func OpenInk(filePath string) (color.Palette, *InkPalette, error) {
 	for i, v := range buf {
 		c, err := constants.CpcColorFromHardwareNumber(int(v))
 		if err != nil {
-			fmt.Fprintf(os.Stderr,"Color error :%v\n",err)
+			fmt.Fprintf(os.Stderr, "Color error :%v\n", err)
 		} else {
 			inkPalette.Colors[i] = c
 		}
@@ -155,9 +154,9 @@ func OpenInk(filePath string) (color.Palette, *InkPalette, error) {
 
 	p := color.Palette{}
 	for _, v := range inkPalette.Colors {
-		c, err  := constants.ColorFromHardware(uint8(v.HardwareNumber))
+		c, err := constants.ColorFromHardware(uint8(v.HardwareNumber))
 		if err != nil {
-			fmt.Fprintf(os.Stderr,"Color error :%v\n",err)
+			fmt.Fprintf(os.Stderr, "Color error :%v\n", err)
 		} else {
 			p = append(p, c)
 		}
@@ -306,11 +305,11 @@ func Scr(filePath string, data []byte, exportType *ExportType) error {
 			fmt.Fprintf(os.Stdout, "Using RLE 16 bits compression\n")
 			data = rle.Encode16(data)
 		case 3:
-			fmt.Fprintf(os.Stdout,"Using LZ4 compression\n")	
+			fmt.Fprintf(os.Stdout, "Using LZ4 compression\n")
 			var dst []byte
-			dst,err := lz4.Encode(dst,data)
+			dst, err := lz4.Encode(dst, data)
 			if err != nil {
-				fmt.Fprintf(os.Stderr,"Error while encoding into LZ4 : %v\n",err)
+				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
 			}
 			data = dst
 		}
@@ -483,11 +482,11 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, expo
 			fmt.Fprintf(os.Stdout, "Using RLE 16 bits compression\n")
 			data = rle.Encode16(data)
 		case 3:
-			fmt.Fprintf(os.Stdout,"Using LZ4 compression\n")	
+			fmt.Fprintf(os.Stdout, "Using LZ4 compression\n")
 			var dst []byte
-			dst,err := lz4.Encode(dst,data)
+			dst, err := lz4.Encode(dst, data)
 			if err != nil {
-				fmt.Fprintf(os.Stderr,"Error while encoding into LZ4 : %v\n",err)
+				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
 			}
 			data = dst
 		}

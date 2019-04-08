@@ -15,6 +15,7 @@ type ExportType struct {
 	Size           constants.Size
 	Compression    int
 	NoAmsdosHeader bool
+	RotationMode   bool
 	TileMode       bool
 	RollMode       bool
 	RollIteration  int

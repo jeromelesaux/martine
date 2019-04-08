@@ -29,7 +29,7 @@ var (
 	noAmsdosHeader  = flag.Bool("n", false, "no amsdos header for all files (default amsdos header added).")
 	plusMode        = flag.Bool("p", false, "Plus mode (means generate an image for CPC Plus Screen)")
 	rollMode        = flag.Bool("roll", false, "Roll mode allow to walk and walk into the input file, associated with rla,rra,sra,sla, keephigh, keeplow, losthigh or lostlow options.")
-	iterations      = flag.Int("iter", -1, "Iterations number to walk in roll mode")
+	iterations      = flag.Int("iter", -1, "Iterations number to walk in roll mode, or number of images to generate in rotation mode.")
 	rra             = flag.Int("rra", -1, "bit rotation on the right and keep pixels")
 	rla             = flag.Int("rla", -1, "bit rotation on the left and keep pixels")
 	sra             = flag.Int("sra", -1, "bit rotation on the right and lost pixels")
@@ -48,6 +48,7 @@ var (
 	compress        = flag.Int("z", -1, "Compression algorithm : \n\t1: rle (default)\n\t2: rle 16bits\n\t3: Lz4\n")
 	kitPath         = flag.String("kit", "", "Path of the palette Cpc plus Kit file.")
 	inkPath         = flag.String("ink", "", "Path of the palette Cpc ink file.")
+	rotateMode      = flag.Bool("rotate", false, "Allow rotation on the input image, the input image must be a square (width equals height)")
 	version         = "0.12"
 )
 
@@ -175,6 +176,7 @@ func main() {
 	exportType.TileIterationX = *tileIterationX
 	exportType.TileIterationY = *tileIterationY
 	exportType.Compression = *compress
+	exportType.RotationMode = *rotateMode
 	if exportType.CpcPlus {
 		exportType.Kit = true
 		exportType.Pal = false
@@ -320,6 +322,11 @@ func main() {
 			} else {
 				fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
 				gfx.SpriteTransform(downgraded, newPalette, size, screenMode, filename, exportType)
+			}
+		}
+		if exportType.RotationMode {
+			if err := gfx.Rotate(downgraded, newPalette, size, uint8(*mode), *picturePath, resizeAlgo, exportType); err != nil {
+				fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", *picturePath, err)
 			}
 		}
 	}
