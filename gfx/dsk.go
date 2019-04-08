@@ -12,6 +12,9 @@ func ImportInDsk(exportType *ExportType) error {
 	if exportType.Kit {
 		floppy.PutFile(exportType.Fullpath(".KIT"), dsk.MODE_BINAIRE, 0, 0, 0, false, false)
 	}
+	if exportType.Ink {
+		floppy.PutFile(exportType.Fullpath(".INK"), dsk.MODE_BINAIRE, 0, 0, 0, false, false)
+	}
 	if exportType.Pal {
 		floppy.PutFile(exportType.Fullpath(".PAL"), dsk.MODE_BINAIRE, 0, 0, 0, false, false)
 	}

@@ -92,10 +92,10 @@ func Ink(filePath string, p color.Palette, screenMode uint8, exportType *ExportT
 	data := make([]uint8,16)
 	fmt.Fprintf(os.Stdout, "Palette size %d\n", len(p))
 	for i := 0; i < len(p); i++ {
-		v, err := constants.HardwareValues(p[i])
+		v, err := constants.HardwareNumber(p[i])
 		if err == nil {
 			for j := 0; j < 12; j++ {
-				data[i] = v[0]
+				data[i] = uint8(v)
 			}
 		} else {
 			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
@@ -145,7 +145,7 @@ func OpenInk(filePath string) (color.Palette, *InkPalette, error) {
 		return color.Palette{}, &InkPalette{}, err
 	}
 	for i, v := range buf {
-		c, err := constants.CpcColorFromHardware(v)
+		c, err := constants.CpcColorFromHardwareNumber(int(v))
 		if err != nil {
 			fmt.Fprintf(os.Stderr,"Color error :%v\n",err)
 		} else {
