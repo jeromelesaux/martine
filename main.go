@@ -49,7 +49,7 @@ var (
 	kitPath         = flag.String("kit", "", "Path of the palette Cpc plus Kit file.")
 	inkPath         = flag.String("ink", "", "Path of the palette Cpc ink file.")
 	rotateMode      = flag.Bool("rotate", false, "Allow rotation on the input image, the input image must be a square (width equals height)")
-	version         = "0.13"
+	version         = "0.14"
 )
 
 func usage() {
