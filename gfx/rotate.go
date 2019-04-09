@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/convert"
 	"image"
 	"image/color"
+	"image/draw"
 	"os"
 )
 
@@ -33,16 +35,18 @@ func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, f
 		}
 	}
 	for i := 0.; i < 360.; i += angle {
-		rin := imaging.Rotate(in, float64(i), color.Transparent)
+		rin := imaging.Rotate(in, float64(i), color.White)
 
 		if rin.Bounds().Max.X < maxSize.Width || rin.Bounds().Max.Y < maxSize.Height {
 			background := image.NewRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: maxSize.Width, Y: maxSize.Height}})
+			draw.Draw(background, background.Bounds(), &image.Uniform{p[0]}, image.ZP, draw.Src)
 			rin = imaging.PasteCenter(
 				background,
 				rin,
 			)
 		}
-	
+		_, rin = convert.DowngradingWithPalette(rin, p)
+
 		newFilename := exportType.OsFullPath(filePath, fmt.Sprintf("%.2d", indice)+".png")
 		if err := Png(newFilename, rin); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create image (%s) error :%v\n", newFilename, err)
