@@ -7,6 +7,7 @@ import (
 	"image"
 	"image/color"
 	"os"
+	"math"
 )
 
 var (
@@ -42,7 +43,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 	var lineSize int
 	fmt.Fprintf(os.Stderr, "%v\n", size)
 	if mode == 0 {
-		lineSize = size.Width / 2
+		lineSize = int(math.Ceil(float64(size.Width) / 2.))
 		data = make([]byte, size.Height*lineSize)
 		offset := 0
 		for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
@@ -70,7 +71,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 		}
 	} else {
 		if mode == 1 {
-			lineSize = size.Width / 4
+			lineSize = int(math.Ceil(float64(size.Width) / 4.))
 			data = make([]byte, size.Height*lineSize)
 			offset := 0
 			for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
@@ -118,7 +119,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 			}
 		} else {
 			if mode == 2 {
-				lineSize = size.Width / 8
+				lineSize = int(math.Ceil(float64(size.Width) / 8.))
 				data = make([]byte, size.Height*lineSize)
 				offset := 0
 				for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {

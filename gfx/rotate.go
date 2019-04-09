@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
 	"image"
 	"image/color"
 	"os"
@@ -25,10 +24,10 @@ func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, f
 	angle := 360. / float64(exportType.RollIteration)
 
 	for i := 0.; i < 360.; i += angle {
-		rin := imaging.Rotate(in, float64(i), color.Black)
+		rin := imaging.Rotate(in, float64(i), color.Transparent)
 
 
-		if rin.Bounds().Max.X%2 != 0 {
+		/*if rin.Bounds().Max.X%2 != 0 {
 			newSize := constants.Size{
 				ColorsAvailable: size.ColorsAvailable,
 				ColumnsNumber:   size.ColumnsNumber,
@@ -49,7 +48,7 @@ func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, f
 				}
 				rin = convert.Resize(rin, newSize, resizeAlgo)
 			}
-		}
+		}*/
 		newSize := constants.Size{
 			ColorsAvailable: size.ColorsAvailable,
 			ColumnsNumber:   size.ColumnsNumber,
