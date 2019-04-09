@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
 	"image"
 	"image/color"
 	"os"
@@ -34,19 +33,17 @@ func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, f
 		}
 	}
 	for i := 0.; i < 360.; i += angle {
-		var rin *image.NRGBA		
+		rin := imaging.Rotate(in, float64(i), color.Transparent)
 
-		if int(i) % 90 == 0 {
-			rin = convert.Resize(in, maxSize,resizeAlgo )
-			rin = imaging.Fill(
+		if rin.Bounds().Max.X < maxSize.Width || rin.Bounds().Max.Y < maxSize.Height {
+			//orig := constants.Size{Width:rin.Bounds().Max.X,Height:rin.Bounds().Max.Y}
+			//	rin = convert.Resize(rin, maxSize,resizeAlgo )
+			background := image.NewRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: maxSize.Width, Y: maxSize.Height}})
+
+			rin = imaging.PasteCenter(
+				background,
 				rin,
-			 	size.Width,
-				size.Height,
-				imaging.Center,
-				resizeAlgo,
 			)
-		} else {
-			rin = imaging.Rotate(in, float64(i), color.Transparent)
 		}
 		//rin = convert.Resize(rin, maxSize, resizeAlgo)
 
@@ -72,7 +69,7 @@ func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, f
 				rin = convert.Resize(rin, newSize, resizeAlgo)
 			}
 		}*/
-		
+
 		newFilename := exportType.OsFullPath(filePath, fmt.Sprintf("%.2d", indice)+".png")
 		if err := Png(newFilename, rin); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create image (%s) error :%v\n", newFilename, err)
