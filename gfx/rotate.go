@@ -20,9 +20,7 @@ func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, f
 	if exportType.RollIteration == -1 {
 		return ErrorMissingNumberOfImageToGenerate
 	}
-	if size.Width != size.Height {
-		return ErrorSizeMismatch
-	}
+
 	var indice int
 	angle := 360. / float64(exportType.RollIteration)
 

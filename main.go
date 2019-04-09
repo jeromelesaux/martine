@@ -49,7 +49,7 @@ var (
 	kitPath         = flag.String("kit", "", "Path of the palette Cpc plus Kit file.")
 	inkPath         = flag.String("ink", "", "Path of the palette Cpc ink file.")
 	rotateMode      = flag.Bool("rotate", false, "Allow rotation on the input image, the input image must be a square (width equals height)")
-	version         = "0.12"
+	version         = "0.13"
 )
 
 func usage() {
@@ -201,6 +201,12 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Cannot decode the image %s error %v", *picturePath, err)
 		os.Exit(-2)
 	}
+
+	if ! customDimension && *rotateMode {
+		size.Width = in.Bounds().Max.X
+		size.Height = in.Bounds().Max.Y
+	}
+	
 
 	fmt.Fprintf(os.Stderr, "Filename :%s, extension:%s\n", filename, extension)
 
