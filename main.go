@@ -24,7 +24,7 @@ var (
 	mode            = flag.Int("m", -1, "Output mode to use :\n\t0 for mode0\n\t1 for mode1\n\t2 for mode2\n\tand add -f option for overscan export.\n\t")
 	output          = flag.String("o", "", "Output directory")
 	overscan        = flag.Bool("f", false, "Overscan mode (default no overscan)")
-	resizeAlgorithm = flag.Int("a", 1, "Algorithm to resize the image (available : \n\t1: NearestNeighbor (default)\n\t2: CatmullRom\n\t3: Lanczos\n\t4: Linear\n\t5: Box\n\t6: Hermite\n\t7: BSpline\n\t8: Hamming\n\t9: Hann\n\t10: Gaussian\n\t11: Blackman\n\t12: Bartlett\n\t13: Welch\n\t14: Cosine\n\t")
+	resizeAlgorithm = flag.Int("a", 1, "Algorithm to resize the image (available : \n\t1: NearestNeighbor (default)\n\t2: CatmullRom\n\t3: Lanczos\n\t4: Linear\n\t5: Box\n\t6: Hermite\n\t7: BSpline\n\t8: Hamming\n\t9: Hann\n\t10: Gaussian\n\t11: Blackman\n\t12: Bartlett\n\t13: Welch\n\t14: Cosine\n\t15: MitchellNetravali\n\t")
 	help            = flag.Bool("help", false, "Display help message")
 	noAmsdosHeader  = flag.Bool("n", false, "no amsdos header for all files (default amsdos header added).")
 	plusMode        = flag.Bool("p", false, "Plus mode (means generate an image for CPC Plus Screen)")
@@ -202,11 +202,10 @@ func main() {
 		os.Exit(-2)
 	}
 
-	if ! customDimension && *rotateMode {
+	if !customDimension && *rotateMode {
 		size.Width = in.Bounds().Max.X
 		size.Height = in.Bounds().Max.Y
 	}
-	
 
 	fmt.Fprintf(os.Stderr, "Filename :%s, extension:%s\n", filename, extension)
 
@@ -240,6 +239,8 @@ func main() {
 		resizeAlgo = imaging.Welch
 	case 14:
 		resizeAlgo = imaging.Cosine
+	case 15:
+		resizeAlgo = imaging.MitchellNetravali
 	default:
 		resizeAlgo = imaging.NearestNeighbor
 	}
