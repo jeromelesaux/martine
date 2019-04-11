@@ -49,6 +49,9 @@ var (
 	kitPath         = flag.String("kit", "", "Path of the palette Cpc plus Kit file.")
 	inkPath         = flag.String("ink", "", "Path of the palette Cpc ink file.")
 	rotateMode      = flag.Bool("rotate", false, "Allow rotation on the input image, the input image must be a square (width equals height)")
+	m4Host = flag.String("host","","Set the ip of your M4.")
+	m4RemotePath = flag.String("remotepath","","remote path on your M4 where you want to copy your files.")
+	m4Autoexec = flag.Bool("autoexec",false,"Execute on your remote CPC the screen file or basic file.")
 	version         = "0.15.rc"
 )
 
@@ -186,6 +189,9 @@ func main() {
 	exportType.TileIterationY = *tileIterationY
 	exportType.Compression = *compress
 	exportType.RotationMode = *rotateMode
+	exportType.M4Host = *m4Host
+	exportType.M4RemotePath = *m4RemotePath
+	exportType.M4Autoexec = *m4Autoexec
 	if exportType.CpcPlus {
 		exportType.Kit = true
 		exportType.Pal = false
