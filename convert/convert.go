@@ -70,11 +70,17 @@ func computePaletteUsage(in *image.NRGBA, p color.Palette) map[color.Color]int {
 }
 
 func downgradeWithPalette(in *image.NRGBA, p color.Palette) *image.NRGBA {
+	cache := make(map[color.Color]color.Color, 0)
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
 			c := in.At(x, y)
-			cPalette := p.Convert(c)
-			in.Set(x, y, cPalette)
+			if cc := cache[c]; cc != nil {
+				in.Set(x, y, cc)
+			} else {
+				cPalette := p.Convert(c)
+				in.Set(x, y, cPalette)
+				cache[c] = cPalette
+			}
 		}
 	}
 	return in
@@ -82,15 +88,21 @@ func downgradeWithPalette(in *image.NRGBA, p color.Palette) *image.NRGBA {
 
 func downgrade(in *image.NRGBA, isCpcPlus bool) (color.Palette, *image.NRGBA) {
 	fmt.Fprintf(os.Stderr, "Plus palette :%d\n", len(constants.CpcPlusPalette))
+	cache := make(map[color.Color]color.Color, 0)
 	p := color.Palette{}
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
 			c := in.At(x, y)
 			var cPalette color.Color
-			if isCpcPlus {
-				cPalette = constants.CpcPlusPalette.Convert(c)
+			if cc := cache[c]; cc != nil {
+				cPalette = cc
 			} else {
-				cPalette = constants.CpcOldPalette.Convert(c)
+				if isCpcPlus {
+					cPalette = constants.CpcPlusPalette.Convert(c)
+				} else {
+					cPalette = constants.CpcOldPalette.Convert(c)
+				}
+				cache[c] = cPalette
 			}
 			in.Set(x, y, cPalette)
 			if !paletteContains(p, cPalette) {

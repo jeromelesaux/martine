@@ -164,6 +164,15 @@ func main() {
 		}
 	}
 
+	if size.Width > constants.WidthMax {
+		fmt.Fprintf(os.Stderr, "Max width allowed is (%d) your choice (%d), Quiting...\n", size.Width, constants.WidthMax)
+		os.Exit(-1)
+	}
+	if size.Height > constants.HeightMax {
+		fmt.Fprintf(os.Stderr, "Max height allowed is (%d) your choice (%d), Quiting...\n", size.Height, constants.HeightMax)
+		os.Exit(-1)
+	}
+
 	if *byteStatement != "" {
 		gfx.ByteToken = *byteStatement
 	}

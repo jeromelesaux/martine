@@ -34,12 +34,13 @@ func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, f
 			maxSize.Height = rin.Bounds().Max.Y
 		}
 	}
+	background := image.NewRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: maxSize.Width, Y: maxSize.Height}})
+	draw.Draw(background, background.Bounds(), &image.Uniform{p[0]}, image.ZP, draw.Src)
+
 	for i := 0.; i < 360.; i += angle {
 		rin := imaging.Rotate(in, float64(i), color.White)
 
 		if rin.Bounds().Max.X < maxSize.Width || rin.Bounds().Max.Y < maxSize.Height {
-			background := image.NewRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: maxSize.Width, Y: maxSize.Height}})
-			draw.Draw(background, background.Bounds(), &image.Uniform{p[0]}, image.ZP, draw.Src)
 			rin = imaging.PasteCenter(
 				background,
 				rin,

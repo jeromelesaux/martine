@@ -48,6 +48,8 @@ var (
 	OverscanMode1 = Size{Width: 384, Height: 272, LinesNumber: 272, ColumnsNumber: 96, ColorsAvailable: 4}
 	OverscanMode2 = Size{Width: 768, Height: 272, LinesNumber: 272, ColumnsNumber: 96, ColorsAvailable: 2}
 	SelfMode      = Size{}
+	WidthMax      = 768
+	HeightMax     = 272
 )
 var (
 	ErrorCpcColorNotFound = errors.New("Cpc color not found")
