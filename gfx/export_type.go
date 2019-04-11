@@ -12,6 +12,9 @@ var amsdosFilenameOnce sync.Once
 type ExportType struct {
 	InputPath      string
 	OutputPath     string
+	M4RemotePath string
+	M4Host string
+	M4Autoexec bool
 	Size           constants.Size
 	Compression    int
 	NoAmsdosHeader bool
@@ -21,6 +24,7 @@ type ExportType struct {
 	RollIteration  int
 	TileIterationX int
 	TileIterationY int
+	M4 bool
 	Dsk            bool
 	Ink            bool
 	Kit            bool

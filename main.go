@@ -201,6 +201,9 @@ func main() {
 		exportType.Scr = false
 		exportType.Kit = true
 	}
+	if exportType.M4Host != "" {
+		exportType.M4 = true
+	}
 	exportType.Dsk = *dsk
 
 	fmt.Fprintf(os.Stdout, "Informations :\n%s", size.ToString())
@@ -355,6 +358,11 @@ func main() {
 	if exportType.Dsk {
 		if err := gfx.ImportInDsk(exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create or write into dsk file error :%v\n", err)
+		}
+	}
+	if exportType.M4 {
+		if err := gfx.ImportInM4(exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Cannot send to M4 error :%v\n", err)
 		}
 	}
 	os.Exit(0)
