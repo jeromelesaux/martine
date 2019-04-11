@@ -6,8 +6,8 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"image"
 	"image/color"
-	"os"
 	"math"
+	"os"
 )
 
 var (

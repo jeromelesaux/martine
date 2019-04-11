@@ -225,6 +225,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, e
 	}
 	binary.Write(fw, binary.LittleEndian, o)
 	fw.Close()
+	exportType.AddFile(osFilepath)
 	return nil
 }
 
@@ -291,6 +292,7 @@ func Kit(filePath string, p color.Palette, screenMode uint8, exportType *ExportT
 	}
 	binary.Write(fw, binary.LittleEndian, data)
 	fw.Close()
+	exportType.AddFile(osFilepath)
 	return nil
 }
 
@@ -342,6 +344,7 @@ func Scr(filePath string, data []byte, exportType *ExportType) error {
 	}
 	binary.Write(fw, binary.LittleEndian, data)
 	fw.Close()
+	exportType.AddFile(osFilepath)
 	return nil
 }
 
