@@ -313,3 +313,33 @@ additionnals options available :
 * -s to define the byte token will be replace the byte token in the ascii files
 * -a to set the algorithm to downsize the image
 * -z compress the image .scr / .win (not overscan) using the algorithm
+
+## 4. rotation sprite : 
+This option able to rotate the input image, iter will generate the number of images.
+```martine -i images/coke.jpg -rotate -iter 16 -o test  -m 1 -w 32 -h 32```
+
+Input : ![samples/coke.jpg](samples/coke.jpg)
+
+results : ![samples/coke.igf](samples/coke.gif)
+
+  files generated : 
+ * .win sprite files
+ * .pal or .ink palette file (.ink will be generated if the -p option is set)
+ * .txt ascii file with palettes values (firmware values and basic values), and screen byte values
+ *  c.txt ascii file with palettes values (firmware values and basic values), and screen byte values by column
+ * .json json file with palettes values (firmware values and basic values), and screen byte values
+ *  _resized.png images files to ensure the resize action
+ * _downgraded.png images files to ensure the downgraded palette action
+
+additionnals options available : 
+* -dsk will generate a dsk file and add all amsdos files will be added.
+* -n will remove amsdos headers from the amsdos files
+* -f will generate overscan screen amsdos file
+* -p will generate a CPC plus screen amsdos file
+* -h will generate sprite of x pixel high
+* -w will generate sprite of x pixel wide
+* -m to define the screen mode 0,1,2
+* -o to set the output directory
+* -s to define the byte token will be replace the byte token in the ascii files
+* -a to set the algorithm to downsize the image
+* -z compress the image .scr / .win (not overscan) using the algorithm

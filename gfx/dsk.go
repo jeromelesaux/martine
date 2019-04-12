@@ -22,7 +22,6 @@ func ImportInDsk(exportType *ExportType) error {
 			}
 		}
 	}
-	//	}
 
 	return dsk.WriteDsk(dskFullpath, floppy)
 }
