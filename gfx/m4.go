@@ -50,7 +50,7 @@ func ImportInM4(exportType *ExportType) error {
 	if exportType.M4Autoexec {
 		p, err := client.Ls(exportType.M4RemotePath)
 		if err != nil {
-			fmt.Fprintf(os.Stderr,"Cannot go to the remote path (%s) error :%v\n", err)
+			fmt.Fprintf(os.Stderr,"Cannot go to the remote path (%s) error :%v\n", exportType.M4RemotePath, err)
 		} else {
 			fmt.Fprintf(os.Stdout,"Set the remote path (%s) \n",p)
 		}
