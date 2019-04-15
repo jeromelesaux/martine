@@ -24,7 +24,7 @@ func ImportInM4(exportType *ExportType) error {
 	client := m4.M4Client{IPClient: exportType.M4Host}
 
 	if err := client.MakeDirectory(exportType.M4RemotePath); err != nil {
-		fmt.Fprintf(os.Stderr,"Cannot create directory on M4 (%s) error %v\n",exportType.M4RemotePath$,err)
+		fmt.Fprintf(os.Stderr,"Cannot create directory on M4 (%s) error %v\n",exportType.M4RemotePath,err)
 	}
 
 	for _, v := range exportType.DskFiles {
