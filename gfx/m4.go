@@ -23,11 +23,13 @@ func ImportInM4(exportType *ExportType) error {
 
 	client := m4.M4Client{IPClient: exportType.M4Host}
 
+	fmt.Fprintf(os.Stdout,"Attempt to create remote directory (%s) to host (%s)\n",exportType.M4RemotePath,client.IPClient)
 	if err := client.MakeDirectory(exportType.M4RemotePath); err != nil {
 		fmt.Fprintf(os.Stderr,"Cannot create directory on M4 (%s) error %v\n",exportType.M4RemotePath,err)
 	}
 
 	for _, v := range exportType.DskFiles {
+		fmt.Fprintf(os.Stdout,"Attempt to uploading file (%s) on remote path (%s) to host (%s)\n",v,client.IPClient,exportType.M4RemotePath)
 		if err := client.Upload(exportType.M4RemotePath, v); err != nil {
 			fmt.Fprintf(os.Stderr, "Something is wrong M4 host (%s) local file (%s) remote path (%s) error :%v\n",
 				exportType.M4Host,
@@ -37,11 +39,12 @@ func ImportInM4(exportType *ExportType) error {
 		}
 	}
 	if exportType.Dsk {
-		dsk := exportType.Fullpath(".dsk")
-		if err := client.Upload(exportType.M4RemotePath,dsk); err != nil {
+		dskFile := exportType.Fullpath(".dsk")
+		fmt.Fprintf(os.Stdout,"Attempt to uploading file (%s) on remote path (%s) to host (%s)\n",dskFile,client.IPClient,exportType.M4RemotePath)
+		if err := client.Upload(exportType.M4RemotePath,dskFile); err != nil {
 			fmt.Fprintf(os.Stderr, "Something is wrong M4 host (%s) local file (%s) remote path (%s) error :%v\n",
 				exportType.M4Host,
-				dsk,
+				dskFile,
 				exportType.M4RemotePath,
 				err)
 		}
