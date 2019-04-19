@@ -29,7 +29,7 @@ func ImportInM4(exportType *ExportType) error {
 	}
 
 	for _, v := range exportType.DskFiles {
-		fmt.Fprintf(os.Stdout,"Attempt to uploading file (%s) on remote path (%s) to host (%s)\n",v,client.IPClient,exportType.M4RemotePath)
+		fmt.Fprintf(os.Stdout,"Attempt to uploading file (%s) on remote path (%s) to host (%s)\n",v,exportType.M4RemotePath,client.IPClient)
 		if err := client.Upload(exportType.M4RemotePath, v); err != nil {
 			fmt.Fprintf(os.Stderr, "Something is wrong M4 host (%s) local file (%s) remote path (%s) error :%v\n",
 				exportType.M4Host,
@@ -40,7 +40,7 @@ func ImportInM4(exportType *ExportType) error {
 	}
 	if exportType.Dsk {
 		dskFile := exportType.Fullpath(".dsk")
-		fmt.Fprintf(os.Stdout,"Attempt to uploading file (%s) on remote path (%s) to host (%s)\n",dskFile,client.IPClient,exportType.M4RemotePath)
+		fmt.Fprintf(os.Stdout,"Attempt to uploading file (%s) on remote path (%s) to host (%s)\n",dskFile,exportType.M4RemotePath,client.IPClient)
 		if err := client.Upload(exportType.M4RemotePath,dskFile); err != nil {
 			fmt.Fprintf(os.Stderr, "Something is wrong M4 host (%s) local file (%s) remote path (%s) error :%v\n",
 				exportType.M4Host,
