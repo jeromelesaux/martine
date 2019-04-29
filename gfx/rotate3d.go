@@ -5,7 +5,6 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
-	"github.com/faiface/pixel"
 	"image"
 	"image/color"
 	"image/draw"
