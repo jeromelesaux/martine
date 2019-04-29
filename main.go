@@ -52,7 +52,7 @@ var (
 	m4Host = flag.String("host","","Set the ip of your M4.")
 	m4RemotePath = flag.String("remotepath","","remote path on your M4 where you want to copy your files.")
 	m4Autoexec = flag.Bool("autoexec",false,"Execute on your remote CPC the screen file or basic file.")
-	version         = "0.15.rc"
+	version         = "0.15"
 )
 
 func usage() {
