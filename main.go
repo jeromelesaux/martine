@@ -52,7 +52,8 @@ var (
 	m4Host = flag.String("host","","Set the ip of your M4.")
 	m4RemotePath = flag.String("remotepath","","remote path on your M4 where you want to copy your files.")
 	m4Autoexec = flag.Bool("autoexec",false,"Execute on your remote CPC the screen file or basic file.")
-	version         = "0.15"
+	rotate3dMode = flag.Bool("rotate3d",false,"Allow 3d rotation on the input image, the input image must be a square (width equals height)")
+	version         = "0.16.rc"
 )
 
 func usage() {
@@ -189,6 +190,7 @@ func main() {
 	exportType.TileIterationY = *tileIterationY
 	exportType.Compression = *compress
 	exportType.RotationMode = *rotateMode
+	exportType.Rotation3DMode = *rotate3dMode
 	exportType.M4Host = *m4Host
 	exportType.M4RemotePath = *m4RemotePath
 	exportType.M4Autoexec = *m4Autoexec
@@ -341,19 +343,24 @@ func main() {
 					gfx.RollLow(*keeplow, *lostlow, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
 				}
 			}
-		} else {
-			if !customDimension {
-				gfx.Transform(downgraded, newPalette, size, *picturePath, exportType)
-			} else {
-				fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
-				gfx.SpriteTransform(downgraded, newPalette, size, screenMode, filename, exportType)
-			}
-		}
+		} 
 		if exportType.RotationMode {
 			if err := gfx.Rotate(downgraded, newPalette, size, uint8(*mode), *picturePath, resizeAlgo, exportType); err != nil {
 				fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", *picturePath, err)
 			}
+		} 
+		if exportType.Rotation3DMode {
+			if err := gfx.Rotate3d(downgraded, newPalette, size, uint8(*mode), *picturePath, resizeAlgo, exportType); err != nil {
+				fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", *picturePath, err)
+			}
+		} 
+		if !exportType.RotationMode && !exportType.Rotation3DMode {
+			gfx.Transform(downgraded, newPalette, size, *picturePath, exportType)
+		} else {
+			fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
+			gfx.SpriteTransform(downgraded, newPalette, size, screenMode, filename, exportType)
 		}
+		
 	}
 	if exportType.Dsk {
 		if err := gfx.ImportInDsk(exportType); err != nil {

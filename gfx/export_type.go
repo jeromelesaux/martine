@@ -19,6 +19,7 @@ type ExportType struct {
 	Compression    int
 	NoAmsdosHeader bool
 	RotationMode   bool
+	Rotation3DMode bool
 	TileMode       bool
 	RollMode       bool
 	RollIteration  int
