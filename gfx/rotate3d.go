@@ -24,7 +24,7 @@ func Rotate3d(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8,
 		targetSize = in.Bounds().Max.Y
 	}
 
-	for i := 0.; i < math.Pi ; i += angle {
+	for i := 0.; i < 360. ; i += angle {
 		background := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: targetSize, Y: targetSize}})
 		draw.Draw(background, background.Bounds(), &image.Uniform{p[0]}, image.ZP, draw.Src)
 		rin := rotateImage(in, background, i)
