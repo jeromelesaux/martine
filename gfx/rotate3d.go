@@ -24,7 +24,7 @@ func Rotate3d(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8,
 		targetSize = in.Bounds().Max.Y
 	}
 
-	for i := 0.; i < 360. ; i += angle {
+	for i := 0.; i < 360.; i += angle {
 		background := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: targetSize, Y: targetSize}})
 		draw.Draw(background, background.Bounds(), &image.Uniform{p[0]}, image.ZP, draw.Src)
 		rin := rotateImage(in, background, i)
@@ -49,7 +49,7 @@ func rotateImage(in, out *image.NRGBA, angle float64) *image.NRGBA {
 	for x := 0; x < in.Bounds().Max.X; x++ {
 		for y := 0; y < in.Bounds().Max.Y; y++ {
 			c := in.At(x, y)
-			x3d, y3d := rotateYAxisCoordinates(x, y, xc, yc, angle)
+			x3d, y3d := rotateY3AxisCoordinates(x, y, xc, yc, angle)
 			out.Set(x3d, y3d, c)
 		}
 	}
@@ -57,7 +57,7 @@ func rotateImage(in, out *image.NRGBA, angle float64) *image.NRGBA {
 }
 
 func rotateCoordinates(x, y, xc, yc int, angle float64) (int, int) {
-	theta := angle * math.Pi / 180. 
+	theta := angle * math.Pi / 180.
 	sinTheta := math.Sin(theta)
 	cosTheta := math.Cos(theta)
 	x3d := (float64(x-xc) * cosTheta) - (float64(y-yc) * sinTheta) + float64(xc)
@@ -65,9 +65,9 @@ func rotateCoordinates(x, y, xc, yc int, angle float64) (int, int) {
 	return int(math.Floor(x3d)), int(math.Floor(y3d))
 }
 
-
+// source : https://slideplayer.com/slide/9723655/
 func rotateYAxisCoordinates(x, y, xc, yc int, angle float64) (int, int) {
-	theta := angle * math.Pi / 180. 
+	theta := angle * math.Pi / 180.
 	cosTheta := math.Cos(theta)
 	x3d := (float64(x-xc) * cosTheta) + float64(xc)
 	y3d := (float64(y))
@@ -75,9 +75,43 @@ func rotateYAxisCoordinates(x, y, xc, yc int, angle float64) (int, int) {
 }
 
 func rotateXAxisCoordinates(x, y, xc, yc int, angle float64) (int, int) {
-	theta := angle * math.Pi / 180. 
+	theta := angle * math.Pi / 180.
 	cosTheta := math.Cos(theta)
 	x3d := (float64(x))
 	y3d := (float64(y-yc) * cosTheta) + float64(yc)
+	return int(math.Floor(x3d)), int(math.Floor(y3d))
+}
+
+func rotateY2AxisCoordinates(x, y, xc, yc int, angle float64) (int, int) {
+	theta := angle * math.Pi / 180.
+	sinTheta := math.Sin(theta)
+	x3d := (float64(x-xc) * sinTheta) + float64(xc)
+	y3d := (float64(y))
+	return int(math.Floor(x3d)), int(math.Floor(y3d))
+}
+
+func rotateX2AxisCoordinates(x, y, xc, yc int, angle float64) (int, int) {
+	theta := angle * math.Pi / 180.
+	sinTheta := math.Sin(theta)
+	x3d := (float64(x))
+	y3d := (float64(y-yc) * sinTheta) + float64(yc)
+	return int(math.Floor(x3d)), int(math.Floor(y3d))
+}
+
+func rotateX3AxisCoordinates(x, y, xc, yc int, angle float64) (int, int) {
+	theta := angle * math.Pi / 180.
+	sinTheta := math.Sin(theta)
+	cosTheta := math.Cos(theta)
+	x3d := (float64(x-xc) * cosTheta) - (float64(y-yc) * sinTheta) + float64(xc)
+	y3d := (float64(y))
+	return int(math.Floor(x3d)), int(math.Floor(y3d))
+}
+
+func rotateY3AxisCoordinates(x, y, xc, yc int, angle float64) (int, int) {
+	theta := angle * math.Pi / 180.
+	sinTheta := math.Sin(theta)
+	cosTheta := math.Cos(theta)
+	x3d := (float64(x))
+	y3d := (float64(y-yc) * cosTheta) + (float64(x-xc) * sinTheta) + float64(yc)
 	return int(math.Floor(x3d)), int(math.Floor(y3d))
 }
