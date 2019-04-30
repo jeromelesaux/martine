@@ -44,12 +44,12 @@ func Rotate3d(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8,
 }
 
 func rotateImage(in, out *image.NRGBA, angle float64) *image.NRGBA {
-	xc := out.Bounds().Max.X / 3
+	xc := out.Bounds().Max.X / 2
 	yc := out.Bounds().Max.Y / 2
 	for x := 0; x < in.Bounds().Max.X; x++ {
 		for y := 0; y < in.Bounds().Max.Y; y++ {
 			c := in.At(x, y)
-			x3d, y3d := rotateCoordinates(x, y, xc, yc, angle)
+			x3d, y3d := rotateYAxisCoordinates(x, y, xc, yc, angle)
 			out.Set(x3d, y3d, c)
 		}
 	}
@@ -62,5 +62,22 @@ func rotateCoordinates(x, y, xc, yc int, angle float64) (int, int) {
 	cosTheta := math.Cos(theta)
 	x3d := (float64(x-xc) * cosTheta) - (float64(y-yc) * sinTheta) + float64(xc)
 	y3d := (float64(y-yc) * cosTheta) + (float64(x-xc) * sinTheta) + float64(yc)
+	return int(math.Floor(x3d)), int(math.Floor(y3d))
+}
+
+
+func rotateYAxisCoordinates(x, y, xc, yc int, angle float64) (int, int) {
+	theta := angle * math.Pi / 180. 
+	cosTheta := math.Cos(theta)
+	x3d := (float64(x-xc) * cosTheta) + float64(xc)
+	y3d := (float64(y))
+	return int(math.Floor(x3d)), int(math.Floor(y3d))
+}
+
+func rotateXAxisCoordinates(x, y, xc, yc int, angle float64) (int, int) {
+	theta := angle * math.Pi / 180. 
+	cosTheta := math.Cos(theta)
+	x3d := (float64(x))
+	y3d := (float64(y-yc) * cosTheta) + float64(yc)
 	return int(math.Floor(x3d)), int(math.Floor(y3d))
 }
