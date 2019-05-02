@@ -360,7 +360,7 @@ func main() {
 				fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", *picturePath, err)
 			}
 		} 
-		if !exportType.RotationMode && !exportType.Rotation3DMode {
+		if !customDimension {
 			gfx.Transform(downgraded, newPalette, size, *picturePath, exportType)
 		} else {
 			fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
