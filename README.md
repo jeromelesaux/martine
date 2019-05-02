@@ -20,13 +20,14 @@ To get binary :
 Usage and options : 
 
 ```
+./martine
 martine convert (jpeg, png format) image to Amstrad cpc screen (even overscan)
-By Impact Sid (Version:0.12)
+By Impact Sid (Version:0.16.rc)
 Special thanks to @Ast (for his support), @Siko and @Tronic for ideas
 usage :
 
   -a int
-    	Algorithm to resize the image (available :
+    	Algorithm to resize the image (available : 
     		1: NearestNeighbor (default)
     		2: CatmullRom
     		3: Lanczos
@@ -41,7 +42,10 @@ usage :
     		12: Bartlett
     		13: Welch
     		14: Cosine
+    		15: MitchellNetravali
     		 (default 1)
+  -autoexec
+    	Execute on your remote CPC the screen file or basic file.
   -dsk
     	Copy files in a new CPC image Dsk.
   -f	Overscan mode (default no overscan)
@@ -49,6 +53,8 @@ usage :
     	Custom output height in pixels. (default -1)
   -help
     	Display help message
+  -host string
+    	Set the ip of your M4.
   -i string
     	Picture path of the input file.
   -info
@@ -84,12 +90,29 @@ usage :
   -p	Plus mode (means generate an image for CPC Plus Screen)
   -pal string
     	Apply the input palette to the image
+  -remotepath string
+    	remote path on your M4 where you want to copy your files.
   -rla int
     	bit rotation on the left and keep pixels (default -1)
   -roll
     	Roll mode allow to walk and walk into the input file, associated with rla,rra,sra,sla, keephigh, keeplow, losthigh or lostlow options.
   -rotate
     	Allow rotation on the input image, the input image must be a square (width equals height)
+  -rotate3d
+    	Allow 3d rotation on the input image, the input image must be a square (width equals height)
+  -rotate3dtype int
+    	Rotation type :
+    		1 rotate on X axis
+    		2 rotate on Y axis
+    		3 rotate reverse X axis
+    		4 rotate left to right on Y axis
+    		5 diagonal rotation on X axis
+    		6 diagonal rotation on Y axis
+    	
+  -rotate3dx0 int
+    	X0 coordinate to apply in 3d rotation (default width of the image/2) (default -1)
+  -rotate3dy0 int
+    	Y0 coordinate to apply in 3d rotation (default height of the image/2) (default -1)
   -rra int
     	bit rotation on the right and keep pixels (default -1)
   -s string
@@ -105,20 +128,22 @@ usage :
   -win string
     	Filepath of the ocp win file
   -z int
-    	Compression algorithm :
+    	Compression algorithm : 
     		1: rle (default)
     		2: rle 16bits
     		3: Lz4 Classic
     		4: Lz4 Raw
     	 (default -1)
+
 ```
 
 Principles : 
-Martine can be used in 4 modes : 
+Martine can be used in 5 modes : 
  * first mode : conversion of an input image into sprite (file .win), cpc screen (file .scr) and overscan screen (larger file .scr)
  * second mode : rotate line or column pixels of an input image (option -roll)
  * bulk conversion of a tiles page : each sprites of the same width and height will be converted to sprites (files .win, option -tile)
- * last mode, rotate an existing image, will produce images rotated
+ * rotate an existing image, will produce images rotated
+ * 3d rotate an existing image on an axis.
 
 examples :
 ## 1. Screen conversion :
@@ -323,6 +348,36 @@ Input : ![samples/coke.jpg](samples/coke.jpg)
 results : ![samples/coke.igf](samples/coke.gif)
 
   files generated : 
+ * .win sprite files
+ * .pal or .ink palette file (.ink will be generated if the -p option is set)
+ * .txt ascii file with palettes values (firmware values and basic values), and screen byte values
+ *  c.txt ascii file with palettes values (firmware values and basic values), and screen byte values by column
+ * .json json file with palettes values (firmware values and basic values), and screen byte values
+ *  _resized.png images files to ensure the resize action
+ * _downgraded.png images files to ensure the downgraded palette action
+
+additionnals options available : 
+* -dsk will generate a dsk file and add all amsdos files will be added.
+* -n will remove amsdos headers from the amsdos files
+* -f will generate overscan screen amsdos file
+* -p will generate a CPC plus screen amsdos file
+* -h will generate sprite of x pixel high
+* -w will generate sprite of x pixel wide
+* -m to define the screen mode 0,1,2
+* -o to set the output directory
+* -s to define the byte token will be replace the byte token in the ascii files
+* -a to set the algorithm to downsize the image
+* -z compress the image .scr / .win (not overscan) using the algorithm
+
+## 5. 3d rotation sprite : 
+This option able to rotate the input image on an axis (X or Y and even on a diagonal), iter will generate the number of images. 
+```./martine -m 0 -w 64 -h 64 -rotate3d -rotate3dtype 2 -o test/ -i images/sonic.png  -iter 12```
+
+Input : ![samples/sonic.png](samples/sonic.png)
+
+Results: ![samples/sonic_rotate.png](samples/sonic_rotate.gif)
+
+ files generated : 
  * .win sprite files
  * .pal or .ink palette file (.ink will be generated if the -p option is set)
  * .txt ascii file with palettes values (firmware values and basic values), and screen byte values
