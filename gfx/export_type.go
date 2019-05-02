@@ -20,6 +20,9 @@ type ExportType struct {
 	NoAmsdosHeader bool
 	RotationMode   bool
 	Rotation3DMode bool
+	Rotation3DX0 int
+	Rotation3DY0 int
+	Rotation3DType int 
 	TileMode       bool
 	RollMode       bool
 	RollIteration  int
@@ -52,6 +55,8 @@ func NewExportType(input, output string) *ExportType {
 		OutputPath:     output,
 		amsdosFilename: make([]byte, 8),
 		DskFiles:       make([]string, 0),
+		Rotation3DX0: -1,
+		Rotation3DY0: -1,
 		Tiles:          NewJsonSlice()}
 }
 

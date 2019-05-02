@@ -53,6 +53,9 @@ var (
 	m4RemotePath = flag.String("remotepath","","remote path on your M4 where you want to copy your files.")
 	m4Autoexec = flag.Bool("autoexec",false,"Execute on your remote CPC the screen file or basic file.")
 	rotate3dMode = flag.Bool("rotate3d",false,"Allow 3d rotation on the input image, the input image must be a square (width equals height)")
+	rotate3dType = flag.Int("rotate3dtype",0,"Rotation type :\n\t1 rotate on X axis\n\t2 rotate on Y axis\n\t3 rotate reverse X axis\n\t4 rotate left to right on Y axis\n\t5 diagonal rotation on X axis\n\t6 diagonal rotation on Y axis\n")
+	rotate3dX0 = flag.Int("rotate3dx0", -1,"X0 coordinate to apply in 3d rotation (default width of the image/2)")
+	rotate3dY0 = flag.Int("rotate3dy0", -1,"Y0 coordinate to apply in 3d rotation (default height of the image/2)")
 	version         = "0.16.rc"
 )
 
@@ -191,6 +194,9 @@ func main() {
 	exportType.Compression = *compress
 	exportType.RotationMode = *rotateMode
 	exportType.Rotation3DMode = *rotate3dMode
+	exportType.Rotation3DType = *rotate3dType
+	exportType.Rotation3DX0 = *rotate3dX0
+	exportType.Rotation3DY0 = *rotate3dY0
 	exportType.M4Host = *m4Host
 	exportType.M4RemotePath = *m4RemotePath
 	exportType.M4Autoexec = *m4Autoexec
