@@ -92,13 +92,13 @@ func main() {
 	}
 
 	if *processFile != "" {
-		process, err := LoadProcessFile(*processFile)
+		proc, err := LoadProcessFile(*processFile)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error while loading (%s) process file error :%v\n", *initProcess, err)
 			os.Exit(-1)
 		}
-		process.Apply()
-		err = process.GenerateRawFile()
+		proc.Apply()
+		err = proc.GenerateRawFile()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error while loading (%s) process file error :%v\n", *initProcess, err)
 			os.Exit(-1)
