@@ -19,13 +19,13 @@ func Rotate3d(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8,
 
 	var indice int
 	angle := 360. / float64(exportType.RollIteration)
-	targetSize := in.Bounds().Max.X
-	if in.Bounds().Max.Y > in.Bounds().Max.X {
-		targetSize = in.Bounds().Max.Y
-	}
+	//targetSize := in.Bounds().Max.X
+	//if in.Bounds().Max.Y > in.Bounds().Max.X {
+	//	targetSize = in.Bounds().Max.Y
+	//}
 
 	for i := 0.; i < 360.; i += angle {
-		background := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: targetSize, Y: targetSize}})
+		background := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: size.Width, Y: size.Height}})
 		draw.Draw(background, background.Bounds(), &image.Uniform{p[0]}, image.ZP, draw.Src)
 		rin := rotateImage(in, background, i, exportType)
 		_, rin = convert.DowngradingWithPalette(rin, p)
@@ -34,7 +34,7 @@ func Rotate3d(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8,
 		if err := Png(newFilename, rin); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create image (%s) error :%v\n", newFilename, err)
 		}
-		if err := SpriteTransform(rin, p, constants.Size{Width: targetSize, Height: targetSize}, mode, newFilename, exportType); err != nil {
+		if err := SpriteTransform(rin, p, constants.Size{Width: size.Width, Height: size.Height}, mode, newFilename, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create sprite image (%s) error %v\n", newFilename, err)
 		}
 		indice++
