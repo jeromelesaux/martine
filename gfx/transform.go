@@ -782,13 +782,13 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 	case 2:
 		factor = 2
 	}
-	if (width * height * factor) != len(data) {
+	if (width * height) != len(data) {
 		return nil, ErrorBadSize
 	}
 	in := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: width, Y: height}})
 	x := 0
 	y := 0
-
+	width *= factor // width in entry is the cpc width not the png width
 	for index, val := range data {
 
 		switch mode {
