@@ -98,11 +98,13 @@ func main() {
 			os.Exit(-1)
 		}
 		proc.Apply()
-		err = proc.GenerateRawFile()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while loading (%s) process file error :%v\n", *initProcess, err)
-			os.Exit(-1)
-		}
+		if proc.PicturePath == "" {
+			err = proc.GenerateRawFile()
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error while loading (%s) process file error :%v\n", *initProcess, err)
+				os.Exit(-1)
+			}
+		}	
 	}
 
 	if *info {

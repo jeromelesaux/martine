@@ -139,7 +139,7 @@ func (p *Process) Apply() {
 }
 
 func (p *Process) GenerateRawFile() error {
-	p.PicturePath = fmt.Sprintf("raw_%4d.png", os.Getppid())
+	p.PicturePath = fmt.Sprintf("raw_%.4d.png", os.Getppid())
 	in, err := gfx.TransformRawCpcData(p.Data, p.Palette, p.Width, p.Height, p.Mode, p.PlusMode)
 	if err != nil {
 		return err
