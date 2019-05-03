@@ -49,13 +49,15 @@ var (
 	kitPath         = flag.String("kit", "", "Path of the palette Cpc plus Kit file.")
 	inkPath         = flag.String("ink", "", "Path of the palette Cpc ink file.")
 	rotateMode      = flag.Bool("rotate", false, "Allow rotation on the input image, the input image must be a square (width equals height)")
-	m4Host = flag.String("host","","Set the ip of your M4.")
-	m4RemotePath = flag.String("remotepath","","remote path on your M4 where you want to copy your files.")
-	m4Autoexec = flag.Bool("autoexec",false,"Execute on your remote CPC the screen file or basic file.")
-	rotate3dMode = flag.Bool("rotate3d",false,"Allow 3d rotation on the input image, the input image must be a square (width equals height)")
-	rotate3dType = flag.Int("rotate3dtype",0,"Rotation type :\n\t1 rotate on X axis\n\t2 rotate on Y axis\n\t3 rotate reverse X axis\n\t4 rotate left to right on Y axis\n\t5 diagonal rotation on X axis\n\t6 diagonal rotation on Y axis\n")
-	rotate3dX0 = flag.Int("rotate3dx0", -1,"X0 coordinate to apply in 3d rotation (default width of the image/2)")
-	rotate3dY0 = flag.Int("rotate3dy0", -1,"Y0 coordinate to apply in 3d rotation (default height of the image/2)")
+	m4Host          = flag.String("host", "", "Set the ip of your M4.")
+	m4RemotePath    = flag.String("remotepath", "", "remote path on your M4 where you want to copy your files.")
+	m4Autoexec      = flag.Bool("autoexec", false, "Execute on your remote CPC the screen file or basic file.")
+	rotate3dMode    = flag.Bool("rotate3d", false, "Allow 3d rotation on the input image, the input image must be a square (width equals height)")
+	rotate3dType    = flag.Int("rotate3dtype", 0, "Rotation type :\n\t1 rotate on X axis\n\t2 rotate on Y axis\n\t3 rotate reverse X axis\n\t4 rotate left to right on Y axis\n\t5 diagonal rotation on X axis\n\t6 diagonal rotation on Y axis\n")
+	rotate3dX0      = flag.Int("rotate3dx0", -1, "X0 coordinate to apply in 3d rotation (default width of the image/2)")
+	rotate3dY0      = flag.Int("rotate3dy0", -1, "Y0 coordinate to apply in 3d rotation (default height of the image/2)")
+	initProcess     = flag.String("initprocess", "", "create a new empty process file.")
+	processFile     = flag.String("processfile", "", "Process file path to apply.")
 	version         = "0.16.rc"
 )
 
@@ -80,6 +82,29 @@ func main() {
 		usage()
 	}
 
+	if *initProcess != "" {
+		err := InitProcess(*initProcess)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error while creating (%s) process file error :%v\n", *initProcess, err)
+			os.Exit(-1)
+		}
+		os.Exit(0)
+	}
+
+	if *processFile != "" {
+		process, err := LoadProcessFile(*processFile)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error while loading (%s) process file error :%v\n", *initProcess, err)
+			os.Exit(-1)
+		}
+		process.Apply()
+		err = process.GenerateRawFile()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error while loading (%s) process file error :%v\n", *initProcess, err)
+			os.Exit(-1)
+		}
+	}
+
 	if *info {
 		if *palettePath != "" {
 			gfx.PalInformation(*palettePath)
@@ -98,6 +123,7 @@ func main() {
 
 	// picture path to convert
 	if *picturePath == "" {
+		fmt.Fprintf(os.Stderr, "No picture to compute (option -picturepath)\n")
 		usage()
 	}
 	filename = filepath.Base(*picturePath)
@@ -349,24 +375,24 @@ func main() {
 					gfx.RollLow(*keeplow, *lostlow, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
 				}
 			}
-		} 
+		}
 		if exportType.RotationMode {
 			if err := gfx.Rotate(downgraded, newPalette, size, uint8(*mode), *picturePath, resizeAlgo, exportType); err != nil {
 				fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", *picturePath, err)
 			}
-		} 
+		}
 		if exportType.Rotation3DMode {
 			if err := gfx.Rotate3d(downgraded, newPalette, size, uint8(*mode), *picturePath, resizeAlgo, exportType); err != nil {
 				fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", *picturePath, err)
 			}
-		} 
+		}
 		if !customDimension {
 			gfx.Transform(downgraded, newPalette, size, *picturePath, exportType)
 		} else {
 			fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
 			gfx.SpriteTransform(downgraded, newPalette, size, screenMode, filename, exportType)
 		}
-		
+
 	}
 	if exportType.Dsk {
 		if err := gfx.ImportInDsk(exportType); err != nil {

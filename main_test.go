@@ -50,7 +50,7 @@ func TestNormalScreenMode1(t *testing.T) {
 }
 
 func TestNormalScreenMode1Dsk(t *testing.T) {
-	args := []string{"run", "main.go", "-i", "samples/Batman-Neal-Adams.jpg", "-m", "1", "-o", "test" ,"-dsk"}
+	args := []string{"run", "main.go", "-i", "samples/Batman-Neal-Adams.jpg", "-m", "1", "-o", "test", "-dsk"}
 	cmd := exec.Command("go", args...)
 	err := cmd.Run()
 	if err != nil {

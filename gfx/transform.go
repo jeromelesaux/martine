@@ -14,6 +14,7 @@ var (
 	ErrorColorNotFound     = errors.New("Color not found in palette.")
 	ErrorNotYetImplemented = errors.New("Function is not yet implemented.")
 	ErrorModeNotFound      = errors.New("Mode not found or not implemented.")
+	ErrorBadSize           = errors.New("Width height does not correspond to data size.")
 )
 
 func Transform(in *image.NRGBA, p color.Palette, size constants.Size, filepath string, exportType *ExportType) error {
@@ -332,6 +333,112 @@ func pixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) byte {
 	return pixel
 }
 
+func rawMode2(b byte) (pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) {
+	if b-128 > 0 {
+		pp1 = 1
+		b = b - 128
+	}
+	if b-64 > 0 {
+		pp2 = 1
+		b = b - 64
+	}
+	if b-32 > 0 {
+		pp3 = 1
+		b = b - 32
+	}
+	if b-16 > 0 {
+		pp4 = 1
+		b = b - 16
+	}
+	if b-8 > 0 {
+		pp5 = 1
+		b = b - 8
+	}
+	if b-4 > 0 {
+		pp6 = 1
+		b = b - 4
+	}
+	if b-2 > 0 {
+		pp7 = 1
+		b = b - 2
+	}
+	if b-1 > 0 {
+		pp8 = 1
+	}
+	return
+}
+
+func rawMode1(b byte) (pp1, pp2, pp3, pp4 int) {
+	if b-128 > 0 {
+		pp1++
+		b -= 128
+	}
+	if b-64 > 0 {
+		pp2++
+		b -= 64
+	}
+	if b-32 > 0 {
+		pp3++
+		b -= 32
+	}
+	if b-16 > 0 {
+		pp4++
+		b -= 16
+	}
+	if b-8 > 0 {
+		pp1 += 2
+		b -= 8
+	}
+	if b-4 > 0 {
+		pp2 += 2
+		b -= 4
+	}
+	if b-2 > 0 {
+		pp3 += 2
+		b -= 2
+	}
+	if b-1 > 0 {
+		pp4 += 2
+	}
+
+	return
+}
+
+func rawMode0(b byte) (pp1, pp2 int) {
+	if b-128 > 0 {
+		pp1++
+		b -= 128
+	}
+	if b-64 > 0 {
+		pp2++
+		b -= 64
+	}
+	if b-32 > 0 {
+		pp1 += 2
+		b -= 32
+	}
+	if b-16 > 0 {
+		pp2 += 2
+		b -= 16
+	}
+	if b-8 > 0 {
+		pp1 += 4
+		b -= 8
+	}
+	if b-4 > 0 {
+		pp2 += 4
+		b -= 4
+	}
+	if b-2 > 0 {
+		pp1 += 8
+		b -= 2
+	}
+	if b-1 > 0 {
+		pp2 += 8
+	}
+	return
+}
+
 func TransformMode0(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *ExportType) error {
 	var bw []byte
 	if exportType.Overscan {
@@ -647,4 +754,163 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 	}
 
 	return Ascii(filePath, bw, p, exportType)
+}
+
+func revertColor(rawColor uint8, index int, isPlus bool) color.Color {
+	var newColor color.Color
+	var err error
+	if isPlus {
+		newColor, err = constants.ColorFromHardware(rawColor)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "No color found in data at index %d\n", index)
+		}
+	} else {
+		plusColor := NewRawCpcPlusColor(uint16(rawColor))
+		c := color.RGBA{A: 0xFF, R: uint8(plusColor.R), G: uint8(plusColor.G), B: uint8(plusColor.B)}
+		newColor = constants.CpcPlusPalette.Convert(c)
+	}
+	return newColor
+}
+
+func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlus bool) (*image.NRGBA, error) {
+	var factor int
+	switch mode {
+	case 0:
+		factor = 8
+	case 1:
+		factor = 4
+	case 2:
+		factor = 2
+	}
+	if (width * height * factor) != len(data) {
+		return nil, ErrorBadSize
+	}
+	in := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: width, Y: height}})
+	x := 0
+	y := 0
+
+	for index, val := range data {
+
+		switch mode {
+		case 0:
+			p1, p2 := rawMode0(byte(val))
+			c1 := palette[p1]
+			newColor := revertColor(uint8(c1), index, isPlus)
+			in.Set(x, y, newColor)
+			x++
+			if (x % width) == 0 {
+				x = 0
+				y++
+			}
+			c2 := palette[p2]
+			newColor = revertColor(uint8(c2), index, isPlus)
+			in.Set(x, y, newColor)
+			x++
+			if (x % width) == 0 {
+				x = 0
+				y++
+			}
+		case 1:
+			p1, p2, p3, p4 := rawMode1(byte(val))
+			c1 := palette[p1]
+			newColor := revertColor(uint8(c1), index, isPlus)
+			in.Set(x, y, newColor)
+			x++
+			if (x % width) == 0 {
+				x = 0
+				y++
+			}
+			c2 := palette[p2]
+			newColor = revertColor(uint8(c2), index, isPlus)
+			in.Set(x, y, newColor)
+			x++
+			if (x % width) == 0 {
+				x = 0
+				y++
+			}
+			c3 := palette[p3]
+			newColor = revertColor(uint8(c3), index, isPlus)
+			in.Set(x, y, newColor)
+			x++
+			if (x % width) == 0 {
+				x = 0
+				y++
+			}
+			c4 := palette[p4]
+			newColor = revertColor(uint8(c4), index, isPlus)
+			in.Set(x, y, newColor)
+			x++
+			if (x % width) == 0 {
+				x = 0
+				y++
+			}
+		case 2:
+			p1, p2, p3, p4, p5, p6, p7, p8 := rawMode2(byte(val))
+			c1 := palette[p1]
+			newColor := revertColor(uint8(c1), index, isPlus)
+			in.Set(x, y, newColor)
+			x++
+			if (x % width) == 0 {
+				x = 0
+				y++
+			}
+			c2 := palette[p2]
+			newColor = revertColor(uint8(c2), index, isPlus)
+			in.Set(x, y, newColor)
+			x++
+			if (x % width) == 0 {
+				x = 0
+				y++
+			}
+			c3 := palette[p3]
+			newColor = revertColor(uint8(c3), index, isPlus)
+			in.Set(x, y, newColor)
+			x++
+			if (x % width) == 0 {
+				x = 0
+				y++
+			}
+			c4 := palette[p4]
+			newColor = revertColor(uint8(c4), index, isPlus)
+			in.Set(x, y, newColor)
+			x++
+			if (x % width) == 0 {
+				x = 0
+				y++
+			}
+			c5 := palette[p5]
+			newColor = revertColor(uint8(c5), index, isPlus)
+			in.Set(x, y, newColor)
+			x++
+			if (x % width) == 0 {
+				x = 0
+				y++
+			}
+			c6 := palette[p6]
+			newColor = revertColor(uint8(c6), index, isPlus)
+			in.Set(x, y, newColor)
+			x++
+			if (x % width) == 0 {
+				x = 0
+				y++
+			}
+			c7 := palette[p7]
+			newColor = revertColor(uint8(c7), index, isPlus)
+			in.Set(x, y, newColor)
+			x++
+			if (x % width) == 0 {
+				x = 0
+				y++
+			}
+			c8 := palette[p8]
+			newColor = revertColor(uint8(c8), index, isPlus)
+			in.Set(x, y, newColor)
+			x++
+			if (x % width) == 0 {
+				x = 0
+				y++
+			}
+		}
+	}
+	return in, nil
 }

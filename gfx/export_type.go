@@ -12,23 +12,23 @@ var amsdosFilenameOnce sync.Once
 type ExportType struct {
 	InputPath      string
 	OutputPath     string
-	M4RemotePath string
-	M4Host string
-	M4Autoexec bool
+	M4RemotePath   string
+	M4Host         string
+	M4Autoexec     bool
 	Size           constants.Size
 	Compression    int
 	NoAmsdosHeader bool
 	RotationMode   bool
 	Rotation3DMode bool
-	Rotation3DX0 int
-	Rotation3DY0 int
-	Rotation3DType int 
+	Rotation3DX0   int
+	Rotation3DY0   int
+	Rotation3DType int
 	TileMode       bool
 	RollMode       bool
 	RollIteration  int
 	TileIterationX int
 	TileIterationY int
-	M4 bool
+	M4             bool
 	Dsk            bool
 	Ink            bool
 	Kit            bool
@@ -55,8 +55,8 @@ func NewExportType(input, output string) *ExportType {
 		OutputPath:     output,
 		amsdosFilename: make([]byte, 8),
 		DskFiles:       make([]string, 0),
-		Rotation3DX0: -1,
-		Rotation3DY0: -1,
+		Rotation3DX0:   -1,
+		Rotation3DY0:   -1,
 		Tiles:          NewJsonSlice()}
 }
 

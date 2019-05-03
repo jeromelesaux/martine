@@ -27,7 +27,7 @@ func Rotate3d(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8,
 	for i := 0.; i < 360.; i += angle {
 		background := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: targetSize, Y: targetSize}})
 		draw.Draw(background, background.Bounds(), &image.Uniform{p[0]}, image.ZP, draw.Src)
-		rin := rotateImage(in, background, i,exportType)
+		rin := rotateImage(in, background, i, exportType)
 		_, rin = convert.DowngradingWithPalette(rin, p)
 
 		newFilename := exportType.OsFullPath(filePath, fmt.Sprintf("%.2d", indice)+".png")
@@ -58,17 +58,24 @@ func rotateImage(in, out *image.NRGBA, angle float64, exportType *ExportType) *i
 	for x := 0; x < in.Bounds().Max.X; x++ {
 		for y := 0; y < in.Bounds().Max.Y; y++ {
 			c := in.At(x, y)
-			var x3d,y3d int
+			var x3d, y3d int
 			switch exportType.Rotation3DType {
-			case 1 : x3d, y3d = rotateXAxisCoordinates(x, y, xc, yc, angle)
-			case 2 : x3d, y3d = rotateYAxisCoordinates(x, y, xc, yc, angle)
-			case 3 : x3d, y3d = rotateToReverseXAxisCoordinates(x, y, xc, yc, angle)
-			case 4 : x3d, y3d = rotateLeftToRightYAxisCoordinates(x, y, xc, yc, angle)
-			case 5 : x3d, y3d = rotateDiagonalXAxisCoordinates(x, y, xc, yc, angle)
-			case 6 : x3d, y3d = rotateDiagonalYAxisCoordinates(x, y, xc, yc, angle)
-			default: x3d, y3d = rotateXAxisCoordinates(x, y, xc, yc, angle)
+			case 1:
+				x3d, y3d = rotateXAxisCoordinates(x, y, xc, yc, angle)
+			case 2:
+				x3d, y3d = rotateYAxisCoordinates(x, y, xc, yc, angle)
+			case 3:
+				x3d, y3d = rotateToReverseXAxisCoordinates(x, y, xc, yc, angle)
+			case 4:
+				x3d, y3d = rotateLeftToRightYAxisCoordinates(x, y, xc, yc, angle)
+			case 5:
+				x3d, y3d = rotateDiagonalXAxisCoordinates(x, y, xc, yc, angle)
+			case 6:
+				x3d, y3d = rotateDiagonalYAxisCoordinates(x, y, xc, yc, angle)
+			default:
+				x3d, y3d = rotateXAxisCoordinates(x, y, xc, yc, angle)
 			}
-			
+
 			out.Set(x3d, y3d, c)
 		}
 	}
