@@ -38,7 +38,7 @@ func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, f
 	draw.Draw(background, background.Bounds(), &image.Uniform{p[0]}, image.ZP, draw.Src)
 
 	for i := 0.; i < 360.; i += angle {
-		rin := imaging.Rotate(in, float64(i), color.White)
+		rin := imaging.Rotate(in, float64(i), p[0])
 
 		if rin.Bounds().Max.X < maxSize.Width || rin.Bounds().Max.Y < maxSize.Height {
 			rin = imaging.PasteCenter(
