@@ -333,107 +333,110 @@ func pixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) byte {
 	return pixel
 }
 
-func rawMode2(b byte) (pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) {
-	if b-128 > 0 {
+func rawPixelMode2(b byte) (pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) {
+	val := int(b)
+	if val-128 >= 0 {
 		pp1 = 1
-		b = b - 128
+		val -= 128
 	}
-	if b-64 > 0 {
+	if val-64 >= 0 {
 		pp2 = 1
-		b = b - 64
+		val -= 64
 	}
-	if b-32 > 0 {
+	if val-32 >= 0 {
 		pp3 = 1
-		b = b - 32
+		val -= 32
 	}
-	if b-16 > 0 {
+	if val-16 >= 0 {
 		pp4 = 1
-		b = b - 16
+		val-= 16
 	}
-	if b-8 > 0 {
+	if val-8 >= 0 {
 		pp5 = 1
-		b = b - 8
+		val -= 8
 	}
-	if b-4 > 0 {
+	if val-4 >= 0 {
 		pp6 = 1
-		b = b - 4
+		val -= 4
 	}
-	if b-2 > 0 {
+	if val-2 >= 0 {
 		pp7 = 1
-		b = b - 2
+		val  -= 2
 	}
-	if b-1 > 0 {
+	if val-1 >= 0 {
 		pp8 = 1
 	}
 	return
 }
 
-func rawMode1(b byte) (pp1, pp2, pp3, pp4 int) {
-	if b-128 > 0 {
+func rawPixelMode1(b byte) (pp1, pp2, pp3, pp4 int) {
+	val := int(b)
+	if val-128 >= 0 {
 		pp1++
-		b -= 128
+		val -= 128
 	}
-	if b-64 > 0 {
+	if val-64 >= 0 {
 		pp2++
-		b -= 64
+		val -= 64
 	}
-	if b-32 > 0 {
+	if val-32 >= 0 {
 		pp3++
-		b -= 32
+		val -= 32
 	}
-	if b-16 > 0 {
+	if val-16 >= 0 {
 		pp4++
-		b -= 16
+		val -= 16
 	}
-	if b-8 > 0 {
+	if val-8 >= 0 {
 		pp1 += 2
-		b -= 8
+		val -= 8
 	}
-	if b-4 > 0 {
+	if val-4 >= 0 {
 		pp2 += 2
-		b -= 4
+		val -= 4
 	}
-	if b-2 > 0 {
+	if val-2 >= 0 {
 		pp3 += 2
-		b -= 2
+		val -= 2
 	}
-	if b-1 > 0 {
+	if val-1 >= 0 {
 		pp4 += 2
 	}
 
 	return
 }
 
-func rawMode0(b byte) (pp1, pp2 int) {
-	if b-128 > 0 {
+func rawPixelMode0(b byte) (pp1, pp2 int) {
+	val := int(b)
+	if val-128 >= 0 {
 		pp1++
-		b -= 128
+		val -= 128
 	}
-	if b-64 > 0 {
+	if val-64 >= 0 {
 		pp2++
-		b -= 64
+		val -= 64
 	}
-	if b-32 > 0 {
+	if val-32 >= 0 {
 		pp1 += 2
-		b -= 32
+		val -= 32
 	}
-	if b-16 > 0 {
+	if val-16 >= 0 {
 		pp2 += 2
-		b -= 16
+		val -= 16
 	}
-	if b-8 > 0 {
+	if val-8 >= 0 {
 		pp1 += 4
-		b -= 8
+		val -= 8
 	}
-	if b-4 > 0 {
+	if val-4 >= 0 {
 		pp2 += 4
-		b -= 4
+		val -= 4
 	}
-	if b-2 > 0 {
+	if val-2 >= 0 {
 		pp1 += 8
-		b -= 2
+		val -= 2
 	}
-	if b-1 > 0 {
+	if val-1 >= 0 {
 		pp2 += 8
 	}
 	return
@@ -759,10 +762,11 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 func revertColor(rawColor uint8, index int, isPlus bool) color.Color {
 	var newColor color.Color
 	var err error
-	if isPlus {
+	if !isPlus {
 		newColor, err = constants.ColorFromHardware(rawColor)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "No color found in data at index %d\n", index)
+			return constants.White.Color
 		}
 	} else {
 		plusColor := NewRawCpcPlusColor(uint16(rawColor))
@@ -773,7 +777,7 @@ func revertColor(rawColor uint8, index int, isPlus bool) color.Color {
 }
 
 func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlus bool) (*image.NRGBA, error) {
-	var factor int
+/*	var factor int
 	switch mode {
 	case 0:
 		factor = 8
@@ -781,19 +785,19 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 		factor = 4
 	case 2:
 		factor = 2
-	}
-	if (width * height) != len(data) {
+	}*/
+/*	if (width * height) != len(data) {
 		return nil, ErrorBadSize
-	}
+	}*/
 	in := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: width, Y: height}})
 	x := 0
 	y := 0
-	width *= factor // width in entry is the cpc width not the png width
+	//width *= factor // width in entry is the cpc width not the png width
 	for index, val := range data {
 
 		switch mode {
 		case 0:
-			p1, p2 := rawMode0(byte(val))
+			p1, p2 := rawPixelMode0(byte(val))
 			c1 := palette[p1]
 			newColor := revertColor(uint8(c1), index, isPlus)
 			in.Set(x, y, newColor)
@@ -811,7 +815,7 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 				y++
 			}
 		case 1:
-			p1, p2, p3, p4 := rawMode1(byte(val))
+			p1, p2, p3, p4 := rawPixelMode1(byte(val))
 			c1 := palette[p1]
 			newColor := revertColor(uint8(c1), index, isPlus)
 			in.Set(x, y, newColor)
@@ -845,7 +849,7 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 				y++
 			}
 		case 2:
-			p1, p2, p3, p4, p5, p6, p7, p8 := rawMode2(byte(val))
+			p1, p2, p3, p4, p5, p6, p7, p8 := rawPixelMode2(byte(val))
 			c1 := palette[p1]
 			newColor := revertColor(uint8(c1), index, isPlus)
 			in.Set(x, y, newColor)

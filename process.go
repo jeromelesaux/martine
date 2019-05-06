@@ -144,5 +144,6 @@ func (p *Process) GenerateRawFile() error {
 	if err != nil {
 		return err
 	}
+	*picturePath = p.PicturePath
 	return gfx.Png(p.PicturePath, in)
 }
