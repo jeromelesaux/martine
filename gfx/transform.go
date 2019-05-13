@@ -349,7 +349,7 @@ func rawPixelMode2(b byte) (pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) {
 	}
 	if val-16 >= 0 {
 		pp4 = 1
-		val-= 16
+		val -= 16
 	}
 	if val-8 >= 0 {
 		pp5 = 1
@@ -361,7 +361,7 @@ func rawPixelMode2(b byte) (pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) {
 	}
 	if val-2 >= 0 {
 		pp7 = 1
-		val  -= 2
+		val -= 2
 	}
 	if val-1 >= 0 {
 		pp8 = 1
@@ -478,7 +478,7 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			addr := CpcScreenAddress(x,y,exportType.Overscan)
+			addr := CpcScreenAddress(x, y, exportType.Overscan)
 			bw[addr] = pixel
 		}
 	}
@@ -518,7 +518,7 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 	return Ascii(filePath, bw, p, exportType)
 }
 
-func CpcScreenAddress(x,y int, isOverscan bool) int {
+func CpcScreenAddress(x, y int, isOverscan bool) int {
 	var addr int
 	if isOverscan {
 		if y > 127 {
@@ -527,7 +527,7 @@ func CpcScreenAddress(x,y int, isOverscan bool) int {
 			addr = (0x800 * (y % 8)) + (0x60 * (y / 8)) + ((x + 1) / 4)
 		}
 	} else {
-		addr = (0x800*(y%8))+(0x50*(y/8))+((x+1)/4)
+		addr = (0x800 * (y % 8)) + (0x50 * (y / 8)) + ((x + 1) / 4)
 	}
 
 	return addr
@@ -583,7 +583,7 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			addr := CpcScreenAddress(x,y,exportType.Overscan)
+			addr := CpcScreenAddress(x, y, exportType.Overscan)
 			bw[addr] = pixel
 		}
 	}
@@ -702,7 +702,7 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			addr := CpcScreenAddress(x,y,exportType.Overscan)
+			addr := CpcScreenAddress(x, y, exportType.Overscan)
 			bw[addr] = pixel
 		}
 

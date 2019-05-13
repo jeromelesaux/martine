@@ -42,7 +42,7 @@ type ExportType struct {
 	amsdosFilename []byte
 	DskFiles       []string
 	Tiles          *JsonSlice
-	DeltaMode bool
+	DeltaMode      bool
 }
 
 func NewExportType(input, output string) *ExportType {

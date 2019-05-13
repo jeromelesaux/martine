@@ -58,6 +58,7 @@ var (
 	rotate3dY0      = flag.Int("rotate3dy0", -1, "Y0 coordinate to apply in 3d rotation (default height of the image/2)")
 	initProcess     = flag.String("initprocess", "", "create a new empty process file.")
 	processFile     = flag.String("processfile", "", "Process file path to apply.")
+	deltaFile       = flag.String("delta", "", "generate the delta byte mode between input image file and the followed image file")
 	version         = "0.16.rc"
 )
 
@@ -104,7 +105,7 @@ func main() {
 				fmt.Fprintf(os.Stderr, "Error while loading (%s) process file error :%v\n", *initProcess, err)
 				os.Exit(-1)
 			}
-		}	
+		}
 	}
 
 	if *info {
@@ -240,6 +241,9 @@ func main() {
 	if exportType.M4Host != "" {
 		exportType.M4 = true
 	}
+	if *deltaFile != "" {
+		exportType.DeltaMode = true
+	}
 	exportType.Dsk = *dsk
 
 	fmt.Fprintf(os.Stdout, "Informations :\n%s", size.ToString())
@@ -298,103 +302,199 @@ func main() {
 	default:
 		resizeAlgo = imaging.NearestNeighbor
 	}
-
-	if exportType.TileMode {
-		if exportType.TileIterationX == -1 || exportType.TileIterationY == -1 {
-			fmt.Fprintf(os.Stderr, "missing arguments iterx and itery to use with tile mode.\n")
-			usage()
-			os.Exit(-1)
-		}
-		err := gfx.TileMode(exportType, uint8(*mode), exportType.TileIterationX, exportType.TileIterationY, resizeAlgo)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Tile mode on error : error :%v\n", err)
-			os.Exit(-1)
-		}
-	} else {
-
-		if *palettePath != "" {
-			fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", *palettePath)
-			palette, _, err = gfx.OpenPal(*palettePath)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *palettePath)
-			} else {
-				fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
-			}
-		}
-		if *inkPath != "" {
-			fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", *inkPath)
-			palette, _, err = gfx.OpenInk(*inkPath)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *inkPath)
-			} else {
-				fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
-			}
-		}
-		if *kitPath != "" {
-			fmt.Fprintf(os.Stdout, "Input plus palette to apply : (%s)\n", *kitPath)
-			palette, _, err = gfx.OpenKit(*kitPath)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *palettePath)
-			} else {
-				fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
-			}
-		}
-
+	if exportType.DeltaMode {
 		out := convert.Resize(in, size, resizeAlgo)
-		fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
-		if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_resized.png", out); err != nil {
+		fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_delta_resized.png")
+		if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta_resized.png", out); err != nil {
 			os.Exit(-2)
 		}
 
-		var newPalette color.Palette
-		var downgraded *image.NRGBA
+		var leftPalette color.Palette
+		var leftDowngraded *image.NRGBA
 		if len(palette) > 0 {
-			newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
+			leftPalette, leftDowngraded = convert.DowngradingWithPalette(out, palette)
 		} else {
-			newPalette, downgraded, err = convert.DowngradingPalette(out, size, exportType.CpcPlus)
+			leftPalette, leftDowngraded, err = convert.DowngradingPalette(out, size, exportType.CpcPlus)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
 			}
 
 		}
-		fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
-		if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_down.png", downgraded); err != nil {
+		fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_delta_down.png")
+		if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta_down.png", leftDowngraded); err != nil {
 			os.Exit(-2)
 		}
 
-		if exportType.RollMode {
-			if *rla != -1 || *sla != -1 {
-				gfx.RollLeft(*rla, *sla, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
-			} else {
-				if *rra != -1 || *sra != -1 {
-					gfx.RollRight(*rra, *sra, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
-				}
-			}
-			if *keephigh != -1 || *losthigh != -1 {
-				gfx.RollUp(*keephigh, *losthigh, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
-			} else {
-				if *keeplow != -1 || *lostlow != -1 {
-					gfx.RollLow(*keeplow, *lostlow, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
-				}
-			}
+		f2, err := os.Open(*deltaFile)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error while opening file %s, error %v\n", *deltaFile, err)
+			os.Exit(-2)
 		}
-		if exportType.RotationMode {
-			if err := gfx.Rotate(downgraded, newPalette, size, uint8(*mode), *picturePath, resizeAlgo, exportType); err != nil {
-				fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", *picturePath, err)
-			}
+		defer f2.Close()
+		in2, _, err := image.Decode(f2)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Cannot decode the image %s error %v", *deltaFile, err)
+			os.Exit(-2)
 		}
-		if exportType.Rotation3DMode {
-			if err := gfx.Rotate3d(downgraded, newPalette, size, uint8(*mode), *picturePath, resizeAlgo, exportType); err != nil {
-				fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", *picturePath, err)
-			}
+		out2 := convert.Resize(in2, size, resizeAlgo)
+		fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_delta2_resized.png")
+		if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta2_resized.png", out); err != nil {
+			os.Exit(-2)
 		}
-		if !customDimension {
-			gfx.Transform(downgraded, newPalette, size, *picturePath, exportType)
+		var rightPalette color.Palette
+		var rightDowngraded *image.NRGBA
+		if len(palette) > 0 {
+			rightPalette, rightDowngraded = convert.DowngradingWithPalette(out2, palette)
 		} else {
-			fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
-			gfx.SpriteTransform(downgraded, newPalette, size, screenMode, filename, exportType)
+			rightPalette, rightDowngraded, err = convert.DowngradingPalette(out2, size, exportType.CpcPlus)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
+			}
+
+		}
+		fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_delta2_down.png")
+		if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta2_down.png", rightDowngraded); err != nil {
+			os.Exit(-2)
 		}
 
+		var dc *gfx.DeltaCollection
+
+		switch *mode {
+		case 0:
+			dc, err = gfx.DeltaMode0(leftDowngraded, leftPalette, rightDowngraded, rightPalette, exportType)
+		case 1:
+			dc, err = gfx.DeltaMode1(leftDowngraded, leftPalette, rightDowngraded, rightPalette, exportType)
+		case 2:
+			dc, err = gfx.DeltaMode2(leftDowngraded, leftPalette, rightDowngraded, rightPalette, exportType)
+		default:
+			fmt.Fprintf(os.Stderr, "mode %d not defined and no custom width or height\n", *mode)
+			usage()
+		}
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error while getting the delta byte action :%v\n", err)
+			os.Exit(-1)
+		}
+		fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
+		fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
+		outFilepath := exportType.OutputPath + string(filepath.Separator) + filename + "_delta.bin"
+		if err = dc.Save(outFilepath); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file (%s) error %v \n", outFilepath, err)
+			os.Exit(-1)
+		}
+		data, err := dc.Marshall()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error while marshalling delta structure error :%v\n", err)
+			os.Exit(-1)
+		}
+
+		outFilepath = exportType.OutputPath + string(filepath.Separator) + filename + ".txt"
+		if err = gfx.Ascii(outFilepath, data, rightPalette, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while exporting data as ascii mode file (%s) error :%v\n", outFilepath, err)
+			os.Exit(-1)
+		}
+		outFilepath = exportType.OutputPath + string(filepath.Separator) + filename + "c.txt"
+		if err = gfx.AsciiByColumn(outFilepath, data, rightPalette, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while exporting data as ascii by column mode file (%s) error :%v\n", outFilepath, err)
+			os.Exit(-1)
+		}
+	} else {
+		if exportType.TileMode {
+			if exportType.TileIterationX == -1 || exportType.TileIterationY == -1 {
+				fmt.Fprintf(os.Stderr, "missing arguments iterx and itery to use with tile mode.\n")
+				usage()
+				os.Exit(-1)
+			}
+			err := gfx.TileMode(exportType, uint8(*mode), exportType.TileIterationX, exportType.TileIterationY, resizeAlgo)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Tile mode on error : error :%v\n", err)
+				os.Exit(-1)
+			}
+		} else {
+
+			if *palettePath != "" {
+				fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", *palettePath)
+				palette, _, err = gfx.OpenPal(*palettePath)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *palettePath)
+				} else {
+					fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
+				}
+			}
+			if *inkPath != "" {
+				fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", *inkPath)
+				palette, _, err = gfx.OpenInk(*inkPath)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *inkPath)
+				} else {
+					fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
+				}
+			}
+			if *kitPath != "" {
+				fmt.Fprintf(os.Stdout, "Input plus palette to apply : (%s)\n", *kitPath)
+				palette, _, err = gfx.OpenKit(*kitPath)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *palettePath)
+				} else {
+					fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
+				}
+			}
+
+			out := convert.Resize(in, size, resizeAlgo)
+			fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
+			if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_resized.png", out); err != nil {
+				os.Exit(-2)
+			}
+
+			var newPalette color.Palette
+			var downgraded *image.NRGBA
+			if len(palette) > 0 {
+				newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
+			} else {
+				newPalette, downgraded, err = convert.DowngradingPalette(out, size, exportType.CpcPlus)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
+				}
+
+			}
+			fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
+			if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_down.png", downgraded); err != nil {
+				os.Exit(-2)
+			}
+
+			if exportType.RollMode {
+				if *rla != -1 || *sla != -1 {
+					gfx.RollLeft(*rla, *sla, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
+				} else {
+					if *rra != -1 || *sra != -1 {
+						gfx.RollRight(*rra, *sra, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
+					}
+				}
+				if *keephigh != -1 || *losthigh != -1 {
+					gfx.RollUp(*keephigh, *losthigh, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
+				} else {
+					if *keeplow != -1 || *lostlow != -1 {
+						gfx.RollLow(*keeplow, *lostlow, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
+					}
+				}
+			}
+			if exportType.RotationMode {
+				if err := gfx.Rotate(downgraded, newPalette, size, uint8(*mode), *picturePath, resizeAlgo, exportType); err != nil {
+					fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", *picturePath, err)
+				}
+			}
+			if exportType.Rotation3DMode {
+				if err := gfx.Rotate3d(downgraded, newPalette, size, uint8(*mode), *picturePath, resizeAlgo, exportType); err != nil {
+					fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", *picturePath, err)
+				}
+			}
+			if !customDimension {
+				gfx.Transform(downgraded, newPalette, size, *picturePath, exportType)
+			} else {
+				fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
+				gfx.SpriteTransform(downgraded, newPalette, size, screenMode, filename, exportType)
+			}
+
+		}
 	}
 	if exportType.Dsk {
 		if err := gfx.ImportInDsk(exportType); err != nil {
