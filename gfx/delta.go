@@ -39,6 +39,22 @@ func (dc *DeltaCollection)NbAdresses() int {
 	return nb
 }
 
+func (di *DeltaItem)ToString() string {
+	out := fmt.Sprintf("byte value #%.2x :",di.Byte)
+	for _,addr := range di.Addresses {
+		out += fmt.Sprintf("\n#%.4x",addr)
+	}
+	return out
+}
+
+func (dc *DeltaCollection)ToString() string {
+	var out string 
+	for _,item := range dc.Items {
+		out += item.ToString() + "\n"
+	}
+	return out
+}
+
 func (dc *DeltaCollection) Add(b byte, address uint16) {
 	for i := 0; i < len(dc.Items); i++ {
 		if dc.Items[i].Byte == b {

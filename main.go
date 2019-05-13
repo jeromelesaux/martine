@@ -376,6 +376,7 @@ func main() {
 		}
 		fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 		fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
+		fmt.Fprintf(os.Stdout,"Report:\n%s\n",dc.ToString())
 		outFilepath := exportType.OutputPath + string(filepath.Separator) + filename + "_delta.bin"
 		if err = dc.Save(outFilepath); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file (%s) error %v \n", outFilepath, err)
