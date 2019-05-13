@@ -14,7 +14,7 @@ import (
 
 var (
 	ErrorMissingNumberOfImageToGenerate = errors.New("Iteration is not set, cannot define the number of images to generate.")
-	ErrorSizeMismatch                   = errors.New("Error width and height mismatch cannot perform rotation.")
+	ErrorSizeMismatch                   = errors.New("Error width and height mismatch cannot perform action.")
 )
 
 func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filePath string, resizeAlgo imaging.ResampleFilter, exportType *ExportType) error {
