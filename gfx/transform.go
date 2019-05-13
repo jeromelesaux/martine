@@ -478,18 +478,8 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			if exportType.Overscan {
-				var addr int
-				if y > 127 {
-					addr = (0x800 * (y % 8)) + (0x60 * (y / 8)) + ((x + 1) / 2) + (0x3800)
-				} else {
-					addr = (0x800 * (y % 8)) + (0x60 * (y / 8)) + ((x + 1) / 2)
-
-				}
-				bw[addr] = pixel
-			} else {
-				bw[(0x800*(y%8))+(0x50*(y/8))+((x+1)/2)] = pixel
-			}
+			addr := CpcScreenAddress(x,y,exportType.Overscan)
+			bw[addr] = pixel
 		}
 	}
 
@@ -526,6 +516,21 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 	}
 
 	return Ascii(filePath, bw, p, exportType)
+}
+
+func CpcScreenAddress(x,y int, isOverscan bool) int {
+	var addr int
+	if isOverscan {
+		if y > 127 {
+			addr = (0x800 * (y % 8)) + (0x60 * (y / 8)) + ((x + 1) / 4) + (0x3800)
+		} else {
+			addr = (0x800 * (y % 8)) + (0x60 * (y / 8)) + ((x + 1) / 4)
+		}
+	} else {
+		addr = (0x800*(y%8))+(0x50*(y/8))+((x+1)/4)
+	}
+
+	return addr
 }
 
 func TransformMode1(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *ExportType) error {
@@ -578,18 +583,8 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			if exportType.Overscan {
-				var addr int
-				if y > 127 {
-					addr = (0x800 * (y % 8)) + (0x60 * (y / 8)) + ((x + 1) / 4) + (0x3800)
-				} else {
-					addr = (0x800 * (y % 8)) + (0x60 * (y / 8)) + ((x + 1) / 4)
-
-				}
-				bw[addr] = pixel
-			} else {
-				bw[(0x800*(y%8))+(0x50*(y/8))+((x+1)/4)] = pixel
-			}
+			addr := CpcScreenAddress(x,y,exportType.Overscan)
+			bw[addr] = pixel
 		}
 	}
 
@@ -707,19 +702,8 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			if exportType.Overscan {
-				var addr int
-				if y > 127 {
-					addr = (0x800 * (y % 8)) + (0x60 * (y / 8)) + ((x + 1) / 8) + (0x3800)
-				} else {
-					addr = (0x800 * (y % 8)) + (0x60 * (y / 8)) + ((x + 1) / 8)
-
-				}
-				bw[addr] = pixel
-			} else {
-				bw[(0x800*(y%8))+(0x50*(y/8))+((x+1)/8)] = pixel
-			}
-			//bw = append(bw, pixel)
+			addr := CpcScreenAddress(x,y,exportType.Overscan)
+			bw[addr] = pixel
 		}
 
 	}
@@ -777,22 +761,10 @@ func revertColor(rawColor uint8, index int, isPlus bool) color.Color {
 }
 
 func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlus bool) (*image.NRGBA, error) {
-/*	var factor int
-	switch mode {
-	case 0:
-		factor = 8
-	case 1:
-		factor = 4
-	case 2:
-		factor = 2
-	}*/
-/*	if (width * height) != len(data) {
-		return nil, ErrorBadSize
-	}*/
+
 	in := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: width, Y: height}})
 	x := 0
 	y := 0
-	//width *= factor // width in entry is the cpc width not the png width
 	for index, val := range data {
 
 		switch mode {
