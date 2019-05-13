@@ -3,6 +3,7 @@ package gfx
 
 
 import (
+	"encoding/binary"
 	"image"
 	"image/color"
 	"fmt"
@@ -12,8 +13,7 @@ import (
 
 type DeltaItem struct {
 	Byte byte
-	Occurences int8
-	Addresses []int16
+	Addresses []uint16
 }
 
 
@@ -28,19 +28,17 @@ func NewDeltaCollection() *DeltaCollection {
 }
 
 func NewDeltaItem() DeltaItem {
-	return DeltaItem{Addresses:make([]int16,0)}
+	return DeltaItem{Addresses:make([]uint16,0)}
 } 
 
-func (dc *DeltaCollection)Add(b byte, address int16) {
+func (dc *DeltaCollection)Add(b byte, address uint16) {
 	for i:= 0; i < len(dc.Items); i++ {
 		if dc.Items[i].Byte == b {
-			dc.Items[i].Occurences ++ 
 			dc.Items[i].Addresses = append(dc.Items[i].Addresses,address)
 			return 
 		}
 	}
 	item := NewDeltaItem()
-	item.Occurences++ 
 	item.Addresses = append(item.Addresses,address)
 	item.Byte = b
 	dc.Items = append(dc.Items,item)
@@ -48,7 +46,7 @@ func (dc *DeltaCollection)Add(b byte, address int16) {
 
 
 
-func DeltaMode0(current *image.NRGBA,currentPalette color.Palette, next *image.NRGBA,nextPalette  color.Palette, filename string, exportType *ExportType) (*DeltaCollection,error) {
+func DeltaMode0(current *image.NRGBA,currentPalette color.Palette, next *image.NRGBA,nextPalette  color.Palette, exportType *ExportType) (*DeltaCollection,error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
 		return data, ErrorSizeMismatch
@@ -88,14 +86,14 @@ func DeltaMode0(current *image.NRGBA,currentPalette color.Palette, next *image.N
 			pixel2 := pixelMode0(p2,p4)
 			if pixel1 != pixel2 {
 				addr := CpcScreenAddress(i,j,exportType.Overscan)
-				data.Add(pixel2,int16(addr))
+				data.Add(pixel2,uint16(addr))
 			}
 		}
 	}
 	return data, nil
 }
 
-func DeltaMode1(current *image.NRGBA,currentPalette color.Palette, next *image.NRGBA,nextPalette  color.Palette, filename string, exportType *ExportType) (*DeltaCollection,error) {
+func DeltaMode1(current *image.NRGBA,currentPalette color.Palette, next *image.NRGBA,nextPalette  color.Palette, exportType *ExportType) (*DeltaCollection,error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
 		return data, ErrorSizeMismatch
@@ -161,14 +159,14 @@ func DeltaMode1(current *image.NRGBA,currentPalette color.Palette, next *image.N
 			pixel2 := pixelMode1(p2,p4,p6,p8)
 			if pixel1 != pixel2 {
 				addr := CpcScreenAddress(i,j,exportType.Overscan)
-				data.Add(pixel2,int16(addr))
+				data.Add(pixel2,uint16(addr))
 			}
 		}
 	}
 	return data, nil
 }
 
-func DeltaMode2(current *image.NRGBA,currentPalette color.Palette, next *image.NRGBA,nextPalette  color.Palette, filename string, exportType *ExportType) (*DeltaCollection,error) {
+func DeltaMode2(current *image.NRGBA,currentPalette color.Palette, next *image.NRGBA,nextPalette  color.Palette, exportType *ExportType) (*DeltaCollection,error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
 		return data, ErrorSizeMismatch
@@ -286,9 +284,51 @@ func DeltaMode2(current *image.NRGBA,currentPalette color.Palette, next *image.N
 			pixel2 := pixelMode2(p2,p4,p6,p8,p10,p12,p14,p16)
 			if pixel1 != pixel2 {
 				addr := CpcScreenAddress(i,j,exportType.Overscan)
-				data.Add(pixel2,int16(addr))
+				data.Add(pixel2,uint16(addr))
 			}
 		}
 	}
 	return data, nil
+}
+
+
+func (dc *DeltaCollection)Save(filename string) error {
+	f, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	for _, item := range dc.Items {
+		occ := len(item.Addresses)
+		iter := occ / 255
+		if occ % 255 != 0 {
+			iter++
+		}
+		for i:=0; i< iter; i++ {
+			if err = binary.Write(f,binary.LittleEndian,item.Byte); err != nil {
+				return err
+			}
+			left := occ - (i * 255)
+			if left < 255 {
+				if err = binary.Write(f,binary.LittleEndian,uint8(left)); err != nil {
+					return err
+				}
+				for j:= 0 + (i*255);j < len(item.Addresses); j++ {
+					if err = binary.Write(f,binary.LittleEndian,item.Addresses[j]); err != nil {
+						return err
+					}
+				}
+			} else {
+				if err = binary.Write(f,binary.LittleEndian,uint8(254)); err != nil {
+					return err
+				}
+				for j:= 0 + (i*255);j < 255; j++ {
+					if err = binary.Write(f,binary.LittleEndian,item.Addresses[j]); err != nil {
+						return err
+					}
+				}
+			}
+		}
+	}
+	return nil 
 }
