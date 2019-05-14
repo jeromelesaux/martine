@@ -107,7 +107,7 @@ func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.
 			}
 			pixel2 := pixelMode0(p2, p4)
 			if pixel1 != pixel2 {
-				addr := CpcScreenAddress(i, j, exportType.Overscan)
+				addr := CpcScreenAddress(0xc000, i, j, 0, exportType.Overscan)
 				data.Add(pixel2, uint16(addr))
 			}
 		}
@@ -180,7 +180,7 @@ func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.
 			}
 			pixel2 := pixelMode1(p2, p4, p6, p8)
 			if pixel1 != pixel2 {
-				addr := CpcScreenAddress(i, j, exportType.Overscan)
+				addr := CpcScreenAddress(0xc000,i, j, 1, exportType.Overscan)
 				data.Add(pixel2, uint16(addr))
 			}
 		}
@@ -305,7 +305,7 @@ func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.
 			}
 			pixel2 := pixelMode2(p2, p4, p6, p8, p10, p12, p14, p16)
 			if pixel1 != pixel2 {
-				addr := CpcScreenAddress(i, j, exportType.Overscan)
+				addr := CpcScreenAddress(0xc000,i, j, 2, exportType.Overscan)
 				data.Add(pixel2, uint16(addr))
 			}
 		}

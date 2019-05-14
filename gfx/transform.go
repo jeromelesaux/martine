@@ -478,7 +478,7 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			addr := CpcScreenAddress(x, y, exportType.Overscan)
+			addr := CpcScreenAddress(0,x, y, 0, exportType.Overscan)
 			bw[addr] = pixel
 		}
 	}
@@ -518,19 +518,27 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 	return Ascii(filePath, bw, p, exportType)
 }
 
-func CpcScreenAddress(x, y int, isOverscan bool) int {
+func CpcScreenAddress(intialeAddresse int, x, y int, mode uint8, isOverscan bool) int {
 	var addr int
+	var adjustMode int 
+	switch mode {
+	case 0 : adjustMode = 2
+	case 1 : adjustMode = 4
+	case 2 : adjustMode = 8
+	}
 	if isOverscan {
 		if y > 127 {
-			addr = (0x800 * (y % 8)) + (0x60 * (y / 8)) + ((x + 1) / 4) + (0x3800)
+			addr = (0x800 * (y % 8)) + (0x60 * (y / 8)) + ((x + 1) / adjustMode) + (0x3800)
 		} else {
-			addr = (0x800 * (y % 8)) + (0x60 * (y / 8)) + ((x + 1) / 4)
+			addr = (0x800 * (y % 8)) + (0x60 * (y / 8)) + ((x + 1) / adjustMode)
 		}
 	} else {
-		addr = (0x800 * (y % 8)) + (0x50 * (y / 8)) + ((x + 1) / 4)
+		addr = (0x800 * (y % 8)) + (0x50 * (y / 8)) + ((x + 1) / adjustMode)
 	}
-
-	return addr
+	if intialeAddresse == 0 {
+		return addr
+	}
+	return intialeAddresse + addr
 }
 
 func TransformMode1(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *ExportType) error {
@@ -583,7 +591,7 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			addr := CpcScreenAddress(x, y, exportType.Overscan)
+			addr := CpcScreenAddress(0,x, y,1, exportType.Overscan)
 			bw[addr] = pixel
 		}
 	}
@@ -702,7 +710,7 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			addr := CpcScreenAddress(x, y, exportType.Overscan)
+			addr := CpcScreenAddress(0,x, y, 2, exportType.Overscan)
 			bw[addr] = pixel
 		}
 
