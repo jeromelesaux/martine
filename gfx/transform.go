@@ -442,7 +442,7 @@ func rawPixelMode0(b byte) (pp1, pp2 int) {
 	return
 }
 
-func TransformMode0(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *ExportType) error {
+func ToMode0(in *image.NRGBA, p color.Palette, exportType *ExportType) []byte {
 	var bw []byte
 	if exportType.Overscan {
 		bw = make([]byte, 0x8000)
@@ -478,14 +478,23 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			addr := CpcScreenAddress(0,x, y, 0, exportType.Overscan)
+			addr := CpcScreenAddress(0, x, y, 0, exportType.Overscan)
 			bw[addr] = pixel
 		}
 	}
 
 	fmt.Println(firmwareColorUsed)
+	return bw
+}
+
+func TransformMode0(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *ExportType) error {
+	bw := ToMode0(in, p, exportType)
+	return Export(filePath, bw, p, 0, exportType)
+}
+
+func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, exportType *ExportType) error {
 	if exportType.Overscan {
-		if err := Overscan(filePath, bw, p, 0, exportType); err != nil {
+		if err := Overscan(filePath, bw, p, screenMode, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
@@ -500,31 +509,33 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 		}
 	}
 	if exportType.CpcPlus {
-		if err := Kit(filePath, p, 0, exportType); err != nil {
+		if err := Kit(filePath, p, screenMode, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	} else {
-		if err := Pal(filePath, p, 0, exportType); err != nil {
+		if err := Pal(filePath, p, screenMode, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
-		if err := Ink(filePath, p, 2, exportType); err != nil {
+		if err := Ink(filePath, p, screenMode, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	}
-
 	return Ascii(filePath, bw, p, exportType)
 }
 
 func CpcScreenAddress(intialeAddresse int, x, y int, mode uint8, isOverscan bool) int {
 	var addr int
-	var adjustMode int 
+	var adjustMode int
 	switch mode {
-	case 0 : adjustMode = 2
-	case 1 : adjustMode = 4
-	case 2 : adjustMode = 8
+	case 0:
+		adjustMode = 2
+	case 1:
+		adjustMode = 4
+	case 2:
+		adjustMode = 8
 	}
 	if isOverscan {
 		if y > 127 {
@@ -541,7 +552,11 @@ func CpcScreenAddress(intialeAddresse int, x, y int, mode uint8, isOverscan bool
 	return intialeAddresse + addr
 }
 
-func TransformMode1(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *ExportType) error {
+func CpcScreenAddressOffset(line int) int {
+	return int(math.Floor(float64(line)/8)*80) + (line%8)*2048
+}
+
+func ToMode1(in *image.NRGBA, p color.Palette, exportType *ExportType) []byte {
 	var bw []byte
 	if exportType.Overscan {
 		bw = make([]byte, 0x8000)
@@ -591,47 +606,19 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			addr := CpcScreenAddress(0,x, y,1, exportType.Overscan)
+			addr := CpcScreenAddress(0, x, y, 1, exportType.Overscan)
 			bw[addr] = pixel
 		}
 	}
-
-	fmt.Println(firmwareColorUsed)
-	if exportType.Overscan {
-		if err := Overscan(filePath, bw, p, 1, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-	} else {
-		if err := Scr(filePath, bw, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-		if err := Loader(filePath, p, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving the loader %s with error %v\n", filePath, err)
-			return err
-		}
-	}
-	if exportType.CpcPlus {
-		if err := Kit(filePath, p, 0, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-	} else {
-		if err := Pal(filePath, p, 1, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-		if err := Ink(filePath, p, 2, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-	}
-
-	return Ascii(filePath, bw, p, exportType)
+	return bw
 }
 
-func TransformMode2(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *ExportType) error {
+func TransformMode1(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *ExportType) error {
+	bw := ToMode1(in, p, exportType)
+	return Export(filePath, bw, p, 1, exportType)
+}
+
+func ToMode2(in *image.NRGBA, p color.Palette, exportType *ExportType) []byte {
 	var bw []byte
 
 	if exportType.Overscan {
@@ -710,45 +697,19 @@ func TransformMode2(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			addr := CpcScreenAddress(0,x, y, 2, exportType.Overscan)
+			addr := CpcScreenAddress(0, x, y, 2, exportType.Overscan)
 			bw[addr] = pixel
 		}
 
 	}
 
 	fmt.Println(firmwareColorUsed)
-	if exportType.Overscan {
-		if err := Overscan(filePath, bw, p, 2, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-	} else {
-		if err := Scr(filePath, bw, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-		if err := Loader(filePath, p, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving the loader %s with error %v\n", filePath, err)
-			return err
-		}
-	}
-	if exportType.CpcPlus {
-		if err := Kit(filePath, p, 0, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-	} else {
-		if err := Pal(filePath, p, 2, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-		if err := Ink(filePath, p, 2, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-	}
+	return bw
+}
 
-	return Ascii(filePath, bw, p, exportType)
+func TransformMode2(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *ExportType) error {
+	bw := ToMode2(in, p, exportType)
+	return Export(filePath, bw, p, 2, exportType)
 }
 
 func revertColor(rawColor uint8, index int, isPlus bool) color.Color {

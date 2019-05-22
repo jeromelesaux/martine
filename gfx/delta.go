@@ -28,28 +28,28 @@ func NewDeltaItem() DeltaItem {
 	return DeltaItem{Addresses: make([]uint16, 0)}
 }
 
-func (di *DeltaItem)NbAddresses() int {
+func (di *DeltaItem) NbAddresses() int {
 	return len(di.Addresses)
 }
-func (dc *DeltaCollection)NbAdresses() int {
-	nb := 0 
-	for _,item := range dc.Items {
+func (dc *DeltaCollection) NbAdresses() int {
+	nb := 0
+	for _, item := range dc.Items {
 		nb += item.NbAddresses()
 	}
 	return nb
 }
 
-func (di *DeltaItem)ToString() string {
-	out := fmt.Sprintf("byte value #%.2x :",di.Byte)
-	for _,addr := range di.Addresses {
-		out += fmt.Sprintf("\n#%.4x",addr)
+func (di *DeltaItem) ToString() string {
+	out := fmt.Sprintf("byte value #%.2x :", di.Byte)
+	for _, addr := range di.Addresses {
+		out += fmt.Sprintf("\n#%.4x", addr)
 	}
 	return out
 }
 
-func (dc *DeltaCollection)ToString() string {
-	var out string 
-	for _,item := range dc.Items {
+func (dc *DeltaCollection) ToString() string {
+	var out string
+	for _, item := range dc.Items {
 		out += item.ToString() + "\n"
 	}
 	return out
@@ -180,7 +180,7 @@ func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.
 			}
 			pixel2 := pixelMode1(p2, p4, p6, p8)
 			if pixel1 != pixel2 {
-				addr := CpcScreenAddress(0xc000,i, j, 1, exportType.Overscan)
+				addr := CpcScreenAddress(0xc000, i, j, 1, exportType.Overscan)
 				data.Add(pixel2, uint16(addr))
 			}
 		}
@@ -305,7 +305,7 @@ func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.
 			}
 			pixel2 := pixelMode2(p2, p4, p6, p8, p10, p12, p14, p16)
 			if pixel1 != pixel2 {
-				addr := CpcScreenAddress(0xc000,i, j, 2, exportType.Overscan)
+				addr := CpcScreenAddress(0xc000, i, j, 2, exportType.Overscan)
 				data.Add(pixel2, uint16(addr))
 			}
 		}
@@ -389,4 +389,21 @@ func (dc *DeltaCollection) Save(filename string) error {
 		}
 	}
 	return nil
+}
+
+func Delta(scr1, scr2 []byte) *DeltaCollection {
+	data := NewDeltaCollection()
+	var line int
+	for offset := 0; offset < 0x4000; offset++ {
+		offsetLine := (offset % 80)
+		if scr1[offset] != scr2[offset] {
+			offsetScreen := CpcScreenAddressOffset(line)
+			addr := 0xC000 + offsetLine + offsetScreen
+			data.Add(scr2[offset], uint16(addr))
+		}
+		if offsetLine == 0 {
+			line++
+		}
+	}
+	return data
 }

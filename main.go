@@ -359,7 +359,7 @@ func main() {
 
 		var dc *gfx.DeltaCollection
 
-		switch *mode {
+		/*switch *mode {
 		case 0:
 			dc, err = gfx.DeltaMode0(leftDowngraded, leftPalette, rightDowngraded, rightPalette, exportType)
 		case 1:
@@ -369,14 +369,29 @@ func main() {
 		default:
 			fmt.Fprintf(os.Stderr, "mode %d not defined and no custom width or height\n", *mode)
 			usage()
+		}*/
+		switch *mode {
+		case 0:
+			scr1 := gfx.ToMode0(leftDowngraded, leftPalette, exportType)
+			scr2 := gfx.ToMode0(rightDowngraded, rightPalette, exportType)
+			dc = gfx.Delta(scr1, scr2)
+		case 1:
+			scr1 := gfx.ToMode1(leftDowngraded, leftPalette, exportType)
+			scr2 := gfx.ToMode1(rightDowngraded, rightPalette, exportType)
+			dc = gfx.Delta(scr1, scr2)
+		case 2:
+			scr1 := gfx.ToMode2(leftDowngraded, leftPalette, exportType)
+			scr2 := gfx.ToMode2(rightDowngraded, rightPalette, exportType)
+			dc = gfx.Delta(scr1, scr2)
 		}
-		if err != nil {
+
+		/*if err != nil {
 			fmt.Fprintf(os.Stderr, "Error while getting the delta byte action :%v\n", err)
 			os.Exit(-1)
-		}
+		}*/
 		fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 		fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
-		fmt.Fprintf(os.Stdout,"Report:\n%s\n",dc.ToString())
+		fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
 		outFilepath := exportType.OutputPath + string(filepath.Separator) + filename + "_delta.bin"
 		if err = dc.Save(outFilepath); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file (%s) error %v \n", outFilepath, err)
