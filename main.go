@@ -359,17 +359,6 @@ func main() {
 
 		var dc *gfx.DeltaCollection
 
-		/*switch *mode {
-		case 0:
-			dc, err = gfx.DeltaMode0(leftDowngraded, leftPalette, rightDowngraded, rightPalette, exportType)
-		case 1:
-			dc, err = gfx.DeltaMode1(leftDowngraded, leftPalette, rightDowngraded, rightPalette, exportType)
-		case 2:
-			dc, err = gfx.DeltaMode2(leftDowngraded, leftPalette, rightDowngraded, rightPalette, exportType)
-		default:
-			fmt.Fprintf(os.Stderr, "mode %d not defined and no custom width or height\n", *mode)
-			usage()
-		}*/
 		switch *mode {
 		case 0:
 			scr1 := gfx.ToMode0(leftDowngraded, leftPalette, exportType)
@@ -384,11 +373,7 @@ func main() {
 			scr2 := gfx.ToMode2(rightDowngraded, rightPalette, exportType)
 			dc = gfx.Delta(scr1, scr2)
 		}
-
-		/*if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while getting the delta byte action :%v\n", err)
-			os.Exit(-1)
-		}*/
+		
 		fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 		fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
 		fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())

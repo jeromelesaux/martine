@@ -393,17 +393,17 @@ func (dc *DeltaCollection) Save(filename string) error {
 
 func Delta(scr1, scr2 []byte) *DeltaCollection {
 	data := NewDeltaCollection()
-	var line int
+	//var line int
 	for offset := 0; offset < 0x4000; offset++ {
-		offsetLine := (offset % 80)
+		//offsetLine := (offset % 80)
 		if scr1[offset] != scr2[offset] {
-			offsetScreen := CpcScreenAddressOffset(line)
-			addr := 0xC000 + offsetLine + offsetScreen
+			//offsetScreen := CpcScreenAddressOffset(line)
+			addr := 0xC000 + offset //  + offsetLine + offsetScreen
 			data.Add(scr2[offset], uint16(addr))
 		}
-		if offsetLine == 0 {
+		/*if offsetLine == 0 {
 			line++
-		}
+		}*/
 	}
 	return data
 }
