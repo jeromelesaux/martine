@@ -3,6 +3,7 @@ package gfx
 import (
 	"image"
 	"image/color"
+	"github.com/esimov/colorquant"
 )
 
 var (
@@ -24,9 +25,13 @@ var (
 	SierraLite = [][]float32{{0, 0, 2.0 / 4.0}, {1.0 / 4.0, 1.0 / 4.0, 0}}
 	// Sierra3 
 	Sierra3 = [][]float32{{ 0.0, 0.0, 0.0, 5.0 / 32.0, 3.0 / 32.0 },{ 2.0 / 32.0, 4.0 / 32.0, 5.0 / 32.0, 4.0 / 32.0, 2.0 / 32.0 },{ 0.0, 2.0 / 32.0, 3.0 / 32.0, 2.0 / 32.0, 0.0 }}
+	// bayer 4
+	Bayer4 = [][]float32{{0,2,1,4}}
+	Bayer16 = [][]float32{{0,8,2,10},{12,4,14,6},{3,11,1,9},{15,7,13,5}}
+	Bayer64 = [][]float32{{0,48,12,60,3,51,15,63},{32,16,44,28,35,19,47,31},{8,56,4,52,11,59,7,55},{40,24,36,20,43,27,39,23},{2,50,14,62,1,49,13,61},{34,18,46,30,33,17,45,29},{10,58,6,54,9,57,5,53},{42,26,38,22,41,25,37,21}}
 )
 
-func Dithering(input image.NRGBA, filter [][]float32, errorMultiplier float32) image.NRGBA {
+func Dithering(input *image.NRGBA, filter [][]float32, errorMultiplier float32) *image.NRGBA {
 	bounds := input.Bounds()
 	img := image.NewNRGBA(bounds)
 	for x := bounds.Min.X; x < bounds.Dx(); x++ {
@@ -101,5 +106,15 @@ func Dithering(input image.NRGBA, filter [][]float32, errorMultiplier float32) i
 			}
 		}
 	}
-   return *img
+   return img
+}
+
+
+
+func DitheringColorquant(input *image.NRGBA, filter [][]float32, numColors int) *image.NRGBA {
+	dither := colorquant.Dither{Filter:filter}
+	bounds := input.Bounds()
+	img := image.NewNRGBA(bounds)
+	dst := dither.Quantize(input,img,numColors,true,true)
+	return dst.(*image.NRGBA)
 }

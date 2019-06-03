@@ -59,7 +59,7 @@ var (
 	initProcess     = flag.String("initprocess", "", "create a new empty process file.")
 	processFile     = flag.String("processfile", "", "Process file path to apply.")
 	deltaFile       = flag.String("delta", "", "generate the delta byte mode between input image file and the followed image file")
-	ditheringAlgo   = flag.Int("dithering",-1,"Dithering algorithm to apply on input image\nAlgorithms available:\n\t0: FloydSteinberg\n\t1: JarvisJudiceNinke\n\t2: Stucki\n\t3: Atkinson\n\t4: Burkes\n\t5: Sierra\n\t6: TwoRowSierra\n\t7: Sierra3\n")
+	ditheringAlgo   = flag.Int("dithering",-1,"Dithering algorithm to apply on input image\nAlgorithms available:\n\t0: FloydSteinberg\n\t1: JarvisJudiceNinke\n\t2: Stucki\n\t3: Atkinson\n\t4: Burkes\n\t5: Sierra\n\t6: TwoRowSierra\n\t7: Sierra3\n\t8: Bayer4\n")
 	ditheringMultiplier = flag.Float64("multiplier",1.18,"error dithering multiplier.")
 	withQuantization = flag.Bool("quantization",false,"use additionnal quantization for dithering.")
 	version         = "0.16.rc"
@@ -317,6 +317,7 @@ func main() {
 		case 6: ditheringMatrix = gfx.TwoRowSierra
 		case 7: ditheringMatrix = gfx.SierraLite
 		case 8: ditheringMatrix = gfx.Sierra3
+		case 9: ditheringMatrix = gfx.Bayer16
 		default: fmt.Fprintf(os.Stderr,"Dithering matrix not available.")
 		os.Exit(-1)	
 		}
@@ -339,7 +340,11 @@ func main() {
 			}
 		}
 		if *ditheringAlgo != -1 {
-			leftDowngraded = gfx.Dithering(leftDowngraded,ditheringMatrix,*ditheringMultiplier)
+			if *withQuantization {
+				leftDowngraded = gfx.DitheringColorquant(leftDowngraded,ditheringMatrix,len(leftPalette))
+			} else {
+				leftDowngraded = gfx.Dithering(leftDowngraded,ditheringMatrix,float32(*ditheringMultiplier))
+			}
 		}
 		fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_delta_down.png")
 		if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta_down.png", leftDowngraded); err != nil {
@@ -373,7 +378,11 @@ func main() {
 			}
 		}
 		if *ditheringAlgo != -1 {
-			rightDowngraded = gfx.Dithering(rightDowngraded,ditheringMatrix,*ditheringMultiplier)
+			if *withQuantization {
+				rightDowngraded = gfx.DitheringColorquant(rightDowngraded,ditheringMatrix,len(rightPalette))
+			} else {
+				rightDowngraded = gfx.Dithering(rightDowngraded,ditheringMatrix,float32(*ditheringMultiplier))
+			}
 		}
 		fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_delta2_down.png")
 		if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta2_down.png", rightDowngraded); err != nil {
@@ -480,7 +489,11 @@ func main() {
 				}
 			}
 			if *ditheringAlgo != -1 {
-				downgraded = gfx.Dithering(downgraded,ditheringMatrix,*ditheringMultiplier)
+				if *withQuantization {
+					downgraded = gfx.DitheringColorquant(downgraded,ditheringMatrix,len(newPalette))
+				} else {
+					downgraded = gfx.Dithering(downgraded,ditheringMatrix,float32(*ditheringMultiplier))
+				}
 			}
 			fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
 			if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_down.png", downgraded); err != nil {
