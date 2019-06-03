@@ -26,9 +26,9 @@ var (
 	Sierra3 = [][]float32{{ 0.0, 0.0, 0.0, 5.0 / 32.0, 3.0 / 32.0 },{ 2.0 / 32.0, 4.0 / 32.0, 5.0 / 32.0, 4.0 / 32.0, 2.0 / 32.0 },{ 0.0, 2.0 / 32.0, 3.0 / 32.0, 2.0 / 32.0, 0.0 }}
 )
 
-func Dithering(input image.Image, filter [][]float32, errorMultiplier float32) image.Image {
+func Dithering(input image.NRGBA, filter [][]float32, errorMultiplier float32) image.NRGBA {
 	bounds := input.Bounds()
-	img := image.NewRGBA(bounds)
+	img := image.NewNRGBA(bounds)
 	for x := bounds.Min.X; x < bounds.Dx(); x++ {
 		for y := bounds.Min.Y; y < bounds.Dy(); y++ {
 			pixel := input.At(x, y)
@@ -101,5 +101,5 @@ func Dithering(input image.Image, filter [][]float32, errorMultiplier float32) i
 			}
 		}
 	}
-   return img
+   return *img
 }

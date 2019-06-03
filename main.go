@@ -59,6 +59,9 @@ var (
 	initProcess     = flag.String("initprocess", "", "create a new empty process file.")
 	processFile     = flag.String("processfile", "", "Process file path to apply.")
 	deltaFile       = flag.String("delta", "", "generate the delta byte mode between input image file and the followed image file")
+	ditheringAlgo   = flag.Int("dithering",-1,"Dithering algorithm to apply on input image\nAlgorithms available:\n\t0: FloydSteinberg\n\t1: JarvisJudiceNinke\n\t2: Stucki\n\t3: Atkinson\n\t4: Burkes\n\t5: Sierra\n\t6: TwoRowSierra\n\t7: Sierra3\n")
+	ditheringMultiplier = flag.Float64("multiplier",1.18,"error dithering multiplier.")
+	withQuantization = flag.Bool("quantization",false,"use additionnal quantization for dithering.")
 	version         = "0.16.rc"
 )
 
@@ -77,6 +80,7 @@ func main() {
 	var customDimension bool
 	var screenMode uint8
 	var palette color.Palette
+	var ditheringMatrix [][]float32
 	flag.Parse()
 
 	if *help {
@@ -302,6 +306,21 @@ func main() {
 	default:
 		resizeAlgo = imaging.NearestNeighbor
 	}
+	if *ditheringAlgo != -1 {
+		switch *ditheringAlgo {
+		case 0: ditheringMatrix = gfx.FloydSteinberg
+		case 1: ditheringMatrix = gfx.JarvisJudiceNinke
+		case 2: ditheringMatrix = gfx.Stucki
+		case 3: ditheringMatrix = gfx.Atkinson
+		case 4: ditheringMatrix = gfx.Burkes
+		case 5: ditheringMatrix = gfx.Sierra
+		case 6: ditheringMatrix = gfx.TwoRowSierra
+		case 7: ditheringMatrix = gfx.SierraLite
+		case 8: ditheringMatrix = gfx.Sierra3
+		default: fmt.Fprintf(os.Stderr,"Dithering matrix not available.")
+		os.Exit(-1)	
+		}
+	}
 	if exportType.DeltaMode {
 		out := convert.Resize(in, size, resizeAlgo)
 		fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_delta_resized.png")
@@ -318,7 +337,9 @@ func main() {
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
 			}
-
+		}
+		if *ditheringAlgo != -1 {
+			leftDowngraded = gfx.Dithering(leftDowngraded,ditheringMatrix,*ditheringMultiplier)
 		}
 		fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_delta_down.png")
 		if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta_down.png", leftDowngraded); err != nil {
@@ -350,7 +371,9 @@ func main() {
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
 			}
-
+		}
+		if *ditheringAlgo != -1 {
+			rightDowngraded = gfx.Dithering(rightDowngraded,ditheringMatrix,*ditheringMultiplier)
 		}
 		fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_delta2_down.png")
 		if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta2_down.png", rightDowngraded); err != nil {
@@ -373,7 +396,7 @@ func main() {
 			scr2 := gfx.ToMode2(rightDowngraded, rightPalette, exportType)
 			dc = gfx.Delta(scr1, scr2)
 		}
-		
+
 		fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 		fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
 		fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
@@ -455,7 +478,9 @@ func main() {
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
 				}
-
+			}
+			if *ditheringAlgo != -1 {
+				downgraded = gfx.Dithering(downgraded,ditheringMatrix,*ditheringMultiplier)
 			}
 			fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
 			if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_down.png", downgraded); err != nil {
