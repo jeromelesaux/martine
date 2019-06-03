@@ -317,7 +317,7 @@ func main() {
 		case 6: ditheringMatrix = gfx.TwoRowSierra
 		case 7: ditheringMatrix = gfx.SierraLite
 		case 8: ditheringMatrix = gfx.Sierra3
-		case 9: ditheringMatrix = gfx.Bayer16
+		case 9: ditheringMatrix = gfx.Bayer9
 		default: fmt.Fprintf(os.Stderr,"Dithering matrix not available.")
 		os.Exit(-1)	
 		}
@@ -490,7 +490,7 @@ func main() {
 			}
 			if *ditheringAlgo != -1 {
 				if *withQuantization {
-					downgraded = gfx.DitheringColorquant(downgraded,ditheringMatrix,len(newPalette))
+					downgraded = gfx.DitheringColorquant(downgraded,ditheringMatrix,size.ColorsAvailable)
 				} else {
 					downgraded = gfx.Dithering(downgraded,ditheringMatrix,float32(*ditheringMultiplier))
 				}
