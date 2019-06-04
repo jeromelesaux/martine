@@ -375,7 +375,7 @@ func main() {
 				fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
 			}
 		}
-		if *ditheringAlgo != -1 {
+	/*	if *ditheringAlgo != -1 {
 			switch ditherType {
 			case gfx.ErrorDiffusionDither:
 				if *withQuantization {
@@ -386,7 +386,7 @@ func main() {
 			case gfx.OrderedDither:
 				leftDowngraded = gfx.BayerDiphering(leftDowngraded,ditheringMatrix,leftPalette)
 			}
-		}
+		}*/
 		fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_delta_down.png")
 		if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta_down.png", leftDowngraded); err != nil {
 			os.Exit(-2)
@@ -418,7 +418,7 @@ func main() {
 				fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
 			}
 		}
-		if *ditheringAlgo != -1 {
+	/*	if *ditheringAlgo != -1 {
 			switch ditherType {
 			case gfx.ErrorDiffusionDither:
 				if *withQuantization {
@@ -429,7 +429,7 @@ func main() {
 			case gfx.OrderedDither:
 				rightDowngraded = gfx.BayerDiphering(rightDowngraded,ditheringMatrix,rightPalette)
 			}
-		}
+		}*/
 		fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_delta2_down.png")
 		if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta2_down.png", rightDowngraded); err != nil {
 			os.Exit(-2)
@@ -535,11 +535,7 @@ func main() {
 						out = gfx.Dithering(out, ditheringMatrix, float32(*ditheringMultiplier))
 					}
 				case gfx.OrderedDither:
-					if exportType.CpcPlus {
-						newPalette,_,_= convert.DowngradingPalette(out,size,exportType.CpcPlus)
-					} else {
-						newPalette = constants.CpcOldPalette
-					}
+					newPalette,_,_= convert.DowngradingPalette(out,size,exportType.CpcPlus)
 					out = gfx.BayerDiphering(out,ditheringMatrix,newPalette)
 				}
 			}

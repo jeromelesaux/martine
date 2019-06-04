@@ -513,6 +513,10 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, expor
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
+		if err := Pal(filePath, p, screenMode, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			return err
+		}
 	} else {
 		if err := Pal(filePath, p, screenMode, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
