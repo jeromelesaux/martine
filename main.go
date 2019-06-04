@@ -59,7 +59,7 @@ var (
 	initProcess         = flag.String("initprocess", "", "create a new empty process file.")
 	processFile         = flag.String("processfile", "", "Process file path to apply.")
 	deltaFile           = flag.String("delta", "", "generate the delta byte mode between input image file and the followed image file")
-	ditheringAlgo       = flag.Int("dithering", -1, "Dithering algorithm to apply on input image\nAlgorithms available:\n\t0: FloydSteinberg\n\t1: JarvisJudiceNinke\n\t2: Stucki\n\t3: Atkinson\n\t4: Sierra\n\t5: SierraLite\n\t6: Sierra3\n\t7: Bayer2\n\t7: Bayer3\n\t7: Bayer4\n\t7: Bayer8\n")
+	ditheringAlgo       = flag.Int("dithering", -1, "Dithering algorithm to apply on input image\nAlgorithms available:\n\t0: FloydSteinberg\n\t1: JarvisJudiceNinke\n\t2: Stucki\n\t3: Atkinson\n\t4: Sierra\n\t5: SierraLite\n\t6: Sierra3\n\t7: Bayer2\n\t8: Bayer3\n\t9: Bayer4\n\t10: Bayer8\n")
 	ditheringMultiplier = flag.Float64("multiplier", 1.18, "error dithering multiplier.")
 	withQuantization    = flag.Bool("quantization", false, "use additionnal quantization for dithering.")
 	version             = "0.16.rc"
@@ -270,7 +270,7 @@ func main() {
 		size.Height = in.Bounds().Max.Y
 	}
 
-	fmt.Fprintf(os.Stderr, "Filename :%s, extension:%s\n", filename, extension)
+	fmt.Fprintf(os.Stdout, "Filename :%s, extension:%s\n", filename, extension)
 
 	var resizeAlgo imaging.ResampleFilter
 	switch *resizeAlgorithm {
@@ -312,36 +312,47 @@ func main() {
 		case 0:
 			ditheringMatrix = gfx.FloydSteinberg
 			ditherType = gfx.ErrorDiffusionDither
+			fmt.Fprintf(os.Stdout, "Dither:FloydSteinberg, Type:ErrorDiffusionDither\n")
 		case 1:
 			ditheringMatrix = gfx.JarvisJudiceNinke
 			ditherType = gfx.ErrorDiffusionDither
+			fmt.Fprintf(os.Stdout, "Dither:JarvisJudiceNinke, Type:ErrorDiffusionDither\n")
 		case 2:
 			ditheringMatrix = gfx.Stucki
 			ditherType = gfx.ErrorDiffusionDither
+			fmt.Fprintf(os.Stdout, "Dither:Stucki, Type:ErrorDiffusionDither\n")
 		case 3:
 			ditheringMatrix = gfx.Atkinson
 			ditherType = gfx.ErrorDiffusionDither
+			fmt.Fprintf(os.Stdout, "Dither:Atkinson, Type:ErrorDiffusionDither\n")
 		case 4:
 			ditheringMatrix = gfx.Sierra
 			ditherType = gfx.ErrorDiffusionDither
+			fmt.Fprintf(os.Stdout, "Dither:Sierra, Type:ErrorDiffusionDither\n")
 		case 5:
 			ditheringMatrix = gfx.SierraLite
 			ditherType = gfx.ErrorDiffusionDither
+			fmt.Fprintf(os.Stdout, "Dither:SierraLite, Type:ErrorDiffusionDither\n")
 		case 6:
 			ditheringMatrix = gfx.Sierra3
 			ditherType = gfx.ErrorDiffusionDither
+			fmt.Fprintf(os.Stdout, "Dither:Sierra3, Type:ErrorDiffusionDither\n")
 		case 7:
 			ditheringMatrix = gfx.Bayer2
 			ditherType = gfx.OrderedDither
+			fmt.Fprintf(os.Stdout, "Dither:Bayer2, Type:OrderedDither\n")
 		case 8:
 			ditheringMatrix = gfx.Bayer3
 			ditherType = gfx.OrderedDither
+			fmt.Fprintf(os.Stdout, "Dither:Bayer3, Type:OrderedDither\n")
 		case 9:
 			ditheringMatrix = gfx.Bayer4
 			ditherType = gfx.OrderedDither
+			fmt.Fprintf(os.Stdout, "Dither:Bayer4, Type:OrderedDither\n")
 		case 10:
 			ditheringMatrix = gfx.Bayer8
 			ditherType = gfx.OrderedDither
+			fmt.Fprintf(os.Stdout, "Dither:Bayer8, Type:OrderedDither\n")
 		default:
 			fmt.Fprintf(os.Stderr, "Dithering matrix not available.")
 			os.Exit(-1)
@@ -373,7 +384,7 @@ func main() {
 					leftDowngraded = gfx.Dithering(leftDowngraded, ditheringMatrix, float32(*ditheringMultiplier))
 				}
 			case gfx.OrderedDither:
-				return
+				leftDowngraded = gfx.BayerDiphering(leftDowngraded, ditheringMatrix, leftPalette)
 			}
 		}
 		fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_delta_down.png")
@@ -416,7 +427,7 @@ func main() {
 					rightDowngraded = gfx.Dithering(rightDowngraded, ditheringMatrix, float32(*ditheringMultiplier))
 				}
 			case gfx.OrderedDither:
-				return
+				rightDowngraded = gfx.BayerDiphering(rightDowngraded, ditheringMatrix, rightPalette)
 			}
 		}
 		fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_delta2_down.png")
@@ -515,6 +526,23 @@ func main() {
 
 			var newPalette color.Palette
 			var downgraded *image.NRGBA
+			if *ditheringAlgo != -1 {
+				switch ditherType {
+				case gfx.ErrorDiffusionDither:
+					if *withQuantization {
+						out = gfx.QuantizeWithDither(out, ditheringMatrix, size.ColorsAvailable, newPalette)
+					} else {
+						out = gfx.Dithering(out, ditheringMatrix, float32(*ditheringMultiplier))
+					}
+				case gfx.OrderedDither:
+					if exportType.CpcPlus {
+						newPalette = constants.CpcPlusPalette
+					} else {
+						newPalette = constants.CpcOldPalette
+					}
+					out = gfx.BayerDiphering(out, ditheringMatrix, newPalette)
+				}
+			}
 			if len(palette) > 0 {
 				newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
 			} else {
@@ -523,18 +551,7 @@ func main() {
 					fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
 				}
 			}
-			if *ditheringAlgo != -1 {
-				switch ditherType {
-				case gfx.ErrorDiffusionDither:
-					if *withQuantization {
-						downgraded = gfx.QuantizeWithDither(downgraded, ditheringMatrix, size.ColorsAvailable, newPalette)
-					} else {
-						downgraded = gfx.Dithering(downgraded, ditheringMatrix, float32(*ditheringMultiplier))
-					}
-				case gfx.OrderedDither:
-					return
-				}
-			}
+
 			fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
 			if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_down.png", downgraded); err != nil {
 				os.Exit(-2)
