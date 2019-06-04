@@ -84,9 +84,9 @@ type MixingPlan struct {
 
 func BayerDiphering(input *image.NRGBA, filter [][]float32, palette color.Palette) *image.NRGBA {
 	image2 := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{input.Bounds().Max.X, input.Bounds().Max.Y}})
-	draw.Draw(image2, image2.Bounds(), input, image.ZP, draw.Src)
-	height := image2.Bounds().Max.X
-	width := image2.Bounds().Max.Y
+	//draw.Draw(image2, image2.Bounds(), input, image.ZP, draw.Src)
+	height := image2.Bounds().Max.Y
+	width := image2.Bounds().Max.X
 	filterRowLenght := len(filter[0]) - 1
 	filterLenght := len(filter[0]) * len(filter[0])
 	pal := InitPalWithPalette(palette)

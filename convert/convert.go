@@ -51,7 +51,7 @@ func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (c
 			}
 		}
 
-		fmt.Fprintf(os.Stderr, "Phasis downgrade colors palette palette (%d)\n", len(newPalette))
+		fmt.Fprintf(os.Stdout, "Phasis downgrade colors palette palette (%d)\n", len(newPalette))
 		return newPalette, downgradeWithPalette(out, newPalette), nil
 
 	}
@@ -87,7 +87,7 @@ func downgradeWithPalette(in *image.NRGBA, p color.Palette) *image.NRGBA {
 }
 
 func downgrade(in *image.NRGBA, isCpcPlus bool) (color.Palette, *image.NRGBA) {
-	fmt.Fprintf(os.Stderr, "Plus palette :%d\n", len(constants.CpcPlusPalette))
+	fmt.Fprintf(os.Stdout, "Plus palette :%d\n", len(constants.CpcPlusPalette))
 	cache := make(map[color.Color]color.Color, 0)
 	p := color.Palette{}
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
