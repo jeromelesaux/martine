@@ -116,8 +116,10 @@ func BayerDiphering(input *image.NRGBA, filter [][]float32, palette color.Palett
 				}
 			}
 			//fmt.Fprintf(os.Stdout,"Analyse done for column %d\n",y)
+			fmt.Fprintf(os.Stdout,".")
 		}
 	})
+	fmt.Fprintf(os.Stdout,"\n")
 	return image2
 }
 
