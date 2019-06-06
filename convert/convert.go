@@ -23,6 +23,8 @@ func DowngradingWithPalette(in *image.NRGBA, p color.Palette) (color.Palette, *i
 	return p, downgradeWithPalette(in, p)
 }
 
+
+
 func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (color.Palette, *image.NRGBA, error) {
 	fmt.Fprintf(os.Stdout, "* Step 2 * Downgrading palette image\n")
 	p, out := downgrade(in, isCpcPlus)
