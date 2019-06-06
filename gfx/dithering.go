@@ -1,13 +1,13 @@
 package gfx
 
 import (
+	"fmt"
 	"github.com/esimov/colorquant"
 	"github.com/esimov/dithergo"
 	"github.com/jeromelesaux/martine/proc"
 	"image"
 	"image/color"
 	"image/draw"
-	"fmt"
 	"os"
 )
 
@@ -31,7 +31,7 @@ var (
 	// Sierra3
 	Sierra3 = [][]float32{{0.0, 0.0, 0.0, 5.0 / 32.0, 3.0 / 32.0}, {2.0 / 32.0, 4.0 / 32.0, 5.0 / 32.0, 4.0 / 32.0, 2.0 / 32.0}, {0.0, 2.0 / 32.0, 3.0 / 32.0, 2.0 / 32.0, 0.0}}
 	// bayer 4
-	Bayer2 = [][]float32{{0, 3},{2, 1}}
+	Bayer2 = [][]float32{{0, 3}, {2, 1}}
 	Bayer3 = [][]float32{{0, 6, 4}, {7, 5, 1}, {3, 2, 8}}
 	Bayer4 = [][]float32{{0, 12, 3, 15}, {8, 4, 11, 7}, {2, 14, 1, 13}, {10, 6, 9, 5}}
 	Bayer8 = [][]float32{{0, 32, 8, 40, 2, 34, 10, 42}, /* 8x8 Bayer ordered dithering  */
@@ -85,38 +85,39 @@ type MixingPlan struct {
 	Ratio  float32
 }
 
+// https://bisqwit.iki.fi/story/howto/dither/jy/#Algorithms
 func BayerDiphering(input *image.NRGBA, filter [][]float32, palette color.Palette) *image.NRGBA {
 	image2 := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{input.Bounds().Max.X, input.Bounds().Max.Y}})
 	height := image2.Bounds().Max.Y
 	width := image2.Bounds().Max.X
 	filterRowLenght := len(filter[0]) - 1
 	filterLenght := len(filter[0]) * len(filter[0])
-	fmt.Fprintf(os.Stdout,"Palette lenght used in Bayer dithering %d\n",len(palette))
+	fmt.Fprintf(os.Stdout, "Palette lenght used in Bayer dithering %d\n", len(palette))
 	pal := InitPalWithPalette(palette)
-	
-		proc.Parallel(0, height, func(yc <-chan int) {
-			for y := range yc {
-				for x := 0; x < width; x++ {
-					temp := input.At(x, y)
-					color := qColorToint(temp)
-					plan := DeviseBestMixingPlan(color, pal, uint(filterLenght))
-					if plan.Ratio == 4.0 { // Tri-tone or quad-tone dithering
-						color := rgbToQColor(plan.Colors[((y&1)*2 + (x & 1))])
-						image2.Set(x, y, color)
-					} else {
-						//fmt.Fprintf(os.Stderr,"(%d,%d):(%d)(%d)\n",x,y,(x & filterRowLenght),((y & filterRowLenght) << 3))
-						mapValue := filter[(x & filterRowLenght)][(y&filterRowLenght)] / float32(filterLenght)
-						planIndex := 0
-						if mapValue < plan.Ratio {
-							planIndex = 1
-						}
-						color := rgbToQColor(plan.Colors[planIndex])
-						image2.Set(x, y, color)
+
+	proc.Parallel(0, height, func(yc <-chan int) {
+		for y := range yc {
+			for x := 0; x < width; x++ {
+				temp := input.At(x, y)
+				color := qColorToint(temp)
+				plan := DeviseBestMixingPlan(color, pal, uint(filterLenght))
+				if plan.Ratio == 4.0 { // Tri-tone or quad-tone dithering
+					color := rgbToQColor(plan.Colors[((y&1)*2 + (x & 1))])
+					image2.Set(x, y, color)
+				} else {
+					//fmt.Fprintf(os.Stderr,"(%d,%d):(%d)(%d)\n",x,y,(x & filterRowLenght),((y & filterRowLenght) << 3))
+					mapValue := filter[(x & filterRowLenght)][(y&filterRowLenght)] / float32(filterLenght)
+					planIndex := 0
+					if mapValue < plan.Ratio {
+						planIndex = 1
 					}
+					color := rgbToQColor(plan.Colors[planIndex])
+					image2.Set(x, y, color)
 				}
-				//fmt.Fprintf(os.Stdout,"Analyse done for column %d\n",y)
 			}
-		})
+			//fmt.Fprintf(os.Stdout,"Analyse done for column %d\n",y)
+		}
+	})
 	return image2
 }
 
