@@ -88,6 +88,48 @@ func downgradeWithPalette(in *image.NRGBA, p color.Palette) *image.NRGBA {
 	return in
 }
 
+func ExtractPalette(in *image.NRGBA, isCpcPlus bool, nbColors int) color.Palette {
+	p := []color.Color{}
+	type ks struct {
+		Key color.Color
+		Value int
+	}
+	cache := make(map[color.Color]int, 0)
+	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
+		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
+			c := in.At(x, y)
+			var cPalette color.Color
+			if cc := cache[c]; cc != 0 {
+				cache[c]++
+			} else {
+				if isCpcPlus {
+					cPalette = constants.CpcPlusPalette.Convert(c)
+				} else {
+					cPalette = constants.CpcOldPalette.Convert(c)
+				}
+				cache[cPalette]++
+			}
+			in.Set(x, y, cPalette)
+		}
+	}
+
+	var s []ks
+	for k,v := range cache {
+		s = append(s, ks{Key:k,Value:v})
+	}
+	sort.Slice(s, func(i, j int) bool {
+        return s[i].Value > s[j].Value
+	})
+	
+	for i,v := range s {
+		if i >= nbColors {
+			break
+		}
+		p = append(p,v.Key)
+	}
+	return p
+}
+
 func PaletteUsed(in *image.NRGBA, isCpcPlus bool) color.Palette {
 	fmt.Fprintf(os.Stdout, "Define the Palette use in image.\n")
 	cache := make(map[color.Color]color.Color, 0)
