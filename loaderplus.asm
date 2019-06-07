@@ -4,7 +4,7 @@ run $
 start:
 ; delock asic 
 di
-ld b,#bc
+ld bc,#bc00
 ld hl,sequence
 ld e,17
 seq:
@@ -31,7 +31,6 @@ ld bc,#7fa0
 out (c),c
 
 ret
-end: 
 
 sequence:
 db #ff,#00,#ff,#77,#b3,#51,#a8,#d4,#62,#39,#9c,#46,#2b,#15,#8a,#cd,#ee
@@ -40,6 +39,6 @@ sprite_colours:
 db #66, #06, #63, #06, #00, #00, #96, #06, #33, #03, #63, #03, #93, #06, #96, #06
 db #96, #09, #c9, #0c, #63, #06, #96, #06, #c6, #09, #c9, #09, #63, #03, #99, #09
 
-
+end: 
 
 save 'palplus.bin',#3000,end-start,AMSDOS
