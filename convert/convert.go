@@ -192,3 +192,14 @@ func paletteContains(p color.Palette, c color.Color) bool {
 	}
 	return false
 }
+
+
+func ConvertPalette(p color.Palette, p0 color.Palette ) color.Palette {
+	var nP  []color.Color
+	fmt.Fprintf(os.Stdout,"Converting palette length %d\n",len(p))
+	for _,v := range p {
+		n := p0.Convert(v)
+		nP = append(nP,n)
+	}
+	return nP
+}

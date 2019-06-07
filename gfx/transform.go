@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/convert"
 	"image"
 	"image/color"
 	"math"
@@ -503,9 +504,17 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, expor
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
-		if err := Loader(filePath, p, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving the loader %s with error %v\n", filePath, err)
-			return err
+		if !exportType.CpcPlus {
+			if err := Loader(filePath, p, exportType); err != nil {
+				fmt.Fprintf(os.Stderr, "Error while saving the loader %s with error %v\n", filePath, err)
+				return err
+			}
+		} else {
+			nP := convert.ConvertPalette(p,constants.CpcOldPalette)
+			if err := Loader(filePath, nP, exportType); err != nil {
+				fmt.Fprintf(os.Stderr, "Error while saving the loader %s with error %v\n", filePath, err)
+				return err
+			}
 		}
 	}
 	if exportType.CpcPlus {
@@ -513,7 +522,8 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, expor
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
-		if err := Pal(filePath, p, screenMode, exportType); err != nil {
+		nP := convert.ConvertPalette(p,constants.CpcOldPalette)
+		if err := Pal(filePath, nP, screenMode, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
