@@ -1,6 +1,8 @@
 package gfx
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"github.com/jeromelesaux/m4client/cpc"
@@ -12,7 +14,7 @@ import (
 // CPC plus loader nb colors *2 offset 0x1d
 
 var (
-	BasicLoader = []byte{
+	BasicLoaderBasic = []byte{
 		0x36, 0x00, 0x05, 0x00, 0x8c, 0x20, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30,
 		0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30,
 		0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c, 0x30, 0x30, 0x2c,
@@ -36,14 +38,84 @@ var (
 		0x63, 0x06, 0x00, 0x00, 0x96, 0x06, 0x33, 0x03, 0x63, 0x03, 0x93, 0x06, 0x96, 0x06, 0x96, 0x09,
 		0xc9, 0x0c, 0x63, 0x06, 0x96, 0x06, 0xc6, 0x09, 0xc9, 0x09, 0x63, 0x03, 0x99, 0x09}
 	// offset file name 24
-	BasicCPCPlusLoader = []byte{
+	startScreenPlusName     = 24
+	BasicCPCPlusLoaderBasic = []byte{
 		0x1a, 0x38, 0x00, 0x0a, 0x00, 0xaa, 0x20, 0x1c, 0xff, 0x2f, 0x01, 0xad, 0x20, 0x0e, 0x01, 0xa8,
 		0x22, 0x70, 0x61, 0x6c, 0x70, 0x6c, 0x75, 0x73, 0x2e, 0x62, 0x69, 0x6e, 0x22, 0x2c, 0x1c, 0x00,
-		0x30, 0x01, 0xa8, 0x22, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x2e, 0x73, 0x63, 0x72, 
+		0x30, 0x01, 0xa8, 0x22, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x2e, 0x73, 0x63, 0x72,
 		0x22, 0x2c, 0x1c, 0x00, 0xc0, 0x01, 0x83, 0x20, 0x1c, 0x00, 0x30, 0x00, 0x00, 0x00, 0x1a}
 )
 
-func Loader(filePath string, p color.Palette, exportType *ExportType) error {
+func Loader(filePath string, p color.Palette, mode uint8, exportType *ExportType) error {
+	if exportType.CpcPlus {
+		return BasicLoaderCPCPlus(filePath, p, mode, exportType)
+	}
+	return BasicLoader(filePath, p, exportType)
+}
+
+func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, exportType *ExportType) error {
+	var palPlus bytes.Buffer
+	bf := bufio.NewWriter(&palPlus)
+	for i := 0; i < len(p); i++ {
+		cp := NewCpcPlusColor(p[i])
+		binary.Write(bf, binary.LittleEndian, cp.Bytes)
+	}
+	// export de la palette assemblée
+	loader := PaletteCPCPlusLoader
+	copy(loader[len(loader):], palPlus.Bytes())
+	nbColors := uint8(len(p) * 2)
+	loader[0x1d] = nbColors
+	header := cpc.CpcHead{Type: 1, User: 0, Address: 0x3000, Exec: 0x3000,
+		Size:        uint16(binary.Size(loader)),
+		Size2:       uint16(binary.Size(loader)),
+		LogicalSize: uint16(binary.Size(loader))}
+	copy(header.Filename[:], "PALPLUS.BIN")
+	header.Checksum = uint16(header.ComputedChecksum16())
+	osFilepath := exportType.AmsdosFullPath("PALPLUS", ".BIN")
+	fw, err := os.Create(osFilepath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
+		return err
+	}
+	if !exportType.NoAmsdosHeader {
+		binary.Write(fw, binary.LittleEndian, header)
+	}
+	binary.Write(fw, binary.LittleEndian, loader)
+	fw.Close()
+
+	exportType.AddFile(osFilepath)
+
+	// export fichier basic loader
+	loader = BasicCPCPlusLoaderBasic
+	filename := exportType.AmsdosFilename()
+	copy(loader[startScreenPlusName:], filename[:])
+	loader[0x1d] = mode
+	fmt.Println(loader)
+	header = cpc.CpcHead{Type: 0, User: 0, Address: 0x170, Exec: 0x0,
+		Size:        uint16(binary.Size(loader)),
+		Size2:       uint16(binary.Size(loader)),
+		LogicalSize: uint16(binary.Size(loader))}
+	file := string(filename) + ".BAS"
+	copy(header.Filename[:], file)
+	header.Checksum = uint16(header.ComputedChecksum16())
+	osFilepath = exportType.AmsdosFullPath(filePath, ".BAS")
+	fw, err = os.Create(osFilepath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
+		return err
+	}
+	if !exportType.NoAmsdosHeader {
+		binary.Write(fw, binary.LittleEndian, header)
+	}
+	binary.Write(fw, binary.LittleEndian, loader)
+	fw.Close()
+
+	exportType.AddFile(osFilepath)
+
+	return nil
+}
+
+func BasicLoader(filePath string, p color.Palette, exportType *ExportType) error {
 	var out string
 	for i := 0; i < len(p); i++ {
 		v, err := constants.FirmwareNumber(p[i])
@@ -59,7 +131,7 @@ func Loader(filePath string, p color.Palette, exportType *ExportType) error {
 	}
 
 	var loader []byte
-	loader = BasicLoader
+	loader = BasicLoaderBasic
 	copy(loader[startPaletteValues:], out[0:len(out)])
 	filename := exportType.AmsdosFilename()
 	copy(loader[startPaletteName:], filename[:])
