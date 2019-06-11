@@ -74,6 +74,17 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, exportType
 
 	nbColors := uint8(len(p) * 2)
 	loader[0x1d] = nbColors
+	
+	paletteHeader,err := cpc.BytesCpcHeader(loader)
+	if err != nil {
+		return err
+	}
+	paletteHeader.Size = uint16(binary.Size(loader))
+	paletteHeader.Size2 = uint16(binary.Size(loader))
+	paletteHeader.LogicalSize = uint16(binary.Size(loader))
+	paletteHeader.Checksum = uint16(paletteHeader.ComputedChecksum16())
+	copy(loader[0:128],paletteHeader.Bytes())
+
 
 	osFilepath := exportType.AmsdosFullPath("PALPLUS", ".BIN")
 	// modifier checksum amsdos header
