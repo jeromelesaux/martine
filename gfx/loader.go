@@ -78,9 +78,9 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, exportType
 	if err != nil {
 		return err
 	}
-	paletteHeader.Size = uint16(binary.Size(loader))
-	paletteHeader.Size2 = uint16(binary.Size(loader))
-	paletteHeader.LogicalSize = uint16(binary.Size(loader))
+	paletteHeader.Size = uint16(binary.Size(loader)) -128
+	paletteHeader.Size2 = uint16(binary.Size(loader)) -128
+	paletteHeader.LogicalSize = uint16(binary.Size(loader)) -128
 	paletteHeader.Checksum = uint16(paletteHeader.ComputedChecksum16())
 	data, err := paletteHeader.Bytes()
 	if err != nil {
