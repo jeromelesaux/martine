@@ -1,8 +1,6 @@
 package gfx
 
 import (
-	"bufio"
-	"bytes"
 	"encoding/binary"
 	"fmt"
 	"github.com/jeromelesaux/m4client/cpc"
@@ -54,15 +52,16 @@ func Loader(filePath string, p color.Palette, mode uint8, exportType *ExportType
 }
 
 func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, exportType *ExportType) error {
-	var palPlus bytes.Buffer
-	bf := bufio.NewWriter(&palPlus)
-	for i := 0; i < len(p); i++ {
-		cp := NewCpcPlusColor(p[i])
-		binary.Write(bf, binary.LittleEndian, cp.Bytes)
-	}
 	// export de la palette assemblée
 	loader := PaletteCPCPlusLoader
-	copy(loader[len(loader):], palPlus.Bytes())
+	
+	for i := 0; i < len(p); i++ {
+		cp := NewCpcPlusColor(p[i])
+		b := cp.Bytes()
+		loader = append(loader,b[1])
+		loader = append(loader,b[0])
+	}
+	
 	nbColors := uint8(len(p) * 2)
 	loader[0x1d] = nbColors
 	header := cpc.CpcHead{Type: 1, User: 0, Address: 0x3000, Exec: 0x3000,
