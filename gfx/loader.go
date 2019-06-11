@@ -73,8 +73,8 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, exportType
 	for i := 0; i < len(p); i++ {
 		cp := NewCpcPlusColor(p[i])
 		b := cp.Bytes()
-		loader = append(loader, b[1])
 		loader = append(loader, b[0])
+		loader = append(loader, b[1])
 	}
  
 	loader[0x9d] = uint8(len(p) * 2)
