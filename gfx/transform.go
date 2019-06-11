@@ -504,17 +504,9 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, expor
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
-		if !exportType.CpcPlus {
-			if err := Loader(filePath, p, screenMode, exportType); err != nil {
-				fmt.Fprintf(os.Stderr, "Error while saving the loader %s with error %v\n", filePath, err)
-				return err
-			}
-		} else {
-			nP := convert.ConvertPalette(p, constants.CpcOldPalette)
-			if err := Loader(filePath, nP, screenMode, exportType); err != nil {
-				fmt.Fprintf(os.Stderr, "Error while saving the loader %s with error %v\n", filePath, err)
-				return err
-			}
+		if err := Loader(filePath, p, screenMode, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving the loader %s with error %v\n", filePath, err)
+			return err
 		}
 	}
 	if exportType.CpcPlus {
