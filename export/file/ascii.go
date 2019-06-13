@@ -13,6 +13,7 @@ import (
 	"strings"
 )
 
+// ByteToken is the token by default
 var ByteToken = "BYTE"
 
 func Ascii(filePath string, data []byte, p color.Palette, exportType *x.ExportType) error {
@@ -154,9 +155,8 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *x.ExportTy
 		if exportType.TileMode {
 			exportType.Tiles.Sprites = append(exportType.Tiles.Sprites, j)
 			return nil
-		} else {
-			return j.Save(exportType.OsFullPath(filePath, ".json"))
-		}
+		} 
+		return j.Save(exportType.OsFullPath(filePath, ".json"))	
 	}
 	return nil
 }
