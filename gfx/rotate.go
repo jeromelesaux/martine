@@ -6,6 +6,8 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
+	"github.com/jeromelesaux/martine/export/file"
+	x "github.com/jeromelesaux/martine/export"
 	"image"
 	"image/color"
 	"image/draw"
@@ -17,7 +19,7 @@ var (
 	ErrorSizeMismatch                   = errors.New("Error width and height mismatch cannot perform action.")
 )
 
-func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filePath string, resizeAlgo imaging.ResampleFilter, exportType *ExportType) error {
+func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filePath string, resizeAlgo imaging.ResampleFilter, exportType *x.ExportType) error {
 	if exportType.RollIteration == -1 {
 		return ErrorMissingNumberOfImageToGenerate
 	}
@@ -49,7 +51,7 @@ func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, f
 		_, rin = convert.DowngradingWithPalette(rin, p)
 
 		newFilename := exportType.OsFullPath(filePath, fmt.Sprintf("%.2d", indice)+".png")
-		if err := Png(newFilename, rin); err != nil {
+		if err := file.Png(newFilename, rin); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create image (%s) error :%v\n", newFilename, err)
 		}
 		if err := SpriteTransform(rin, p, maxSize, mode, newFilename, exportType); err != nil {

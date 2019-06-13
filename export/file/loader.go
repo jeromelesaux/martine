@@ -1,10 +1,11 @@
-package gfx
+package file
 
 import (
 	"encoding/binary"
 	"fmt"
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/constants"
+	x "github.com/jeromelesaux/martine/export"
 	"image/color"
 	"os"
 )
@@ -79,19 +80,19 @@ var (
 		0x00, 0x1a, 0x00}
 )
 
-func Loader(filePath string, p color.Palette, mode uint8, exportType *ExportType) error {
+func Loader(filePath string, p color.Palette, mode uint8, exportType *x.ExportType) error {
 	if exportType.CpcPlus {
 		return BasicLoaderCPCPlus(filePath, p, mode, exportType)
 	}
 	return BasicLoader(filePath, p, exportType)
 }
 
-func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, exportType *ExportType) error {
+func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, exportType *x.ExportType) error {
 	// export de la palette assemblée
 	loader := PaletteCPCPlusLoader
 
 	for i := 0; i < len(p); i++ {
-		cp := NewCpcPlusColor(p[i])
+		cp := constants.NewCpcPlusColor(p[i])
 		b := cp.Bytes()
 		loader = append(loader, b[0])
 		loader = append(loader, b[1])
@@ -163,7 +164,7 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, exportType
 	return nil
 }
 
-func BasicLoader(filePath string, p color.Palette, exportType *ExportType) error {
+func BasicLoader(filePath string, p color.Palette, exportType *x.ExportType) error {
 	var out string
 	for i := 0; i < len(p); i++ {
 		v, err := constants.FirmwareNumber(p[i])

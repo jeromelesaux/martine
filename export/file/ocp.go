@@ -1,4 +1,4 @@
-package gfx
+package file
 
 import (
 	"encoding/binary"
@@ -6,6 +6,7 @@ import (
 	rawlz4 "github.com/bkaradzic/go-lz4"
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/constants"
+	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/lz4"
 	"github.com/jeromelesaux/martine/rle"
 	"image/color"
@@ -26,45 +27,10 @@ var OverscanBoot = [...]byte{0x0e, 0x00, 0x0a, 0x00, 0x01, 0xc0, 0x20, 0x69, 0x4
 	0x00, 0xc3, 0xc6, 0xba, 0xc3, 0xc1, 0xb9, 0x00, 0x00, 0xc3, 0x35, 0xba, 0x00, 0xed, 0x49, 0xd9,
 	0xfb, 0xc3, 0x00, 0xbe, 0x2b, 0x00, 0x71, 0x18, 0x08, 0xc3, 0x41, 0xb9, 0xc9, 0x00, 0x00, 0x00}
 
-type CpcPlusColor struct {
-	G uint16
-	R uint16
-	B uint16
-}
 
-func NewRawCpcPlusColor(v uint16) *CpcPlusColor {
-	c := &CpcPlusColor{}
-	c.B = v & 0xf //1111
-	c.R = v >> 4 & 0xf
-	c.G = v >> 8 & 0xf
-	return c
-}
-
-func (c *CpcPlusColor) ToString() string {
-	return fmt.Sprintf("R:%.2b(%d),G:%.2b(%d),B:%.2b(%d)", c.R, c.R, c.G, c.G, c.B, c.B)
-}
-
-func (c *CpcPlusColor) Value() uint16 {
-	v := c.B | c.R<<4 | c.G<<8
-	fmt.Fprintf(os.Stderr, "value(%d,%d,%d)(%b,%b,%b) #%.4x (%.b): %d\n", c.R, c.G, c.B, c.R, c.G, c.B,
-		v, v, c.B+(c.R*16)+c.G*256)
-	return v
-}
-func (c *CpcPlusColor) Bytes() []byte {
-	buf := make([]byte, 2)
-	binary.LittleEndian.PutUint16(buf, c.Value())
-	//	fmt.Fprintf(os.Stderr, "%b\n", buf)
-	return buf
-}
-
-func NewCpcPlusColor(c color.Color) CpcPlusColor {
-	r, g, b, _ := c.RGBA()
-	//	fmt.Fprintf(os.Stderr,"original colors r:%d,g:%d,b:%d\n",r,g,b)
-	return CpcPlusColor{G: uint16(g / 4096), R: uint16(r / 4096), B: uint16(b / 4096)}
-}
 
 type KitPalette struct {
-	Colors [16]CpcPlusColor
+	Colors [16] constants.CpcPlusColor
 }
 
 func (i *KitPalette) ToString() string {
@@ -87,7 +53,7 @@ func (i *InkPalette) ToString() string {
 	return out
 }
 
-func Ink(filePath string, p color.Palette, screenMode uint8, exportType *ExportType) error {
+func Ink(filePath string, p color.Palette, screenMode uint8, exportType *x.ExportType) error {
 	fmt.Fprintf(os.Stdout, "Saving INK file (%s)\n", filePath)
 	data := make([]uint8, 16)
 	fmt.Fprintf(os.Stdout, "Palette size %d\n", len(p))
@@ -165,7 +131,7 @@ func OpenInk(filePath string) (color.Palette, *InkPalette, error) {
 	return p, inkPalette, nil
 }
 
-func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, exportType *ExportType) error {
+func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, exportType *x.ExportType) error {
 	o := make([]byte, 0x7e90-0x80)
 	osFilepath := exportType.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", osFilepath)
@@ -207,7 +173,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, e
 	if exportType.CpcPlus {
 		offset := 0
 		for i := 0; i < len(p); i++ {
-			cp := NewCpcPlusColor(p[i])
+			cp := constants.NewCpcPlusColor(p[i])
 			fmt.Fprintf(os.Stderr, "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
 			v := cp.Bytes()
 			copy(o[(0x801-0x170)+offset:], v[:])
@@ -249,7 +215,7 @@ func OpenKit(filePath string) (color.Palette, *KitPalette, error) {
 		return color.Palette{}, KitPalette, err
 	}
 	for i, v := range buf {
-		c := NewRawCpcPlusColor(v)
+		c := constants.NewRawCpcPlusColor(v)
 		c.B *= 30
 		c.R *= 30
 		c.G *= 30
@@ -264,13 +230,13 @@ func OpenKit(filePath string) (color.Palette, *KitPalette, error) {
 	return p, KitPalette, nil
 }
 
-func Kit(filePath string, p color.Palette, screenMode uint8, exportType *ExportType) error {
+func Kit(filePath string, p color.Palette, screenMode uint8, exportType *x.ExportType) error {
 	osFilepath := exportType.AmsdosFullPath(filePath, ".Kit")
 	fmt.Fprintf(os.Stdout, "Saving Kit file (%s)\n", osFilepath)
 	data := [16]uint16{}
 
 	for i := 0; i < len(p); i++ {
-		cp := NewCpcPlusColor(p[i])
+		cp := constants.NewCpcPlusColor(p[i])
 		data[i] = cp.Value()
 	}
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x8809, Exec: 0x8809,
@@ -296,7 +262,7 @@ func Kit(filePath string, p color.Palette, screenMode uint8, exportType *ExportT
 	return nil
 }
 
-func Scr(filePath string, data []byte, exportType *ExportType) error {
+func Scr(filePath string, data []byte, exportType *x.ExportType) error {
 	osFilepath := exportType.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving SCR file (%s)\n", osFilepath)
 	if exportType.Compression != -1 {
@@ -402,7 +368,7 @@ func OpenPal(filePath string) (color.Palette, *OcpPalette, error) {
 	return p, ocpPalette, nil
 }
 
-func Pal(filePath string, p color.Palette, screenMode uint8, exportType *ExportType) error {
+func Pal(filePath string, p color.Palette, screenMode uint8, exportType *x.ExportType) error {
 	fmt.Fprintf(os.Stdout, "Saving PAL file (%s)\n", filePath)
 	data := OcpPalette{ScreenMode: screenMode, ColorAnimation: 0, ColorAnimationDelay: 0}
 	for i := 0; i < 16; i++ {
@@ -481,7 +447,7 @@ func OpenWin(filePath string) (*OcpWinFooter, error) {
 	return ocpWinFooter, nil
 }
 
-func Win(filePath string, data []byte, screenMode uint8, width, height int, exportType *ExportType) error {
+func Win(filePath string, data []byte, screenMode uint8, width, height int, exportType *x.ExportType) error {
 	osFilepath := exportType.AmsdosFullPath(filePath, ".WIN")
 	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", osFilepath, screenMode, width, height)
 	win := OcpWinFooter{Unused: 3, Height: byte(height), Unused2: 0, Width: uint16(width * 8)}

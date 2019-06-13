@@ -1,10 +1,11 @@
-package gfx
+package file
 
 import (
 	"encoding/binary"
 	"fmt"
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/constants"
+	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/rle"
 	"image/color"
 	"os"
@@ -14,7 +15,7 @@ import (
 
 var ByteToken = "BYTE"
 
-func Ascii(filePath string, data []byte, p color.Palette, exportType *ExportType) error {
+func Ascii(filePath string, data []byte, p color.Palette, exportType *x.ExportType) error {
 	eol := "\n"
 	if runtime.GOOS == "windows" {
 		eol = "\r\n"
@@ -68,7 +69,7 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *ExportType
 
 	if exportType.CpcPlus {
 		for i := 0; i < len(p); i++ {
-			cp := NewCpcPlusColor(p[i])
+			cp := constants.NewCpcPlusColor(p[i])
 			v := cp.Value()
 			out += fmt.Sprintf("#%.2x, #%.2x", byte(v), byte(v>>8))
 			if (i+1)%8 == 0 && i+1 < len(p) {
@@ -148,7 +149,7 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *ExportType
 		for i := 0; i < len(data); i++ {
 			screen[i] = fmt.Sprintf("0x%.2x", data[i])
 		}
-		j := NewJson(exportType.Filename(), exportType.Size.Width, exportType.Size.Height, screen, palette)
+		j := x.NewJson(exportType.Filename(), exportType.Size.Width, exportType.Size.Height, screen, palette)
 		fmt.Fprintf(os.Stdout, "Filepath:%s\n", filePath)
 		if exportType.TileMode {
 			exportType.Tiles.Sprites = append(exportType.Tiles.Sprites, j)
@@ -160,7 +161,7 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *ExportType
 	return nil
 }
 
-func AsciiByColumn(filePath string, data []byte, p color.Palette, exportType *ExportType) error {
+func AsciiByColumn(filePath string, data []byte, p color.Palette, exportType *x.ExportType) error {
 	eol := "\n"
 	if runtime.GOOS == "windows" {
 		eol = "\r\n"
@@ -209,7 +210,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, exportType *Ex
 
 	if exportType.CpcPlus {
 		for i := 0; i < len(p); i++ {
-			cp := NewCpcPlusColor(p[i])
+			cp := constants.NewCpcPlusColor(p[i])
 			v := cp.Value()
 			out += fmt.Sprintf("#%.2x, #%.2x", byte(v), byte(v>>8))
 			if (i+1)%8 == 0 && i+1 < len(p) {

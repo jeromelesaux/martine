@@ -1,6 +1,7 @@
 package gfx
 
 import (
+	x "github.com/jeromelesaux/martine/export"
 	"bytes"
 	"encoding/binary"
 	"fmt"
@@ -68,7 +69,7 @@ func (dc *DeltaCollection) Add(b byte, address uint16) {
 	dc.Items = append(dc.Items, item)
 }
 
-func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, exportType *ExportType) (*DeltaCollection, error) {
+func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, exportType *x.ExportType) (*DeltaCollection, error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
 		return data, ErrorSizeMismatch
@@ -115,7 +116,7 @@ func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.
 	return data, nil
 }
 
-func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, exportType *ExportType) (*DeltaCollection, error) {
+func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, exportType *x.ExportType) (*DeltaCollection, error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
 		return data, ErrorSizeMismatch
@@ -188,7 +189,7 @@ func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.
 	return data, nil
 }
 
-func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, exportType *ExportType) (*DeltaCollection, error) {
+func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, exportType *x.ExportType) (*DeltaCollection, error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
 		return data, ErrorSizeMismatch

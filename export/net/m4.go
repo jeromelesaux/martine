@@ -1,9 +1,10 @@
-package gfx
+package net
 
 import (
 	"errors"
 	"fmt"
 	"github.com/jeromelesaux/m4client/m4"
+	x "github.com/jeromelesaux/martine/export"
 	"os"
 	"path"
 )
@@ -12,7 +13,7 @@ var (
 	ErrorNoHostDefined = errors.New("No host defined.")
 )
 
-func ImportInM4(exportType *ExportType) error {
+func ImportInM4(exportType *x.ExportType) error {
 	if exportType.M4Host == "" {
 		return ErrorNoHostDefined
 	}

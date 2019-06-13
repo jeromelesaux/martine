@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/jeromelesaux/martine/gfx"
+	"github.com/jeromelesaux/martine/export/file"
 	"os"
 )
 
@@ -145,5 +146,5 @@ func (p *Process) GenerateRawFile() error {
 		return err
 	}
 	*picturePath = p.PicturePath
-	return gfx.Png(p.PicturePath, in)
+	return file.Png(p.PicturePath, in)
 }

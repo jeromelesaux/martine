@@ -1,13 +1,14 @@
-package gfx
+package file
 
 import (
 	"fmt"
 	"github.com/jeromelesaux/dsk"
+	x "github.com/jeromelesaux/martine/export"
 	"os"
 	"path/filepath"
 )
 
-func ImportInDsk(exportType *ExportType) error {
+func ImportInDsk(exportType *x.ExportType) error {
 	dskFullpath := exportType.Fullpath(".dsk")
 	floppy := dsk.FormatDsk(9, 40)
 	dsk.WriteDsk(dskFullpath, floppy)

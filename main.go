@@ -14,6 +14,9 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/gfx"
+	"github.com/jeromelesaux/martine/export/net"
+	"github.com/jeromelesaux/martine/export/file"
+	x "github.com/jeromelesaux/martine/export"
 )
 
 var (
@@ -115,16 +118,16 @@ func main() {
 
 	if *info {
 		if *palettePath != "" {
-			gfx.PalInformation(*palettePath)
+			file.PalInformation(*palettePath)
 		}
 		if *winPath != "" {
-			gfx.WinInformation(*winPath)
+			file.WinInformation(*winPath)
 		}
 		if *kitPath != "" {
-			gfx.KitInformation(*kitPath)
+			file.KitInformation(*kitPath)
 		}
 		if *inkPath != "" {
-			gfx.InkInformation(*inkPath)
+			file.InkInformation(*inkPath)
 		}
 		os.Exit(0)
 	}
@@ -153,7 +156,7 @@ func main() {
 		*output = "./"
 	}
 
-	exportType := gfx.NewExportType(*picturePath, *output)
+	exportType := x.NewExportType(*picturePath, *output)
 
 	if *mode == -1 {
 		fmt.Fprintf(os.Stderr, "No output mode defined can not choose. Quiting\n")
@@ -215,7 +218,7 @@ func main() {
 	}
 
 	if *byteStatement != "" {
-		gfx.ByteToken = *byteStatement
+		file.ByteToken = *byteStatement
 	}
 	exportType.Size = size
 	exportType.TileMode = *tileMode
@@ -361,7 +364,7 @@ func main() {
 	if exportType.DeltaMode {
 		out := convert.Resize(in, size, resizeAlgo)
 		fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_delta_resized.png")
-		if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta_resized.png", out); err != nil {
+		if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta_resized.png", out); err != nil {
 			os.Exit(-2)
 		}
 
@@ -388,7 +391,7 @@ func main() {
 			}
 		}*/
 		fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_delta_down.png")
-		if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta_down.png", leftDowngraded); err != nil {
+		if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta_down.png", leftDowngraded); err != nil {
 			os.Exit(-2)
 		}
 
@@ -405,7 +408,7 @@ func main() {
 		}
 		out2 := convert.Resize(in2, size, resizeAlgo)
 		fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_delta2_resized.png")
-		if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta2_resized.png", out); err != nil {
+		if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta2_resized.png", out); err != nil {
 			os.Exit(-2)
 		}
 		var rightPalette color.Palette
@@ -431,7 +434,7 @@ func main() {
 			}
 		}*/
 		fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_delta2_down.png")
-		if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta2_down.png", rightDowngraded); err != nil {
+		if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta2_down.png", rightDowngraded); err != nil {
 			os.Exit(-2)
 		}
 
@@ -467,12 +470,12 @@ func main() {
 		}
 
 		outFilepath = exportType.OutputPath + string(filepath.Separator) + filename + ".txt"
-		if err = gfx.Ascii(outFilepath, data, rightPalette, exportType); err != nil {
+		if err = file.Ascii(outFilepath, data, rightPalette, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while exporting data as ascii mode file (%s) error :%v\n", outFilepath, err)
 			os.Exit(-1)
 		}
 		outFilepath = exportType.OutputPath + string(filepath.Separator) + filename + "c.txt"
-		if err = gfx.AsciiByColumn(outFilepath, data, rightPalette, exportType); err != nil {
+		if err = file.AsciiByColumn(outFilepath, data, rightPalette, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while exporting data as ascii by column mode file (%s) error :%v\n", outFilepath, err)
 			os.Exit(-1)
 		}
@@ -492,7 +495,7 @@ func main() {
 
 			if *palettePath != "" {
 				fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", *palettePath)
-				palette, _, err = gfx.OpenPal(*palettePath)
+				palette, _, err = file.OpenPal(*palettePath)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *palettePath)
 				} else {
@@ -501,7 +504,7 @@ func main() {
 			}
 			if *inkPath != "" {
 				fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", *inkPath)
-				palette, _, err = gfx.OpenInk(*inkPath)
+				palette, _, err = file.OpenInk(*inkPath)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *inkPath)
 				} else {
@@ -510,7 +513,7 @@ func main() {
 			}
 			if *kitPath != "" {
 				fmt.Fprintf(os.Stdout, "Input plus palette to apply : (%s)\n", *kitPath)
-				palette, _, err = gfx.OpenKit(*kitPath)
+				palette, _, err = file.OpenKit(*kitPath)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *palettePath)
 				} else {
@@ -520,7 +523,7 @@ func main() {
 
 			out := convert.Resize(in, size, resizeAlgo)
 			fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
-			if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_resized.png", out); err != nil {
+			if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_resized.png", out); err != nil {
 				os.Exit(-2)
 			}
 
@@ -554,7 +557,7 @@ func main() {
 			}
 			
 			fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
-			if err := gfx.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_down.png", downgraded); err != nil {
+			if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_down.png", downgraded); err != nil {
 				os.Exit(-2)
 			}
 
@@ -594,12 +597,12 @@ func main() {
 		}
 	}
 	if exportType.Dsk {
-		if err := gfx.ImportInDsk(exportType); err != nil {
+		if err := file.ImportInDsk(exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create or write into dsk file error :%v\n", err)
 		}
 	}
 	if exportType.M4 {
-		if err := gfx.ImportInM4(exportType); err != nil {
+		if err := net.ImportInM4(exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot send to M4 error :%v\n", err)
 		}
 	}

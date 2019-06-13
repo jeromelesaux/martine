@@ -1,4 +1,4 @@
-package gfx
+package export
 
 import (
 	"github.com/jeromelesaux/martine/constants"

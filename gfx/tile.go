@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/convert"
+	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/file"
 	"github.com/oliamb/cutter"
 	"image"
 	_ "image/jpeg"
@@ -13,7 +15,7 @@ import (
 	"strconv"
 )
 
-func TileMode(exportType *ExportType, mode uint8, iterationX, iterationY int, algo imaging.ResampleFilter) error {
+func TileMode(exportType *x.ExportType, mode uint8, iterationX, iterationY int, algo imaging.ResampleFilter) error {
 	fr, err := os.Open(exportType.InputPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot open (%s),error :%v\n", exportType.InputPath, err)
@@ -56,7 +58,7 @@ func TileMode(exportType *ExportType, mode uint8, iterationX, iterationY int, al
 			resized := convert.Resize(cropped, exportType.Size, algo)
 			ext := "_resized_" + strconv.Itoa(index) + ".png"
 			filePath := exportType.OutputPath + string(filepath.Separator) + exportType.OsFilename(ext)
-			if err := Png(filePath, resized); err != nil {
+			if err := file.Png(filePath, resized); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot not resized image, error %v\n", err)
 			}
 			p, downgraded, err := convert.DowngradingPalette(resized, exportType.Size, exportType.CpcPlus)
@@ -65,7 +67,7 @@ func TileMode(exportType *ExportType, mode uint8, iterationX, iterationY int, al
 			}
 			ext = "_downgraded_" + strconv.Itoa(index) + ".png"
 			filePath = exportType.OutputPath + string(filepath.Separator) + exportType.OsFilename(ext)
-			if err := Png(filePath, downgraded); err != nil {
+			if err := file.Png(filePath, downgraded); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot not downgrad image, error %v\n", err)
 			}
 			ext = strconv.Itoa(index) + ".png"

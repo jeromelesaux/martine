@@ -5,6 +5,8 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
+	"github.com/jeromelesaux/martine/export/file"
+	x "github.com/jeromelesaux/martine/export"
 	"image"
 	"image/color"
 	"image/draw"
@@ -12,7 +14,7 @@ import (
 	"os"
 )
 
-func Rotate3d(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filePath string, resizeAlgo imaging.ResampleFilter, exportType *ExportType) error {
+func Rotate3d(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filePath string, resizeAlgo imaging.ResampleFilter, exportType *x.ExportType) error {
 	if exportType.RollIteration == -1 {
 		return ErrorMissingNumberOfImageToGenerate
 	}
@@ -31,7 +33,7 @@ func Rotate3d(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8,
 		_, rin = convert.DowngradingWithPalette(rin, p)
 
 		newFilename := exportType.OsFullPath(filePath, fmt.Sprintf("%.2d", indice)+".png")
-		if err := Png(newFilename, rin); err != nil {
+		if err := file.Png(newFilename, rin); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create image (%s) error :%v\n", newFilename, err)
 		}
 		if err := SpriteTransform(rin, p, constants.Size{Width: size.Width, Height: size.Height}, mode, newFilename, exportType); err != nil {
@@ -43,7 +45,7 @@ func Rotate3d(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8,
 	return nil
 }
 
-func rotateImage(in, out *image.NRGBA, angle float64, exportType *ExportType) *image.NRGBA {
+func rotateImage(in, out *image.NRGBA, angle float64, exportType *x.ExportType) *image.NRGBA {
 	var xc, yc int
 	if exportType.Rotation3DX0 != -1 {
 		xc = exportType.Rotation3DX0
