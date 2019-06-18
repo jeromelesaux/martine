@@ -1,14 +1,19 @@
 package gfx
 
 import (
-	x "github.com/jeromelesaux/martine/export"
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"fmt"
+	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/file"
 	"image"
 	"image/color"
 	"os"
+	"path/filepath"
 )
+
+var ErrorCanNotProceed = errors.New("Can not proceed to treatment")
 
 type DeltaItem struct {
 	Byte      byte
@@ -396,15 +401,101 @@ func Delta(scr1, scr2 []byte) *DeltaCollection {
 	data := NewDeltaCollection()
 	//var line int
 	for offset := 0; offset < 0x4000; offset++ {
-		//offsetLine := (offset % 80)
 		if scr1[offset] != scr2[offset] {
-			//offsetScreen := CpcScreenAddressOffset(line)
-			addr := 0xC000 + offset //  + offsetLine + offsetScreen
+			addr := 0xC000 + offset
 			data.Add(scr2[offset], uint16(addr))
 		}
-		/*if offsetLine == 0 {
-			line++
-		}*/
 	}
 	return data
+}
+
+func ExportDelta(filename string, dc *DeltaCollection, exportType *x.ExportType) error {
+	if err := dc.Save(filename + ".bin"); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while saving file (%s) error %v \n", filename+".bin", err)
+		return err
+	}
+	data, err := dc.Marshall()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while marshalling delta structure error :%v\n", err)
+		return err
+	}
+
+	var emptyPalette []color.Color
+	outFilepath := exportType.OutputPath + string(filepath.Separator) + filename + ".txt"
+	if err = file.Ascii(outFilepath, data, emptyPalette, exportType); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while exporting data as ascii mode file (%s) error :%v\n", outFilepath, err)
+		return err
+	}
+	outFilepath = exportType.OutputPath + string(filepath.Separator) + filename + "c.txt"
+	if err = file.AsciiByColumn(outFilepath, data, emptyPalette, exportType); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while exporting data as ascii by column mode file (%s) error :%v\n", outFilepath, err)
+		return err
+	}
+	return nil
+}
+
+func ProceedDelta(filespath []string, exportType *x.ExportType) error {
+
+	if len(filespath) == 1 {
+		return ErrorCanNotProceed
+	}
+	for i := 0; i < len(filespath)-1; i++ {
+		f1, err := os.Open(filespath[i])
+		if err != nil {
+			return err
+		}
+		defer f1.Close()
+		f2, err := os.Open(filespath[i+1])
+		if err != nil {
+			return err
+		}
+		defer f2.Close()
+		var d1, d2 [0x4000 + 128]byte
+		//var d1, d2 []byte
+		// suppress amsdos file header
+		if err := binary.Read(f1, binary.LittleEndian, &d1); err != nil {
+			return err
+		}
+		if err := binary.Read(f2, binary.LittleEndian, &d2); err != nil {
+			return err
+		}
+		dc := Delta(d1[128:], d2[128:])
+		fmt.Fprintf(os.Stdout, "files (%s) (%s)", filespath[i], filespath[i+1])
+		fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
+		fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
+		fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
+		out := exportType.OutputPath + string(filepath.Separator) + fmt.Sprintf("%dto%d", i, (i+1))
+		if err := ExportDelta(out, dc, exportType); err != nil {
+			return err
+		}
+	}
+	f1, err := os.Open(filespath[len(filespath)-1])
+	if err != nil {
+		return err
+	}
+	defer f1.Close()
+	f2, err := os.Open(filespath[0])
+	if err != nil {
+		return err
+	}
+	defer f2.Close()
+	var d1, d2 [0x4000 + 128]byte
+	// suppress amsdos file header
+	if err := binary.Read(f1, binary.LittleEndian, &d1); err != nil {
+		return err
+	}
+	if err := binary.Read(f2, binary.LittleEndian, &d2); err != nil {
+		return err
+	}
+	dc := Delta(d1[128:], d2[128:])
+	fmt.Fprintf(os.Stdout, "files (%s) (%s)", filespath[len(filespath)-1], filespath[0])
+	fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
+	fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
+	fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
+	out := exportType.OutputPath + string(filepath.Separator) + fmt.Sprintf("%dto0", len(filespath)-1)
+	if err := ExportDelta(out, dc, exportType); err != nil {
+		return err
+	}
+
+	return nil
 }
