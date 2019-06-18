@@ -100,7 +100,7 @@ func main() {
 	var deltaFiles stringSlice
 	var err error
 	var in image.Image
-	flag.Var(&deltaFiles,"df","")
+	flag.Var(&deltaFiles,"df","scr file to add in delta mode comparison.")
 	flag.Parse()
 
 	if *help {
