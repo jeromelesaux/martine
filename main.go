@@ -73,7 +73,7 @@ var (
 	initProcess     = flag.String("initprocess", "", "create a new empty process file.")
 	processFile     = flag.String("processfile", "", "Process file path to apply.")
 	//deltaSlice          = flag.String("delta","","generate the delta byte mode from the scr followed files.")
-	deltaMode           = flag.Bool("delta", false, "delta mode: compute delta between two files (prefixed by the argument -df)\n\t(ex: -delta -df file1.scr -df file2.scr -df file3.scr).")
+	deltaMode           = flag.Bool("delta", false, "delta mode: compute delta between two files (prefixed by the argument -df)\n\t(ex: -delta -df file1.SCR -df file2.SCR -df file3.SCR).\n\t(ex with wildcard: -delta -df file\\?.SCR or -delta file\\*.SCR")
 	ditheringAlgo       = flag.Int("dithering", -1, "Dithering algorithm to apply on input image\nAlgorithms available:\n\t0: FloydSteinberg\n\t1: JarvisJudiceNinke\n\t2: Stucki\n\t3: Atkinson\n\t4: Sierra\n\t5: SierraLite\n\t6: Sierra3\n\t7: Bayer2\n\t8: Bayer3\n\t9: Bayer4\n\t10: Bayer8\n")
 	ditheringMultiplier = flag.Float64("multiplier", 1.18, "error dithering multiplier.")
 	withQuantization    = flag.Bool("quantization", false, "use additionnal quantization for dithering.")
@@ -100,7 +100,7 @@ func main() {
 	var deltaFiles stringSlice
 	var err error
 	var in image.Image
-	flag.Var(&deltaFiles,"df","scr file to add in delta mode comparison.")
+	flag.Var(&deltaFiles,"df","scr file path to add in delta mode comparison. (wildcard accepted such as ? or * file filename.) ")
 	flag.Parse()
 
 	if *help {
