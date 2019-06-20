@@ -1,6 +1,7 @@
 package gfx
 
 import (
+	"github.com/jeromelesaux/martine/common"
 	"bytes"
 	"encoding/binary"
 	"errors"
@@ -474,7 +475,14 @@ func ExportDelta(filename string, dc *DeltaCollection, exportType *x.ExportType)
 func ProceedDelta(filespath []string, exportType *x.ExportType) error {
 
 	if len(filespath) == 1 {
-		return ErrorCanNotProceed
+		var err error 
+		filespath,err = common.WilcardedFiles(filespath)
+		if err != nil {
+			return err
+		}
+		if len(filespath) == 1 {
+			return ErrorCanNotProceed
+		}
 	}
 	for i := 0; i < len(filespath)-1; i++ {
 		f1, err := os.Open(filespath[i])
@@ -529,7 +537,7 @@ func ProceedDelta(filespath []string, exportType *x.ExportType) error {
 	fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 	fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
 	fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
-	out := exportType.OutputPath + string(filepath.Separator) + fmt.Sprintf("%dto0", len(filespath)-1)
+	out := exportType.OutputPath + string(filepath.Separator) + fmt.Sprintf("%dto0", len(filespath))
 	if err := ExportDelta(out, dc, exportType); err != nil {
 		return err
 	}
