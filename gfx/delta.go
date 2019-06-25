@@ -341,37 +341,6 @@ func (dc *DeltaCollection) Marshall() ([]byte, error) {
 				}
 			} 
 		}
-
-
-	/*	iter := occ / 255
-		if occ%255 != 0 {
-			iter++
-		}
-		for i := 0; i < iter; i++ {
-			if err := binary.Write(&b, binary.LittleEndian, item.Byte); err != nil {
-				return b.Bytes(), err
-			}
-			left := occ - (i * 255)
-			if left < 255 {
-				if err := binary.Write(&b, binary.LittleEndian, uint8(left)); err != nil {
-					return b.Bytes(), err
-				}
-				for j := 0 + (i * 255); j < len(item.Addresses); j++ {
-					if err := binary.Write(&b, binary.LittleEndian, item.Addresses[j]); err != nil {
-						return b.Bytes(), err
-					}
-				}
-			} else {
-				if err := binary.Write(&b, binary.LittleEndian, uint8(254)); err != nil {
-					return b.Bytes(), err
-				}
-				for j := 0 + (i * 255); j < 255; j++ {
-					if err := binary.Write(&b, binary.LittleEndian, item.Addresses[j]); err != nil {
-						return b.Bytes(), err
-					}
-				}
-			}
-		}*/
 	}
 	return b.Bytes(), nil
 }
@@ -401,36 +370,6 @@ func (dc *DeltaCollection) Save(filename string) error {
 				}
 			} 
 		}
-		/*
-		iter := occ / 255
-		if occ%255 != 0 {
-			iter++
-		}
-		for i := 0; i < iter; i++ {
-			if err = binary.Write(f, binary.LittleEndian, item.Byte); err != nil {
-				return err
-			}
-			left := occ - (i * 255)
-			if left < 255 {
-				if err = binary.Write(f, binary.LittleEndian, uint8(left)); err != nil {
-					return err
-				}
-				for j := 0 + (i * 255); j < len(item.Addresses); j++ {
-					if err = binary.Write(f, binary.LittleEndian, item.Addresses[j]); err != nil {
-						return err
-					}
-				}
-			} else {
-				if err = binary.Write(f, binary.LittleEndian, uint8(254)); err != nil {
-					return err
-				}
-				for j := 0 + (i * 255); j < 255; j++ {
-					if err = binary.Write(f, binary.LittleEndian, item.Addresses[j]); err != nil {
-						return err
-					}
-				}
-			}
-		}*/
 	}
 	return nil
 }

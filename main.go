@@ -29,7 +29,7 @@ func (f *stringSlice)Set(value string) error {
 	*f = append(*f,value)
 	return nil
 }
-
+var deltaFiles stringSlice
 var (
 	byteStatement   = flag.String("s", "", "Byte statement to replace in ascii export (default is BYTE), you can replace or instance by defb")
 	picturePath     = flag.String("i", "", "Picture path of the input file.")
@@ -97,7 +97,7 @@ func main() {
 	var palette color.Palette
 	var ditheringMatrix [][]float32
 	var ditherType gfx.DitheringType
-	var deltaFiles stringSlice
+	
 	var err error
 	var in image.Image
 	flag.Var(&deltaFiles,"df","scr file path to add in delta mode comparison. (wildcard accepted such as ? or * file filename.) ")
@@ -123,7 +123,7 @@ func main() {
 			os.Exit(-1)
 		}
 		proc.Apply()
-		if proc.PicturePath == "" {
+		if proc.PicturePath == "" && !proc.Delta {
 			err = proc.GenerateRawFile()
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error while loading (%s) process file error :%v\n", *initProcess, err)
@@ -379,11 +379,6 @@ func main() {
 		}
 	}
 	if exportType.DeltaMode {
-		/*	out := convert.Resize(in, size, resizeAlgo)
-			fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_delta_resized.png")
-			if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta_resized.png", out); err != nil {
-				os.Exit(-2)
-			}*/
 		fmt.Fprintf(os.Stdout, "delta files to proceed.\n")
 		for i, v := range deltaFiles {
 			fmt.Fprintf(os.Stdout, "[%d]:%s\n", i, v)
@@ -392,106 +387,6 @@ func main() {
 			fmt.Fprintf(os.Stderr, "error while proceeding delta mode %v\n", err)
 			os.Exit(-1)
 		}
-		/*var leftPalette color.Palette
-		var leftDowngraded *image.NRGBA
-		if len(palette) > 0 {
-			leftPalette, leftDowngraded = convert.DowngradingWithPalette(out, palette)
-		} else {
-			leftPalette, leftDowngraded, err = convert.DowngradingPalette(out, size, exportType.CpcPlus)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
-			}
-		}*/
-		/*	if *ditheringAlgo != -1 {
-			switch ditherType {
-			case gfx.ErrorDiffusionDither:
-				if *withQuantization {
-					leftDowngraded = gfx.QuantizeWithDither(leftDowngraded, ditheringMatrix, len(leftPalette), leftPalette)
-				} else {
-					leftDowngraded = gfx.Dithering(leftDowngraded, ditheringMatrix, float32(*ditheringMultiplier))
-				}
-			case gfx.OrderedDither:
-				leftDowngraded = gfx.BayerDiphering(leftDowngraded,ditheringMatrix,leftPalette)
-			}
-		}*/
-		/*fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_delta_down.png")
-		if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta_down.png", leftDowngraded); err != nil {
-			os.Exit(-2)
-		}
-
-		f2, err := os.Open(*deltaFiles)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while opening file %s, error %v\n", *deltaFiles, err)
-			os.Exit(-2)
-		}
-		defer f2.Close()
-		in2, _, err := image.Decode(f2)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot decode the image %s error %v", *deltaFiles, err)
-			os.Exit(-2)
-		}
-		out2 := convert.Resize(in2, size, resizeAlgo)
-		fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_delta2_resized.png")
-		if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta2_resized.png", out); err != nil {
-			os.Exit(-2)
-		}
-		var rightPalette color.Palette
-		var rightDowngraded *image.NRGBA
-		if len(palette) > 0 {
-			rightPalette, rightDowngraded = convert.DowngradingWithPalette(out2, palette)
-		} else {
-			rightPalette, rightDowngraded, err = convert.DowngradingPalette(out2, size, exportType.CpcPlus)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
-			}
-		}
-
-		fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_delta2_down.png")
-		if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_delta2_down.png", rightDowngraded); err != nil {
-			os.Exit(-2)
-		}
-
-		var dc *gfx.DeltaCollection
-
-		switch *mode {
-		case 0:
-			scr1 := gfx.ToMode0(leftDowngraded, leftPalette, exportType)
-			scr2 := gfx.ToMode0(rightDowngraded, rightPalette, exportType)
-			dc = gfx.Delta(scr1, scr2)
-		case 1:
-			scr1 := gfx.ToMode1(leftDowngraded, leftPalette, exportType)
-			scr2 := gfx.ToMode1(rightDowngraded, rightPalette, exportType)
-			dc = gfx.Delta(scr1, scr2)
-		case 2:
-			scr1 := gfx.ToMode2(leftDowngraded, leftPalette, exportType)
-			scr2 := gfx.ToMode2(rightDowngraded, rightPalette, exportType)
-			dc = gfx.Delta(scr1, scr2)
-		}
-
-		fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
-		fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
-		fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
-		outFilepath := exportType.OutputPath + string(filepath.Separator) + filename + "_delta.bin"
-		if err = dc.Save(outFilepath); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file (%s) error %v \n", outFilepath, err)
-			os.Exit(-1)
-		}
-		data, err := dc.Marshall()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while marshalling delta structure error :%v\n", err)
-			os.Exit(-1)
-		}
-
-		outFilepath = exportType.OutputPath + string(filepath.Separator) + filename + ".txt"
-		if err = file.Ascii(outFilepath, data, rightPalette, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while exporting data as ascii mode file (%s) error :%v\n", outFilepath, err)
-			os.Exit(-1)
-		}
-		outFilepath = exportType.OutputPath + string(filepath.Separator) + filename + "c.txt"
-		if err = file.AsciiByColumn(outFilepath, data, rightPalette, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while exporting data as ascii by column mode file (%s) error :%v\n", outFilepath, err)
-			os.Exit(-1)
-		}*/
 	} else {
 		if exportType.TileMode {
 			if exportType.TileIterationX == -1 || exportType.TileIterationY == -1 {

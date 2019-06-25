@@ -14,7 +14,7 @@ type Process struct {
 	Width           int    `json:"width"`
 	Height          int    `json:"height"`
 	Mode            int    `json:"mode"`
-	Output          string `json:"ouputPath"`
+	Output          string `json:"outputPath"`
 	Overscan        bool   `json:"isOverscan"`
 	ResizeAlgorithm int    `json:"resizeAlgorithm"`
 	NoAmsdosHeader  bool   `json:"noAmsdosHeader"`
@@ -49,6 +49,8 @@ type Process struct {
 	Rotate3dY0      int    `json:"rotate3dY0"`
 	Data            []int  `json:"data"`
 	Palette         []int  `json:"palette"`
+	Delta bool `json:"delta"`
+	DeltaFile []string `json:"df"`
 }
 
 func NewProcess() *Process {
@@ -74,6 +76,7 @@ func NewProcess() *Process {
 		Rotate3dY0:      -1,
 		Data:            make([]int, 0),
 		Palette:         make([]int, 0),
+		DeltaFile: make([]string,0),
 	}
 }
 
@@ -137,6 +140,10 @@ func (p *Process) Apply() {
 	*rotate3dType = p.Rotate3dType
 	*rotate3dX0 = p.Rotate3dX0
 	*rotate3dY0 = p.Rotate3dY0
+	*deltaMode = p.Delta
+	for i:=0; i<len(p.DeltaFile);i++ {
+		deltaFiles.Set(p.DeltaFile[i])
+	}
 }
 
 func (p *Process) GenerateRawFile() error {
