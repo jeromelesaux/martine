@@ -77,6 +77,7 @@ var (
 	ditheringAlgo       = flag.Int("dithering", -1, "Dithering algorithm to apply on input image\nAlgorithms available:\n\t0: FloydSteinberg\n\t1: JarvisJudiceNinke\n\t2: Stucki\n\t3: Atkinson\n\t4: Sierra\n\t5: SierraLite\n\t6: Sierra3\n\t7: Bayer2\n\t8: Bayer3\n\t9: Bayer4\n\t10: Bayer8\n")
 	ditheringMultiplier = flag.Float64("multiplier", 1.18, "error dithering multiplier.")
 	withQuantization    = flag.Bool("quantization", false, "use additionnal quantization for dithering.")
+	extendedDsk = flag.Bool("extendeddsk",false,"Export in a Extended DSK 80 tracks, 10 sectors 400 ko per face")
 	version             = "0.18.rc"
 )
 
@@ -236,6 +237,7 @@ func main() {
 	if *byteStatement != "" {
 		file.ByteToken = *byteStatement
 	}
+	exportType.ExtendedDsk = *extendedDsk
 	exportType.Size = size
 	exportType.TileMode = *tileMode
 	exportType.RollMode = *rollMode

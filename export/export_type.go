@@ -43,6 +43,7 @@ type ExportType struct {
 	DskFiles       []string
 	Tiles          *JsonSlice
 	DeltaMode      bool
+	ExtendedDsk bool 
 }
 
 func NewExportType(input, output string) *ExportType {
