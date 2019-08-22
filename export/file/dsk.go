@@ -10,11 +10,14 @@ import (
 
 func ImportInDsk(exportType *x.ExportType) error {
 	dskFullpath := exportType.Fullpath(".dsk")
-	dskType := 0 
+
+	var floppy *dsk.DSK 
 	if exportType.ExtendedDsk {
-		dskType = 1
+		floppy = dsk.FormatDsk(10, 80,1,1)
+	} else {
+		floppy = dsk.FormatDsk(9, 40,1,0)
 	}
-	floppy := dsk.FormatDsk(9, 40,1,dskType)
+	
 	dsk.WriteDsk(dskFullpath, floppy)
 	for _, v := range exportType.DskFiles {
 		if filepath.Ext(v) == ".TXT" {
