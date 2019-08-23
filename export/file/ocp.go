@@ -13,6 +13,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"io/ioutil"
 )
 
 var OverscanBoot = [...]byte{0x0e, 0x00, 0x0a, 0x00, 0x01, 0xc0, 0x20, 0x69, 0x4d, 0x50, 0x20, 0x76, 0x32, 0x00, 0x0d,
@@ -262,6 +263,24 @@ func Kit(filePath string, p color.Palette, screenMode uint8, exportType *x.Expor
 	return nil
 }
 
+func RawScr(filePath string) ([]byte,error) {
+	fr, err := os.Open(filePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
+		return []byte{}, err
+	}
+	header := &cpc.CpcHead{}
+	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
+		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(0, io.SeekStart)
+	}
+	bf, err := ioutil.ReadAll(fr)
+	if err != nil {
+		return nil, err
+	}
+	return bf,nil
+}
+
 func Scr(filePath string, data []byte, exportType *x.ExportType) error {
 	osFilepath := exportType.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving SCR file (%s)\n", osFilepath)
@@ -421,6 +440,27 @@ type OcpWinFooter struct {
 func (o *OcpWinFooter) ToString() string {
 	return fmt.Sprintf("Width:(%d)\nHeight:(%d)\n", o.Width, o.Height)
 }
+
+func RawWin(filePath string) ([]byte,error) {
+	fr, err := os.Open(filePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
+		return []byte{}, err
+	}
+	header := &cpc.CpcHead{}
+	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
+		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(0, io.SeekStart)
+	}
+	bf, err := ioutil.ReadAll(fr)
+	if err != nil {
+		return nil, err
+	}
+	raw := make([]byte,len(bf)-5)
+	copy(raw[:],bf[0:len(bf)-5])
+	return raw,nil
+}
+
 
 func OpenWin(filePath string) (*OcpWinFooter, error) {
 	fr, err := os.Open(filePath)
