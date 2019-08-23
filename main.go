@@ -9,6 +9,7 @@ import (
 	_ "image/png"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
@@ -25,59 +26,60 @@ func (f *stringSlice) String() string {
 	return ""
 }
 
-func (f *stringSlice)Set(value string) error {
-	*f = append(*f,value)
+func (f *stringSlice) Set(value string) error {
+	*f = append(*f, value)
 	return nil
 }
+
 var deltaFiles stringSlice
 var (
-	byteStatement   = flag.String("s", "", "Byte statement to replace in ascii export (default is BYTE), you can replace or instance by defb")
-	picturePath     = flag.String("i", "", "Picture path of the input file.")
-	width           = flag.Int("w", -1, "Custom output width in pixels.")
-	height          = flag.Int("h", -1, "Custom output height in pixels.")
-	mode            = flag.Int("m", -1, "Output mode to use :\n\t0 for mode0\n\t1 for mode1\n\t2 for mode2\n\tand add -f option for overscan export.\n\t")
-	output          = flag.String("o", "", "Output directory")
-	overscan        = flag.Bool("f", false, "Overscan mode (default no overscan)")
-	resizeAlgorithm = flag.Int("a", 1, "Algorithm to resize the image (available : \n\t1: NearestNeighbor (default)\n\t2: CatmullRom\n\t3: Lanczos\n\t4: Linear\n\t5: Box\n\t6: Hermite\n\t7: BSpline\n\t8: Hamming\n\t9: Hann\n\t10: Gaussian\n\t11: Blackman\n\t12: Bartlett\n\t13: Welch\n\t14: Cosine\n\t15: MitchellNetravali\n\t")
-	help            = flag.Bool("help", false, "Display help message")
-	noAmsdosHeader  = flag.Bool("n", false, "no amsdos header for all files (default amsdos header added).")
-	plusMode        = flag.Bool("p", false, "Plus mode (means generate an image for CPC Plus Screen)")
-	rollMode        = flag.Bool("roll", false, "Roll mode allow to walk and walk into the input file, associated with rla,rra,sra,sla, keephigh, keeplow, losthigh or lostlow options.")
-	iterations      = flag.Int("iter", -1, "Iterations number to walk in roll mode, or number of images to generate in rotation mode.")
-	rra             = flag.Int("rra", -1, "bit rotation on the right and keep pixels")
-	rla             = flag.Int("rla", -1, "bit rotation on the left and keep pixels")
-	sra             = flag.Int("sra", -1, "bit rotation on the right and lost pixels")
-	sla             = flag.Int("sla", -1, "bit rotation on the left and lost pixels")
-	losthigh        = flag.Int("losthigh", -1, "bit rotation on the top and lost pixels")
-	lostlow         = flag.Int("lostlow", -1, "bit rotation on the bottom and lost pixels")
-	keephigh        = flag.Int("keephigh", -1, "bit rotation on the top and keep pixels")
-	keeplow         = flag.Int("keeplow", -1, "bit rotation on the bottom and keep pixels")
-	palettePath     = flag.String("pal", "", "Apply the input palette to the image")
-	info            = flag.Bool("info", false, "Return the information of the file, associated with -pal and -win options")
-	winPath         = flag.String("win", "", "Filepath of the ocp win file")
-	dsk             = flag.Bool("dsk", false, "Copy files in a new CPC image Dsk.")
-	tileMode        = flag.Bool("tile", false, "Tile mode to create multiples sprites from a same image.")
-	tileIterationX  = flag.Int("iterx", -1, "Number of tiles on a row in the input image.")
-	tileIterationY  = flag.Int("itery", -1, "Number of tiles on a column in the input image.")
-	compress        = flag.Int("z", -1, "Compression algorithm : \n\t1: rle (default)\n\t2: rle 16bits\n\t3: Lz4 Classic\n\t4: Lz4 Raw\n")
-	kitPath         = flag.String("kit", "", "Path of the palette Cpc plus Kit file.")
-	inkPath         = flag.String("ink", "", "Path of the palette Cpc ink file.")
-	rotateMode      = flag.Bool("rotate", false, "Allow rotation on the input image, the input image must be a square (width equals height)")
-	m4Host          = flag.String("host", "", "Set the ip of your M4.")
-	m4RemotePath    = flag.String("remotepath", "", "remote path on your M4 where you want to copy your files.")
-	m4Autoexec      = flag.Bool("autoexec", false, "Execute on your remote CPC the screen file or basic file.")
-	rotate3dMode    = flag.Bool("rotate3d", false, "Allow 3d rotation on the input image, the input image must be a square (width equals height)")
-	rotate3dType    = flag.Int("rotate3dtype", 0, "Rotation type :\n\t1 rotate on X axis\n\t2 rotate on Y axis\n\t3 rotate reverse X axis\n\t4 rotate left to right on Y axis\n\t5 diagonal rotation on X axis\n\t6 diagonal rotation on Y axis\n")
-	rotate3dX0      = flag.Int("rotate3dx0", -1, "X0 coordinate to apply in 3d rotation (default width of the image/2)")
-	rotate3dY0      = flag.Int("rotate3dy0", -1, "Y0 coordinate to apply in 3d rotation (default height of the image/2)")
-	initProcess     = flag.String("initprocess", "", "create a new empty process file.")
-	processFile     = flag.String("processfile", "", "Process file path to apply.")
-	//deltaSlice          = flag.String("delta","","generate the delta byte mode from the scr followed files.")
+	byteStatement       = flag.String("s", "", "Byte statement to replace in ascii export (default is BYTE), you can replace or instance by defb")
+	picturePath         = flag.String("i", "", "Picture path of the input file.")
+	width               = flag.Int("w", -1, "Custom output width in pixels.")
+	height              = flag.Int("h", -1, "Custom output height in pixels.")
+	mode                = flag.Int("m", -1, "Output mode to use :\n\t0 for mode0\n\t1 for mode1\n\t2 for mode2\n\tand add -f option for overscan export.\n\t")
+	output              = flag.String("o", "", "Output directory")
+	overscan            = flag.Bool("f", false, "Overscan mode (default no overscan)")
+	resizeAlgorithm     = flag.Int("a", 1, "Algorithm to resize the image (available : \n\t1: NearestNeighbor (default)\n\t2: CatmullRom\n\t3: Lanczos\n\t4: Linear\n\t5: Box\n\t6: Hermite\n\t7: BSpline\n\t8: Hamming\n\t9: Hann\n\t10: Gaussian\n\t11: Blackman\n\t12: Bartlett\n\t13: Welch\n\t14: Cosine\n\t15: MitchellNetravali\n\t")
+	help                = flag.Bool("help", false, "Display help message")
+	noAmsdosHeader      = flag.Bool("n", false, "no amsdos header for all files (default amsdos header added).")
+	plusMode            = flag.Bool("p", false, "Plus mode (means generate an image for CPC Plus Screen)")
+	rollMode            = flag.Bool("roll", false, "Roll mode allow to walk and walk into the input file, associated with rla,rra,sra,sla, keephigh, keeplow, losthigh or lostlow options.")
+	iterations          = flag.Int("iter", -1, "Iterations number to walk in roll mode, or number of images to generate in rotation mode.")
+	rra                 = flag.Int("rra", -1, "bit rotation on the right and keep pixels")
+	rla                 = flag.Int("rla", -1, "bit rotation on the left and keep pixels")
+	sra                 = flag.Int("sra", -1, "bit rotation on the right and lost pixels")
+	sla                 = flag.Int("sla", -1, "bit rotation on the left and lost pixels")
+	losthigh            = flag.Int("losthigh", -1, "bit rotation on the top and lost pixels")
+	lostlow             = flag.Int("lostlow", -1, "bit rotation on the bottom and lost pixels")
+	keephigh            = flag.Int("keephigh", -1, "bit rotation on the top and keep pixels")
+	keeplow             = flag.Int("keeplow", -1, "bit rotation on the bottom and keep pixels")
+	palettePath         = flag.String("pal", "", "Apply the input palette to the image")
+	info                = flag.Bool("info", false, "Return the information of the file, associated with -pal and -win options")
+	winPath             = flag.String("win", "", "Filepath of the ocp win file")
+	dsk                 = flag.Bool("dsk", false, "Copy files in a new CPC image Dsk.")
+	tileMode            = flag.Bool("tile", false, "Tile mode to create multiples sprites from a same image.")
+	tileIterationX      = flag.Int("iterx", -1, "Number of tiles on a row in the input image.")
+	tileIterationY      = flag.Int("itery", -1, "Number of tiles on a column in the input image.")
+	compress            = flag.Int("z", -1, "Compression algorithm : \n\t1: rle (default)\n\t2: rle 16bits\n\t3: Lz4 Classic\n\t4: Lz4 Raw\n")
+	kitPath             = flag.String("kit", "", "Path of the palette Cpc plus Kit file.")
+	inkPath             = flag.String("ink", "", "Path of the palette Cpc ink file.")
+	rotateMode          = flag.Bool("rotate", false, "Allow rotation on the input image, the input image must be a square (width equals height)")
+	m4Host              = flag.String("host", "", "Set the ip of your M4.")
+	m4RemotePath        = flag.String("remotepath", "", "remote path on your M4 where you want to copy your files.")
+	m4Autoexec          = flag.Bool("autoexec", false, "Execute on your remote CPC the screen file or basic file.")
+	rotate3dMode        = flag.Bool("rotate3d", false, "Allow 3d rotation on the input image, the input image must be a square (width equals height)")
+	rotate3dType        = flag.Int("rotate3dtype", 0, "Rotation type :\n\t1 rotate on X axis\n\t2 rotate on Y axis\n\t3 rotate reverse X axis\n\t4 rotate left to right on Y axis\n\t5 diagonal rotation on X axis\n\t6 diagonal rotation on Y axis\n")
+	rotate3dX0          = flag.Int("rotate3dx0", -1, "X0 coordinate to apply in 3d rotation (default width of the image/2)")
+	rotate3dY0          = flag.Int("rotate3dy0", -1, "Y0 coordinate to apply in 3d rotation (default height of the image/2)")
+	initProcess         = flag.String("initprocess", "", "create a new empty process file.")
+	processFile         = flag.String("processfile", "", "Process file path to apply.")
 	deltaMode           = flag.Bool("delta", false, "delta mode: compute delta between two files (prefixed by the argument -df)\n\t(ex: -delta -df file1.SCR -df file2.SCR -df file3.SCR).\n\t(ex with wildcard: -delta -df file\\?.SCR or -delta file\\*.SCR")
 	ditheringAlgo       = flag.Int("dithering", -1, "Dithering algorithm to apply on input image\nAlgorithms available:\n\t0: FloydSteinberg\n\t1: JarvisJudiceNinke\n\t2: Stucki\n\t3: Atkinson\n\t4: Sierra\n\t5: SierraLite\n\t6: Sierra3\n\t7: Bayer2\n\t8: Bayer3\n\t9: Bayer4\n\t10: Bayer8\n")
 	ditheringMultiplier = flag.Float64("multiplier", 1.18, "error dithering multiplier.")
 	withQuantization    = flag.Bool("quantization", false, "use additionnal quantization for dithering.")
-	extendedDsk = flag.Bool("extendeddsk",false,"Export in a Extended DSK 80 tracks, 10 sectors 400 ko per face")
+	extendedDsk         = flag.Bool("extendeddsk", false, "Export in a Extended DSK 80 tracks, 10 sectors 400 ko per face")
+	reverse             = flag.Bool("reverse", false, "Transform .scr (overscan or not) file with palette (pal or kit file) into png file")
 	version             = "0.18.rc"
 )
 
@@ -98,10 +100,10 @@ func main() {
 	var palette color.Palette
 	var ditheringMatrix [][]float32
 	var ditherType gfx.DitheringType
-	
+
 	var err error
 	var in image.Image
-	flag.Var(&deltaFiles,"df","scr file path to add in delta mode comparison. (wildcard accepted such as ? or * file filename.) ")
+	flag.Var(&deltaFiles, "df", "scr file path to add in delta mode comparison. (wildcard accepted such as ? or * file filename.) ")
 	flag.Parse()
 
 	if *help {
@@ -175,63 +177,65 @@ func main() {
 
 	exportType := x.NewExportType(*picturePath, *output)
 
-	if *mode == -1 && !*deltaMode {
+	if *mode == -1 && !*deltaMode && !*reverse {
 		fmt.Fprintf(os.Stderr, "No output mode defined can not choose. Quiting\n")
 		usage()
 	}
-	switch *mode {
-	case 0:
-		size = constants.Mode0
-		screenMode = 0
-		if *overscan {
-			size = constants.OverscanMode0
+	if !*reverse {
+		switch *mode {
+		case 0:
+			size = constants.Mode0
+			screenMode = 0
+			if *overscan {
+				size = constants.OverscanMode0
+			}
+		case 1:
+			size = constants.Mode1
+			screenMode = 1
+			if *overscan {
+				size = constants.OverscanMode1
+			}
+		case 2:
+			screenMode = 2
+			size = constants.Mode2
+			if *overscan {
+				size = constants.OverscanMode2
+			}
+		default:
+			if *height == -1 && *width == -1 && !*deltaMode {
+				fmt.Fprintf(os.Stderr, "mode %d not defined and no custom width or height\n", *mode)
+				usage()
+			}
 		}
-	case 1:
-		size = constants.Mode1
-		screenMode = 1
-		if *overscan {
-			size = constants.OverscanMode1
-		}
-	case 2:
-		screenMode = 2
-		size = constants.Mode2
-		if *overscan {
-			size = constants.OverscanMode2
-		}
-	default:
-		if *height == -1 && *width == -1 && !*deltaMode {
-			fmt.Fprintf(os.Stderr, "mode %d not defined and no custom width or height\n", *mode)
-			usage()
-		}
-	}
-	if *height != -1 {
-		customDimension = true
-		exportType.Win = true
-		size.Height = *height
-		if *width != -1 {
-			size.Width = *width
-		} else {
-			size.Width = 0
-		}
-	}
-	if *width != -1 {
-		exportType.Win = true
-		customDimension = true
-		size.Width = *width
 		if *height != -1 {
+			customDimension = true
+			exportType.Win = true
 			size.Height = *height
-		} else {
-			size.Height = 0
+			if *width != -1 {
+				size.Width = *width
+			} else {
+				size.Width = 0
+			}
 		}
-	}
+		if *width != -1 {
+			exportType.Win = true
+			customDimension = true
+			size.Width = *width
+			if *height != -1 {
+				size.Height = *height
+			} else {
+				size.Height = 0
+			}
+		}
 
-	if size.Width > constants.WidthMax {
-		fmt.Fprintf(os.Stderr, "Max width allowed is (%d) your choice (%d), Quiting...\n", size.Width, constants.WidthMax)
-		os.Exit(-1)
-	}
-	if size.Height > constants.HeightMax {
-		fmt.Fprintf(os.Stderr, "Max height allowed is (%d) your choice (%d), Quiting...\n", size.Height, constants.HeightMax)
-		os.Exit(-1)
+		if size.Width > constants.WidthMax {
+			fmt.Fprintf(os.Stderr, "Max width allowed is (%d) your choice (%d), Quiting...\n", size.Width, constants.WidthMax)
+			os.Exit(-1)
+		}
+		if size.Height > constants.HeightMax {
+			fmt.Fprintf(os.Stderr, "Max height allowed is (%d) your choice (%d), Quiting...\n", size.Height, constants.HeightMax)
+			os.Exit(-1)
+		}
 	}
 
 	if *byteStatement != "" {
@@ -272,7 +276,7 @@ func main() {
 	exportType.Dsk = *dsk
 
 	fmt.Fprintf(os.Stdout, "Informations :\n%s", size.ToString())
-	if !exportType.DeltaMode {
+	if !exportType.DeltaMode && !*reverse {
 		f, err := os.Open(*picturePath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error while opening file %s, error %v\n", *picturePath, err)
@@ -380,6 +384,44 @@ func main() {
 			os.Exit(-1)
 		}
 	}
+
+	if *reverse {
+
+		outpath := *output + string(filepath.Separator) + strings.Replace(strings.ToLower(filename), ".scr", ".png", 1)
+		if exportType.Overscan {
+			p, mode, err := file.OverscanPalette(*picturePath)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Cannot get the palette from file (%s) error %v\n", *picturePath, err)
+				os.Exit(-1)
+			}
+
+			if err := gfx.OverscanToPng(*picturePath, outpath, mode, p); err != nil {
+				fmt.Fprintf(os.Stderr, "Cannot not convert to PNG file (%s) error %v\n", *picturePath, err)
+				os.Exit(-1)
+			}
+			os.Exit(1)
+		}
+		if *mode == -1 {
+			fmt.Fprintf(os.Stderr, "Mode is mandatory to convert to PNG")
+			os.Exit(-1)
+		}
+		if *palettePath == "" {
+			fmt.Fprintf(os.Stderr, "For screen or window image, pal file palette is mandatory.\n")
+			os.Exit(-1)
+		}
+		p, _, err := file.OpenPal(*palettePath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Cannot open kit file (%s) error %v\n", *palettePath, err)
+			os.Exit(-1)
+		}
+
+		if err := gfx.ScrToPng(*picturePath, outpath, screenMode, p); err != nil {
+			fmt.Fprintf(os.Stderr, "Cannot not convert to PNG file (%s) error %v\n", *picturePath, err)
+			os.Exit(-1)
+		}
+		os.Exit(1)
+	}
+
 	if exportType.DeltaMode {
 		fmt.Fprintf(os.Stdout, "delta files to proceed.\n")
 		for i, v := range deltaFiles {

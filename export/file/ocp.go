@@ -11,9 +11,9 @@ import (
 	"github.com/jeromelesaux/martine/rle"
 	"image/color"
 	"io"
+	"io/ioutil"
 	"os"
 	"strings"
-	"io/ioutil"
 )
 
 var OverscanBoot = [...]byte{0x0e, 0x00, 0x0a, 0x00, 0x01, 0xc0, 0x20, 0x69, 0x4d, 0x50, 0x20, 0x76, 0x32, 0x00, 0x0d,
@@ -28,10 +28,8 @@ var OverscanBoot = [...]byte{0x0e, 0x00, 0x0a, 0x00, 0x01, 0xc0, 0x20, 0x69, 0x4
 	0x00, 0xc3, 0xc6, 0xba, 0xc3, 0xc1, 0xb9, 0x00, 0x00, 0xc3, 0x35, 0xba, 0x00, 0xed, 0x49, 0xd9,
 	0xfb, 0xc3, 0x00, 0xbe, 0x2b, 0x00, 0x71, 0x18, 0x08, 0xc3, 0x41, 0xb9, 0xc9, 0x00, 0x00, 0x00}
 
-
-
 type KitPalette struct {
-	Colors [16] constants.CpcPlusColor
+	Colors [16]constants.CpcPlusColor
 }
 
 func (i *KitPalette) ToString() string {
@@ -99,6 +97,7 @@ func OpenInk(filePath string) (color.Palette, *InkPalette, error) {
 		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
 		return color.Palette{}, &InkPalette{}, err
 	}
+	defer fr.Close()
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
@@ -130,6 +129,74 @@ func OpenInk(filePath string) (color.Palette, *InkPalette, error) {
 		}
 	}
 	return p, inkPalette, nil
+}
+
+func OverscanPalette(filePath string) (color.Palette, uint8, error) {
+	fr, err := os.Open(filePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
+		return color.Palette{}, 0xff, err
+	}
+	defer fr.Close()
+	header := &cpc.CpcHead{}
+	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
+		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(0, 0)
+	}
+	palette := color.Palette{}
+	b, err := ioutil.ReadAll(fr)
+	if err != nil {
+		return palette, 0xff, err
+	}
+	fmt.Fprintf(os.Stdout, "Read (%X)\n", len(b))
+	var mode uint8
+	isPlus := false
+	if b[(0x1ac-0x170)] == 1 {
+		isPlus = true
+	}
+	pens := 0
+	switch b[0x184-0x170] {
+	case 0x0e:
+		pens = 16
+		mode = 0
+	case 0x0f:
+		pens = 4
+		mode = 1
+	case 0x10:
+		pens = 2
+		mode = 2
+	}
+	if isPlus {
+		offset := 0
+		for i := 0; i < pens; i++ {
+			pc := binary.LittleEndian.Uint16(b[(0x801-0x170)+offset:])
+			fmt.Fprintf(os.Stdout, "Read color %d\n", pc)
+			if err == nil {
+				c := constants.NewRawCpcPlusColor(pc)
+				fmt.Fprintf(os.Stdout, "PEN(%d) R(%d) G(%d) B(%d)\n", i, c.R, c.G, c.B)
+				col := color.RGBA{A: 0xff, B: uint8(c.B) << 3, G: uint8(c.G) << 3, R: uint8(c.R) << 3}
+				palette = append(palette, col)
+			} else {
+				fmt.Fprintf(os.Stderr, "Error while retreiving color from hardware value %X error %v\n", pc, err)
+			}
+			offset += 2
+		}
+	} else {
+		for i := 0; i < pens; i++ {
+			v := b[(0x7f00-0x170)+i]
+			fmt.Fprintf(os.Stdout, "PEN(%d) Hardware value (%X)\n", i, v)
+			c, err := constants.ColorFromHardware(v)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error while retreiving color from hardware value %X error %v\n", v, err)
+				palette = append(palette, color.White)
+			} else {
+
+				palette = append(palette, c)
+			}
+		}
+	}
+	fmt.Fprintf(os.Stdout, "Overscan file (%s) palette length (%d) mode (%d)\n", filePath, len(palette), mode)
+	return palette, mode, nil
 }
 
 func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, exportType *x.ExportType) error {
@@ -263,7 +330,7 @@ func Kit(filePath string, p color.Palette, screenMode uint8, exportType *x.Expor
 	return nil
 }
 
-func RawScr(filePath string) ([]byte,error) {
+func RawScr(filePath string) ([]byte, error) {
 	fr, err := os.Open(filePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
@@ -278,7 +345,27 @@ func RawScr(filePath string) ([]byte,error) {
 	if err != nil {
 		return nil, err
 	}
-	return bf,nil
+	return bf, nil
+}
+
+func RawOverscan(filePath string) ([]byte, error) {
+	fr, err := os.Open(filePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
+		return []byte{}, err
+	}
+	header := &cpc.CpcHead{}
+	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
+		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(0, io.SeekStart)
+	}
+	bf, err := ioutil.ReadAll(fr)
+	if err != nil {
+		return nil, err
+	}
+	data := make([]byte, len(bf)-0x30)
+	copy(data, bf[0x30:])
+	return data, nil
 }
 
 func Scr(filePath string, data []byte, exportType *x.ExportType) error {
@@ -441,7 +528,7 @@ func (o *OcpWinFooter) ToString() string {
 	return fmt.Sprintf("Width:(%d)\nHeight:(%d)\n", o.Width, o.Height)
 }
 
-func RawWin(filePath string) ([]byte,error) {
+func RawWin(filePath string) ([]byte, error) {
 	fr, err := os.Open(filePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
@@ -456,11 +543,10 @@ func RawWin(filePath string) ([]byte,error) {
 	if err != nil {
 		return nil, err
 	}
-	raw := make([]byte,len(bf)-5)
-	copy(raw[:],bf[0:len(bf)-5])
-	return raw,nil
+	raw := make([]byte, len(bf)-5)
+	copy(raw[:], bf[0:len(bf)-5])
+	return raw, nil
 }
-
 
 func OpenWin(filePath string) (*OcpWinFooter, error) {
 	fr, err := os.Open(filePath)

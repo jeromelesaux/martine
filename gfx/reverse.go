@@ -56,7 +56,7 @@ func ScrToPng(scrPath string, output string, mode uint8, p color.Palette) error 
 	}
 	cpcRow := 0
 	switch mode {
-	case 0 :
+	case 0:
 		for y := 0; y < m.Height; y++ {
 			cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
 			for x := 0; x < m.Width; x += 2 {
@@ -64,19 +64,19 @@ func ScrToPng(scrPath string, output string, mode uint8, p color.Palette) error 
 				pp1, pp2 := rawPixelMode0(val)
 				c1 := p[pp1]
 				c2 := p[pp2]
-	
+
 				out.Set(x, y, c1)
 				out.Set(x+1, y, c2)
 				cpcRow++
 			}
 			cpcRow = 0
 		}
-	case 1 :
+	case 1:
 		for y := 0; y < m.Height; y++ {
 			cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
 			for x := 0; x < m.Width; x += 4 {
 				val := d[cpcLine+cpcRow]
-				pp1, pp2,pp3,pp4 := rawPixelMode1(val)
+				pp1, pp2, pp3, pp4 := rawPixelMode1(val)
 				c1 := p[pp1]
 				c2 := p[pp2]
 				c3 := p[pp3]
@@ -89,12 +89,12 @@ func ScrToPng(scrPath string, output string, mode uint8, p color.Palette) error 
 			}
 			cpcRow = 0
 		}
-	case 2 :
+	case 2:
 		for y := 0; y < m.Height; y++ {
 			cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
 			for x := 0; x < m.Width; x += 8 {
 				val := d[cpcLine+cpcRow]
-				pp1, pp2,pp3,pp4, pp5,pp6,pp7,pp8 := rawPixelMode2(val)
+				pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 := rawPixelMode2(val)
 				c1 := p[pp1]
 				c2 := p[pp2]
 				c3 := p[pp3]
@@ -116,7 +116,7 @@ func ScrToPng(scrPath string, output string, mode uint8, p color.Palette) error 
 			cpcRow = 0
 		}
 	}
-	
+
 	return xl.Png(output, out)
 }
 
@@ -136,16 +136,16 @@ func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) e
 		Min: image.Point{X: 0, Y: 0},
 		Max: image.Point{X: int(m.Width), Y: int(m.Height)}})
 
-	d, err := xl.RawScr(scrPath) // RawOverscan data commence en 0x30
+	d, err := xl.RawOverscan(scrPath) // RawOverscan data commence en 0x30
 	if err != nil {
 		return err
 	}
 	cpcRow := 0
 	switch mode {
-	case 0 :
+	case 0:
 		for y := 0; y < m.Height; y++ {
-			cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
-			if y > 127 {
+			cpcLine := ((y/0x8)*0x60 + ((y % 0x8) * 0x800))
+			if y > 135 {
 				cpcLine += (0x3800)
 			}
 			for x := 0; x < m.Width; x += 2 {
@@ -153,22 +153,22 @@ func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) e
 				pp1, pp2 := rawPixelMode0(val)
 				c1 := p[pp1]
 				c2 := p[pp2]
-	
+
 				out.Set(x, y, c1)
 				out.Set(x+1, y, c2)
 				cpcRow++
 			}
 			cpcRow = 0
 		}
-	case 1 :
+	case 1:
 		for y := 0; y < m.Height; y++ {
-			cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
-			if y > 127 {
+			cpcLine := ((y/0x8)*0x60 + ((y % 0x8) * 0x800))
+			if y > 135 {
 				cpcLine += (0x3800)
 			}
 			for x := 0; x < m.Width; x += 4 {
 				val := d[cpcLine+cpcRow]
-				pp1, pp2,pp3,pp4 := rawPixelMode1(val)
+				pp1, pp2, pp3, pp4 := rawPixelMode1(val)
 				c1 := p[pp1]
 				c2 := p[pp2]
 				c3 := p[pp3]
@@ -181,15 +181,15 @@ func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) e
 			}
 			cpcRow = 0
 		}
-	case 2 :
+	case 2:
 		for y := 0; y < m.Height; y++ {
-			cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
-			if y > 127 {
+			cpcLine := ((y/0x8)*0x60 + ((y % 0x8) * 0x800))
+			if cpcLine > 135 {
 				cpcLine += (0x3800)
 			}
 			for x := 0; x < m.Width; x += 8 {
 				val := d[cpcLine+cpcRow]
-				pp1, pp2,pp3,pp4, pp5,pp6,pp7,pp8 := rawPixelMode2(val)
+				pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 := rawPixelMode2(val)
 				c1 := p[pp1]
 				c2 := p[pp2]
 				c3 := p[pp3]
@@ -211,6 +211,6 @@ func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) e
 			cpcRow = 0
 		}
 	}
-	
+
 	return xl.Png(output, out)
 }
