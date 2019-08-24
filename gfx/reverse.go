@@ -140,6 +140,7 @@ func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) e
 	if err != nil {
 		return err
 	}
+	
 	cpcRow := 0
 	switch mode {
 	case 0:

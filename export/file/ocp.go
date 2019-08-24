@@ -1,6 +1,7 @@
 package file
 
 import (
+	"errors"
 	"encoding/binary"
 	"fmt"
 	rawlz4 "github.com/bkaradzic/go-lz4"
@@ -15,6 +16,8 @@ import (
 	"os"
 	"strings"
 )
+
+var BadFileFormat = errors.New("Bad file format.")
 
 var OverscanBoot = [...]byte{0x0e, 0x00, 0x0a, 0x00, 0x01, 0xc0, 0x20, 0x69, 0x4d, 0x50, 0x20, 0x76, 0x32, 0x00, 0x0d,
 	0x00, 0x14, 0x00, 0xad, 0x20, 0x0e, 0x01, 0x83, 0x1c, 0xad, 0x01, 0x00, 0x00, 0x00, 0x01, 0x30,
@@ -174,9 +177,10 @@ func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 			if err == nil {
 				c := constants.NewRawCpcPlusColor(pc)
 				fmt.Fprintf(os.Stdout, "PEN(%d) R(%d) G(%d) B(%d)\n", i, c.R, c.G, c.B)
-				col := color.RGBA{A: 0xff, B: uint8(c.B) << 3, G: uint8(c.G) << 3, R: uint8(c.R) << 3}
+				col := color.RGBA{A: 0xff, B: uint8(c.B) << 4, G: uint8(c.G) << 4, R: uint8(c.R) << 4}
 				palette = append(palette, col)
 			} else {
+				palette = append(palette, color.Black)
 				fmt.Fprintf(os.Stderr, "Error while retreiving color from hardware value %X error %v\n", pc, err)
 			}
 			offset += 2
@@ -188,7 +192,7 @@ func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 			c, err := constants.ColorFromHardware(v)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error while retreiving color from hardware value %X error %v\n", v, err)
-				palette = append(palette, color.White)
+				palette = append(palette, color.Black)
 			} else {
 
 				palette = append(palette, c)
@@ -345,6 +349,9 @@ func RawScr(filePath string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	if len(bf) > 0x4000 {
+		return nil,BadFileFormat
+	}
 	return bf, nil
 }
 
@@ -365,6 +372,10 @@ func RawOverscan(filePath string) ([]byte, error) {
 	}
 	data := make([]byte, len(bf)-0x30)
 	copy(data, bf[0x30:])
+	fmt.Fprintf(os.Stdout,"Raw overscan length #%X\n",len(data))
+	if  len(data) <= 0x4000 {
+		return nil, BadFileFormat
+	}
 	return data, nil
 }
 
@@ -466,6 +477,7 @@ func OpenPal(filePath string) (color.Palette, *OcpPalette, error) {
 		c, err := constants.ColorFromHardware(v[0])
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Hardware color value %.2x is not recognized error :%v\n", v[0], err)
+			p = append(p, color.Black)
 		} else {
 			p = append(p, c)
 		}

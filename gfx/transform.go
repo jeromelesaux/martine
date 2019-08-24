@@ -375,35 +375,35 @@ func rawPixelMode2(b byte) (pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) {
 func rawPixelMode1(b byte) (pp1, pp2, pp3, pp4 int) {
 	val := int(b)
 	if val-128 >= 0 {
-		pp1++
+		pp1 &= 1
 		val -= 128
 	}
 	if val-64 >= 0 {
-		pp2++
+		pp2 &=1
 		val -= 64
 	}
 	if val-32 >= 0 {
-		pp3++
+		pp3 &=1
 		val -= 32
 	}
 	if val-16 >= 0 {
-		pp4++
+		pp4 &= 1
 		val -= 16
 	}
 	if val-8 >= 0 {
-		pp1 += 2
+		pp1 &= 2
 		val -= 8
 	}
 	if val-4 >= 0 {
-		pp2 += 2
+		pp2 &= 2
 		val -= 4
 	}
 	if val-2 >= 0 {
-		pp3 += 2
+		pp3 &= 2
 		val -= 2
 	}
 	if val-1 >= 0 {
-		pp4 += 2
+		pp4 &= 2
 	}
 
 	return
@@ -411,37 +411,46 @@ func rawPixelMode1(b byte) (pp1, pp2, pp3, pp4 int) {
 
 func rawPixelMode0(b byte) (pp1, pp2 int) {
 	val := int(b)
+	//fmt.Fprintf(os.Stderr,"v:%.8b\n",val)
 	if val-128 >= 0 {
-		pp1++
+		pp1 |=1
 		val -= 128
 	}
+	//fmt.Fprintf(os.Stderr,"v:%.8b\n",val)
 	if val-64 >= 0 {
-		pp2++
+		pp2 |= 1
 		val -= 64
 	}
+	//fmt.Fprintf(os.Stderr,"v:%.8b\n",val)
 	if val-32 >= 0 {
-		pp1 += 2
+		pp1 |= 4
 		val -= 32
 	}
+	//fmt.Fprintf(os.Stderr,"v:%.8b\n",val)
 	if val-16 >= 0 {
-		pp2 += 2
+		pp2 |= 4
 		val -= 16
 	}
+	//fmt.Fprintf(os.Stderr,"v:%.8b\n",val)
 	if val-8 >= 0 {
-		pp1 += 4
+		pp1 |= 2
 		val -= 8
 	}
+	//fmt.Fprintf(os.Stderr,"v:%.8b\n",val)
 	if val-4 >= 0 {
-		pp2 += 4
+		pp2 |= 2
 		val -= 4
 	}
+	//fmt.Fprintf(os.Stderr,"v:%.8b\n",val)
 	if val-2 >= 0 {
-		pp1 += 8
+		pp1 |= 8
 		val -= 2
 	}
+	//fmt.Fprintf(os.Stderr,"v:%.8b\n",val)
 	if val-1 >= 0 {
-		pp2 += 8
+		pp2 |= 8
 	}
+	//fmt.Fprintf(os.Stderr,"v:%.8b\n",val)
 	return
 }
 
