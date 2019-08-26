@@ -1,8 +1,8 @@
 package file
 
 import (
-	"errors"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	rawlz4 "github.com/bkaradzic/go-lz4"
 	"github.com/jeromelesaux/m4client/cpc"
@@ -350,7 +350,7 @@ func RawScr(filePath string) ([]byte, error) {
 		return nil, err
 	}
 	if len(bf) > 0x4000 {
-		return nil,BadFileFormat
+		return nil, BadFileFormat
 	}
 	return bf, nil
 }
@@ -372,8 +372,8 @@ func RawOverscan(filePath string) ([]byte, error) {
 	}
 	data := make([]byte, len(bf)-0x30)
 	copy(data, bf[0x30:])
-	fmt.Fprintf(os.Stdout,"Raw overscan length #%X\n",len(data))
-	if  len(data) <= 0x4000 {
+	fmt.Fprintf(os.Stdout, "Raw overscan length #%X\n", len(data))
+	if len(data) <= 0x4000 {
 		return nil, BadFileFormat
 	}
 	return data, nil
@@ -413,10 +413,10 @@ func Scr(filePath string, data []byte, exportType *x.ExportType) error {
 		Size2:       uint16(binary.Size(data)),
 		LogicalSize: uint16(binary.Size(data))}
 
-	cpcFilename := exportType.OsFilename(".SCR")
+	cpcFilename := exportType.GetAmsdosFilename(filePath, ".SCR")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
-	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))
+	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	fw, err := os.Create(osFilepath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
@@ -510,7 +510,7 @@ func Pal(filePath string, p color.Palette, screenMode uint8, exportType *x.Expor
 		Size2:       uint16(binary.Size(data)),
 		LogicalSize: uint16(binary.Size(data))}
 
-	cpcFilename := exportType.OsFilename(".PAL")
+	cpcFilename := exportType.GetAmsdosFilename(filePath, ".PAL")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header lenght %d\n", binary.Size(header))

@@ -43,7 +43,7 @@ type ExportType struct {
 	DskFiles       []string
 	Tiles          *JsonSlice
 	DeltaMode      bool
-	ExtendedDsk bool 
+	ExtendedDsk    bool
 }
 
 func NewExportType(input, output string) *ExportType {
@@ -104,6 +104,18 @@ func (e *ExportType) TransformToAmsdosFile(filePath string) string {
 
 func (e *ExportType) OsFilename(ext string) string {
 	file := strings.ToUpper(filepath.Base(e.InputPath))
+	filename := strings.TrimSuffix(file, filepath.Ext(file))
+	filenameSize := len(filename)
+	if filenameSize > 8 {
+		filenameSize = 8
+	}
+	osFile := make([]byte, filenameSize)
+	copy(osFile, filename[0:filenameSize])
+	return string(osFile) + ext
+}
+
+func (e *ExportType) GetAmsdosFilename(filePath string, ext string) string {
+	file := strings.ToUpper(filepath.Base(filePath))
 	filename := strings.TrimSuffix(file, filepath.Ext(file))
 	filenameSize := len(filename)
 	if filenameSize > 8 {

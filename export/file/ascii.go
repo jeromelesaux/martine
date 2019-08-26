@@ -155,8 +155,8 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *x.ExportTy
 		if exportType.TileMode {
 			exportType.Tiles.Sprites = append(exportType.Tiles.Sprites, j)
 			return nil
-		} 
-		return j.Save(exportType.OsFullPath(filePath, ".json"))	
+		}
+		return j.Save(exportType.OsFullPath(filePath, ".json"))
 	}
 	return nil
 }

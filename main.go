@@ -441,18 +441,34 @@ func main() {
 				os.Exit(-1)
 			}
 		} else {
-			if err := gfx.ApplyOneImage(in,
-				resizeAlgo,
-				exportType,
-				filename, *picturePath, *palettePath, *inkPath, *kitPath,
-				*mode, *ditheringAlgo, *rla, *sla, *rra, *sra, *keephigh, *keeplow, *losthigh, *lostlow, *iterations,
-				screenMode,
-				*ditheringMultiplier,
-				ditheringMatrix,
-				ditherType,
-				customDimension, *withQuantization); err != nil {
-				fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
-				os.Exit(-1)
+			if *flash {
+				if err := gfx.Flash(in,
+					resizeAlgo,
+					exportType,
+					filename, *picturePath, *palettePath, *inkPath, *kitPath,
+					*mode, *ditheringAlgo, *rla, *sla, *rra, *sra, *keephigh, *keeplow, *losthigh, *lostlow, *iterations,
+					screenMode,
+					*ditheringMultiplier,
+					ditheringMatrix,
+					ditherType,
+					customDimension, *withQuantization); err != nil {
+					fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
+					os.Exit(-1)
+				}
+			} else {
+				if err := gfx.ApplyOneImage(in,
+					resizeAlgo,
+					exportType,
+					filename, *picturePath, *palettePath, *inkPath, *kitPath,
+					*mode, *ditheringAlgo, *rla, *sla, *rra, *sra, *keephigh, *keeplow, *losthigh, *lostlow, *iterations,
+					screenMode,
+					*ditheringMultiplier,
+					ditheringMatrix,
+					ditherType,
+					customDimension, *withQuantization); err != nil {
+					fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
+					os.Exit(-1)
+				}
 			}
 		}
 	}

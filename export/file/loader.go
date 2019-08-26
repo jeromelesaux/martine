@@ -182,7 +182,7 @@ func BasicLoader(filePath string, p color.Palette, exportType *x.ExportType) err
 	var loader []byte
 	loader = BasicLoaderBasic
 	copy(loader[startPaletteValues:], out[0:len(out)])
-	filename := exportType.AmsdosFilename()
+	filename := exportType.GetAmsdosFilename(filePath, "")
 	copy(loader[startPaletteName:], filename[:])
 	copy(loader[startScreenName:], filename[:])
 	fmt.Println(loader)
@@ -190,7 +190,7 @@ func BasicLoader(filePath string, p color.Palette, exportType *x.ExportType) err
 		Size:        uint16(binary.Size(loader)),
 		Size2:       uint16(binary.Size(loader)),
 		LogicalSize: uint16(binary.Size(loader))}
-	file := string(filename) + ".BAS"
+	file := exportType.GetAmsdosFilename(string(filename), ".BAS")
 	copy(header.Filename[:], file)
 	header.Checksum = uint16(header.ComputedChecksum16())
 	osFilepath := exportType.AmsdosFullPath(filePath, ".BAS")

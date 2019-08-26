@@ -1,8 +1,8 @@
 package file
 
 import (
-	"testing"
 	"github.com/jeromelesaux/martine/constants"
+	"testing"
 )
 
 func TestCpcPlusColor(t *testing.T) {
