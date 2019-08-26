@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"image"
-	"image/color"
 	_ "image/jpeg"
 	_ "image/png"
 	"os"
@@ -13,7 +12,6 @@ import (
 
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/net"
@@ -80,6 +78,7 @@ var (
 	withQuantization    = flag.Bool("quantization", false, "use additionnal quantization for dithering.")
 	extendedDsk         = flag.Bool("extendeddsk", false, "Export in a Extended DSK 80 tracks, 10 sectors 400 ko per face")
 	reverse             = flag.Bool("reverse", false, "Transform .scr (overscan or not) file with palette (pal or kit file) into png file")
+	flash               = flag.Bool("flash", false, "generate flash animation with two ocp screens.")
 	version             = "0.18.rc"
 )
 
@@ -97,12 +96,10 @@ func main() {
 	var filename, extension string
 	var customDimension bool
 	var screenMode uint8
-	var palette color.Palette
-	var ditheringMatrix [][]float32
 	var ditherType gfx.DitheringType
-
-	var err error
+	var ditheringMatrix [][]float32
 	var in image.Image
+
 	flag.Var(&deltaFiles, "df", "scr file path to add in delta mode comparison. (wildcard accepted such as ? or * file filename.) ")
 	flag.Parse()
 
@@ -444,108 +441,19 @@ func main() {
 				os.Exit(-1)
 			}
 		} else {
-
-			if *palettePath != "" {
-				fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", *palettePath)
-				palette, _, err = file.OpenPal(*palettePath)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *palettePath)
-				} else {
-					fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
-				}
+			if err := gfx.ApplyOneImage(in,
+				resizeAlgo,
+				exportType,
+				filename, *picturePath, *palettePath, *inkPath, *kitPath,
+				*mode, *ditheringAlgo, *rla, *sla, *rra, *sra, *keephigh, *keeplow, *losthigh, *lostlow, *iterations,
+				screenMode,
+				*ditheringMultiplier,
+				ditheringMatrix,
+				ditherType,
+				customDimension, *withQuantization); err != nil {
+				fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
+				os.Exit(-1)
 			}
-			if *inkPath != "" {
-				fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", *inkPath)
-				palette, _, err = file.OpenInk(*inkPath)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *inkPath)
-				} else {
-					fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
-				}
-			}
-			if *kitPath != "" {
-				fmt.Fprintf(os.Stdout, "Input plus palette to apply : (%s)\n", *kitPath)
-				palette, _, err = file.OpenKit(*kitPath)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", *palettePath)
-				} else {
-					fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
-				}
-			}
-
-			out := convert.Resize(in, size, resizeAlgo)
-			fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
-			if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_resized.png", out); err != nil {
-				os.Exit(-2)
-			}
-
-			var newPalette color.Palette
-			var downgraded *image.NRGBA
-			if *ditheringAlgo != -1 {
-				switch ditherType {
-				case gfx.ErrorDiffusionDither:
-					if *withQuantization {
-						out = gfx.QuantizeWithDither(out, ditheringMatrix, size.ColorsAvailable, newPalette)
-					} else {
-						out = gfx.Dithering(out, ditheringMatrix, float32(*ditheringMultiplier))
-					}
-				case gfx.OrderedDither:
-					//newPalette = convert.PaletteUsed(out,exportType.CpcPlus)
-					if exportType.CpcPlus {
-						newPalette = convert.ExtractPalette(out, exportType.CpcPlus, 27)
-						out = gfx.BayerDiphering(out, ditheringMatrix, newPalette)
-					} else {
-						out = gfx.BayerDiphering(out, ditheringMatrix, constants.CpcOldPalette)
-					}
-				}
-			}
-			if len(palette) > 0 {
-				newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
-			} else {
-				newPalette, downgraded, err = convert.DowngradingPalette(out, size, exportType.CpcPlus)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", *picturePath)
-				}
-			}
-
-			fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
-			if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_down.png", downgraded); err != nil {
-				os.Exit(-2)
-			}
-
-			if exportType.RollMode {
-				if *rla != -1 || *sla != -1 {
-					gfx.RollLeft(*rla, *sla, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
-				} else {
-					if *rra != -1 || *sra != -1 {
-						gfx.RollRight(*rra, *sra, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
-					}
-				}
-				if *keephigh != -1 || *losthigh != -1 {
-					gfx.RollUp(*keephigh, *losthigh, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
-				} else {
-					if *keeplow != -1 || *lostlow != -1 {
-						gfx.RollLow(*keeplow, *lostlow, *iterations, screenMode, size, downgraded, newPalette, filename, exportType)
-					}
-				}
-			}
-			if exportType.RotationMode {
-				if err := gfx.Rotate(downgraded, newPalette, size, uint8(*mode), *picturePath, resizeAlgo, exportType); err != nil {
-					fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", *picturePath, err)
-				}
-			}
-			if exportType.Rotation3DMode {
-				if err := gfx.Rotate3d(downgraded, newPalette, size, uint8(*mode), *picturePath, resizeAlgo, exportType); err != nil {
-					fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", *picturePath, err)
-				}
-			}
-			if !customDimension {
-				gfx.Transform(downgraded, newPalette, size, *picturePath, exportType)
-			} else {
-				fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
-				gfx.SpriteTransform(downgraded, newPalette, size, screenMode, filename, exportType)
-			}
-
 		}
 	}
 	if exportType.Dsk {
