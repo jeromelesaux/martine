@@ -117,23 +117,25 @@ func (e *ExportType) OsFilename(ext string) string {
 func (e *ExportType) GetAmsdosFilename(filePath string, ext string) string {
 	file := strings.ToUpper(filepath.Base(filePath))
 	filename := strings.TrimSuffix(file, filepath.Ext(file))
-	filenameSize := len(filename)
-	if filenameSize > 8 {
-		filenameSize = 8
-	}
-	osFile := make([]byte, filenameSize)
-	copy(osFile, filename[0:filenameSize])
-	return string(osFile) + ext
+	filenameSize := 7
+	end := len(filename)
+	if len(filename) < 8 {
+		filenameSize = len(filename) -1
+	}	
+	osFile := filename[0:filenameSize] + filename[end-1:end]
+	return osFile + ext
 }
 
 func (e *ExportType) AmsdosFullPath(filePath string, newExtension string) string {
 	filename := filepath.Base(filePath)
 	file := strings.TrimSuffix(filename, filepath.Ext(filename))
-	length := 8
+	length := 7
+	end := len(file)
 	if len(file) < 8 {
-		length = len(file)
-	}
-	newFilename := file[0:length] + newExtension
+		length = len(file) -1
+	} 
+
+	newFilename := file[0:length] + file[end-1:end]  + newExtension
 	return e.OutputPath + string(filepath.Separator) + strings.ToUpper(newFilename)
 }
 

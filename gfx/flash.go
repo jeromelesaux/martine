@@ -1,6 +1,8 @@
 package gfx
 
 import (
+	"path/filepath"
+	"path"
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
@@ -41,6 +43,8 @@ func Flash(in image.Image,
 		x++
 		y = 0
 	}
+
+	
 	err = ApplyOneImage(leftIm,
 		resizeAlgo,
 		exportType,
@@ -66,12 +70,29 @@ func Flash(in image.Image,
 		y = 0
 	}
 
+	flashMode  := mode - 1 
+	if flashMode < 0 {
+		flashMode = 2
+	} 
+	ext := path.Ext(filename)
+	name := strings.Replace(filename,ext,"",1)
+	namesize := len(name)
+	if namesize > 8 {
+		namesize = 7
+	}
+	flashPaletteFilename :=strings.ToUpper(name)[0:namesize] + "1.PAL"
+	flashPalettePath := exportType.OutputPath + string(filepath.Separator)+  flashPaletteFilename
+	switch flashMode {
+	case 0 : exportType.Size = constants.Mode0
+	case 1 : exportType.Size = constants.Mode1
+	case 2 : exportType.Size = constants.Mode2
+	}
 	err = ApplyOneImage(rigthIm,
 		resizeAlgo,
 		exportType,
-		filenameRigth, filepathRigth, palettePath, inkPath, kitPath,
-		mode, ditheringAlgo, rla, sla, rra, sra, keephigh, keeplow, losthigh, lostlow, iterations,
-		screenMode,
+		filenameRigth, filepathRigth, flashPalettePath, inkPath, kitPath,
+		flashMode, ditheringAlgo, rla, sla, rra, sra, keephigh, keeplow, losthigh, lostlow, iterations,
+		uint8(flashMode),
 		ditheringMultiplier,
 		ditheringMatrix,
 		ditherType,
