@@ -29,10 +29,20 @@ func Flash(in image.Image,
 	im := convert.Resize(in, size, resizeAlgo)
 	leftIm := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{exportType.Size.Width, exportType.Size.Height}})
 	rigthIm := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{exportType.Size.Width, exportType.Size.Height}})
-	filenameLeft := strings.Replace(filename, ".", "1.", 1)
-	filenameRigth := strings.Replace(filename, ".", "2.", 1)
-	filepathLeft := strings.Replace(picturePath, ".", "1.", 1)
-	filepathRigth := strings.Replace(picturePath, ".", "2.", 1)
+	indexExtFilename := strings.LastIndex(filename,".")
+	indexExtPath := strings.LastIndex(picturePath,".")
+	
+	bFilename := make([]byte,indexExtFilename)
+	bPath := make([]byte,indexExtPath)
+	formerExt := filename[indexExtFilename:len(filename)]
+	copy(bFilename,filename[0:indexExtFilename])
+	copy(bPath,picturePath[0:indexExtPath])
+
+
+	filenameLeft := string(bFilename) + "1" + formerExt
+	filenameRigth := string(bFilename) + "2" + formerExt
+	filepathLeft :=string(bPath) + "1" + formerExt
+	filepathRigth := string(bPath) + "2" + formerExt
 	x := 0
 	for i := 0; i < size.Width; i += 2 {
 		y := 0
@@ -80,7 +90,7 @@ func Flash(in image.Image,
 	if namesize > 8 {
 		namesize = 7
 	}
-	flashPaletteFilename :=strings.ToUpper(name)[0:namesize] + "1.PAL"
+	flashPaletteFilename := strings.ToUpper(name)[0:namesize] + "1.PAL"
 	flashPalettePath := exportType.OutputPath + string(filepath.Separator)+  flashPaletteFilename
 	switch flashMode {
 	case 0 : exportType.Size = constants.Mode0
