@@ -1,11 +1,11 @@
 package gfx
 
 import (
-	"github.com/jeromelesaux/martine/common"
 	"bytes"
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/jeromelesaux/martine/common"
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 	"image"
@@ -324,22 +324,22 @@ func (dc *DeltaCollection) Marshall() ([]byte, error) {
 	var b bytes.Buffer
 	for _, item := range dc.Items {
 		occ := len(item.Addresses)
-		for i:=0; i < occ ; i+=255 {
+		for i := 0; i < occ; i += 255 {
 			if err := binary.Write(&b, binary.LittleEndian, item.Byte); err != nil {
 				return b.Bytes(), err
 			}
 			var nbocc uint8 = 255
-			if occ - i < 255 {
+			if occ-i < 255 {
 				nbocc = uint8(occ - i)
 			}
 			if err := binary.Write(&b, binary.LittleEndian, nbocc); err != nil {
 				return b.Bytes(), err
 			}
-			for j:=i; j < 255 && j < occ; j++ {
+			for j := i; j < 255 && j < occ; j++ {
 				if err := binary.Write(&b, binary.LittleEndian, item.Addresses[j]); err != nil {
 					return b.Bytes(), err
 				}
-			} 
+			}
 		}
 	}
 	return b.Bytes(), nil
@@ -353,22 +353,22 @@ func (dc *DeltaCollection) Save(filename string) error {
 	defer f.Close()
 	for _, item := range dc.Items {
 		occ := len(item.Addresses)
-		for i:=0; i < occ ; i+=255 {
+		for i := 0; i < occ; i += 255 {
 			if err := binary.Write(f, binary.LittleEndian, item.Byte); err != nil {
 				return err
 			}
 			var nbocc uint8 = 255
-			if occ - i < 255 {
+			if occ-i < 255 {
 				nbocc = uint8(occ - i)
 			}
 			if err := binary.Write(f, binary.LittleEndian, nbocc); err != nil {
 				return err
 			}
-			for j:=i; j < 255 && j < occ; j++ {
+			for j := i; j < 255 && j < occ; j++ {
 				if err := binary.Write(f, binary.LittleEndian, item.Addresses[j]); err != nil {
 					return err
 				}
-			} 
+			}
 		}
 	}
 	return nil
@@ -414,8 +414,8 @@ func ExportDelta(filename string, dc *DeltaCollection, exportType *x.ExportType)
 func ProceedDelta(filespath []string, exportType *x.ExportType) error {
 
 	if len(filespath) == 1 {
-		var err error 
-		filespath,err = common.WilcardedFiles(filespath)
+		var err error
+		filespath, err = common.WilcardedFiles(filespath)
 		if err != nil {
 			return err
 		}

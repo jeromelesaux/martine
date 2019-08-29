@@ -44,15 +44,6 @@ var (
 		{63, 31, 55, 23, 61, 29, 53, 21}}
 )
 
-type DitheringType struct {
-	string
-}
-
-var (
-	OrderedDither        = DitheringType{"Ordered"}
-	ErrorDiffusionDither = DitheringType{"ErrorDiffusion"}
-)
-
 func Dithering(input *image.NRGBA, filter [][]float32, errorMultiplier float32) *image.NRGBA {
 	dither := dither.Dither{Settings: dither.Settings{Filter: filter}}
 	dst := dither.Color(input, errorMultiplier)

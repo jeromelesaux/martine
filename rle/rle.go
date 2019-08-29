@@ -22,7 +22,7 @@ func Encode(in []byte) []byte {
 					out = append(out, 255)
 					out = append(out, c)
 				}
-				if nb % 255 != 0 {
+				if nb%255 != 0 {
 					out = append(out, uint8(nb%255))
 					out = append(out, c)
 				}
@@ -40,7 +40,7 @@ func Encode(in []byte) []byte {
 						out = append(out, 255)
 						out = append(out, c)
 					}
-					if nb % 255 != 0 {
+					if nb%255 != 0 {
 						out = append(out, uint8(nb%255))
 						out = append(out, c)
 					}
@@ -61,7 +61,7 @@ func Encode(in []byte) []byte {
 				out = append(out, 255)
 				out = append(out, c)
 			}
-			if nb % 255 != 0 {
+			if nb%255 != 0 {
 				out = append(out, uint8(nb%255))
 				out = append(out, c)
 			}

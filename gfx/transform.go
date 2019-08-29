@@ -1,12 +1,12 @@
 package gfx
 
 import (
-	"github.com/jeromelesaux/martine/export/file"
 	"errors"
 	"fmt"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/file"
 	"image"
 	"image/color"
 	"math"
@@ -379,11 +379,11 @@ func rawPixelMode1(b byte) (pp1, pp2, pp3, pp4 int) {
 		val -= 128
 	}
 	if val-64 >= 0 {
-		pp2 &=1
+		pp2 &= 1
 		val -= 64
 	}
 	if val-32 >= 0 {
-		pp3 &=1
+		pp3 &= 1
 		val -= 32
 	}
 	if val-16 >= 0 {
@@ -413,7 +413,7 @@ func rawPixelMode0(b byte) (pp1, pp2 int) {
 	val := int(b)
 	//fmt.Fprintf(os.Stderr,"v:%.8b\n",val)
 	if val-128 >= 0 {
-		pp1 |=1
+		pp1 |= 1
 		val -= 128
 	}
 	//fmt.Fprintf(os.Stderr,"v:%.8b\n",val)

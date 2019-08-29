@@ -3,8 +3,8 @@ package constants
 import (
 	"encoding/binary"
 	"fmt"
-	"os"
 	"image/color"
+	"os"
 )
 
 type CpcPlusColor struct {

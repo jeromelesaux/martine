@@ -2,7 +2,6 @@ package gfx
 
 import (
 	"fmt"
-	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/convert"
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
@@ -15,7 +14,7 @@ import (
 	"strconv"
 )
 
-func TileMode(exportType *x.ExportType, mode uint8, iterationX, iterationY int, algo imaging.ResampleFilter) error {
+func TileMode(exportType *x.ExportType, mode uint8, iterationX, iterationY int) error {
 	fr, err := os.Open(exportType.InputPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot open (%s),error :%v\n", exportType.InputPath, err)
@@ -55,7 +54,7 @@ func TileMode(exportType *x.ExportType, mode uint8, iterationX, iterationY int, 
 				return err
 			}
 
-			resized := convert.Resize(cropped, exportType.Size, algo)
+			resized := convert.Resize(cropped, exportType.Size, exportType.ResizingAlgo)
 			ext := "_resized_" + strconv.Itoa(index) + ".png"
 			filePath := exportType.OutputPath + string(filepath.Separator) + exportType.OsFilename(ext)
 			if err := file.Png(filePath, resized); err != nil {

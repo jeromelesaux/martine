@@ -1,12 +1,12 @@
 package lz4
 
 import (
-	"io"
 	"bytes"
 	"github.com/pierrec/lz4"
+	"io"
 )
 
-func Encode(dst, src []byte) ([]byte,error) {
+func Encode(dst, src []byte) ([]byte, error) {
 	header := lz4.Header{}
 	r := bytes.NewReader(src)
 	var zout bytes.Buffer
@@ -18,5 +18,5 @@ func Encode(dst, src []byte) ([]byte,error) {
 	}
 	err = zw.Close()
 	dst = zout.Bytes()
-	return dst, err	
+	return dst, err
 }

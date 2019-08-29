@@ -94,10 +94,7 @@ func usage() {
 func main() {
 	var size constants.Size
 	var filename, extension string
-	var customDimension bool
 	var screenMode uint8
-	var ditherType gfx.DitheringType
-	var ditheringMatrix [][]float32
 	var in image.Image
 
 	flag.Var(&deltaFiles, "df", "scr file path to add in delta mode comparison. (wildcard accepted such as ? or * file filename.) ")
@@ -205,7 +202,7 @@ func main() {
 			}
 		}
 		if *height != -1 {
-			customDimension = true
+			exportType.CustomDimension = true
 			exportType.Win = true
 			size.Height = *height
 			if *width != -1 {
@@ -216,7 +213,7 @@ func main() {
 		}
 		if *width != -1 {
 			exportType.Win = true
-			customDimension = true
+			exportType.CustomDimension = true
 			size.Width = *width
 			if *height != -1 {
 				size.Height = *height
@@ -237,62 +234,6 @@ func main() {
 
 	if *byteStatement != "" {
 		file.ByteToken = *byteStatement
-	}
-	exportType.ExtendedDsk = *extendedDsk
-	exportType.Size = size
-	exportType.TileMode = *tileMode
-	exportType.RollMode = *rollMode
-	exportType.RollIteration = *iterations
-	exportType.NoAmsdosHeader = *noAmsdosHeader
-	exportType.CpcPlus = *plusMode
-	exportType.TileIterationX = *tileIterationX
-	exportType.TileIterationY = *tileIterationY
-	exportType.Compression = *compress
-	exportType.RotationMode = *rotateMode
-	exportType.Rotation3DMode = *rotate3dMode
-	exportType.Rotation3DType = *rotate3dType
-	exportType.Rotation3DX0 = *rotate3dX0
-	exportType.Rotation3DY0 = *rotate3dY0
-	exportType.M4Host = *m4Host
-	exportType.M4RemotePath = *m4RemotePath
-	exportType.M4Autoexec = *m4Autoexec
-	if exportType.CpcPlus {
-		exportType.Kit = true
-		exportType.Pal = false
-	}
-	exportType.Overscan = *overscan
-	if exportType.Overscan {
-		exportType.Scr = false
-		exportType.Kit = true
-	}
-	if exportType.M4Host != "" {
-		exportType.M4 = true
-	}
-
-	exportType.DeltaMode = *deltaMode
-	exportType.Dsk = *dsk
-
-	fmt.Fprintf(os.Stdout, "Informations :\n%s", size.ToString())
-	if !exportType.DeltaMode && !*reverse {
-		f, err := os.Open(*picturePath)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while opening file %s, error %v\n", *picturePath, err)
-			os.Exit(-2)
-		}
-		defer f.Close()
-		in, _, err = image.Decode(f)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot decode the image %s error %v", *picturePath, err)
-			os.Exit(-2)
-		}
-	}
-	if !customDimension && *rotateMode {
-		size.Width = in.Bounds().Max.X
-		size.Height = in.Bounds().Max.Y
-	}
-
-	if !*deltaMode {
-		fmt.Fprintf(os.Stdout, "Filename :%s, extension:%s\n", filename, extension)
 	}
 
 	var resizeAlgo imaging.ResampleFilter
@@ -330,51 +271,124 @@ func main() {
 	default:
 		resizeAlgo = imaging.NearestNeighbor
 	}
+	exportType.ExtendedDsk = *extendedDsk
+	exportType.Size = size
+	exportType.TileMode = *tileMode
+	exportType.RollMode = *rollMode
+	exportType.RollIteration = *iterations
+	exportType.NoAmsdosHeader = *noAmsdosHeader
+	exportType.CpcPlus = *plusMode
+	exportType.TileIterationX = *tileIterationX
+	exportType.TileIterationY = *tileIterationY
+	exportType.Compression = *compress
+	exportType.RotationMode = *rotateMode
+	exportType.Rotation3DMode = *rotate3dMode
+	exportType.Rotation3DType = *rotate3dType
+	exportType.Rotation3DX0 = *rotate3dX0
+	exportType.Rotation3DY0 = *rotate3dY0
+	exportType.M4Host = *m4Host
+	exportType.M4RemotePath = *m4RemotePath
+	exportType.M4Autoexec = *m4Autoexec
+	exportType.ResizingAlgo = resizeAlgo
+	exportType.DitheringMultiplier = *ditheringMultiplier
+	exportType.DitheringWithQuantification = *withQuantization
+	exportType.PalettePath = *palettePath
+	exportType.InkPath = *inkPath
+	exportType.KitPath = *kitPath
+	exportType.RotationRlaBit = *rla
+	exportType.RotationSraBit = *sra
+	exportType.RotationSlaBit = *sla
+	exportType.RotationRraBit = *rra
+	exportType.RotationKeephighBit = *keephigh
+	exportType.RotationKeeplowBit = *keeplow
+	exportType.RotationLosthighBit = *losthigh
+	exportType.RotationLostlowBit = *lostlow
+	exportType.RotationIterations = *iterations
+
+	if exportType.CpcPlus {
+		exportType.Kit = true
+		exportType.Pal = false
+	}
+	exportType.Overscan = *overscan
+	if exportType.Overscan {
+		exportType.Scr = false
+		exportType.Kit = true
+	}
+	if exportType.M4Host != "" {
+		exportType.M4 = true
+	}
+
+	exportType.DeltaMode = *deltaMode
+	exportType.Dsk = *dsk
+
+	fmt.Fprintf(os.Stdout, "Informations :\n%s", size.ToString())
+	if !exportType.DeltaMode && !*reverse {
+		f, err := os.Open(*picturePath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error while opening file %s, error %v\n", *picturePath, err)
+			os.Exit(-2)
+		}
+		defer f.Close()
+		in, _, err = image.Decode(f)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Cannot decode the image %s error %v", *picturePath, err)
+			os.Exit(-2)
+		}
+	}
+	if !exportType.CustomDimension && *rotateMode {
+		size.Width = in.Bounds().Max.X
+		size.Height = in.Bounds().Max.Y
+	}
+
+	if !*deltaMode {
+		fmt.Fprintf(os.Stdout, "Filename :%s, extension:%s\n", filename, extension)
+	}
+
 	if *ditheringAlgo != -1 {
 		switch *ditheringAlgo {
 		case 0:
-			ditheringMatrix = gfx.FloydSteinberg
-			ditherType = gfx.ErrorDiffusionDither
+			exportType.DitheringMatrix = gfx.FloydSteinberg
+			exportType.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:FloydSteinberg, Type:ErrorDiffusionDither\n")
 		case 1:
-			ditheringMatrix = gfx.JarvisJudiceNinke
-			ditherType = gfx.ErrorDiffusionDither
+			exportType.DitheringMatrix = gfx.JarvisJudiceNinke
+			exportType.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:JarvisJudiceNinke, Type:ErrorDiffusionDither\n")
 		case 2:
-			ditheringMatrix = gfx.Stucki
-			ditherType = gfx.ErrorDiffusionDither
+			exportType.DitheringMatrix = gfx.Stucki
+			exportType.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:Stucki, Type:ErrorDiffusionDither\n")
 		case 3:
-			ditheringMatrix = gfx.Atkinson
-			ditherType = gfx.ErrorDiffusionDither
+			exportType.DitheringMatrix = gfx.Atkinson
+			exportType.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:Atkinson, Type:ErrorDiffusionDither\n")
 		case 4:
-			ditheringMatrix = gfx.Sierra
-			ditherType = gfx.ErrorDiffusionDither
+			exportType.DitheringMatrix = gfx.Sierra
+			exportType.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:Sierra, Type:ErrorDiffusionDither\n")
 		case 5:
-			ditheringMatrix = gfx.SierraLite
-			ditherType = gfx.ErrorDiffusionDither
+			exportType.DitheringMatrix = gfx.SierraLite
+			exportType.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:SierraLite, Type:ErrorDiffusionDither\n")
 		case 6:
-			ditheringMatrix = gfx.Sierra3
-			ditherType = gfx.ErrorDiffusionDither
+			exportType.DitheringMatrix = gfx.Sierra3
+			exportType.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:Sierra3, Type:ErrorDiffusionDither\n")
 		case 7:
-			ditheringMatrix = gfx.Bayer2
-			ditherType = gfx.OrderedDither
+			exportType.DitheringMatrix = gfx.Bayer2
+			exportType.DitheringType = constants.OrderedDither
 			fmt.Fprintf(os.Stdout, "Dither:Bayer2, Type:OrderedDither\n")
 		case 8:
-			ditheringMatrix = gfx.Bayer3
-			ditherType = gfx.OrderedDither
+			exportType.DitheringMatrix = gfx.Bayer3
+			exportType.DitheringType = constants.OrderedDither
 			fmt.Fprintf(os.Stdout, "Dither:Bayer3, Type:OrderedDither\n")
 		case 9:
-			ditheringMatrix = gfx.Bayer4
-			ditherType = gfx.OrderedDither
+			exportType.DitheringMatrix = gfx.Bayer4
+			exportType.DitheringType = constants.OrderedDither
 			fmt.Fprintf(os.Stdout, "Dither:Bayer4, Type:OrderedDither\n")
 		case 10:
-			ditheringMatrix = gfx.Bayer8
-			ditherType = gfx.OrderedDither
+			exportType.DitheringMatrix = gfx.Bayer8
+			exportType.DitheringType = constants.OrderedDither
 			fmt.Fprintf(os.Stdout, "Dither:Bayer8, Type:OrderedDither\n")
 		default:
 			fmt.Fprintf(os.Stderr, "Dithering matrix not available.")
@@ -435,7 +449,7 @@ func main() {
 				usage()
 				os.Exit(-1)
 			}
-			err := gfx.TileMode(exportType, uint8(*mode), exportType.TileIterationX, exportType.TileIterationY, resizeAlgo)
+			err := gfx.TileMode(exportType, uint8(*mode), exportType.TileIterationX, exportType.TileIterationY)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Tile mode on error : error :%v\n", err)
 				os.Exit(-1)
@@ -443,29 +457,19 @@ func main() {
 		} else {
 			if *flash {
 				if err := gfx.Flash(in,
-					resizeAlgo,
 					exportType,
-					filename, *picturePath, *palettePath, *inkPath, *kitPath,
-					*mode, *ditheringAlgo, *rla, *sla, *rra, *sra, *keephigh, *keeplow, *losthigh, *lostlow, *iterations,
-					screenMode,
-					*ditheringMultiplier,
-					ditheringMatrix,
-					ditherType,
-					customDimension, *withQuantization); err != nil {
+					filename, *picturePath,
+					*mode,
+					screenMode); err != nil {
 					fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
 					os.Exit(-1)
 				}
 			} else {
 				if err := gfx.ApplyOneImage(in,
-					resizeAlgo,
 					exportType,
-					filename, *picturePath, *palettePath, *inkPath, *kitPath,
-					*mode, *ditheringAlgo, *rla, *sla, *rra, *sra, *keephigh, *keeplow, *losthigh, *lostlow, *iterations,
-					screenMode,
-					*ditheringMultiplier,
-					ditheringMatrix,
-					ditherType,
-					customDimension, *withQuantization); err != nil {
+					filename, *picturePath,
+					*mode,
+					screenMode); err != nil {
 					fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
 					os.Exit(-1)
 				}

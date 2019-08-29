@@ -7,6 +7,15 @@ import (
 	"strconv"
 )
 
+type DitheringType struct {
+	string
+}
+
+var (
+	OrderedDither        = DitheringType{"Ordered"}
+	ErrorDiffusionDither = DitheringType{"ErrorDiffusion"}
+)
+
 type Size struct {
 	Width           int
 	Height          int

@@ -2,7 +2,6 @@ package gfx
 
 import (
 	"fmt"
-	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
@@ -14,70 +13,65 @@ import (
 )
 
 func ApplyOneImage(in image.Image,
-	resizeAlgo imaging.ResampleFilter,
 	exportType *export.ExportType,
-	filename, picturePath, palettePath, inkPath, kitPath string,
-	mode, ditheringAlgo, rla, sla, rra, sra, keephigh, keeplow, losthigh, lostlow, iterations int,
-	screenMode uint8,
-	ditheringMultiplier float64,
-	ditheringMatrix [][]float32,
-	ditherType DitheringType,
-	customDimension, withQuantization bool) error {
+	filename, picturePath string,
+	mode int,
+	screenMode uint8) error {
 
 	var palette color.Palette
 	var newPalette color.Palette
 	var downgraded *image.NRGBA
 	var err error
 
-	if palettePath != "" {
-		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", palettePath)
-		palette, _, err = file.OpenPal(palettePath)
+	if exportType.PalettePath != "" {
+		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", exportType.PalettePath)
+		palette, _, err = file.OpenPal(exportType.PalettePath)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", palettePath)
+			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", exportType.PalettePath)
 		} else {
 			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
 		}
 	}
-	if inkPath != "" {
-		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", inkPath)
-		palette, _, err = file.OpenInk(inkPath)
+	if exportType.InkPath != "" {
+		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", exportType.InkPath)
+		palette, _, err = file.OpenInk(exportType.InkPath)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", inkPath)
+			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", exportType.InkPath)
 		} else {
 			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
 		}
 	}
-	if kitPath != "" {
-		fmt.Fprintf(os.Stdout, "Input plus palette to apply : (%s)\n", kitPath)
-		palette, _, err = file.OpenKit(kitPath)
+	if exportType.KitPath != "" {
+		fmt.Fprintf(os.Stdout, "Input plus palette to apply : (%s)\n", exportType.KitPath)
+		palette, _, err = file.OpenKit(exportType.KitPath)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", palettePath)
+			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", exportType.KitPath)
 		} else {
 			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
 		}
 	}
 
-	out := convert.Resize(in, exportType.Size, resizeAlgo)
+	out := convert.Resize(in, exportType.Size, exportType.ResizingAlgo)
 	fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
 	if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_resized.png", out); err != nil {
 		os.Exit(-2)
 	}
 
-	if ditheringAlgo != -1 {
-		switch ditherType {
-		case ErrorDiffusionDither:
-			if withQuantization {
-				out = QuantizeWithDither(out, ditheringMatrix, exportType.Size.ColorsAvailable, newPalette)
+	if exportType.DitheringAlgo != -1 {
+		switch exportType.DitheringType {
+		case constants.ErrorDiffusionDither:
+			if exportType.DitheringWithQuantification {
+				out = QuantizeWithDither(out, exportType.DitheringMatrix, exportType.Size.ColorsAvailable, newPalette)
 			} else {
-				out = Dithering(out, ditheringMatrix, float32(ditheringMultiplier))
+				out = Dithering(out, exportType.DitheringMatrix, float32(exportType.DitheringMultiplier))
 			}
-		case OrderedDither:
+		case constants.OrderedDither:
 			//newPalette = convert.PaletteUsed(out,exportType.CpcPlus)
 			if exportType.CpcPlus {
 				newPalette = convert.ExtractPalette(out, exportType.CpcPlus, 27)
-				out = BayerDiphering(out, ditheringMatrix, newPalette)
+				out = BayerDiphering(out, exportType.DitheringMatrix, newPalette)
 			} else {
-				out = BayerDiphering(out, ditheringMatrix, constants.CpcOldPalette)
+				out = BayerDiphering(out, exportType.DitheringMatrix, constants.CpcOldPalette)
 			}
 		}
 	}
@@ -96,32 +90,32 @@ func ApplyOneImage(in image.Image,
 	}
 
 	if exportType.RollMode {
-		if rla != -1 || sla != -1 {
-			RollLeft(rla, sla, iterations, screenMode, exportType.Size, downgraded, newPalette, filename, exportType)
+		if exportType.RotationRlaBit != -1 || exportType.RotationSlaBit != -1 {
+			RollLeft(exportType.RotationRlaBit, exportType.RotationSlaBit, exportType.RotationIterations, screenMode, exportType.Size, downgraded, newPalette, filename, exportType)
 		} else {
-			if rra != -1 || sra != -1 {
-				RollRight(rra, sra, iterations, screenMode, exportType.Size, downgraded, newPalette, filename, exportType)
+			if exportType.RotationRraBit != -1 || exportType.RotationSraBit != -1 {
+				RollRight(exportType.RotationRraBit, exportType.RotationSraBit, exportType.RotationIterations, screenMode, exportType.Size, downgraded, newPalette, filename, exportType)
 			}
 		}
-		if keephigh != -1 || losthigh != -1 {
-			RollUp(keephigh, losthigh, iterations, screenMode, exportType.Size, downgraded, newPalette, filename, exportType)
+		if exportType.RotationKeephighBit != -1 || exportType.RotationLosthighBit != -1 {
+			RollUp(exportType.RotationKeephighBit, exportType.RotationLosthighBit, exportType.RotationIterations, screenMode, exportType.Size, downgraded, newPalette, filename, exportType)
 		} else {
-			if keeplow != -1 || lostlow != -1 {
-				RollLow(keeplow, lostlow, iterations, screenMode, exportType.Size, downgraded, newPalette, filename, exportType)
+			if exportType.RotationKeeplowBit != -1 || exportType.RotationLostlowBit != -1 {
+				RollLow(exportType.RotationKeeplowBit, exportType.RotationLostlowBit, exportType.RotationIterations, screenMode, exportType.Size, downgraded, newPalette, filename, exportType)
 			}
 		}
 	}
 	if exportType.RotationMode {
-		if err := Rotate(downgraded, newPalette, exportType.Size, uint8(mode), picturePath, resizeAlgo, exportType); err != nil {
+		if err := Rotate(downgraded, newPalette, exportType.Size, uint8(mode), picturePath, exportType.ResizingAlgo, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", picturePath, err)
 		}
 	}
 	if exportType.Rotation3DMode {
-		if err := Rotate3d(downgraded, newPalette, exportType.Size, uint8(mode), picturePath, resizeAlgo, exportType); err != nil {
+		if err := Rotate3d(downgraded, newPalette, exportType.Size, uint8(mode), picturePath, exportType.ResizingAlgo, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", picturePath, err)
 		}
 	}
-	if !customDimension {
+	if !exportType.CustomDimension {
 		Transform(downgraded, newPalette, exportType.Size, picturePath, exportType)
 	} else {
 		fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")

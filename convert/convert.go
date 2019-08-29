@@ -23,8 +23,6 @@ func DowngradingWithPalette(in *image.NRGBA, p color.Palette) (color.Palette, *i
 	return p, downgradeWithPalette(in, p)
 }
 
-
-
 func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (color.Palette, *image.NRGBA, error) {
 	fmt.Fprintf(os.Stdout, "* Step 2 * Downgrading palette image\n")
 	p, out := downgrade(in, isCpcPlus)
@@ -91,7 +89,7 @@ func downgradeWithPalette(in *image.NRGBA, p color.Palette) *image.NRGBA {
 func ExtractPalette(in *image.NRGBA, isCpcPlus bool, nbColors int) color.Palette {
 	p := []color.Color{}
 	type ks struct {
-		Key color.Color
+		Key   color.Color
 		Value int
 	}
 	cache := make(map[color.Color]int, 0)
@@ -114,18 +112,18 @@ func ExtractPalette(in *image.NRGBA, isCpcPlus bool, nbColors int) color.Palette
 	}
 
 	var s []ks
-	for k,v := range cache {
-		s = append(s, ks{Key:k,Value:v})
+	for k, v := range cache {
+		s = append(s, ks{Key: k, Value: v})
 	}
 	sort.Slice(s, func(i, j int) bool {
-        return s[i].Value > s[j].Value
+		return s[i].Value > s[j].Value
 	})
-	
-	for i,v := range s {
+
+	for i, v := range s {
 		if i >= nbColors {
 			break
 		}
-		p = append(p,v.Key)
+		p = append(p, v.Key)
 	}
 	return p
 }
@@ -193,13 +191,12 @@ func paletteContains(p color.Palette, c color.Color) bool {
 	return false
 }
 
-
-func ConvertPalette(p color.Palette, p0 color.Palette ) color.Palette {
-	var nP  []color.Color
-	fmt.Fprintf(os.Stdout,"Converting palette length %d\n",len(p))
-	for _,v := range p {
+func ConvertPalette(p color.Palette, p0 color.Palette) color.Palette {
+	var nP []color.Color
+	fmt.Fprintf(os.Stdout, "Converting palette length %d\n", len(p))
+	for _, v := range p {
 		n := p0.Convert(v)
-		nP = append(nP,n)
+		nP = append(nP, n)
 	}
 	return nP
 }

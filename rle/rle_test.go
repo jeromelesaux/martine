@@ -28,9 +28,9 @@ func TestRleEncode(t *testing.T) {
 	}
 	t.Log(out)
 
-	inRepeat := make([]byte,0)
-	for i:=0; i< 510 ; i++ {
-		inRepeat = append(inRepeat,0x10)
+	inRepeat := make([]byte, 0)
+	for i := 0; i < 510; i++ {
+		inRepeat = append(inRepeat, 0x10)
 	}
 	out = Encode(inRepeat)
 	if len(out) != 4 {

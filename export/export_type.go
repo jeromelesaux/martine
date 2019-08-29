@@ -1,6 +1,7 @@
 package export
 
 import (
+	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
 	"path/filepath"
 	"strings"
@@ -10,40 +11,59 @@ import (
 var amsdosFilenameOnce sync.Once
 
 type ExportType struct {
-	InputPath      string
-	OutputPath     string
-	M4RemotePath   string
-	M4Host         string
-	M4Autoexec     bool
-	Size           constants.Size
-	Compression    int
-	NoAmsdosHeader bool
-	RotationMode   bool
-	Rotation3DMode bool
-	Rotation3DX0   int
-	Rotation3DY0   int
-	Rotation3DType int
-	TileMode       bool
-	RollMode       bool
-	RollIteration  int
-	TileIterationX int
-	TileIterationY int
-	M4             bool
-	Dsk            bool
-	Ink            bool
-	Kit            bool
-	Pal            bool
-	Scr            bool
-	Win            bool
-	Overscan       bool
-	Json           bool
-	Ascii          bool
-	CpcPlus        bool
-	amsdosFilename []byte
-	DskFiles       []string
-	Tiles          *JsonSlice
-	DeltaMode      bool
-	ExtendedDsk    bool
+	InputPath                   string
+	OutputPath                  string
+	PalettePath                 string
+	InkPath                     string
+	KitPath                     string
+	M4RemotePath                string
+	M4Host                      string
+	M4Autoexec                  bool
+	Size                        constants.Size
+	Compression                 int
+	NoAmsdosHeader              bool
+	RotationMode                bool
+	Rotation3DMode              bool
+	Rotation3DX0                int
+	Rotation3DY0                int
+	Rotation3DType              int
+	TileMode                    bool
+	RollMode                    bool
+	RollIteration               int
+	TileIterationX              int
+	TileIterationY              int
+	M4                          bool
+	Dsk                         bool
+	Ink                         bool
+	Kit                         bool
+	Pal                         bool
+	Scr                         bool
+	Win                         bool
+	Overscan                    bool
+	Json                        bool
+	Ascii                       bool
+	CpcPlus                     bool
+	CustomDimension             bool
+	amsdosFilename              []byte
+	DskFiles                    []string
+	Tiles                       *JsonSlice
+	DeltaMode                   bool
+	ExtendedDsk                 bool
+	ResizingAlgo                imaging.ResampleFilter
+	DitheringAlgo               int
+	DitheringMatrix             [][]float32
+	DitheringMultiplier         float64
+	DitheringWithQuantification bool
+	DitheringType               constants.DitheringType
+	RotationRraBit              int
+	RotationRlaBit              int
+	RotationSraBit              int
+	RotationSlaBit              int
+	RotationLosthighBit         int
+	RotationLostlowBit          int
+	RotationKeephighBit         int
+	RotationKeeplowBit          int
+	RotationIterations          int
 }
 
 func NewExportType(input, output string) *ExportType {
@@ -120,8 +140,8 @@ func (e *ExportType) GetAmsdosFilename(filePath string, ext string) string {
 	filenameSize := 7
 	end := len(filename)
 	if len(filename) < 8 {
-		filenameSize = len(filename) -1
-	}	
+		filenameSize = len(filename) - 1
+	}
 	osFile := filename[0:filenameSize] + filename[end-1:end]
 	return osFile + ext
 }
@@ -132,10 +152,10 @@ func (e *ExportType) AmsdosFullPath(filePath string, newExtension string) string
 	length := 7
 	end := len(file)
 	if len(file) < 8 {
-		length = len(file) -1
-	} 
+		length = len(file) - 1
+	}
 
-	newFilename := file[0:length] + file[end-1:end]  + newExtension
+	newFilename := file[0:length] + file[end-1:end] + newExtension
 	return e.OutputPath + string(filepath.Separator) + strings.ToUpper(newFilename)
 }
 

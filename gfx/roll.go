@@ -3,8 +3,8 @@ package gfx
 import (
 	"fmt"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/export/file"
 	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/file"
 	"image"
 	"image/color"
 	"os"

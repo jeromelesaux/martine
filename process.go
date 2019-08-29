@@ -3,54 +3,54 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/gfx"
 	"os"
 )
 
 type Process struct {
-	ByteStatement   string `json:"byteStatement"`
-	PicturePath     string `json:"picturePath"`
-	Width           int    `json:"width"`
-	Height          int    `json:"height"`
-	Mode            int    `json:"mode"`
-	Output          string `json:"outputPath"`
-	Overscan        bool   `json:"isOverscan"`
-	ResizeAlgorithm int    `json:"resizeAlgorithm"`
-	NoAmsdosHeader  bool   `json:"noAmsdosHeader"`
-	PlusMode        bool   `json:"isPlusMode"`
-	RollMode        bool   `json:"isRollMode"`
-	Iterations      int    `json:"iterations"`
-	Rra             int    `json:"rra"`
-	Rla             int    `json:"rla"`
-	Sra             int    `json:"sra"`
-	Sla             int    `json:"sla"`
-	Losthigh        int    `json:"lostHigh"`
-	Lostlow         int    `json:"lostLow"`
-	Keephigh        int    `json:"keepHigh"`
-	Keeplow         int    `json:"keepLow"`
-	PalettePath     string `json:"palettePath"`
-	Info            bool   `json:"info"`
-	WinPath         string `json:"winPath"`
-	Dsk             bool   `json:"generateDsk"`
-	TileMode        bool   `json:"tileMode"`
-	TileIterationX  int    `json:"tileIterationX"`
-	TileIterationY  int    `json:"tileIterationY"`
-	Compress        int    `json:"compress"`
-	KitPath         string `json:"kitPath"`
-	InkPath         string `json:"inkPath"`
-	RotateMode      bool   `json:"isRotateMode"`
-	M4Host          string `json:"m4Host"`
-	M4RemotePath    string `json:"m4RemotePath"`
-	M4Autoexec      bool   `json:"m4Autoexec"`
-	Rotate3dMode    bool   `json:"isRotate3dMode"`
-	Rotate3dType    int    `json:"rotate3dType"`
-	Rotate3dX0      int    `json:"rotate3dX0"`
-	Rotate3dY0      int    `json:"rotate3dY0"`
-	Data            []int  `json:"data"`
-	Palette         []int  `json:"palette"`
-	Delta bool `json:"delta"`
-	DeltaFile []string `json:"df"`
+	ByteStatement   string   `json:"byteStatement"`
+	PicturePath     string   `json:"picturePath"`
+	Width           int      `json:"width"`
+	Height          int      `json:"height"`
+	Mode            int      `json:"mode"`
+	Output          string   `json:"outputPath"`
+	Overscan        bool     `json:"isOverscan"`
+	ResizeAlgorithm int      `json:"resizeAlgorithm"`
+	NoAmsdosHeader  bool     `json:"noAmsdosHeader"`
+	PlusMode        bool     `json:"isPlusMode"`
+	RollMode        bool     `json:"isRollMode"`
+	Iterations      int      `json:"iterations"`
+	Rra             int      `json:"rra"`
+	Rla             int      `json:"rla"`
+	Sra             int      `json:"sra"`
+	Sla             int      `json:"sla"`
+	Losthigh        int      `json:"lostHigh"`
+	Lostlow         int      `json:"lostLow"`
+	Keephigh        int      `json:"keepHigh"`
+	Keeplow         int      `json:"keepLow"`
+	PalettePath     string   `json:"palettePath"`
+	Info            bool     `json:"info"`
+	WinPath         string   `json:"winPath"`
+	Dsk             bool     `json:"generateDsk"`
+	TileMode        bool     `json:"tileMode"`
+	TileIterationX  int      `json:"tileIterationX"`
+	TileIterationY  int      `json:"tileIterationY"`
+	Compress        int      `json:"compress"`
+	KitPath         string   `json:"kitPath"`
+	InkPath         string   `json:"inkPath"`
+	RotateMode      bool     `json:"isRotateMode"`
+	M4Host          string   `json:"m4Host"`
+	M4RemotePath    string   `json:"m4RemotePath"`
+	M4Autoexec      bool     `json:"m4Autoexec"`
+	Rotate3dMode    bool     `json:"isRotate3dMode"`
+	Rotate3dType    int      `json:"rotate3dType"`
+	Rotate3dX0      int      `json:"rotate3dX0"`
+	Rotate3dY0      int      `json:"rotate3dY0"`
+	Data            []int    `json:"data"`
+	Palette         []int    `json:"palette"`
+	Delta           bool     `json:"delta"`
+	DeltaFile       []string `json:"df"`
 }
 
 func NewProcess() *Process {
@@ -76,7 +76,7 @@ func NewProcess() *Process {
 		Rotate3dY0:      -1,
 		Data:            make([]int, 0),
 		Palette:         make([]int, 0),
-		DeltaFile: make([]string,0),
+		DeltaFile:       make([]string, 0),
 	}
 }
 
@@ -141,7 +141,7 @@ func (p *Process) Apply() {
 	*rotate3dX0 = p.Rotate3dX0
 	*rotate3dY0 = p.Rotate3dY0
 	*deltaMode = p.Delta
-	for i:=0; i<len(p.DeltaFile);i++ {
+	for i := 0; i < len(p.DeltaFile); i++ {
 		deltaFiles.Set(p.DeltaFile[i])
 	}
 }
