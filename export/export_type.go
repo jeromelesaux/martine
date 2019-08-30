@@ -64,6 +64,10 @@ type ExportType struct {
 	RotationKeephighBit         int
 	RotationKeeplowBit          int
 	RotationIterations          int
+	FlashScreenFilepath1        string
+	FlashScreenFilepath2        string
+	FlashPaletteFilepath1       string
+	FlashPaletteFilepath2       string
 }
 
 func NewExportType(input, output string) *ExportType {

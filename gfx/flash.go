@@ -4,6 +4,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/file"
 	"image"
 	"path"
 	"path/filepath"
@@ -46,12 +47,24 @@ func Flash(in image.Image,
 		x++
 		y = 0
 	}
+	ext := path.Ext(filename)
+	name := strings.Replace(filename, ext, "", 1)
+	namesize := len(name)
+	if namesize > 8 {
+		namesize = 7
+	}
+	flashPaletteFilename1 := strings.ToUpper(name)[0:namesize] + "1.PAL"
+	flashPalettePath1 := exportType.OutputPath + string(filepath.Separator) + flashPaletteFilename1
 
 	err = ApplyOneImage(leftIm,
 		exportType,
 		filenameLeft, filepathLeft,
 		mode,
 		screenMode)
+	if err != nil {
+		return err
+	}
+	p1, _, err := file.OpenPal(flashPalettePath1)
 	if err != nil {
 		return err
 	}
@@ -71,14 +84,7 @@ func Flash(in image.Image,
 	if flashMode < 0 {
 		flashMode = 2
 	}
-	ext := path.Ext(filename)
-	name := strings.Replace(filename, ext, "", 1)
-	namesize := len(name)
-	if namesize > 8 {
-		namesize = 7
-	}
-	flashPaletteFilename := strings.ToUpper(name)[0:namesize] + "1.PAL"
-	flashPalettePath := exportType.OutputPath + string(filepath.Separator) + flashPaletteFilename
+
 	switch flashMode {
 	case 0:
 		exportType.Size = constants.Mode0
@@ -87,12 +93,23 @@ func Flash(in image.Image,
 	case 2:
 		exportType.Size = constants.Mode2
 	}
-	exportType.PalettePath = flashPalettePath
+
+	flashPaletteFilename2 := strings.ToUpper(name)[0:namesize] + "2.PAL"
+	flashPalettePath2 := exportType.OutputPath + string(filepath.Separator) + flashPaletteFilename2
+
+	exportType.PalettePath = flashPalettePath1
+
 	err = ApplyOneImage(rigthIm,
 		exportType,
 		filenameRigth, filepathRigth,
 		flashMode,
 		uint8(flashMode))
-	return err
-
+	if err != nil {
+		return err
+	}
+	p2, _, err := file.OpenPal(flashPalettePath2)
+	if err != nil {
+		return err
+	}
+	return file.FlashLoader(filenameLeft, filenameRigth, p1, p2, exportType)
 }
