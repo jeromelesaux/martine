@@ -111,6 +111,8 @@ var (
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	}
+	flashBinaryMode1Offset    = 38
+	flashBinaryMode2Offset    = 62
 	flashBinaryPalette1Offset = 170
 	flashBinaryPalette2Offset = 186
 )
@@ -244,7 +246,7 @@ func BasicLoader(filePath string, p color.Palette, exportType *x.ExportType) err
 	return nil
 }
 
-func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, exportType *x.ExportType) error {
+func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, m1, m2 uint8, exportType *x.ExportType) error {
 	// modification du binaire flash
 	pal1 := make([]byte, 16)
 	pal2 := make([]byte, 16)
@@ -262,10 +264,27 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 		}
 		pal2[i] = v[0]
 	}
+
 	var flashLoader []byte
 	flashLoader = FlashBinaryLoader
 	copy(flashLoader[flashBinaryPalette1Offset:], pal1)
 	copy(flashLoader[flashBinaryPalette2Offset:], pal2)
+	switch m1 {
+	case 0:
+		flashLoader[flashBinaryMode1Offset] = constants.Mode0.GatearrayValue
+	case 1:
+		flashLoader[flashBinaryMode1Offset] = constants.Mode1.GatearrayValue
+	case 2:
+		flashLoader[flashBinaryMode1Offset] = constants.Mode2.GatearrayValue
+	}
+	switch m2 {
+	case 0:
+		flashLoader[flashBinaryMode2Offset] = constants.Mode0.GatearrayValue
+	case 1:
+		flashLoader[flashBinaryMode2Offset] = constants.Mode1.GatearrayValue
+	case 2:
+		flashLoader[flashBinaryMode2Offset] = constants.Mode2.GatearrayValue
+	}
 	binaryHeader := cpc.CpcHead{Type: 2, User: 0, Address: 0x3000, Exec: 0x3000,
 		Size:        uint16(binary.Size(flashLoader)),
 		Size2:       uint16(binary.Size(flashLoader)),

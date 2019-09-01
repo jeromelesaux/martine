@@ -97,7 +97,7 @@ func Flash(in image.Image,
 	flashPaletteFilename2 := strings.ToUpper(name)[0:namesize] + "2.PAL"
 	flashPalettePath2 := exportType.OutputPath + string(filepath.Separator) + flashPaletteFilename2
 
-	exportType.PalettePath = flashPalettePath1
+	//exportType.PalettePath = flashPalettePath1
 
 	err = ApplyOneImage(rigthIm,
 		exportType,
@@ -111,5 +111,5 @@ func Flash(in image.Image,
 	if err != nil {
 		return err
 	}
-	return file.FlashLoader(filenameLeft, filenameRigth, p1, p2, exportType)
+	return file.FlashLoader(filenameLeft, filenameRigth, p1, p2,uint8(mode),uint8(flashMode), exportType)
 }

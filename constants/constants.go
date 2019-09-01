@@ -22,6 +22,7 @@ type Size struct {
 	LinesNumber     int
 	ColumnsNumber   int
 	ColorsAvailable int
+	GatearrayValue  uint8
 }
 
 type CpcColor struct {
@@ -50,9 +51,9 @@ func (s *Size) ToString() string {
 }
 
 var (
-	Mode0         = Size{Width: 160, Height: 200, LinesNumber: 200, ColumnsNumber: 20, ColorsAvailable: 16}
-	Mode1         = Size{Width: 320, Height: 200, LinesNumber: 200, ColumnsNumber: 40, ColorsAvailable: 4}
-	Mode2         = Size{Width: 640, Height: 200, LinesNumber: 200, ColumnsNumber: 80, ColorsAvailable: 2}
+	Mode0         = Size{Width: 160, Height: 200, LinesNumber: 200, ColumnsNumber: 20, ColorsAvailable: 16, GatearrayValue: 0x9c}
+	Mode1         = Size{Width: 320, Height: 200, LinesNumber: 200, ColumnsNumber: 40, ColorsAvailable: 4, GatearrayValue: 0x9d}
+	Mode2         = Size{Width: 640, Height: 200, LinesNumber: 200, ColumnsNumber: 80, ColorsAvailable: 2, GatearrayValue: 0x9e}
 	OverscanMode0 = Size{Width: 192, Height: 272, LinesNumber: 272, ColumnsNumber: 96, ColorsAvailable: 16}
 	OverscanMode1 = Size{Width: 384, Height: 272, LinesNumber: 272, ColumnsNumber: 96, ColorsAvailable: 4}
 	OverscanMode2 = Size{Width: 768, Height: 272, LinesNumber: 272, ColumnsNumber: 96, ColorsAvailable: 2}
