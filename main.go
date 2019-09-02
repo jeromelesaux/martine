@@ -78,7 +78,10 @@ var (
 	withQuantization    = flag.Bool("quantization", false, "use additionnal quantization for dithering.")
 	extendedDsk         = flag.Bool("extendeddsk", false, "Export in a Extended DSK 80 tracks, 10 sectors 400 ko per face")
 	reverse             = flag.Bool("reverse", false, "Transform .scr (overscan or not) file with palette (pal or kit file) into png file")
-	flash               = flag.Bool("flash", false, "generate flash animation with two ocp screens.")
+	flash               = flag.Bool("flash", false, "generate flash animation with two ocp screens.\n\t(ex: -m 1 -flash -i input.png -o test -dsk)\n\tor\n\t(ex: -m 1 -flash -i input1.scr -pal input1.pal -m2 0 -i2 input2.scr -pal2 input2.pal -o test -dsk )")
+	picturePath2        = flag.String("i2", "", "Picture path of the second input file (flash mode)")
+	mode2               = flag.Int("m2", -1, "Output mode to use :\n\t0 for mode0\n\t1 for mode1\n\t2 for mode2\n\tmode of the second input file (flash mode)")
+	palettePath2        = flag.String("pal2", "", "Apply the input palette to the second image (flash mode)")
 	version             = "0.18.rc"
 )
 
@@ -456,11 +459,11 @@ func main() {
 			}
 		} else {
 			if *flash {
-				if err := gfx.Flash(in,
-					exportType,
-					filename, *picturePath,
+				if err := gfx.Flash(*picturePath, *picturePath2,
+					*palettePath, *palettePath2,
 					*mode,
-					screenMode); err != nil {
+					*mode2,
+					exportType); err != nil {
 					fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
 					os.Exit(-1)
 				}

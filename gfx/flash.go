@@ -6,12 +6,40 @@ import (
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 	"image"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
 )
 
-func Flash(in image.Image,
+func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, exportType *export.ExportType) error {
+	if filepath2 == "" && filepath1 != "" {
+		filename := filepath.Base(filepath1)
+		f, err := os.Open(filepath1)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		in, _, err := image.Decode(f)
+		if err != nil {
+			return err
+		}
+		return AutoFlash(in, exportType, filename, filepath1, m1, uint8(m1))
+	}
+	filename1 := filepath.Base(filepath1)
+	filename2 := filepath.Base(filepath2)
+	p1,_,err := file.OpenPal(palpath1)
+	if err != nil {
+		return err
+	}
+	p2,_,err := file.OpenPal(palpath2)
+	if err != nil {
+		return err
+	}
+	return file.FlashLoader(filename1, filename2, p1, p2, uint8(m1), uint8(m2), exportType)
+}
+
+func AutoFlash(in image.Image,
 	exportType *export.ExportType,
 	filename, picturePath string,
 	mode int,
