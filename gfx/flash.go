@@ -28,14 +28,18 @@ func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, exportTy
 	}
 	filename1 := filepath.Base(filepath1)
 	filename2 := filepath.Base(filepath2)
-	p1,_,err := file.OpenPal(palpath1)
+	p1, _, err := file.OpenPal(palpath1)
 	if err != nil {
 		return err
 	}
-	p2,_,err := file.OpenPal(palpath2)
+	p2, _, err := file.OpenPal(palpath2)
 	if err != nil {
 		return err
 	}
+	exportType.AddFile(filepath1)
+	exportType.AddFile(filepath2)
+	exportType.AddFile(palpath1)
+	exportType.AddFile(palpath2)
 	return file.FlashLoader(filename1, filename2, p1, p2, uint8(m1), uint8(m2), exportType)
 }
 
