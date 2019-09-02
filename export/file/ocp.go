@@ -446,11 +446,15 @@ func (o *OcpPalette) ToString() string {
 	out += fmt.Sprintf("Color Animation:(%d)\n", o.ColorAnimation)
 	out += fmt.Sprintf("Color Animation delay :(%d)\n", o.ColorAnimationDelay)
 	for index, v := range o.PaletteColors {
-		out += fmt.Sprintf("Color (%d) : value (%d)(%.2x)\n", index, v[0], v[0])
+		out += fmt.Sprintf("Color (%d) : value (%d)(#%.2x)\n", index, v[0], v[0])
 	}
 	for index, v := range o.BorderColor {
-		out += fmt.Sprintf("Color border (%d) : value (%d)(%.2x)\n", index, v, v)
+		out += fmt.Sprintf("Color border (%d) : value (%d)(#%.2x)\n", index, v, v)
 	}
+	for _, v := range o.PaletteColors {
+		out += fmt.Sprintf("#%.2x, ", v[0])
+	}
+	out += "\n"
 	return out
 }
 

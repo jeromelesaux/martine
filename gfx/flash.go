@@ -111,5 +111,5 @@ func Flash(in image.Image,
 	if err != nil {
 		return err
 	}
-	return file.FlashLoader(filenameLeft, filenameRigth, p1, p2,uint8(mode),uint8(flashMode), exportType)
+	return file.FlashLoader(filenameLeft, filenameRigth, p1, p2, uint8(mode), uint8(flashMode), exportType)
 }
