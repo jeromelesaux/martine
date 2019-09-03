@@ -82,7 +82,7 @@ var (
 	picturePath2        = flag.String("i2", "", "Picture path of the second input file (flash mode)")
 	mode2               = flag.Int("m2", -1, "Output mode to use :\n\t0 for mode0\n\t1 for mode1\n\t2 for mode2\n\tmode of the second input file (flash mode)")
 	palettePath2        = flag.String("pal2", "", "Apply the input palette to the second image (flash mode)")
-	version             = "0.18.rc"
+	version             = "0.18.2.rc"
 )
 
 func usage() {
