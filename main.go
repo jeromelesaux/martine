@@ -325,7 +325,7 @@ func main() {
 	exportType.Dsk = *dsk
 
 	fmt.Fprintf(os.Stdout, "Informations :\n%s", size.ToString())
-	if !exportType.DeltaMode && !*reverse {
+	if !exportType.DeltaMode && !*reverse && strings.ToUpper(extension) != ".SCR" {
 		f, err := os.Open(*picturePath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error while opening file %s, error %v\n", *picturePath, err)
