@@ -9,7 +9,6 @@ import (
 	"image/color"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 // CPC plus loader nb colors *2 offset 0x9d
@@ -326,8 +325,8 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 	// modification du flash loader en basic
 	var basicLoader []byte
 	basicLoader = FlashBasicLoader
-	copy(basicLoader[flashScreen1Offset:], strings.ToUpper(screenFilename1[0:len(screenFilename1)-4]))
-	copy(basicLoader[flashScreen2Offset:], strings.ToUpper(screenFilename2[0:len(screenFilename2)-4]))
+	copy(basicLoader[flashScreen1Offset:], exportType.GetAmsdosFilename(screenFilename1, ".SCR"))
+	copy(basicLoader[flashScreen2Offset:], exportType.GetAmsdosFilename(screenFilename2, ".SCR"))
 	basicHeader := cpc.CpcHead{Type: 0, User: 0, Address: 0x170, Exec: 0x0,
 		Size:        uint16(binary.Size(basicLoader)),
 		Size2:       uint16(binary.Size(basicLoader)),
