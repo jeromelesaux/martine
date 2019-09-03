@@ -260,20 +260,28 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 	// modification du binaire flash
 	pal1 := make([]byte, 16)
 	pal2 := make([]byte, 16)
+	
+	pl1 := p2
+	pl2 := p1
+	
+	if m1 > m2 {
+		pl1 = p1
+		pl2 = p2
+	}
 	var l1,l2 uint8
-	for i := 0; i < len(p1); i++ {
-		v, err := constants.HardwareValues(p1[i])
+	for i := 0; i < len(pl1); i++ {
+		v, err := constants.HardwareValues(pl1[i])
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p1[i], err)
+			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", pl1[i], err)
 		} else {
 			l1++
 		}
 		pal1[i] = v[0]
 	}
-	for i := 0; i < len(p2); i++ {
-		v, err := constants.HardwareValues(p2[i])
+	for i := 0; i < len(pl2); i++ {
+		v, err := constants.HardwareValues(pl2[i])
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p2[i], err)
+			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", pl2[i], err)
 		} else {
 			l2++
 		}
