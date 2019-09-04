@@ -325,8 +325,8 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 	// modification du flash loader en basic
 	var basicLoader []byte
 	basicLoader = FlashBasicLoader
-	copy(basicLoader[flashScreen1Offset:], exportType.GetAmsdosFilename(screenFilename1, ".SCR"))
-	copy(basicLoader[flashScreen2Offset:], exportType.GetAmsdosFilename(screenFilename2, ".SCR"))
+	copy(basicLoader[flashScreen1Offset:], exportType.GetAmsdosFilename(screenFilename1, ""))
+	copy(basicLoader[flashScreen2Offset:], exportType.GetAmsdosFilename(screenFilename2, ""))
 	basicHeader := cpc.CpcHead{Type: 0, User: 0, Address: 0x170, Exec: 0x0,
 		Size:        uint16(binary.Size(basicLoader)),
 		Size2:       uint16(binary.Size(basicLoader)),
