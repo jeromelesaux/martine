@@ -587,3 +587,15 @@ func HardwareNumber(c color.Color) (int, error) {
 	return -1, ErrorCpcColorNotFound
 
 }
+
+func FlashColorQuotient(c1, c2 CpcColor) float64 {
+	r0, g0, b0, _ := c1.Color.RGBA()
+	r1, g1, b1, _ := c2.Color.RGBA()
+
+	return ((CToF(r0) * 30) + (CToF(g0) * 59) + (CToF(b0) * 11)) /
+		((CToF(r1) * 30) + (CToF(g1) * 59) + (CToF(b1) * 11))
+}
+
+func CToF(c uint32) float64 {
+	return (float64(c) / 255. * 100)
+}
