@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"image"
+	"image/color"
 	_ "image/jpeg"
 	_ "image/png"
 	"os"
@@ -82,7 +83,7 @@ var (
 	picturePath2        = flag.String("i2", "", "Picture path of the second input file (flash mode)")
 	mode2               = flag.Int("m2", -1, "Output mode to use :\n\t0 for mode0\n\t1 for mode1\n\t2 for mode2\n\tmode of the second input file (flash mode)")
 	palettePath2        = flag.String("pal2", "", "Apply the input palette to the second image (flash mode)")
-	version             = "0.19.rc"
+	version             = "0.18.1.rc"
 )
 
 func usage() {
@@ -419,17 +420,28 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Mode is mandatory to convert to PNG")
 			os.Exit(-1)
 		}
-		if *palettePath == "" {
-			fmt.Fprintf(os.Stderr, "For screen or window image, pal file palette is mandatory.\n")
-			os.Exit(-1)
-		}
-		p, _, err := file.OpenPal(*palettePath)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot open kit file (%s) error %v\n", *palettePath, err)
-			os.Exit(-1)
+		var p color.Palette
+		var err error
+		if *palettePath != "" && *plusMode == false {
+			p, _, err = file.OpenPal(*palettePath)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Cannot open palette file (%s) error %v\n", *palettePath, err)
+				os.Exit(-1)
+			}
+		} else {
+			if *kitPath != "" && *plusMode == true {
+				p, _, err = file.OpenKit(*kitPath)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Cannot open kit file (%s) error %v\n", *kitPath, err)
+					os.Exit(-1)
+				}
+			} else {
+				fmt.Fprintf(os.Stderr, "For screen or window image, pal or kit file palette is mandatory.\n")
+				os.Exit(-1)
+			}
 		}
 
-		if err := gfx.ScrToPng(*picturePath, outpath, screenMode, p); err != nil {
+		if err := gfx.ScrToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot not convert to PNG file (%s) error %v\n", *picturePath, err)
 			os.Exit(-1)
 		}

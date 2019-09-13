@@ -375,35 +375,35 @@ func rawPixelMode2(b byte) (pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) {
 func rawPixelMode1(b byte) (pp1, pp2, pp3, pp4 int) {
 	val := int(b)
 	if val-128 >= 0 {
-		pp1 &= 1
+		pp1 |= 1
 		val -= 128
 	}
 	if val-64 >= 0 {
-		pp2 &= 1
+		pp2 |= 1
 		val -= 64
 	}
 	if val-32 >= 0 {
-		pp3 &= 1
+		pp3 |= 1
 		val -= 32
 	}
 	if val-16 >= 0 {
-		pp4 &= 1
+		pp4 |= 1
 		val -= 16
 	}
 	if val-8 >= 0 {
-		pp1 &= 2
+		pp1 |= 2
 		val -= 8
 	}
 	if val-4 >= 0 {
-		pp2 &= 2
+		pp2 |= 2
 		val -= 4
 	}
 	if val-2 >= 0 {
-		pp3 &= 2
+		pp3 |= 2
 		val -= 2
 	}
 	if val-1 >= 0 {
-		pp4 &= 2
+		pp4 |= 2
 	}
 
 	return
