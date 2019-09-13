@@ -481,8 +481,8 @@ func OpenPal(filePath string) (color.Palette, *OcpPalette, error) {
 		c, err := constants.ColorFromHardware(v[0])
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Hardware color value %.2x is not recognized error :%v\n", v[0], err)
-			p = append(p, color.Black)
-			
+			p = append(p, color.White)
+
 		} else {
 			p = append(p, c)
 		}

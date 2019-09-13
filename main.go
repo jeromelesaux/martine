@@ -491,7 +491,7 @@ func main() {
 					}
 				} else {
 					fmt.Fprintf(os.Stderr, "Error while applying on one image : SCR format not used for this treatment\n")
-						os.Exit(-1)
+					os.Exit(-1)
 				}
 			}
 		}
