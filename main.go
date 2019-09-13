@@ -480,13 +480,18 @@ func main() {
 					os.Exit(-1)
 				}
 			} else {
-				if err := gfx.ApplyOneImage(in,
-					exportType,
-					filename, *picturePath,
-					*mode,
-					screenMode); err != nil {
-					fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
-					os.Exit(-1)
+				if strings.ToUpper(extension) != ".SCR" {
+					if err := gfx.ApplyOneImage(in,
+						exportType,
+						filename, *picturePath,
+						*mode,
+						screenMode); err != nil {
+						fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
+						os.Exit(-1)
+					}
+				} else {
+					fmt.Fprintf(os.Stderr, "Error while applying on one image : SCR format not used for this treatment\n")
+						os.Exit(-1)
 				}
 			}
 		}
