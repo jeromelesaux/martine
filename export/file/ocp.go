@@ -286,18 +286,12 @@ func OpenKit(filePath string) (color.Palette, *KitPalette, error) {
 		fmt.Fprintf(os.Stderr, "Error while reading Ocp Palette from file (%s) error %v\n", filePath, err)
 		return color.Palette{}, KitPalette, err
 	}
+	p := color.Palette{}
 	for i, v := range buf {
 		c := constants.NewRawCpcPlusColor(v)
-		c.B *= 30
-		c.R *= 30
-		c.G *= 30
 		KitPalette.Colors[i] = *c
-	}
-
-	p := color.Palette{}
-	for _, v := range KitPalette.Colors {
-		c := constants.CpcPlusPalette.Convert(color.RGBA{R: uint8(v.R), B: uint8(v.B), G: uint8(v.G), A: 0xFF})
-		p = append(p, c)
+		pp := constants.NewColorCpcPlusColor(*c)
+		p = append(p, pp)
 	}
 	return p, KitPalette, nil
 }
@@ -370,8 +364,8 @@ func RawOverscan(filePath string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	data := make([]byte, len(bf)-0x30)
-	copy(data, bf[0x30:])
+	data := make([]byte, 0x8000)
+	copy(data, bf[0x200-0x170:])
 	fmt.Fprintf(os.Stdout, "Raw overscan length #%X\n", len(data))
 	if len(data) <= 0x4000 {
 		return nil, BadFileFormat

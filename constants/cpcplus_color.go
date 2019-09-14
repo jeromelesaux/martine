@@ -43,3 +43,7 @@ func NewCpcPlusColor(c color.Color) CpcPlusColor {
 	//	fmt.Fprintf(os.Stderr,"original colors r:%d,g:%d,b:%d\n",r,g,b)
 	return CpcPlusColor{G: uint16(g / 4096), R: uint16(r / 4096), B: uint16(b / 4096)}
 }
+
+func NewColorCpcPlusColor(c CpcPlusColor) color.Color {
+	return color.RGBA{G: uint8(c.G << 4), R: uint8(c.R << 4), B: uint8(c.B << 4), A: 0xff}
+}

@@ -20,12 +20,12 @@ func TestPixels(t *testing.T) {
 	}
 }
 
-func TestPixelsMode1( t *testing.T) {
+func TestPixelsMode1(t *testing.T) {
 	p10 := 1
 	p20 := 2
 	p30 := 0
 	p40 := 3
-	v := pixelMode1(p10, p20,p30,p40)
+	v := pixelMode1(p10, p20, p30, p40)
 	t.Logf("v:%d, %8b\n", v, v)
 	p1, p2, p3, p4 := rawPixelMode1(v)
 	if p1 != p10 {
@@ -39,5 +39,42 @@ func TestPixelsMode1( t *testing.T) {
 	}
 	if p4 != p40 {
 		t.Fatalf("expected value %d and gets %d\n", p40, p4)
+	}
+}
+func TestPixelsMode2(t *testing.T) {
+	p10 := 1
+	p20 := 0
+	p30 := 1
+	p40 := 0
+	p50 := 1
+	p60 := 0
+	p70 := 1
+	p80 := 0
+	v := pixelMode2(p10, p20, p30, p40, p50, p60, p70, p80)
+	t.Logf("v:%d, %8b\n", v, v)
+	p1, p2, p3, p4, p5, p6, p7, p8 := rawPixelMode2(v)
+	if p1 != p10 {
+		t.Fatalf("expected value %d and gets %d\n", p10, p1)
+	}
+	if p2 != p20 {
+		t.Fatalf("expected value %d and gets %d\n", p20, p2)
+	}
+	if p3 != p30 {
+		t.Fatalf("expected value %d and gets %d\n", p30, p3)
+	}
+	if p4 != p40 {
+		t.Fatalf("expected value %d and gets %d\n", p40, p4)
+	}
+	if p5 != p50 {
+		t.Fatalf("expected value %d and gets %d\n", p50, p5)
+	}
+	if p6 != p60 {
+		t.Fatalf("expected value %d and gets %d\n", p60, p6)
+	}
+	if p7 != p70 {
+		t.Fatalf("expected value %d and gets %d\n", p70, p7)
+	}
+	if p8 != p80 {
+		t.Fatalf("expected value %d and gets %d\n", p80, p8)
 	}
 }

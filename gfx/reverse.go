@@ -146,7 +146,7 @@ func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) e
 	case 0:
 		for y := 0; y < m.Height; y++ {
 			cpcLine := ((y/0x8)*0x60 + ((y % 0x8) * 0x800))
-			if y > 135 {
+			if y > 127 {
 				cpcLine += (0x3800)
 			}
 			for x := 0; x < m.Width; x += 2 {
@@ -164,7 +164,7 @@ func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) e
 	case 1:
 		for y := 0; y < m.Height; y++ {
 			cpcLine := ((y/0x8)*0x60 + ((y % 0x8) * 0x800))
-			if y > 135 {
+			if y > 127 {
 				cpcLine += (0x3800)
 			}
 			for x := 0; x < m.Width; x += 4 {
@@ -185,7 +185,7 @@ func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) e
 	case 2:
 		for y := 0; y < m.Height; y++ {
 			cpcLine := ((y/0x8)*0x60 + ((y % 0x8) * 0x800))
-			if cpcLine > 135 {
+			if y > 127 {
 				cpcLine += (0x3800)
 			}
 			for x := 0; x < m.Width; x += 8 {
