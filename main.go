@@ -83,6 +83,7 @@ var (
 	picturePath2        = flag.String("i2", "", "Picture path of the second input file (flash mode)")
 	mode2               = flag.Int("m2", -1, "Output mode to use :\n\t0 for mode0\n\t1 for mode1\n\t2 for mode2\n\tmode of the second input file (flash mode)")
 	palettePath2        = flag.String("pal2", "", "Apply the input palette to the second image (flash mode)")
+	egx1                = flag.Bool("egx1", false, "Create egx 1 output cpc image.")
 	version             = "0.18.3.rc"
 )
 
@@ -480,18 +481,27 @@ func main() {
 					os.Exit(-1)
 				}
 			} else {
-				if strings.ToUpper(extension) != ".SCR" {
-					if err := gfx.ApplyOneImage(in,
+				if *egx1 {
+					if err := gfx.Egx1(in,
 						exportType,
-						filename, *picturePath,
-						*mode,
-						screenMode); err != nil {
+						filename, *picturePath); err != nil {
 						fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
 						os.Exit(-1)
 					}
 				} else {
-					fmt.Fprintf(os.Stderr, "Error while applying on one image : SCR format not used for this treatment\n")
-					os.Exit(-1)
+					if strings.ToUpper(extension) != ".SCR" {
+						if err := gfx.ApplyOneImage(in,
+							exportType,
+							filename, *picturePath,
+							*mode,
+							screenMode); err != nil {
+							fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
+							os.Exit(-1)
+						}
+					} else {
+						fmt.Fprintf(os.Stderr, "Error while applying on one image : SCR format not used for this treatment\n")
+						os.Exit(-1)
+					}
 				}
 			}
 		}
