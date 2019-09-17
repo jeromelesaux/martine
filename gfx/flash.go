@@ -106,7 +106,9 @@ func Egx1(in image.Image,
 			firmwareColorUsed[pp4]++
 
 			pixel := pixelMode1(pp1, pp2, pp3, pp4)
-			addr := CpcScreenAddress(0, x, y, 1, exportType.Overscan)
+			addr := CpcScreenAddress(0, x, y, 0, exportType.Overscan)
+			bw[addr] = pixel
+			addr = CpcScreenAddress(0, x+1, y, 0, exportType.Overscan)
 			bw[addr] = pixel
 		}
 	}
