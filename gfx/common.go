@@ -12,6 +12,59 @@ import (
 	"path/filepath"
 )
 
+func DoDithering(in *image.NRGBA, p color.Palette, exportType *export.ExportType) (*image.NRGBA, color.Palette) {
+	if exportType.DitheringAlgo != -1 {
+		switch exportType.DitheringType {
+		case constants.ErrorDiffusionDither:
+			if exportType.DitheringWithQuantification {
+				in = QuantizeWithDither(in, exportType.DitheringMatrix, exportType.Size.ColorsAvailable, p)
+			} else {
+				in = Dithering(in, exportType.DitheringMatrix, float32(exportType.DitheringMultiplier))
+			}
+		case constants.OrderedDither:
+			//newPalette = convert.PaletteUsed(out,exportType.CpcPlus)
+			if exportType.CpcPlus {
+				p = convert.ExtractPalette(in, exportType.CpcPlus, 27)
+				in = BayerDiphering(in, exportType.DitheringMatrix, p)
+			} else {
+				in = BayerDiphering(in, exportType.DitheringMatrix, constants.CpcOldPalette)
+			}
+		}
+	}
+	return in, p
+}
+
+func DoTransformation(in *image.NRGBA, p color.Palette, filename, picturePath string, screenMode uint8, mode int, exportType *export.ExportType) error {
+	var err error
+	if exportType.RollMode {
+		if exportType.RotationRlaBit != -1 || exportType.RotationSlaBit != -1 {
+			RollLeft(exportType.RotationRlaBit, exportType.RotationSlaBit, exportType.RotationIterations, screenMode, exportType.Size, in, p, filename, exportType)
+		} else {
+			if exportType.RotationRraBit != -1 || exportType.RotationSraBit != -1 {
+				RollRight(exportType.RotationRraBit, exportType.RotationSraBit, exportType.RotationIterations, screenMode, exportType.Size, in, p, filename, exportType)
+			}
+		}
+		if exportType.RotationKeephighBit != -1 || exportType.RotationLosthighBit != -1 {
+			RollUp(exportType.RotationKeephighBit, exportType.RotationLosthighBit, exportType.RotationIterations, screenMode, exportType.Size, in, p, filename, exportType)
+		} else {
+			if exportType.RotationKeeplowBit != -1 || exportType.RotationLostlowBit != -1 {
+				RollLow(exportType.RotationKeeplowBit, exportType.RotationLostlowBit, exportType.RotationIterations, screenMode, exportType.Size, in, p, filename, exportType)
+			}
+		}
+	}
+	if exportType.RotationMode {
+		if err = Rotate(in, p, exportType.Size, uint8(mode), picturePath, exportType.ResizingAlgo, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", picturePath, err)
+		}
+	}
+	if exportType.Rotation3DMode {
+		if err = Rotate3d(in, p, exportType.Size, uint8(mode), picturePath, exportType.ResizingAlgo, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", picturePath, err)
+		}
+	}
+	return err
+}
+
 func ApplyOneImage(in image.Image,
 	exportType *export.ExportType,
 	filename, picturePath string,
@@ -57,24 +110,8 @@ func ApplyOneImage(in image.Image,
 		os.Exit(-2)
 	}
 
-	if exportType.DitheringAlgo != -1 {
-		switch exportType.DitheringType {
-		case constants.ErrorDiffusionDither:
-			if exportType.DitheringWithQuantification {
-				out = QuantizeWithDither(out, exportType.DitheringMatrix, exportType.Size.ColorsAvailable, newPalette)
-			} else {
-				out = Dithering(out, exportType.DitheringMatrix, float32(exportType.DitheringMultiplier))
-			}
-		case constants.OrderedDither:
-			//newPalette = convert.PaletteUsed(out,exportType.CpcPlus)
-			if exportType.CpcPlus {
-				newPalette = convert.ExtractPalette(out, exportType.CpcPlus, 27)
-				out = BayerDiphering(out, exportType.DitheringMatrix, newPalette)
-			} else {
-				out = BayerDiphering(out, exportType.DitheringMatrix, constants.CpcOldPalette)
-			}
-		}
-	}
+	out, newPalette = DoDithering(out, newPalette, exportType)
+
 	if len(palette) > 0 {
 		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
 	} else {
@@ -89,32 +126,8 @@ func ApplyOneImage(in image.Image,
 		os.Exit(-2)
 	}
 
-	if exportType.RollMode {
-		if exportType.RotationRlaBit != -1 || exportType.RotationSlaBit != -1 {
-			RollLeft(exportType.RotationRlaBit, exportType.RotationSlaBit, exportType.RotationIterations, screenMode, exportType.Size, downgraded, newPalette, filename, exportType)
-		} else {
-			if exportType.RotationRraBit != -1 || exportType.RotationSraBit != -1 {
-				RollRight(exportType.RotationRraBit, exportType.RotationSraBit, exportType.RotationIterations, screenMode, exportType.Size, downgraded, newPalette, filename, exportType)
-			}
-		}
-		if exportType.RotationKeephighBit != -1 || exportType.RotationLosthighBit != -1 {
-			RollUp(exportType.RotationKeephighBit, exportType.RotationLosthighBit, exportType.RotationIterations, screenMode, exportType.Size, downgraded, newPalette, filename, exportType)
-		} else {
-			if exportType.RotationKeeplowBit != -1 || exportType.RotationLostlowBit != -1 {
-				RollLow(exportType.RotationKeeplowBit, exportType.RotationLostlowBit, exportType.RotationIterations, screenMode, exportType.Size, downgraded, newPalette, filename, exportType)
-			}
-		}
-	}
-	if exportType.RotationMode {
-		if err := Rotate(downgraded, newPalette, exportType.Size, uint8(mode), picturePath, exportType.ResizingAlgo, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", picturePath, err)
-		}
-	}
-	if exportType.Rotation3DMode {
-		if err := Rotate3d(downgraded, newPalette, exportType.Size, uint8(mode), picturePath, exportType.ResizingAlgo, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", picturePath, err)
-		}
-	}
+	DoTransformation(downgraded, newPalette, filename, picturePath, screenMode, mode, exportType)
+
 	if !exportType.CustomDimension {
 		Transform(downgraded, newPalette, exportType.Size, picturePath, exportType)
 	} else {
