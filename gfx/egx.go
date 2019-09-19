@@ -59,7 +59,7 @@ func Egx(filepath1, filepath2, palpath string, m1, m2 int, exportType *export.Ex
 				return err
 			}
 		}
-		if err = ToEgx1(in0, in1, p, filePath, exportType); err != nil {
+		if err = ToEgx1(in0, in1, p, uint8(m1), filePath, exportType); err != nil {
 			return err
 		}
 
@@ -110,7 +110,7 @@ func Egx(filepath1, filepath2, palpath string, m1, m2 int, exportType *export.Ex
 					return err
 				}
 			}
-			if err = ToEgx2(in1, in2, p, filePath, exportType); err != nil {
+			if err = ToEgx2(in1, in2, p, uint8(m1), filePath, exportType); err != nil {
 				return err
 			}
 
@@ -163,7 +163,7 @@ func AutoEgx1(in image.Image,
 
 	downgraded, p = DoDithering(downgraded, p, exportType)
 
-	return ToEgx1(downgraded, downgraded, p, picturePath, exportType)
+	return ToEgx1(downgraded, downgraded, p, 0, picturePath, exportType)
 }
 
 func AutoEgx2(in image.Image,
@@ -204,10 +204,10 @@ func AutoEgx2(in image.Image,
 
 	downgraded, p = DoDithering(downgraded, p, exportType)
 
-	return ToEgx2(downgraded, downgraded, p, picturePath, exportType)
+	return ToEgx2(downgraded, downgraded, p, 1, picturePath, exportType)
 }
 
-func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, picturePath string, exportType *export.ExportType) error {
+func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8, picturePath string, exportType *export.ExportType) error {
 	var bw []byte
 	if exportType.Overscan {
 		bw = make([]byte, 0x8000)
@@ -215,8 +215,14 @@ func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, picturePath string, 
 		bw = make([]byte, 0x4000)
 	}
 	firmwareColorUsed := make(map[int]int, 0)
+	mode0Line := 1
+	mode1Line := 0
+	if firstLineMode == 1 {
+		mode0Line = 0 
+		mode1Line = 1
+	}
 
-	for y := inMode0.Bounds().Min.Y + 1; y < inMode0.Bounds().Max.Y; y += 2 {
+	for y := inMode0.Bounds().Min.Y + mode0Line; y < inMode0.Bounds().Max.Y; y += 2 {
 		for x := inMode0.Bounds().Min.X; x < inMode0.Bounds().Max.X; x += 2 {
 			c1 := inMode0.At(x, y)
 			pp1, err := PalettePosition(c1, p)
@@ -238,7 +244,7 @@ func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, picturePath string, 
 			bw[addr] = pixel
 		}
 	}
-	for y := inMode1.Bounds().Min.Y; y < inMode1.Bounds().Max.Y; y += 2 {
+	for y := inMode1.Bounds().Min.Y + mode1Line; y < inMode1.Bounds().Max.Y; y += 2 {
 		for x := inMode1.Bounds().Min.X; x < inMode1.Bounds().Max.X; x += 4 {
 			c1 := inMode1.At(x, y)
 			pp1, err := PalettePosition(c1, p)
@@ -280,7 +286,7 @@ func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, picturePath string, 
 	return Export(picturePath, bw, p, 1, exportType)
 }
 
-func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, picturePath string, exportType *export.ExportType) error {
+func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette,firstLineMode uint8, picturePath string, exportType *export.ExportType) error {
 	var bw []byte
 	if exportType.Overscan {
 		bw = make([]byte, 0x8000)
@@ -288,8 +294,14 @@ func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, picturePath string, 
 		bw = make([]byte, 0x4000)
 	}
 	firmwareColorUsed := make(map[int]int, 0)
+	mode0Line := 1
+	mode1Line := 0
+	if firstLineMode == 1 {
+		mode0Line = 0 
+		mode1Line = 1
+	}
 
-	for y := inMode1.Bounds().Min.Y + 1; y < inMode1.Bounds().Max.Y; y += 2 {
+	for y := inMode1.Bounds().Min.Y + mode0Line; y < inMode1.Bounds().Max.Y; y += 2 {
 		for x := inMode1.Bounds().Min.X; x < inMode1.Bounds().Max.X; x += 4 {
 			c1 := inMode1.At(x, y)
 			pp1, err := PalettePosition(c1, p)
@@ -326,7 +338,7 @@ func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, picturePath string, 
 			bw[addr] = pixel
 		}
 	}
-	for y := inMode2.Bounds().Min.Y; y < inMode2.Bounds().Max.Y; y += 2 {
+	for y := inMode2.Bounds().Min.Y+mode1Line; y < inMode2.Bounds().Max.Y; y += 2 {
 		for x := inMode2.Bounds().Min.X; x < inMode2.Bounds().Max.X; x += 8 {
 			c1 := inMode2.At(x, y)
 			pp1, err := PalettePosition(c1, p)
