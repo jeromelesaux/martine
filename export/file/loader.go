@@ -751,7 +751,7 @@ var (
 	flashBinaryPalette1Offset = 78
 	flashBinaryPalette2Offset = 97
 	egxMode1Offset            = 4689 - 128
-	egxMode2Offset            = 4753 - 128
+	egxMode2Offset            = 4751 - 128
 	egxBinaryPaletteOffset    = 4839 - 128
 )
 
@@ -1035,7 +1035,7 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, exportType 
 	egxLoader = EgxBinary
 	copy(egxLoader[egxBinaryPaletteOffset:], pal)
 
-	switch mode1 {
+	switch mode2 {
 	case 0:
 		egxLoader[egxMode1Offset] = 0x8c
 	case 1:
@@ -1044,7 +1044,7 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, exportType 
 		egxLoader[egxMode1Offset] = 0x8e
 	}
 
-	switch mode2 {
+	switch mode1 {
 	case 0:
 		egxLoader[egxMode2Offset] = 0x8c
 	case 1:
