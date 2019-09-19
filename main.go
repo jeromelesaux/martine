@@ -83,8 +83,8 @@ var (
 	picturePath2        = flag.String("i2", "", "Picture path of the second input file (flash mode)")
 	mode2               = flag.Int("m2", -1, "Output mode to use :\n\t0 for mode0\n\t1 for mode1\n\t2 for mode2\n\tmode of the second input file (flash mode)")
 	palettePath2        = flag.String("pal2", "", "Apply the input palette to the second image (flash mode)")
-	egx1                = flag.Bool("egx1", false, "Create egx 1 output cpc image (mix mode 0 / 1).")
-	egx2                = flag.Bool("egx2", false, "Create egx 2 output cpc image (mix mode 1 / 2).")
+	egx1                = flag.Bool("egx1", false, "Create egx 1 output cpc image (mix mode 0 / 1).\n\t(ex: -egx1 -i 1.SCR -m 0 -pal 1.PAL -i2 2.SCR -o test -m2 1 -dsk)\n\tor\n\t(ex: -egx1 -i input.png -m 0 -o test -dsk)")
+	egx2                = flag.Bool("egx2", false, "Create egx 2 output cpc image (mix mode 1 / 2).(ex: -egx2 -i 1.SCR -m 0 -pal 1.PAL -i2 2.SCR -o test -m2 1 -dsk)\n\tor\n\t(ex: -egx2 -i input.png -m 0 -o test -dsk)")
 	version             = "0.19.rc"
 )
 
