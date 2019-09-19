@@ -9,6 +9,10 @@ import (
 )
 
 var amsdosFilenameOnce sync.Once
+var (
+	Egx1Mode = 1
+	Egx2Mode = 2
+)
 
 type ExportType struct {
 	InputPath                   string
@@ -68,6 +72,7 @@ type ExportType struct {
 	FlashScreenFilepath2        string
 	FlashPaletteFilepath1       string
 	FlashPaletteFilepath2       string
+	EgxFormat                   int
 }
 
 func NewExportType(input, output string) *ExportType {

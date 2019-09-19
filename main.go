@@ -83,8 +83,9 @@ var (
 	picturePath2        = flag.String("i2", "", "Picture path of the second input file (flash mode)")
 	mode2               = flag.Int("m2", -1, "Output mode to use :\n\t0 for mode0\n\t1 for mode1\n\t2 for mode2\n\tmode of the second input file (flash mode)")
 	palettePath2        = flag.String("pal2", "", "Apply the input palette to the second image (flash mode)")
-	egx1                = flag.Bool("egx1", false, "Create egx 1 output cpc image.")
-	version             = "0.18.3.rc"
+	egx1                = flag.Bool("egx1", false, "Create egx 1 output cpc image (mix mode 0 / 1).")
+	egx2                = flag.Bool("egx2", false, "Create egx 2 output cpc image (mix mode 1 / 2).")
+	version             = "0.19.rc"
 )
 
 func usage() {
@@ -323,6 +324,13 @@ func main() {
 		exportType.M4 = true
 	}
 
+	if *egx1 {
+		exportType.EgxFormat = x.Egx1Mode
+	}
+	if *egx2 {
+		exportType.EgxFormat = x.Egx2Mode
+	}
+
 	exportType.DeltaMode = *deltaMode
 	exportType.Dsk = *dsk
 
@@ -481,10 +489,12 @@ func main() {
 					os.Exit(-1)
 				}
 			} else {
-				if *egx1 {
-					if err := gfx.Egx1(in,
-						exportType,
-						filename, *picturePath); err != nil {
+				if exportType.EgxFormat > 0 {
+					if err := gfx.Egx(*picturePath, *picturePath2,
+						*palettePath,
+						*mode,
+						*mode2,
+						exportType); err != nil {
 						fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
 						os.Exit(-1)
 					}

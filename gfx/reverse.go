@@ -34,7 +34,7 @@ func SpriteToPng(winPath string, output string, p color.Palette) error {
 	return xl.Png(output, out)
 }
 
-func ScrToPng(scrPath string, output string, mode uint8, p color.Palette) error {
+func ScrToImg(scrPath string, mode uint8, p color.Palette) (*image.NRGBA, error) {
 	var m constants.Size
 	switch mode {
 	case 0:
@@ -44,7 +44,7 @@ func ScrToPng(scrPath string, output string, mode uint8, p color.Palette) error 
 	case 2:
 		m = constants.Mode2
 	default:
-		return UNDEFINED_MODE
+		return nil, UNDEFINED_MODE
 	}
 	out := image.NewNRGBA(image.Rectangle{
 		Min: image.Point{X: 0, Y: 0},
@@ -52,7 +52,7 @@ func ScrToPng(scrPath string, output string, mode uint8, p color.Palette) error 
 
 	d, err := xl.RawScr(scrPath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	cpcRow := 0
 	switch mode {
@@ -116,11 +116,19 @@ func ScrToPng(scrPath string, output string, mode uint8, p color.Palette) error 
 			cpcRow = 0
 		}
 	}
+	return out, nil
+}
 
+func ScrToPng(scrPath string, output string, mode uint8, p color.Palette) error {
+
+	out, err := ScrToImg(scrPath, mode, p)
+	if err != nil {
+		return err
+	}
 	return xl.Png(output, out)
 }
 
-func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) error {
+func OverscanToImg(scrPath string, mode uint8, p color.Palette) (*image.NRGBA, error) {
 	var m constants.Size
 	switch mode {
 	case 0:
@@ -130,7 +138,7 @@ func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) e
 	case 2:
 		m = constants.OverscanMode2
 	default:
-		return UNDEFINED_MODE
+		return nil, UNDEFINED_MODE
 	}
 	out := image.NewNRGBA(image.Rectangle{
 		Min: image.Point{X: 0, Y: 0},
@@ -138,7 +146,7 @@ func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) e
 
 	d, err := xl.RawOverscan(scrPath) // RawOverscan data commence en 0x30
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	cpcRow := 0
@@ -212,6 +220,13 @@ func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) e
 			cpcRow = 0
 		}
 	}
+	return out, nil
+}
 
+func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) error {
+	out, err := OverscanToImg(scrPath, mode, p)
+	if err != nil {
+		return err
+	}
 	return xl.Png(output, out)
 }
