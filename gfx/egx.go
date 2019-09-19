@@ -50,11 +50,11 @@ func Egx(filepath1, filepath2, palpath string, m1, m2 int, exportType *export.Ex
 				return err
 			}
 		} else {
-			in0, err = ScrToImg(f0, uint8(m1), p)
+			in0, err = ScrToImg(f0, 0, p)
 			if err != nil {
 				return err
 			}
-			in1, err = ScrToImg(f1, uint8(m2), p)
+			in1, err = ScrToImg(f1, 1, p)
 			if err != nil {
 				return err
 			}
@@ -63,7 +63,7 @@ func Egx(filepath1, filepath2, palpath string, m1, m2 int, exportType *export.Ex
 			return err
 		}
 
-		if err = file.EgxLoader(filePath, p, 0, 1, exportType); err != nil {
+		if err = file.EgxLoader(filePath, p, uint8(m1), uint8(m2), exportType); err != nil {
 			return err
 		}
 		return nil
@@ -82,7 +82,6 @@ func Egx(filepath1, filepath2, palpath string, m1, m2 int, exportType *export.Ex
 			} else {
 				filename := filepath.Base(filepath2)
 				filePath = exportType.OutputPath + string(filepath.Separator) + filename
-
 				f1 = filepath2
 				f2 = filepath1
 			}
@@ -96,7 +95,7 @@ func Egx(filepath1, filepath2, palpath string, m1, m2 int, exportType *export.Ex
 				if err != nil {
 					return err
 				}
-				in1, err = OverscanToImg(f2, mode2, p)
+				in2, err = OverscanToImg(f2, mode2, p)
 				if err != nil {
 					return err
 				}
@@ -105,7 +104,7 @@ func Egx(filepath1, filepath2, palpath string, m1, m2 int, exportType *export.Ex
 				if err != nil {
 					return err
 				}
-				in1, err = ScrToImg(f2, mode2, p)
+				in2, err = ScrToImg(f2, mode2, p)
 				if err != nil {
 					return err
 				}
@@ -114,7 +113,7 @@ func Egx(filepath1, filepath2, palpath string, m1, m2 int, exportType *export.Ex
 				return err
 			}
 
-			if err = file.EgxLoader(filePath, p, 1, 2, exportType); err != nil {
+			if err = file.EgxLoader(filePath, p, uint8(m1), uint8(m2), exportType); err != nil {
 				return err
 			}
 		} else {
@@ -218,7 +217,7 @@ func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8,
 	mode0Line := 1
 	mode1Line := 0
 	if firstLineMode == 1 {
-		mode0Line = 0 
+		mode0Line = 0
 		mode1Line = 1
 	}
 
@@ -286,7 +285,7 @@ func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8,
 	return Export(picturePath, bw, p, 1, exportType)
 }
 
-func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette,firstLineMode uint8, picturePath string, exportType *export.ExportType) error {
+func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8, picturePath string, exportType *export.ExportType) error {
 	var bw []byte
 	if exportType.Overscan {
 		bw = make([]byte, 0x8000)
@@ -294,14 +293,14 @@ func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette,firstLineMode uint8, 
 		bw = make([]byte, 0x4000)
 	}
 	firmwareColorUsed := make(map[int]int, 0)
-	mode0Line := 1
-	mode1Line := 0
+	mode1Line := 1
+	mode2Line := 0
 	if firstLineMode == 1 {
-		mode0Line = 0 
-		mode1Line = 1
+		mode1Line = 0
+		mode2Line = 1
 	}
 
-	for y := inMode1.Bounds().Min.Y + mode0Line; y < inMode1.Bounds().Max.Y; y += 2 {
+	for y := inMode1.Bounds().Min.Y + mode1Line; y < inMode1.Bounds().Max.Y; y += 2 {
 		for x := inMode1.Bounds().Min.X; x < inMode1.Bounds().Max.X; x += 4 {
 			c1 := inMode1.At(x, y)
 			pp1, err := PalettePosition(c1, p)
@@ -338,7 +337,7 @@ func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette,firstLineMode uint8, 
 			bw[addr] = pixel
 		}
 	}
-	for y := inMode2.Bounds().Min.Y+mode1Line; y < inMode2.Bounds().Max.Y; y += 2 {
+	for y := inMode2.Bounds().Min.Y + mode2Line; y < inMode2.Bounds().Max.Y; y += 2 {
 		for x := inMode2.Bounds().Min.X; x < inMode2.Bounds().Max.X; x += 8 {
 			c1 := inMode2.At(x, y)
 			pp1, err := PalettePosition(c1, p)
@@ -390,14 +389,14 @@ func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette,firstLineMode uint8, 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
 				pp7 = 0
 			}
-			firmwareColorUsed[pp3]++
+			firmwareColorUsed[pp7]++
 			c8 := inMode2.At(x+7, y)
 			pp8, err := PalettePosition(c8, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, x+3, y)
 				pp8 = 0
 			}
-			firmwareColorUsed[pp4]++
+			firmwareColorUsed[pp8]++
 			pixel := pixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
 			addr := CpcScreenAddress(0, x, y, 2, exportType.Overscan)
 			bw[addr] = pixel
