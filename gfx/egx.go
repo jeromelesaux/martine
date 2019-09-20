@@ -19,19 +19,18 @@ var (
 
 func Egx(filepath1, filepath2, palpath string, m1, m2 int, exportType *export.ExportType) error {
 	if m1 == 0 && m2 == 1 || m2 == 0 && m1 == 1 {
-		var filePath, f0, f1 string
+		var f0, f1 string
 		var mode0, mode1 uint8
 		mode0 = 0
 		mode1 = 1
 		if m1 == 0 {
-			filename := filepath.Base(filepath1)
-			filePath = exportType.OutputPath + string(filepath.Separator) + filename
+			//filename := filepath.Base(filepath1)
+			//filePath = exportType.OutputPath + string(filepath.Separator) + filename
 			f0 = filepath1
 			f1 = filepath2
 		} else {
-			filename := filepath.Base(filepath2)
-			filePath = exportType.OutputPath + string(filepath.Separator) + filename
-
+			//filename := filepath.Base(filepath2)
+			//filePath = exportType.OutputPath + string(filepath.Separator) + filename
 			f0 = filepath2
 			f1 = filepath1
 		}
@@ -59,29 +58,29 @@ func Egx(filepath1, filepath2, palpath string, m1, m2 int, exportType *export.Ex
 				return err
 			}
 		}
-		if err = ToEgx1(in0, in1, p, uint8(m1), filePath, exportType); err != nil {
+		if err = ToEgx1(in0, in1, p, uint8(m1), "egx.scr", exportType); err != nil {
 			return err
 		}
 
-		if err = file.EgxLoader(filePath, p, uint8(m1), uint8(m2), exportType); err != nil {
+		if err = file.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), exportType); err != nil {
 			return err
 		}
 		return nil
 	} else {
 		if m1 == 1 && m2 == 2 || m2 == 1 && m1 == 2 {
-			var filePath, f2, f1 string
+			var f2, f1 string
 			var mode2, mode1 uint8
 			mode1 = 1
 			mode2 = 2
 			if m1 == 1 {
-				filename := filepath.Base(filepath1)
-				filePath = exportType.OutputPath + string(filepath.Separator) + filename
+				//filename := filepath.Base(filepath1)
+				//filePath = exportType.OutputPath + string(filepath.Separator) + filename
 
 				f1 = filepath1
 				f2 = filepath2
 			} else {
-				filename := filepath.Base(filepath2)
-				filePath = exportType.OutputPath + string(filepath.Separator) + filename
+				//filename := filepath.Base(filepath2)
+				//filePath = exportType.OutputPath + string(filepath.Separator) + filename
 				f1 = filepath2
 				f2 = filepath1
 			}
@@ -109,11 +108,11 @@ func Egx(filepath1, filepath2, palpath string, m1, m2 int, exportType *export.Ex
 					return err
 				}
 			}
-			if err = ToEgx2(in1, in2, p, uint8(m1), filePath, exportType); err != nil {
+			if err = ToEgx2(in1, in2, p, uint8(m1), "egx.scr", exportType); err != nil {
 				return err
 			}
 
-			if err = file.EgxLoader(filePath, p, uint8(m1), uint8(m2), exportType); err != nil {
+			if err = file.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), exportType); err != nil {
 				return err
 			}
 		} else {
