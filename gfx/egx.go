@@ -112,7 +112,7 @@ func Egx(filepath1, filepath2, palpath string, m1, m2 int, exportType *export.Ex
 				return err
 			}
 
-			if err = file.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), exportType); err != nil {
+			if err = file.EgxLoader("egx.scr", p, uint8(m2), uint8(m1), exportType); err != nil {
 				return err
 			}
 		} else {
