@@ -4698,7 +4698,7 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, expo
 }
 
 func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uint8, exportType *x.ExportType) error {
-	o := make([]byte, 0x7e90-0x80)
+	o := make([]byte, 0x8000-0x80)
 	osFilepath := exportType.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", osFilepath)
 	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x170, Exec: 0x0,
@@ -4718,8 +4718,8 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 	if !exportType.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
-	copy(o, egxOverscanTemplate[:])
-	copy(o[0x200-0x170:], data[:])
+	copy(o[:], egxOverscanTemplate[:])
+	copy(o[0x200-0x170:], data[:]) //  - 0x170  to have the file offset 
 	//o[(0x1ac-0x170)] = 0 // cpc old
 	switch exportType.CpcPlus {
 	case true:
@@ -4744,18 +4744,19 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 	extraFlag := 0
 
 	if mode1 == 0 && mode2 == 1 {
-		extraFlag = 1
-	}
-	if mode2 == 0 && mode1 == 1 {
 		extraFlag = 2
 	}
-	if mode1 == 1 && mode2 == 2 {
-		extraFlag = 3
+	if mode2 == 0 && mode1 == 1 {
+		extraFlag = 1
 	}
-	if mode1 == 2 && mode2 == 1 {
+	if mode1 == 1 && mode2 == 2 {
 		extraFlag = 4
 	}
+	if mode1 == 2 && mode2 == 1 {
+		extraFlag = 3
+	}
 	o[0x8f] = byte(extraFlag)
+
 	// affectation de la palette CPC old
 	if exportType.CpcPlus {
 		offset := 0
@@ -4776,6 +4777,7 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 			}
 		}
 	}
+	copy(o[0x7da0:], egxOverscanTemplate[0x7da0:]) // copy egx routine 
 	binary.Write(fw, binary.LittleEndian, o)
 	fw.Close()
 	exportType.AddFile(osFilepath)
