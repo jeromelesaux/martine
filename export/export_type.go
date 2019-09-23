@@ -73,6 +73,8 @@ type ExportType struct {
 	FlashPaletteFilepath1       string
 	FlashPaletteFilepath2       string
 	EgxFormat                   int
+	EgxMode1                    uint8
+	EgxMode2                    uint8
 }
 
 func NewExportType(input, output string) *ExportType {

@@ -506,10 +506,18 @@ func TransformMode0(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 
 func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, exportType *x.ExportType) error {
 	if exportType.Overscan {
-		if err := file.Overscan(filePath, bw, p, screenMode, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-			return err
+		if exportType.EgxFormat == 0 {
+			if err := file.Overscan(filePath, bw, p, screenMode, exportType); err != nil {
+				fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+				return err
+			}
+		} else {
+			if err := file.EgxOverscan(filePath, bw, p, exportType.EgxMode1, exportType.EgxMode2, exportType); err != nil {
+				fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+				return err
+			}
 		}
+
 	} else {
 		if err := file.Scr(filePath, bw, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)

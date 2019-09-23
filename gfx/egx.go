@@ -17,10 +17,11 @@ var (
 	ErrorFeatureNotImplemented = errors.New("Feature not implemented, check your syntax.")
 )
 
-func Egx(filepath1, filepath2, palpath string, m1, m2 int, exportType *export.ExportType) error {
+func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, exportType *export.ExportType) error {
 	if m1 == 0 && m2 == 1 || m2 == 0 && m1 == 1 {
 		var f0, f1 string
 		var mode0, mode1 uint8
+		var err error
 		mode0 = 0
 		mode1 = 1
 		if m1 == 0 {
@@ -33,10 +34,6 @@ func Egx(filepath1, filepath2, palpath string, m1, m2 int, exportType *export.Ex
 			//filePath = exportType.OutputPath + string(filepath.Separator) + filename
 			f0 = filepath2
 			f1 = filepath1
-		}
-		p, _, err := file.OpenPal(palpath)
-		if err != nil {
-			return err
 		}
 		var in0, in1 *image.NRGBA
 		if exportType.Overscan {
@@ -61,15 +58,17 @@ func Egx(filepath1, filepath2, palpath string, m1, m2 int, exportType *export.Ex
 		if err = ToEgx1(in0, in1, p, uint8(m1), "egx.scr", exportType); err != nil {
 			return err
 		}
-
-		if err = file.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), exportType); err != nil {
-			return err
+		if !exportType.Overscan {
+			if err = file.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), exportType); err != nil {
+				return err
+			}
 		}
 		return nil
 	} else {
 		if m1 == 1 && m2 == 2 || m2 == 1 && m1 == 2 {
 			var f2, f1 string
 			var mode2, mode1 uint8
+			var err error
 			mode1 = 1
 			mode2 = 2
 			if m1 == 1 {
@@ -83,10 +82,6 @@ func Egx(filepath1, filepath2, palpath string, m1, m2 int, exportType *export.Ex
 				//filePath = exportType.OutputPath + string(filepath.Separator) + filename
 				f1 = filepath2
 				f2 = filepath1
-			}
-			p, _, err := file.OpenPal(palpath)
-			if err != nil {
-				return err
 			}
 			var in2, in1 *image.NRGBA
 			if exportType.Overscan {
@@ -111,9 +106,10 @@ func Egx(filepath1, filepath2, palpath string, m1, m2 int, exportType *export.Ex
 			if err = ToEgx2(in1, in2, p, uint8(m1), "egx.scr", exportType); err != nil {
 				return err
 			}
-
-			if err = file.EgxLoader("egx.scr", p, uint8(m2), uint8(m1), exportType); err != nil {
-				return err
+			if !exportType.Overscan {
+				if err = file.EgxLoader("egx.scr", p, uint8(m2), uint8(m1), exportType); err != nil {
+					return err
+				}
 			}
 		} else {
 			return ErrorFeatureNotImplemented

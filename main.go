@@ -330,6 +330,12 @@ func main() {
 	if *egx2 {
 		exportType.EgxFormat = x.Egx2Mode
 	}
+	if *mode != -1 {
+		exportType.EgxMode1 = uint8(*mode)
+	}
+	if *mode2 != -1 {
+		exportType.EgxMode2 = uint8(*mode2)
+	}
 
 	exportType.DeltaMode = *deltaMode
 	exportType.Dsk = *dsk
@@ -489,9 +495,29 @@ func main() {
 					os.Exit(-1)
 				}
 			} else {
+				var p color.Palette
+				var err error
+				if exportType.CpcPlus {
+					if *kitPath != "" {
+						p, _, err = file.OpenKit(*kitPath)
+						if err != nil {
+							fmt.Fprintf(os.Stderr, "Error while reading kit file (%s) :%v\n", *kitPath, err)
+							os.Exit(-1)
+						}
+					}
+				} else {
+					if *palettePath != "" {
+						p, _, err = file.OpenPal(*palettePath)
+						if err != nil {
+							fmt.Fprintf(os.Stderr, "Error while reading palette file (%s) :%v\n", *palettePath, err)
+							os.Exit(-1)
+						}
+					}
+				}
+
 				if exportType.EgxFormat > 0 {
 					if err := gfx.Egx(*picturePath, *picturePath2,
-						*palettePath,
+						p,
 						*mode,
 						*mode2,
 						exportType); err != nil {
