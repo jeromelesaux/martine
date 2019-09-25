@@ -4750,10 +4750,10 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 		extraFlag = 1
 	}
 	if mode1 == 1 && mode2 == 2 {
-		extraFlag = 4
+		extraFlag = 3
 	}
 	if mode1 == 2 && mode2 == 1 {
-		extraFlag = 3
+		extraFlag = 4
 	}
 	o[0x8f] = byte(extraFlag)
 
