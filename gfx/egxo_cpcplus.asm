@@ -6,9 +6,11 @@ nolist
 zstart
 run start
 
+
+; partie loader basic
 db #0e,#00,#0a,#00,#01,#c0,#20,#69
 db #4d,#50,#20,#76,#32,#00,#0d,#00
-db #14,#00,#ad,#20
+db #14,#00,#ad,#20 
 
 
 ;----------------------------------------------------
@@ -37,7 +39,7 @@ db #32,#06,#22,#07,#23,#0c,#0d
 db #d0
 db #00,#00,#3f,#ff,#00,#ff,#77,#b3
 db #51,#a8,#d4,#62,#39,#9c,#46,#2b
-db #15,#8a,#cd,#ee
+db #15,#8a,#cd,#ee ; sequence de delock asic
 
 
 ;----------------------------------------------------
@@ -4229,25 +4231,7 @@ lignes	equ 272/2	; 270/2 = ca marche aussi...
 	push de
 	push hl
 
-	; delock asic 
-	ld bc,#bc00
-	ld hl,delock_asic
-	ld e,17
-	seq:
-	ld a,(hl)
-	out (c),a
-	inc hl
-	dec e
-	jr nz,seq
-	ei
-	;; page-in asic registers to #4000-#7fff
-	ld bc,#7fb8
-	out (c),c
 
-	ld hl,#800 ; localisation des couleurs
-	ld de,#6400 ; destination des couleurs
-	ld bc,16*2
-	ldir
 
 ;---------------------------------------------------- switch automatique du EGX en fonction de son flag
 ; si db #00 d'origine ou > #04 --> on n'affiche aucun EGX, sortie propre.
@@ -4357,23 +4341,40 @@ pokemodelignepaire
 	or l
 	jr nz,loopmode
 
-ink			; et la on balance les 15 encres deja stockees (dans l'ordre) en &7f00
-	ld bc,#800
-	ld e,#10
-loopink
-	ld a,(bc)
-	out (c),c
-	out (c),a
-	inc c
-	dec e
-	jr nz,loopink	
+		; et la on balance les 15 encres deja stockees (dans l'ordre) en &7f00
+
+ink_plus
+;	di
+	; delock asic 
+;	ld bc,#bc00
+;	ld hl,delock_asic
+;	ld e,17
+;	seqplus:
+;	ld a,(hl)
+;	out (c),a
+;	inc hl
+;	dec e
+;	jr nz,seqplus
+;	ei
+	;; page-in asic registers to #4000-#7fff
+;	ld bc,#7fb8
+;	out (c),c
+
+;	ld hl,#800 ; localisation des couleurs
+;	ld de,#6400 ; destination des couleurs
+;	ld bc,32
+;	ldir
+
+	;; page-out asic registers
+;	ld bc,#7fa0
+;	out (c),c
 
 tstspckey
         ld bc,#f40e
         out (c),c
         ld bc,#F6c0
         out (c),c
-        db #ed,#41	; out(c),0
+        db #ed,#71	; out(c),0
         ld bc,#f792
         out (c),c
         ld bc,#f645
@@ -4383,7 +4384,7 @@ tstspckey
         ld bc,#f782
         out (c),c
         dec b
-        db #ed,#41	; out(c),0
+        db #ed,#71	; out(c),0
 	rla
 	jp c,main
 exit
@@ -4407,14 +4408,11 @@ loopcrtc
 	exx
 	ei
 
-	ds 6,0	; 6 octets de libres...
-
 	ret
 inter	
 	dw 0
 
-delock_asic
-	db #ff,#00,#ff,#77,#b3,#51,#a8,#d4,#62,#39,#9c,#46,#2b,#15,#8a,#cd,#ee
+
 
 crtcraz
 	db #01,#28,#02,#2E,#06,#19,#07,#1E,#0c,#30
@@ -4424,4 +4422,3 @@ zeend
 
 ;save 'egx.scr',#170,zeend-zstart,AMSDOS
 save 'egx.scr',#170,zeend-zstart,DSK,'egx_cpcplus.dsk'
-
