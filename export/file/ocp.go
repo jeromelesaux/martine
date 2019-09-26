@@ -4093,6 +4093,11 @@ func (i *KitPalette) ToString() string {
 	for _, v := range i.Colors {
 		out += v.ToString() + "\n"
 	}
+	out += "DW "
+	for _, v := range i.Colors {
+		out += fmt.Sprintf("#%0.4X", v.Value()) + ", "
+	}
+	out += "\n"
 	return out
 }
 

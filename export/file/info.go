@@ -31,7 +31,7 @@ func KitInformation(filePath string) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", filePath)
 	} else {
-		fmt.Fprintf(os.Stdout, "Palette from file %s\n %s", filePath, palette.ToString())
+		fmt.Fprintf(os.Stdout, "Palette from file %s %s", filePath, palette.ToString())
 	}
 }
 
