@@ -35,7 +35,7 @@ db #01,#30,#02
 db #32,#06,#22,#07,#23,#0c,#0d
 ;----------------------------------------------------
 
-
+data_plus
 db #d0
 db #00,#00,#3f,#ff,#00,#ff,#77,#b3
 db #51,#a8,#d4,#62,#39,#9c,#46,#2b
@@ -72,22 +72,7 @@ jr nz,l01c3
 ld a,(#01ac)
 cp #01
 jr nz,l01f5
-ld hl,#019b
-ld bc,#bc11
-l01d9
-ld a,(hl)
-out (c),a
-inc l
-dec c
-jr nz,l01d9
-ld bc,#7fb8
-out (c),c
-ld hl,#0801
-ld de,#6400
-ld bc,#0020
-ldir
-ld bc,#7fa0
-out (c),c
+call set_ink_plus
 l01f5
 ld hl,#b7f9
 call #bcdd
@@ -323,8 +308,8 @@ db #00
 ;----------------------------------------------------
 adr_0801
 ; encres cpc+
-DW #0666, #0663, #0000, #0696, #0333, #0363, #0693, #0696
-DW #0996, #0CC9, #0663, #0696, #09C6, #09C9, #0363, #0999
+db #66, #06, #63, #06, #00, #00, #96, #06, #33, #03, #63, #03, #93, #06, #96, #06
+db #96, #09, #C9, #0C, #63, #06, #96, #06, #C6, #09, #C9, #09, #63, #03, #99, #09
 ;----------------------------------------------------
 
 org #0822
@@ -4157,6 +4142,7 @@ nop
 
 
 ;----------------------------------------------------
+org #7f10
 adr_7f10
 ; zone libre de code de &7f10 a &7fff (taille &ef max)
 ;db #00,#00,#00,#00,#00,#00,#00,#00
@@ -4344,31 +4330,10 @@ pokemodelignepaire
 		; et la on balance les 15 encres deja stockees (dans l'ordre) en &7f00
 
 ink_plus
-;	di
-	; delock asic 
-;	ld bc,#bc00
-;	ld hl,delock_asic
-;	ld e,17
-;	seqplus:
-;	ld a,(hl)
-;	out (c),a
-;	inc hl
-;	dec e
-;	jr nz,seqplus
-;	ei
-	;; page-in asic registers to #4000-#7fff
-;	ld bc,#7fb8
-;	out (c),c
-
-;	ld hl,#800 ; localisation des couleurs
-;	ld de,#6400 ; destination des couleurs
-;	ld bc,32
-;	ldir
-
-	;; page-out asic registers
-;	ld bc,#7fa0
-;	out (c),c
-
+	di
+	call set_ink_plus
+	ei
+	
 tstspckey
         ld bc,#f40e
         out (c),c
@@ -4417,8 +4382,27 @@ inter
 crtcraz
 	db #01,#28,#02,#2E,#06,#19,#07,#1E,#0c,#30
 
+set_ink_plus
+	ld hl,data_plus
+	ld bc,#bc11
+	l01d9
+	ld a,(hl)
+	out (c),a
+	inc l
+	dec c
+	jr nz,l01d9
+	ld bc,#7fb8
+	out (c),c
+	ld hl,#0801
+	ld de,#6400
+	ld bc,#0020
+	ldir
+	ld bc,#7fa0
+	out (c),c
+	ret
+
 zeend
 
 
-;save 'egx.scr',#170,zeend-zstart,AMSDOS
+;save 'egx.scr',#170,zeend-zstart
 save 'egx.scr',#170,zeend-zstart,DSK,'egx_cpcplus.dsk'
