@@ -1,4 +1,4 @@
-;write "egxo.scr"
+;write "egxofix.scr"
 ;generation du fichier .scr sur le pc...
 
 org #0170
@@ -6,16 +6,14 @@ nolist
 zstart
 run start
 
-
-; partie loader basic
 db #0e,#00,#0a,#00,#01,#c0,#20,#69
 db #4d,#50,#20,#76,#32,#00,#0d,#00
-db #14,#00,#ad,#20 
+db #14,#00,#ad,#20
 
 
 ;----------------------------------------------------
 adr_0184
-; Mode ecran (&0e=mode0 / &0f=mode1 / &10=mode2)
+; Mode ecran (#0e=mode0 / &0f=mode1 / &10=mode2)
 db #0f
 ;----------------------------------------------------
 
@@ -26,25 +24,25 @@ db #ad,#01,#00,#00,#00
 ;----------------------------------------------------
 adr_018d
 ; overscan crtc config
-; r&01=&30
-; r&02=&32
-; r&06=&22
-; r&07=&23
-; r&0c=&0d
+; r#01=&30
+; r#02=&32
+; r#06=&22
+; r#07=&23
+; r#0c=&0d
 db #01,#30,#02
 db #32,#06,#22,#07,#23,#0c,#0d
 ;----------------------------------------------------
 
-data_plus
+
 db #d0
 db #00,#00,#3f,#ff,#00,#ff,#77,#b3
 db #51,#a8,#d4,#62,#39,#9c,#46,#2b
-db #15,#8a,#cd,#ee ; sequence de delock asic
+db #15,#8a,#cd,#ee
 
 
 ;----------------------------------------------------
 adr_01ac
-; flag old ou plus (&00=cpc old / &01=cpc+)
+; flag old ou plus (#00=cpc old / &01=cpc+)
 db #01
 ;----------------------------------------------------
 
@@ -72,7 +70,22 @@ jr nz,l01c3
 ld a,(#01ac)
 cp #01
 jr nz,l01f5
-call set_ink_plus
+ld hl,#019b
+ld bc,#bc11
+l01d9
+ld a,(hl)
+out (c),a
+inc l
+dec c
+jr nz,l01d9
+ld bc,#7fb8
+out (c),c
+ld hl,adr_0801
+ld de,#6400
+ld bc,#0020
+ldir
+ld bc,#7fa0
+out (c),c
 l01f5
 ld hl,#b7f9
 call #bcdd
@@ -95,11 +108,11 @@ adr_01ff
 EXTRAFLAG
 db #01
 ; si db #00 d'origine ou > #04 --> on n'affiche aucun EGX, sortie propre.
-; si db #01 ---> EGX1 type mode0(&8c) impaire / mode1(&8d) paire.
-; si db #02 ---> EGX1 type mode1(&8d)impaire / mode0(&8c) paire.
-; si db #03 ---> EGX2 type mode1(&8d) impaire / mode2(&8e) paire.
-; si db #04 ---> EGX2 type mode2(&8e) impaire / mode1(&8d) paire.
-; A noter que d'autres valeurs > &04 pourront-etre utilisees pour autre chose que de l'EGX...
+; si db #01 ---> EGX1 type mode0(#8c) impaire / mode1(&8d) paire.
+; si db #02 ---> EGX1 type mode1(#8d)impaire / mode0(&8c) paire.
+; si db #03 ---> EGX2 type mode1(#8d) impaire / mode2(&8e) paire.
+; si db #04 ---> EGX2 type mode2(#8e) impaire / mode1(&8d) paire.
+; A noter que d'autres valeurs > #04 pourront-etre utilisees pour autre chose que de l'EGX...
 ; Ce EXTRAFLAG est donc encore libre pour autre chose ^^ \o/
 ;----------------------------------------------------
 
@@ -107,9 +120,9 @@ db #01
 ;----------------------------------------------------
 ; data screen overcan...
 ; attention...
-; encres cpc plus en &801-&821
+; encres cpc plus en #801-&821
 ; et
-; encres cpc old en &7f00-&7f0f (dans l'ordre!)
+; encres cpc old en #7f00-&7f0f (dans l'ordre!)
 org #0200
 db #50,#50,#50,#50,#50,#50,#50,#50
 db #50,#50,#50,#50,#50,#50,#50,#50
@@ -308,14 +321,33 @@ db #00
 ;----------------------------------------------------
 adr_0801
 ; encres cpc+
-db #66, #06, #63, #06, #00, #00, #96, #06, #33, #03, #63, #03, #93, #06, #96, #06
+db #96, #07, #63, #06, #00, #00, #96, #06, #33, #03, #63, #03, #93, #06, #96, #06
 db #96, #09, #C9, #0C, #63, #06, #96, #06, #C6, #09, #C9, #09, #63, #03, #99, #09
 ;----------------------------------------------------
 
 org #0822
-db #00,#00,#00,#00,#00,#00,#00,#00
-db #00,#00,#00,#00,#00,#00,#00,#00
-db #00,#00,#00,#00,#00,#00,#00,#00
+
+;----------------------------- 22 octets
+inkdeb	
+; Connecting I/O Page
+Ld bc,#7FB8
+out (c),c
+ld hl,adr_0801
+ld de,#6400
+ld bc,32
+ldir
+; Deconnecting I/O Page
+Ld bc,#7fA0
+out (c),c
+ret
+inkfin
+
+; Donc On vire x22 octets de #00 (zone grise...)
+
+;db #00,#00,#00,#00,#00,#00,#00,#00
+;db #00,#00,#00,#00,#00,#00,#00,#00
+;db #00,#00,#00,#00,#00,#00
+db #00,#00
 db #00,#00,#00,#00,#00,#00,#00,#00
 db #00,#00,#00,#00,#00,#00,#00,#00
 db #00,#00,#00,#00,#00,#00,#00,#00
@@ -4122,29 +4154,14 @@ db #00,#00,#00,#00,#00,#00
 ;----------------------------------------------------
 adr_7f00
 ; encre cpc old (de 0 a 15, dans l'ordre donc)
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
+db #54,#40,#5e,#4b,#5f,#58,#44,#47
+db #43,#5c,#56,#4e,#5b,#46,#54,#54
 ;----------------------------------------------------
 
 
 ;----------------------------------------------------
-org #7f10
 adr_7f10
-; zone libre de code de &7f10 a &7fff (taille &ef max)
+; zone libre de code de #7f10 a &7fff (taille &ef max)
 ;db #00,#00,#00,#00,#00,#00,#00,#00
 ;db #00,#00,#00,#00,#00,#00,#00,#00
 ;db #00,#00,#00,#00,#00,#00,#00,#00
@@ -4217,15 +4234,13 @@ lignes	equ 272/2	; 270/2 = ca marche aussi...
 	push de
 	push hl
 
-
-
 ;---------------------------------------------------- switch automatique du EGX en fonction de son flag
 ; si db #00 d'origine ou > #04 --> on n'affiche aucun EGX, sortie propre.
-; si db #01 ---> EGX1 type mode0(&8c) impaire / mode1(&8d) paire.
-; si db #02 ---> EGX1 type mode1(&8d)impaire / mode0(&8c) paire.
-; si db #03 ---> EGX2 type mode1(&8d) impaire / mode2(&8e) paire.
-; si db #04 ---> EGX2 type mode2(&8e) impaire / mode1(&8d) paire.
-; A noter que d'autres valeurs > &04 pourront-etre utilisees pour autre chose que de l'EGX...
+; si db #01 ---> EGX1 type mode0(#8c) impaire / mode1(&8d) paire.
+; si db #02 ---> EGX1 type mode1(#8d)impaire / mode0(&8c) paire.
+; si db #03 ---> EGX2 type mode1(#8d) impaire / mode2(&8e) paire.
+; si db #04 ---> EGX2 type mode2(#8e) impaire / mode1(&8d) paire.
+; A noter que d'autres valeurs > #04 pourront-etre utilisees pour autre chose que de l'EGX...
 ; Ce EXTRAFLAG est donc encore libre pour autre chose ^^ \o/
 ;----------------------------------------------------
 	ld a,(EXTRAFLAG)
@@ -4327,31 +4342,57 @@ pokemodelignepaire
 	or l
 	jr nz,loopmode
 
-		; et la on balance les 15 encres deja stockees (dans l'ordre) en &7f00
-
-ink_plus
-	di
-	call set_ink_plus
-	ei
 	
+; et la on balance les encres+ deja stockees (dans l'ordre) en #801
+
+	call inkdeb	
+
+; pas besoin de delocker l'asic, il l'est deja car #01 en place ici 
+; adr_01ac
+; flag old ou plus (#00=cpc old / &01=cpc+)
+; db #01
+
+; pas besoin de DI... c'est deja sous DI... Encore moins de EI...
+
+; 22 octets a caser hors page i/o ASIC.
+; en #822 par exemple... (zone grise...) - si dispo... voir avec ast...
+
+;inkdeb	
+; Connecting I/O Page
+;Ld bc,#7FB8
+;out (c),c
+;ld hl,#801
+;ld de,#6400
+;ld bc,32
+;ldir
+; Deconnecting I/O Page
+;Ld bc,#7fA0
+;out (c),c
+;ret
+;inkfin
+
+
 tstspckey
         ld bc,#f40e
         out (c),c
         ld bc,#F6c0
         out (c),c
-        db #ed,#71	; out(c),0
+	db #ed,#71	; out(c),0 
+
         ld bc,#f792
         out (c),c
-        ld bc,#f645
+        ld bc,#f645	; ligne clavier 5
         out (c),c
         ld b,#f4
         in a,(c)
         ld bc,#f782
         out (c),c
         dec b
-        db #ed,#71	; out(c),0
+	db #ed,#71	; out(c),0 
+
 	rla
 	jp c,main
+
 exit
 	ld hl,crtcraz
 	ld a,#05
@@ -4373,36 +4414,15 @@ loopcrtc
 	exx
 	ei
 
+	ds 17,0	; 17 octets de libres...
+
 	ret
 inter	
 	dw 0
 
-
-
 crtcraz
 	db #01,#28,#02,#2E,#06,#19,#07,#1E,#0c,#30
 
-set_ink_plus
-	ld hl,data_plus
-	ld bc,#bc11
-	l01d9
-	ld a,(hl)
-	out (c),a
-	inc l
-	dec c
-	jr nz,l01d9
-	ld bc,#7fb8
-	out (c),c
-	ld hl,#0801
-	ld de,#6400
-	ld bc,#0020
-	ldir
-	ld bc,#7fa0
-	out (c),c
-	ret
-
 zeend
 
-
-;save 'egx.scr',#170,zeend-zstart
-save 'egx.scr',#170,zeend-zstart,DSK,'egx_cpcplus.dsk'
+;save'egx.scr',#170,zeend-zstart,DSK,'egx_cpcplus.dsk'
