@@ -8841,6 +8841,7 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 		}
 	}
 	if exportType.CpcPlus {
+		copy(o[0x6b2:0x6c8], egxPlusOverscanTemplate[0x6b2:0x6c8])
 		copy(o[0x7da0:], egxPlusOverscanTemplate[0x7da0:]) // copy egx routine
 	} else {
 		copy(o[0x7da0:], egxOverscanTemplate[0x7da0:]) // copy egx routine
