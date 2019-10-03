@@ -107,7 +107,7 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, exportType *e
 				return err
 			}
 			if !exportType.Overscan {
-				if err = file.EgxLoader("egx.scr", p, uint8(m2), uint8(m1), exportType); err != nil {
+				if err = file.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), exportType); err != nil {
 					return err
 				}
 			}
@@ -290,7 +290,7 @@ func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8,
 	firmwareColorUsed := make(map[int]int, 0)
 	mode1Line := 1
 	mode2Line := 0
-	if firstLineMode == 1 {
+	if firstLineMode == 2 {
 		mode1Line = 0
 		mode2Line = 1
 	}
