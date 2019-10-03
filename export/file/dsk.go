@@ -9,7 +9,23 @@ import (
 )
 
 func ImportInDsk(exportType *x.ExportType) error {
-	dskFullpath := exportType.Fullpath(".dsk")
+	var suffix string
+	if exportType.EgxFormat == x.Egx1Mode {
+		suffix += "-egx1"
+	}
+	if exportType.EgxFormat == x.Egx2Mode {
+		suffix += "-egx2"
+	}
+	if exportType.CpcPlus {
+		suffix += "-cpcplus"
+	}
+	if exportType.Overscan {
+		suffix += "-overscan"
+	}
+	if exportType.Flash {
+		suffix += "-flash"
+	}
+	dskFullpath := exportType.Fullpath(suffix + ".dsk")
 
 	var floppy *dsk.DSK
 	if exportType.ExtendedDsk {

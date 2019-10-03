@@ -310,6 +310,7 @@ func main() {
 	exportType.RotationLosthighBit = *losthigh
 	exportType.RotationLostlowBit = *lostlow
 	exportType.RotationIterations = *iterations
+	exportType.Flash = *flash
 
 	if exportType.CpcPlus {
 		exportType.Kit = true

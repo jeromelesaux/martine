@@ -55,11 +55,11 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, exportType *e
 				return err
 			}
 		}
-		if err = ToEgx1(in0, in1, p, uint8(m1), filepath1, exportType); err != nil {
+		if err = ToEgx1(in0, in1, p, uint8(m1), "egx.scr", exportType); err != nil {
 			return err
 		}
 		if !exportType.Overscan {
-			if err = file.EgxLoader(filepath1, p, uint8(m1), uint8(m2), exportType); err != nil {
+			if err = file.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), exportType); err != nil {
 				return err
 			}
 		}
@@ -103,11 +103,11 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, exportType *e
 					return err
 				}
 			}
-			if err = ToEgx2(in1, in2, p, uint8(m1), filepath1, exportType); err != nil {
+			if err = ToEgx2(in1, in2, p, uint8(m1), "egx.scr", exportType); err != nil {
 				return err
 			}
 			if !exportType.Overscan {
-				if err = file.EgxLoader(filepath1, p, uint8(m1), uint8(m2), exportType); err != nil {
+				if err = file.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), exportType); err != nil {
 					return err
 				}
 			}

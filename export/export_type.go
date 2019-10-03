@@ -68,6 +68,7 @@ type ExportType struct {
 	RotationKeephighBit         int
 	RotationKeeplowBit          int
 	RotationIterations          int
+	Flash                       bool
 	FlashScreenFilepath1        string
 	FlashScreenFilepath2        string
 	FlashPaletteFilepath1       string
