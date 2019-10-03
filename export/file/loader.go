@@ -668,6 +668,7 @@ var (
 	startPaletteValues   = 6
 	startPaletteName     = 58 + 16
 	startScreenName      = 149 + 16
+	startPlusScreenName  = 20
 	paletteCPCPlusLoader = []byte{
 		0x00, 0x50, 0x41, 0x4C, 0x50, 0x4C, 0x55, 0x53,
 		0x20, 0x42, 0x49, 0x4E, 0x00, 0x00, 0x00, 0x00,
@@ -1616,6 +1617,8 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, exportType 
 	var loader []byte
 	if exportType.CpcPlus {
 		loader = egxPlusBasicLoader
+		copy(loader[startPlusScreenName:], filename[:])
+
 	} else {
 		loader = egxLoaderBasic
 		copy(loader[startPaletteValues:], out[0:len(out)])
