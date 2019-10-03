@@ -8145,9 +8145,9 @@ func (i *KitPalette) ToString() string {
 	for _, v := range i.Colors {
 		out += v.ToString() + "\n"
 	}
-	out += "DW "
+	out += "DB "
 	for _, v := range i.Colors {
-		out += fmt.Sprintf("#%0.4X", v.Value()) + ", "
+		out += fmt.Sprintf("#%0.2X, #%0.2X", v.Bytes()[1], v.Bytes()[0]) + ", "
 	}
 	out += "\n"
 	return out
