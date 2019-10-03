@@ -97,12 +97,19 @@ func (e *ExportType) AddFile(file string) {
 	e.DskFiles = append(e.DskFiles, file)
 }
 
+func RemoveUnsupportedChar(s string) string {
+	s = strings.ReplaceAll(s, "-", "")
+	s = strings.ReplaceAll(s, "_", "")
+	s = strings.ReplaceAll(s, ".", "")
+	return s
+}
+
 func (e *ExportType) AmsdosFilename() []byte {
 	for i := 0; i < 8; i++ {
 		e.amsdosFilename[i] = ' '
 	}
 	file := strings.ToUpper(filepath.Base(e.InputPath))
-	filename := strings.TrimSuffix(file, filepath.Ext(file))
+	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
 	filenameSize := len(filename)
 	if filenameSize > 8 {
 		filenameSize = 8
@@ -123,7 +130,7 @@ func (e *ExportType) Fullpath(ext string) string {
 func (e *ExportType) TransformToAmsdosFile(filePath string) string {
 	amsdosFile := make([]byte, 8)
 	file := strings.ToUpper(filepath.Base(e.InputPath))
-	filename := strings.TrimSuffix(file, filepath.Ext(file))
+	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
 	filenameSize := len(filename)
 	if filenameSize > 8 {
 		filenameSize = 8
@@ -135,7 +142,7 @@ func (e *ExportType) TransformToAmsdosFile(filePath string) string {
 
 func (e *ExportType) OsFilename(ext string) string {
 	file := strings.ToUpper(filepath.Base(e.InputPath))
-	filename := strings.TrimSuffix(file, filepath.Ext(file))
+	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
 	filenameSize := len(filename)
 	if filenameSize > 8 {
 		filenameSize = 8
@@ -147,7 +154,7 @@ func (e *ExportType) OsFilename(ext string) string {
 
 func (e *ExportType) GetAmsdosFilename(filePath string, ext string) string {
 	file := strings.ToUpper(filepath.Base(filePath))
-	filename := strings.TrimSuffix(file, filepath.Ext(file))
+	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
 	filenameSize := 7
 	end := len(filename)
 	if len(filename) < 8 {
@@ -159,7 +166,7 @@ func (e *ExportType) GetAmsdosFilename(filePath string, ext string) string {
 
 func (e *ExportType) AmsdosFullPath(filePath string, newExtension string) string {
 	filename := filepath.Base(filePath)
-	file := strings.TrimSuffix(filename, filepath.Ext(filename))
+	file := RemoveUnsupportedChar(strings.TrimSuffix(filename, filepath.Ext(filename)))
 	length := 7
 	end := len(file)
 	if len(file) < 8 {
@@ -172,7 +179,7 @@ func (e *ExportType) AmsdosFullPath(filePath string, newExtension string) string
 
 func (e *ExportType) OsFullPath(filePath string, newExtension string) string {
 	filename := filepath.Base(filePath)
-	file := strings.TrimSuffix(filename, filepath.Ext(filename))
+	file := RemoveUnsupportedChar(strings.TrimSuffix(filename, filepath.Ext(filename)))
 	newFilename := file + newExtension
 	return e.OutputPath + string(filepath.Separator) + newFilename
 }
