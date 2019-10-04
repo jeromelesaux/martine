@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 	"image"
@@ -530,11 +529,6 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, expor
 	}
 	if exportType.CpcPlus {
 		if err := file.Kit(filePath, p, screenMode, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-		nP := convert.ConvertPalette(p, constants.CpcOldPalette)
-		if err := file.Pal(filePath, nP, screenMode, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
