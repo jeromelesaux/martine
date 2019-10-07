@@ -1688,9 +1688,9 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, exportType 
 		for i := 0; i < len(p); i++ {
 			cp := constants.NewCpcPlusColor(p[i])
 			b := cp.Bytes()
-			kit[index] = b[1]
-			index++
 			kit[index] = b[0]
+			index++
+			kit[index] = b[1]
 			index++
 		}
 		copy(egxLoader[egxPlusBinaryPaletteOffset:], kit[:])
