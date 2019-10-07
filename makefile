@@ -29,6 +29,6 @@ build:
 	@echo "Compilation for macos"
 	GOOS=darwin go build ${LDFLAGS} -o martine $(SOURCEDIR)/main.go $(SOURCEDIR)/process.go
 	zip martine-$(appversion)-macos.zip martine  ./resources/*
-	@echo "Compilation for macos"
+	@echo "Compilation for raspberry pi Raspbian"
 	GOOS=linux ARCH=arm GOARM=5 go build ${LDFLAGS} -o martine $(SOURCEDIR)/main.go $(SOURCEDIR)/process.go
 	zip martine-$(appversion)-arm.zip martine  ./resources/*
