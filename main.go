@@ -85,7 +85,7 @@ var (
 	palettePath2        = flag.String("pal2", "", "Apply the input palette to the second image (flash mode)")
 	egx1                = flag.Bool("egx1", false, "Create egx 1 output cpc image (mix mode 0 / 1).\n\t(ex: -egx1 -i 1.SCR -m 0 -pal 1.PAL -i2 2.SCR -o test -m2 1 -dsk)\n\tor\n\t(ex: -egx1 -i input.png -m 0 -o test -dsk)")
 	egx2                = flag.Bool("egx2", false, "Create egx 2 output cpc image (mix mode 1 / 2).(ex: -egx2 -i 1.SCR -m 0 -pal 1.PAL -i2 2.SCR -o test -m2 1 -dsk)\n\tor\n\t(ex: -egx2 -i input.png -m 0 -o test -dsk)")
-	version             = "0.20"
+	version             = "0.21.rc"
 )
 
 func usage() {
