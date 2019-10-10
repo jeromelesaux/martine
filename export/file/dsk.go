@@ -25,6 +25,10 @@ func ImportInDsk(exportType *x.ExportType) error {
 	if exportType.Flash {
 		suffix += "-flash"
 	}
+	if exportType.CustomDimension {
+		suffix += "-sprite"
+	}
+
 	dskFullpath := exportType.Fullpath(suffix + ".dsk")
 
 	var floppy *dsk.DSK
