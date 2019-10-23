@@ -516,11 +516,11 @@ func main() {
 					}
 				}
 
-				if len(p) == 0 {
-					fmt.Fprintf(os.Stderr, "Now colors found in palette, give up treatment.\n")
-					os.Exit(-1)
-				}
 				if exportType.EgxFormat > 0 {
+					if len(p) == 0 {
+						fmt.Fprintf(os.Stderr, "Now colors found in palette, give up treatment.\n")
+						os.Exit(-1)
+					}
 					if err := gfx.Egx(*picturePath, *picturePath2,
 						p,
 						*mode,
