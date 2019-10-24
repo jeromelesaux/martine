@@ -44,22 +44,26 @@ func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (c
 		sort.Sort(sort.Reverse(sort.IntSlice(a)))
 		var distance = -1.
 		for i, k := range a {
-			if i > 0 {
-				distance = constants.ColorsDistance(n[a[i]][0], n[a[i-1]][0])
-			}
 			if len(newPalette) >= size.ColorsAvailable {
 				break
 			}
-			if distance == -1 {
-				fmt.Fprintf(os.Stdout, "distance(color:%v): accepted\n", n[a[i]][0])
-				newPalette = append(newPalette, n[k][0])
-			} else {
-				if distance > 10. {
-					fmt.Fprintf(os.Stdout, "distance(colors:%v,%v): %.2f accepted\n", n[a[i]][0], n[a[i-1]][0], distance)
+			if isCpcPlus {
+				if i > 0 {
+					distance = constants.ColorsDistance(n[a[i]][0], n[a[i-1]][0])
+				}
+				if distance == -1 {
+					fmt.Fprintf(os.Stdout, "distance(color:%v): accepted\n", n[a[i]][0])
 					newPalette = append(newPalette, n[k][0])
 				} else {
-					fmt.Fprintf(os.Stdout, "distance(colors:%v,%v): %.2f skipped\n", n[a[i]][0], n[a[i-1]][0], distance)
+					if distance > 10. {
+						fmt.Fprintf(os.Stdout, "distance(colors:%v,%v): %.2f accepted\n", n[a[i]][0], n[a[i-1]][0], distance)
+						newPalette = append(newPalette, n[k][0])
+					} else {
+						fmt.Fprintf(os.Stdout, "distance(colors:%v,%v): %.2f skipped\n", n[a[i]][0], n[a[i-1]][0], distance)
+					}
 				}
+			} else {
+				newPalette = append(newPalette, n[k][0])
 			}
 		}
 
