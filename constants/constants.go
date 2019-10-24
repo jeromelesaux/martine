@@ -160,6 +160,35 @@ func HardwareValueAreEquals(hv []uint8, val uint8) bool {
 	return false
 }
 
+func diffColor(a, b uint32) int64 {
+	if a > b {
+		return int64(a - b)
+	}
+	return int64(b - a)
+}
+
+func sqrt(v int64) int64 {
+	if v < 0 {
+		return -v
+	}
+	return v
+}
+
+var DistanceMax int64 = 584970
+
+// from website https://www.compuphase.com/cmetric.htm
+func ColorsDistance(c1, c2 color.Color) float64 {
+	r1, g1, b1, _ := c1.RGBA()
+	r2, g2, b2, _ := c2.RGBA()
+	rmean := int64(r1>>8+r2>>8) / 2
+	r := diffColor(r1>>8, r2>>8)
+	g := diffColor(g1>>8, g2>>8)
+	b := diffColor(b1>>8, b2>>8)
+	distance := sqrt((((512 + rmean) * r * r) >> 8) + (4 * g * g) + (((767 - rmean) * b * b) >> 8))
+	//fmt.Fprintf(os.Stdout, "distance :%d distanceMax:%d\n", distance, DistanceMax)
+	return float64(distance) / float64(DistanceMax) * 100.
+}
+
 func CpcColorFromHardwareNumber(c int) (CpcColor, error) {
 	if White.HardwareNumber == c {
 		return White, nil
