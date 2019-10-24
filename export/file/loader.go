@@ -1423,7 +1423,7 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, exportType
 
 	// export fichier basic loader
 	loader = basicCPCPlusLoaderBasic
-	filename := exportType.AmsdosFilename()
+	filename := exportType.GetAmsdosFilename(filePath, "")
 	copy(loader[startScreenPlusName:], filename[:])
 	switch mode {
 	case 0:
