@@ -83,7 +83,7 @@ func BayerDiphering(input *image.NRGBA, filter [][]float32, palette color.Palett
 	width := image2.Bounds().Max.X
 	filterRowLenght := len(filter[0]) - 1
 	filterLenght := len(filter[0]) * len(filter[0])
-	fmt.Fprintf(os.Stdout, "Palette lenght used in Bayer dithering %d\n", len(palette))
+	fmt.Fprintf(os.Stdout, "Palette length used in Bayer dithering %d\n", len(palette))
 	pal := InitPalWithPalette(palette)
 
 	proc.Parallel(0, height, func(yc <-chan int) {
