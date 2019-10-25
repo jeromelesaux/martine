@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"image/color"
+	"sort"
 	"strconv"
 )
 
@@ -175,6 +176,65 @@ func sqrt(v int64) int64 {
 }
 
 var DistanceMax int64 = 584970
+
+type PaletteReducer struct {
+	Cs []ColorReducer
+}
+
+func NewPaletteReducer() *PaletteReducer {
+	return &PaletteReducer{Cs: make([]ColorReducer, 0)}
+}
+
+type ColorReducer struct {
+	C         color.Color
+	Occurence int
+	Distances map[color.Color]float64
+}
+
+func NewColorReducer(c color.Color, occ int) ColorReducer {
+	return ColorReducer{C: c, Occurence: occ, Distances: make(map[color.Color]float64)}
+}
+
+func (p *PaletteReducer) ComputeDistances() {
+	for index, v := range p.Cs {
+		for i, v2 := range p.Cs {
+			if index == i {
+				continue
+			}
+			p.Cs[index].Distances[v2.C] = ColorsDistance(v.C, v2.C)
+		}
+	}
+}
+
+type ByOccurence []ColorReducer
+
+func (b ByOccurence) Len() int           { return len(b) }
+func (b ByOccurence) Less(i, j int) bool { return b[i].Occurence < b[j].Occurence }
+func (b ByOccurence) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
+
+func (p *PaletteReducer) OccurencesSort() {
+	sort.Sort(sort.Reverse(ByOccurence(p.Cs)))
+}
+
+func (pr *PaletteReducer) Reduce(nbColors int) color.Palette {
+	var p color.Palette
+
+	pr.ComputeDistances()
+	pr.OccurencesSort()
+	p = append(p, pr.Cs[0].C)
+	for i := 1; i < len(pr.Cs); i++ {
+		if len(p) < nbColors {
+			previous := pr.Cs[i-1]
+			current := pr.Cs[i]
+			if previous.Distances[current.C] > 10. {
+				p = append(p, current.C)
+			}
+		} else {
+			break
+		}
+	}
+	return p
+}
 
 // from website https://www.compuphase.com/cmetric.htm
 func ColorsDistance(c1, c2 color.Color) float64 {

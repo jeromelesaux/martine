@@ -32,7 +32,16 @@ func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (c
 		fmt.Fprintf(os.Stderr, "Check color usage in image.\n")
 		colorUsage := computePaletteUsage(out, p)
 		fmt.Println(colorUsage)
-		n := map[int][]color.Color{}
+		// feed sort palette colors structure
+		paletteToReduce := constants.NewPaletteReducer()
+
+		for c, v := range colorUsage {
+			paletteToReduce.Cs = append(paletteToReduce.Cs, constants.NewColorReducer(c, v))
+		}
+		// launch analyse
+		newPalette := paletteToReduce.Reduce(size.ColorsAvailable)
+
+	/*	n := map[int][]color.Color{}
 		var a []int
 		for k, v := range colorUsage {
 			n[v] = append(n[v], k)
@@ -65,7 +74,7 @@ func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (c
 			} else {
 				newPalette = append(newPalette, n[k][0])
 			}
-		}
+		} */
 
 		fmt.Fprintf(os.Stdout, "Phasis downgrade colors palette palette (%d)\n", len(newPalette))
 		return newPalette, downgradeWithPalette(out, newPalette), nil
