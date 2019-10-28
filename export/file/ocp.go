@@ -8213,8 +8213,12 @@ func OpenInk(filePath string) (color.Palette, *InkPalette, error) {
 	defer fr.Close()
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, 0)
+		fmt.Fprintf(os.Stderr, "Cannot read the Ink Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(0, io.SeekStart)
+	}
+	if header.Checksum != header.ComputedChecksum16() {
+		fmt.Fprintf(os.Stderr, "Cannot read the Ink Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(0, io.SeekStart)
 	}
 
 	inkPalette := &InkPalette{}
@@ -8253,8 +8257,12 @@ func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 	defer fr.Close()
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, 0)
+		fmt.Fprintf(os.Stderr, "Cannot read the Overscan Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(0, io.SeekStart)
+	}
+	if header.Checksum != header.ComputedChecksum16() {
+		fmt.Fprintf(os.Stderr, "Cannot read the Overscan Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(0, io.SeekStart)
 	}
 	palette := color.Palette{}
 	b, err := ioutil.ReadAll(fr)
@@ -8386,8 +8394,12 @@ func OpenKit(filePath string) (color.Palette, *KitPalette, error) {
 	}
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, 0)
+		fmt.Fprintf(os.Stderr, "Cannot read the Kit Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(0, io.SeekStart)
+	}
+	if header.Checksum != header.ComputedChecksum16() {
+		fmt.Fprintf(os.Stderr, "Cannot read the Kit Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(0, io.SeekStart)
 	}
 
 	KitPalette := &KitPalette{}
@@ -8446,9 +8458,14 @@ func RawScr(filePath string) ([]byte, error) {
 	}
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fmt.Fprintf(os.Stderr, "Cannot read the RawScr Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		fr.Seek(0, io.SeekStart)
 	}
+	if header.Checksum != header.ComputedChecksum16() {
+		fmt.Fprintf(os.Stderr, "Cannot read the RawScr Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(0, io.SeekStart)
+	}
+
 	bf, err := ioutil.ReadAll(fr)
 	if err != nil {
 		return nil, err
@@ -8467,7 +8484,11 @@ func RawOverscan(filePath string) ([]byte, error) {
 	}
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fmt.Fprintf(os.Stderr, "Cannot read the Overscan Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(0, io.SeekStart)
+	}
+	if header.Checksum != header.ComputedChecksum16() {
+		fmt.Fprintf(os.Stderr, "Cannot read the Overscan Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		fr.Seek(0, io.SeekStart)
 	}
 	bf, err := ioutil.ReadAll(fr)
@@ -8571,7 +8592,11 @@ func OpenPal(filePath string) (color.Palette, *OcpPalette, error) {
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, 0)
+		fr.Seek(0, io.SeekStart)
+	}
+	if header.Checksum != header.ComputedChecksum16() {
+		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(0, io.SeekStart)
 	}
 
 	ocpPalette := &OcpPalette{}
@@ -8657,9 +8682,14 @@ func RawWin(filePath string) ([]byte, error) {
 	}
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Win Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		fr.Seek(0, io.SeekStart)
 	}
+	if header.Checksum != header.ComputedChecksum16() {
+		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Win Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(0, io.SeekStart)
+	}
+
 	bf, err := ioutil.ReadAll(fr)
 	if err != nil {
 		return nil, err
@@ -8678,6 +8708,11 @@ func OpenWin(filePath string) (*OcpWinFooter, error) {
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(0, io.SeekStart)
+	}
+	if header.Checksum != header.ComputedChecksum16() {
+		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(0, io.SeekStart)
 	}
 
 	ocpWinFooter := &OcpWinFooter{}
