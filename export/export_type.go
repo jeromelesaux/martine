@@ -76,6 +76,8 @@ type ExportType struct {
 	EgxFormat                   int
 	EgxMode1                    uint8
 	EgxMode2                    uint8
+	Sna                         bool
+	SnaPath                     string
 }
 
 func NewExportType(input, output string) *ExportType {
