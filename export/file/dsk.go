@@ -28,7 +28,7 @@ func ImportInDsk(exportType *x.ExportType) error {
 	if exportType.CustomDimension {
 		suffix += "-sprite"
 	}
-	if exportType.DitheringAlgo != -1 {
+	if exportType.DitheringAlgo != 0 {
 		suffix += "-dithering"
 	}
 
