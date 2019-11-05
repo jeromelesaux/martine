@@ -549,6 +549,8 @@ func main() {
 			}
 		}
 	}
+
+	// export into bundle DSK or SNA
 	if exportType.Dsk {
 		if err := file.ImportInDsk(exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create or write into dsk file error :%v\n", err)

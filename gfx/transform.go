@@ -206,13 +206,20 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 		return err
 	}
-	if err := file.Pal(filename, p, mode, exportType); err != nil {
-		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
-		return err
-	}
-	if err := file.Ink(filename, p, 2, exportType); err != nil {
-		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
-		return err
+	if !exportType.CpcPlus {
+		if err := file.Pal(filename, p, mode, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+			return err
+		}
+		if err := file.Ink(filename, p, 2, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+			return err
+		}
+	} else {
+		if err := file.Kit(filename, p, mode, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+			return err
+		}
 	}
 	if err := file.Ascii(filename, data, p, exportType); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving ascii file for (%s) error :%v\n", filename, err)
