@@ -18,6 +18,7 @@ var (
 )
 
 func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, exportType *export.ExportType) error {
+	p = constants.SortColorsByDistance(p)
 	if m1 == 0 && m2 == 1 || m2 == 0 && m1 == 1 {
 		var f0, f1 string
 		var mode0, mode1 uint8
@@ -150,6 +151,7 @@ func AutoEgx1(in image.Image,
 			fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", picturePath)
 		}
 	}
+	p = constants.SortColorsByDistance(p)
 	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
 	if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_down.png", downgraded); err != nil {
 		os.Exit(-2)
@@ -183,6 +185,7 @@ func AutoEgx2(in image.Image,
 			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
 		}
 	}
+
 	if len(palette) > 0 {
 		p, downgraded = convert.DowngradingWithPalette(im, palette)
 	} else {
@@ -191,6 +194,7 @@ func AutoEgx2(in image.Image,
 			fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", picturePath)
 		}
 	}
+	p = constants.SortColorsByDistance(p)
 	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
 	if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_down.png", downgraded); err != nil {
 		os.Exit(-2)

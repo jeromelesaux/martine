@@ -8671,7 +8671,7 @@ type OcpWinFooter struct {
 }
 
 func (o *OcpWinFooter) ToString() string {
-	return fmt.Sprintf("Width:(%d)\nHeight:(%d)\n", o.Width, o.Height)
+	return fmt.Sprintf("Width:(%d)\nHeight:(%d)\n", o.Width/8, o.Height)
 }
 
 func RawWin(filePath string) ([]byte, error) {

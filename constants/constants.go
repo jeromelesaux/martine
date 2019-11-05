@@ -249,6 +249,17 @@ func ColorsDistance(c1, c2 color.Color) float64 {
 	return float64(distance) / float64(DistanceMax) * 100.
 }
 
+func ColorDistance2(c1, c2 color.Color) int64 {
+	r1, g1, b1, _ := c1.RGBA()
+	r2, g2, b2, _ := c2.RGBA()
+	rmean := int64(r1>>8+r2>>8) / 2
+	r := int64(r1>>8 - r2>>8)
+	g := int64(g1>>8 - g2>>8)
+	b := int64(b1>>8 - b2>>8)
+	distance := (((512+rmean)*r*r)>>8 + (4 * g * g) + (((767 - rmean) * b * b) >> 8))
+	return distance
+}
+
 func CpcColorFromHardwareNumber(c int) (CpcColor, error) {
 	if White.HardwareNumber == c {
 		return White, nil
@@ -687,4 +698,23 @@ func FlashColorQuotient(c1, c2 CpcColor) float64 {
 
 func CToF(c uint32) float64 {
 	return (float64(c) / 255. * 100)
+}
+
+type ByDistance []color.Color
+
+func (p ByDistance) Len() int { return len(p) }
+
+func (p ByDistance) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
+
+func (p ByDistance) Less(i, j int) bool {
+	d := ColorDistance2(p[i], p[j])
+	if d > 0. {
+		return true
+	}
+	return false
+}
+
+func SortColorsByDistance(p color.Palette) color.Palette {
+	sort.Sort(sort.Reverse(ByDistance(p)))
+	return p
 }
