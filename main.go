@@ -280,7 +280,6 @@ func main() {
 		resizeAlgo = imaging.NearestNeighbor
 	}
 	exportType.ExtendedDsk = *extendedDsk
-	exportType.Size = size
 	exportType.TileMode = *tileMode
 	exportType.RollMode = *rollMode
 	exportType.RollIteration = *iterations
@@ -359,10 +358,17 @@ func main() {
 			os.Exit(-2)
 		}
 	}
-	if !exportType.CustomDimension && *rotateMode {
+
+	// gestion de la taille de l'image en sortie
+	if !exportType.CustomDimension && *rotateMode && !exportType.SpriteHard {
 		size.Width = in.Bounds().Max.X
 		size.Height = in.Bounds().Max.Y
 	}
+	if *spriteHard {
+		size.Width = 16
+		size.Height = 16
+	}
+	exportType.Size = size
 
 	if !*deltaMode {
 		fmt.Fprintf(os.Stdout, "Filename :%s, extension:%s\n", filename, extension)
@@ -418,11 +424,6 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Dithering matrix not available.")
 			os.Exit(-1)
 		}
-	}
-
-	if *spriteHard {
-		size.Width = 16
-		size.Height = 16
 	}
 
 	if *reverse {
