@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-func ImportInDsk(exportType *x.ExportType) error {
+func ImportInDsk(filePath string, exportType *x.ExportType) error {
 	var suffix string
 	if exportType.EgxFormat == x.Egx1Mode {
 		suffix += "-egx1"
@@ -25,14 +25,14 @@ func ImportInDsk(exportType *x.ExportType) error {
 	if exportType.Flash {
 		suffix += "-flash"
 	}
-	if exportType.CustomDimension {
+	if exportType.CustomDimension || exportType.SpriteHard {
 		suffix += "-sprite"
 	}
 	if exportType.DitheringAlgo != 0 {
 		suffix += "-dithering"
 	}
 
-	dskFullpath := exportType.Fullpath(suffix + ".dsk")
+	dskFullpath := exportType.AmsdosFullPath(filePath, suffix+".dsk")
 
 	var floppy *dsk.DSK
 	if exportType.ExtendedDsk {

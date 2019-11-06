@@ -38,6 +38,52 @@ func Transform(in *image.NRGBA, p color.Palette, size constants.Size, filepath s
 	}
 }
 
+func SpriteHardTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, exportType *x.ExportType) error {
+	var data []byte
+	size.Height = in.Bounds().Max.Y
+	size.Width = in.Bounds().Max.X
+	firmwareColorUsed := make(map[int]int, 0)
+	offset := 0
+	data = make([]byte, 256)
+	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
+		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
+			c := in.At(x, y)
+			pp, err := PalettePosition(c, p)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c, x, y)
+				pp = 0
+			}
+			firmwareColorUsed[pp]++
+			data[offset] = byte(pp)
+			offset++
+		}
+	}
+	fmt.Println(firmwareColorUsed)
+	if err := file.Win(filename, data, mode, 16, size.Height, exportType); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+		return err
+	}
+	if !exportType.CpcPlus {
+		if err := file.Pal(filename, p, mode, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+			return err
+		}
+		if err := file.Ink(filename, p, 2, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+			return err
+		}
+	} else {
+		if err := file.Kit(filename, p, mode, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+			return err
+		}
+	}
+	if err := file.Ascii(filename, data, p, exportType); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while saving ascii file for (%s) error :%v\n", filename, err)
+	}
+	return file.AsciiByColumn(filename, data, p, exportType)
+}
+
 func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, exportType *x.ExportType) error {
 	var data []byte
 	firmwareColorUsed := make(map[int]int, 0)

@@ -133,8 +133,13 @@ func ApplyOneImage(in image.Image,
 	if !exportType.CustomDimension {
 		Transform(downgraded, newPalette, exportType.Size, picturePath, exportType)
 	} else {
-		fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
-		SpriteTransform(downgraded, newPalette, exportType.Size, screenMode, filename, exportType)
+		if !exportType.SpriteHard {
+			fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
+			SpriteTransform(downgraded, newPalette, exportType.Size, screenMode, filename, exportType)
+		} else {
+			fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
+			SpriteHardTransform(downgraded, newPalette, exportType.Size, screenMode, filename, exportType)
+		}
 	}
 	return err
 }

@@ -78,6 +78,7 @@ type ExportType struct {
 	EgxMode2                    uint8
 	Sna                         bool
 	SnaPath                     string
+	SpriteHard                  bool
 }
 
 func NewExportType(input, output string) *ExportType {
