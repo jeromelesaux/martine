@@ -35,7 +35,7 @@ func DoSpliteRaster(in image.Image, screenMode uint8, filename string, exportTyp
 	if err := Export(filename, bw, p, screenMode, exportType); err != nil {
 		return err
 	}
-	return file.ExportSplitRaster(filename, p, rasters)
+	return file.ExportSplitRaster(filename, p, rasters, exportType)
 }
 
 func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, exportType *export.ExportType) (color.Palette, []byte, []*constants.SplitRaster, error) {
