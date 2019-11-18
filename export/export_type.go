@@ -79,6 +79,7 @@ type ExportType struct {
 	Sna                         bool
 	SnaPath                     string
 	SpriteHard                  bool
+	SplitRaster                 bool
 }
 
 func NewExportType(input, output string) *ExportType {

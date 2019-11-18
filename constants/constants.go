@@ -718,3 +718,23 @@ func SortColorsByDistance(p color.Palette) color.Palette {
 	sort.Sort(sort.Reverse(ByDistance(p)))
 	return p
 }
+
+type SplitRaster struct {
+	Offset       uint16
+	Length       uint8
+	Occurence    int
+	PaletteIndex int
+}
+
+func NewSpliteRaster(offset uint16, length uint8, occurence int, paletteIndex int) *SplitRaster {
+	return &SplitRaster{
+		Offset:       offset,
+		Length:       length,
+		Occurence:    occurence,
+		PaletteIndex: paletteIndex,
+	}
+}
+
+func (s *SplitRaster) Boundaries() (uint16, uint16) {
+	return s.Offset, s.Offset + uint16(s.Length)
+}
