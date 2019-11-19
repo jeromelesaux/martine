@@ -1294,6 +1294,9 @@ func OffsetAtIndex(b []byte, pattern []byte, occurence int) int {
 	i := 0
 	founds := 0
 	for {
+		if i+len(pattern) > len(b) {
+			return -1
+		}
 		v := b[i : i+len(pattern)]
 		if bytes.Compare(v, pattern) == 0 && founds == occurence {
 			return i + len(pattern)

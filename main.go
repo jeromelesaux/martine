@@ -41,18 +41,18 @@ var (
 	overscan            = flag.Bool("f", false, "Overscan mode (default no overscan)")
 	resizeAlgorithm     = flag.Int("a", 1, "Algorithm to resize the image (available : \n\t1: NearestNeighbor (default)\n\t2: CatmullRom\n\t3: Lanczos\n\t4: Linear\n\t5: Box\n\t6: Hermite\n\t7: BSpline\n\t8: Hamming\n\t9: Hann\n\t10: Gaussian\n\t11: Blackman\n\t12: Bartlett\n\t13: Welch\n\t14: Cosine\n\t15: MitchellNetravali\n\t")
 	help                = flag.Bool("help", false, "Display help message")
-	noAmsdosHeader      = flag.Bool("n", false, "no amsdos header for all files (default amsdos header added).")
+	noAmsdosHeader      = flag.Bool("n", false, "No amsdos header for all files (default amsdos header added).")
 	plusMode            = flag.Bool("p", false, "Plus mode (means generate an image for CPC Plus Screen)")
 	rollMode            = flag.Bool("roll", false, "Roll mode allow to walk and walk into the input file, associated with rla,rra,sra,sla, keephigh, keeplow, losthigh or lostlow options.")
 	iterations          = flag.Int("iter", -1, "Iterations number to walk in roll mode, or number of images to generate in rotation mode.")
-	rra                 = flag.Int("rra", -1, "bit rotation on the right and keep pixels")
-	rla                 = flag.Int("rla", -1, "bit rotation on the left and keep pixels")
-	sra                 = flag.Int("sra", -1, "bit rotation on the right and lost pixels")
-	sla                 = flag.Int("sla", -1, "bit rotation on the left and lost pixels")
-	losthigh            = flag.Int("losthigh", -1, "bit rotation on the top and lost pixels")
-	lostlow             = flag.Int("lostlow", -1, "bit rotation on the bottom and lost pixels")
-	keephigh            = flag.Int("keephigh", -1, "bit rotation on the top and keep pixels")
-	keeplow             = flag.Int("keeplow", -1, "bit rotation on the bottom and keep pixels")
+	rra                 = flag.Int("rra", -1, "Bit rotation on the right and keep pixels")
+	rla                 = flag.Int("rla", -1, "Bit rotation on the left and keep pixels")
+	sra                 = flag.Int("sra", -1, "Bit rotation on the right and lost pixels")
+	sla                 = flag.Int("sla", -1, "Bit rotation on the left and lost pixels")
+	losthigh            = flag.Int("losthigh", -1, "Bit rotation on the top and lost pixels")
+	lostlow             = flag.Int("lostlow", -1, "Bit rotation on the bottom and lost pixels")
+	keephigh            = flag.Int("keephigh", -1, "Bit rotation on the top and keep pixels")
+	keeplow             = flag.Int("keeplow", -1, "Bit rotation on the bottom and keep pixels")
 	palettePath         = flag.String("pal", "", "Apply the input palette to the image")
 	info                = flag.Bool("info", false, "Return the information of the file, associated with -pal and -win options")
 	winPath             = flag.String("win", "", "Filepath of the ocp win file")
@@ -65,18 +65,18 @@ var (
 	inkPath             = flag.String("ink", "", "Path of the palette Cpc ink file.")
 	rotateMode          = flag.Bool("rotate", false, "Allow rotation on the input image, the input image must be a square (width equals height)")
 	m4Host              = flag.String("host", "", "Set the ip of your M4.")
-	m4RemotePath        = flag.String("remotepath", "", "remote path on your M4 where you want to copy your files.")
+	m4RemotePath        = flag.String("remotepath", "", "Remote path on your M4 where you want to copy your files.")
 	m4Autoexec          = flag.Bool("autoexec", false, "Execute on your remote CPC the screen file or basic file.")
 	rotate3dMode        = flag.Bool("rotate3d", false, "Allow 3d rotation on the input image, the input image must be a square (width equals height)")
 	rotate3dType        = flag.Int("rotate3dtype", 0, "Rotation type :\n\t1 rotate on X axis\n\t2 rotate on Y axis\n\t3 rotate reverse X axis\n\t4 rotate left to right on Y axis\n\t5 diagonal rotation on X axis\n\t6 diagonal rotation on Y axis\n")
 	rotate3dX0          = flag.Int("rotate3dx0", -1, "X0 coordinate to apply in 3d rotation (default width of the image/2)")
 	rotate3dY0          = flag.Int("rotate3dy0", -1, "Y0 coordinate to apply in 3d rotation (default height of the image/2)")
-	initProcess         = flag.String("initprocess", "", "create a new empty process file.")
+	initProcess         = flag.String("initprocess", "", "Create a new empty process file.")
 	processFile         = flag.String("processfile", "", "Process file path to apply.")
-	deltaMode           = flag.Bool("delta", false, "delta mode: compute delta between two files (prefixed by the argument -df)\n\t(ex: -delta -df file1.SCR -df file2.SCR -df file3.SCR).\n\t(ex with wildcard: -delta -df file\\?.SCR or -delta file\\*.SCR")
+	deltaMode           = flag.Bool("delta", false, "Delta mode: compute delta between two files (prefixed by the argument -df)\n\t(ex: -delta -df file1.SCR -df file2.SCR -df file3.SCR).\n\t(ex with wildcard: -delta -df file\\?.SCR or -delta file\\*.SCR")
 	ditheringAlgo       = flag.Int("dithering", -1, "Dithering algorithm to apply on input image\nAlgorithms available:\n\t0: FloydSteinberg\n\t1: JarvisJudiceNinke\n\t2: Stucki\n\t3: Atkinson\n\t4: Sierra\n\t5: SierraLite\n\t6: Sierra3\n\t7: Bayer2\n\t8: Bayer3\n\t9: Bayer4\n\t10: Bayer8\n")
-	ditheringMultiplier = flag.Float64("multiplier", 1.18, "error dithering multiplier.")
-	withQuantization    = flag.Bool("quantization", false, "use additionnal quantization for dithering.")
+	ditheringMultiplier = flag.Float64("multiplier", 1.18, "Error dithering multiplier.")
+	withQuantization    = flag.Bool("quantization", false, "Use additionnal quantization for dithering.")
 	extendedDsk         = flag.Bool("extendeddsk", false, "Export in a Extended DSK 80 tracks, 10 sectors 400 ko per face")
 	reverse             = flag.Bool("reverse", false, "Transform .scr (overscan or not) file with palette (pal or kit file) into png file")
 	flash               = flag.Bool("flash", false, "generate flash animation with two ocp screens.\n\t(ex: -m 1 -flash -i input.png -o test -dsk)\n\tor\n\t(ex: -m 1 -flash -i input1.scr -pal input1.pal -m2 0 -i2 input2.scr -pal2 input2.pal -o test -dsk )")
@@ -87,6 +87,7 @@ var (
 	egx2                = flag.Bool("egx2", false, "Create egx 2 output cpc image (mix mode 1 / 2).(ex: -egx2 -i 1.SCR -m 0 -pal 1.PAL -i2 2.SCR -o test -m2 1 -dsk)\n\tor\n\t(ex: -egx2 -i input.png -m 0 -o test -dsk)")
 	sna                 = flag.Bool("sna", false, "Copy files in a new CPC image Sna.")
 	spriteHard          = flag.Bool("spritehard", false, "generate sprite hard for cpc plus.")
+	splitRasters        = flag.Bool("splitrasters", false, "Create Split rastered image.")
 	version             = "0.21.rc"
 )
 
@@ -314,6 +315,7 @@ func main() {
 	exportType.Flash = *flash
 	exportType.Sna = *sna
 	exportType.SpriteHard = *spriteHard
+	exportType.SplitRaster = *splitRasters
 
 	if exportType.CpcPlus {
 		exportType.Kit = true
@@ -540,18 +542,22 @@ func main() {
 						os.Exit(-1)
 					}
 				} else {
-					if strings.ToUpper(extension) != ".SCR" {
-						if err := gfx.ApplyOneImage(in,
-							exportType,
-							filename, *picturePath,
-							*mode,
-							screenMode); err != nil {
-							fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
+					if exportType.SplitRaster {
+						gfx.DoSpliteRaster(in, screenMode, filename, exportType)
+					} else {
+						if strings.ToUpper(extension) != ".SCR" {
+							if err := gfx.ApplyOneImage(in,
+								exportType,
+								filename, *picturePath,
+								*mode,
+								screenMode); err != nil {
+								fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
+								os.Exit(-1)
+							}
+						} else {
+							fmt.Fprintf(os.Stderr, "Error while applying on one image : SCR format not used for this treatment\n")
 							os.Exit(-1)
 						}
-					} else {
-						fmt.Fprintf(os.Stderr, "Error while applying on one image : SCR format not used for this treatment\n")
-						os.Exit(-1)
 					}
 				}
 			}

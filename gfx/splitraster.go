@@ -50,6 +50,9 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, expo
 	if err != nil {
 		return p, bw, rasters, err
 	}
+	if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_downgraded.png", newIm); err != nil {
+		return nil, bw, rasters, err
+	}
 
 	fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), newIm.Bounds().Max.X, newIm.Bounds().Max.Y)
 	fmt.Println(in.Bounds())
@@ -69,6 +72,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, expo
 				if isSplitRaster(newIm, x, y, 16) {
 					notSplitRaster = true
 					backgroundColor := p[0]
+					fmt.Fprintf(os.Stdout, "X{%d,%d},Y{%d} might be a splitraster\n", x, (x + 16), y)
 					switch screenMode {
 					case 0:
 						for i := 0; i < 16; {
