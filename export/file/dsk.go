@@ -31,6 +31,9 @@ func ImportInDsk(filePath string, exportType *x.ExportType) error {
 	if exportType.DitheringAlgo != 0 {
 		suffix += "-dithering"
 	}
+	if exportType.SplitRaster {
+		suffix += "-splitrasters"
+	}
 
 	dskFullpath := exportType.AmsdosFullPath(filePath, suffix+".dsk")
 
