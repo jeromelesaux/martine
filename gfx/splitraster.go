@@ -65,45 +65,46 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, expo
 	firmwareColorUsed := make(map[int]int, 0)
 	var occurence int
 	notSplitRaster := true
+	backgroundColor := p[0]
 	for y := 0; y < exportType.Size.Height; y++ {
 		for x := 0; x < exportType.Size.Width; {
 			if x%16 == 0 {
-				occurence++
-				if isSplitRaster(newIm, x, y, 16) {
-					notSplitRaster = true
-					backgroundColor := p[0]
+				if isSplitRaster(newIm, backgroundColor, x, y, 16) {
+					occurence++
+					notSplitRaster = false
+					pp, _ := PalettePosition(backgroundColor, p)
 					fmt.Fprintf(os.Stdout, "X{%d,%d},Y{%d} might be a splitraster\n", x, (x + 16), y)
 					switch screenMode {
 					case 0:
 						for i := 0; i < 16; {
-							pp, _ := PalettePosition(backgroundColor, p)
 							pixel := pixelMode0(pp, pp)
 							addr := CpcScreenAddress(0, x+i, y, 0, exportType.Overscan)
 							bw[addr] = pixel
 							i += 2
 							firmwareColorUsed[pp] += 2
-							rasters = append(rasters, constants.NewSpliteRaster(uint16(addr), 16, occurence, pp))
 						}
+						addr := CpcScreenAddress(0, x, y, 0, exportType.Overscan)
+						rasters = append(rasters, constants.NewSpliteRaster(uint16(addr), 16, occurence, pp))
 					case 1:
 						for i := 0; i < 16; {
-							pp, _ := PalettePosition(backgroundColor, p)
 							pixel := pixelMode1(pp, pp, pp, pp)
 							addr := CpcScreenAddress(0, x+i, y, 1, exportType.Overscan)
 							bw[addr] = pixel
 							i += 4
 							firmwareColorUsed[pp] += 4
-							rasters = append(rasters, constants.NewSpliteRaster(uint16(addr), 16, occurence, pp))
 						}
+						addr := CpcScreenAddress(0, x, y, 1, exportType.Overscan)
+						rasters = append(rasters, constants.NewSpliteRaster(uint16(addr), 16, occurence, pp))
 					case 2:
 						for i := 0; i < 16; {
-							pp, _ := PalettePosition(backgroundColor, p)
 							pixel := pixelMode2(pp, pp, pp, pp, pp, pp, pp, pp)
 							addr := CpcScreenAddress(0, x+i, y, 2, exportType.Overscan)
 							bw[addr] = pixel
 							i += 8
 							firmwareColorUsed[pp] += 8
-							rasters = append(rasters, constants.NewSpliteRaster(uint16(addr), 16, occurence, pp))
 						}
+						addr := CpcScreenAddress(0, x, y, 2, exportType.Overscan)
+						rasters = append(rasters, constants.NewSpliteRaster(uint16(addr), 16, occurence, pp))
 					}
 					// ajout d'un split raster
 					// modification de l'image destination pour utiliser celle du background
@@ -134,12 +135,11 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, expo
 	return p, bw, rasters, nil
 }
 
-func isSplitRaster(in *image.NRGBA, pos, y, length int) bool {
-	c := in.At(pos, y)
+func isSplitRaster(in *image.NRGBA, backgroundColor color.Color, pos, y, length int) bool {
 	occ := 0
-	for x := pos + 1; x < pos+length || x < in.Bounds().Max.X; x++ {
-		c2 := in.At(x, y)
-		if !constants.ColorsAreEquals(c, c2) {
+	for x := pos; x < pos+length || x < in.Bounds().Max.X; x++ {
+		c := in.At(x, y)
+		if !constants.ColorsAreEquals(c, backgroundColor) {
 			return false
 		}
 		occ++

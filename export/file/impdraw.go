@@ -1259,10 +1259,11 @@ func ExportSplitRaster(filename string, p color.Palette, rasters []*constants.Sp
 
 	var binarySplitRaster []byte
 	binarySplitRaster = splitRasterTemplate
+	fmt.Fprintf(os.Stdout, "{%d} splits rasters found\n", len(rasters))
 	for _, v := range rasters {
 		offset := OffsetAtIndex(binarySplitRaster, splitRasterTemplate, v.Occurence)
 		if offset == -1 {
-			fmt.Fprintf(os.Stderr, "Occurence [%d] not found in split raster template\n", v.Occurence)
+			fmt.Fprintf(os.Stderr, "Occurence [%d]{offset:%d,palette index:%d}  not found in split raster template\n", v.Occurence, v.Offset, v.PaletteIndex)
 			continue
 		}
 		binarySplitRaster[offset] = byte(v.PaletteIndex)
