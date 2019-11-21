@@ -543,7 +543,14 @@ func main() {
 					}
 				} else {
 					if exportType.SplitRaster {
-						gfx.DoSpliteRaster(in, screenMode, filename, exportType)
+						if exportType.Overscan {
+							if err := gfx.DoSpliteRaster(in, screenMode, filename, exportType); err != nil {
+								fmt.Fprintf(os.Stderr, "Error while applying splitraster on one image :%v\n", err)
+								os.Exit(-1)
+							}
+						} else {
+							fmt.Fprintf(os.Stderr, "Only overscan mode implemented for this feature, %v", gfx.ErrorNotYetImplemented)
+						}
 					} else {
 						if strings.ToUpper(extension) != ".SCR" {
 							if err := gfx.ApplyOneImage(in,

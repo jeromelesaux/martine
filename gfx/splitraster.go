@@ -16,7 +16,7 @@ func DoSpliteRaster(in image.Image, screenMode uint8, filename string, exportTyp
 
 	var p color.Palette
 	var bw []byte
-	var rasters []*constants.SplitRaster
+	var rasters *constants.SplitRasterScreen
 	var err error
 	if !exportType.Overscan {
 		return ErrorNotYetImplemented
@@ -38,21 +38,26 @@ func DoSpliteRaster(in image.Image, screenMode uint8, filename string, exportTyp
 	return file.ExportSplitRaster(filename, p, rasters, exportType)
 }
 
-func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, exportType *export.ExportType) (color.Palette, []byte, []*constants.SplitRaster, error) {
-	rasters := make([]*constants.SplitRaster, 0)
+func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, exportType *export.ExportType) (color.Palette, []byte, *constants.SplitRasterScreen, error) {
+
 	var bw []byte
+	srs := constants.NewSplitRasterScreen()
 	out := convert.Resize(in, exportType.Size, exportType.ResizingAlgo)
 	fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
 	if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_resized.png", out); err != nil {
-		return nil, bw, rasters, err
+		return nil, bw, srs, err
 	}
 	p, newIm, err := convert.DowngradingPalette(out, exportType.Size, exportType.CpcPlus)
 	if err != nil {
-		return p, bw, rasters, err
+		return p, bw, srs, err
 	}
 	if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_downgraded.png", newIm); err != nil {
-		return nil, bw, rasters, err
+		return nil, bw, srs, err
 	}
+
+	srIm := image.NewNRGBA(image.Rectangle{
+		Min: image.Point{X: out.Bounds().Min.X, Y: out.Bounds().Min.Y},
+		Max: image.Point{X: out.Bounds().Max.X, Y: out.Bounds().Max.Y}})
 
 	fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), newIm.Bounds().Max.X, newIm.Bounds().Max.Y)
 	fmt.Println(in.Bounds())
@@ -63,15 +68,16 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, expo
 		bw = make([]byte, 0x4000)
 	}
 	firmwareColorUsed := make(map[int]int, 0)
-	var occurence int
-	notSplitRaster := true
 	backgroundColor := p[0]
+	notSplitRaster := true
 	for y := 0; y < exportType.Size.Height; y++ {
 		for x := 0; x < exportType.Size.Width; {
 			if x%16 == 0 {
-				if isSplitRaster(newIm, backgroundColor, x, y, 16) {
-					occurence++
+				if !srs.IsFull() {
 					notSplitRaster = false
+					if isSplitRaster(newIm, x, y, 16) {
+						srs = SetCpcOldSplitRaster(out, srIm, constants.CpcOldPalette, srs, x, y, 16)
+					}
 					pp, _ := PalettePosition(backgroundColor, p)
 					fmt.Fprintf(os.Stdout, "X{%d,%d},Y{%d} might be a splitraster\n", x, (x + 16), y)
 					switch screenMode {
@@ -83,8 +89,6 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, expo
 							i += 2
 							firmwareColorUsed[pp] += 2
 						}
-						addr := CpcScreenAddress(0, x, y, 0, exportType.Overscan)
-						rasters = append(rasters, constants.NewSpliteRaster(uint16(addr), 16, occurence, pp))
 					case 1:
 						for i := 0; i < 16; {
 							pixel := pixelMode1(pp, pp, pp, pp)
@@ -93,8 +97,6 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, expo
 							i += 4
 							firmwareColorUsed[pp] += 4
 						}
-						addr := CpcScreenAddress(0, x, y, 1, exportType.Overscan)
-						rasters = append(rasters, constants.NewSpliteRaster(uint16(addr), 16, occurence, pp))
 					case 2:
 						for i := 0; i < 16; {
 							pixel := pixelMode2(pp, pp, pp, pp, pp, pp, pp, pp)
@@ -103,8 +105,6 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, expo
 							i += 8
 							firmwareColorUsed[pp] += 8
 						}
-						addr := CpcScreenAddress(0, x, y, 2, exportType.Overscan)
-						rasters = append(rasters, constants.NewSpliteRaster(uint16(addr), 16, occurence, pp))
 					}
 					// ajout d'un split raster
 					// modification de l'image destination pour utiliser celle du background
@@ -113,33 +113,66 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, expo
 				} else {
 					notSplitRaster = true
 				}
+
+			} else {
+				notSplitRaster = true
 			}
 			if notSplitRaster {
+
 				// traitement normal des pixels
 				switch screenMode {
 				case 0:
-					bw, firmwareColorUsed = setPixelMode0(newIm, p, x, y, bw, firmwareColorUsed, exportType)
+					bw, firmwareColorUsed = setPixelMode0(newIm, srIm, p, x, y, bw, firmwareColorUsed, exportType)
 					x += 2
 				case 1:
-					bw, firmwareColorUsed = setPixelMode1(newIm, p, x, y, bw, firmwareColorUsed, exportType)
+					bw, firmwareColorUsed = setPixelMode1(newIm, srIm, p, x, y, bw, firmwareColorUsed, exportType)
 					x += 4
 				case 2:
-					bw, firmwareColorUsed = setPixelMode2(newIm, p, x, y, bw, firmwareColorUsed, exportType)
+					bw, firmwareColorUsed = setPixelMode2(newIm, srIm, p, x, y, bw, firmwareColorUsed, exportType)
 					x += 4
 				}
 			}
-
 		}
 	}
+	if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_splitraster.png", srIm); err != nil {
+		return nil, bw, srs, err
+	}
 	fmt.Println(firmwareColorUsed)
-	return p, bw, rasters, nil
+	return p, bw, srs, nil
 }
 
-func isSplitRaster(in *image.NRGBA, backgroundColor color.Color, pos, y, length int) bool {
+func SetCpcOldSplitRaster(in *image.NRGBA, out *image.NRGBA, p color.Palette, s *constants.SplitRasterScreen, pos, y, length int) *constants.SplitRasterScreen {
 	occ := 0
-	for x := pos; x < pos+length || x < in.Bounds().Max.X; x++ {
+	if !s.Add(constants.NewSpliteRaster(uint16(pos), length, occ)) {
+		return s
+	}
+	for x := pos; x < pos+length && x < in.Bounds().Max.X; x++ {
 		c := in.At(x, y)
-		if !constants.ColorsAreEquals(c, backgroundColor) {
+		c2 := p.Convert(c) // find the color in palette old cpc
+		out.Set(x, y, c2)
+		hds, err := constants.HardwareValues(c2)
+		if err != nil {
+			r, g, b, _ := c.RGBA()
+			fmt.Fprintf(os.Stderr, "not hardware value for color (%d,%d,%d)\n", r, g, b)
+			continue
+		}
+		if !s.Values[len(s.Values)-1].Add(0, int(hds[0])) {
+			continue
+		}
+		occ++
+	}
+	if occ < (length - 1) {
+		return s
+	}
+	return s
+}
+
+func isSplitRaster(in *image.NRGBA, pos, y, length int) bool {
+	occ := 0
+	c := in.At(pos, y)
+	for x := pos + 1; x < pos+length && x < in.Bounds().Max.X; x++ {
+		c2 := in.At(x, y)
+		if !constants.ColorsAreEquals(c2, c) {
 			return false
 		}
 		occ++
@@ -175,8 +208,9 @@ func extractPixelMode0(in *image.NRGBA, p color.Palette, x, y int, exportType *e
 }
 */
 
-func setPixelMode0(in *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, exportType *export.ExportType) ([]byte, map[int]int) {
+func setPixelMode0(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, exportType *export.ExportType) ([]byte, map[int]int) {
 	c1 := in.At(x, y)
+	out.Set(x, y, c1)
 	pp1, err := PalettePosition(c1, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
@@ -185,6 +219,7 @@ func setPixelMode0(in *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwa
 	firmwareColorUsed[pp1]++
 	//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 	c2 := in.At(x+1, y)
+	out.Set(x+1, y, c2)
 	pp2, err := PalettePosition(c2, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
@@ -203,8 +238,9 @@ func setPixelMode0(in *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwa
 	return bw, firmwareColorUsed
 }
 
-func setPixelMode1(in *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, exportType *export.ExportType) ([]byte, map[int]int) {
+func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, exportType *export.ExportType) ([]byte, map[int]int) {
 	c1 := in.At(x, y)
+	out.Set(x, y, c1)
 	pp1, err := PalettePosition(c1, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
@@ -213,6 +249,7 @@ func setPixelMode1(in *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwa
 	firmwareColorUsed[pp1]++
 	//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 	c2 := in.At(x+1, y)
+	out.Set(x+1, y, c2)
 	pp2, err := PalettePosition(c2, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
@@ -220,6 +257,7 @@ func setPixelMode1(in *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwa
 	}
 	firmwareColorUsed[pp2]++
 	c3 := in.At(x+2, y)
+	out.Set(x+2, y, c3)
 	pp3, err := PalettePosition(c3, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
@@ -227,6 +265,7 @@ func setPixelMode1(in *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwa
 	}
 	firmwareColorUsed[pp3]++
 	c4 := in.At(x+3, y)
+	out.Set(x+3, y, c4)
 	pp4, err := PalettePosition(c4, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
@@ -244,8 +283,9 @@ func setPixelMode1(in *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwa
 	return bw, firmwareColorUsed
 }
 
-func setPixelMode2(in *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, exportType *export.ExportType) ([]byte, map[int]int) {
+func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, exportType *export.ExportType) ([]byte, map[int]int) {
 	c1 := in.At(x, y)
+	out.Set(x, y, c1)
 	pp1, err := PalettePosition(c1, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
@@ -254,6 +294,7 @@ func setPixelMode2(in *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwa
 	firmwareColorUsed[pp1]++
 	//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 	c2 := in.At(x+1, y)
+	out.Set(x+1, y, c2)
 	pp2, err := PalettePosition(c2, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
@@ -261,6 +302,7 @@ func setPixelMode2(in *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwa
 	}
 	firmwareColorUsed[pp2]++
 	c3 := in.At(x+2, y)
+	out.Set(x+2, y, c3)
 	pp3, err := PalettePosition(c3, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
@@ -268,6 +310,7 @@ func setPixelMode2(in *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwa
 	}
 	firmwareColorUsed[pp3]++
 	c4 := in.At(x+3, y)
+	out.Set(x+3, y, c4)
 	pp4, err := PalettePosition(c4, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
@@ -275,6 +318,7 @@ func setPixelMode2(in *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwa
 	}
 	firmwareColorUsed[pp4]++
 	c5 := in.At(x+4, y)
+	out.Set(x+4, y, c5)
 	pp5, err := PalettePosition(c5, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
@@ -283,6 +327,7 @@ func setPixelMode2(in *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwa
 	firmwareColorUsed[pp5]++
 	//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 	c6 := in.At(x+5, y)
+	out.Set(x+5, y, c6)
 	pp6, err := PalettePosition(c6, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
@@ -290,6 +335,7 @@ func setPixelMode2(in *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwa
 	}
 	firmwareColorUsed[pp6]++
 	c7 := in.At(x+6, y)
+	out.Set(x+6, y, c7)
 	pp7, err := PalettePosition(c7, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
@@ -297,6 +343,7 @@ func setPixelMode2(in *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwa
 	}
 	firmwareColorUsed[pp7]++
 	c8 := in.At(x+7, y)
+	out.Set(x+7, y, c8)
 	pp8, err := PalettePosition(c8, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, x+7, y)
