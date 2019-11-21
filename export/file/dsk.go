@@ -56,5 +56,6 @@ func ImportInDsk(filePath string, exportType *x.ExportType) error {
 			}
 		}
 	}
+	fmt.Fprintf(os.Stdout, "Saving final dsk in path {%s}\n", dskFullpath)
 	return dsk.WriteDsk(dskFullpath, floppy)
 }

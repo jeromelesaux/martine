@@ -719,19 +719,53 @@ func SortColorsByDistance(p color.Palette) color.Palette {
 	return p
 }
 
-type SplitRaster struct {
-	Offset       uint16
-	Length       uint8
-	Occurence    int
-	PaletteIndex int
+type SplitRasterScreen struct {
+	Values []SplitRaster
 }
 
-func NewSpliteRaster(offset uint16, length uint8, occurence int, paletteIndex int) *SplitRaster {
-	return &SplitRaster{
-		Offset:       offset,
-		Length:       length,
-		Occurence:    occurence,
-		PaletteIndex: paletteIndex,
+func NewSplitRasterScreen() *SplitRasterScreen {
+	return &SplitRasterScreen{Values: make([]SplitRaster, 0)}
+}
+
+func (srs *SplitRasterScreen) Add(s SplitRaster) bool {
+	if srs.IsFull() {
+		return false
+	}
+	srs.Values = append(srs.Values, s)
+	return true
+}
+
+func (srs *SplitRasterScreen) IsFull() bool {
+	if len(srs.Values) >= 256 {
+		return true
+	}
+	return false
+}
+
+type SplitRaster struct {
+	Offset        uint16
+	Length        int
+	Occurence     int
+	HardwareColor []int
+	PaletteIndex  []int
+}
+
+func (s *SplitRaster) Add(paletteIndex, hardwareColor int) bool {
+	if len(s.PaletteIndex) >= s.Length || len(s.HardwareColor) >= s.Length {
+		return false
+	}
+	s.PaletteIndex = append(s.PaletteIndex, paletteIndex)
+	s.HardwareColor = append(s.HardwareColor, hardwareColor)
+	return true
+}
+
+func NewSpliteRaster(offset uint16, length, occurence int) SplitRaster {
+	return SplitRaster{
+		Offset:        offset,
+		Length:        length,
+		Occurence:     occurence,
+		PaletteIndex:  make([]int, 0),
+		HardwareColor: make([]int, 0),
 	}
 }
 
