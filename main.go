@@ -34,8 +34,8 @@ var deltaFiles stringSlice
 var (
 	byteStatement       = flag.String("s", "", "Byte statement to replace in ascii export (default is BYTE), you can replace or instance by defb")
 	picturePath         = flag.String("i", "", "Picture path of the input file.")
-	width               = flag.Int("w", -1, "Custom output width in pixels.")
-	height              = flag.Int("h", -1, "Custom output height in pixels.")
+	width               = flag.Int("w", -1, "Custom output width in pixels. (Will produce a sprite file .win)")
+	height              = flag.Int("h", -1, "Custom output height in pixels. (Will produce a sprite file .win)")
 	mode                = flag.Int("m", -1, "Output mode to use :\n\t0 for mode0\n\t1 for mode1\n\t2 for mode2\n\tand add -f option for overscan export.\n\t")
 	output              = flag.String("o", "", "Output directory")
 	overscan            = flag.Bool("f", false, "Overscan mode (default no overscan)")
@@ -61,8 +61,8 @@ var (
 	tileIterationX      = flag.Int("iterx", -1, "Number of tiles on a row in the input image.")
 	tileIterationY      = flag.Int("itery", -1, "Number of tiles on a column in the input image.")
 	compress            = flag.Int("z", -1, "Compression algorithm : \n\t1: rle (default)\n\t2: rle 16bits\n\t3: Lz4 Classic\n\t4: Lz4 Raw\n")
-	kitPath             = flag.String("kit", "", "Path of the palette Cpc plus Kit file.")
-	inkPath             = flag.String("ink", "", "Path of the palette Cpc ink file.")
+	kitPath             = flag.String("kit", "", "Path of the palette Cpc plus Kit file. (Apply the input kit palette on the image)")
+	inkPath             = flag.String("ink", "", "Path of the palette Cpc ink file. (Apply the input ink palette on the image)")
 	rotateMode          = flag.Bool("rotate", false, "Allow rotation on the input image, the input image must be a square (width equals height)")
 	m4Host              = flag.String("host", "", "Set the ip of your M4.")
 	m4RemotePath        = flag.String("remotepath", "", "Remote path on your M4 where you want to copy your files.")
@@ -86,8 +86,8 @@ var (
 	egx1                = flag.Bool("egx1", false, "Create egx 1 output cpc image (mix mode 0 / 1).\n\t(ex: -egx1 -i 1.SCR -m 0 -pal 1.PAL -i2 2.SCR -o test -m2 1 -dsk)\n\tor\n\t(ex: -egx1 -i input.png -m 0 -o test -dsk)")
 	egx2                = flag.Bool("egx2", false, "Create egx 2 output cpc image (mix mode 1 / 2).(ex: -egx2 -i 1.SCR -m 0 -pal 1.PAL -i2 2.SCR -o test -m2 1 -dsk)\n\tor\n\t(ex: -egx2 -i input.png -m 0 -o test -dsk)")
 	sna                 = flag.Bool("sna", false, "Copy files in a new CPC image Sna.")
-	spriteHard          = flag.Bool("spritehard", false, "generate sprite hard for cpc plus.")
-	splitRasters        = flag.Bool("splitrasters", false, "Create Split rastered image.")
+	spriteHard          = flag.Bool("spritehard", false, "Generate sprite hard for cpc plus.")
+	splitRasters        = flag.Bool("splitrasters", false, "Create Split rastered image. (Will produce Overscan output file and .SPL with split rasters file)")
 	version             = "0.21.rc"
 )
 
