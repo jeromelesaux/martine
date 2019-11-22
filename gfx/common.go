@@ -110,6 +110,13 @@ func ApplyOneImage(in image.Image,
 		os.Exit(-2)
 	}
 
+	if newPalette == nil { // in case of dithering without input palette
+		if exportType.CpcPlus {
+			newPalette = constants.CpcPlusPalette
+		} else {
+			newPalette = constants.CpcOldPalette
+		}
+	}
 	out, newPalette = DoDithering(out, newPalette, exportType)
 
 	if len(palette) > 0 {
