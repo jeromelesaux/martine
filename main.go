@@ -88,7 +88,7 @@ var (
 	sna                 = flag.Bool("sna", false, "Copy files in a new CPC image Sna.")
 	spriteHard          = flag.Bool("spritehard", false, "Generate sprite hard for cpc plus.")
 	splitRasters        = flag.Bool("splitrasters", false, "Create Split rastered image. (Will produce Overscan output file and .SPL with split rasters file)")
-	version             = "0.21"
+	version             = "0.22.rc"
 )
 
 func usage() {
