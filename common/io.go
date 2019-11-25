@@ -2,7 +2,9 @@ package common
 
 import (
 	"encoding/binary"
+	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -17,14 +19,20 @@ func WilcardedFiles(filespath []string) ([]string, error) {
 		if err != nil {
 			return fullfilespath, err
 		}
+		reg := filepath.Base(v)
+		fmt.Fprintf(os.Stdout, "Regular to match (%s)\n", reg)
 		for _, f := range fis {
 			if !f.IsDir() {
 				check := dir + string(filepath.Separator) + f.Name()
-				matchs, err := filepath.Match(v, check)
+				fmt.Fprintf(os.Stdout, "Checking regex for (%s) matches (%s)\n", f.Name(), reg)
+				matchs, err := filepath.Match(reg, f.Name())
 				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error while checking match with error %v\n", err)
 					return fullfilespath, err
 				}
+				fmt.Fprintf(os.Stdout, "Returns %v\n", matchs)
 				if matchs {
+					fmt.Fprintf(os.Stdout, "Ok (%s) matches (%s)\n", reg, check)
 					if !ContainsFilepath(fullfilespath, check) {
 						fullfilespath = append(fullfilespath, check)
 					}

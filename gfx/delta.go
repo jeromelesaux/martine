@@ -12,13 +12,14 @@ import (
 	"image/color"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
-var ErrorCanNotProceed = errors.New("Can not proceed to treatment")
+var ErrorCanNotProceed = errors.New("Can not proceed treatment")
 
 type DeltaItem struct {
-	Byte      byte
-	Addresses []uint16
+	Byte    byte
+	Offsets []uint16
 }
 
 type DeltaCollection struct {
@@ -32,11 +33,11 @@ func NewDeltaCollection() *DeltaCollection {
 }
 
 func NewDeltaItem() DeltaItem {
-	return DeltaItem{Addresses: make([]uint16, 0)}
+	return DeltaItem{Offsets: make([]uint16, 0)}
 }
 
 func (di *DeltaItem) NbAddresses() int {
-	return len(di.Addresses)
+	return len(di.Offsets)
 }
 func (dc *DeltaCollection) NbAdresses() int {
 	nb := 0
@@ -48,7 +49,7 @@ func (dc *DeltaCollection) NbAdresses() int {
 
 func (di *DeltaItem) ToString() string {
 	out := fmt.Sprintf("byte value #%.2x :", di.Byte)
-	for _, addr := range di.Addresses {
+	for _, addr := range di.Offsets {
 		out += fmt.Sprintf("\n#%.4x", addr)
 	}
 	return out
@@ -65,12 +66,12 @@ func (dc *DeltaCollection) ToString() string {
 func (dc *DeltaCollection) Add(b byte, address uint16) {
 	for i := 0; i < len(dc.Items); i++ {
 		if dc.Items[i].Byte == b {
-			dc.Items[i].Addresses = append(dc.Items[i].Addresses, address)
+			dc.Items[i].Offsets = append(dc.Items[i].Offsets, address)
 			return
 		}
 	}
 	item := NewDeltaItem()
-	item.Addresses = append(item.Addresses, address)
+	item.Offsets = append(item.Offsets, address)
 	item.Byte = b
 	dc.Items = append(dc.Items, item)
 }
@@ -323,7 +324,7 @@ func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.
 func (dc *DeltaCollection) Marshall() ([]byte, error) {
 	var b bytes.Buffer
 	for _, item := range dc.Items {
-		occ := len(item.Addresses)
+		occ := len(item.Offsets)
 		for i := 0; i < occ; i += 255 {
 			if err := binary.Write(&b, binary.LittleEndian, item.Byte); err != nil {
 				return b.Bytes(), err
@@ -336,7 +337,7 @@ func (dc *DeltaCollection) Marshall() ([]byte, error) {
 				return b.Bytes(), err
 			}
 			for j := i; j < 255 && j < occ; j++ {
-				if err := binary.Write(&b, binary.LittleEndian, item.Addresses[j]); err != nil {
+				if err := binary.Write(&b, binary.LittleEndian, item.Offsets[j]); err != nil {
 					return b.Bytes(), err
 				}
 			}
@@ -352,7 +353,7 @@ func (dc *DeltaCollection) Save(filename string) error {
 	}
 	defer f.Close()
 	for _, item := range dc.Items {
-		occ := len(item.Addresses)
+		occ := len(item.Offsets)
 		for i := 0; i < occ; i += 255 {
 			if err := binary.Write(f, binary.LittleEndian, item.Byte); err != nil {
 				return err
@@ -365,7 +366,7 @@ func (dc *DeltaCollection) Save(filename string) error {
 				return err
 			}
 			for j := i; j < 255 && j < occ; j++ {
-				if err := binary.Write(f, binary.LittleEndian, item.Addresses[j]); err != nil {
+				if err := binary.Write(f, binary.LittleEndian, item.Offsets[j]); err != nil {
 					return err
 				}
 			}
@@ -374,13 +375,12 @@ func (dc *DeltaCollection) Save(filename string) error {
 	return nil
 }
 
-func Delta(scr1, scr2 []byte) *DeltaCollection {
+func Delta(scr1, scr2 []byte, isSprite bool) *DeltaCollection {
 	data := NewDeltaCollection()
 	//var line int
-	for offset := 0; offset < 0x4000; offset++ {
+	for offset := 0; offset < len(scr1); offset++ {
 		if scr1[offset] != scr2[offset] {
-			addr := 0xC000 + offset
-			data.Add(scr2[offset], uint16(addr))
+			data.Add(scr2[offset], uint16(offset))
 		}
 	}
 	return data
@@ -419,31 +419,54 @@ func ProceedDelta(filespath []string, exportType *x.ExportType) error {
 		if err != nil {
 			return err
 		}
-		if len(filespath) == 1 {
+		if len(filespath) == 1 || len(filespath) == 0 {
 			return ErrorCanNotProceed
 		}
 	}
+	var d1, d2 []byte
+	var err error
+	var isSprite = false
+	fmt.Fprintf(os.Stdout, "%v\n", filespath)
 	for i := 0; i < len(filespath)-1; i++ {
-		f1, err := os.Open(filespath[i])
-		if err != nil {
-			return err
+		switch strings.ToUpper(filepath.Ext(filespath[i])) {
+		case ".WIN":
+			d1, err = file.RawWin(filespath[i])
+			if err != nil {
+				return err
+			}
+		case ".SCR":
+			d1, err = file.RawScr(filespath[i])
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "File (%s) is not a simple screen.\n", filespath[i])
+			}
+			d1, err = file.RawOverscan(filespath[i])
+			if err != nil {
+				return err
+			}
+		default:
+			return ErrorCanNotProceed
 		}
-		defer f1.Close()
-		f2, err := os.Open(filespath[i+1])
-		if err != nil {
-			return err
+
+		switch strings.ToUpper(filepath.Ext(filespath[i+1])) {
+		case ".WIN":
+			d2, err = file.RawWin(filespath[i+1])
+			if err != nil {
+				return err
+			}
+		case ".SCR":
+			d2, err = file.RawScr(filespath[i+1])
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "File (%s) is not a simple screen.\n", filespath[i+1])
+			}
+			d2, err = file.RawOverscan(filespath[i+1])
+			if err != nil {
+				return err
+			}
+		default:
+			return ErrorCanNotProceed
 		}
-		defer f2.Close()
-		var d1, d2 [0x4000 + 128]byte
-		//var d1, d2 []byte
-		// suppress amsdos file header
-		if err := binary.Read(f1, binary.LittleEndian, &d1); err != nil {
-			return err
-		}
-		if err := binary.Read(f2, binary.LittleEndian, &d2); err != nil {
-			return err
-		}
-		dc := Delta(d1[128:], d2[128:])
+
+		dc := Delta(d1, d2, isSprite)
 		fmt.Fprintf(os.Stdout, "files (%s) (%s)", filespath[i], filespath[i+1])
 		fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 		fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
@@ -453,6 +476,45 @@ func ProceedDelta(filespath []string, exportType *x.ExportType) error {
 			return err
 		}
 	}
+
+	switch strings.ToUpper(filepath.Ext(filespath[len(filespath)-1])) {
+	case ".WIN":
+		d1, err = file.RawWin(filespath[len(filespath)-1])
+		if err != nil {
+			return err
+		}
+	case ".SCR":
+		d1, err = file.RawScr(filespath[len(filespath)-1])
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "File (%s) is not a simple screen.\n", filespath[len(filespath)-1])
+		}
+		d1, err = file.RawOverscan(filespath[len(filespath)-1])
+		if err != nil {
+			return err
+		}
+	default:
+		return ErrorCanNotProceed
+	}
+
+	switch strings.ToUpper(filepath.Ext(filespath[0])) {
+	case ".WIN":
+		d2, err = file.RawWin(filespath[0])
+		if err != nil {
+			return err
+		}
+	case ".SCR":
+		d2, err = file.RawScr(filespath[0])
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "File (%s) is not a simple screen.\n", filespath[0])
+		}
+		d2, err = file.RawOverscan(filespath[0])
+		if err != nil {
+			return err
+		}
+	default:
+		return ErrorCanNotProceed
+	}
+
 	f1, err := os.Open(filespath[len(filespath)-1])
 	if err != nil {
 		return err
@@ -463,15 +525,7 @@ func ProceedDelta(filespath []string, exportType *x.ExportType) error {
 		return err
 	}
 	defer f2.Close()
-	var d1, d2 [0x4000 + 128]byte
-	// suppress amsdos file header
-	if err := binary.Read(f1, binary.LittleEndian, &d1); err != nil {
-		return err
-	}
-	if err := binary.Read(f2, binary.LittleEndian, &d2); err != nil {
-		return err
-	}
-	dc := Delta(d1[128:], d2[128:])
+	dc := Delta(d1, d2, isSprite)
 	fmt.Fprintf(os.Stdout, "files (%s) (%s)", filespath[len(filespath)-1], filespath[0])
 	fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 	fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
