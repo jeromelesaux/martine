@@ -1,11 +1,12 @@
 package export
 
 import (
-	"github.com/disintegration/imaging"
-	"github.com/jeromelesaux/martine/constants"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/disintegration/imaging"
+	"github.com/jeromelesaux/martine/constants"
 )
 
 var amsdosFilenameOnce sync.Once
@@ -80,6 +81,8 @@ type ExportType struct {
 	SnaPath                     string
 	SpriteHard                  bool
 	SplitRaster                 bool
+	ScanlineSequence            []int
+	CustomScanlineSequence      bool
 }
 
 func NewExportType(input, output string) *ExportType {

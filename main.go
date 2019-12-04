@@ -9,6 +9,7 @@ import (
 	_ "image/png"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/disintegration/imaging"
@@ -88,6 +89,7 @@ var (
 	sna                 = flag.Bool("sna", false, "Copy files in a new CPC image Sna.")
 	spriteHard          = flag.Bool("spritehard", false, "Generate sprite hard for cpc plus.")
 	splitRasters        = flag.Bool("splitrasters", false, "Create Split rastered image. (Will produce Overscan output file and .SPL with split rasters file)")
+	scanlineSequence    = flag.String("scanlinesequence", "", "Scanline sequence to apply on sprite.")
 	version             = "0.22.rc"
 )
 
@@ -301,6 +303,18 @@ func main() {
 		resizeAlgo = imaging.MitchellNetravali
 	default:
 		resizeAlgo = imaging.NearestNeighbor
+	}
+
+	if *scanlineSequence != "" {
+		sequence := strings.Split(*scanlineSequence, ",")
+		for _, v := range sequence {
+			line, err := strconv.Atoi(v)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Bad scanline sequence (%s) error:%v\n", *scanlineSequence, err)
+				os.Exit(-1)
+			}
+			exportType.ScanlineSequence = append(exportType.ScanlineSequence, line)
+		}
 	}
 	exportType.ExtendedDsk = *extendedDsk
 	exportType.TileMode = *tileMode
