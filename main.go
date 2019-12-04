@@ -109,25 +109,27 @@ func main() {
 	flag.Var(&deltaFiles, "df", "scr file path to add in delta mode comparison. (wildcard accepted such as ? or * file filename.) ")
 
 	flag.Parse()
-	firstArg := flag.Args()[0]
-	if firstArg[0] != '-' {
-		flag.Set("i", firstArg)
-		for i := 1; i < len(flag.Args()); i += 2 {
-			name := strings.Replace(flag.Arg(i), "-", "", 1)
-			var value string
-			if len(flag.Args()) > i+1 {
-				if flag.Arg(i + 1)[0] == '-' {
-					value = "true"
-					i--
+	if len(flag.Args()) > 0 {
+		firstArg := flag.Args()[0]
+		if firstArg[0] != '-' {
+			flag.Set("i", firstArg)
+			for i := 1; i < len(flag.Args()); i += 2 {
+				name := strings.Replace(flag.Arg(i), "-", "", 1)
+				var value string
+				if len(flag.Args()) > i+1 {
+					if flag.Arg(i + 1)[0] == '-' {
+						value = "true"
+						i--
+					} else {
+						value = flag.Arg(i + 1)
+					}
 				} else {
-					value = flag.Arg(i + 1)
+					value = "true"
 				}
-			} else {
-				value = "true"
+				flag.Set(name, value)
 			}
-			flag.Set(name, value)
+			flag.Parse()
 		}
-		flag.Parse()
 	}
 	if *help {
 		usage()
