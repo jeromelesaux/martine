@@ -89,7 +89,7 @@ var (
 	sna                 = flag.Bool("sna", false, "Copy files in a new CPC image Sna.")
 	spriteHard          = flag.Bool("spritehard", false, "Generate sprite hard for cpc plus.")
 	splitRasters        = flag.Bool("splitrasters", false, "Create Split rastered image. (Will produce Overscan output file and .SPL with split rasters file)")
-	scanlineSequence    = flag.String("scanlinesequence", "", "Scanline sequence to apply on sprite.")
+	scanlineSequence    = flag.String("scanlinesequence", "", "Scanline sequence to apply on sprite. for instance : \n\tmartine -i myimage.jpg -w 4 -h 4 -scanlinesequence 0,2,1,3 \n\twill generate a sprite stored with lines order 0 2 1 and 3.\n")
 	version             = "0.22.rc"
 )
 
@@ -314,6 +314,10 @@ func main() {
 				os.Exit(-1)
 			}
 			exportType.ScanlineSequence = append(exportType.ScanlineSequence, line)
+		}
+		if size.Width != len(exportType.ScanlineSequence) {
+			fmt.Fprintf(os.Stderr, "You have not defined all lines sequence in the option, gets sequence for %d lines and the output image lines is %d\n", len(exportType.ScanlineSequence), size.Width)
+			os.Exit(-1)
 		}
 	}
 	exportType.ExtendedDsk = *extendedDsk

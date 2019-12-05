@@ -3,13 +3,14 @@ package gfx
 import (
 	"errors"
 	"fmt"
-	"github.com/jeromelesaux/martine/constants"
-	x "github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
 	"image"
 	"image/color"
 	"math"
 	"os"
+
+	"github.com/jeromelesaux/martine/constants"
+	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/file"
 )
 
 var (
@@ -113,8 +114,12 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 				}
 				firmwareColorUsed[pp2]++
 				pixel := pixelMode0(pp1, pp2)
-
-				data[offset] = pixel
+				if len(exportType.ScanlineSequence) > 0 {
+					newOffset := (exportType.ScanlineSequence[y] * lineSize) + offset
+					data[newOffset] = pixel
+				} else {
+					data[offset] = pixel
+				}
 				offset++
 			}
 		}
@@ -162,7 +167,12 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 					// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 					//	MEND
 
-					data[offset] = pixel
+					if len(exportType.ScanlineSequence) > 0 {
+						newOffset := (exportType.ScanlineSequence[y] * lineSize) + offset
+						data[newOffset] = pixel
+					} else {
+						data[offset] = pixel
+					}
 					offset++
 				}
 			}
@@ -238,7 +248,12 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 						// MACRO PIXM0 COL2,COL1
 						// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 						//	MEND
-						data[offset] = pixel
+						if len(exportType.ScanlineSequence) > 0 {
+							newOffset := (exportType.ScanlineSequence[y] * lineSize) + offset
+							data[newOffset] = pixel
+						} else {
+							data[offset] = pixel
+						}
 						offset++
 					}
 				}
