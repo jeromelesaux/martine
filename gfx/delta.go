@@ -23,6 +23,7 @@ type DeltaItem struct {
 }
 
 type DeltaCollection struct {
+	OccurencePerFrame uint16
 	Items []DeltaItem
 }
 
@@ -330,6 +331,10 @@ func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.
 //
 func (dc *DeltaCollection) Marshall() ([]byte, error) {
 	var b bytes.Buffer
+	dc.OccurencePerFrame = uint16(len(dc.Items))
+	if err := binary.Write(&b, binary.LittleEndian, dc.OccurencePerFrame); err != nil {
+		return b.Bytes(), err
+	}
 	for _, item := range dc.Items {
 		occ := len(item.Offsets)
 		for i := 0; i < occ; i += 255 {
@@ -359,6 +364,10 @@ func (dc *DeltaCollection) Save(filename string) error {
 		return err
 	}
 	defer f.Close()
+	dc.OccurencePerFrame = uint16(len(dc.Items))
+	if err := binary.Write(f, binary.LittleEndian, dc.OccurencePerFrame); err != nil {
+		return err
+	}
 	for _, item := range dc.Items {
 		occ := len(item.Offsets)
 		for i := 0; i < occ; i += 255 {
