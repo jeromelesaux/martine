@@ -5,14 +5,15 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/jeromelesaux/martine/common"
-	x "github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
 	"image"
 	"image/color"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/jeromelesaux/martine/common"
+	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/file"
 )
 
 var ErrorCanNotProceed = errors.New("Can not proceed treatment")
@@ -24,7 +25,7 @@ type DeltaItem struct {
 
 type DeltaCollection struct {
 	OccurencePerFrame uint16
-	Items []DeltaItem
+	Items             []DeltaItem
 }
 
 func NewDeltaCollection() *DeltaCollection {
@@ -546,7 +547,7 @@ func ProceedDelta(filespath []string, exportType *x.ExportType) error {
 	fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 	fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
 	fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
-	out := exportType.OutputPath + string(filepath.Separator) + fmt.Sprintf("%dto0", len(filespath))
+	out := exportType.OutputPath + string(filepath.Separator) + fmt.Sprintf("%dto0", len(filespath)-1)
 	if err := ExportDelta(out, dc, exportType); err != nil {
 		return err
 	}

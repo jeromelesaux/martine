@@ -112,7 +112,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 					fmt.Fprintf(os.Stdout, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 					pp2 = 0
 				}
-				firmwareColorUsed[pp2]++
+				firmwareColorUsed[pp2]++ 
 				pixel := pixelMode0(pp1, pp2)
 				if len(exportType.ScanlineSequence) > 0 {
 					newOffset := (exportType.ScanlineSequence[y] * lineSize) + (offset % lineSize)
