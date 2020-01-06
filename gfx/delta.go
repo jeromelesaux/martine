@@ -48,9 +48,13 @@ func (dc *DeltaCollection) NbAdresses() int {
 }
 
 func (di *DeltaItem) ToString() string {
-	out := fmt.Sprintf("byte value #%.2x :", di.Byte)
-	for _, addr := range di.Offsets {
-		out += fmt.Sprintf("\n#%.4x", addr)
+	out := fmt.Sprintf("byte value #%.2x : offsets :", di.Byte)
+
+	for i, addr := range di.Offsets {
+		if i%8 == 0 {
+			out += "\n"
+		}
+		out += fmt.Sprintf("#%.4x ", addr)
 	}
 	return out
 }
@@ -321,6 +325,9 @@ func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.
 	return data, nil
 }
 
+//
+// format byte value, number of occurence, offsets values.
+//
 func (dc *DeltaCollection) Marshall() ([]byte, error) {
 	var b bytes.Buffer
 	for _, item := range dc.Items {
