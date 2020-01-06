@@ -9,6 +9,7 @@ import (
 	_ "image/png"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/disintegration/imaging"
@@ -88,6 +89,7 @@ var (
 	sna                 = flag.Bool("sna", false, "Copy files in a new CPC image Sna.")
 	spriteHard          = flag.Bool("spritehard", false, "Generate sprite hard for cpc plus.")
 	splitRasters        = flag.Bool("splitrasters", false, "Create Split rastered image. (Will produce Overscan output file and .SPL with split rasters file)")
+	scanlineSequence    = flag.String("scanlinesequence", "", "Scanline sequence to apply on sprite. for instance : \n\tmartine -i myimage.jpg -w 4 -h 4 -scanlinesequence 0,2,1,3 \n\twill generate a sprite stored with lines order 0 2 1 and 3.\n")
 	version             = "0.22.rc"
 )
 
@@ -109,25 +111,27 @@ func main() {
 	flag.Var(&deltaFiles, "df", "scr file path to add in delta mode comparison. (wildcard accepted such as ? or * file filename.) ")
 
 	flag.Parse()
-	firstArg := flag.Args()[0]
-	if firstArg[0] != '-' {
-		flag.Set("i", firstArg)
-		for i := 1; i < len(flag.Args()); i += 2 {
-			name := strings.Replace(flag.Arg(i), "-", "", 1)
-			var value string
-			if len(flag.Args()) > i+1 {
-				if flag.Arg(i + 1)[0] == '-' {
-					value = "true"
-					i--
+	if len(flag.Args()) > 0 {
+		firstArg := flag.Args()[0]
+		if firstArg[0] != '-' {
+			flag.Set("i", firstArg)
+			for i := 1; i < len(flag.Args()); i += 2 {
+				name := strings.Replace(flag.Arg(i), "-", "", 1)
+				var value string
+				if len(flag.Args()) > i+1 {
+					if flag.Arg(i + 1)[0] == '-' {
+						value = "true"
+						i--
+					} else {
+						value = flag.Arg(i + 1)
+					}
 				} else {
-					value = flag.Arg(i + 1)
+					value = "true"
 				}
-			} else {
-				value = "true"
+				flag.Set(name, value)
 			}
-			flag.Set(name, value)
+			flag.Parse()
 		}
-		flag.Parse()
 	}
 	if *help {
 		usage()
@@ -299,6 +303,22 @@ func main() {
 		resizeAlgo = imaging.MitchellNetravali
 	default:
 		resizeAlgo = imaging.NearestNeighbor
+	}
+
+	if *scanlineSequence != "" {
+		sequence := strings.Split(*scanlineSequence, ",")
+		for _, v := range sequence {
+			line, err := strconv.Atoi(v)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Bad scanline sequence (%s) error:%v\n", *scanlineSequence, err)
+				os.Exit(-1)
+			}
+			exportType.ScanlineSequence = append(exportType.ScanlineSequence, line)
+		}
+		if size.Width != len(exportType.ScanlineSequence) {
+			fmt.Fprintf(os.Stderr, "You have not defined all lines sequence in the option, gets sequence for %d lines and the output image lines is %d\n", len(exportType.ScanlineSequence), size.Width)
+			os.Exit(-1)
+		}
 	}
 	exportType.ExtendedDsk = *extendedDsk
 	exportType.TileMode = *tileMode

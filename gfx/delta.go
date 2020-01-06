@@ -5,14 +5,15 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/jeromelesaux/martine/common"
-	x "github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
 	"image"
 	"image/color"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/jeromelesaux/martine/common"
+	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/file"
 )
 
 var ErrorCanNotProceed = errors.New("Can not proceed treatment")
@@ -23,7 +24,8 @@ type DeltaItem struct {
 }
 
 type DeltaCollection struct {
-	Items []DeltaItem
+	OccurencePerFrame uint16
+	Items             []DeltaItem
 }
 
 func NewDeltaCollection() *DeltaCollection {
@@ -330,6 +332,10 @@ func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.
 //
 func (dc *DeltaCollection) Marshall() ([]byte, error) {
 	var b bytes.Buffer
+	dc.OccurencePerFrame = uint16(len(dc.Items))
+	if err := binary.Write(&b, binary.LittleEndian, dc.OccurencePerFrame); err != nil {
+		return b.Bytes(), err
+	}
 	for _, item := range dc.Items {
 		occ := len(item.Offsets)
 		for i := 0; i < occ; i += 255 {
@@ -359,6 +365,10 @@ func (dc *DeltaCollection) Save(filename string) error {
 		return err
 	}
 	defer f.Close()
+	dc.OccurencePerFrame = uint16(len(dc.Items))
+	if err := binary.Write(f, binary.LittleEndian, dc.OccurencePerFrame); err != nil {
+		return err
+	}
 	for _, item := range dc.Items {
 		occ := len(item.Offsets)
 		for i := 0; i < occ; i += 255 {
@@ -537,7 +547,7 @@ func ProceedDelta(filespath []string, exportType *x.ExportType) error {
 	fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 	fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
 	fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
-	out := exportType.OutputPath + string(filepath.Separator) + fmt.Sprintf("%dto0", len(filespath))
+	out := exportType.OutputPath + string(filepath.Separator) + fmt.Sprintf("%dto0", len(filespath)-1)
 	if err := ExportDelta(out, dc, exportType); err != nil {
 		return err
 	}

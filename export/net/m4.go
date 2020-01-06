@@ -89,10 +89,12 @@ func ImportInM4(exportType *x.ExportType) error {
 			}
 		}
 		if exportType.Scr {
-			client.Run(exportType.M4RemotePath + "/" + basicFile)
+			fmt.Fprintf(os.Stdout, "Execute basic file (%s)\n", "/"+exportType.M4RemotePath+"/"+basicFile)
+			client.Run("/" + exportType.M4RemotePath + "/" + basicFile)
 		} else {
 			if exportType.Overscan {
-				client.Run(exportType.M4RemotePath + "/" + overscanFile)
+				fmt.Fprintf(os.Stdout, "Execute overscan file (%s)\n", "/"+exportType.M4RemotePath+"/"+overscanFile)
+				client.Run("/" + exportType.M4RemotePath + "/" + overscanFile)
 			} else {
 				fmt.Fprintf(os.Stdout, "Too many importants files, cannot choice.\n")
 			}
