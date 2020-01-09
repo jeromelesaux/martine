@@ -90,7 +90,7 @@ var (
 	spriteHard          = flag.Bool("spritehard", false, "Generate sprite hard for cpc plus.")
 	splitRasters        = flag.Bool("splitrasters", false, "Create Split rastered image. (Will produce Overscan output file and .SPL with split rasters file)")
 	scanlineSequence    = flag.String("scanlinesequence", "", "Scanline sequence to apply on sprite. for instance : \n\tmartine -i myimage.jpg -w 4 -h 4 -scanlinesequence 0,2,1,3 \n\twill generate a sprite stored with lines order 0 2 1 and 3.\n")
-	maskSprite          = flag.String("mask", "", "Mask to apply on each bit of the sprite ()")
+	maskSprite          = flag.String("mask", "", "Mask to apply on each bit of the sprite (to apply an and operation on each pixel with the value #AA [in hexdecimal: #AA or 0xAA, in decimal: 170] ex: martine -i myimage.png -w 40 -h 80 -mask #AA -m 0 -maskand)")
 	maskOrOperation     = flag.Bool("maskor", false, "Will apply an OR operation on each byte with the mask")
 	maskAdOperation     = flag.Bool("maskand", false, "Will apply an AND operation on each byte with the mask")
 	version             = "0.22.rc"
@@ -380,7 +380,7 @@ func main() {
 				exportType.MaskSprite = uint8(v)
 			}
 		default:
-			v, err := strconv.ParseUint(mask, 16, 16)
+			v, err := strconv.ParseUint(mask, 10, 8)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "cannot get the hexadecimal value fom %s, error : %v\n", *maskSprite, err)
 			} else {
