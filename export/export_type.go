@@ -1,6 +1,9 @@
 package export
 
 import (
+	"errors"
+	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -14,6 +17,8 @@ var (
 	Egx1Mode = 1
 	Egx2Mode = 2
 )
+
+var ErrorNotAllowed = errors.New("Not allowed here.")
 
 type ExportType struct {
 	InputPath                   string
@@ -83,6 +88,34 @@ type ExportType struct {
 	SplitRaster                 bool
 	ScanlineSequence            []int
 	CustomScanlineSequence      bool
+	MaskSprite                  uint8
+	MaskOrOperation             bool
+	MaskAndOperation            bool
+}
+
+func MaskIsAllowed(mode uint8, value uint8) bool {
+	err, values := ModeMaskSprite(mode)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error with mode %d error :%v\n", mode, err)
+		return false
+	}
+	for _, v := range values {
+		if v == value {
+			return true
+		}
+	}
+	return false
+}
+
+func ModeMaskSprite(mode uint8) (error, []uint8) {
+	switch mode {
+	case 0:
+		return nil, []uint8{0xAA, 0x55}
+	case 1:
+		return nil, []uint8{0x88, 0x44, 0x24, 0x11}
+	default:
+		return ErrorNotAllowed, make([]uint8, 0)
+	}
 }
 
 func NewExportType(input, output string) *ExportType {
