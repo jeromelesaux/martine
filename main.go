@@ -90,6 +90,9 @@ var (
 	spriteHard          = flag.Bool("spritehard", false, "Generate sprite hard for cpc plus.")
 	splitRasters        = flag.Bool("splitrasters", false, "Create Split rastered image. (Will produce Overscan output file and .SPL with split rasters file)")
 	scanlineSequence    = flag.String("scanlinesequence", "", "Scanline sequence to apply on sprite. for instance : \n\tmartine -i myimage.jpg -w 4 -h 4 -scanlinesequence 0,2,1,3 \n\twill generate a sprite stored with lines order 0 2 1 and 3.\n")
+	maskSprite          = flag.String("mask", "", "Mask to apply on each bit of the sprite (to apply an and operation on each pixel with the value #AA [in hexdecimal: #AA or 0xAA, in decimal: 170] ex: martine -i myimage.png -w 40 -h 80 -mask #AA -m 0 -maskand)")
+	maskOrOperation     = flag.Bool("maskor", false, "Will apply an OR operation on each byte with the mask")
+	maskAdOperation     = flag.Bool("maskand", false, "Will apply an AND operation on each byte with the mask")
 	version             = "0.22.rc"
 )
 
@@ -356,6 +359,56 @@ func main() {
 	exportType.Sna = *sna
 	exportType.SpriteHard = *spriteHard
 	exportType.SplitRaster = *splitRasters
+
+	if *maskSprite != "" {
+		mask := *maskSprite
+		switch mask[0] {
+		case '#':
+			value := strings.Replace(mask, "#", "", -1)
+			v, err := strconv.ParseUint(value, 16, 8)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "cannot get the hexadecimal value fom %s, error : %v\n", *maskSprite, err)
+			} else {
+				exportType.MaskSprite = uint8(v)
+			}
+		case '0':
+			value := strings.Replace(mask, "0x", "", -1)
+			v, err := strconv.ParseUint(value, 16, 8)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "cannot get the hexadecimal value fom %s, error : %v\n", *maskSprite, err)
+			} else {
+				exportType.MaskSprite = uint8(v)
+			}
+		default:
+			v, err := strconv.ParseUint(mask, 10, 8)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "cannot get the hexadecimal value fom %s, error : %v\n", *maskSprite, err)
+			} else {
+				exportType.MaskSprite = uint8(v)
+			}
+		}
+		if exportType.MaskSprite != 0 {
+			if *maskOrOperation {
+				exportType.MaskOrOperation = true
+			}
+			if *maskAdOperation {
+				exportType.MaskAndOperation = true
+			}
+			if exportType.MaskAndOperation && exportType.MaskOrOperation {
+				fmt.Fprintf(os.Stderr, "Or and And operations are setted, will only apply And operation.\n")
+				exportType.MaskOrOperation = false
+			}
+			if !exportType.MaskAndOperation && !exportType.MaskOrOperation {
+				fmt.Fprintf(os.Stderr, "Or and And operations are not setted, will only apply And operation.\n")
+				exportType.MaskAndOperation = true
+			}
+			fmt.Fprintf(os.Stdout, "Applying sprite mask value [#%X] [%.8b] AND = %t, OR =%t\n",
+				exportType.MaskSprite,
+				exportType.MaskSprite,
+				exportType.MaskAndOperation,
+				exportType.MaskOrOperation)
+		}
+	}
 
 	if exportType.CpcPlus {
 		exportType.Kit = true

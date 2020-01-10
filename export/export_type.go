@@ -18,7 +18,7 @@ var (
 	Egx2Mode = 2
 )
 
-var ErrorNotAllowed = errors.New("Not allowed here.")
+var ErrorNotAllowed = errors.New("Error not allowed.")
 
 type ExportType struct {
 	InputPath                   string

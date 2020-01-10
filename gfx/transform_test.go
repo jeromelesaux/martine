@@ -78,3 +78,18 @@ func TestPixelsMode2(t *testing.T) {
 		t.Fatalf("expected value %d and gets %d\n", p80, p8)
 	}
 }
+
+func TestMaskChoice(t *testing.T) {
+	a := 0xAA
+	t.Logf("mask:%b\n", a)
+	b := 0x55
+	t.Logf("%b\n", b)
+	t.Logf("%b\n", (b & a))
+	c := 1
+	t.Logf("%b\n", (c & a))
+	d := 2
+	t.Logf("%b\n", (d & a))
+	if (a & d) != 0 {
+		t.Fatalf("expected value %b and gets %b, comparison with %b\n", 0, (a & d), a)
+	}
+}
