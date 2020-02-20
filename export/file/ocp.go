@@ -4,17 +4,18 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"image/color"
+	"io"
+	"io/ioutil"
+	"os"
+	"strings"
+
 	rawlz4 "github.com/bkaradzic/go-lz4"
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/constants"
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/lz4"
 	"github.com/jeromelesaux/martine/rle"
-	"image/color"
-	"io"
-	"io/ioutil"
-	"os"
-	"strings"
 )
 
 var BadFileFormat = errors.New("Bad file format.")
@@ -8571,10 +8572,10 @@ func (o *OcpPalette) ToString() string {
 	out += fmt.Sprintf("Color Animation:(%d)\n", o.ColorAnimation)
 	out += fmt.Sprintf("Color Animation delay :(%d)\n", o.ColorAnimationDelay)
 	for index, v := range o.PaletteColors {
-		out += fmt.Sprintf("Color (%d) : value (%d)(#%.2x)\n", index, v[0], v[0])
+		out += fmt.Sprintf("Color (%d) [%s] : value (%d)(#%.2x)\n", index, constants.CpcColorStringFromHardwareNumber(v[0]), v[0], v[0])
 	}
 	for index, v := range o.BorderColor {
-		out += fmt.Sprintf("Color border (%d) : value (%d)(#%.2x)\n", index, v, v)
+		out += fmt.Sprintf("Color border (%d) [%s] : value (%d)(#%.2x)\n", index, constants.CpcColorStringFromHardwareNumber(v), v, v)
 	}
 	for _, v := range o.PaletteColors {
 		out += fmt.Sprintf("#%.2x, ", v[0])

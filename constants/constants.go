@@ -772,3 +772,88 @@ func NewSpliteRaster(offset uint16, length, occurence int) SplitRaster {
 func (s *SplitRaster) Boundaries() (uint16, uint16) {
 	return s.Offset, s.Offset + uint16(s.Length)
 }
+
+func CpcColorStringFromHardwareNumber(c uint8) string {
+	if HardwareValueAreEquals(White.HardwareValues, c) {
+		return "White"
+	}
+	if HardwareValueAreEquals(SeaGreen.HardwareValues, c) {
+		return "SeaGreen"
+	}
+	if HardwareValueAreEquals(PastelYellow.HardwareValues, c) {
+		return "PastelYellow"
+	}
+	if HardwareValueAreEquals(Blue.HardwareValues, c) {
+		return "Blue"
+	}
+	if HardwareValueAreEquals(Purple.HardwareValues, c) {
+		return "Purple"
+	}
+	if HardwareValueAreEquals(Cyan.HardwareValues, c) {
+		return "Cyan"
+	}
+	if HardwareValueAreEquals(Pink.HardwareValues, c) {
+		return "Pink"
+	}
+	if HardwareValueAreEquals(BrightYellow.HardwareValues, c) {
+		return "BrightYellow"
+	}
+	if HardwareValueAreEquals(BrightWhite.HardwareValues, c) {
+		return "BrightWhite"
+	}
+	if HardwareValueAreEquals(BrightRed.HardwareValues, c) {
+		return "BrightRed"
+	}
+	if HardwareValueAreEquals(BrightMagenta.HardwareValues, c) {
+		return "BrightMagenta"
+	}
+	if HardwareValueAreEquals(Orange.HardwareValues, c) {
+		return "Orange"
+	}
+	if HardwareValueAreEquals(PastelMagenta.HardwareValues, c) {
+		return "PastelMagenta"
+	}
+	if HardwareValueAreEquals(BrightGreen.HardwareValues, c) {
+		return "BrightGreen"
+	}
+	if HardwareValueAreEquals(BrightCyan.HardwareValues, c) {
+		return "BrightCyan"
+	}
+	if HardwareValueAreEquals(Black.HardwareValues, c) {
+		return "Black"
+	}
+	if HardwareValueAreEquals(BrightBlue.HardwareValues, c) {
+		return "BrightBlue"
+	}
+	if HardwareValueAreEquals(Green.HardwareValues, c) {
+		return "Green"
+	}
+	if HardwareValueAreEquals(SkyBlue.HardwareValues, c) {
+		return "SkyBlue"
+	}
+	if HardwareValueAreEquals(Magenta.HardwareValues, c) {
+		return "Magenta"
+	}
+	if HardwareValueAreEquals(PastelGreen.HardwareValues, c) {
+		return "PastelGreen"
+	}
+	if HardwareValueAreEquals(Lime.HardwareValues, c) {
+		return "Lime"
+	}
+	if HardwareValueAreEquals(PastelCyan.HardwareValues, c) {
+		return "PastelCyan"
+	}
+	if HardwareValueAreEquals(Red.HardwareValues, c) {
+		return "Red"
+	}
+	if HardwareValueAreEquals(Mauve.HardwareValues, c) {
+		return "Mauve"
+	}
+	if HardwareValueAreEquals(Yellow.HardwareValues, c) {
+		return "Yellow"
+	}
+	if HardwareValueAreEquals(PastelBlue.HardwareValues, c) {
+		return "PastelBlue"
+	}
+	return "not defined"
+}
