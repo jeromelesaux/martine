@@ -67,12 +67,19 @@ func TileMode(exportType *x.ExportType, mode uint8, iterationX, iterationY int) 
 			}
 
 			if exportType.ZigZag {
-				zizagImg := downgraded
-				for i1 := 1; i1 < downgraded.Bounds().Max.X; i1 += 2 {
-					yZigZag := 0
-					for y2 := downgraded.Bounds().Max.Y - 1; y2 >= 0; y2-- {
-						zizagImg.Set(i1, yZigZag, downgraded.At(i1, y2))
-						yZigZag++
+				zizagImg := image.NewNRGBA(image.Rectangle{
+					image.Point{X: 0, Y: 0},
+					image.Point{X: downgraded.Bounds().Max.X, Y: downgraded.Bounds().Max.Y}})
+				for y := 1; y < downgraded.Bounds().Max.Y; y += 2 {
+					xZigZag := 0
+					for x := downgraded.Bounds().Max.X - 1; x >= 0; x-- {
+						zizagImg.Set(xZigZag, y, downgraded.At(x, y))
+						xZigZag++
+					}
+				}
+				for y := 0; y < downgraded.Bounds().Max.Y; y += 2 {
+					for x := 0; x < downgraded.Bounds().Max.X; x++ {
+						zizagImg.Set(x, y, downgraded.At(x, y))
 					}
 				}
 				downgraded = zizagImg

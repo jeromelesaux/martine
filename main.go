@@ -59,8 +59,8 @@ var (
 	winPath             = flag.String("win", "", "Filepath of the ocp win file")
 	dsk                 = flag.Bool("dsk", false, "Copy files in a new CPC image Dsk.")
 	tileMode            = flag.Bool("tile", false, "Tile mode to create multiples sprites from a same image.")
-	tileIterationX      = flag.Int("iterx", -1, "Number of tiles on a row in the input image.")
-	tileIterationY      = flag.Int("itery", -1, "Number of tiles on a column in the input image.")
+	tileIterationX      = flag.Int("iterx", 1, "Number of tiles on a row in the input image.")
+	tileIterationY      = flag.Int("itery", 1, "Number of tiles on a column in the input image.")
 	compress            = flag.Int("z", -1, "Compression algorithm : \n\t1: rle (default)\n\t2: rle 16bits\n\t3: Lz4 Classic\n\t4: Lz4 Raw\n")
 	kitPath             = flag.String("kit", "", "Path of the palette Cpc plus Kit file. (Apply the input kit palette on the image)")
 	inkPath             = flag.String("ink", "", "Path of the palette Cpc ink file. (Apply the input ink palette on the image)")
@@ -93,16 +93,22 @@ var (
 	maskSprite          = flag.String("mask", "", "Mask to apply on each bit of the sprite (to apply an and operation on each pixel with the value #AA [in hexdecimal: #AA or 0xAA, in decimal: 170] ex: martine -i myimage.png -w 40 -h 80 -mask #AA -m 0 -maskand)")
 	maskOrOperation     = flag.Bool("maskor", false, "Will apply an OR operation on each byte with the mask")
 	maskAdOperation     = flag.Bool("maskand", false, "Will apply an AND operation on each byte with the mask")
-	zigzap              = flag.Bool("zigzap", false, "generate data in zigzag order (inc first line and dec next line for tiles)")
-	version             = "0.22.rc"
+	zigzag              = flag.Bool("zigzag", false, "generate data in zigzag order (inc first line and dec next line for tiles)")
+	appVersion          = "0.22.rc"
+	version             = flag.Bool("version", false, "print martine's version")
 )
 
 func usage() {
 	fmt.Fprintf(os.Stdout, "martine convert (jpeg, png format) image to Amstrad cpc screen (even overscan)\n")
-	fmt.Fprintf(os.Stdout, "By Impact Sid (Version:%s)\n", version)
+	fmt.Fprintf(os.Stdout, "By Impact Sid (Version:%s)\n", appVersion)
 	fmt.Fprintf(os.Stdout, "Special thanks to @Ast (for his support), @Siko and @Tronic for ideas\n")
 	fmt.Fprintf(os.Stdout, "usage :\n\n")
 	flag.PrintDefaults()
+	os.Exit(-1)
+}
+
+func printVersion() {
+	fmt.Fprintf(os.Stdout, "%s\n", appVersion)
 	os.Exit(-1)
 }
 
@@ -139,6 +145,9 @@ func main() {
 	}
 	if *help {
 		usage()
+	}
+	if *version {
+		printVersion()
 	}
 
 	if *initProcess != "" {
@@ -360,7 +369,7 @@ func main() {
 	exportType.Sna = *sna
 	exportType.SpriteHard = *spriteHard
 	exportType.SplitRaster = *splitRasters
-	exportType.ZigZag = *zigzap
+	exportType.ZigZag = *zigzag
 
 	if *maskSprite != "" {
 		mask := *maskSprite
