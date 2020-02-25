@@ -93,6 +93,7 @@ var (
 	maskSprite          = flag.String("mask", "", "Mask to apply on each bit of the sprite (to apply an and operation on each pixel with the value #AA [in hexdecimal: #AA or 0xAA, in decimal: 170] ex: martine -i myimage.png -w 40 -h 80 -mask #AA -m 0 -maskand)")
 	maskOrOperation     = flag.Bool("maskor", false, "Will apply an OR operation on each byte with the mask")
 	maskAdOperation     = flag.Bool("maskand", false, "Will apply an AND operation on each byte with the mask")
+	zigzap              = flag.Bool("zigzap", false, "generate data in zigzag order (inc first line and dec next line for tiles)")
 	version             = "0.22.rc"
 )
 
@@ -359,6 +360,7 @@ func main() {
 	exportType.Sna = *sna
 	exportType.SpriteHard = *spriteHard
 	exportType.SplitRaster = *splitRasters
+	exportType.ZigZag = *zigzap
 
 	if *maskSprite != "" {
 		mask := *maskSprite

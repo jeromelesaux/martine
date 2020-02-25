@@ -91,6 +91,7 @@ type ExportType struct {
 	MaskSprite                  uint8
 	MaskOrOperation             bool
 	MaskAndOperation            bool
+	ZigZag                      bool
 }
 
 func MaskIsAllowed(mode uint8, value uint8) bool {

@@ -2,16 +2,17 @@ package gfx
 
 import (
 	"fmt"
-	"github.com/jeromelesaux/martine/convert"
-	x "github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
-	"github.com/oliamb/cutter"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"github.com/jeromelesaux/martine/convert"
+	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/file"
+	"github.com/oliamb/cutter"
 )
 
 func TileMode(exportType *x.ExportType, mode uint8, iterationX, iterationY int) error {
@@ -64,6 +65,19 @@ func TileMode(exportType *x.ExportType, mode uint8, iterationX, iterationY int) 
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot downgrad the palette, error :%v\n", err)
 			}
+
+			if exportType.ZigZag {
+				zizagImg := downgraded
+				for i1 := 1; i1 < downgraded.Bounds().Max.X; i1 += 2 {
+					yZigZag := 0
+					for y2 := downgraded.Bounds().Max.Y - 1; y2 >= 0; y2-- {
+						zizagImg.Set(i1, yZigZag, downgraded.At(i1, y2))
+						yZigZag++
+					}
+				}
+				downgraded = zizagImg
+			}
+
 			ext = "_downgraded_" + strconv.Itoa(index) + ".png"
 			filePath = exportType.OutputPath + string(filepath.Separator) + exportType.OsFilename(ext)
 			if err := file.Png(filePath, downgraded); err != nil {

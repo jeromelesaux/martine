@@ -2,14 +2,15 @@ package gfx
 
 import (
 	"fmt"
-	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
-	"github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
 	"image"
 	"image/color"
 	"os"
 	"path/filepath"
+
+	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/convert"
+	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/file"
 )
 
 func DoDithering(in *image.NRGBA, p color.Palette, exportType *export.ExportType) (*image.NRGBA, color.Palette) {
