@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/disintegration/imaging"
+	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
@@ -530,6 +531,12 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Dithering matrix not available.")
 			os.Exit(-1)
 		}
+	}
+
+	// check output path directory
+	if err := common.CheckOutput(exportType); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while checking directory %s error %v\n", exportType.OutputPath, err)
+		os.Exit(-1)
 	}
 
 	if *reverse {
