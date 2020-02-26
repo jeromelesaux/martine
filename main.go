@@ -202,15 +202,9 @@ func main() {
 
 	// output directory to store results
 	if *output != "" {
-		fi, err := os.Stat(*output)
-		if err != nil {
+		if err := common.CheckOutput(*output); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while getting directory informations :%v, Quiting\n", err)
 			os.Exit(-2)
-		}
-
-		if !fi.IsDir() {
-			fmt.Fprintf(os.Stderr, "%s is not a directory will store in current directory\n", *output)
-			*output = "./"
 		}
 	} else {
 		*output = "./"
@@ -531,12 +525,6 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Dithering matrix not available.")
 			os.Exit(-1)
 		}
-	}
-
-	// check output path directory
-	if err := common.CheckOutput(exportType); err != nil {
-		fmt.Fprintf(os.Stderr, "Error while checking directory %s error %v\n", exportType.OutputPath, err)
-		os.Exit(-1)
 	}
 
 	if *reverse {
