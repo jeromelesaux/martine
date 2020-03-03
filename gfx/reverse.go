@@ -2,36 +2,113 @@ package gfx
 
 import (
 	"errors"
-	"github.com/jeromelesaux/martine/constants"
-	xl "github.com/jeromelesaux/martine/export/file"
 	"image"
 	"image/color"
+
+	"github.com/jeromelesaux/martine/constants"
+	xl "github.com/jeromelesaux/martine/export/file"
 )
 
 var (
 	UNDEFINED_MODE = errors.New("Undefined mode")
 )
 
-func SpriteToPng(winPath string, output string, p color.Palette) error {
+func SpriteToPng(winPath string, output string, mode uint8, p color.Palette) error {
 	footer, err := xl.OpenWin(winPath)
 	if err != nil {
 		return err
 	}
-	out := image.NewNRGBA(image.Rectangle{
-		Min: image.Point{X: 0, Y: 0},
-		Max: image.Point{X: int(footer.Width), Y: int(footer.Height)}})
+	var out *image.NRGBA
+
 	d, err := xl.RawWin(winPath)
 	if err != nil {
 		return err
 	}
-	for x := 0; x < int(footer.Height); x++ {
+	switch mode {
+	case 0:
+		out = image.NewNRGBA(image.Rectangle{
+			Min: image.Point{X: 0, Y: 0},
+			Max: image.Point{X: int(footer.Width / 8 * 2), Y: int(footer.Height)}})
+		index := 0
+
+		for y := 0; y < int(footer.Height); y++ {
+			indexX := 0
+			for x := 0; x < int(footer.Width/8); x++ {
+				val := d[index]
+				pp1, pp2 := rawPixelMode0(val)
+				c1 := p[pp1]
+				c2 := p[pp2]
+				out.Set(indexX, y, c1)
+				indexX++
+				out.Set(indexX, y, c2)
+				indexX++
+				index++
+			}
+		}
+	case 1:
+		out = image.NewNRGBA(image.Rectangle{
+			Min: image.Point{X: 0, Y: 0},
+			Max: image.Point{X: int(footer.Width / 8 * 4), Y: int(footer.Height)}})
+		index := 0
+		for y := 0; y < int(footer.Height); y++ {
+			indexX := 0
+			for x := 0; x < int(footer.Width/8); x++ {
+				val := d[index]
+				pp1, pp2, pp3, pp4 := rawPixelMode1(val)
+				c1 := p[pp1]
+				c2 := p[pp2]
+				c3 := p[pp3]
+				c4 := p[pp4]
+				out.Set(indexX, y, c1)
+				indexX++
+				out.Set(indexX, y, c2)
+				indexX++
+				out.Set(indexX, y, c3)
+				indexX++
+				out.Set(indexX, y, c4)
+				indexX++
+				index++
+			}
+		}
+	case 2:
+		out = image.NewNRGBA(image.Rectangle{
+			Min: image.Point{X: 0, Y: 0},
+			Max: image.Point{X: int(footer.Width / 8 * 8), Y: int(footer.Height)}})
+		index := 0
 		for y := 0; y < int(footer.Width); y++ {
-			i := d[x+y]
-			c := p[i]
-			out.Set(x, y, c)
+			indexX := 0
+			for x := 0; x < int(footer.Width/8); x++ {
+				val := d[index]
+				pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 := rawPixelMode2(val)
+				c1 := p[pp1]
+				c2 := p[pp2]
+				c3 := p[pp3]
+				c4 := p[pp4]
+				c5 := p[pp5]
+				c6 := p[pp6]
+				c7 := p[pp7]
+				c8 := p[pp8]
+				out.Set(indexX, y, c1)
+				indexX++
+				out.Set(indexX, y, c2)
+				indexX++
+				out.Set(indexX, y, c3)
+				indexX++
+				out.Set(indexX, y, c4)
+				indexX++
+				out.Set(indexX, y, c5)
+				indexX++
+				out.Set(indexX, y, c6)
+				indexX++
+				out.Set(indexX, y, c7)
+				indexX++
+				out.Set(indexX, y, c8)
+				indexX++
+				index++
+			}
 		}
 	}
-	return xl.Png(output, out)
+	return xl.Png(output+".png", out)
 }
 
 func ScrToImg(scrPath string, mode uint8, p color.Palette) (*image.NRGBA, error) {

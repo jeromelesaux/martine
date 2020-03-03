@@ -323,8 +323,9 @@ func main() {
 			}
 			exportType.ScanlineSequence = append(exportType.ScanlineSequence, line)
 		}
-		if size.Width != len(exportType.ScanlineSequence) {
-			fmt.Fprintf(os.Stderr, "You have not defined all lines sequence in the option, gets sequence for %d lines and the output image lines is %d\n", len(exportType.ScanlineSequence), size.Width)
+		modulo := size.Height % len(exportType.ScanlineSequence)
+		if modulo != 0 {
+			fmt.Fprintf(os.Stderr, "height modulo scanlinesequence is not equal to 0 %d lines and the output image lines is %d\n", len(exportType.ScanlineSequence), size.Height)
 			os.Exit(-1)
 		}
 	}
@@ -567,10 +568,17 @@ func main() {
 				os.Exit(-1)
 			}
 		}
-
-		if err := gfx.ScrToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot not convert to PNG file (%s) error %v\n", *picturePath, err)
-			os.Exit(-1)
+		switch strings.ToUpper(filepath.Ext(filename)) {
+		case ".WIN":
+			if err := gfx.SpriteToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
+				fmt.Fprintf(os.Stderr, "Cannot not convert to PNG file (%s) error %v\n", *picturePath, err)
+				os.Exit(-1)
+			}
+		case ".SCR":
+			if err := gfx.ScrToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
+				fmt.Fprintf(os.Stderr, "Cannot not convert to PNG file (%s) error %v\n", *picturePath, err)
+				os.Exit(-1)
+			}
 		}
 		os.Exit(1)
 	}

@@ -17,7 +17,7 @@ func CheckOutput(out string) error {
 		}
 		return nil
 	}
-	if infos.IsDir() {
+	if !infos.IsDir() {
 		fmt.Fprintf(os.Stderr, "%s is not a directory can not continue\n", out)
 		return ErrorIsNotDirectory
 	}
