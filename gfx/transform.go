@@ -124,7 +124,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 					scanlineSize := len(exportType.ScanlineSequence)
 					scanlineIndex := y % scanlineSize
 					scanlineValue := exportType.ScanlineSequence[scanlineIndex]
-					newOffset := (scanlineValue * y) + (offset % lineSize)
+					newOffset := (scanlineValue * ((y / scanlineSize) + 1) * lineSize) + (x / 2)
 					data[newOffset] = pixel
 				} else {
 					data[offset] = pixel
@@ -185,7 +185,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 						scanlineSize := len(exportType.ScanlineSequence)
 						scanlineIndex := y % scanlineSize
 						scanlineValue := exportType.ScanlineSequence[scanlineIndex]
-						newOffset := (scanlineValue * lineSize) + (offset % lineSize)
+						newOffset := (scanlineValue * ((y / scanlineSize) + 1) * lineSize) + (x / 4)
 						data[newOffset] = pixel
 					} else {
 						data[offset] = pixel
@@ -269,7 +269,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 							scanlineSize := len(exportType.ScanlineSequence)
 							scanlineIndex := y % scanlineSize
 							scanlineValue := exportType.ScanlineSequence[scanlineIndex]
-							newOffset := (scanlineValue * lineSize) + (offset % lineSize)
+							newOffset := (scanlineValue * ((y / scanlineSize) + 1) * lineSize) + (x / 8)
 							data[newOffset] = pixel
 						} else {
 							data[offset] = pixel
