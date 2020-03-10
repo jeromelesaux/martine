@@ -564,7 +564,7 @@ func main() {
 					os.Exit(-1)
 				}
 			} else {
-				fmt.Fprintf(os.Stderr, "For screen or window image, pal or kit file palette is mandatory.\n")
+				fmt.Fprintf(os.Stderr, "For screen or window image, pal or kit file palette is mandatory. (kit file must be associated with -p option)\n")
 				os.Exit(-1)
 			}
 		}
