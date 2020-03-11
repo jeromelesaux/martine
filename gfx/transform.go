@@ -69,13 +69,28 @@ func SpriteHardTransform(in *image.NRGBA, p color.Palette, size constants.Size, 
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 			return err
 		}
-		if err := file.Ink(filename, p, 2, exportType); err != nil {
+		filePath := exportType.OsFullPath(filename, "_palettepal.png")
+		if err := file.PalToPng(filePath, p); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			return err
+		}
+		if err := file.Ink(filename, p, mode, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+			return err
+		}
+		filePath = exportType.OsFullPath(filename, "_paletteink.png")
+		if err := file.PalToPng(filePath, p); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	} else {
 		if err := file.Kit(filename, p, mode, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+			return err
+		}
+		filePath := exportType.OsFullPath(filename, "_palettekit.png")
+		if err := file.PalToPng(filePath, p); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	}
@@ -292,13 +307,28 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 			return err
 		}
+		filePath := exportType.OsFullPath(filename, "_palettepal.png")
+		if err := file.PalToPng(filePath, p); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			return err
+		}
 		if err := file.Ink(filename, p, 2, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+			return err
+		}
+		filePath = exportType.OsFullPath(filename, "_paletteink.png")
+		if err := file.PalToPng(filePath, p); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	} else {
 		if err := file.Kit(filename, p, mode, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+			return err
+		}
+		filePath := exportType.OsFullPath(filename, "_palettekit.png")
+		if err := file.PalToPng(filename+"_palettekit.png", p); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	}
@@ -615,18 +645,33 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, expor
 			return err
 		}
 	}
-	if exportType.CpcPlus {
-		if err := file.Kit(filePath, p, screenMode, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-	} else {
+	if !exportType.CpcPlus {
 		if err := file.Pal(filePath, p, screenMode, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
+		filePath2 := exportType.OsFullPath(filePath, "_palettepal.png")
+		if err := file.PalToPng(filePath2, p); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath2, err)
+			return err
+		}
 		if err := file.Ink(filePath, p, screenMode, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			return err
+		}
+		filePath2 = exportType.OsFullPath(filePath, "_paletteink.png")
+		if err := file.PalToPng(filePath2, p); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath2, err)
+			return err
+		}
+	} else {
+		if err := file.Kit(filePath, p, screenMode, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			return err
+		}
+		filePath2 := exportType.OsFullPath(filePath, "_palettekit.png")
+		if err := file.PalToPng(filePath2, p); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath2, err)
 			return err
 		}
 	}

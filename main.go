@@ -95,7 +95,7 @@ var (
 	maskOrOperation     = flag.Bool("maskor", false, "Will apply an OR operation on each byte with the mask")
 	maskAdOperation     = flag.Bool("maskand", false, "Will apply an AND operation on each byte with the mask")
 	zigzag              = flag.Bool("zigzag", false, "generate data in zigzag order (inc first line and dec next line for tiles)")
-	appVersion          = "0.22"
+	appVersion          = "0.23rc"
 	version             = flag.Bool("version", false, "print martine's version")
 )
 

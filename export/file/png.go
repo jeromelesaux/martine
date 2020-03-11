@@ -22,6 +22,7 @@ func Png(filePath string, im *image.NRGBA) error {
 		return err
 	}
 	fwd.Close()
+	fmt.Fprintf(os.Stdout, "Create output file (%s)\n", filePath)
 	return nil
 }
 
