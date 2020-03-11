@@ -107,7 +107,7 @@ func ApplyOneImage(in image.Image,
 
 	out := convert.Resize(in, exportType.Size, exportType.ResizingAlgo)
 	fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
-	if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_resized.png", out); err != nil {
+	if err := file.Png(filepath.Join(exportType.OutputPath, filename+"_resized.png"), out); err != nil {
 		os.Exit(-2)
 	}
 
@@ -132,7 +132,7 @@ func ApplyOneImage(in image.Image,
 	newPalette = constants.SortColorsByDistance(newPalette)
 
 	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
-	if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_down.png", downgraded); err != nil {
+	if err := file.Png(filepath.Join(exportType.OutputPath, filename+"_down.png"), downgraded); err != nil {
 		os.Exit(-2)
 	}
 

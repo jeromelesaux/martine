@@ -23,7 +23,7 @@ func WilcardedFiles(filespath []string) ([]string, error) {
 		fmt.Fprintf(os.Stdout, "Regular to match (%s)\n", reg)
 		for _, f := range fis {
 			if !f.IsDir() {
-				check := dir + string(filepath.Separator) + f.Name()
+				check := filepath.Join(dir, f.Name())
 				fmt.Fprintf(os.Stdout, "Checking regex for (%s) matches (%s)\n", f.Name(), reg)
 				matchs, err := filepath.Match(reg, f.Name())
 				if err != nil {

@@ -2,14 +2,15 @@ package gfx
 
 import (
 	"fmt"
-	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
-	"github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
 	"image"
 	"image/color"
 	"os"
 	"path/filepath"
+
+	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/convert"
+	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/file"
 )
 
 func DoSpliteRaster(in image.Image, screenMode uint8, filename string, exportType *export.ExportType) error {
@@ -44,14 +45,14 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, expo
 	srs := constants.NewSplitRasterScreen()
 	out := convert.Resize(in, exportType.Size, exportType.ResizingAlgo)
 	fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
-	if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_resized.png", out); err != nil {
+	if err := file.Png(filepath.Join(exportType.OutputPath, filename+"_resized.png"), out); err != nil {
 		return nil, bw, srs, err
 	}
 	p, newIm, err := convert.DowngradingPalette(out, exportType.Size, exportType.CpcPlus)
 	if err != nil {
 		return p, bw, srs, err
 	}
-	if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_downgraded.png", newIm); err != nil {
+	if err := file.Png(filepath.Join(exportType.OutputPath, filename+"_downgraded.png"), newIm); err != nil {
 		return nil, bw, srs, err
 	}
 
@@ -134,7 +135,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, expo
 			}
 		}
 	}
-	if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_splitraster.png", srIm); err != nil {
+	if err := file.Png(filepath.Join(exportType.OutputPath, filename+"_splitraster.png"), srIm); err != nil {
 		return nil, bw, srs, err
 	}
 	fmt.Println(firmwareColorUsed)

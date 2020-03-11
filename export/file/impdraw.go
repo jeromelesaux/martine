@@ -3,12 +3,13 @@ package file
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/jeromelesaux/m4client/cpc"
-	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/export"
 	"image/color"
 	"os"
 	"path/filepath"
+
+	"github.com/jeromelesaux/m4client/cpc"
+	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/export"
 )
 
 /*
@@ -92,7 +93,7 @@ func ExportSplitRaster(filename string, p color.Palette, rasters *constants.Spli
 		LogicalSize: uint16(binary.Size(output))}
 	copy(header.Filename[:], exportType.GetAmsdosFilename(filename, ".SPL"))
 	header.Checksum = uint16(header.ComputedChecksum16())
-	basicPath := exportType.OutputPath + string(filepath.Separator) + exportType.GetAmsdosFilename(filename, ".SPL")
+	basicPath := filepath.Join(exportType.OutputPath, exportType.GetAmsdosFilename(filename, ".SPL"))
 	fw, err := os.Create(basicPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", basicPath, err)

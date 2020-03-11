@@ -530,7 +530,7 @@ func main() {
 
 	if *reverse {
 
-		outpath := *output + string(filepath.Separator) + strings.Replace(strings.ToLower(filename), ".scr", ".png", 1)
+		outpath := filepath.Join(*output, strings.Replace(strings.ToLower(filename), ".scr", ".png", 1))
 		if exportType.Overscan {
 			p, mode, err := file.OverscanPalette(*picturePath)
 			if err != nil {
@@ -693,7 +693,7 @@ func main() {
 					break
 				}
 			}
-			exportType.SnaPath = *output + string(filepath.Separator) + "test.sna"
+			exportType.SnaPath = filepath.Join(*output, "test.sna")
 			if err := file.ImportInSna(gfxFile, exportType.SnaPath, screenMode); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot create or write into sna file error :%v\n", err)
 			}

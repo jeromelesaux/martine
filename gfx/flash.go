@@ -1,15 +1,16 @@
 package gfx
 
 import (
-	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
-	"github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
 	"image"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/convert"
+	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/file"
 )
 
 func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, exportType *export.ExportType) error {
@@ -86,7 +87,7 @@ func AutoFlash(in image.Image,
 		namesize = 7
 	}
 	flashPaletteFilename1 := strings.ToUpper(name)[0:namesize] + "1.PAL"
-	flashPalettePath1 := exportType.OutputPath + string(filepath.Separator) + flashPaletteFilename1
+	flashPalettePath1 := filepath.Join(exportType.OutputPath, flashPaletteFilename1)
 
 	err = ApplyOneImage(leftIm,
 		exportType,
@@ -127,7 +128,7 @@ func AutoFlash(in image.Image,
 	}
 
 	flashPaletteFilename2 := strings.ToUpper(name)[0:namesize] + "2.PAL"
-	flashPalettePath2 := exportType.OutputPath + string(filepath.Separator) + flashPaletteFilename2
+	flashPalettePath2 := filepath.Join(exportType.OutputPath, flashPaletteFilename2)
 
 	exportType.PalettePath = flashPalettePath1
 

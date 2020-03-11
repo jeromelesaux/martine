@@ -166,7 +166,7 @@ func (e *ExportType) Filename() string {
 }
 
 func (e *ExportType) Fullpath(ext string) string {
-	return e.OutputPath + string(filepath.Separator) + e.OsFilename(ext)
+	return filepath.Join(e.OutputPath, e.OsFilename(ext))
 }
 
 func (e *ExportType) TransformToAmsdosFile(filePath string) string {
@@ -216,12 +216,12 @@ func (e *ExportType) AmsdosFullPath(filePath string, newExtension string) string
 	}
 
 	newFilename := file[0:length] + file[end-1:end] + newExtension
-	return e.OutputPath + string(filepath.Separator) + strings.ToUpper(newFilename)
+	return filepath.Join(e.OutputPath, strings.ToUpper(newFilename))
 }
 
 func (e *ExportType) OsFullPath(filePath string, newExtension string) string {
 	filename := filepath.Base(filePath)
 	file := RemoveUnsupportedChar(strings.TrimSuffix(filename, filepath.Ext(filename)))
 	newFilename := file + newExtension
-	return e.OutputPath + string(filepath.Separator) + newFilename
+	return filepath.Join(e.OutputPath, newFilename)
 }

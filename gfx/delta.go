@@ -415,12 +415,12 @@ func ExportDelta(filename string, dc *DeltaCollection, exportType *x.ExportType)
 	}
 
 	var emptyPalette []color.Color
-	outFilepath := exportType.OutputPath + string(filepath.Separator) + filename + ".txt"
+	outFilepath := filepath.Join(exportType.OutputPath, filename+".txt")
 	if err = file.Ascii(outFilepath, data, emptyPalette, exportType); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while exporting data as ascii mode file (%s) error :%v\n", outFilepath, err)
 		return err
 	}
-	outFilepath = exportType.OutputPath + string(filepath.Separator) + filename + "c.txt"
+	outFilepath = filepath.Join(exportType.OutputPath, filename+"c.txt")
 	if err = file.AsciiByColumn(outFilepath, data, emptyPalette, exportType); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while exporting data as ascii by column mode file (%s) error :%v\n", outFilepath, err)
 		return err
@@ -488,7 +488,7 @@ func ProceedDelta(filespath []string, exportType *x.ExportType) error {
 		fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 		fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
 		fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
-		out := exportType.OutputPath + string(filepath.Separator) + fmt.Sprintf("%dto%d", i, (i+1))
+		out := filepath.Join(exportType.OutputPath, fmt.Sprintf("%dto%d", i, (i+1)))
 		if err := ExportDelta(out, dc, exportType); err != nil {
 			return err
 		}
@@ -547,7 +547,7 @@ func ProceedDelta(filespath []string, exportType *x.ExportType) error {
 	fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 	fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
 	fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
-	out := exportType.OutputPath + string(filepath.Separator) + fmt.Sprintf("%dto0", len(filespath)-1)
+	out := filepath.Join(exportType.OutputPath, fmt.Sprintf("%dto0", len(filespath)-1))
 	if err := ExportDelta(out, dc, exportType); err != nil {
 		return err
 	}

@@ -327,7 +327,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 			return err
 		}
 		filePath := exportType.OsFullPath(filename, "_palettekit.png")
-		if err := file.PalToPng(filename+"_palettekit.png", p); err != nil {
+		if err := file.PalToPng(filePath, p); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}

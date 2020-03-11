@@ -3,12 +3,13 @@ package file
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/jeromelesaux/m4client/cpc"
-	"github.com/jeromelesaux/martine/constants"
-	x "github.com/jeromelesaux/martine/export"
 	"image/color"
 	"os"
 	"path/filepath"
+
+	"github.com/jeromelesaux/m4client/cpc"
+	"github.com/jeromelesaux/martine/constants"
+	x "github.com/jeromelesaux/martine/export"
 )
 
 // CPC plus loader nb colors *2 offset 0x9d
@@ -1557,7 +1558,7 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 		LogicalSize: uint16(binary.Size(flashLoader))}
 	copy(binaryHeader.Filename[:], "FLASH   BIN")
 	binaryHeader.Checksum = uint16(binaryHeader.ComputedChecksum16())
-	flashBinPath := exportType.OutputPath + string(filepath.Separator) + "FLASH.BIN"
+	flashBinPath := filepath.Join(exportType.OutputPath, "FLASH.BIN")
 	fw, err := os.Create(flashBinPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", flashBinPath, err)
@@ -1582,7 +1583,7 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 		LogicalSize: uint16(binary.Size(basicLoader))}
 	copy(binaryHeader.Filename[:], "-SWITCH.BAS")
 	basicHeader.Checksum = uint16(basicHeader.ComputedChecksum16())
-	basicPath := exportType.OutputPath + string(filepath.Separator) + "-SWITCH.BAS"
+	basicPath := filepath.Join(exportType.OutputPath, "-SWITCH.BAS")
 	fw2, err := os.Create(basicPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", basicPath, err)
@@ -1721,7 +1722,7 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, exportType 
 		LogicalSize: uint16(binary.Size(egxLoader))}
 	copy(binaryHeader.Filename[:], "EGX     BIN")
 	binaryHeader.Checksum = uint16(binaryHeader.ComputedChecksum16())
-	egxBinPath := exportType.OutputPath + string(filepath.Separator) + "EGX.BIN"
+	egxBinPath := filepath.Join(exportType.OutputPath, "EGX.BIN")
 	fw, err = os.Create(egxBinPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", egxBinPath, err)

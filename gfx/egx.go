@@ -3,14 +3,15 @@ package gfx
 import (
 	"errors"
 	"fmt"
-	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
-	"github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
 	"image"
 	"image/color"
 	"os"
 	"path/filepath"
+
+	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/convert"
+	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/file"
 )
 
 var (
@@ -153,7 +154,7 @@ func AutoEgx1(in image.Image,
 	}
 	p = constants.SortColorsByDistance(p)
 	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
-	if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_down.png", downgraded); err != nil {
+	if err := file.Png(filepath.Join(exportType.OutputPath, filename+"_down.png"), downgraded); err != nil {
 		os.Exit(-2)
 	}
 
@@ -196,7 +197,7 @@ func AutoEgx2(in image.Image,
 	}
 	p = constants.SortColorsByDistance(p)
 	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
-	if err := file.Png(exportType.OutputPath+string(filepath.Separator)+filename+"_down.png", downgraded); err != nil {
+	if err := file.Png(filepath.Join(exportType.OutputPath, filename+"_down.png"), downgraded); err != nil {
 		os.Exit(-2)
 	}
 

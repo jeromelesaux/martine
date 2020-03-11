@@ -2,9 +2,6 @@ package gfx
 
 import (
 	"fmt"
-	"github.com/jeromelesaux/martine/constants"
-	x "github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
 	"image"
 	"image/color"
 	"os"
@@ -12,6 +9,10 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/jeromelesaux/martine/constants"
+	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/file"
 )
 
 func RollLeft(rla, sla, iterations int, screenMode uint8, size constants.Size, downgraded *image.NRGBA, newPalette color.Palette, filename string, exportType *x.ExportType) {
@@ -53,7 +54,7 @@ func RollLeft(rla, sla, iterations int, screenMode uint8, size constants.Size, d
 			}
 			newFilename := strconv.Itoa(i) + strings.TrimSuffix(filename, path.Ext(filename)) + ".png"
 			fmt.Fprintf(os.Stdout, "Saving downgraded image iteration (%d) into (%s)\n", i, newFilename)
-			file.Png(exportType.OutputPath+string(filepath.Separator)+newFilename, im)
+			file.Png(filepath.Join(exportType.OutputPath, newFilename), im)
 			fmt.Fprintf(os.Stdout, "Tranform image in sprite iteration (%d)\n", i)
 			SpriteTransform(im, newPalette, size, screenMode, newFilename, exportType)
 		}
@@ -95,7 +96,7 @@ func RollRight(rra, sra, iterations int, screenMode uint8, size constants.Size, 
 			}
 			newFilename := strconv.Itoa(i) + strings.TrimSuffix(filename, path.Ext(filename)) + ".png"
 			fmt.Fprintf(os.Stdout, "Saving downgraded image iteration (%d) into (%s)\n", i, newFilename)
-			file.Png(exportType.OutputPath+string(filepath.Separator)+newFilename, im)
+			file.Png(filepath.Join(exportType.OutputPath, newFilename), im)
 			fmt.Fprintf(os.Stdout, "Tranform image in sprite iteration (%d)\n", i)
 			SpriteTransform(im, newPalette, size, screenMode, newFilename, exportType)
 		}
@@ -136,7 +137,7 @@ func RollUp(keephigh, losthigh, iterations int, screenMode uint8, size constants
 			}
 			newFilename := strconv.Itoa(i) + strings.TrimSuffix(filename, path.Ext(filename)) + ".png"
 			fmt.Fprintf(os.Stdout, "Saving downgraded image iteration (%d) into (%s)\n", i, newFilename)
-			file.Png(exportType.OutputPath+string(filepath.Separator)+newFilename, im)
+			file.Png(filepath.Join(exportType.OutputPath, newFilename), im)
 			fmt.Fprintf(os.Stdout, "Tranform image in sprite iteration (%d)\n", i)
 			SpriteTransform(im, newPalette, size, screenMode, newFilename, exportType)
 		}
@@ -177,7 +178,7 @@ func RollLow(keeplow, lostlow, iterations int, screenMode uint8, size constants.
 			}
 			newFilename := strconv.Itoa(i) + strings.TrimSuffix(filename, path.Ext(filename)) + ".png"
 			fmt.Fprintf(os.Stdout, "Saving downgraded image iteration (%d) into (%s)\n", i, newFilename)
-			file.Png(exportType.OutputPath+string(filepath.Separator)+newFilename, im)
+			file.Png(filepath.Join(exportType.OutputPath, newFilename), im)
 			fmt.Fprintf(os.Stdout, "Tranform image in sprite iteration (%d)\n", i)
 			SpriteTransform(im, newPalette, size, screenMode, newFilename, exportType)
 		}
