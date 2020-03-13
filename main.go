@@ -6,6 +6,7 @@ import (
 	"image"
 	"image/color"
 	_ "image/jpeg"
+	"image/png"
 	_ "image/png"
 	"os"
 	"path/filepath"
@@ -15,6 +16,7 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/convert"
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/net"
@@ -95,6 +97,7 @@ var (
 	maskOrOperation     = flag.Bool("maskor", false, "Will apply an OR operation on each byte with the mask")
 	maskAdOperation     = flag.Bool("maskand", false, "Will apply an AND operation on each byte with the mask")
 	zigzag              = flag.Bool("zigzag", false, "generate data in zigzag order (inc first line and dec next line for tiles)")
+	tileMap             = flag.Bool("tilemap", false, "Analyse the input image and generate the tiles, the tile map and gloabl schema.")
 	appVersion          = "0.23rc"
 	version             = flag.Bool("version", false, "print martine's version")
 )
@@ -593,55 +596,74 @@ func main() {
 			os.Exit(-1)
 		}
 	} else {
-		if exportType.TileMode {
-			if exportType.TileIterationX == -1 || exportType.TileIterationY == -1 {
-				fmt.Fprintf(os.Stderr, "missing arguments iterx and itery to use with tile mode.\n")
-				usage()
+		if *tileMap {
+			if !exportType.CustomDimension {
+				fmt.Fprintf(os.Stderr, "You must set height and width to define the tile dimensions (options -h and -w)\n")
 				os.Exit(-1)
 			}
-			err := gfx.TileMode(exportType, uint8(*mode), exportType.TileIterationX, exportType.TileIterationY)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Tile mode on error : error :%v\n", err)
+			analyze := gfx.AnalyzeTilesBoard(in, exportType.Size)
+			if err := analyze.SaveSchema(filepath.Join(exportType.OutputPath, "tilesmap_schema.png")); err != nil {
+				fmt.Fprintf(os.Stderr, "Cannot save tilemap schema error :%v\n", err)
 				os.Exit(-1)
 			}
+			if err := analyze.SaveTilemap(filepath.Join(exportType.OutputPath, "tilesmap.map")); err != nil {
+				fmt.Fprintf(os.Stderr, "Cannot save tilemap csv file error :%v\n", err)
+				os.Exit(-1)
+			}
+			for i, v := range analyze.BoardTiles {
+				tile := v.Tile.Image()
+				tileFilepath := filepath.Join(exportType.OutputPath, fmt.Sprintf("%.2d.png", i))
+				f, err := os.Create(tileFilepath)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Cannot create tiles %.2d error %v\n", i, err)
+					os.Exit(-1)
+				}
+				defer f.Close()
+				if err := png.Encode(f, tile); err != nil {
+					fmt.Fprintf(os.Stderr, "Cannot encode in png tile %.2d error %v\n", i, err)
+					os.Exit(-1)
+				}
+
+				var palette color.Palette
+				if exportType.CpcPlus {
+					palette = constants.CpcPlusPalette
+				} else {
+					palette = constants.CpcOldPalette
+				}
+
+				out, palette := gfx.DoDithering(tile, palette, exportType)
+				palette, out, err = convert.DowngradingPalette(out, exportType.Size, exportType.CpcPlus)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", tileFilepath)
+				}
+
+				palette = constants.SortColorsByDistance(palette)
+
+				fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
+				if err := file.Png(tileFilepath+"_down.png", out); err != nil {
+					os.Exit(-2)
+				}
+				if err := gfx.SpriteTransform(tile, palette, exportType.Size, screenMode, tileFilepath, exportType); err != nil {
+					fmt.Fprintf(os.Stderr, "Cannot create tile from image %s, error :%v\n", tileFilepath, err)
+				}
+			}
+
 		} else {
-			if *flash {
-				if err := gfx.Flash(*picturePath, *picturePath2,
-					*palettePath, *palettePath2,
-					*mode,
-					*mode2,
-					exportType); err != nil {
-					fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
+			if exportType.TileMode {
+				if exportType.TileIterationX == -1 || exportType.TileIterationY == -1 {
+					fmt.Fprintf(os.Stderr, "missing arguments iterx and itery to use with tile mode.\n")
+					usage()
+					os.Exit(-1)
+				}
+				err := gfx.TileMode(exportType, uint8(*mode), exportType.TileIterationX, exportType.TileIterationY)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Tile mode on error : error :%v\n", err)
 					os.Exit(-1)
 				}
 			} else {
-				var p color.Palette
-				var err error
-				if exportType.CpcPlus {
-					if *kitPath != "" {
-						p, _, err = file.OpenKit(*kitPath)
-						if err != nil {
-							fmt.Fprintf(os.Stderr, "Error while reading kit file (%s) :%v\n", *kitPath, err)
-							os.Exit(-1)
-						}
-					}
-				} else {
-					if *palettePath != "" {
-						p, _, err = file.OpenPal(*palettePath)
-						if err != nil {
-							fmt.Fprintf(os.Stderr, "Error while reading palette file (%s) :%v\n", *palettePath, err)
-							os.Exit(-1)
-						}
-					}
-				}
-
-				if exportType.EgxFormat > 0 {
-					if len(p) == 0 {
-						fmt.Fprintf(os.Stderr, "Now colors found in palette, give up treatment.\n")
-						os.Exit(-1)
-					}
-					if err := gfx.Egx(*picturePath, *picturePath2,
-						p,
+				if *flash {
+					if err := gfx.Flash(*picturePath, *picturePath2,
+						*palettePath, *palettePath2,
 						*mode,
 						*mode2,
 						exportType); err != nil {
@@ -649,28 +671,63 @@ func main() {
 						os.Exit(-1)
 					}
 				} else {
-					if exportType.SplitRaster {
-						if exportType.Overscan {
-							if err := gfx.DoSpliteRaster(in, screenMode, filename, exportType); err != nil {
-								fmt.Fprintf(os.Stderr, "Error while applying splitraster on one image :%v\n", err)
+					var p color.Palette
+					var err error
+					if exportType.CpcPlus {
+						if *kitPath != "" {
+							p, _, err = file.OpenKit(*kitPath)
+							if err != nil {
+								fmt.Fprintf(os.Stderr, "Error while reading kit file (%s) :%v\n", *kitPath, err)
 								os.Exit(-1)
 							}
-						} else {
-							fmt.Fprintf(os.Stderr, "Only overscan mode implemented for this feature, %v", gfx.ErrorNotYetImplemented)
 						}
 					} else {
-						if strings.ToUpper(extension) != ".SCR" {
-							if err := gfx.ApplyOneImage(in,
-								exportType,
-								filename, *picturePath,
-								*mode,
-								screenMode); err != nil {
-								fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
+						if *palettePath != "" {
+							p, _, err = file.OpenPal(*palettePath)
+							if err != nil {
+								fmt.Fprintf(os.Stderr, "Error while reading palette file (%s) :%v\n", *palettePath, err)
 								os.Exit(-1)
 							}
-						} else {
-							fmt.Fprintf(os.Stderr, "Error while applying on one image : SCR format not used for this treatment\n")
+						}
+					}
+
+					if exportType.EgxFormat > 0 {
+						if len(p) == 0 {
+							fmt.Fprintf(os.Stderr, "Now colors found in palette, give up treatment.\n")
 							os.Exit(-1)
+						}
+						if err := gfx.Egx(*picturePath, *picturePath2,
+							p,
+							*mode,
+							*mode2,
+							exportType); err != nil {
+							fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
+							os.Exit(-1)
+						}
+					} else {
+						if exportType.SplitRaster {
+							if exportType.Overscan {
+								if err := gfx.DoSpliteRaster(in, screenMode, filename, exportType); err != nil {
+									fmt.Fprintf(os.Stderr, "Error while applying splitraster on one image :%v\n", err)
+									os.Exit(-1)
+								}
+							} else {
+								fmt.Fprintf(os.Stderr, "Only overscan mode implemented for this feature, %v", gfx.ErrorNotYetImplemented)
+							}
+						} else {
+							if strings.ToUpper(extension) != ".SCR" {
+								if err := gfx.ApplyOneImage(in,
+									exportType,
+									filename, *picturePath,
+									*mode,
+									screenMode); err != nil {
+									fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
+									os.Exit(-1)
+								}
+							} else {
+								fmt.Fprintf(os.Stderr, "Error while applying on one image : SCR format not used for this treatment\n")
+								os.Exit(-1)
+							}
 						}
 					}
 				}

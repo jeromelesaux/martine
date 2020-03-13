@@ -102,6 +102,20 @@ type Tile struct {
 	Colors [][]color.Color
 }
 
+func (t *Tile) Image() *image.NRGBA {
+	im := image.NewNRGBA(
+		image.Rectangle{
+			Min: image.Point{X: 0, Y: 0},
+			Max: image.Point{X: t.Size.Width, Y: t.Size.Height},
+		})
+	for y := 0; y < t.Size.Height; y++ {
+		for x := 0; x < t.Size.Width; x++ {
+			im.Set(x, y, t.Colors[x][y])
+		}
+	}
+	return im
+}
+
 func NewTile(size constants.Size) *Tile {
 	colors := make([][]color.Color, size.Width)
 	for i := 0; i < size.Width; i++ {
