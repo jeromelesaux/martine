@@ -211,8 +211,8 @@ func (a *AnalyzeBoard) SaveSchema(filePath string) error {
 		return err
 	}
 	defer f.Close()
-	totWidth := 20*len(a.BoardTiles) + 20
-	totHeight := 25*len(a.BoardTiles) + 20
+	totWidth := 10*len(a.BoardTiles) + 20
+	totHeight := 15*len(a.BoardTiles) + 20 + (25 * len(a.TileMap))
 	im := image.NewNRGBA(
 		image.Rectangle{
 			Min: image.Point{X: 0, Y: 0},
