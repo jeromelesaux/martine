@@ -211,8 +211,8 @@ func (a *AnalyzeBoard) SaveSchema(filePath string) error {
 		return err
 	}
 	defer f.Close()
-	totWidth := 10*len(a.BoardTiles) + 20
-	totHeight := 15*len(a.BoardTiles) + 20 + (25 * len(a.TileMap))
+	totWidth := (16 * len(a.BoardTiles)) + 20 + (20 * len(a.TileMap[0]))
+	totHeight := (20 * len(a.BoardTiles)) + 20 + (40 * len(a.TileMap))
 	im := image.NewNRGBA(
 		image.Rectangle{
 			Min: image.Point{X: 0, Y: 0},
@@ -253,7 +253,7 @@ func (a *AnalyzeBoard) SaveSchema(filePath string) error {
 		for _, val := range v {
 			label := fmt.Sprintf("%.2d", val)
 			pixfont.DrawString(im, x0, y0, label, fontColor)
-			x0 += 20
+			x0 += 30
 		}
 		x0 = 10
 		y0 += 10
