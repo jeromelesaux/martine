@@ -36,7 +36,7 @@ func (f *stringSlice) Set(value string) error {
 
 var deltaFiles stringSlice
 var (
-	byteStatement       = flag.String("s", "", "Byte statement to replace in ascii export (default is BYTE), you can replace or instance by defb")
+	byteStatement       = flag.String("s", "", "Byte statement to replace in ascii export (default is db), you can replace or instance by defb or byte")
 	picturePath         = flag.String("i", "", "Picture path of the input file.")
 	width               = flag.Int("w", -1, "Custom output width in pixels. (Will produce a sprite file .win)")
 	height              = flag.Int("h", -1, "Custom output height in pixels. (Will produce a sprite file .win)")

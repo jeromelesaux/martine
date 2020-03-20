@@ -3,18 +3,19 @@ package file
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/jeromelesaux/m4client/cpc"
-	"github.com/jeromelesaux/martine/constants"
-	x "github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/rle"
 	"image/color"
 	"os"
 	"runtime"
 	"strings"
+
+	"github.com/jeromelesaux/m4client/cpc"
+	"github.com/jeromelesaux/martine/constants"
+	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/rle"
 )
 
 // ByteToken is the token by default
-var ByteToken = "BYTE"
+var ByteToken = "db" // "BYTE"
 
 func Ascii(filePath string, data []byte, p color.Palette, exportType *x.ExportType) error {
 	eol := "\n"
@@ -37,7 +38,8 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *x.ExportTy
 	cpcFilename := string(exportType.AmsdosFilename()) + ".TXT"
 	osFilepath := exportType.AmsdosFullPath(filePath, ".TXT")
 	fmt.Fprintf(os.Stdout, "Writing ascii file (%s) data length (%d)\n", osFilepath, len(data))
-	out += "; Screen " + cpcFilename + eol + ".screen:" + eol
+	sizeInfos := fmt.Sprintf("; width %d height %d %s", exportType.Size.Width, exportType.Size.Height, eol)
+	out += "; Screen " + cpcFilename + eol + ".screen:" + eol + sizeInfos
 	for i = 0; i < len(data); i += 8 {
 		out += fmt.Sprintf("%s ", ByteToken)
 		if i < len(data) {
@@ -173,7 +175,8 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, exportType *x.
 	cpcFilename := string(exportType.AmsdosFilename()) + "C.TXT"
 	osFilepath := exportType.AmsdosFullPath(filePath, "C.TXT")
 	fmt.Fprintf(os.Stdout, "Writing ascii file (%s) values by columns data length (%d)\n", osFilepath, len(data))
-	out += "; Screen by column " + cpcFilename + eol + ".screen:" + eol
+	sizeInfos := fmt.Sprintf("; width %d height %d %s", exportType.Size.Width, exportType.Size.Height, eol)
+	out += "; Screen by column " + cpcFilename + eol + ".screen:" + eol + sizeInfos
 	pas := exportType.Size.Width
 	h := 0
 	nbValues := 1
