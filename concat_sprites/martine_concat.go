@@ -1,0 +1,69 @@
+package main
+
+import (
+	"bufio"
+	"flag"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/jeromelesaux/martine/common"
+)
+
+var (
+	files = flag.String("files", "", "sprites files to concat (wildcard accepted such as ? or * file filename.) ")
+	out   = flag.String("out", "", "output file to store data.")
+)
+
+func main() {
+	flag.Parse()
+	var err error
+	spritesFiles := []string{*files}
+	filespath, err := common.WilcardedFiles(spritesFiles)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error while getting the files path. %v\n", err)
+		os.Exit(-1)
+	}
+	f, err := os.Create(*out)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error while opening file %s error : %v\n.", *out, err)
+		os.Exit(-1)
+	}
+	defer f.Close()
+	for _, v := range filespath {
+		displaySprite(v, f)
+	}
+	os.Exit(0)
+}
+
+func displaySprite(filePath string, out *os.File) {
+	f, err := os.Open(filePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Cannot open file (%s) error :%v\n", filePath, err)
+		return
+	}
+	defer f.Close()
+	base := filepath.Base(filePath)
+	ext := filepath.Ext(base)
+	spriteName := strings.Replace(base, ext, "", 1)
+	out.Write([]byte(fmt.Sprintf("%s\n", strings.ToLower(spriteName))))
+	scanner := bufio.NewScanner(f)
+
+	scanner.Scan() // remove amsdos header
+	for scanner.Scan() {
+		in := scanner.Text()
+
+		switch in[0] {
+		case ';':
+			// end of the data
+			return
+		case '.':
+			continue
+		default:
+			out.Write([]byte(fmt.Sprintf("%s\n", in)))
+
+		}
+
+	}
+}
