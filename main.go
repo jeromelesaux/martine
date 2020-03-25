@@ -591,7 +591,7 @@ func main() {
 		for i, v := range deltaFiles {
 			fmt.Fprintf(os.Stdout, "[%d]:%s\n", i, v)
 		}
-		if err := gfx.ProceedDelta(deltaFiles, exportType); err != nil {
+		if err := gfx.ProceedDelta(deltaFiles, exportType, uint8(*mode)); err != nil {
 			fmt.Fprintf(os.Stderr, "error while proceeding delta mode %v\n", err)
 			os.Exit(-1)
 		}

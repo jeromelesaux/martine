@@ -8727,6 +8727,7 @@ func OpenWin(filePath string) (*OcpWinFooter, error) {
 		fmt.Fprintf(os.Stderr, "Error while reading Ocp Win from file (%s) error %v\n", filePath, err)
 		return ocpWinFooter, err
 	}
+	ocpWinFooter.Width = uint16(uint(ocpWinFooter.Width / 8))
 	return ocpWinFooter, nil
 }
 

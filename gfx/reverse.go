@@ -28,12 +28,12 @@ func SpriteToPng(winPath string, output string, mode uint8, p color.Palette) err
 	case 0:
 		out = image.NewNRGBA(image.Rectangle{
 			Min: image.Point{X: 0, Y: 0},
-			Max: image.Point{X: int(footer.Width / 8 * 2), Y: int(footer.Height)}})
+			Max: image.Point{X: int(footer.Width * 2), Y: int(footer.Height)}})
 		index := 0
 
 		for y := 0; y < int(footer.Height); y++ {
 			indexX := 0
-			for x := 0; x < int(footer.Width/8); x++ {
+			for x := 0; x < int(footer.Width); x++ {
 				val := d[index]
 				pp1, pp2 := rawPixelMode0(val)
 				c1 := p[pp1]
@@ -48,11 +48,11 @@ func SpriteToPng(winPath string, output string, mode uint8, p color.Palette) err
 	case 1:
 		out = image.NewNRGBA(image.Rectangle{
 			Min: image.Point{X: 0, Y: 0},
-			Max: image.Point{X: int(footer.Width / 8 * 4), Y: int(footer.Height)}})
+			Max: image.Point{X: int(footer.Width * 4), Y: int(footer.Height)}})
 		index := 0
 		for y := 0; y < int(footer.Height); y++ {
 			indexX := 0
-			for x := 0; x < int(footer.Width/8); x++ {
+			for x := 0; x < int(footer.Width); x++ {
 				val := d[index]
 				pp1, pp2, pp3, pp4 := rawPixelMode1(val)
 				c1 := p[pp1]
@@ -73,7 +73,7 @@ func SpriteToPng(winPath string, output string, mode uint8, p color.Palette) err
 	case 2:
 		out = image.NewNRGBA(image.Rectangle{
 			Min: image.Point{X: 0, Y: 0},
-			Max: image.Point{X: int(footer.Width / 8 * 8), Y: int(footer.Height)}})
+			Max: image.Point{X: int(footer.Width * 8), Y: int(footer.Height)}})
 		index := 0
 		for y := 0; y < int(footer.Width); y++ {
 			indexX := 0

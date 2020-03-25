@@ -11,12 +11,17 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jeromelesaux/martine/constants"
+
 	"github.com/jeromelesaux/martine/common"
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 )
 
-var ErrorCanNotProceed = errors.New("Can not proceed treatment")
+var (
+	ErrorCanNotProceed = errors.New("Can not proceed treatment")
+	ErrorSizeDiffers   = errors.New("Sizes differs can not proceed treatment")
+)
 
 type DeltaItem struct {
 	Byte    byte
@@ -338,22 +343,27 @@ func (dc *DeltaCollection) Marshall() ([]byte, error) {
 	}
 	for _, item := range dc.Items {
 		occ := len(item.Offsets)
-		for i := 0; i < occ; i += 255 {
+		nbCycles := uint(occ/255) + 1
+		for n := 0; n < int(nbCycles); n++ {
 			if err := binary.Write(&b, binary.LittleEndian, item.Byte); err != nil {
 				return b.Bytes(), err
 			}
 			var nbocc uint8 = 255
-			if occ-i < 255 {
-				nbocc = uint8(occ - i)
+			if occ < 255 {
+				nbocc = uint8(occ)
 			}
 			if err := binary.Write(&b, binary.LittleEndian, nbocc); err != nil {
 				return b.Bytes(), err
 			}
-			for j := i; j < 255 && j < occ; j++ {
+			start := n * 255
+			fmt.Fprintf(os.Stdout, "Writing byte:#%.2X nb:#%d values: \n", item.Byte, nbocc)
+			for j := start; (j-start < 255) && j < occ; j++ {
+				fmt.Fprintf(os.Stdout, "#%.4X ", item.Offsets[j])
 				if err := binary.Write(&b, binary.LittleEndian, item.Offsets[j]); err != nil {
 					return b.Bytes(), err
 				}
 			}
+			fmt.Fprintf(os.Stdout, "\n")
 		}
 	}
 	return b.Bytes(), nil
@@ -392,12 +402,25 @@ func (dc *DeltaCollection) Save(filename string) error {
 	return nil
 }
 
-func Delta(scr1, scr2 []byte, isSprite bool) *DeltaCollection {
+func DeltaAddress(x, y int) int {
+	//return (0x50 * (y / 8)) + (x + 1)
+	return (0x800 * (y % 8)) + (0x50 * (y / 8)) + x
+}
+
+func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8) *DeltaCollection {
 	data := NewDeltaCollection()
 	//var line int
-	for offset := 0; offset < len(scr1); offset++ {
+	for offset := 0; offset < len(scr1); offset++ { // a revoir car pour un sprite ce n'est le même mode d'adressage
 		if scr1[offset] != scr2[offset] {
-			data.Add(scr2[offset], uint16(offset))
+			if isSprite {
+				y := int(offset / (size.Width))
+				x := (offset - (y * (size.Width)))
+				newOffset := DeltaAddress(x, y)
+				fmt.Fprintf(os.Stdout, "X:%d,Y:%d,byte:#%.2x,addresse:#%.4x\n", x, y, scr2[offset], newOffset)
+				data.Add(scr2[offset], uint16(newOffset))
+			} else {
+				data.Add(scr2[offset], uint16(offset))
+			}
 		}
 	}
 	return data
@@ -428,7 +451,7 @@ func ExportDelta(filename string, dc *DeltaCollection, exportType *x.ExportType)
 	return nil
 }
 
-func ProceedDelta(filespath []string, exportType *x.ExportType) error {
+func ProceedDelta(filespath []string, exportType *x.ExportType, mode uint8) error {
 
 	if len(filespath) == 1 {
 		var err error
@@ -443,6 +466,7 @@ func ProceedDelta(filespath []string, exportType *x.ExportType) error {
 	var d1, d2 []byte
 	var err error
 	var isSprite = false
+	var size constants.Size
 	fmt.Fprintf(os.Stdout, "%v\n", filespath)
 	for i := 0; i < len(filespath)-1; i++ {
 		switch strings.ToUpper(filepath.Ext(filespath[i])) {
@@ -451,6 +475,13 @@ func ProceedDelta(filespath []string, exportType *x.ExportType) error {
 			if err != nil {
 				return err
 			}
+			isSprite = true
+			footer, err := file.OpenWin(filespath[i])
+			if err != nil {
+				return err
+			}
+			size.Width = int(footer.Width)
+			size.Height = int(footer.Height)
 		case ".SCR":
 			d1, err = file.RawScr(filespath[i])
 			if err != nil {
@@ -470,6 +501,13 @@ func ProceedDelta(filespath []string, exportType *x.ExportType) error {
 			if err != nil {
 				return err
 			}
+			isSprite = true
+			footer, err := file.OpenWin(filespath[i+1])
+			if err != nil {
+				return err
+			}
+			size.Width = int(footer.Width)
+			size.Height = int(footer.Height)
 		case ".SCR":
 			d2, err = file.RawScr(filespath[i+1])
 			if err != nil {
@@ -483,7 +521,10 @@ func ProceedDelta(filespath []string, exportType *x.ExportType) error {
 			return ErrorCanNotProceed
 		}
 
-		dc := Delta(d1, d2, isSprite)
+		if len(d1) != len(d2) {
+			return ErrorSizeDiffers
+		}
+		dc := Delta(d1, d2, isSprite, size, mode)
 		fmt.Fprintf(os.Stdout, "files (%s) (%s)", filespath[i], filespath[i+1])
 		fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 		fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
@@ -500,6 +541,12 @@ func ProceedDelta(filespath []string, exportType *x.ExportType) error {
 		if err != nil {
 			return err
 		}
+		footer, err := file.OpenWin(filespath[len(filespath)-1])
+		if err != nil {
+			return err
+		}
+		size.Width = int(footer.Width)
+		size.Height = int(footer.Height)
 	case ".SCR":
 		d1, err = file.RawScr(filespath[len(filespath)-1])
 		if err != nil {
@@ -519,6 +566,12 @@ func ProceedDelta(filespath []string, exportType *x.ExportType) error {
 		if err != nil {
 			return err
 		}
+		footer, err := file.OpenWin(filespath[0])
+		if err != nil {
+			return err
+		}
+		size.Width = int(footer.Width)
+		size.Height = int(footer.Height)
 	case ".SCR":
 		d2, err = file.RawScr(filespath[0])
 		if err != nil {
@@ -542,7 +595,7 @@ func ProceedDelta(filespath []string, exportType *x.ExportType) error {
 		return err
 	}
 	defer f2.Close()
-	dc := Delta(d1, d2, isSprite)
+	dc := Delta(d1, d2, isSprite, size, mode)
 	fmt.Fprintf(os.Stdout, "files (%s) (%s)", filespath[len(filespath)-1], filespath[0])
 	fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 	fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
