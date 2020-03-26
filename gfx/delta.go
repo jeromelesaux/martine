@@ -33,6 +33,15 @@ type DeltaCollection struct {
 	Items             []DeltaItem
 }
 
+func (d *DeltaCollection) Occurences() int {
+	occurence := 0
+	for _, v := range d.Items {
+		n := len(v.Offsets)
+		occurence += int(n/255) + 1
+	}
+	return occurence
+}
+
 func NewDeltaCollection() *DeltaCollection {
 	return &DeltaCollection{
 		Items: make([]DeltaItem, 0),
@@ -375,10 +384,11 @@ func (dc *DeltaCollection) Save(filename string) error {
 		return err
 	}
 	defer f.Close()
-	dc.OccurencePerFrame = uint16(len(dc.Items))
+	dc.OccurencePerFrame = uint16(dc.Occurences())
 	if err := binary.Write(f, binary.LittleEndian, dc.OccurencePerFrame); err != nil {
 		return err
 	}
+	// occurencesPerframe doit correspondre au nombre offsets modulo 255 et non au nombre d'items
 	for _, item := range dc.Items {
 		occ := len(item.Offsets)
 		for i := 0; i < occ; i += 255 {

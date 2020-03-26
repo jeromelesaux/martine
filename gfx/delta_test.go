@@ -23,5 +23,5 @@ func TestSaveDelta(t *testing.T) {
 	if fi.Size() != int64(filesize) {
 		t.Fatalf("expected %d length and gets %d\n", filesize, fi.Size())
 	}
-	os.Remove("delta.bin")
+	//os.Remove("delta.bin")
 }
