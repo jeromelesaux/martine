@@ -14,7 +14,7 @@ go build
 ```
 
 To get binary : 
-[https//github.com/jeromelesaux/martine/releases](https//github.com/jeromelesaux/martine/releases)
+[https://github.com/jeromelesaux/martine/releases](https//github.com/jeromelesaux/martine/releases)
 <br>OS avaible : Linux, Macos X and Windows  
 
 Usage and options : 
