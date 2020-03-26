@@ -392,11 +392,14 @@ func (dc *DeltaCollection) Save(filename string) error {
 			if err := binary.Write(f, binary.LittleEndian, nbocc); err != nil {
 				return err
 			}
-			for j := i; j < 255 && j < occ; j++ {
+			iter := 0
+			for j := i; iter < 254 && j < occ; j++ {
+				iter++
 				if err := binary.Write(f, binary.LittleEndian, item.Offsets[j]); err != nil {
 					return err
 				}
 			}
+			fmt.Fprintf(os.Stderr, "iter:%d\n", iter)
 		}
 	}
 	return nil
