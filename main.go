@@ -98,7 +98,7 @@ var (
 	maskAdOperation     = flag.Bool("maskand", false, "Will apply an AND operation on each byte with the mask")
 	zigzag              = flag.Bool("zigzag", false, "generate data in zigzag order (inc first line and dec next line for tiles)")
 	tileMap             = flag.Bool("tilemap", false, "Analyse the input image and generate the tiles, the tile map and gloabl schema.")
-	appVersion          = "0.23"
+	appVersion          = "0.24rc"
 	version             = flag.Bool("version", false, "print martine's version")
 )
 

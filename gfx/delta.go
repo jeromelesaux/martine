@@ -346,33 +346,32 @@ func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.
 //
 func (dc *DeltaCollection) Marshall() ([]byte, error) {
 	var b bytes.Buffer
-	dc.OccurencePerFrame = uint16(len(dc.Items))
+	dc.OccurencePerFrame = uint16(dc.Occurences())
 	if err := binary.Write(&b, binary.LittleEndian, dc.OccurencePerFrame); err != nil {
 		return b.Bytes(), err
 	}
+	// occurencesPerframe doit correspondre au nombre offsets modulo 255 et non au nombre d'items
 	for _, item := range dc.Items {
 		occ := len(item.Offsets)
-		nbCycles := uint(occ/255) + 1
-		for n := 0; n < int(nbCycles); n++ {
+		for i := 0; i < occ; i += 255 {
 			if err := binary.Write(&b, binary.LittleEndian, item.Byte); err != nil {
 				return b.Bytes(), err
 			}
 			var nbocc uint8 = 255
-			if occ < 255 {
-				nbocc = uint8(occ)
+			if occ-i < 255 {
+				nbocc = uint8(occ - i)
 			}
 			if err := binary.Write(&b, binary.LittleEndian, nbocc); err != nil {
 				return b.Bytes(), err
 			}
-			start := n * 255
-			fmt.Fprintf(os.Stdout, "Writing byte:#%.2X nb:#%d values: \n", item.Byte, nbocc)
-			for j := start; (j-start < 255) && j < occ; j++ {
-				fmt.Fprintf(os.Stdout, "#%.4X ", item.Offsets[j])
+			iter := 0
+			for j := i; iter < 254 && j < occ; j++ {
+				iter++
 				if err := binary.Write(&b, binary.LittleEndian, item.Offsets[j]); err != nil {
 					return b.Bytes(), err
 				}
 			}
-			fmt.Fprintf(os.Stdout, "\n")
+			fmt.Fprintf(os.Stderr, "iter:%d\n", iter)
 		}
 	}
 	return b.Bytes(), nil
@@ -384,35 +383,12 @@ func (dc *DeltaCollection) Save(filename string) error {
 		return err
 	}
 	defer f.Close()
-	dc.OccurencePerFrame = uint16(dc.Occurences())
-	if err := binary.Write(f, binary.LittleEndian, dc.OccurencePerFrame); err != nil {
+	b, err := dc.Marshall()
+	if err != nil {
 		return err
 	}
-	// occurencesPerframe doit correspondre au nombre offsets modulo 255 et non au nombre d'items
-	for _, item := range dc.Items {
-		occ := len(item.Offsets)
-		for i := 0; i < occ; i += 255 {
-			if err := binary.Write(f, binary.LittleEndian, item.Byte); err != nil {
-				return err
-			}
-			var nbocc uint8 = 255
-			if occ-i < 255 {
-				nbocc = uint8(occ - i)
-			}
-			if err := binary.Write(f, binary.LittleEndian, nbocc); err != nil {
-				return err
-			}
-			iter := 0
-			for j := i; iter < 254 && j < occ; j++ {
-				iter++
-				if err := binary.Write(f, binary.LittleEndian, item.Offsets[j]); err != nil {
-					return err
-				}
-			}
-			fmt.Fprintf(os.Stderr, "iter:%d\n", iter)
-		}
-	}
-	return nil
+	_, err = f.Write(b)
+	return err
 }
 
 func DeltaAddress(x, y int) int {
