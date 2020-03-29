@@ -64,7 +64,7 @@ func (dc *DeltaCollection) NbAdresses() int {
 }
 
 func (di *DeltaItem) ToString() string {
-	out := fmt.Sprintf("byte value #%.2x : offsets :", di.Byte)
+	out := fmt.Sprintf("byte value #%.2x : offsets (%d):", di.Byte, len(di.Offsets))
 
 	for i, addr := range di.Offsets {
 		if i%8 == 0 {
@@ -365,9 +365,11 @@ func (dc *DeltaCollection) Marshall() ([]byte, error) {
 				return b.Bytes(), err
 			}
 			iter := 0
-			for j := i; iter < 254 && j < occ; j++ {
+			for j := i; iter < 255 && j < occ; j++ {
 				iter++
-				if err := binary.Write(&b, binary.LittleEndian, item.Offsets[j]); err != nil {
+				value := item.Offsets[j]
+				//			fmt.Fprintf(os.Stdout, "Value[%d]:%.4x\n", j, value)
+				if err := binary.Write(&b, binary.LittleEndian, value); err != nil {
 					return b.Bytes(), err
 				}
 			}
@@ -393,7 +395,7 @@ func (dc *DeltaCollection) Save(filename string) error {
 
 func DeltaAddress(x, y int) int {
 	//return (0x50 * (y / 8)) + (x + 1)
-	return (0x800 * (y % 8)) + (0x50 * (y / 8)) + x
+	return (0x800 * (y % 8)) + (0x50 * (y / 8)) + (x)
 }
 
 func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8) *DeltaCollection {
@@ -404,7 +406,7 @@ func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8) *D
 			if isSprite {
 				y := int(offset / (size.Width))
 				x := (offset - (y * (size.Width)))
-				newOffset := DeltaAddress(x, y)
+				newOffset := DeltaAddress(x, y) + 0xC000
 				fmt.Fprintf(os.Stdout, "X:%d,Y:%d,byte:#%.2x,addresse:#%.4x\n", x, y, scr2[offset], newOffset)
 				data.Add(scr2[offset], uint16(newOffset))
 			} else {
