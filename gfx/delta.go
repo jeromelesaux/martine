@@ -29,16 +29,13 @@ type DeltaItem struct {
 }
 
 type DeltaCollection struct {
-	OccurencePerFrame uint16
+	OccurencePerFrame uint8
 	Items             []DeltaItem
 }
 
 func (d *DeltaCollection) Occurences() int {
 	occurence := 0
-	for _, v := range d.Items {
-		n := len(v.Offsets)
-		occurence += int(n/255) + 1
-	}
+	occurence += len(d.Items)
 	return occurence
 }
 
@@ -346,35 +343,49 @@ func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.
 //
 func (dc *DeltaCollection) Marshall() ([]byte, error) {
 	var b bytes.Buffer
-	dc.OccurencePerFrame = uint16(dc.Occurences())
+	dc.OccurencePerFrame = uint8(dc.Occurences())
 	if err := binary.Write(&b, binary.LittleEndian, dc.OccurencePerFrame); err != nil {
 		return b.Bytes(), err
 	}
 	// occurencesPerframe doit correspondre au nombre offsets modulo 255 et non au nombre d'items
 	for _, item := range dc.Items {
 		occ := len(item.Offsets)
-		for i := 0; i < occ; i += 255 {
-			if err := binary.Write(&b, binary.LittleEndian, item.Byte); err != nil {
+		if err := binary.Write(&b, binary.LittleEndian, item.Byte); err != nil {
+			return b.Bytes(), err
+		}
+		if err := binary.Write(&b, binary.LittleEndian, uint16(occ)); err != nil {
+			return b.Bytes(), err
+		}
+		for i := 0; i < occ; i++ {
+			value := item.Offsets[i]
+			//			fmt.Fprintf(os.Stdout, "Value[%d]:%.4x\n", j, value)
+			if err := binary.Write(&b, binary.LittleEndian, value); err != nil {
 				return b.Bytes(), err
 			}
-			var nbocc uint8 = 255
-			if occ-i < 255 {
-				nbocc = uint8(occ - i)
-			}
-			if err := binary.Write(&b, binary.LittleEndian, nbocc); err != nil {
-				return b.Bytes(), err
-			}
-			iter := 0
-			for j := i; iter < 255 && j < occ; j++ {
-				iter++
-				value := item.Offsets[j]
-				//			fmt.Fprintf(os.Stdout, "Value[%d]:%.4x\n", j, value)
-				if err := binary.Write(&b, binary.LittleEndian, value); err != nil {
+		}
+		/*
+			for i := 0; i < occ; i += 255 {
+				if err := binary.Write(&b, binary.LittleEndian, item.Byte); err != nil {
 					return b.Bytes(), err
 				}
-			}
-			fmt.Fprintf(os.Stderr, "iter:%d\n", iter)
-		}
+				var nbocc uint8 = 255
+				if occ-i < 255 {
+					nbocc = uint8(occ - i)
+				}
+				if err := binary.Write(&b, binary.LittleEndian, nbocc); err != nil {
+					return b.Bytes(), err
+				}
+				iter := 0
+				for j := i; iter < 255 && j < occ; j++ {
+					iter++
+					value := item.Offsets[j]
+					//			fmt.Fprintf(os.Stdout, "Value[%d]:%.4x\n", j, value)
+					if err := binary.Write(&b, binary.LittleEndian, value); err != nil {
+						return b.Bytes(), err
+					}
+				}
+				//fmt.Fprintf(os.Stderr, "iter:%d\n", iter)
+			}*/
 	}
 	return b.Bytes(), nil
 }
@@ -398,7 +409,7 @@ func DeltaAddress(x, y int) int {
 	return (0x800 * (y % 8)) + (0x50 * (y / 8)) + (x)
 }
 
-func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8) *DeltaCollection {
+func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8, initialAddress int) *DeltaCollection {
 	data := NewDeltaCollection()
 	//var line int
 	for offset := 0; offset < len(scr1); offset++ { // a revoir car pour un sprite ce n'est le même mode d'adressage
@@ -406,7 +417,7 @@ func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8) *D
 			if isSprite {
 				y := int(offset / (size.Width))
 				x := (offset - (y * (size.Width)))
-				newOffset := DeltaAddress(x, y) + 0xC000
+				newOffset := DeltaAddress(x, y) + initialAddress
 				fmt.Fprintf(os.Stdout, "X:%d,Y:%d,byte:#%.2x,addresse:#%.4x\n", x, y, scr2[offset], newOffset)
 				data.Add(scr2[offset], uint16(newOffset))
 			} else {
@@ -442,7 +453,7 @@ func ExportDelta(filename string, dc *DeltaCollection, exportType *x.ExportType)
 	return nil
 }
 
-func ProceedDelta(filespath []string, exportType *x.ExportType, mode uint8) error {
+func ProceedDelta(filespath []string, initialAddress int, exportType *x.ExportType, mode uint8) error {
 
 	if len(filespath) == 1 {
 		var err error
@@ -515,7 +526,7 @@ func ProceedDelta(filespath []string, exportType *x.ExportType, mode uint8) erro
 		if len(d1) != len(d2) {
 			return ErrorSizeDiffers
 		}
-		dc := Delta(d1, d2, isSprite, size, mode)
+		dc := Delta(d1, d2, isSprite, size, mode, initialAddress)
 		fmt.Fprintf(os.Stdout, "files (%s) (%s)", filespath[i], filespath[i+1])
 		fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 		fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
@@ -586,7 +597,7 @@ func ProceedDelta(filespath []string, exportType *x.ExportType, mode uint8) erro
 		return err
 	}
 	defer f2.Close()
-	dc := Delta(d1, d2, isSprite, size, mode)
+	dc := Delta(d1, d2, isSprite, size, mode, initialAddress)
 	fmt.Fprintf(os.Stdout, "files (%s) (%s)", filespath[len(filespath)-1], filespath[0])
 	fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 	fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())

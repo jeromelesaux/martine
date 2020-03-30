@@ -98,7 +98,8 @@ var (
 	maskAdOperation     = flag.Bool("maskand", false, "Will apply an AND operation on each byte with the mask")
 	zigzag              = flag.Bool("zigzag", false, "generate data in zigzag order (inc first line and dec next line for tiles)")
 	tileMap             = flag.Bool("tilemap", false, "Analyse the input image and generate the tiles, the tile map and gloabl schema.")
-	appVersion          = "0.24rc"
+	initialAddress      = flag.Int("address", 0xC000, "Starting address to display sprite in delta packing")
+	appVersion          = "0.24.1rc"
 	version             = flag.Bool("version", false, "print martine's version")
 )
 
@@ -591,7 +592,7 @@ func main() {
 		for i, v := range deltaFiles {
 			fmt.Fprintf(os.Stdout, "[%d]:%s\n", i, v)
 		}
-		if err := gfx.ProceedDelta(deltaFiles, exportType, uint8(*mode)); err != nil {
+		if err := gfx.ProceedDelta(deltaFiles, *initialAddress, exportType, uint8(*mode)); err != nil {
 			fmt.Fprintf(os.Stderr, "error while proceeding delta mode %v\n", err)
 			os.Exit(-1)
 		}
