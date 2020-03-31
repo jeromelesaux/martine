@@ -409,6 +409,23 @@ func DeltaAddress(x, y int) int {
 	return (0x800 * (y % 8)) + (0x50 * (y / 8)) + (x)
 }
 
+func X(offset uint16) uint16 {
+	line := Y(offset)
+	//fmt.Fprintf(os.Stdout, "res:%d\n", int(offset)-DeltaAddress(0, int(line)))
+	return uint16(int(offset) - DeltaAddress(0, int(line)))
+}
+func Y(offset uint16) uint16 {
+	line := 0
+	for i := 0; i < 200; i++ {
+		lineAddress := DeltaAddress(0, i)
+		if lineAddress > int(offset) {
+			line = i - 1
+			break
+		}
+	}
+	return uint16(line)
+}
+
 func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8, initialAddress int) *DeltaCollection {
 	data := NewDeltaCollection()
 	//var line int
