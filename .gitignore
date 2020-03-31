@@ -6,3 +6,5 @@ papy/
 flash/
 essais/
 reference/
+.DS_Store
+.vscode/
