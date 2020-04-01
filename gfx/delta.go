@@ -347,6 +347,9 @@ func (dc *DeltaCollection) Marshall() ([]byte, error) {
 	if err := binary.Write(&b, binary.LittleEndian, dc.OccurencePerFrame); err != nil {
 		return b.Bytes(), err
 	}
+	if dc.OccurencePerFrame == 0 { // no difference between transitions
+		return b.Bytes(), nil
+	}
 	// occurencesPerframe doit correspondre au nombre offsets modulo 255 et non au nombre d'items
 	for _, item := range dc.Items {
 		occ := len(item.Offsets)
@@ -363,29 +366,6 @@ func (dc *DeltaCollection) Marshall() ([]byte, error) {
 				return b.Bytes(), err
 			}
 		}
-		/*
-			for i := 0; i < occ; i += 255 {
-				if err := binary.Write(&b, binary.LittleEndian, item.Byte); err != nil {
-					return b.Bytes(), err
-				}
-				var nbocc uint8 = 255
-				if occ-i < 255 {
-					nbocc = uint8(occ - i)
-				}
-				if err := binary.Write(&b, binary.LittleEndian, nbocc); err != nil {
-					return b.Bytes(), err
-				}
-				iter := 0
-				for j := i; iter < 255 && j < occ; j++ {
-					iter++
-					value := item.Offsets[j]
-					//			fmt.Fprintf(os.Stdout, "Value[%d]:%.4x\n", j, value)
-					if err := binary.Write(&b, binary.LittleEndian, value); err != nil {
-						return b.Bytes(), err
-					}
-				}
-				//fmt.Fprintf(os.Stderr, "iter:%d\n", iter)
-			}*/
 	}
 	return b.Bytes(), nil
 }
@@ -553,9 +533,11 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 		fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 		fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
 		fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
-		out := filepath.Join(exportType.OutputPath, fmt.Sprintf("%.2dto%.2d", i, (i+1)))
-		if err := ExportDelta(out, dc, exportType); err != nil {
-			return err
+		if dc.OccurencePerFrame != 0 {
+			out := filepath.Join(exportType.OutputPath, fmt.Sprintf("%.2dto%.2d", i, (i+1)))
+			if err := ExportDelta(out, dc, exportType); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -624,9 +606,11 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 	fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 	fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
 	fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
-	out := filepath.Join(exportType.OutputPath, fmt.Sprintf("%.2dto00", len(filespath)-1))
-	if err := ExportDelta(out, dc, exportType); err != nil {
-		return err
+	if dc.OccurencePerFrame != 0 {
+		out := filepath.Join(exportType.OutputPath, fmt.Sprintf("%.2dto00", len(filespath)-1))
+		if err := ExportDelta(out, dc, exportType); err != nil {
+			return err
+		}
 	}
 	fmt.Fprintf(os.Stdout, "files order : %v\n", filespath)
 	fmt.Fprintf(os.Stdout, "Starting address to display delta : #%.4X\n", initialAddress)
