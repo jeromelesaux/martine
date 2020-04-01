@@ -426,7 +426,7 @@ func Y(offset uint16) uint16 {
 	return uint16(line)
 }
 
-func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8, initialAddress int, startX, startY uint16) *DeltaCollection {
+func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8, initialAddress uint16, startX, startY uint16) *DeltaCollection {
 	data := NewDeltaCollection()
 	//var line int
 	for offset := 0; offset < len(scr1); offset++ { // a revoir car pour un sprite ce n'est le même mode d'adressage
@@ -434,8 +434,8 @@ func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8, in
 			if isSprite {
 				y := int(offset / (size.Width))
 				x := (offset - (y * (size.Width)))
-				newOffset := DeltaAddress(x+int(startX), y+int(startY)) + initialAddress
-				fmt.Fprintf(os.Stdout, "X:%d,Y:%d,byte:#%.2x,addresse:#%.4x\n", x, y, scr2[offset], newOffset)
+				newOffset := DeltaAddress(x, y) + int(initialAddress)
+				//	fmt.Fprintf(os.Stdout, "X:%d,Y:%d,byte:#%.2x,addresse:#%.4x\n", x, y, scr2[offset], newOffset)
 				data.Add(scr2[offset], uint16(newOffset))
 			} else {
 				data.Add(scr2[offset], uint16(offset))
@@ -470,7 +470,7 @@ func ExportDelta(filename string, dc *DeltaCollection, exportType *x.ExportType)
 	return nil
 }
 
-func ProceedDelta(filespath []string, initialAddress int, exportType *x.ExportType, mode uint8) error {
+func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.ExportType, mode uint8) error {
 
 	if len(filespath) == 1 {
 		var err error
@@ -487,6 +487,7 @@ func ProceedDelta(filespath []string, initialAddress int, exportType *x.ExportTy
 	var isSprite = false
 	var size constants.Size
 	var startX, startY uint16
+
 	startX = X(uint16(initialAddress - 0xC000))
 	startY = Y(uint16(initialAddress - 0xC000))
 	fmt.Fprintf(os.Stdout, "%v\n", filespath)
@@ -552,7 +553,7 @@ func ProceedDelta(filespath []string, initialAddress int, exportType *x.ExportTy
 		fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 		fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
 		fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
-		out := filepath.Join(exportType.OutputPath, fmt.Sprintf("%dto%d", i, (i+1)))
+		out := filepath.Join(exportType.OutputPath, fmt.Sprintf("%.2dto%.2d", i, (i+1)))
 		if err := ExportDelta(out, dc, exportType); err != nil {
 			return err
 		}
@@ -623,11 +624,12 @@ func ProceedDelta(filespath []string, initialAddress int, exportType *x.ExportTy
 	fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 	fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
 	fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
-	out := filepath.Join(exportType.OutputPath, fmt.Sprintf("%dto0", len(filespath)-1))
+	out := filepath.Join(exportType.OutputPath, fmt.Sprintf("%.2dto00", len(filespath)-1))
 	if err := ExportDelta(out, dc, exportType); err != nil {
 		return err
 	}
 	fmt.Fprintf(os.Stdout, "files order : %v\n", filespath)
+	fmt.Fprintf(os.Stdout, "Starting address to display delta : #%.4X\n", initialAddress)
 
 	return nil
 }

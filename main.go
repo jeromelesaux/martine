@@ -98,7 +98,7 @@ var (
 	maskAdOperation     = flag.Bool("maskand", false, "Will apply an AND operation on each byte with the mask")
 	zigzag              = flag.Bool("zigzag", false, "generate data in zigzag order (inc first line and dec next line for tiles)")
 	tileMap             = flag.Bool("tilemap", false, "Analyse the input image and generate the tiles, the tile map and gloabl schema.")
-	initialAddress      = flag.Int("address", 0xC000, "Starting address to display sprite in delta packing")
+	initialAddress      = flag.String("address", "0xC000", "Starting address to display sprite in delta packing")
 	appVersion          = "0.24.1rc"
 	version             = flag.Bool("version", false, "print martine's version")
 )
@@ -372,31 +372,10 @@ func main() {
 	exportType.ZigZag = *zigzag
 
 	if *maskSprite != "" {
-		mask := *maskSprite
-		switch mask[0] {
-		case '#':
-			value := strings.Replace(mask, "#", "", -1)
-			v, err := strconv.ParseUint(value, 16, 8)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "cannot get the hexadecimal value fom %s, error : %v\n", *maskSprite, err)
-			} else {
-				exportType.MaskSprite = uint8(v)
-			}
-		case '0':
-			value := strings.Replace(mask, "0x", "", -1)
-			v, err := strconv.ParseUint(value, 16, 8)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "cannot get the hexadecimal value fom %s, error : %v\n", *maskSprite, err)
-			} else {
-				exportType.MaskSprite = uint8(v)
-			}
-		default:
-			v, err := strconv.ParseUint(mask, 10, 8)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "cannot get the hexadecimal value fom %s, error : %v\n", *maskSprite, err)
-			} else {
-				exportType.MaskSprite = uint8(v)
-			}
+
+		v, err := common.ParseHexadecimal8(*maskSprite)
+		if err == nil {
+			exportType.MaskSprite = uint8(v)
 		}
 		if exportType.MaskSprite != 0 {
 			if *maskOrOperation {
@@ -592,7 +571,12 @@ func main() {
 		for i, v := range deltaFiles {
 			fmt.Fprintf(os.Stdout, "[%d]:%s\n", i, v)
 		}
-		if err := gfx.ProceedDelta(deltaFiles, *initialAddress, exportType, uint8(*mode)); err != nil {
+		screenAddress, err := common.ParseHexadecimal16(*initialAddress)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error while parsing (%s) use the starting address #C000, err : %v\n", *initialAddress, err)
+			screenAddress = 0xC000
+		}
+		if err := gfx.ProceedDelta(deltaFiles, screenAddress, exportType, uint8(*mode)); err != nil {
 			fmt.Fprintf(os.Stderr, "error while proceeding delta mode %v\n", err)
 			os.Exit(-1)
 		}
