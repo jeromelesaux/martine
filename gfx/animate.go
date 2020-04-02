@@ -26,22 +26,23 @@ func Animation(filepaths []string, screenMode uint8, export *export.ExportType) 
 	case 2:
 		sizeScreen = constants.OverscanMode2
 	}
+	export.Overscan = true
 	board, palette, err := concatSprites(filepaths, sizeScreen, export.Size, screenMode, export)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot concat content of files %v error :%v\n", filepaths, err)
 		return err
 	}
-	if err := Transform(board, palette, export.Size, filepath.Join(export.OutputPath, "board.png"), export); err != nil {
+	if err := Transform(board, palette, sizeScreen, filepath.Join(export.OutputPath, "board.png"), export); err != nil {
 		fmt.Fprintf(os.Stderr, "Can not transform to image error : %v\n", err)
 		return err
 	}
 	return nil
 }
 
-func concatSprites(filepaths []string, sizeScreen, size constants.Size, screenMode uint8, export *export.ExportType) (*image.NRGBA, color.Palette, error) {
-	nbImgWidth := int(sizeScreen.Width / size.Width)
+func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, screenMode uint8, export *export.ExportType) (*image.NRGBA, color.Palette, error) {
+	nbImgWidth := int(sizeScreen.Width / spriteSize.Width)
 	//nbImgHeight := int(sizeScreen.Height / size.Height)
-	largeMarge := sizeScreen.Width - (size.Width*nbImgWidth)/nbImgWidth
+	largeMarge := (sizeScreen.Width - (spriteSize.Width * nbImgWidth)) / nbImgWidth
 
 	board := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: sizeScreen.Width, Y: sizeScreen.Height}})
 	var palette, newPalette color.Palette
@@ -94,14 +95,6 @@ func concatSprites(filepaths []string, sizeScreen, size constants.Size, screenMo
 				if err := file.Png(filepath.Join(export.OutputPath, filename+"_resized.png"), out); err != nil {
 					os.Exit(-2)
 				}
-				if newPalette == nil { // in case of dithering without input palette
-					if export.CpcPlus {
-						newPalette = constants.CpcPlusPalette
-					} else {
-						newPalette = constants.CpcOldPalette
-					}
-				}
-				out, newPalette = DoDithering(out, newPalette, export)
 
 				if len(palette) > 0 {
 					newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
@@ -119,25 +112,25 @@ func concatSprites(filepaths []string, sizeScreen, size constants.Size, screenMo
 					os.Exit(-2)
 				}
 
-				DoTransformation(downgraded, newPalette, filename, v, screenMode, int(screenMode), export)
 				if err := SpriteTransform(downgraded, newPalette, export.Size, screenMode, filename, export); err != nil {
-					fmt.Fprintf(os.Stderr, "error while transform in sprite error : %v\n")
+					fmt.Fprintf(os.Stderr, "error while transform in sprite error : %v\n", err)
 				}
-				contour := image.Rectangle{Min: image.Point{X: startX, Y: startY}, Max: image.Point{X: startX + size.Width, Y: startY + size.Height}}
+				contour := image.Rectangle{Min: image.Point{X: startX, Y: startY}, Max: image.Point{X: startX + spriteSize.Width, Y: startY + spriteSize.Height}}
 				draw.Draw(board, contour, downgraded, image.ZP, draw.Src)
 
 				nbLarge++
 				if nbLarge >= nbImgWidth {
 					nbLarge = 0
 					startX = 0
-					startY += size.Height
+					startY += spriteSize.Height
 				} else {
-					startX += size.Height + largeMarge
+					startX += spriteSize.Width + largeMarge
 				}
-
 			}
 		}
 	}
-
+	if err := file.Png(filepath.Join(export.OutputPath, "board.png"), board); err != nil {
+		os.Exit(-2)
+	}
 	return board, newPalette, nil
 }
