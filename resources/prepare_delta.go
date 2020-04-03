@@ -85,34 +85,36 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Cannot decode json file (%s) error :%v\n", v, err)
 			os.Exit(-1)
 		}
-		out += fmt.Sprintf("delta%.d\n", index)
-		for i := 0; i < len(d.Screen); i += 8 {
-			out += fmt.Sprintf("%s ", file.ByteToken)
-			if i < len(d.Screen) {
-				out += fmt.Sprintf("%s", toDamsByte(d.Screen[i]))
+		if len(d.Screen) != 1 {
+			out += fmt.Sprintf("delta%.2d\n", index)
+			for i := 0; i < len(d.Screen); i += 8 {
+				out += fmt.Sprintf("%s ", file.ByteToken)
+				if i < len(d.Screen) {
+					out += fmt.Sprintf("%s", toDamsByte(d.Screen[i]))
+				}
+				if i+1 < len(d.Screen) {
+					out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+1]))
+				}
+				if i+2 < len(d.Screen) {
+					out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+2]))
+				}
+				if i+3 < len(d.Screen) {
+					out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+3]))
+				}
+				if i+4 < len(d.Screen) {
+					out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+4]))
+				}
+				if i+5 < len(d.Screen) {
+					out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+5]))
+				}
+				if i+6 < len(d.Screen) {
+					out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+6]))
+				}
+				if i+7 < len(d.Screen) {
+					out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+7]))
+				}
+				out += fmt.Sprintf("%s", eol)
 			}
-			if i+1 < len(d.Screen) {
-				out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+1]))
-			}
-			if i+2 < len(d.Screen) {
-				out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+2]))
-			}
-			if i+3 < len(d.Screen) {
-				out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+3]))
-			}
-			if i+4 < len(d.Screen) {
-				out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+4]))
-			}
-			if i+5 < len(d.Screen) {
-				out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+5]))
-			}
-			if i+6 < len(d.Screen) {
-				out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+6]))
-			}
-			if i+7 < len(d.Screen) {
-				out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+7]))
-			}
-			out += fmt.Sprintf("%s", eol)
 		}
 	}
 	if *outfile != "" {

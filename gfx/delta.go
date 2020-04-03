@@ -343,7 +343,7 @@ func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.
 //
 func (dc *DeltaCollection) Marshall() ([]byte, error) {
 	var b bytes.Buffer
-	dc.OccurencePerFrame = uint8(dc.Occurences())
+
 	if err := binary.Write(&b, binary.LittleEndian, dc.OccurencePerFrame); err != nil {
 		return b.Bytes(), err
 	}
@@ -422,6 +422,7 @@ func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8, in
 			}
 		}
 	}
+	data.OccurencePerFrame = uint8(data.Occurences())
 	return data
 }
 
