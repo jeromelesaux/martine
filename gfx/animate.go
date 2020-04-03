@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"image/draw"
 	"image/gif"
+	"image/png"
 	"os"
 	"path/filepath"
 	"strings"
@@ -25,6 +26,8 @@ func Animation(filepaths []string, screenMode uint8, export *export.ExportType) 
 		sizeScreen = constants.OverscanMode1
 	case 2:
 		sizeScreen = constants.OverscanMode2
+	default:
+		sizeScreen = constants.OverscanMode0
 	}
 	export.Overscan = true
 	board, palette, err := concatSprites(filepaths, sizeScreen, export.Size, screenMode, export)
@@ -73,7 +76,10 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
 		}
 	}
-	for _, v := range filepaths {
+	var startX, startY int
+	nbLarge := 0
+	for index0, v := range filepaths {
+
 		if strings.ToUpper(filepath.Ext(v)) == ".GIF" {
 			f, err := os.Open(v)
 			if err != nil {
@@ -85,8 +91,6 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 				return board, newPalette, err
 			}
 
-			var startX, startY int
-			nbLarge := 0
 			for index, in := range g.Image {
 				// gif change size between frame.
 				// create a new blank image with size from config.width config.height
@@ -138,7 +142,61 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 					startX += spriteSize.Width + largeMarge
 				}
 			}
+		} else {
+			if strings.ToUpper(filepath.Ext(v)) == ".PNG" {
+				f, err := os.Open(v)
+				if err != nil {
+					return board, newPalette, err
+				}
+				defer f.Close()
+				in, err := png.Decode(f)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error while reading png file (%s) error %v, skipping\n", v, err)
+					continue
+				}
+				var downgraded *image.NRGBA
+				filename := fmt.Sprintf("%.2d", index0)
+				out := convert.Resize(in, export.Size, export.ResizingAlgo)
+				fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
+				if err := file.Png(filepath.Join(export.OutputPath, filename+"_resized.png"), out); err != nil {
+					os.Exit(-2)
+				}
+
+				if len(palette) > 0 {
+					newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
+				} else {
+					newPalette, downgraded, err = convert.DowngradingPalette(out, export.Size, export.CpcPlus)
+					if err != nil {
+						fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", v)
+					}
+				}
+
+				newPalette = constants.SortColorsByDistance(newPalette)
+
+				fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
+				if err := file.Png(filepath.Join(export.OutputPath, filename+"_down.png"), downgraded); err != nil {
+					os.Exit(-2)
+				}
+
+				if err := SpriteTransform(downgraded, newPalette, export.Size, screenMode, filename, export); err != nil {
+					fmt.Fprintf(os.Stderr, "error while transform in sprite error : %v\n", err)
+				}
+				contour := image.Rectangle{Min: image.Point{X: startX, Y: startY}, Max: image.Point{X: startX + spriteSize.Width, Y: startY + spriteSize.Height}}
+				draw.Draw(board, contour, downgraded, image.ZP, draw.Src)
+
+				nbLarge++
+				if nbLarge >= nbImgWidth {
+					nbLarge = 0
+					startX = 0
+					startY += spriteSize.Height
+				} else {
+					startX += spriteSize.Width + largeMarge
+				}
+			} else {
+				fmt.Fprintf(os.Stderr, "File is not a image file compatible (%s) skipping.\n", v)
+			}
 		}
+
 	}
 	if err := file.Png(filepath.Join(export.OutputPath, "board.png"), board); err != nil {
 		os.Exit(-2)
