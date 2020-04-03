@@ -88,6 +88,17 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 			var startX, startY int
 			nbLarge := 0
 			for index, in := range g.Image {
+				// gif change size between frame.
+				// create a new blank image with size from config.width config.height
+				// add position into blank image the paletted image rect
+				if in.Rect.Max.X != g.Config.Width || in.Rect.Max.Y != g.Config.Height {
+					newIm := image.NewPaletted(
+						image.Rectangle{image.Point{X: 0, Y: 0},
+							image.Point{X: g.Config.Width, Y: g.Config.Height}},
+						in.Palette)
+					draw.Draw(newIm, in.Rect, in, in.Rect.Min, draw.Src)
+					in = newIm
+				}
 				var downgraded *image.NRGBA
 				filename := fmt.Sprintf("%.2d", index)
 				out := convert.Resize(in, export.Size, export.ResizingAlgo)
