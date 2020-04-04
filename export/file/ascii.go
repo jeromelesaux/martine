@@ -17,7 +17,7 @@ import (
 // ByteToken is the token by default
 var ByteToken = "db" // "BYTE"
 
-func Ascii(filePath string, data []byte, p color.Palette, exportType *x.ExportType) error {
+func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, exportType *x.ExportType) error {
 	eol := "\n"
 	if runtime.GOOS == "windows" {
 		eol = "\r\n"
@@ -136,8 +136,9 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *x.ExportTy
 	}
 	binary.Write(fw, binary.LittleEndian, []byte(out))
 	fw.Close()
-	exportType.AddFile(osFilepath)
-
+	if !dontImportDsk {
+		exportType.AddFile(osFilepath)
+	}
 	if exportType.Json {
 		palette := make([]string, len(p))
 		for i := 0; i < len(p); i++ {
@@ -163,7 +164,7 @@ func Ascii(filePath string, data []byte, p color.Palette, exportType *x.ExportTy
 	return nil
 }
 
-func AsciiByColumn(filePath string, data []byte, p color.Palette, exportType *x.ExportType) error {
+func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk bool, exportType *x.ExportType) error {
 	eol := "\n"
 	if runtime.GOOS == "windows" {
 		eol = "\r\n"
@@ -277,6 +278,8 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, exportType *x.
 	}
 	binary.Write(fw, binary.LittleEndian, []byte(out))
 	fw.Close()
-	exportType.AddFile(osFilepath)
+	if !dontImportDsk {
+		exportType.AddFile(osFilepath)
+	}
 	return nil
 }

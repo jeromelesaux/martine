@@ -100,7 +100,7 @@ var (
 	tileMap             = flag.Bool("tilemap", false, "Analyse the input image and generate the tiles, the tile map and gloabl schema.")
 	initialAddress      = flag.String("address", "0xC000", "Starting address to display sprite in delta packing")
 	animate             = flag.Bool("animate", false, "Will produce an full screen with all sprite on the same image (add -i image.gif or -i *.png)")
-	appVersion          = "0.24.1rc"
+	appVersion          = "0.24.2rc"
 	version             = flag.Bool("version", false, "print martine's version")
 )
 
@@ -646,7 +646,7 @@ func main() {
 					if err := file.Png(tileFilepath+"_down.png", out); err != nil {
 						os.Exit(-2)
 					}
-					if err := gfx.SpriteTransform(tile, palette, exportType.Size, screenMode, tileFilepath, exportType); err != nil {
+					if err := gfx.SpriteTransform(tile, palette, exportType.Size, screenMode, tileFilepath, false, exportType); err != nil {
 						fmt.Fprintf(os.Stderr, "Cannot create tile from image %s, error :%v\n", tileFilepath, err)
 					}
 				}

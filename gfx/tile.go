@@ -93,7 +93,7 @@ func TileMode(exportType *x.ExportType, mode uint8, iterationX, iterationY int) 
 			ext = strconv.Itoa(index) + ".png"
 			exportType.Size.Width = resized.Bounds().Max.X
 			exportType.Size.Height = resized.Bounds().Max.Y
-			if err := SpriteTransform(downgraded, p, exportType.Size, mode, exportType.OsFilename(ext), exportType); err != nil {
+			if err := SpriteTransform(downgraded, p, exportType.Size, mode, exportType.OsFilename(ext), false, exportType); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot create sprite from image, error :%v\n", err)
 			}
 			index++

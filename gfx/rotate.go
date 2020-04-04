@@ -3,15 +3,16 @@ package gfx
 import (
 	"errors"
 	"fmt"
+	"image"
+	"image/color"
+	"image/draw"
+	"os"
+
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
-	"image"
-	"image/color"
-	"image/draw"
-	"os"
 )
 
 var (
@@ -54,7 +55,7 @@ func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, f
 		if err := file.Png(newFilename, rin); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create image (%s) error :%v\n", newFilename, err)
 		}
-		if err := SpriteTransform(rin, p, maxSize, mode, newFilename, exportType); err != nil {
+		if err := SpriteTransform(rin, p, maxSize, mode, newFilename, false, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create sprite image (%s) error %v\n", newFilename, err)
 		}
 		indice++

@@ -439,12 +439,12 @@ func ExportDelta(filename string, dc *DeltaCollection, exportType *x.ExportType)
 
 	var emptyPalette []color.Color
 	outFilepath := filepath.Join(exportType.OutputPath, filename+".txt")
-	if err = file.Ascii(outFilepath, data, emptyPalette, exportType); err != nil {
+	if err = file.Ascii(outFilepath, data, emptyPalette, false, exportType); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while exporting data as ascii mode file (%s) error :%v\n", outFilepath, err)
 		return err
 	}
 	outFilepath = filepath.Join(exportType.OutputPath, filename+"c.txt")
-	if err = file.AsciiByColumn(outFilepath, data, emptyPalette, exportType); err != nil {
+	if err = file.AsciiByColumn(outFilepath, data, emptyPalette, false, exportType); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while exporting data as ascii by column mode file (%s) error :%v\n", outFilepath, err)
 		return err
 	}

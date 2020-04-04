@@ -60,12 +60,12 @@ func SpriteHardTransform(in *image.NRGBA, p color.Palette, size constants.Size, 
 		}
 	}
 	fmt.Println(firmwareColorUsed)
-	if err := file.Win(filename, data, mode, 16, size.Height, exportType); err != nil {
+	if err := file.Win(filename, data, mode, 16, size.Height, false, exportType); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 		return err
 	}
 	if !exportType.CpcPlus {
-		if err := file.Pal(filename, p, mode, exportType); err != nil {
+		if err := file.Pal(filename, p, mode, false, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 			return err
 		}
@@ -74,7 +74,7 @@ func SpriteHardTransform(in *image.NRGBA, p color.Palette, size constants.Size, 
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
-		if err := file.Ink(filename, p, mode, exportType); err != nil {
+		if err := file.Ink(filename, p, mode, false, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 			return err
 		}
@@ -84,7 +84,7 @@ func SpriteHardTransform(in *image.NRGBA, p color.Palette, size constants.Size, 
 			return err
 		}
 	} else {
-		if err := file.Kit(filename, p, mode, exportType); err != nil {
+		if err := file.Kit(filename, p, mode, false, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 			return err
 		}
@@ -94,13 +94,13 @@ func SpriteHardTransform(in *image.NRGBA, p color.Palette, size constants.Size, 
 			return err
 		}
 	}
-	if err := file.Ascii(filename, data, p, exportType); err != nil {
+	if err := file.Ascii(filename, data, p, false, exportType); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving ascii file for (%s) error :%v\n", filename, err)
 	}
-	return file.AsciiByColumn(filename, data, p, exportType)
+	return file.AsciiByColumn(filename, data, p, false, exportType)
 }
 
-func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, exportType *x.ExportType) error {
+func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, exportType *x.ExportType) error {
 	var data []byte
 	firmwareColorUsed := make(map[int]int, 0)
 	size.Height = in.Bounds().Max.Y
@@ -298,12 +298,12 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 		}
 	}
 	fmt.Println(firmwareColorUsed)
-	if err := file.Win(filename, data, mode, lineSize, size.Height, exportType); err != nil {
+	if err := file.Win(filename, data, mode, lineSize, size.Height, dontImportDsk, exportType); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 		return err
 	}
 	if !exportType.CpcPlus {
-		if err := file.Pal(filename, p, mode, exportType); err != nil {
+		if err := file.Pal(filename, p, mode, dontImportDsk, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 			return err
 		}
@@ -312,7 +312,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
-		if err := file.Ink(filename, p, 2, exportType); err != nil {
+		if err := file.Ink(filename, p, 2, dontImportDsk, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 			return err
 		}
@@ -322,7 +322,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 			return err
 		}
 	} else {
-		if err := file.Kit(filename, p, mode, exportType); err != nil {
+		if err := file.Kit(filename, p, mode, dontImportDsk, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 			return err
 		}
@@ -332,10 +332,10 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 			return err
 		}
 	}
-	if err := file.Ascii(filename, data, p, exportType); err != nil {
+	if err := file.Ascii(filename, data, p, dontImportDsk, exportType); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving ascii file for (%s) error :%v\n", filename, err)
 	}
-	return file.AsciiByColumn(filename, data, p, exportType)
+	return file.AsciiByColumn(filename, data, p, dontImportDsk, exportType)
 }
 
 func PalettePosition(c color.Color, p color.Palette) (int, error) {
@@ -646,7 +646,7 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, expor
 		}
 	}
 	if !exportType.CpcPlus {
-		if err := file.Pal(filePath, p, screenMode, exportType); err != nil {
+		if err := file.Pal(filePath, p, screenMode, false, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
@@ -655,7 +655,7 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, expor
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath2, err)
 			return err
 		}
-		if err := file.Ink(filePath, p, screenMode, exportType); err != nil {
+		if err := file.Ink(filePath, p, screenMode, false, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
@@ -665,7 +665,7 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, expor
 			return err
 		}
 	} else {
-		if err := file.Kit(filePath, p, screenMode, exportType); err != nil {
+		if err := file.Kit(filePath, p, screenMode, false, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
@@ -675,7 +675,7 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, expor
 			return err
 		}
 	}
-	return file.Ascii(filePath, bw, p, exportType)
+	return file.Ascii(filePath, bw, p, false, exportType)
 }
 
 func CpcScreenAddress(intialeAddresse int, x, y int, mode uint8, isOverscan bool) int {

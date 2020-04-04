@@ -143,7 +143,7 @@ func ApplyOneImage(in image.Image,
 	} else {
 		if !exportType.SpriteHard {
 			fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
-			SpriteTransform(downgraded, newPalette, exportType.Size, screenMode, filename, exportType)
+			SpriteTransform(downgraded, newPalette, exportType.Size, screenMode, filename, false, exportType)
 		} else {
 			fmt.Fprintf(os.Stdout, "Transform image in sprite hard.\n")
 			SpriteHardTransform(downgraded, newPalette, exportType.Size, screenMode, filename, exportType)

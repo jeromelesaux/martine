@@ -8166,7 +8166,7 @@ func (i *InkPalette) ToString() string {
 	return out
 }
 
-func Ink(filePath string, p color.Palette, screenMode uint8, exportType *x.ExportType) error {
+func Ink(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, exportType *x.ExportType) error {
 	fmt.Fprintf(os.Stdout, "Saving INK file (%s)\n", filePath)
 	data := make([]uint8, 16)
 	fmt.Fprintf(os.Stdout, "Palette size %d\n", len(p))
@@ -8200,7 +8200,9 @@ func Ink(filePath string, p color.Palette, screenMode uint8, exportType *x.Expor
 	}
 	binary.Write(fw, binary.LittleEndian, data)
 	fw.Close()
-	exportType.AddFile(osFilepath)
+	if !dontImportDsk {
+		exportType.AddFile(osFilepath)
+	}
 	return nil
 }
 
@@ -8419,7 +8421,7 @@ func OpenKit(filePath string) (color.Palette, *KitPalette, error) {
 	return p, KitPalette, nil
 }
 
-func Kit(filePath string, p color.Palette, screenMode uint8, exportType *x.ExportType) error {
+func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, exportType *x.ExportType) error {
 	osFilepath := exportType.AmsdosFullPath(filePath, ".Kit")
 	fmt.Fprintf(os.Stdout, "Saving Kit file (%s)\n", osFilepath)
 	data := [16]uint16{}
@@ -8447,7 +8449,9 @@ func Kit(filePath string, p color.Palette, screenMode uint8, exportType *x.Expor
 	}
 	binary.Write(fw, binary.LittleEndian, data)
 	fw.Close()
-	exportType.AddFile(osFilepath)
+	if !dontImportDsk {
+		exportType.AddFile(osFilepath)
+	}
 	return nil
 }
 
@@ -8621,7 +8625,7 @@ func OpenPal(filePath string) (color.Palette, *OcpPalette, error) {
 	return p, ocpPalette, nil
 }
 
-func Pal(filePath string, p color.Palette, screenMode uint8, exportType *x.ExportType) error {
+func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, exportType *x.ExportType) error {
 	fmt.Fprintf(os.Stdout, "Saving PAL file (%s)\n", filePath)
 	data := OcpPalette{ScreenMode: screenMode, ColorAnimation: 0, ColorAnimationDelay: 0}
 	for i := 0; i < 16; i++ {
@@ -8660,7 +8664,9 @@ func Pal(filePath string, p color.Palette, screenMode uint8, exportType *x.Expor
 	}
 	binary.Write(fw, binary.LittleEndian, data)
 	fw.Close()
-	exportType.AddFile(osFilepath)
+	if !dontImportDsk {
+		exportType.AddFile(osFilepath)
+	}
 	return nil
 }
 
@@ -8731,7 +8737,7 @@ func OpenWin(filePath string) (*OcpWinFooter, error) {
 	return ocpWinFooter, nil
 }
 
-func Win(filePath string, data []byte, screenMode uint8, width, height int, exportType *x.ExportType) error {
+func Win(filePath string, data []byte, screenMode uint8, width, height int, dontImportDsk bool, exportType *x.ExportType) error {
 	osFilepath := exportType.AmsdosFullPath(filePath, ".WIN")
 	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", osFilepath, screenMode, width, height)
 	win := OcpWinFooter{Unused: 3, Height: byte(height), Unused2: 0, Width: uint16(width * 8)}
@@ -8787,7 +8793,9 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, expo
 	binary.Write(fw, binary.LittleEndian, data)
 	binary.Write(fw, binary.LittleEndian, win)
 	fw.Close()
-	exportType.AddFile(osFilepath)
+	if !dontImportDsk {
+		exportType.AddFile(osFilepath)
+	}
 	return nil
 }
 

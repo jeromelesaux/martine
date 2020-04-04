@@ -127,7 +127,7 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 					os.Exit(-2)
 				}
 
-				if err := SpriteTransform(downgraded, newPalette, export.Size, screenMode, filename, export); err != nil {
+				if err := SpriteTransform(downgraded, newPalette, export.Size, screenMode, filename, true, export); err != nil {
 					fmt.Fprintf(os.Stderr, "error while transform in sprite error : %v\n", err)
 				}
 				contour := image.Rectangle{Min: image.Point{X: startX, Y: startY}, Max: image.Point{X: startX + spriteSize.Width, Y: startY + spriteSize.Height}}
@@ -178,7 +178,7 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 					os.Exit(-2)
 				}
 
-				if err := SpriteTransform(downgraded, newPalette, export.Size, screenMode, filename, export); err != nil {
+				if err := SpriteTransform(downgraded, newPalette, export.Size, screenMode, filename, true, export); err != nil {
 					fmt.Fprintf(os.Stderr, "error while transform in sprite error : %v\n", err)
 				}
 				contour := image.Rectangle{Min: image.Point{X: startX, Y: startY}, Max: image.Point{X: startX + spriteSize.Width, Y: startY + spriteSize.Height}}

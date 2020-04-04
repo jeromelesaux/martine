@@ -2,16 +2,17 @@ package gfx
 
 import (
 	"fmt"
-	"github.com/disintegration/imaging"
-	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
-	x "github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
 	"image"
 	"image/color"
 	"image/draw"
 	"math"
 	"os"
+
+	"github.com/disintegration/imaging"
+	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/convert"
+	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/file"
 )
 
 func Rotate3d(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filePath string, resizeAlgo imaging.ResampleFilter, exportType *x.ExportType) error {
@@ -36,7 +37,7 @@ func Rotate3d(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8,
 		if err := file.Png(newFilename, rin); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create image (%s) error :%v\n", newFilename, err)
 		}
-		if err := SpriteTransform(rin, p, constants.Size{Width: size.Width, Height: size.Height}, mode, newFilename, exportType); err != nil {
+		if err := SpriteTransform(rin, p, constants.Size{Width: size.Width, Height: size.Height}, mode, newFilename, false, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create sprite image (%s) error %v\n", newFilename, err)
 		}
 		indice++
