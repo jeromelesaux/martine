@@ -100,7 +100,7 @@ var (
 	tileMap             = flag.Bool("tilemap", false, "Analyse the input image and generate the tiles, the tile map and gloabl schema.")
 	initialAddress      = flag.String("address", "0xC000", "Starting address to display sprite in delta packing")
 	animate             = flag.Bool("animate", false, "Will produce an full screen with all sprite on the same image (add -i image.gif or -i *.png)")
-	appVersion          = "0.24.2rc"
+	appVersion          = "0.24"
 	version             = flag.Bool("version", false, "print martine's version")
 )
 
