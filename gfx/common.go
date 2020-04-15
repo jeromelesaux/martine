@@ -111,6 +111,13 @@ func ApplyOneImage(in image.Image,
 		os.Exit(-2)
 	}
 
+	if exportType.Reducer > -1 {
+		out = convert.Reducer(out, exportType.Reducer)
+		if err := file.Png(filepath.Join(exportType.OutputPath, filename+"_resized.png"), out); err != nil {
+			os.Exit(-2)
+		}
+	}
+
 	if newPalette == nil { // in case of dithering without input palette
 		if exportType.CpcPlus {
 			newPalette = constants.CpcPlusPalette

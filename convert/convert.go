@@ -3,12 +3,13 @@ package convert
 import (
 	"errors"
 	"fmt"
-	"github.com/disintegration/imaging"
-	"github.com/jeromelesaux/martine/constants"
 	"image"
 	"image/color"
 	"os"
 	"sort"
+
+	"github.com/disintegration/imaging"
+	"github.com/jeromelesaux/martine/constants"
 )
 
 var ErrorCannotDowngradePalette = errors.New("Cannot Downgrade colors palette.")
@@ -16,6 +17,42 @@ var ErrorCannotDowngradePalette = errors.New("Cannot Downgrade colors palette.")
 func Resize(in image.Image, size constants.Size, algo imaging.ResampleFilter) *image.NRGBA {
 	fmt.Fprintf(os.Stdout, "* Step 1 * Resizing image to width %d pixels heigh %d\n", size.Width, size.Height)
 	return imaging.Resize(in, size.Width, size.Height, algo)
+}
+
+func Reducer(in *image.NRGBA, reducer int) *image.NRGBA {
+	var mask uint8
+
+	switch reducer {
+	case 1:
+		mask = 8
+	case 2:
+		mask = 16
+	case 3:
+		mask = 32
+	}
+
+	fmt.Fprintf(os.Stdout, "Applying reducer mask :(%.8b)\n", mask)
+	for x := 0; x < in.Bounds().Max.X; x++ {
+		for y := 0; y < in.Bounds().Max.Y; y++ {
+			c := in.At(x, y)
+			r, g, b, a := c.RGBA()
+			r2 := xorMask(r, mask)
+			g2 := xorMask(g, mask)
+			b2 := xorMask(b, mask)
+			a2 := xorMask(a, mask)
+			c2 := color.NRGBA{R: r2, G: g2, B: b2, A: a2}
+			in.Set(x, y, c2)
+		}
+	}
+	return in
+}
+
+func xorMask(v uint32, m uint8) uint8 {
+	v2 := uint8(v)
+	if v2 > m {
+		v2 ^= m
+	}
+	return v2
 }
 
 func DowngradingWithPalette(in *image.NRGBA, p color.Palette) (color.Palette, *image.NRGBA) {
@@ -41,40 +78,40 @@ func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (c
 		// launch analyse
 		newPalette := paletteToReduce.Reduce(size.ColorsAvailable)
 
-	/*	n := map[int][]color.Color{}
-		var a []int
-		for k, v := range colorUsage {
-			n[v] = append(n[v], k)
-		}
-		for k := range n {
-			a = append(a, k)
-		}
-		newPalette := []color.Color{}
-		sort.Sort(sort.Reverse(sort.IntSlice(a)))
-		var distance = -1.
-		for i, k := range a {
-			if len(newPalette) >= size.ColorsAvailable {
-				break
+		/*	n := map[int][]color.Color{}
+			var a []int
+			for k, v := range colorUsage {
+				n[v] = append(n[v], k)
 			}
-			if isCpcPlus {
-				if i > 0 {
-					distance = constants.ColorsDistance(n[a[i]][0], n[a[i-1]][0])
+			for k := range n {
+				a = append(a, k)
+			}
+			newPalette := []color.Color{}
+			sort.Sort(sort.Reverse(sort.IntSlice(a)))
+			var distance = -1.
+			for i, k := range a {
+				if len(newPalette) >= size.ColorsAvailable {
+					break
 				}
-				if distance == -1 {
-					fmt.Fprintf(os.Stdout, "distance(color:%v): accepted\n", n[a[i]][0])
-					newPalette = append(newPalette, n[k][0])
-				} else {
-					if distance > 10. {
-						fmt.Fprintf(os.Stdout, "distance(colors:%v,%v): %.2f accepted\n", n[a[i]][0], n[a[i-1]][0], distance)
+				if isCpcPlus {
+					if i > 0 {
+						distance = constants.ColorsDistance(n[a[i]][0], n[a[i-1]][0])
+					}
+					if distance == -1 {
+						fmt.Fprintf(os.Stdout, "distance(color:%v): accepted\n", n[a[i]][0])
 						newPalette = append(newPalette, n[k][0])
 					} else {
-						fmt.Fprintf(os.Stdout, "distance(colors:%v,%v): %.2f skipped\n", n[a[i]][0], n[a[i-1]][0], distance)
+						if distance > 10. {
+							fmt.Fprintf(os.Stdout, "distance(colors:%v,%v): %.2f accepted\n", n[a[i]][0], n[a[i-1]][0], distance)
+							newPalette = append(newPalette, n[k][0])
+						} else {
+							fmt.Fprintf(os.Stdout, "distance(colors:%v,%v): %.2f skipped\n", n[a[i]][0], n[a[i-1]][0], distance)
+						}
 					}
+				} else {
+					newPalette = append(newPalette, n[k][0])
 				}
-			} else {
-				newPalette = append(newPalette, n[k][0])
-			}
-		} */
+			} */
 
 		fmt.Fprintf(os.Stdout, "Phasis downgrade colors palette palette (%d)\n", len(newPalette))
 		return newPalette, downgradeWithPalette(out, newPalette), nil

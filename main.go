@@ -100,7 +100,8 @@ var (
 	tileMap             = flag.Bool("tilemap", false, "Analyse the input image and generate the tiles, the tile map and gloabl schema.")
 	initialAddress      = flag.String("address", "0xC000", "Starting address to display sprite in delta packing")
 	animate             = flag.Bool("animate", false, "Will produce an full screen with all sprite on the same image (add -i image.gif or -i *.png)")
-	appVersion          = "0.24"
+	reducer             = flag.Int("reducer", -1, "Reducer mask will reduce original image colors. Available : \n\t1 : lower\n\t2 : medium\n\t3 : strong\n")
+	appVersion          = "0.25rc"
 	version             = flag.Bool("version", false, "print martine's version")
 )
 
@@ -372,6 +373,7 @@ func main() {
 	exportType.SplitRaster = *splitRasters
 	exportType.ZigZag = *zigzag
 	exportType.Animate = *animate
+	exportType.Reducer = *reducer
 
 	if *maskSprite != "" {
 
