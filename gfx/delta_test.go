@@ -1,6 +1,7 @@
 package gfx
 
 import (
+	"fmt"
 	"os"
 	"testing"
 )
@@ -35,5 +36,17 @@ func TestXandY(t *testing.T) {
 		if addr != i {
 			t.Fatalf("expected #%.4x and gets #%.4x for x:%d y:%d\n", i, addr, x, y)
 		}
+	}
+
+	add := 0xe010 //- 0xC000
+	x, y, err := CpcCoordinates(0xe010, 0xC000)
+	if err != nil {
+		t.Fatal()
+	}
+	res := DeltaAddress(x, y) + 0xC000
+	a := DeltaAddress(16, 3) + 0xC000
+	fmt.Println(a)
+	if res != add {
+		t.Fatalf("does not match")
 	}
 }

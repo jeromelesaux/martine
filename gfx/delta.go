@@ -19,8 +19,9 @@ import (
 )
 
 var (
-	ErrorCanNotProceed = errors.New("Can not proceed treatment")
-	ErrorSizeDiffers   = errors.New("Sizes differs can not proceed treatment")
+	ErrorCanNotProceed       = errors.New("Can not proceed treatment")
+	ErrorSizeDiffers         = errors.New("Sizes differs can not proceed treatment")
+	ErrorCoordinatesNotFound = errors.New("Coordinates not found.")
 )
 
 type DeltaItem struct {
@@ -394,9 +395,10 @@ func X(offset uint16) uint16 {
 	//fmt.Fprintf(os.Stdout, "res:%d\n", int(offset)-DeltaAddress(0, int(line)))
 	return uint16(int(offset) - DeltaAddress(0, int(line)))
 }
+
 func Y(offset uint16) uint16 {
 	line := 0
-	for i := 0; i < 200; i++ {
+	for i := 0; i < constants.Mode0.Height; i++ {
 		lineAddress := DeltaAddress(0, i)
 		if lineAddress > int(offset) {
 			line = i - 1
@@ -406,16 +408,30 @@ func Y(offset uint16) uint16 {
 	return uint16(line)
 }
 
-func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8, initialAddress uint16, startX, startY uint16) *DeltaCollection {
+func CpcCoordinates(address, startingAddress uint16) (int, int, error) {
+	for y := 0; y < constants.Mode0.Height; y++ {
+		for x := 0; x < constants.Mode0.Width; x++ {
+			v := uint16(DeltaAddress(x, y))
+			v += startingAddress
+			if v == address {
+				return x, y, nil
+			}
+		}
+	}
+	return 0, 0, ErrorCoordinatesNotFound
+}
+
+func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8, x0, y0 uint16) *DeltaCollection {
 	data := NewDeltaCollection()
 	//var line int
 	for offset := 0; offset < len(scr1); offset++ { // a revoir car pour un sprite ce n'est le même mode d'adressage
 		if scr1[offset] != scr2[offset] {
 			if isSprite {
-				y := int(offset / (size.Width))
-				x := (offset - (y * (size.Width)))
-				newOffset := DeltaAddress(x, y) + int(initialAddress)
-				//	fmt.Fprintf(os.Stdout, "X:%d,Y:%d,byte:#%.2x,addresse:#%.4x\n", x, y, scr2[offset], newOffset)
+
+				y := int(offset/(size.Width)) + int(y0)
+				x := ((offset + int(x0)) - ((y - int(y0)) * (size.Width)))
+				newOffset := DeltaAddress(x, y) + 0xC000
+				//	fmt.Fprintf(os.Stdout, "X0:%d,Y0:%d,X:%d,Y:%d,byte:#%.2x,addresse:#%.4x\n", x0, y0, x, y, scr2[offset], newOffset)
 				data.Add(scr2[offset], uint16(newOffset))
 			} else {
 				data.Add(scr2[offset], uint16(offset))
@@ -467,12 +483,14 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 	var err error
 	var isSprite = false
 	var size constants.Size
-	var startX, startY uint16
+	//var x0, y0 uint16
 
-	startX = X(uint16(initialAddress - 0xC000))
-	startY = Y(uint16(initialAddress - 0xC000))
+	x0, y0, err := CpcCoordinates(initialAddress, 0xC000)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error while computing cpc coordinates :%v\n", err)
+	}
 	fmt.Fprintf(os.Stdout, "%v\n", filespath)
-	fmt.Fprintf(os.Stdout, "X:%d,Y:%d\n", startX, startY)
+	fmt.Fprintf(os.Stdout, "Cpc coordinates X:%d,Y:%d [#%.4x]\n", x0, y0, initialAddress)
 	for i := 0; i < len(filespath)-1; i++ {
 		switch strings.ToUpper(filepath.Ext(filespath[i])) {
 		case ".WIN":
@@ -529,7 +547,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 		if len(d1) != len(d2) {
 			return ErrorSizeDiffers
 		}
-		dc := Delta(d1, d2, isSprite, size, mode, initialAddress, startX, startY)
+		dc := Delta(d1, d2, isSprite, size, mode, uint16(x0), uint16(y0))
 		fmt.Fprintf(os.Stdout, "files (%s) (%s)", filespath[i], filespath[i+1])
 		fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 		fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
@@ -602,7 +620,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 		return err
 	}
 	defer f2.Close()
-	dc := Delta(d1, d2, isSprite, size, mode, initialAddress, startX, startY)
+	dc := Delta(d1, d2, isSprite, size, mode, uint16(x0), uint16(y0))
 	fmt.Fprintf(os.Stdout, "files (%s) (%s)", filespath[len(filespath)-1], filespath[0])
 	fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 	fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
