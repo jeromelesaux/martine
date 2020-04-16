@@ -472,7 +472,48 @@ Results: ![samples/sonic_rotate.png](samples/sonic_rotate.gif)
 ### flash 
 
 ### tilemap
+This option allows to create allow tiles and tile map from the input image. If for instance you use the mario level 1 like this : 
+![samples/mario-level1.png](samples/mario-level1.png)
+```martine -i mario-level1.png -w 16 -h 16 -tilemap -o Mario-level1```
 
+By this command line, martine will analyse the image to find all tiles 16 pixels high and 16 pixels wide. It will keep in memory the tile position to produce the tile map.
+![samples/mario-level1/tilesmap_schema.png](samples/mario-level1/tilesmap_schema.png)
+A csv ot the same tile map is also created (tilesmap.map).
+Martine will also generate all tiles found.
+- ![samples/mario-level1/00.png](samples/mario-level1/00.png) tile 00 
+- ![samples/mario-level1/01.png](samples/mario-level1/01.png) tile 01
+- ![samples/mario-level1/02.png](samples/mario-level1/02.png) tile 02
+- ![samples/mario-level1/03.png](samples/mario-level1/03.png) tile 03
+- ![samples/mario-level1/04.png](samples/mario-level1/04.png) tile 04
+- ![samples/mario-level1/05.png](samples/mario-level1/05.png) tile 05 
+- ![samples/mario-level1/06.png](samples/mario-level1/06.png) tile 06
+- ![samples/mario-level1/07.png](samples/mario-level1/07.png) tile 07
+- ![samples/mario-level1/08.png](samples/mario-level1/08.png) tile 08
+- ![samples/mario-level1/09.png](samples/mario-level1/09.png) tile 09
+- ![samples/mario-level1/10.png](samples/mario-level1/10.png) tile 10 
+- ![samples/mario-level1/01.png](samples/mario-level1/11.png) tile 11
+- ![samples/mario-level1/02.png](samples/mario-level1/12.png) tile 12
+- ![samples/mario-level1/03.png](samples/mario-level1/13.png) tile 13
+- ![samples/mario-level1/04.png](samples/mario-level1/14.png) tile 14
+- ![samples/mario-level1/05.png](samples/mario-level1/15.png) tile 15 
+- ![samples/mario-level1/06.png](samples/mario-level1/16.png) tile 16
+- ![samples/mario-level1/07.png](samples/mario-level1/17.png) tile 17
+- ![samples/mario-level1/08.png](samples/mario-level1/18.png) tile 18
+- ![samples/mario-level1/09.png](samples/mario-level1/19.png) tile 19
+- ![samples/mario-level1/10.png](samples/mario-level1/20.png) tile 20 
+- ![samples/mario-level1/01.png](samples/mario-level1/21.png) tile 21
+- ![samples/mario-level1/02.png](samples/mario-level1/22.png) tile 22
+- ![samples/mario-level1/03.png](samples/mario-level1/23.png) tile 23
+- ![samples/mario-level1/04.png](samples/mario-level1/24.png) tile 24
+- ![samples/mario-level1/05.png](samples/mario-level1/25.png) tile 25 
+- ![samples/mario-level1/06.png](samples/mario-level1/26.png) tile 26
+- ![samples/mario-level1/07.png](samples/mario-level1/27.png) tile 27
+- ![samples/mario-level1/08.png](samples/mario-level1/28.png) tile 28
+- ![samples/mario-level1/09.png](samples/mario-level1/29.png) tile 29
+- ![samples/mario-level1/10.png](samples/mario-level1/30.png) tile 30 
+- ![samples/mario-level1/10.png](samples/mario-level1/31.png) tile 31
+
+and the palette for each tile for instance : ![samples/mario-level1/31_palettepal.png](samples/mario-level1/31_palettepal.png)
 ### egx
 
 ### deltapacking
