@@ -31,7 +31,7 @@ All screens data are associated with basic programs launchers to quick display t
 Output:
 Martine generates a lot of differents files, which allow you to find the format and the data you will use.
 
-files generated :  
+### files generated :  
  * .win or .scr sprite or screen files
  * .pal or .ink palette file (.ink will be generated if the -p option is set)
  * .txt ascii file with palettes values (firmware values and basic values), and screen byte values
@@ -45,7 +45,7 @@ files generated :
  * _palettekit.png palette image describing the CPC plus colors used
 
 ## Options 
-additionnals options available : 
+### additionnals options available : 
 * -dsk will generate a dsk file and add all amsdos files will be added.
 * -n will remove amsdos headers from the amsdos files
 * -f will generate overscan screen amsdos file
@@ -79,7 +79,7 @@ additionnals options available :
 * -splitrasters will generate a rastered screen 
 * -reverse create a png image from your .scr .win file
 
-hardware options (if you owns a M4 Card, you can transfert your results by Wifi to your CPC using those options) : 
+### hardware options (if you owns a M4 Card, you can transfert your results by Wifi to your CPC using those options) : 
 * -host ip or dns name of your M4.
 * -autoexec will execute the launcher or sna file on your remote CPC.
 
@@ -546,10 +546,11 @@ will produce ![](samples/bwind_egx.png)
 
 Some explanations : <br>
 I choose here to be in full screen (option -f).
-martine needs to know the two modes of each input images (here -m 0 mode 0 for the first image, -m2 1 mode 1 for the second image).
--i and -i2 for the .scr images.
-And the palette path option -pal.
-You can note that martine allows you to choose you own palette. You can modify your palette to have a different rendering.
-
+martine needs to know the two modes of each input images (here -m 0 mode 0 for the first image, -m2 1 mode 1 for the second image).<br>
+-i and -i2 for the .scr images.<br>
+And the palette path option -pal.<br>
+You can note that martine allows you to choose you own palette. You can modify your palette to have a different rendering.<br>
+If you want to iterate and gets the results quickly on your own machine, I advise you to add the M4 option and use the sna output. <br>
+Complete your command line with for instance ```-sna -host 192.168.1.100 -autoexec ``` 
 
 ### deltapacking
