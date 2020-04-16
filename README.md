@@ -5,9 +5,29 @@ A cli which converts JPEG or PNG image file into  SCR/PAL or Overscan  Amstrad C
 Multi os, you can convert any pictures to Amstrad CPC Screen.
 The files generated (.win, .scr, .ink) are compatible with [OCP art studio](http://www.cpc-power.com/index.php?page=detail&num=4963) and Impdraw V2 [i2](http://amstradplus.forumforever.com/t462-iMPdraw-v2-0.htm)
 
+# Contents :
+ * [Introduction](#Introduction)
+ * [Output files](#Output_files)
+ * [Options](#Options)
+ * [Installation](#Installation)
+ * [Usage](#Usage)
+ * [Technics](#Technics)
+	* [Screen Conversion](#Screen_conversion)
+	* [Roll sprite](#Roll)
+	* [Tiles](#Tiles)
+	* [Rotation Sprite](#Rotation)
+	* [3D Rotation](#3D_rotation)
+	* [Tilemap](#Tilemap)
+	* [Flash](#flash)
+	* [Egx](#Egx)
+	* [Deltapacking](#Deltapacking)
+
+## Introduction 
 Martine tries to accelerate your game, demo animation development by organize and conversion of your graphical data.
 All screens data are associated with basic programs launchers to quick display the output on real machines.
 
+
+## Output_files
 Output:
 Martine generates a lot of differents files, which allow you to find the format and the data you will use.
 
@@ -24,6 +44,7 @@ files generated :
  * _palettepal.png palette image describing the CPC old colors used
  * _palettekit.png palette image describing the CPC plus colors used
 
+## Options 
 additionnals options available : 
 * -dsk will generate a dsk file and add all amsdos files will be added.
 * -n will remove amsdos headers from the amsdos files
@@ -54,14 +75,16 @@ additionnals options available :
 * -maskor Will apply an OR operation on each byte with the mask
 * -tilemap
     	Analyse the input image and generate the tiles, the tile map and gloabl schema.
-
-hardware options (if you owns a M4 Card, you can transfert your results by Wifi to your CPC using those options) : 
-* -host ip or dns name of your M4.
-* -autoexec will execute the launcher or sna file on your remote CPC.
 * -spritehard will generate 16x16 bits sprite hard for CPC plus.
 * -splitrasters will generate a rastered screen 
 * -reverse create a png image from your .scr .win file
 
+hardware options (if you owns a M4 Card, you can transfert your results by Wifi to your CPC using those options) : 
+* -host ip or dns name of your M4.
+* -autoexec will execute the launcher or sna file on your remote CPC.
+
+
+## Installation
 
 To Install and compile
 ```
@@ -75,6 +98,8 @@ To get binary :
 [https://github.com/jeromelesaux/martine/releases](https//github.com/jeromelesaux/martine/releases)
 <br>OS avaible : Linux, Macos X and Windows  
 
+
+## Usage
 Usage and options : 
 
 ```
@@ -288,7 +313,7 @@ usage :
   -zigzag
     	generate data in zigzag order (inc first line and dec next line for tiles)
 ```
-
+## Technics
 Principles : 
 Martine can be used in several modes : 
  * first mode : conversion of an input image into sprite (file .win), cpc screen (file .scr) and overscan screen (larger file .scr)
@@ -303,7 +328,7 @@ Martine can be used in several modes :
  * flash to generate a flash screen
 
 examples :
-## 1. Simple screen conversion :
+### Screen_conversion 
 * convert samples/Batman-Neal-Adams.jpg 
 
   * in mode 0 
@@ -341,7 +366,7 @@ input ![samples/Batman-Neal-Adams.jpg](samples/Batman-Neal-Adams.jpg)
  
 
 
-## 2. Samples roll usage : 
+### Roll : 
 
 ```martine -i samples/rotate.png -m 0 -w 16 -h 16 -roll -rra 1 -iter 16```
 
@@ -393,7 +418,7 @@ after rotate the first pixels' column in 16 differents images :
 
  
 
-## 3. tile option :
+### Tiles :
 
 this option will extract all the tiles from an image and generate the sprites files. 
 sample usage : 
@@ -427,7 +452,7 @@ Warn, all sprite must have the same size.
  ![14rotate.png](samples/TILES_resized_20.png)
 
 
-## 4. rotation sprite : 
+### Rotation : 
 This option able to rotate the input image, iter will generate the number of images.
 ```martine -i images/coke.jpg -rotate -iter 16 -o test  -m 1 -w 32 -h 32```
 
@@ -436,7 +461,7 @@ Input : ![samples/coke.jpg](samples/coke.jpg)
 results : ![samples/coke.igf](samples/coke.gif)
 
 
-## 5. 3d rotation sprite : 
+### 3D_rotation
 This option able to rotate the input image on an axis (X or Y and even on a diagonal), iter will generate the number of images. 
 ```./martine -m 0 -w 64 -h 64 -rotate3d -rotate3dtype 2 -o test/ -i images/sonic.png  -iter 12```
 
@@ -444,3 +469,10 @@ Input : ![samples/sonic.png](samples/sonic.png)
 
 Results: ![samples/sonic_rotate.png](samples/sonic_rotate.gif)
 
+### flash 
+
+### tilemap
+
+### egx
+
+### deltapacking
