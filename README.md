@@ -860,3 +860,6 @@ save'delta.bin',#1000,end-start,DSK,'bomberman.dsk'
 ```
 
 Now you can get the result here : [sna](samples/deltapacking-megaman/megaman.sna) or [dsk](samples/deltapacking-megaman/megaman.dsk)
+
+You will obtain this : 
+![video emu](samples/deltapacking-megaman/megaman-emulator.gif)
