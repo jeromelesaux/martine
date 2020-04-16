@@ -25,7 +25,9 @@ The files generated (.win, .scr, .ink) are compatible with [OCP art studio](http
 ## Introduction 
 Martine tries to accelerate your game, demo animation development by organize and conversion of your graphical data.
 All screens data are associated with basic programs launchers to quick display the output on real machines.
-You can follow the development here [Cpcwiki in english](https://www.cpcwiki.eu/forum/applications/martine-a-cpc-old-plus-tool-to-handle-your-images/) or here [Amstrad plus forum in french](https://amstradplus.forumforever.com/t513-martine-fait-du-dessin.htm)
+You can follow the development here [Cpcwiki in english](https://www.cpcwiki.eu/forum/applications/martine-a-cpc-old-plus-tool-to-handle-your-images/) or here [Amstrad plus forum in french](https://amstradplus.forumforever.com/t513-martine-fait-du-dessin.htm) <br>
+A Gui was developed for windows users by Tronic you can get it [here](https://index.amstrad.info/wp-content/uploads/martine/)
+
 
 
 ## Output_files
