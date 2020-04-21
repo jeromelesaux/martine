@@ -442,7 +442,7 @@ func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8, x0
 	return data
 }
 
-func ExportDelta(filename string, dc *DeltaCollection, exportType *x.ExportType) error {
+func ExportDelta(filename string, dc *DeltaCollection, mode uint8, exportType *x.ExportType) error {
 	if err := dc.Save(filename + ".bin"); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file (%s) error %v \n", filename+".bin", err)
 		return err
@@ -460,7 +460,7 @@ func ExportDelta(filename string, dc *DeltaCollection, exportType *x.ExportType)
 		return err
 	}
 	outFilepath = filepath.Join(exportType.OutputPath, filename+"c.txt")
-	if err = file.AsciiByColumn(outFilepath, data, emptyPalette, false, exportType); err != nil {
+	if err = file.AsciiByColumn(outFilepath, data, emptyPalette, false, mode, exportType); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while exporting data as ascii by column mode file (%s) error :%v\n", outFilepath, err)
 		return err
 	}
@@ -554,7 +554,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 		fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
 		if dc.OccurencePerFrame != 0 {
 			out := filepath.Join(exportType.OutputPath, fmt.Sprintf("%.2dto%.2d", i, (i+1)))
-			if err := ExportDelta(out, dc, exportType); err != nil {
+			if err := ExportDelta(out, dc, mode, exportType); err != nil {
 				return err
 			}
 		}
@@ -627,7 +627,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 	fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
 	if dc.OccurencePerFrame != 0 {
 		out := filepath.Join(exportType.OutputPath, fmt.Sprintf("%.2dto00", len(filespath)-1))
-		if err := ExportDelta(out, dc, exportType); err != nil {
+		if err := ExportDelta(out, dc, mode, exportType); err != nil {
 			return err
 		}
 	}

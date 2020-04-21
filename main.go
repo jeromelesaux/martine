@@ -101,7 +101,7 @@ var (
 	initialAddress      = flag.String("address", "0xC000", "Starting address to display sprite in delta packing")
 	animate             = flag.Bool("animate", false, "Will produce an full screen with all sprite on the same image (add -i image.gif or -i *.png)")
 	reducer             = flag.Int("reducer", -1, "Reducer mask will reduce original image colors. Available : \n\t1 : lower\n\t2 : medium\n\t3 : strong\n")
-	appVersion          = "0.25"
+	appVersion          = "0.26rc"
 	version             = flag.Bool("version", false, "print martine's version")
 )
 
@@ -595,6 +595,10 @@ func main() {
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error while parsing (%s) use the starting address #C000, err : %v\n", *initialAddress, err)
 				screenAddress = 0xC000
+			}
+			if *mode == -1 {
+				fmt.Fprintf(os.Stderr, "You must set the mode for this feature. (option -m)\n")
+				os.Exit(-1)
 			}
 			if err := gfx.ProceedDelta(deltaFiles, screenAddress, exportType, uint8(*mode)); err != nil {
 				fmt.Fprintf(os.Stderr, "error while proceeding delta mode %v\n", err)

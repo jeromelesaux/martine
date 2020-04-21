@@ -164,7 +164,7 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, ex
 	return nil
 }
 
-func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk bool, exportType *x.ExportType) error {
+func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk bool, mode uint8, exportType *x.ExportType) error {
 	eol := "\n"
 	if runtime.GOOS == "windows" {
 		eol = "\r\n"
@@ -178,10 +178,21 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 	fmt.Fprintf(os.Stdout, "Writing ascii file (%s) values by columns data length (%d)\n", osFilepath, len(data))
 	sizeInfos := fmt.Sprintf("; width %d height %d %s", exportType.Size.Width, exportType.Size.Height, eol)
 	out += "; Screen by column " + cpcFilename + eol + ".screen:" + eol + sizeInfos
-	pas := exportType.Size.Width
+	var adjustMode int
+	switch mode {
+	case 0:
+		adjustMode = 2
+	case 1:
+		adjustMode = 4
+	case 2:
+		adjustMode = 8
+	}
+	pas := exportType.Size.Width / adjustMode
 	h := 0
 	nbValues := 1
 	octetsRead := 0
+
+	end := (exportType.Size.Width + 1)
 	for {
 
 		if nbValues == 1 {
@@ -192,7 +203,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 
 		i += pas
 		octetsRead++
-		if nbValues < 8 && octetsRead != len(data) {
+		if nbValues < end && octetsRead != len(data) {
 			out += " ,"
 		}
 		if octetsRead == len(data) {
@@ -204,7 +215,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 			i = h
 		}
 
-		if nbValues == 8 {
+		if nbValues == end {
 			out += eol
 			nbValues = 1
 		}

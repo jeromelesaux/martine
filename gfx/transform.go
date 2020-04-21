@@ -97,7 +97,7 @@ func SpriteHardTransform(in *image.NRGBA, p color.Palette, size constants.Size, 
 	if err := file.Ascii(filename, data, p, false, exportType); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving ascii file for (%s) error :%v\n", filename, err)
 	}
-	return file.AsciiByColumn(filename, data, p, false, exportType)
+	return file.AsciiByColumn(filename, data, p, false, mode, exportType)
 }
 
 func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, exportType *x.ExportType) error {
@@ -335,7 +335,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 	if err := file.Ascii(filename, data, p, dontImportDsk, exportType); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving ascii file for (%s) error :%v\n", filename, err)
 	}
-	return file.AsciiByColumn(filename, data, p, dontImportDsk, exportType)
+	return file.AsciiByColumn(filename, data, p, dontImportDsk, mode, exportType)
 }
 
 func PalettePosition(c color.Color, p color.Palette) (int, error) {
