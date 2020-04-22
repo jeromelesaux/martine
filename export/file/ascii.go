@@ -192,8 +192,10 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 	h := 0
 	nbValues := 1
 	octetsRead := 0
-
-	end := (exportType.Size.Width + 1)
+	end := 17
+	if (exportType.Size.Width + 1) < end {
+		end = (exportType.Size.Width + 1)
+	}
 	for {
 
 		if nbValues == 1 {
