@@ -172,6 +172,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 
 	var out string
 	var i int
+	var jsonData []string
 
 	cpcFilename := string(exportType.AmsdosFilename()) + "C.TXT"
 	osFilepath := exportType.AmsdosFullPath(filePath, "C.TXT")
@@ -199,6 +200,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 			out += fmt.Sprintf("%s ", ByteToken)
 		}
 		out += fmt.Sprintf("#%0.2x", data[i])
+		jsonData = append(jsonData, fmt.Sprintf("0x%.2x", data[i]))
 		nbValues++
 
 		i += pas
@@ -291,6 +293,26 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 	fw.Close()
 	if !dontImportDsk {
 		exportType.AddFile(osFilepath)
+	}
+
+	if exportType.Json {
+		palette := make([]string, len(p))
+		for i := 0; i < len(p); i++ {
+			v, err := constants.FirmwareNumber(p[i])
+			if err == nil {
+				palette[i] = fmt.Sprintf("%.2d", v)
+			} else {
+				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+			}
+		}
+
+		j := x.NewJson(exportType.Filename(), exportType.Size.Width, exportType.Size.Height, jsonData, palette)
+		fmt.Fprintf(os.Stdout, "Filepath:%s\n", filePath)
+		if exportType.TileMode {
+			exportType.Tiles.Sprites = append(exportType.Tiles.Sprites, j)
+			return nil
+		}
+		return j.Save(exportType.OsFullPath(filePath, "_column.json"))
 	}
 	return nil
 }
