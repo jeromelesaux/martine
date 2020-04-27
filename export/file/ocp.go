@@ -8146,9 +8146,19 @@ func (i *KitPalette) ToString() string {
 	for _, v := range i.Colors {
 		out += v.ToString() + "\n"
 	}
-	out += "DB "
-	for _, v := range i.Colors {
-		out += fmt.Sprintf("#%0.2X, #%0.2X", v.Bytes()[1], v.Bytes()[0]) + ", "
+
+	out += "db "
+	for index, v := range i.Colors {
+		out += fmt.Sprintf("#%0.2X, #%0.2X", v.Bytes()[0], v.Bytes()[1])
+		if index == (len(i.Colors) - 1) {
+			out += ""
+		} else {
+			if (index+1)%8 == 0 {
+				out += "\ndb "
+			} else {
+				out += ", "
+			}
+		}
 	}
 	out += "\n"
 	return out
