@@ -8591,8 +8591,21 @@ func (o *OcpPalette) ToString() string {
 	for index, v := range o.BorderColor {
 		out += fmt.Sprintf("Color border (%d) [%s] : value (%d)(#%.2x)\n", index, constants.CpcColorStringFromHardwareNumber(v), v, v)
 	}
+	out += "Colors from Gatearray:\n"
 	for _, v := range o.PaletteColors {
 		out += fmt.Sprintf("#%.2x, ", v[0])
+	}
+	out += "\nColors from firmware:\n"
+
+	for _, v := range o.PaletteColors {
+		hcolor, err := constants.ColorFromHardware(v[0])
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error color :%v\n", err)
+			out += fmt.Sprintf("00, ")
+		} else {
+			fcolor, _ := constants.FirmwareNumber(hcolor)
+			out += fmt.Sprintf("%.2d, ", fcolor)
+		}
 	}
 	out += "\n"
 	return out
