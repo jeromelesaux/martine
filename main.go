@@ -101,7 +101,9 @@ var (
 	initialAddress      = flag.String("address", "0xC000", "Starting address to display sprite in delta packing")
 	animate             = flag.Bool("animate", false, "Will produce an full screen with all sprite on the same image (add -i image.gif or -i *.png)")
 	reducer             = flag.Int("reducer", -1, "Reducer mask will reduce original image colors. Available : \n\t1 : lower\n\t2 : medium\n\t3 : strong\n")
-	appVersion          = "0.26.1rc"
+	jsonOutput          = flag.Bool("json", false, "Generate json format output.")
+	txtOutput           = flag.Bool("txt", false, "Generate text format output.")
+	appVersion          = "0.26.2rc"
 	version             = flag.Bool("version", false, "print martine's version")
 )
 
@@ -374,6 +376,8 @@ func main() {
 	exportType.ZigZag = *zigzag
 	exportType.Animate = *animate
 	exportType.Reducer = *reducer
+	exportType.Json = *jsonOutput
+	exportType.Ascii = *txtOutput
 
 	if *maskSprite != "" {
 

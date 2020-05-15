@@ -123,8 +123,6 @@ func ModeMaskSprite(mode uint8) (error, []uint8) {
 
 func NewExportType(input, output string) *ExportType {
 	return &ExportType{
-		Json:           true,
-		Ascii:          true,
 		Scr:            true,
 		Pal:            true,
 		Ink:            true,
