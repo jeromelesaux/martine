@@ -106,12 +106,17 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 	size.Height = in.Bounds().Max.Y
 	size.Width = in.Bounds().Max.X
 	var lineSize int
+	lineToAdd := 1
+	if exportType.OneLine {
+		lineToAdd = 2
+	}
 	fmt.Fprintf(os.Stderr, "%v\n", size)
 	if mode == 0 {
 		lineSize = int(math.Ceil(float64(size.Width) / 2.))
 		data = make([]byte, size.Height*lineSize)
 		offset := 0
-		for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
+
+		for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
 			for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
 				c1 := in.At(x, y)
 				pp1, err := PalettePosition(c1, p)
@@ -152,7 +157,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 			lineSize = int(math.Ceil(float64(size.Width) / 4.))
 			data = make([]byte, size.Height*lineSize)
 			offset := 0
-			for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
+			for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
 				for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 4 {
 
 					c1 := in.At(x, y)
@@ -213,7 +218,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 				lineSize = int(math.Ceil(float64(size.Width) / 8.))
 				data = make([]byte, size.Height*lineSize)
 				offset := 0
-				for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
+				for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
 					for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 8 {
 
 						c1 := in.At(x, y)
@@ -573,6 +578,11 @@ func rawPixelMode0(b byte) (pp1, pp2 int) {
 
 func ToMode0(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte {
 	var bw []byte
+
+	lineToAdd := 1
+	if exportType.OneLine {
+		lineToAdd = 2
+	}
 	if exportType.Overscan {
 		bw = make([]byte, 0x8000)
 	} else {
@@ -582,7 +592,7 @@ func ToMode0(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 	fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
 	fmt.Println(in.Bounds())
 
-	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
+	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
 
 			c1 := in.At(x, y)
@@ -710,6 +720,11 @@ func CpcScreenAddressOffset(line int) int {
 
 func ToMode1(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte {
 	var bw []byte
+
+	lineToAdd := 1
+	if exportType.OneLine {
+		lineToAdd = 2
+	}
 	if exportType.Overscan {
 		bw = make([]byte, 0x8000)
 	} else {
@@ -720,7 +735,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 	fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
 	fmt.Println(in.Bounds())
 
-	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
+	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 4 {
 
 			c1 := in.At(x, y)
@@ -773,6 +788,10 @@ func TransformMode1(in *image.NRGBA, p color.Palette, size constants.Size, fileP
 func ToMode2(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte {
 	var bw []byte
 
+	lineToAdd := 1
+	if exportType.OneLine {
+		lineToAdd = 2
+	}
 	if exportType.Overscan {
 		bw = make([]byte, 0x8000)
 	} else {
@@ -782,7 +801,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 	fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
 	fmt.Println(in.Bounds())
 
-	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
+	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 8 {
 
 			c1 := in.At(x, y)

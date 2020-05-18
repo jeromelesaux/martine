@@ -103,6 +103,7 @@ var (
 	reducer             = flag.Int("reducer", -1, "Reducer mask will reduce original image colors. Available : \n\t1 : lower\n\t2 : medium\n\t3 : strong\n")
 	jsonOutput          = flag.Bool("json", false, "Generate json format output.")
 	txtOutput           = flag.Bool("txt", false, "Generate text format output.")
+	oneLine             = flag.Bool("oneline", false, "Display every other line.")
 	appVersion          = "0.26.2rc"
 	version             = flag.Bool("version", false, "print martine's version")
 )
@@ -378,6 +379,7 @@ func main() {
 	exportType.Reducer = *reducer
 	exportType.Json = *jsonOutput
 	exportType.Ascii = *txtOutput
+	exportType.OneLine = *oneLine
 
 	if *maskSprite != "" {
 
