@@ -151,6 +151,24 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 				}
 				offset++
 			}
+			if exportType.OneLine {
+				y++
+				for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
+					pp := 0
+					firmwareColorUsed[pp]++
+					pixel := pixelMode0(pp, pp)
+					if len(exportType.ScanlineSequence) > 0 {
+						scanlineSize := len(exportType.ScanlineSequence)
+						scanlineIndex := y % scanlineSize
+						scanlineValue := exportType.ScanlineSequence[scanlineIndex]
+						newOffset := (scanlineValue * ((y / scanlineSize) + 1) * lineSize) + (x / 2)
+						data[newOffset] = pixel
+					} else {
+						data[offset] = pixel
+					}
+					offset++
+				}
+			}
 		}
 	} else {
 		if mode == 1 {
@@ -212,7 +230,26 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 					}
 					offset++
 				}
+				if exportType.OneLine {
+					y++
+					for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 4 {
+						pp := 0
+						firmwareColorUsed[pp]++
+						pixel := pixelMode1(pp, pp, pp, pp)
+						if len(exportType.ScanlineSequence) > 0 {
+							scanlineSize := len(exportType.ScanlineSequence)
+							scanlineIndex := y % scanlineSize
+							scanlineValue := exportType.ScanlineSequence[scanlineIndex]
+							newOffset := (scanlineValue * ((y / scanlineSize) + 1) * lineSize) + (x / 2)
+							data[newOffset] = pixel
+						} else {
+							data[offset] = pixel
+						}
+						offset++
+					}
+				}
 			}
+
 		} else {
 			if mode == 2 {
 				lineSize = int(math.Ceil(float64(size.Width) / 8.))
@@ -295,6 +332,24 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 							data[offset] = pixel
 						}
 						offset++
+					}
+					if exportType.OneLine {
+						y++
+						for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 8 {
+							pp := 0
+							firmwareColorUsed[pp]++
+							pixel := pixelMode2(pp, pp, pp, pp, pp, pp, pp, pp)
+							if len(exportType.ScanlineSequence) > 0 {
+								scanlineSize := len(exportType.ScanlineSequence)
+								scanlineIndex := y % scanlineSize
+								scanlineValue := exportType.ScanlineSequence[scanlineIndex]
+								newOffset := (scanlineValue * ((y / scanlineSize) + 1) * lineSize) + (x / 2)
+								data[newOffset] = pixel
+							} else {
+								data[offset] = pixel
+							}
+							offset++
+						}
 					}
 				}
 			} else {
