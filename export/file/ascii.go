@@ -149,11 +149,16 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, ex
 				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
+		hardwarepalette := make([]string, len(p))
+		for i := 0; i < len(p); i++ {
+			fcolor, _ := constants.FirmwareNumber(p[i])
+			hardwarepalette[i] = fmt.Sprintf("%.2x, ", fcolor)
+		}
 		screen := make([]string, len(data))
 		for i := 0; i < len(data); i++ {
 			screen[i] = fmt.Sprintf("0x%.2x", data[i])
 		}
-		j := x.NewJson(exportType.Filename(), exportType.Size.Width, exportType.Size.Height, screen, palette)
+		j := x.NewJson(exportType.Filename(), exportType.Size.Width, exportType.Size.Height, screen, palette, hardwarepalette)
 		fmt.Fprintf(os.Stdout, "Filepath:%s\n", filePath)
 		if exportType.TileMode {
 			exportType.Tiles.Sprites = append(exportType.Tiles.Sprites, j)
@@ -307,8 +312,13 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
+		hardwarepalette := make([]string, len(p))
+		for i := 0; i < len(p); i++ {
+			fcolor, _ := constants.FirmwareNumber(p[i])
+			hardwarepalette[i] = fmt.Sprintf("%.2x, ", fcolor)
+		}
 
-		j := x.NewJson(exportType.Filename(), exportType.Size.Width, exportType.Size.Height, jsonData, palette)
+		j := x.NewJson(exportType.Filename(), exportType.Size.Width, exportType.Size.Height, jsonData, palette, hardwarepalette)
 		fmt.Fprintf(os.Stdout, "Filepath:%s\n", filePath)
 		if exportType.TileMode {
 			exportType.Tiles.Sprites = append(exportType.Tiles.Sprites, j)

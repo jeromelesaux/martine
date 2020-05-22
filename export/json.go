@@ -10,20 +10,22 @@ type JsonSlice struct {
 }
 
 type Json struct {
-	Label   string   `json:"label"`
-	Width   int      `json:"width"`
-	Height  int      `json:"height"`
-	Screen  []string `json:"screen"`
-	Palette []string `json:"palette"`
+	Label           string   `json:"label"`
+	Width           int      `json:"width"`
+	Height          int      `json:"height"`
+	Screen          []string `json:"screen"`
+	Palette         []string `json:"palette"`
+	HardwarePalette []string `json:"hardwarepalette"`
 }
 
-func NewJson(label string, width int, height int, screen []string, palette []string) *Json {
+func NewJson(label string, width int, height int, screen []string, palette []string, hardwarepalette []string) *Json {
 	return &Json{
-		Label:   label,
-		Width:   width,
-		Height:  height,
-		Screen:  screen,
-		Palette: palette,
+		Label:           label,
+		Width:           width,
+		Height:          height,
+		Screen:          screen,
+		Palette:         palette,
+		HardwarePalette: hardwarepalette,
 	}
 }
 
