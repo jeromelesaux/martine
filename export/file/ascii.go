@@ -152,7 +152,7 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, ex
 		hardwarepalette := make([]string, len(p))
 		for i := 0; i < len(p); i++ {
 			fcolor, _ := constants.FirmwareNumber(p[i])
-			hardwarepalette[i] = fmt.Sprintf("%.2x, ", fcolor)
+			hardwarepalette[i] = fmt.Sprintf("0x%.2x", fcolor)
 		}
 		screen := make([]string, len(data))
 		for i := 0; i < len(data); i++ {
@@ -315,7 +315,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 		hardwarepalette := make([]string, len(p))
 		for i := 0; i < len(p); i++ {
 			fcolor, _ := constants.FirmwareNumber(p[i])
-			hardwarepalette[i] = fmt.Sprintf("%.2x, ", fcolor)
+			hardwarepalette[i] = fmt.Sprintf("0x%.2x", fcolor)
 		}
 
 		j := x.NewJson(exportType.Filename(), exportType.Size.Width, exportType.Size.Height, jsonData, palette, hardwarepalette)
