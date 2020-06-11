@@ -95,6 +95,7 @@ type ExportType struct {
 	Animate                     bool
 	Reducer                     int
 	OneLine                     bool
+	OneRow                      bool
 }
 
 func MaskIsAllowed(mode uint8, value uint8) bool {
