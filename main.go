@@ -105,7 +105,7 @@ var (
 	txtOutput           = flag.Bool("txt", false, "Generate text format output.")
 	oneLine             = flag.Bool("oneline", false, "Display every other line.")
 	oneRow              = flag.Bool("onerow", false, "Display  every other row.")
-	appVersion          = "0.26.3rc"
+	appVersion          = "0.26.4rc"
 	version             = flag.Bool("version", false, "print martine's version")
 )
 

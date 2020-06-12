@@ -107,7 +107,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 	size.Width = in.Bounds().Max.X
 	var lineSize int
 	lineToAdd := 1
-	rowToAdd := 0
+
 	if exportType.OneLine {
 		lineToAdd = 2
 	}
@@ -117,11 +117,9 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 		lineSize = int(math.Ceil(float64(size.Width) / 2.))
 		data = make([]byte, size.Height*lineSize)
 		offset := 0
-		if exportType.OneRow {
-			rowToAdd = 0
-		}
+
 		for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
-			for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 + rowToAdd {
+			for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
 				c1 := in.At(x, y)
 				pp1, err := PalettePosition(c1, p)
 				if err != nil {
@@ -137,6 +135,9 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 					pp2 = 0
 				}
 				firmwareColorUsed[pp2]++
+				if exportType.OneRow {
+					pp2 = 0
+				}
 				pixel := pixelMode0(pp1, pp2)
 				if exportType.MaskAndOperation {
 					pixel = pixel & exportType.MaskSprite
@@ -179,11 +180,9 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 			lineSize = int(math.Ceil(float64(size.Width) / 4.))
 			data = make([]byte, size.Height*lineSize)
 			offset := 0
-			if exportType.OneRow {
-				rowToAdd = 4
-			}
+
 			for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
-				for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 4 + rowToAdd {
+				for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 4 {
 
 					c1 := in.At(x, y)
 					pp1, err := PalettePosition(c1, p)
@@ -214,7 +213,10 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 						pp4 = 0
 					}
 					firmwareColorUsed[pp4]++
-
+					if exportType.OneRow {
+						pp2 = 0
+						pp4 = 0
+					}
 					pixel := pixelMode1(pp1, pp2, pp3, pp4)
 					//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 					// MACRO PIXM0 COL2,COL1
@@ -262,11 +264,9 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 				lineSize = int(math.Ceil(float64(size.Width) / 8.))
 				data = make([]byte, size.Height*lineSize)
 				offset := 0
-				if exportType.OneRow {
-					rowToAdd = 8
-				}
+
 				for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
-					for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 8 + rowToAdd {
+					for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 8 {
 
 						c1 := in.At(x, y)
 						pp1, err := PalettePosition(c1, p)
@@ -326,7 +326,12 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 							pp8 = 0
 						}
 						firmwareColorUsed[pp8]++
-
+						if exportType.OneRow {
+							pp2 = 0
+							pp4 = 0
+							pp6 = 0
+							pp8 = 0
+						}
 						pixel := pixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
 						//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 						// MACRO PIXM0 COL2,COL1
@@ -645,10 +650,6 @@ func ToMode0(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 	var bw []byte
 
 	lineToAdd := 1
-	rowToAdd := 0
-	if exportType.OneRow {
-		rowToAdd = 2
-	}
 	if exportType.OneLine {
 		lineToAdd = 2
 	}
@@ -662,7 +663,7 @@ func ToMode0(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 	fmt.Println(in.Bounds())
 
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
-		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 + rowToAdd {
+		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
 
 			c1 := in.At(x, y)
 			pp1, err := PalettePosition(c1, p)
@@ -680,7 +681,9 @@ func ToMode0(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 			}
 
 			firmwareColorUsed[pp2]++
-
+			if exportType.OneRow {
+				pp2 = 0
+			}
 			pixel := pixelMode0(pp1, pp2)
 			//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 			// MACRO PIXM0 COL2,COL1
@@ -791,12 +794,9 @@ func ToMode1(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 	var bw []byte
 
 	lineToAdd := 1
-	rowToAdd := 0
+
 	if exportType.OneLine {
 		lineToAdd = 2
-	}
-	if exportType.OneRow {
-		rowToAdd = 4
 	}
 	if exportType.Overscan {
 		bw = make([]byte, 0x8000)
@@ -809,7 +809,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 	fmt.Println(in.Bounds())
 
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
-		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 4 + rowToAdd {
+		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 4 {
 
 			c1 := in.At(x, y)
 			pp1, err := PalettePosition(c1, p)
@@ -840,7 +840,10 @@ func ToMode1(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 				pp4 = 0
 			}
 			firmwareColorUsed[pp4]++
-
+			if exportType.OneRow {
+				pp4 = 0
+				pp2 = 0
+			}
 			pixel := pixelMode1(pp1, pp2, pp3, pp4)
 			//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 			// MACRO PIXM0 COL2,COL1
@@ -862,13 +865,11 @@ func ToMode2(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 	var bw []byte
 
 	lineToAdd := 1
-	rowToAdd := 0
+
 	if exportType.OneLine {
 		lineToAdd = 2
 	}
-	if exportType.OneRow {
-		rowToAdd = 8
-	}
+
 	if exportType.Overscan {
 		bw = make([]byte, 0x8000)
 	} else {
@@ -879,7 +880,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 	fmt.Println(in.Bounds())
 
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
-		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 8 + rowToAdd {
+		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 8 {
 
 			c1 := in.At(x, y)
 			pp1, err := PalettePosition(c1, p)
@@ -939,7 +940,12 @@ func ToMode2(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 				pp8 = 0
 			}
 			firmwareColorUsed[pp8]++
-
+			if exportType.OneRow {
+				pp2 = 0
+				pp4 = 0
+				pp6 = 0
+				pp8 = 0
+			}
 			pixel := pixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
 			//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 			// MACRO PIXM0 COL2,COL1
