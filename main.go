@@ -105,7 +105,8 @@ var (
 	txtOutput           = flag.Bool("txt", false, "Generate text format output.")
 	oneLine             = flag.Bool("oneline", false, "Display every other line.")
 	oneRow              = flag.Bool("onerow", false, "Display  every other row.")
-	appVersion          = "0.26.0"
+	impCatcher          = flag.Bool("imp", false, "Will generate sprites as Imp-Catcher format (Impdraw V2).")
+	appVersion          = "0.27.0rc"
 	version             = flag.Bool("version", false, "print martine's version")
 )
 
@@ -522,8 +523,9 @@ func main() {
 			os.Exit(-1)
 		}
 	}
+	if *impCatcher {
 
-	if *reverse {
+	} else if *reverse {
 
 		outpath := filepath.Join(*output, strings.Replace(strings.ToLower(filename), ".scr", ".png", 1))
 		if exportType.Overscan {
