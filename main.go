@@ -105,7 +105,7 @@ var (
 	txtOutput           = flag.Bool("txt", false, "Generate text format output.")
 	oneLine             = flag.Bool("oneline", false, "Display every other line.")
 	oneRow              = flag.Bool("onerow", false, "Display  every other row.")
-	impCatcher          = flag.Bool("imp", false, "Will generate sprites as Imp-Catcher format (Impdraw V2).")
+	impCatcher          = flag.Bool("imp", false, "Will generate sprites as IMP-Catcher format (Impdraw V2).")
 	appVersion          = "0.27.0rc"
 	version             = flag.Bool("version", false, "print martine's version")
 )
@@ -163,7 +163,7 @@ func main() {
 	}
 
 	if *initProcess != "" {
-		err := InitProcess(*initProcess)
+		_, err := InitProcess(*initProcess)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error while creating (%s) process file error :%v\n", *initProcess, err)
 			os.Exit(-1)
@@ -443,7 +443,7 @@ func main() {
 	exportType.Dsk = *dsk
 
 	fmt.Fprintf(os.Stdout, "Informations :\n%s", size.ToString())
-	if !exportType.DeltaMode && !*reverse && !*animate && strings.ToUpper(extension) != ".SCR" {
+	if !*impCatcher && !exportType.DeltaMode && !*reverse && !*animate && strings.ToUpper(extension) != ".SCR" {
 		f, err := os.Open(*picturePath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error while opening file %s, error %v\n", *picturePath, err)
@@ -524,7 +524,44 @@ func main() {
 		}
 	}
 	if *impCatcher {
+		if !exportType.CustomDimension {
+			fmt.Fprintf(os.Stderr, "You must set custom width and height.")
+			os.Exit(-1)
+		}
+		sprites := make([]byte, 0)
+		fmt.Fprintf(os.Stdout, "[%s]\n", *picturePath)
+		spritesPaths, err := common.WilcardedFiles([]string{*picturePath})
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error while getting wildcard files %s error : %v\n", *picturePath, err)
+		}
+		for _, v := range spritesPaths {
+			f, err := os.Open(v)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error while opening file %s, error %v\n", *picturePath, err)
+				os.Exit(-2)
+			}
+			defer f.Close()
+			in, _, err = image.Decode(f)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Cannot decode the image %s error %v", *picturePath, err)
+				os.Exit(-2)
+			}
+			gfx.ApplyOneImage(in,
+				exportType,
+				filepath.Base(v),
+				v,
+				*mode,
+				screenMode)
 
+			spritePath := exportType.AmsdosFullPath(v, ".WIN")
+			data, err := file.RawWin(spritePath)
+			sprites = append(sprites, data...)
+		}
+		finalFile := strings.ReplaceAll(filename, "?", "")
+		if err = file.Imp(sprites, uint(exportType.Size.Width), uint(exportType.Size.Height), finalFile, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", *picturePath, err)
+		}
+		os.Exit(0)
 	} else if *reverse {
 
 		outpath := filepath.Join(*output, strings.Replace(strings.ToLower(filename), ".scr", ".png", 1))

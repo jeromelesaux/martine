@@ -3,9 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx"
-	"os"
 )
 
 type Process struct {
@@ -102,14 +103,15 @@ func NewProcess() *Process {
 	}
 }
 
-func InitProcess(filePath string) error {
+func InitProcess(filePath string) (*Process, error) {
 	p := NewProcess()
 	f, err := os.Create(filePath)
 	if err != nil {
-		return err
+		return p, err
 	}
 	defer f.Close()
-	return json.NewEncoder(f).Encode(p)
+	err = json.NewEncoder(f).Encode(p)
+	return p, err
 }
 
 func LoadProcessFile(filePath string) (*Process, error) {

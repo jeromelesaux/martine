@@ -17,7 +17,7 @@ type ImpFooter struct {
 	Width    uint
 }
 
-func Imp(sprites []byte, width, height uint, filename string, export x.ExportType) error {
+func Imp(sprites []byte, width, height uint, filename string, export *x.ExportType) error {
 	impHeader := &ImpFooter{
 		NbFrames: uint(len(sprites)),
 		Height:   height,
@@ -47,7 +47,7 @@ func Imp(sprites []byte, width, height uint, filename string, export x.ExportTyp
 	}
 	binary.Write(fw, binary.LittleEndian, output)
 	fw.Close()
-
+	fmt.Fprintf(os.Stdout, "Imp-Catcher file exported in [%s]\n", impPath)
 	export.AddFile(impPath)
 	return nil
 }
