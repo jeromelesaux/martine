@@ -8465,6 +8465,56 @@ func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 	return nil
 }
 
+func DepackOCP(buf []byte) ([]byte, error) {
+	var bmpCpc []byte
+	var PosIn, PosOut int
+	var LgOut, CntBlock int
+	bmpCpc = make([]byte, 0x10000)
+	copy(bmpCpc, buf)
+	for PosOut < 0x4000 {
+		if buf[PosIn] == 'M' && buf[PosIn+1] == 'J' && buf[PosIn+2] == 'H' {
+			PosIn += 3
+			LgOut = int(buf[PosIn])
+			PosIn++
+			LgOut += (int(buf[PosIn]) << 8)
+			PosIn++
+			CntBlock = 0
+			for CntBlock < LgOut {
+				if buf[PosIn] == 'M' && buf[PosIn+1] == 'J' && buf[PosIn+2] == 'H' {
+					break
+				}
+
+				a := buf[PosIn]
+				PosIn++
+				if a == 1 { // MARKER_OCP
+					var c int
+					c = int(buf[PosIn])
+					PosIn++
+					a = buf[PosIn]
+					PosIn++
+					if c == 0 {
+						c = 0x100
+					}
+
+					for i := 0; i < c && CntBlock < LgOut; i++ {
+						bmpCpc[PosOut] = a
+						PosOut++
+						CntBlock++
+					}
+				} else {
+					bmpCpc[PosOut] = a
+					PosOut++
+					CntBlock++
+				}
+			}
+		} else {
+			PosOut = 0x4000
+		}
+	}
+
+	return bmpCpc, nil
+}
+
 func RawScr(filePath string) ([]byte, error) {
 	fr, err := os.Open(filePath)
 	if err != nil {
@@ -8487,6 +8537,9 @@ func RawScr(filePath string) ([]byte, error) {
 	}
 	if len(bf) > 0x4000 {
 		return nil, BadFileFormat
+	}
+	if bf[0] == 'M' && bf[1] == 'J' && bf[2] == 'H' { // Compression OCP
+		return DepackOCP(bf)
 	}
 	return bf, nil
 }
