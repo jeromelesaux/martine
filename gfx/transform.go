@@ -55,7 +55,7 @@ func SpriteHardTransform(in *image.NRGBA, p color.Palette, size constants.Size, 
 				pp = 0
 			}
 			firmwareColorUsed[pp]++
-			data[offset] = byte(pp)
+			data[offset] = byte(exportType.SwapInk(pp))
 			offset++
 		}
 	}
@@ -126,6 +126,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 					fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 					pp1 = 0
 				}
+				pp1 = exportType.SwapInk(pp1)
 				firmwareColorUsed[pp1]++
 				//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 				c2 := in.At(x+1, y)
@@ -134,6 +135,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 					fmt.Fprintf(os.Stdout, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 					pp2 = 0
 				}
+				pp2 = exportType.SwapInk(pp2)
 				firmwareColorUsed[pp2]++
 				if exportType.OneRow {
 					pp2 = 0
@@ -190,6 +192,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 						fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 						pp1 = 0
 					}
+					pp1 = exportType.SwapInk(pp1)
 					firmwareColorUsed[pp1]++
 					//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 					c2 := in.At(x+1, y)
@@ -198,6 +201,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 						fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 						pp2 = 0
 					}
+					pp2 = exportType.SwapInk(pp2)
 					firmwareColorUsed[pp2]++
 					c3 := in.At(x+2, y)
 					pp3, err := PalettePosition(c3, p)
@@ -205,6 +209,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 						fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 						pp3 = 0
 					}
+					pp3 = exportType.SwapInk(pp3)
 					firmwareColorUsed[pp3]++
 					c4 := in.At(x+3, y)
 					pp4, err := PalettePosition(c4, p)
@@ -212,6 +217,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 						fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 						pp4 = 0
 					}
+					pp4 = exportType.SwapInk(pp4)
 					firmwareColorUsed[pp4]++
 					if exportType.OneRow {
 						pp2 = 0
@@ -274,6 +280,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 							fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 							pp1 = 0
 						}
+						pp1 = exportType.SwapInk(pp1)
 						firmwareColorUsed[pp1]++
 						//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 						c2 := in.At(x+1, y)
@@ -282,6 +289,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 							fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 							pp2 = 0
 						}
+						pp2 = exportType.SwapInk(pp2)
 						firmwareColorUsed[pp2]++
 						c3 := in.At(x+2, y)
 						pp3, err := PalettePosition(c3, p)
@@ -289,6 +297,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 							fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 							pp3 = 0
 						}
+						pp3 = exportType.SwapInk(pp3)
 						firmwareColorUsed[pp3]++
 						c4 := in.At(x+3, y)
 						pp4, err := PalettePosition(c4, p)
@@ -296,6 +305,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 							fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 							pp4 = 0
 						}
+						pp4 = exportType.SwapInk(pp4)
 						firmwareColorUsed[pp4]++
 						c5 := in.At(x+4, y)
 						pp5, err := PalettePosition(c5, p)
@@ -303,6 +313,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 							fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
 							pp5 = 0
 						}
+						pp5 = exportType.SwapInk(pp5)
 						firmwareColorUsed[pp5]++
 						//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 						c6 := in.At(x+5, y)
@@ -311,13 +322,15 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 							fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
 							pp6 = 0
 						}
+						pp6 = exportType.SwapInk(pp6)
 						firmwareColorUsed[pp6]++
 						c7 := in.At(x+6, y)
 						pp7, err := PalettePosition(c7, p)
 						if err != nil {
 							fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
-							pp3 = 0
+							pp7 = 0
 						}
+						pp7 = exportType.SwapInk(pp7)
 						firmwareColorUsed[pp7]++
 						c8 := in.At(x+7, y)
 						pp8, err := PalettePosition(c8, p)
@@ -325,6 +338,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 							fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, x+7, y)
 							pp8 = 0
 						}
+						pp8 = exportType.SwapInk(pp8)
 						firmwareColorUsed[pp8]++
 						if exportType.OneRow {
 							pp2 = 0
@@ -671,6 +685,7 @@ func ToMode0(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
+			pp1 = exportType.SwapInk(pp1)
 			firmwareColorUsed[pp1]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := in.At(x+1, y)
@@ -679,7 +694,7 @@ func ToMode0(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
-
+			pp2 = exportType.SwapInk(pp2)
 			firmwareColorUsed[pp2]++
 			if exportType.OneRow {
 				pp2 = 0
@@ -817,6 +832,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
+			pp1 = exportType.SwapInk(pp1)
 			firmwareColorUsed[pp1]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := in.At(x+1, y)
@@ -825,6 +841,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
+			pp2 = exportType.SwapInk(pp2)
 			firmwareColorUsed[pp2]++
 			c3 := in.At(x+2, y)
 			pp3, err := PalettePosition(c3, p)
@@ -832,6 +849,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
+			pp3 = exportType.SwapInk(pp3)
 			firmwareColorUsed[pp3]++
 			c4 := in.At(x+3, y)
 			pp4, err := PalettePosition(c4, p)
@@ -839,6 +857,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
+			pp4 = exportType.SwapInk(pp4)
 			firmwareColorUsed[pp4]++
 			if exportType.OneRow {
 				pp4 = 0
@@ -888,6 +907,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
+			pp1 = exportType.SwapInk(pp1)
 			firmwareColorUsed[pp1]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := in.At(x+1, y)
@@ -896,6 +916,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
+			pp2 = exportType.SwapInk(pp2)
 			firmwareColorUsed[pp2]++
 			c3 := in.At(x+2, y)
 			pp3, err := PalettePosition(c3, p)
@@ -903,6 +924,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
+			pp3 = exportType.SwapInk(pp3)
 			firmwareColorUsed[pp3]++
 			c4 := in.At(x+3, y)
 			pp4, err := PalettePosition(c4, p)
@@ -910,6 +932,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
+			pp4 = exportType.SwapInk(pp4)
 			firmwareColorUsed[pp4]++
 			c5 := in.At(x+4, y)
 			pp5, err := PalettePosition(c5, p)
@@ -917,6 +940,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
 				pp5 = 0
 			}
+			pp5 = exportType.SwapInk(pp5)
 			firmwareColorUsed[pp5]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c6 := in.At(x+5, y)
@@ -925,13 +949,15 @@ func ToMode2(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
 				pp6 = 0
 			}
+			pp6 = exportType.SwapInk(pp6)
 			firmwareColorUsed[pp6]++
 			c7 := in.At(x+6, y)
 			pp7, err := PalettePosition(c7, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
-				pp3 = 0
+				pp7 = 0
 			}
+			pp7 = exportType.SwapInk(pp7)
 			firmwareColorUsed[pp7]++
 			c8 := in.At(x+7, y)
 			pp8, err := PalettePosition(c8, p)
@@ -939,6 +965,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, x+7, y)
 				pp8 = 0
 			}
+			pp8 = exportType.SwapInk(pp8)
 			firmwareColorUsed[pp8]++
 			if exportType.OneRow {
 				pp2 = 0

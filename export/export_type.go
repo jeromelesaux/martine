@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -96,6 +97,7 @@ type ExportType struct {
 	Reducer                     int
 	OneLine                     bool
 	OneRow                      bool
+	InkSwapper                  map[int]int
 }
 
 func MaskIsAllowed(mode uint8, value uint8) bool {
@@ -134,11 +136,46 @@ func NewExportType(input, output string) *ExportType {
 		DskFiles:       make([]string, 0),
 		Rotation3DX0:   -1,
 		Rotation3DY0:   -1,
-		Tiles:          NewJsonSlice()}
+		Tiles:          NewJsonSlice(),
+		InkSwapper:     make(map[int]int)}
 }
 
 func (e *ExportType) AddFile(file string) {
 	e.DskFiles = append(e.DskFiles, file)
+}
+
+func (e *ExportType) ImportInkSwap(s string) error {
+	if s == "" {
+		return nil
+	}
+	items := strings.Split(s, ",")
+	for _, v := range items {
+		var key, val int
+		values := strings.Split(v, "=")
+		if len(values) != 2 {
+			return fmt.Errorf("Expects two values parsed and gets %d, from [%s]",
+				len(values),
+				v)
+		}
+		key, err := strconv.Atoi(values[0])
+		if err != nil {
+			return err
+		}
+		val, err = strconv.Atoi(values[1])
+		if err != nil {
+			return err
+		}
+		e.InkSwapper[key] = val
+	}
+
+	return nil
+}
+
+func (e *ExportType) SwapInk(inkIndex int) int {
+	if v, ok := e.InkSwapper[inkIndex]; ok {
+		return v
+	}
+	return inkIndex
 }
 
 func RemoveUnsupportedChar(s string) string {
