@@ -385,21 +385,25 @@ func (dc *DeltaCollection) Save(filename string) error {
 	return err
 }
 
-func DeltaAddress(x, y int) int {
+func DeltaAddress(x, y, lineOctetWidth int) int {
 	//return (0x50 * (y / 8)) + (x + 1)
-	return (0x800 * (y % 8)) + (0x50 * (y / 8)) + (x)
+	// lineOctetWidth == 0x50
+	if y > (8 * 0x800 / lineOctetWidth) {
+		fmt.Fprintf(os.Stderr, "WARNING: y (%d) is superior to  (8 * 0x800 /#%x)\n", y, lineOctetWidth)
+	}
+	return (0x800 * (y % 8)) + (lineOctetWidth * (y / 8)) + (x)
 }
 
-func X(offset uint16) uint16 {
-	line := Y(offset)
+func X(offset uint16, lineOctetWidth int) uint16 {
+	line := Y(offset, lineOctetWidth)
 	//fmt.Fprintf(os.Stdout, "res:%d\n", int(offset)-DeltaAddress(0, int(line)))
-	return uint16(int(offset) - DeltaAddress(0, int(line)))
+	return uint16(int(offset) - DeltaAddress(0, int(line), lineOctetWidth))
 }
 
-func Y(offset uint16) uint16 {
+func Y(offset uint16, lineOctetWidth int) uint16 {
 	line := 0
 	for i := 0; i < constants.Mode0.Height; i++ {
-		lineAddress := DeltaAddress(0, i)
+		lineAddress := DeltaAddress(0, i, lineOctetWidth)
 		if lineAddress > int(offset) {
 			line = i - 1
 			break
@@ -408,10 +412,10 @@ func Y(offset uint16) uint16 {
 	return uint16(line)
 }
 
-func CpcCoordinates(address, startingAddress uint16) (int, int, error) {
+func CpcCoordinates(address, startingAddress uint16, lineOctetWidth int) (int, int, error) {
 	for y := 0; y < constants.Mode0.Height; y++ {
 		for x := 0; x < constants.Mode0.Width; x++ {
-			v := uint16(DeltaAddress(x, y))
+			v := uint16(DeltaAddress(x, y, lineOctetWidth))
 			v += startingAddress
 			if v == address {
 				return x, y, nil
@@ -421,7 +425,7 @@ func CpcCoordinates(address, startingAddress uint16) (int, int, error) {
 	return 0, 0, ErrorCoordinatesNotFound
 }
 
-func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8, x0, y0 uint16) *DeltaCollection {
+func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8, x0, y0 uint16, lineOctetWidth int) *DeltaCollection {
 	data := NewDeltaCollection()
 	//var line int
 	for offset := 0; offset < len(scr1); offset++ { // a revoir car pour un sprite ce n'est le même mode d'adressage
@@ -430,7 +434,7 @@ func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8, x0
 
 				y := int(offset/(size.Width)) + int(y0)
 				x := ((offset + int(x0)) - ((y - int(y0)) * (size.Width)))
-				newOffset := DeltaAddress(x, y) + 0xC000
+				newOffset := DeltaAddress(x, y, lineOctetWidth) + 0xC000
 				//	fmt.Fprintf(os.Stdout, "X0:%d,Y0:%d,X:%d,Y:%d,byte:#%.2x,addresse:#%.4x\n", x0, y0, x, y, scr2[offset], newOffset)
 				data.Add(scr2[offset], uint16(newOffset))
 			} else {
@@ -484,8 +488,8 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 	var isSprite = false
 	var size constants.Size
 	//var x0, y0 uint16
-
-	x0, y0, err := CpcCoordinates(initialAddress, 0xC000)
+	lineOctetsWidth := exportType.LineWidth
+	x0, y0, err := CpcCoordinates(initialAddress, 0xC000, lineOctetsWidth)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error while computing cpc coordinates :%v\n", err)
 	}
@@ -547,7 +551,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 		if len(d1) != len(d2) {
 			return ErrorSizeDiffers
 		}
-		dc := Delta(d1, d2, isSprite, size, mode, uint16(x0), uint16(y0))
+		dc := Delta(d1, d2, isSprite, size, mode, uint16(x0), uint16(y0), lineOctetsWidth)
 		fmt.Fprintf(os.Stdout, "files (%s) (%s)", filespath[i], filespath[i+1])
 		fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 		fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
@@ -620,7 +624,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 		return err
 	}
 	defer f2.Close()
-	dc := Delta(d1, d2, isSprite, size, mode, uint16(x0), uint16(y0))
+	dc := Delta(d1, d2, isSprite, size, mode, uint16(x0), uint16(y0), lineOctetsWidth)
 	fmt.Fprintf(os.Stdout, "files (%s) (%s)", filespath[len(filespath)-1], filespath[0])
 	fmt.Fprintf(os.Stdout, "%d bytes differ from the both images\n", len(dc.Items))
 	fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())

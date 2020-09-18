@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/disintegration/imaging"
+	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
 )
 
@@ -98,6 +99,7 @@ type ExportType struct {
 	OneLine                     bool
 	OneRow                      bool
 	InkSwapper                  map[int]int
+	LineWidth                   int
 }
 
 func MaskIsAllowed(mode uint8, value uint8) bool {
@@ -137,7 +139,8 @@ func NewExportType(input, output string) *ExportType {
 		Rotation3DX0:   -1,
 		Rotation3DY0:   -1,
 		Tiles:          NewJsonSlice(),
-		InkSwapper:     make(map[int]int)}
+		InkSwapper:     make(map[int]int),
+		LineWidth:      0x50}
 }
 
 func (e *ExportType) AddFile(file string) {
@@ -263,4 +266,13 @@ func (e *ExportType) OsFullPath(filePath string, newExtension string) string {
 	file := RemoveUnsupportedChar(strings.TrimSuffix(filename, filepath.Ext(filename)))
 	newFilename := file + newExtension
 	return filepath.Join(e.OutputPath, newFilename)
+}
+
+func (e *ExportType) SetLineWith(i string) error {
+	v, err := common.ParseHexadecimal8(i)
+	if err != nil {
+		return err
+	}
+	e.LineWidth = int(v)
+	return nil
 }

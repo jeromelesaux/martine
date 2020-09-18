@@ -107,7 +107,8 @@ var (
 	oneRow              = flag.Bool("onerow", false, "Display  every other row.")
 	impCatcher          = flag.Bool("imp", false, "Will generate sprites as IMP-Catcher format (Impdraw V2).")
 	inkSwap             = flag.String("inkswap", "", "Swap ink:\n\tfor instance mode 4 (4 inks) : 0=4,1=3,2=1,4=2\n\twill swap in output image index 0 by 4 and 1 by 3 and so on.")
-	appVersion          = "0.27.0rc"
+	lineWidth           = flag.String("linewidth", "#50", "Line width in hexadecimal to compute the screen address in delta mode.")
+	appVersion          = "0.27.1rc"
 	version             = flag.Bool("version", false, "print martine's version")
 )
 
@@ -387,6 +388,12 @@ func main() {
 	if err := exportType.ImportInkSwap(*inkSwap); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot parse inkswap option with error [%s]\n", err)
 		os.Exit(-1)
+	}
+	if *lineWidth != "" {
+		if err := exportType.SetLineWith(*lineWidth); err != nil {
+			fmt.Fprintf(os.Stderr, "Cannot parse linewidth option with error [%s]\n", err)
+			os.Exit(-1)
+		}
 	}
 
 	if *maskSprite != "" {
