@@ -8136,6 +8136,74 @@ var egxOverscanTemplate = []byte{
 	0x00, 0x00, 0x00, 0xc9, 0x00, 0x00, 0x01, 0x28,
 	0x02, 0x2e, 0x06, 0x19, 0x07, 0x1e, 0x0c, 0x30,
 }
+var codeScrStandard = []byte{ // Routine à mettre en #C7D0
+	0x3A, 0xD0, 0xD7, //      LD      A,  (#D7D0)
+	0xCD, 0x1C, 0xBD, //      CALL    #BD1C
+	0x21, 0xD1, 0xD7, //      LD      HL, #D7D1
+	0x46,             //      LD      B,  (HL)
+	0x48,             //      LD      C,  B
+	0xCD, 0x38, 0xBC, //      CALL    #BC38
+	0xAF,             //      XOR     A
+	0x21, 0xD1, 0xD7, //      LD      HL, #D7D1
+	0x46,             // BCL: LD      B,  (HL)
+	0x48,             //      LD      C,  B
+	0xF5,             //      PUSH    AF
+	0xE5,             //      PUSH    HL
+	0xCD, 0x32, 0xBC, //      CALL    #BC32
+	0xE1,       //      POP     HL
+	0xF1,       //      POP     AF
+	0x23,       //      INC     HL
+	0x3C,       //      INC     A
+	0xFE, 0x10, //      CP      #10
+	0x20, 0xF1, //      JR      NZ,BCL
+	0xC3, 0x18, 0xBB, //      JP      #BB18
+}
+
+var codeScrPlusP0 = []byte{
+	0xF3,             //				DI
+	0x01, 0x11, 0xBC, //				LD		BC,#BC11
+	0x21, 0xD0, 0xDF, //				LD		HL,#DFD0
+	0x7E,       //	BCL1:		LD		A,(HL)
+	0xED, 0x79, //				OUT		(C),A
+	0x23,       //				INC		HL
+	0x0D,       //				DEC		C
+	0x20, 0xF9, //				JR		NZ,BCL1
+	0x01, 0xA0, 0x7F, //				LD		BC,#7FA0
+	0x3A, 0xD0, 0xD7, //				LD		A,(#D7D0)
+	0xED, 0x79, //				OUT		(C),A
+	0xED, 0x49, //				OUT		(C),C
+	0x01, 0xB8, 0x7F, //				LD		BC,#7FB8
+	0xED, 0x49, //				OUT		(C),C
+	0x21, 0xD1, 0xD7, //				LD		HL,#D7D1
+	0x11, 0x00, 0x64, //				LD		DE,#6400
+	0x01, 0x22, 0x00, //				LD		BC,#0022
+	0xED, 0xB0, //				LDIR
+	0xCD, 0xD0, 0xCF, //	BCL2:		CALL	WaitKey
+	0x38, 0xFB, //				JR		C,BCL2
+	0xFB, //				EI
+	0xC9, //				RET
+}
+
+var codeScrPlusP1 = []byte{
+	0x01, 0x0E, 0xF4, //	WaitKey:	LD		BC,#F40E
+	0xED, 0x49, //				OUT		(C),C
+	0x01, 0xC0, 0xF6, //				LD		BC,#F6C0
+	0xED, 0x49, //				OUT		(C),C
+	0xAF,       //				XOR		A
+	0xED, 0x79, //				OUT		(C),A
+	0x01, 0x92, 0xF7, //				LD		BC,#F792
+	0xED, 0x49, //				OUT		(C),C
+	0x01, 0x45, 0xF6, //				LD		BC,#F645
+	0xED, 0x49, //				OUT		(C),C
+	0x06, 0xF4, //				LD		B,#F4
+	0xED, 0x78, //				IN		A,(C)
+	0x01, 0x82, 0xF7, //				LD		BC,#F782
+	0xED, 0x49, //				OUT		(C),C
+	0x01, 0x00, 0xF6, //				LD		BC,#F600
+	0xED, 0x49, //				OUT		(C),C
+	0x17, //				RLA
+	0xC9, //				RET
+}
 
 type KitPalette struct {
 	Colors [16]constants.CpcPlusColor
@@ -8572,9 +8640,49 @@ func RawOverscan(filePath string) ([]byte, error) {
 	return data, nil
 }
 
-func Scr(filePath string, data []byte, exportType *x.ExportType) error {
+func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, exportType *x.ExportType) error {
 	osFilepath := exportType.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving SCR file (%s)\n", osFilepath)
+
+	if exportType.CpcPlus {
+		switch screenMode {
+		case 0:
+			data[0x17D0] = 0
+		case 1:
+			data[0x17D0] = 1
+		case 2:
+			data[0x17D0] = 2
+		}
+		offset := 1
+		for i := 0; i < len(p); i++ {
+			cp := constants.NewCpcPlusColor(p[i])
+			fmt.Fprintf(os.Stderr, "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
+			v := cp.Bytes()
+			copy(data[0x17D0+offset:], v[:])
+			offset += 2
+		}
+		copy(data[0x07d0:], codeScrPlusP0[:])
+		copy(data[0x0fd0:], codeScrPlusP1[:])
+
+	} else {
+		switch screenMode {
+		case 0:
+			data[0x17D0] = 0
+		case 1:
+			data[0x17D0] = 1
+		case 2:
+			data[0x17D0] = 2
+		}
+		for i := 0; i < len(p); i++ {
+			v, err := constants.HardwareValues(p[i])
+			if err == nil {
+				data[(0x17D0+1)+i] = v[0]
+			} else {
+				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+			}
+		}
+		copy(data[0x07d0:], codeScrStandard[:])
+	}
 	if exportType.Compression != -1 {
 		switch exportType.Compression {
 		case 1:

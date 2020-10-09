@@ -733,7 +733,7 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, expor
 		}
 
 	} else {
-		if err := file.Scr(filePath, bw, exportType); err != nil {
+		if err := file.Scr(filePath, bw, p, screenMode, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
