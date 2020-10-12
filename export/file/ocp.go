@@ -8653,7 +8653,7 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, export
 		case 2:
 			data[0x17D0] = 2
 		}
-		offset := 1
+		offset := 0
 		for i := 0; i < len(p); i++ {
 			cp := constants.NewCpcPlusColor(p[i])
 			fmt.Fprintf(os.Stderr, "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
@@ -8676,7 +8676,7 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, export
 		for i := 0; i < len(p); i++ {
 			v, err := constants.HardwareValues(p[i])
 			if err == nil {
-				data[(0x17D0+1)+i] = v[0]
+				data[(0x17D0)+i] = v[0]
 			} else {
 				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
