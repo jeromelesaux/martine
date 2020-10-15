@@ -602,7 +602,7 @@ Compute the difference between images and ouput screen address (here the sprite 
 
 Format your data : 
 
-```prepare_delta -sprite sprites/m00.json -delta delta/\*.json -out data.asm ```
+```prepare_delta -sprite sprites/m00.json -m 0 -delta delta/\*.json -out data.asm ```
 
 The assembly code can be compiled with Rasm from Roudoudou : 
 ```
