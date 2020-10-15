@@ -598,7 +598,7 @@ You will obtain in the sprites folder all sprites.
 
 Compute the difference between images and ouput screen address (here the sprite will start at the address #D005): 
 
-```martine -delta -df sprites/\*.WIN -o delta -address "#D005"```
+```martine -delta -df sprites/\*.WIN -o delta -address "#D005" -json```
 
 Format your data : 
 
