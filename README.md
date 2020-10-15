@@ -543,7 +543,7 @@ It's important to generate in differents folders, martine will erase the files g
 
 Now create the egx file by the command : 
 ```
-martine -egx1 -m 0 -i egx_bwind/mode0/BWINND.SCR -m2 1 egx_bwind/mode1/BWINND.SCR -o egx_bwind/ -pal egx_bwind/mode0/BWINND.PAL -f -dsk
+martine -egx1 -m 0 -i egx_bwind/mode0/BWINND.SCR -m2 1 -i2 egx_bwind/mode1/BWINND.SCR -o egx_bwind/ -pal egx_bwind/mode0/BWINND.PAL -f -dsk
 ```
 will produce ![](samples/bwind_egx.png)
 
