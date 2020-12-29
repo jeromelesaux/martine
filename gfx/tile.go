@@ -67,7 +67,8 @@ func TileMode(exportType *x.ExportType, mode uint8, iterationX, iterationY int) 
 			}
 
 			if exportType.ZigZag {
-				zizagImg := image.NewNRGBA(image.Rectangle{
+				downgraded = Zigzag(downgraded)
+				/*zizagImg := image.NewNRGBA(image.Rectangle{
 					image.Point{X: 0, Y: 0},
 					image.Point{X: downgraded.Bounds().Max.X, Y: downgraded.Bounds().Max.Y}})
 				for y := 1; y < downgraded.Bounds().Max.Y; y += 2 {
@@ -82,7 +83,7 @@ func TileMode(exportType *x.ExportType, mode uint8, iterationX, iterationY int) 
 						zizagImg.Set(x, y, downgraded.At(x, y))
 					}
 				}
-				downgraded = zizagImg
+				downgraded = zizagImg*/
 			}
 
 			ext = "_downgraded_" + strconv.Itoa(index) + ".png"
@@ -101,4 +102,24 @@ func TileMode(exportType *x.ExportType, mode uint8, iterationX, iterationY int) 
 	}
 
 	return exportType.Tiles.Save(exportType.Fullpath(".json"))
+}
+
+func Zigzag(in *image.NRGBA) *image.NRGBA {
+	zizagImg := image.NewNRGBA(image.Rectangle{
+		image.Point{X: 0, Y: 0},
+		image.Point{X: in.Bounds().Max.X, Y: in.Bounds().Max.Y}})
+	for y := 1; y < in.Bounds().Max.Y; y += 2 {
+		xZigZag := 0
+		for x := in.Bounds().Max.X - 1; x >= 0; x-- {
+			zizagImg.Set(xZigZag, y, in.At(x, y))
+			xZigZag++
+		}
+	}
+	for y := 0; y < in.Bounds().Max.Y; y += 2 {
+		for x := 0; x < in.Bounds().Max.X; x++ {
+			zizagImg.Set(x, y, in.At(x, y))
+		}
+	}
+	in = zizagImg
+	return in
 }

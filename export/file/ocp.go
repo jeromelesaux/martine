@@ -8643,28 +8643,32 @@ func RawOverscan(filePath string) ([]byte, error) {
 func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, exportType *x.ExportType) error {
 	osFilepath := exportType.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving SCR file (%s)\n", osFilepath)
-
+	var exec uint16
 	if exportType.CpcPlus {
+		exec = 0x821
 		switch screenMode {
 		case 0:
-			data[0x17D0] = 0
+			data[0x17d0] = 0
 		case 1:
-			data[0x17D0] = 1
+			data[0x17d0] = 1
 		case 2:
-			data[0x17D0] = 2
+			data[0x17d0] = 2
 		}
-		offset := 0
+		offset := 1
 		for i := 0; i < len(p); i++ {
 			cp := constants.NewCpcPlusColor(p[i])
-			fmt.Fprintf(os.Stderr, "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
+			//fmt.Fprintf(os.Stderr, "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
 			v := cp.Bytes()
-			copy(data[0x17D0+offset:], v[:])
-			offset += 2
+			data[0x17d0+offset] = v[0]
+			offset++
+			data[0x17d0+offset] = v[1]
+			offset++
 		}
 		copy(data[0x07d0:], codeScrPlusP0[:])
 		copy(data[0x0fd0:], codeScrPlusP1[:])
 
 	} else {
+		exec = 0x811
 		switch screenMode {
 		case 0:
 			data[0x17D0] = 0
@@ -8709,7 +8713,7 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, export
 			data = dst[4:]
 		}
 	}
-	header := cpc.CpcHead{Type: 2, User: 0, Address: 0xc000, Exec: 0xC7D0,
+	header := cpc.CpcHead{Type: 2, User: 0, Address: 0xc000, Exec: exec,
 		Size:        uint16(binary.Size(data)),
 		Size2:       uint16(binary.Size(data)),
 		LogicalSize: uint16(binary.Size(data))}

@@ -97,7 +97,7 @@ var (
 	maskOrOperation     = flag.Bool("maskor", false, "Will apply an OR operation on each byte with the mask")
 	maskAdOperation     = flag.Bool("maskand", false, "Will apply an AND operation on each byte with the mask")
 	zigzag              = flag.Bool("zigzag", false, "generate data in zigzag order (inc first line and dec next line for tiles)")
-	tileMap             = flag.Bool("tilemap", false, "Analyse the input image and generate the tiles, the tile map and gloabl schema.")
+	tileMap             = flag.Bool("tilemap", false, "Analyse the input image and generate the tiles, the tile map and global schema.")
 	initialAddress      = flag.String("address", "0xC000", "Starting address to display sprite in delta packing")
 	animate             = flag.Bool("animate", false, "Will produce an full screen with all sprite on the same image (add -i image.gif or -i *.png)")
 	reducer             = flag.Int("reducer", -1, "Reducer mask will reduce original image colors. Available : \n\t1 : lower\n\t2 : medium\n\t3 : strong\n")
@@ -106,7 +106,7 @@ var (
 	oneLine             = flag.Bool("oneline", false, "Display every other line.")
 	oneRow              = flag.Bool("onerow", false, "Display  every other row.")
 	impCatcher          = flag.Bool("imp", false, "Will generate sprites as IMP-Catcher format (Impdraw V2).")
-	inkSwap             = flag.String("inkswap", "", "Swap ink:\n\tfor instance mode 4 (4 inks) : 0=4,1=3,2=1,4=2\n\twill swap in output image index 0 by 4 and 1 by 3 and so on.")
+	inkSwap             = flag.String("inkswap", "", "Swap ink:\n\tfor instance mode 4 (4 inks) : 0=3,1=0,2=1,3=2\n\twill swap in output image index 0 by 3 and 1 by 0 and so on.")
 	lineWidth           = flag.String("linewidth", "#50", "Line width in hexadecimal to compute the screen address in delta mode.")
 	appVersion          = "0.27.1rc"
 	version             = flag.Bool("version", false, "print martine's version")
@@ -125,6 +125,10 @@ func printVersion() {
 	fmt.Fprintf(os.Stdout, "%s\n", appVersion)
 	os.Exit(-1)
 }
+
+/*
+@Todo : add zigzag on sprite and sprite hard.
+*/
 
 func main() {
 	var size constants.Size

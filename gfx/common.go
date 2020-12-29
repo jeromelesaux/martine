@@ -148,6 +148,10 @@ func ApplyOneImage(in image.Image,
 	if !exportType.CustomDimension && !exportType.SpriteHard {
 		Transform(downgraded, newPalette, exportType.Size, picturePath, exportType)
 	} else {
+		if exportType.ZigZag {
+			// prepare zigzag transformation
+			downgraded = Zigzag(downgraded)
+		}
 		if !exportType.SpriteHard {
 			fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
 			SpriteTransform(downgraded, newPalette, exportType.Size, screenMode, filename, false, exportType)
