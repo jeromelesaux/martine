@@ -44,3 +44,9 @@ build:
 	GOOS=linux ARCH=arm GOARM=5 go build ${LDFLAGS} -o format_sprite $(SOURCEDIR)/resources/formatter/sprites/format_sprite.go
 	GOOS=linux ARCH=arm GOARM=5 go build ${LDFLAGS} -o format_data $(SOURCEDIR)/resources/formatter/data/format_data.go
 	zip martine-$(appversion)-arm.zip martine  prepare_delta format_sprite format_data ./resources/*
+	@echo "Compilation for windows 32bits"
+	GOOS=windows GOARCH=386 go build ${LDFLAGS} -o martine.exe $(SOURCEDIR)/main.go $(SOURCEDIR)/process.go
+	GOOS=windows GOARCH=386 go build ${LDFLAGS} -o prepare_delta.exe $(SOURCEDIR)/resources/formatter/delta/prepare_delta.go
+	GOOS=windows GOARCH=386 go build ${LDFLAGS} -o format_sprite.exe $(SOURCEDIR)/resources/formatter/sprites/format_sprite.go
+	GOOS=windows GOARCH=386 go build ${LDFLAGS} -o format_data.exe $(SOURCEDIR)/resources/formatter/data/format_data.go
+	zip martine-$(appversion)-windows-32bits.zip martine.exe  prepare_delta.exe format_sprite.exe format_data.exe ./resources/*
