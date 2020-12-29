@@ -108,7 +108,7 @@ var (
 	impCatcher          = flag.Bool("imp", false, "Will generate sprites as IMP-Catcher format (Impdraw V2).")
 	inkSwap             = flag.String("inkswap", "", "Swap ink:\n\tfor instance mode 4 (4 inks) : 0=3,1=0,2=1,3=2\n\twill swap in output image index 0 by 3 and 1 by 0 and so on.")
 	lineWidth           = flag.String("linewidth", "#50", "Line width in hexadecimal to compute the screen address in delta mode.")
-	appVersion          = "0.27.1rc"
+	appVersion          = "0.27"
 	version             = flag.Bool("version", false, "print martine's version")
 )
 
