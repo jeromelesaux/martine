@@ -51,7 +51,7 @@ func TileMode(exportType *x.ExportType, mode uint8, iterationX, iterationY int) 
 				Mode:   cutter.TopLeft,
 			})
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot not crop image for (%d,%d), error :%v\n", i, y, err)
+				fmt.Fprintf(os.Stderr, "Cannot crop image for (%d,%d), error :%v\n", i, y, err)
 				return err
 			}
 
@@ -59,7 +59,7 @@ func TileMode(exportType *x.ExportType, mode uint8, iterationX, iterationY int) 
 			ext := "_resized_" + strconv.Itoa(index) + ".png"
 			filePath := filepath.Join(exportType.OutputPath, exportType.OsFilename(ext))
 			if err := file.Png(filePath, resized); err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot not resized image, error %v\n", err)
+				fmt.Fprintf(os.Stderr, "Cannot resized image, error %v\n", err)
 			}
 			p, downgraded, err := convert.DowngradingPalette(resized, exportType.Size, exportType.CpcPlus)
 			if err != nil {
@@ -89,7 +89,7 @@ func TileMode(exportType *x.ExportType, mode uint8, iterationX, iterationY int) 
 			ext = "_downgraded_" + strconv.Itoa(index) + ".png"
 			filePath = filepath.Join(exportType.OutputPath, exportType.OsFilename(ext))
 			if err := file.Png(filePath, downgraded); err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot not downgrad image, error %v\n", err)
+				fmt.Fprintf(os.Stderr, "Cannot downgrade image, error %v\n", err)
 			}
 			ext = strconv.Itoa(index) + ".png"
 			exportType.Size.Width = resized.Bounds().Max.X

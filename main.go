@@ -458,7 +458,9 @@ func main() {
 	exportType.DeltaMode = *deltaMode
 	exportType.Dsk = *dsk
 
-	fmt.Fprintf(os.Stdout, "Informations :\n%s", size.ToString())
+	if !*reverse {
+		fmt.Fprintf(os.Stdout, "Informations :\n%s", size.ToString())
+	}
 	if !*impCatcher && !exportType.DeltaMode && !*reverse && !*animate && strings.ToUpper(extension) != ".SCR" {
 		f, err := os.Open(*picturePath)
 		if err != nil {
@@ -589,7 +591,7 @@ func main() {
 			}
 
 			if err := gfx.OverscanToPng(*picturePath, outpath, mode, p); err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot not convert to PNG file (%s) error %v\n", *picturePath, err)
+				fmt.Fprintf(os.Stderr, "Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
 				os.Exit(-1)
 			}
 			os.Exit(1)
@@ -621,12 +623,12 @@ func main() {
 		switch strings.ToUpper(filepath.Ext(filename)) {
 		case ".WIN":
 			if err := gfx.SpriteToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot not convert to PNG file (%s) error %v\n", *picturePath, err)
+				fmt.Fprintf(os.Stderr, "Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
 				os.Exit(-1)
 			}
 		case ".SCR":
 			if err := gfx.ScrToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot not convert to PNG file (%s) error %v\n", *picturePath, err)
+				fmt.Fprintf(os.Stderr, "Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
 				os.Exit(-1)
 			}
 		}

@@ -8583,6 +8583,13 @@ func DepackOCP(buf []byte) ([]byte, error) {
 	return bmpCpc, nil
 }
 
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
 func RawScr(filePath string) ([]byte, error) {
 	fr, err := os.Open(filePath)
 	if err != nil {
@@ -8603,13 +8610,20 @@ func RawScr(filePath string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(bf) > 0x4000 {
-		return nil, BadFileFormat
+
+	var sz int
+	sz = min(0x4000, len(bf))
+
+	var rawSrc []byte
+	rawSrc = make([]byte, sz)
+	for i := 0; i < sz; i++ {
+		rawSrc[i] = bf[i]
 	}
-	if bf[0] == 'M' && bf[1] == 'J' && bf[2] == 'H' { // Compression OCP
-		return DepackOCP(bf)
+
+	if rawSrc[0] == 'M' && rawSrc[1] == 'J' && rawSrc[2] == 'H' { // Compression OCP
+		return DepackOCP(rawSrc)
 	}
-	return bf, nil
+	return rawSrc, nil
 }
 
 func RawOverscan(filePath string) ([]byte, error) {
@@ -8891,6 +8905,11 @@ func RawWin(filePath string) ([]byte, error) {
 	}
 	raw := make([]byte, len(bf)-5)
 	copy(raw[:], bf[0:len(bf)-5])
+
+	if raw[0] == 'M' && raw[1] == 'J' && raw[2] == 'H' { // Compression OCP
+		return DepackOCP(raw)
+	}
+
 	return raw, nil
 }
 
@@ -8911,7 +8930,11 @@ func OpenWin(filePath string) (*OcpWinFooter, error) {
 	}
 
 	ocpWinFooter := &OcpWinFooter{}
-	_, err = fr.Seek(-5, io.SeekEnd)
+	//_, err = fr.Seek(-5, io.SeekEnd)
+
+	fmt.Fprintf(os.Stdout, "LogicalSize=%d\n", header.LogicalSize)
+	_, err = fr.Seek(0x80+int64(header.LogicalSize)-5, io.SeekStart)
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while seek in the file (%s) with error %v\n", filePath, err)
 		return &OcpWinFooter{}, err
