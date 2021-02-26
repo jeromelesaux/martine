@@ -8403,6 +8403,12 @@ func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 }
 
 func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, exportType *x.ExportType) error {
+	// remove first line to keep #38 address free
+	for i := 0; i < exportType.Size.Width; i++ {
+		data[i] = 0
+	}
+	// end of the hack
+
 	o := make([]byte, 0x7e90-0x80)
 	osFilepath := exportType.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", osFilepath)
