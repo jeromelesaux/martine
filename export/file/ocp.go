@@ -8404,7 +8404,16 @@ func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 
 func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, exportType *x.ExportType) error {
 	// remove first line to keep #38 address free
-	for i := 0; i < exportType.Size.Width; i++ {
+	var width int
+	switch screenMode {
+	case 0:
+		width = exportType.Size.Width / 2
+	case 1:
+		width = exportType.Size.Width / 4
+	case 2:
+		width = exportType.Size.Width / 8
+	}
+	for i := 0; i < width; i++ {
 		data[i] = 0
 	}
 	// end of the hack
