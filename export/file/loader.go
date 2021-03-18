@@ -1477,7 +1477,7 @@ func BasicLoader(filePath string, p color.Palette, exportType *x.ExportType) err
 
 	var loader []byte
 	loader = basicLoaderBasic
-	copy(loader[startPaletteValues:], out[0:len(out)])
+	copy(loader[startPaletteValues:], out[0:])
 	basicFile := exportType.AmsdosFullPath(filePath, "")
 	filename := filepath.Base(basicFile) // exportType.GetAmsdosFilename(filePath, "")
 	copy(loader[startPaletteName:], filename[:])
@@ -1623,7 +1623,7 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, exportType 
 
 	} else {
 		loader = egxLoaderBasic
-		copy(loader[startPaletteValues:], out[0:len(out)])
+		copy(loader[startPaletteValues:], out[0:])
 		copy(loader[startPaletteName:], filename[:])
 		copy(loader[startScreenName:], filename[:])
 	}
