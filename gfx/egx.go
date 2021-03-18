@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	ErrorFeatureNotImplemented = errors.New("Feature not implemented, check your syntax.")
+	ErrorFeatureNotImplemented = errors.New("feature not implemented, check your syntax")
 )
 
 func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, exportType *export.ExportType) error {
@@ -213,7 +213,7 @@ func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8,
 	} else {
 		bw = make([]byte, 0x4000)
 	}
-	firmwareColorUsed := make(map[int]int, 0)
+	firmwareColorUsed := make(map[int]int)
 	mode0Line := 1
 	mode1Line := 0
 	if firstLineMode == 1 {
@@ -292,7 +292,7 @@ func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8,
 	} else {
 		bw = make([]byte, 0x4000)
 	}
-	firmwareColorUsed := make(map[int]int, 0)
+	firmwareColorUsed := make(map[int]int)
 	mode1Line := 1
 	mode2Line := 0
 	if firstLineMode == 2 {

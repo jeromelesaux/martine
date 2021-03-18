@@ -125,7 +125,7 @@ func ApplyOneImage(in image.Image,
 			newPalette = constants.CpcOldPalette
 		}
 	}
-	out, newPalette = DoDithering(out, newPalette, exportType)
+	out, _ = DoDithering(out, newPalette, exportType)
 
 	if len(palette) > 0 {
 		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)

@@ -14,10 +14,10 @@ import (
 )
 
 var (
-	ErrorColorNotFound     = errors.New("Color not found in palette.")
-	ErrorNotYetImplemented = errors.New("Function is not yet implemented.")
-	ErrorModeNotFound      = errors.New("Mode not found or not implemented.")
-	ErrorBadSize           = errors.New("Width height does not correspond to data size.")
+	ErrorColorNotFound     = errors.New("color not found in palette")
+	ErrorNotYetImplemented = errors.New("function is not yet implemented")
+	ErrorModeNotFound      = errors.New("mode not found or not implemented")
+	ErrorBadSize           = errors.New("width height does not correspond to data size")
 )
 
 func Transform(in *image.NRGBA, p color.Palette, size constants.Size, filepath string, exportType *x.ExportType) error {
@@ -43,7 +43,7 @@ func SpriteHardTransform(in *image.NRGBA, p color.Palette, size constants.Size, 
 	var data []byte
 	size.Height = in.Bounds().Max.Y
 	size.Width = in.Bounds().Max.X
-	firmwareColorUsed := make(map[int]int, 0)
+	firmwareColorUsed := make(map[int]int)
 	offset := 0
 	data = make([]byte, 256)
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
@@ -102,7 +102,7 @@ func SpriteHardTransform(in *image.NRGBA, p color.Palette, size constants.Size, 
 
 func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, exportType *x.ExportType) error {
 	var data []byte
-	firmwareColorUsed := make(map[int]int, 0)
+	firmwareColorUsed := make(map[int]int)
 	size.Height = in.Bounds().Max.Y
 	size.Width = in.Bounds().Max.X
 	var lineSize int
@@ -672,7 +672,7 @@ func ToMode0(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 	} else {
 		bw = make([]byte, 0x4000)
 	}
-	firmwareColorUsed := make(map[int]int, 0)
+	firmwareColorUsed := make(map[int]int)
 	fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
 	fmt.Println(in.Bounds())
 
@@ -819,7 +819,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 		bw = make([]byte, 0x4000)
 	}
 
-	firmwareColorUsed := make(map[int]int, 0)
+	firmwareColorUsed := make(map[int]int)
 	fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
 	fmt.Println(in.Bounds())
 
@@ -894,7 +894,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 	} else {
 		bw = make([]byte, 0x4000)
 	}
-	firmwareColorUsed := make(map[int]int, 0)
+	firmwareColorUsed := make(map[int]int)
 	fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
 	fmt.Println(in.Bounds())
 

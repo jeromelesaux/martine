@@ -62,7 +62,7 @@ func AutoFlash(in image.Image,
 
 	bFilename := make([]byte, indexExtFilename)
 	bPath := make([]byte, indexExtPath)
-	formerExt := filename[indexExtFilename:len(filename)]
+	formerExt := filename[indexExtFilename:]
 	copy(bFilename, filename[0:indexExtFilename])
 	copy(bPath, picturePath[0:indexExtPath])
 

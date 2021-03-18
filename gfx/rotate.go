@@ -16,8 +16,8 @@ import (
 )
 
 var (
-	ErrorMissingNumberOfImageToGenerate = errors.New("Iteration is not set, cannot define the number of images to generate.")
-	ErrorSizeMismatch                   = errors.New("Error width and height mismatch cannot perform action.")
+	ErrorMissingNumberOfImageToGenerate = errors.New("iteration is not set, cannot define the number of images to generate")
+	ErrorSizeMismatch                   = errors.New("error width and height mismatch cannot perform action")
 )
 
 func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filePath string, resizeAlgo imaging.ResampleFilter, exportType *x.ExportType) error {
@@ -38,7 +38,7 @@ func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, f
 		}
 	}
 	background := image.NewRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: maxSize.Width, Y: maxSize.Height}})
-	draw.Draw(background, background.Bounds(), &image.Uniform{p[0]}, image.ZP, draw.Src)
+	draw.Draw(background, background.Bounds(), &image.Uniform{p[0]}, image.Point{0, 0}, draw.Src)
 
 	for i := 0.; i < 360.; i += angle {
 		rin := imaging.Rotate(in, float64(i), p[0])

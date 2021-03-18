@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	UNDEFINED_MODE = errors.New("Undefined mode")
+	ErrorUndefinedMode = errors.New("undefined mode")
 )
 
 func SpriteToPng(winPath string, output string, mode uint8, p color.Palette) error {
@@ -121,7 +121,7 @@ func ScrToImg(scrPath string, mode uint8, p color.Palette) (*image.NRGBA, error)
 	case 2:
 		m = constants.Mode2
 	default:
-		return nil, UNDEFINED_MODE
+		return nil, ErrorUndefinedMode
 	}
 	out := image.NewNRGBA(image.Rectangle{
 		Min: image.Point{X: 0, Y: 0},
@@ -215,7 +215,7 @@ func OverscanToImg(scrPath string, mode uint8, p color.Palette) (*image.NRGBA, e
 	case 2:
 		m = constants.OverscanMode2
 	default:
-		return nil, UNDEFINED_MODE
+		return nil, ErrorUndefinedMode
 	}
 	out := image.NewNRGBA(image.Rectangle{
 		Min: image.Point{X: 0, Y: 0},

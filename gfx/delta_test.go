@@ -30,21 +30,21 @@ func TestSaveDelta(t *testing.T) {
 func TestXandY(t *testing.T) {
 
 	for i := 0; i < 0x4000; i++ {
-		y := Y(uint16(i))
-		x := X(uint16(i))
-		addr := DeltaAddress(int(x), int(y))
+		y := Y(uint16(i), 0)
+		x := X(uint16(i), 0)
+		addr := DeltaAddress(int(x), int(y), 0)
 		if addr != i {
 			t.Fatalf("expected #%.4x and gets #%.4x for x:%d y:%d\n", i, addr, x, y)
 		}
 	}
 
 	add := 0xe010 //- 0xC000
-	x, y, err := CpcCoordinates(0xe010, 0xC000)
+	x, y, err := CpcCoordinates(0xe010, 0xC000, 0)
 	if err != nil {
 		t.Fatal()
 	}
-	res := DeltaAddress(x, y) + 0xC000
-	a := DeltaAddress(16, 3) + 0xC000
+	res := DeltaAddress(x, y, 0) + 0xC000
+	a := DeltaAddress(16, 3, 0) + 0xC000
 	fmt.Println(a)
 	if res != add {
 		t.Fatalf("does not match")

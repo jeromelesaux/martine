@@ -1,10 +1,11 @@
 package file
 
 import (
-	"github.com/jeromelesaux/martine/constants"
-	x "github.com/jeromelesaux/martine/export"
 	"os"
 	"testing"
+
+	"github.com/jeromelesaux/martine/constants"
+	x "github.com/jeromelesaux/martine/export"
 )
 
 func TestAsciiByColumn(t *testing.T) {
@@ -18,7 +19,7 @@ func TestAsciiByColumn(t *testing.T) {
 	e := x.NewExportType("input.bin", "./")
 	e.Size.Height = 5
 	e.Size.Width = 5
-	err := AsciiByColumn("test.bin", data, constants.CpcOldPalette, e)
+	err := AsciiByColumn("test.bin", data, constants.CpcOldPalette, true, 1, e)
 	if err != nil {
 		t.Fatalf("expected no error and gets :%v", err)
 	}

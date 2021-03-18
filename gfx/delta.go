@@ -19,9 +19,9 @@ import (
 )
 
 var (
-	ErrorCanNotProceed       = errors.New("Can not proceed treatment")
-	ErrorSizeDiffers         = errors.New("Sizes differs can not proceed treatment")
-	ErrorCoordinatesNotFound = errors.New("Coordinates not found.")
+	ErrorCanNotProceed       = errors.New("can not proceed treatment")
+	ErrorSizeDiffers         = errors.New("sizes differs can not proceed treatment")
+	ErrorCoordinatesNotFound = errors.New("coordinates not found")
 )
 
 type DeltaItem struct {
@@ -510,7 +510,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 			size.Width = int(footer.Width)
 			size.Height = int(footer.Height)
 		case ".SCR":
-			d1, err = file.RawScr(filespath[i])
+			_, err = file.RawScr(filespath[i])
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "File (%s) is not a simple screen.\n", filespath[i])
 			}
@@ -536,7 +536,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 			size.Width = int(footer.Width)
 			size.Height = int(footer.Height)
 		case ".SCR":
-			d2, err = file.RawScr(filespath[i+1])
+			_, err = file.RawScr(filespath[i+1])
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "File (%s) is not a simple screen.\n", filespath[i+1])
 			}
@@ -577,7 +577,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 		size.Width = int(footer.Width)
 		size.Height = int(footer.Height)
 	case ".SCR":
-		d1, err = file.RawScr(filespath[len(filespath)-1])
+		_, err = file.RawScr(filespath[len(filespath)-1])
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "File (%s) is not a simple screen.\n", filespath[len(filespath)-1])
 		}
@@ -602,7 +602,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 		size.Width = int(footer.Width)
 		size.Height = int(footer.Height)
 	case ".SCR":
-		d2, err = file.RawScr(filespath[0])
+		_, err = file.RawScr(filespath[0])
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "File (%s) is not a simple screen.\n", filespath[0])
 		}

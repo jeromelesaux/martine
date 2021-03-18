@@ -131,7 +131,7 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 					fmt.Fprintf(os.Stderr, "error while transform in sprite error : %v\n", err)
 				}
 				contour := image.Rectangle{Min: image.Point{X: startX, Y: startY}, Max: image.Point{X: startX + spriteSize.Width, Y: startY + spriteSize.Height}}
-				draw.Draw(board, contour, downgraded, image.ZP, draw.Src)
+				draw.Draw(board, contour, downgraded, image.Point{0, 0}, draw.Src)
 
 				nbLarge++
 				if nbLarge >= nbImgWidth {
@@ -182,7 +182,7 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 					fmt.Fprintf(os.Stderr, "error while transform in sprite error : %v\n", err)
 				}
 				contour := image.Rectangle{Min: image.Point{X: startX, Y: startY}, Max: image.Point{X: startX + spriteSize.Width, Y: startY + spriteSize.Height}}
-				draw.Draw(board, contour, downgraded, image.ZP, draw.Src)
+				draw.Draw(board, contour, downgraded, image.Point{0, 0}, draw.Src)
 
 				nbLarge++
 				if nbLarge >= nbImgWidth {

@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	ErrorSizeOverflow = errors.New("Size overflow the image size capacity.")
+	ErrorSizeOverflow = errors.New("size overflow the image size capacity")
 )
 
 type TilePosition struct {
@@ -218,7 +218,7 @@ func (a *AnalyzeBoard) SaveSchema(filePath string) error {
 			Min: image.Point{X: 0, Y: 0},
 			Max: image.Point{X: totWidth, Y: totHeight},
 		})
-	draw.Draw(im, im.Bounds(), &image.Uniform{color.White}, image.ZP, draw.Src)
+	draw.Draw(im, im.Bounds(), &image.Uniform{color.White}, image.Point{0, 0}, draw.Src)
 
 	x0 := 5
 	y0 := 5

@@ -68,7 +68,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, expo
 	} else {
 		bw = make([]byte, 0x4000)
 	}
-	firmwareColorUsed := make(map[int]int, 0)
+	firmwareColorUsed := make(map[int]int)
 	backgroundColor := p[0]
 	notSplitRaster := true
 	for y := 0; y < exportType.Size.Height; y++ {
@@ -178,10 +178,7 @@ func isSplitRaster(in *image.NRGBA, pos, y, length int) bool {
 		}
 		occ++
 	}
-	if occ < (length - 1) {
-		return false
-	}
-	return true
+	return occ >= (length - 1)
 }
 
 /*

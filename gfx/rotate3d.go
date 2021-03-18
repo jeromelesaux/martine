@@ -29,7 +29,7 @@ func Rotate3d(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8,
 
 	for i := 0.; i < 360.; i += angle {
 		background := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: size.Width, Y: size.Height}})
-		draw.Draw(background, background.Bounds(), &image.Uniform{p[0]}, image.ZP, draw.Src)
+		draw.Draw(background, background.Bounds(), &image.Uniform{p[0]}, image.Point{0, 0}, draw.Src)
 		rin := rotateImage(in, background, i, exportType)
 		_, rin = convert.DowngradingWithPalette(rin, p)
 

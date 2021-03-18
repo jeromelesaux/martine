@@ -2,13 +2,14 @@ package gfx
 
 import (
 	"fmt"
-	"github.com/esimov/colorquant"
-	"github.com/esimov/dithergo"
-	"github.com/jeromelesaux/martine/proc"
 	"image"
 	"image/color"
 	"image/draw"
 	"os"
+
+	"github.com/esimov/colorquant"
+	dither "github.com/esimov/dithergo"
+	"github.com/jeromelesaux/martine/proc"
 )
 
 var (
@@ -48,7 +49,7 @@ func Dithering(input *image.NRGBA, filter [][]float32, errorMultiplier float32) 
 	dither := dither.Dither{Settings: dither.Settings{Filter: filter}}
 	dst := dither.Color(input, errorMultiplier)
 	out := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{dst.Bounds().Max.X, dst.Bounds().Max.Y}})
-	draw.Draw(out, out.Bounds(), dst, image.ZP, draw.Src)
+	draw.Draw(out, out.Bounds(), dst, image.Point{0, 0}, draw.Src)
 	return out
 }
 
@@ -57,7 +58,7 @@ func QuantizeNoDither(input *image.NRGBA, numColors int, pal color.Palette) *ima
 	img := image.NewPaletted(image.Rect(0, 0, bounds.Dx(), bounds.Dy()), pal)
 	dst := colorquant.NoDither.Quantize(input, img, numColors, false, true)
 	out := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{dst.Bounds().Max.X, dst.Bounds().Max.Y}})
-	draw.Draw(out, out.Bounds(), dst, image.ZP, draw.Src)
+	draw.Draw(out, out.Bounds(), dst, image.Point{0, 0}, draw.Src)
 	return out
 }
 
@@ -67,7 +68,7 @@ func QuantizeWithDither(input *image.NRGBA, filter [][]float32, numColors int, p
 	img := image.NewPaletted(image.Rect(0, 0, bounds.Dx(), bounds.Dy()), pal)
 	dst := dither.Quantize(input, img, numColors, true, true)
 	out := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{dst.Bounds().Max.X, dst.Bounds().Max.Y}})
-	draw.Draw(out, out.Bounds(), dst, image.ZP, draw.Src)
+	draw.Draw(out, out.Bounds(), dst, image.Point{0, 0}, draw.Src)
 	return out
 }
 
