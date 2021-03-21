@@ -38,12 +38,18 @@ build:
 	GOOS=darwin go build ${LDFLAGS} -o format_sprite $(SOURCEDIR)/resources/formatter/sprites/format_sprite.go
 	GOOS=darwin go build ${LDFLAGS} -o format_data $(SOURCEDIR)/resources/formatter/data/format_data.go
 	zip martine-$(appversion)-macos.zip martine  prepare_delta format_sprite format_data ./resources/*
-	@echo "Compilation for raspberry pi Raspbian"
+	@echo "Compilation for raspberry pi Raspbian 32 bits"
 	GOOS=linux ARCH=arm GOARM=5 go build ${LDFLAGS} -o martine $(SOURCEDIR)/main.go $(SOURCEDIR)/process.go
 	GOOS=linux ARCH=arm GOARM=5 go build ${LDFLAGS} -o prepare_delta $(SOURCEDIR)/resources/formatter/delta/prepare_delta.go
 	GOOS=linux ARCH=arm GOARM=5 go build ${LDFLAGS} -o format_sprite $(SOURCEDIR)/resources/formatter/sprites/format_sprite.go
 	GOOS=linux ARCH=arm GOARM=5 go build ${LDFLAGS} -o format_data $(SOURCEDIR)/resources/formatter/data/format_data.go
 	zip martine-$(appversion)-arm.zip martine  prepare_delta format_sprite format_data ./resources/*
+	@echo "Compilation for raspberry pi Raspbian 64 bits"
+	GOOS=linux ARCH=arm64 GOARM=5 go build ${LDFLAGS} -o martine $(SOURCEDIR)/main.go $(SOURCEDIR)/process.go
+	GOOS=linux ARCH=arm64 GOARM=5 go build ${LDFLAGS} -o prepare_delta $(SOURCEDIR)/resources/formatter/delta/prepare_delta.go
+	GOOS=linux ARCH=arm64 GOARM=5 go build ${LDFLAGS} -o format_sprite $(SOURCEDIR)/resources/formatter/sprites/format_sprite.go
+	GOOS=linux ARCH=arm64 GOARM=5 go build ${LDFLAGS} -o format_data $(SOURCEDIR)/resources/formatter/data/format_data.go
+	zip martine-$(appversion)-arm-64bits.zip martine  prepare_delta format_sprite format_data ./resources/*
 	@echo "Compilation for windows 32bits"
 	GOOS=windows GOARCH=386 go build ${LDFLAGS} -o martine.exe $(SOURCEDIR)/main.go $(SOURCEDIR)/process.go
 	GOOS=windows GOARCH=386 go build ${LDFLAGS} -o prepare_delta.exe $(SOURCEDIR)/resources/formatter/delta/prepare_delta.go
