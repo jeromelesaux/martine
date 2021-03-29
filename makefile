@@ -27,44 +27,24 @@ build:
 	rm -fr ${BINARY}
 	mkdir ${BINARY}
 	@echo "Compilation for linux"
-	mkdir ${BINARY}/martine-linux-64bits
-	GOOS=linux go build ${LDFLAGS} -o ${BINARY}/martine-linux-64bits/martine $(SOURCEDIR)/main.go $(SOURCEDIR)/process.go
-	GOOS=linux go build ${LDFLAGS} -o ${BINARY}/martine-linux-64bits/prepare_delta $(SOURCEDIR)/resources/formatter/delta/prepare_delta.go
-	GOOS=linux go build ${LDFLAGS} -o ${BINARY}/martine-linux-64bits/format_sprite $(SOURCEDIR)/resources/formatter/sprites/format_sprite.go
-	GOOS=linux go build ${LDFLAGS} -o ${BINARY}/martine-linux-64bits/format_data $(SOURCEDIR)/resources/formatter/data/format_data.go
-	zip ${BINARY}/martine-$(appversion)-linux.zip ${BINARY}/martine-linux-64bits/* ./resources/*
+	(make compile ARCH=amd64 OS=linux)
 	@echo "Compilation for windows"
-	mkdir ${BINARY}/martine-windows-64bits
-	GOOS=windows go build ${LDFLAGS} -o ${BINARY}/martine-windows-64bits/martine.exe $(SOURCEDIR)/main.go $(SOURCEDIR)/process.go
-	GOOS=windows go build ${LDFLAGS} -o ${BINARY}/martine-windows-64bits/prepare_delta.exe $(SOURCEDIR)/resources/formatter/delta/prepare_delta.go
-	GOOS=windows go build ${LDFLAGS} -o ${BINARY}/martine-windows-64bits/format_sprite.exe $(SOURCEDIR)/resources/formatter/sprites/format_sprite.go
-	GOOS=windows go build ${LDFLAGS} -o ${BINARY}/martine-windows-64bits/format_data.exe $(SOURCEDIR)/resources/formatter/data/format_data.go
-	zip ${BINARY}/martine-$(appversion)-windows.zip  ${BINARY}/martine-windows-64bits/* ./resources/*
+	(make compile ARCH=amd64 OS=windows)
 	@echo "Compilation for macos"
-	mkdir ${BINARY}/martine-darwin-64bits 
-	GOOS=darwin go build ${LDFLAGS} -o ${BINARY}/martine-darwin-64bits/martine $(SOURCEDIR)/main.go $(SOURCEDIR)/process.go
-	GOOS=darwin go build ${LDFLAGS} -o ${BINARY}/martine-darwin-64bits/prepare_delta $(SOURCEDIR)/resources/formatter/delta/prepare_delta.go
-	GOOS=darwin go build ${LDFLAGS} -o ${BINARY}/martine-darwin-64bits/format_sprite $(SOURCEDIR)/resources/formatter/sprites/format_sprite.go
-	GOOS=darwin go build ${LDFLAGS} -o ${BINARY}/martine-darwin-64bits/format_data $(SOURCEDIR)/resources/formatter/data/format_data.go
-	zip ${BINARY}/martine-$(appversion)-macos.zip ${BINARY}/martine-darwin-64bits/* ./resources/*
+	(make compile ARCH=amd64 OS=darwin )
 	@echo "Compilation for raspberry pi Raspbian 64 bits"
-	mkdir ${BINARY}/martine-linux-arm64bits
-	GOOS=linux GOARCH=arm64 go build ${LDFLAGS} -o ${BINARY}/martine-linux-arm64bits/martine $(SOURCEDIR)/main.go $(SOURCEDIR)/process.go
-	GOOS=linux GOARCH=arm64 go build ${LDFLAGS} -o ${BINARY}/martine-linux-arm64bits/prepare_delta $(SOURCEDIR)/resources/formatter/delta/prepare_delta.go
-	GOOS=linux GOARCH=arm64 go build ${LDFLAGS} -o ${BINARY}/martine-linux-arm64bits/format_sprite $(SOURCEDIR)/resources/formatter/sprites/format_sprite.go
-	GOOS=linux GOARCH=arm64 go build ${LDFLAGS} -o ${BINARY}/martine-linux-arm64bits/format_data $(SOURCEDIR)/resources/formatter/data/format_data.go
-	zip ${BINARY}/martine-$(appversion)-arm-64bits.zip ${BINARY}/martine-linux-arm64bits/* ./resources/*
+	(make compile ARCH=arm64 OS=linux)
 	@echo "Compilation for windows 32bits"
-	mkdir ${BINARY}/martine-windows-32bits
-	GOOS=windows GOARCH=386 go build ${LDFLAGS} -o ${BINARY}/martine-windows-32bits/martine.exe $(SOURCEDIR)/main.go $(SOURCEDIR)/process.go
-	GOOS=windows GOARCH=386 go build ${LDFLAGS} -o ${BINARY}/martine-windows-32bits/prepare_delta.exe $(SOURCEDIR)/resources/formatter/delta/prepare_delta.go
-	GOOS=windows GOARCH=386 go build ${LDFLAGS} -o ${BINARY}/martine-windows-32bits/format_sprite.exe $(SOURCEDIR)/resources/formatter/sprites/format_sprite.go
-	GOOS=windows GOARCH=386 go build ${LDFLAGS} -o ${BINARY}/martine-windows-32bits/format_data.exe $(SOURCEDIR)/resources/formatter/data/format_data.go
-	zip ${BINARY}/martine-$(appversion)-windows-32bits.zip ${BINARY}/martine-windows-32bits/* ./resources/*
+	(make compile ARCH=386 OS=windows )
 	@echo "Compilation for raspberry pi Raspbian 32 bits"
-	mkdir ${BINARY}/martine-linux-arm32bits
-	GOOS=linux GOARCH=arm GOARM=5 go build ${LDFLAGS} -o ${BINARY}/martine-linux-arm32bits/martine $(SOURCEDIR)/main.go $(SOURCEDIR)/process.go
-	GOOS=linux GOARCH=arm GOARM=5 go build ${LDFLAGS} -o ${BINARY}/martine-linux-arm32bits/prepare_delta $(SOURCEDIR)/resources/formatter/delta/prepare_delta.go
-	GOOS=linux GOARCH=arm GOARM=5 go build ${LDFLAGS} -o ${BINARY}/martine-linux-arm32bits/format_sprite $(SOURCEDIR)/resources/formatter/sprites/format_sprite.go
-	GOOS=linux GOARCH=arm GOARM=5 go build ${LDFLAGS} -o ${BINARY}/martine-linux-arm32bits/format_data $(SOURCEDIR)/resources/formatter/data/format_data.go
-	zip ${BINARY}/martine-$(appversion)-arm.zip ${BINARY}/martine-linux-arm32bits/* ./resources/*
+	(make compile ARCH=arm OS=linux GOARM=5)
+
+
+compile:
+	@echo "Compilation for ${ARCH} ${OS} bits"
+	mkdir ${BINARY}/martine-${OS}-${ARCH}
+	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/martine $(SOURCEDIR)/main.go $(SOURCEDIR)/process.go
+	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/prepare_delta $(SOURCEDIR)/resources/formatter/delta/prepare_delta.go
+	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/format_sprite $(SOURCEDIR)/resources/formatter/sprites/format_sprite.go
+	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/format_data $(SOURCEDIR)/resources/formatter/data/format_data.go
+	zip ${BINARY}/martine-$(appversion)-${ARCH}.zip ${BINARY}/martine-${OS}-${ARCH}* ./resources/*
