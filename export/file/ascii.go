@@ -12,6 +12,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/rle"
+	zx0 "github.com/jeromelesaux/zx0/encode"
 )
 
 // ByteToken is the token by default
@@ -33,7 +34,11 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, ex
 		case 2:
 			fmt.Fprintf(os.Stdout, "Using RLE 16 bits compression\n")
 			data = rle.Encode16(data)
+		case 5:
+			fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
+			data = zx0.Encode(data)
 		}
+
 	}
 	cpcFilename := string(exportType.AmsdosFilename()) + ".TXT"
 	osFilepath := exportType.AmsdosFullPath(filePath, ".TXT")

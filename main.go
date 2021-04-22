@@ -64,7 +64,7 @@ var (
 	tileMode            = flag.Bool("tile", false, "Tile mode to create multiples sprites from a same image.")
 	tileIterationX      = flag.Int("iterx", 1, "Number of tiles on a row in the input image.")
 	tileIterationY      = flag.Int("itery", 1, "Number of tiles on a column in the input image.")
-	compress            = flag.Int("z", -1, "Compression algorithm : \n\t1: rle (default)\n\t2: rle 16bits\n\t3: Lz4 Classic\n\t4: Lz4 Raw\n")
+	compress            = flag.Int("z", -1, "Compression algorithm : \n\t1: rle (default)\n\t2: rle 16bits\n\t3: Lz4 Classic\n\t4: Lz4 Raw\n\t5: zx0 crunch\n")
 	kitPath             = flag.String("kit", "", "Path of the palette Cpc plus Kit file. (Apply the input kit palette on the image)")
 	inkPath             = flag.String("ink", "", "Path of the palette Cpc ink file. (Apply the input ink palette on the image)")
 	rotateMode          = flag.Bool("rotate", false, "Allow rotation on the input image, the input image must be a square (width equals height)")
@@ -108,7 +108,7 @@ var (
 	impCatcher          = flag.Bool("imp", false, "Will generate sprites as IMP-Catcher format (Impdraw V2).")
 	inkSwap             = flag.String("inkswap", "", "Swap ink:\n\tfor instance mode 4 (4 inks) : 0=3,1=0,2=1,3=2\n\twill swap in output image index 0 by 3 and 1 by 0 and so on.")
 	lineWidth           = flag.String("linewidth", "#50", "Line width in hexadecimal to compute the screen address in delta mode.")
-	appVersion          = "0.28"
+	appVersion          = "0.29"
 	version             = flag.Bool("version", false, "print martine's version")
 )
 

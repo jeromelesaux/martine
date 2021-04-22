@@ -16,6 +16,7 @@ import (
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/lz4"
 	"github.com/jeromelesaux/martine/rle"
+	zx0 "github.com/jeromelesaux/zx0/encode"
 )
 
 var BadFileFormat = errors.New("Bad file format.")
@@ -8740,6 +8741,9 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, export
 				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
 			}
 			data = dst[4:]
+		case 5:
+			fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
+			data = zx0.Encode(data)
 		}
 	}
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0xc000, Exec: exec,
@@ -8991,6 +8995,9 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, dont
 				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
 			}
 			data = dst[4:]
+		case 5:
+			fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
+			data = zx0.Encode(data)
 		}
 	}
 	filesize := binary.Size(data) + binary.Size(win)
