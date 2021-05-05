@@ -71,7 +71,7 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, ex
 		if i+7 < len(data) {
 			out += fmt.Sprintf(", #%0.2x", data[i+7])
 		}
-		out += fmt.Sprintf("%s", eol)
+		out += eol
 	}
 	out += "; Palette " + cpcFilename + eol + ".palette:" + eol + ByteToken + " "
 

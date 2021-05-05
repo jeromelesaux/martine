@@ -2,10 +2,11 @@ package file
 
 import (
 	"fmt"
-	"github.com/jeromelesaux/dsk"
-	x "github.com/jeromelesaux/martine/export"
 	"os"
 	"path/filepath"
+
+	"github.com/jeromelesaux/dsk"
+	x "github.com/jeromelesaux/martine/export"
 )
 
 func ImportInDsk(filePath string, exportType *x.ExportType) error {
@@ -39,9 +40,9 @@ func ImportInDsk(filePath string, exportType *x.ExportType) error {
 
 	var floppy *dsk.DSK
 	if exportType.ExtendedDsk {
-		floppy = dsk.FormatDsk(10, 80, 1, 1)
+		floppy = dsk.FormatDsk(10, 80, 1, 1, dsk.DataFormat)
 	} else {
-		floppy = dsk.FormatDsk(9, 40, 1, 0)
+		floppy = dsk.FormatDsk(9, 40, 1, 0, dsk.DataFormat)
 	}
 
 	dsk.WriteDsk(dskFullpath, floppy)

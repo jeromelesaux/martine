@@ -24,9 +24,8 @@ func Imp(sprites []byte, width, height uint, filename string, export *x.ExportTy
 		Width:    width,
 	}
 	output := make([]byte, 0)
-	for _, v := range sprites {
-		output = append(output, v)
-	}
+	output = append(output, sprites...)
+
 	buf := new(bytes.Buffer)
 	binary.Write(buf, binary.LittleEndian, impHeader)
 	output = append(output, buf.Bytes()...)

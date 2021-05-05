@@ -19,7 +19,7 @@ import (
 	zx0 "github.com/jeromelesaux/zx0/encode"
 )
 
-var BadFileFormat = errors.New("Bad file format.")
+var ErrorBadFileFormat = errors.New("bad file format")
 
 var OverscanBoot = [...]byte{0x0e, 0x00, 0x0a, 0x00, 0x01, 0xc0, 0x20, 0x69, 0x4d, 0x50, 0x20, 0x76, 0x32, 0x00, 0x0d,
 	0x00, 0x14, 0x00, 0xad, 0x20, 0x0e, 0x01, 0x83, 0x1c, 0xad, 0x01, 0x00, 0x00, 0x00, 0x01, 0x30,
@@ -8627,11 +8627,9 @@ func RawScr(filePath string) ([]byte, error) {
 		return nil, err
 	}
 
-	var sz int
-	sz = min(0x4000, len(bf))
+	var sz int = min(0x4000, len(bf))
 
-	var rawSrc []byte
-	rawSrc = make([]byte, sz)
+	var rawSrc []byte = make([]byte, sz)
 	for i := 0; i < sz; i++ {
 		rawSrc[i] = bf[i]
 	}
@@ -8665,7 +8663,7 @@ func RawOverscan(filePath string) ([]byte, error) {
 	copy(data, bf[0x200-0x170:])
 	fmt.Fprintf(os.Stdout, "Raw overscan length #%X\n", len(data))
 	if len(data) <= 0x4000 {
-		return nil, BadFileFormat
+		return nil, ErrorBadFileFormat
 	}
 	return data, nil
 }
@@ -8799,7 +8797,7 @@ func (o *OcpPalette) ToString() string {
 		hcolor, err := constants.ColorFromHardware(v[0])
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error color :%v\n", err)
-			out += fmt.Sprintf("00, ")
+			out += "00, "
 		} else {
 			fcolor, _ := constants.FirmwareNumber(hcolor)
 			out += fmt.Sprintf("%.2d, ", fcolor)

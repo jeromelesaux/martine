@@ -42,7 +42,7 @@ func PalToPng(filePath string, palette color.Palette) error {
 			Min: image.Point{X: 5 + (i*colorWidth + i*5), Y: 5},
 			Max: image.Point{X: colorWidth + 5 + (i*colorWidth + i*5), Y: colorWidth + 5},
 		}
-		draw.Draw(im, contour, &image.Uniform{palette[i]}, image.ZP, draw.Src)
+		draw.Draw(im, contour, &image.Uniform{palette[i]}, image.Point{0, 0}, draw.Src)
 	}
 
 	return Png(filePath, im)

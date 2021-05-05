@@ -1475,8 +1475,7 @@ func BasicLoader(filePath string, p color.Palette, exportType *x.ExportType) err
 
 	}
 
-	var loader []byte
-	loader = basicLoaderBasic
+	var loader []byte = basicLoaderBasic
 	copy(loader[startPaletteValues:], out[0:])
 	basicFile := exportType.AmsdosFullPath(filePath, "")
 	filename := filepath.Base(basicFile) // exportType.GetAmsdosFilename(filePath, "")
@@ -1530,8 +1529,7 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 		index--
 	}
 
-	var flashLoader []byte
-	flashLoader = flashBinaryLoader
+	var flashLoader []byte = flashBinaryLoader
 	copy(flashLoader[flashBinaryPalette1Offset:], pal1)
 	copy(flashLoader[flashBinaryPalette2Offset:], pal2)
 
@@ -1574,8 +1572,7 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 	exportType.AddFile(flashBinPath)
 
 	// modification du flash loader en basic
-	var basicLoader []byte
-	basicLoader = flashBasicLoader
+	var basicLoader []byte = flashBasicLoader
 	copy(basicLoader[flashScreen1Offset:], exportType.GetAmsdosFilename(screenFilename2, ""))
 	copy(basicLoader[flashScreen2Offset:], exportType.GetAmsdosFilename(screenFilename1, ""))
 	basicHeader := cpc.CpcHead{Type: 0, User: 0, Address: 0x170, Exec: 0x0,
