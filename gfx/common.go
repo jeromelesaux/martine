@@ -162,3 +162,87 @@ func ApplyOneImage(in image.Image,
 	}
 	return err
 }
+
+func InternalApplyOneImage(in image.Image,
+	exportType *export.ExportType,
+	mode int,
+	screenMode uint8) ([]byte, color.Palette, int, error) {
+
+	var palette color.Palette
+	var newPalette color.Palette
+	var downgraded *image.NRGBA
+	var err error
+
+	if exportType.PalettePath != "" {
+		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", exportType.PalettePath)
+		palette, _, err = file.OpenPal(exportType.PalettePath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", exportType.PalettePath)
+		} else {
+			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
+		}
+	}
+	if exportType.InkPath != "" {
+		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", exportType.InkPath)
+		palette, _, err = file.OpenInk(exportType.InkPath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", exportType.InkPath)
+		} else {
+			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
+		}
+	}
+	if exportType.KitPath != "" {
+		fmt.Fprintf(os.Stdout, "Input plus palette to apply : (%s)\n", exportType.KitPath)
+		palette, _, err = file.OpenKit(exportType.KitPath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", exportType.KitPath)
+		} else {
+			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
+		}
+	}
+
+	out := convert.Resize(in, exportType.Size, exportType.ResizingAlgo)
+
+	if exportType.Reducer > -1 {
+		out = convert.Reducer(out, exportType.Reducer)
+	}
+
+	if newPalette == nil { // in case of dithering without input palette
+		if exportType.CpcPlus {
+			newPalette = constants.CpcPlusPalette
+		} else {
+			newPalette = constants.CpcOldPalette
+		}
+	}
+	out, _ = DoDithering(out, newPalette, exportType)
+
+	if len(palette) > 0 {
+		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
+	} else {
+		newPalette, downgraded, err = convert.DowngradingPalette(out, exportType.Size, exportType.CpcPlus)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image")
+		}
+	}
+
+	newPalette = constants.SortColorsByDistance(newPalette)
+
+	var data []byte
+	var lineSize int
+	if !exportType.CustomDimension && !exportType.SpriteHard {
+		data = InternalTransform(downgraded, newPalette, exportType.Size, exportType)
+	} else {
+		if exportType.ZigZag {
+			// prepare zigzag transformation
+			downgraded = Zigzag(downgraded)
+		}
+		if !exportType.SpriteHard {
+			fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
+			data, _, lineSize, err = InternalSpriteTransform(downgraded, newPalette, exportType.Size, screenMode, exportType)
+		} else {
+			fmt.Fprintf(os.Stdout, "Transform image in sprite hard.\n")
+			data, _ = InternalSpriteHardTransform(downgraded, newPalette, exportType.Size, screenMode, exportType)
+		}
+	}
+	return data, newPalette, lineSize, err
+}

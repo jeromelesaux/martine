@@ -39,11 +39,29 @@ func Transform(in *image.NRGBA, p color.Palette, size constants.Size, filepath s
 	}
 }
 
-func SpriteHardTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, exportType *x.ExportType) error {
-	var data []byte
+func InternalTransform(in *image.NRGBA, p color.Palette, size constants.Size, exportType *x.ExportType) []byte {
+	switch size {
+	case constants.Mode0:
+		return ToMode0(in, p, exportType)
+	case constants.Mode1:
+		return ToMode1(in, p, exportType)
+	case constants.Mode2:
+		return ToMode2(in, p, exportType)
+	case constants.OverscanMode0:
+		return ToMode0(in, p, exportType)
+	case constants.OverscanMode1:
+		return ToMode1(in, p, exportType)
+	case constants.OverscanMode2:
+		return ToMode2(in, p, exportType)
+	default:
+		return []byte{}
+	}
+}
+
+func InternalSpriteHardTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, exportType *x.ExportType) (data []byte, firmwareColorUsed map[int]int) {
 	size.Height = in.Bounds().Max.Y
 	size.Width = in.Bounds().Max.X
-	firmwareColorUsed := make(map[int]int)
+	firmwareColorUsed = make(map[int]int)
 	offset := 0
 	data = make([]byte, 256)
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
@@ -59,6 +77,12 @@ func SpriteHardTransform(in *image.NRGBA, p color.Palette, size constants.Size, 
 			offset++
 		}
 	}
+	return data, firmwareColorUsed
+}
+
+func SpriteHardTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, exportType *x.ExportType) error {
+
+	data, firmwareColorUsed := InternalSpriteHardTransform(in, p, size, mode, exportType)
 	fmt.Println(firmwareColorUsed)
 	if err := file.Win(filename, data, mode, 16, size.Height, false, exportType); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
@@ -100,19 +124,16 @@ func SpriteHardTransform(in *image.NRGBA, p color.Palette, size constants.Size, 
 	return file.AsciiByColumn(filename, data, p, false, mode, exportType)
 }
 
-func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, exportType *x.ExportType) error {
-	var data []byte
-	firmwareColorUsed := make(map[int]int)
+func InternalSpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, exportType *x.ExportType) (data []byte, firmwareColorUsed map[int]int, lineSize int, err error) {
+
+	firmwareColorUsed = make(map[int]int)
 	size.Height = in.Bounds().Max.Y
 	size.Width = in.Bounds().Max.X
-	var lineSize int
 	lineToAdd := 1
 
 	if exportType.OneLine {
 		lineToAdd = 2
 	}
-
-	fmt.Fprintf(os.Stderr, "%v\n", size)
 	if mode == 0 {
 		lineSize = int(math.Ceil(float64(size.Width) / 2.))
 		data = make([]byte, size.Height*lineSize)
@@ -123,7 +144,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 				c1 := in.At(x, y)
 				pp1, err := PalettePosition(c1, p)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+					//fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 					pp1 = 0
 				}
 				pp1 = exportType.SwapInk(pp1)
@@ -132,7 +153,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 				c2 := in.At(x+1, y)
 				pp2, err := PalettePosition(c2, p)
 				if err != nil {
-					fmt.Fprintf(os.Stdout, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+					//fmt.Fprintf(os.Stdout, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 					pp2 = 0
 				}
 				pp2 = exportType.SwapInk(pp2)
@@ -189,7 +210,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 					c1 := in.At(x, y)
 					pp1, err := PalettePosition(c1, p)
 					if err != nil {
-						fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+						//	fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 						pp1 = 0
 					}
 					pp1 = exportType.SwapInk(pp1)
@@ -198,7 +219,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 					c2 := in.At(x+1, y)
 					pp2, err := PalettePosition(c2, p)
 					if err != nil {
-						fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+						//fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 						pp2 = 0
 					}
 					pp2 = exportType.SwapInk(pp2)
@@ -206,7 +227,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 					c3 := in.At(x+2, y)
 					pp3, err := PalettePosition(c3, p)
 					if err != nil {
-						fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
+						//	fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 						pp3 = 0
 					}
 					pp3 = exportType.SwapInk(pp3)
@@ -214,7 +235,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 					c4 := in.At(x+3, y)
 					pp4, err := PalettePosition(c4, p)
 					if err != nil {
-						fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
+						//	fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 						pp4 = 0
 					}
 					pp4 = exportType.SwapInk(pp4)
@@ -277,7 +298,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 						c1 := in.At(x, y)
 						pp1, err := PalettePosition(c1, p)
 						if err != nil {
-							fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+							//		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 							pp1 = 0
 						}
 						pp1 = exportType.SwapInk(pp1)
@@ -286,7 +307,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 						c2 := in.At(x+1, y)
 						pp2, err := PalettePosition(c2, p)
 						if err != nil {
-							fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+							//fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 							pp2 = 0
 						}
 						pp2 = exportType.SwapInk(pp2)
@@ -294,7 +315,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 						c3 := in.At(x+2, y)
 						pp3, err := PalettePosition(c3, p)
 						if err != nil {
-							fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
+							//		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 							pp3 = 0
 						}
 						pp3 = exportType.SwapInk(pp3)
@@ -302,7 +323,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 						c4 := in.At(x+3, y)
 						pp4, err := PalettePosition(c4, p)
 						if err != nil {
-							fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
+							//		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 							pp4 = 0
 						}
 						pp4 = exportType.SwapInk(pp4)
@@ -310,7 +331,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 						c5 := in.At(x+4, y)
 						pp5, err := PalettePosition(c5, p)
 						if err != nil {
-							fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
+							//	fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
 							pp5 = 0
 						}
 						pp5 = exportType.SwapInk(pp5)
@@ -319,7 +340,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 						c6 := in.At(x+5, y)
 						pp6, err := PalettePosition(c6, p)
 						if err != nil {
-							fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
+							//	fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
 							pp6 = 0
 						}
 						pp6 = exportType.SwapInk(pp6)
@@ -327,7 +348,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 						c7 := in.At(x+6, y)
 						pp7, err := PalettePosition(c7, p)
 						if err != nil {
-							fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
+							//fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
 							pp7 = 0
 						}
 						pp7 = exportType.SwapInk(pp7)
@@ -335,7 +356,7 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 						c8 := in.At(x+7, y)
 						pp8, err := PalettePosition(c8, p)
 						if err != nil {
-							fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, x+7, y)
+							//		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, x+7, y)
 							pp8 = 0
 						}
 						pp8 = exportType.SwapInk(pp8)
@@ -382,9 +403,18 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 					}
 				}
 			} else {
-				return ErrorModeNotFound
+				return data, firmwareColorUsed, lineSize, ErrorModeNotFound
 			}
 		}
+	}
+	return data, firmwareColorUsed, lineSize, nil
+}
+
+func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, exportType *x.ExportType) error {
+
+	data, firmwareColorUsed, lineSize, err := InternalSpriteTransform(in, p, size, mode, exportType)
+	if err != nil {
+		return err
 	}
 	fmt.Println(firmwareColorUsed)
 	if err := file.Win(filename, data, mode, lineSize, size.Height, dontImportDsk, exportType); err != nil {
@@ -442,20 +472,15 @@ func PalettePosition(c color.Color, p color.Palette) (int, error) {
 
 func pixelMode0(pp1, pp2 int) byte {
 	var pixel byte
-	//fmt.Fprintf(os.Stderr,"1:(%.8b)2:(%.8b)4:(%.8b)8:(%.8b)\n",1,2,4,8)
-	//fmt.Fprintf(os.Stderr,"uint8(pp1)&1:%.8b\n",uint8(pp1)&1)
 	if uint8(pp1)&1 == 1 {
 		pixel += 128
 	}
-	//fmt.Fprintf(os.Stderr,"uint8(pp1)&2:%.8b\n",uint8(pp1)&2)
 	if uint8(pp1)&2 == 2 {
 		pixel += 8
 	}
-	//fmt.Fprintf(os.Stderr,"uint8(pp1)&4:%.8b\n",uint8(pp1)&4)
 	if uint8(pp1)&4 == 4 {
 		pixel += 32
 	}
-	//fmt.Fprintf(os.Stderr,"uint8(pp1)&8:%.8b\n",uint8(pp1)&8)
 	if uint8(pp1)&8 == 8 {
 		pixel += 2
 	}
@@ -476,20 +501,15 @@ func pixelMode0(pp1, pp2 int) byte {
 
 func pixelMode1(pp1, pp2, pp3, pp4 int) byte {
 	var pixel byte
-	//fmt.Fprintf(os.Stderr,"1:(%.8b)2:(%.8b)4:(%.8b)8:(%.8b)\n",1,2,4,8)
-	//fmt.Fprintf(os.Stderr,"uint8(pp1)&1:%.8b\n",uint8(pp1)&1)
 	if uint8(pp1)&1 == 1 {
 		pixel += 128
 	}
-	//fmt.Fprintf(os.Stderr,"uint8(pp1)&2:%.8b\n",uint8(pp1)&2)
 	if uint8(pp1)&2 == 2 {
 		pixel += 8
 	}
-	//fmt.Fprintf(os.Stderr,"uint8(pp1)&4:%.8b\n",uint8(pp1)&4)
 	if uint8(pp2)&1 == 1 {
 		pixel += 64
 	}
-	//fmt.Fprintf(os.Stderr,"uint8(pp1)&8:%.8b\n",uint8(pp1)&8)
 	if uint8(pp2)&2 == 2 {
 		pixel += 4
 	}
@@ -510,20 +530,15 @@ func pixelMode1(pp1, pp2, pp3, pp4 int) byte {
 
 func pixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) byte {
 	var pixel byte
-	//fmt.Fprintf(os.Stderr,"1:(%.8b)2:(%.8b)4:(%.8b)8:(%.8b)\n",1,2,4,8)
-	//fmt.Fprintf(os.Stderr,"uint8(pp1)&1:%.8b\n",uint8(pp1)&1)
 	if uint8(pp1)&1 == 1 {
 		pixel += 128
 	}
-	//fmt.Fprintf(os.Stderr,"uint8(pp1)&2:%.8b\n",uint8(pp1)&2)
 	if uint8(pp2)&1 == 1 {
 		pixel += 64
 	}
-	//fmt.Fprintf(os.Stderr,"uint8(pp1)&4:%.8b\n",uint8(pp1)&4)
 	if uint8(pp3)&1 == 1 {
 		pixel += 32
 	}
-	//fmt.Fprintf(os.Stderr,"uint8(pp1)&8:%.8b\n",uint8(pp1)&8)
 	if uint8(pp4)&1 == 1 {
 		pixel += 16
 	}

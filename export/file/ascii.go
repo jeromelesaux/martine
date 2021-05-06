@@ -25,7 +25,6 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, ex
 	}
 
 	var out string
-	var i int
 	if exportType.Compression != -1 {
 		switch exportType.Compression {
 		case 1:
@@ -45,81 +44,15 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, ex
 	fmt.Fprintf(os.Stdout, "Writing ascii file (%s) data length (%d)\n", osFilepath, len(data))
 	sizeInfos := fmt.Sprintf("; width %d height %d %s", exportType.Size.Width, exportType.Size.Height, eol)
 	out += "; Screen " + cpcFilename + eol + ".screen:" + eol + sizeInfos
-	for i = 0; i < len(data); i += 8 {
-		out += fmt.Sprintf("%s ", ByteToken)
-		if i < len(data) {
-			out += fmt.Sprintf("#%0.2x", data[i])
-		}
-		if i+1 < len(data) {
-			out += fmt.Sprintf(", #%0.2x", data[i+1])
-		}
-		if i+2 < len(data) {
-			out += fmt.Sprintf(", #%0.2x", data[i+2])
-		}
-		if i+3 < len(data) {
-			out += fmt.Sprintf(", #%0.2x", data[i+3])
-		}
-		if i+4 < len(data) {
-			out += fmt.Sprintf(", #%0.2x", data[i+4])
-		}
-		if i+5 < len(data) {
-			out += fmt.Sprintf(", #%0.2x", data[i+5])
-		}
-		if i+6 < len(data) {
-			out += fmt.Sprintf(", #%0.2x", data[i+6])
-		}
-		if i+7 < len(data) {
-			out += fmt.Sprintf(", #%0.2x", data[i+7])
-		}
-		out += eol
-	}
+	out += FormatAssemblyDatabyte(data, eol)
 	out += "; Palette " + cpcFilename + eol + ".palette:" + eol + ByteToken + " "
 
 	if exportType.CpcPlus {
-		for i := 0; i < len(p); i++ {
-			cp := constants.NewCpcPlusColor(p[i])
-			v := cp.Value()
-			out += fmt.Sprintf("#%.2x, #%.2x", byte(v), byte(v>>8))
-			if (i+1)%8 == 0 && i+1 < len(p) {
-				out += eol + ByteToken + " "
-			} else {
-				if i+1 < len(p) {
-					out += ", "
-				}
-			}
-		}
+		out += FormatAssemblyCPCPlusPalette(p, eol)
 	} else {
-		for i := 0; i < len(p); i++ {
-			v, err := constants.HardwareValues(p[i])
-			if err == nil {
-				out += fmt.Sprintf("#%0.2x", v[0])
-				if (i+1)%8 == 0 && i+1 < len(p) {
-					out += eol + ByteToken + " "
-				} else {
-					if i+1 < len(p) {
-						out += ", "
-					}
-				}
-			} else {
-				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
-			}
-		}
+		out += FormatAssemblyCPCPalette(p, eol)
 		out += eol + "; Basic Palette " + cpcFilename + eol + ".basic_palette:" + eol + ByteToken + " "
-		for i := 0; i < len(p); i++ {
-			v, err := constants.FirmwareNumber(p[i])
-			if err == nil {
-				out += fmt.Sprintf("%0.2d", v)
-				if (i+1)%8 == 0 && i+1 < len(p) {
-					out += eol + ByteToken + " "
-				} else {
-					if i+1 < len(p) {
-						out += ", "
-					}
-				}
-			} else {
-				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
-			}
-		}
+		out += FormatAssemblyBasicPalette(p, eol)
 		out += eol
 	}
 	//fmt.Fprintf(os.Stdout,"%s",out)
@@ -238,50 +171,11 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 	out += "; Palette " + cpcFilename + eol + ".palette:" + eol + ByteToken + " "
 
 	if exportType.CpcPlus {
-		for i := 0; i < len(p); i++ {
-			cp := constants.NewCpcPlusColor(p[i])
-			v := cp.Value()
-			out += fmt.Sprintf("#%.2x, #%.2x", byte(v), byte(v>>8))
-			if (i+1)%8 == 0 && i+1 < len(p) {
-				out += eol + ByteToken + " "
-			} else {
-				if i+1 < len(p) {
-					out += ", "
-				}
-			}
-		}
+		out += FormatAssemblyCPCPlusPalette(p, eol)
 	} else {
-		for i := 0; i < len(p); i++ {
-			v, err := constants.HardwareValues(p[i])
-			if err == nil {
-				out += fmt.Sprintf("#%0.2x", v[0])
-				if (i+1)%8 == 0 && i+1 < len(p) {
-					out += eol + ByteToken + " "
-				} else {
-					if i+1 < len(p) {
-						out += ", "
-					}
-				}
-			} else {
-				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
-			}
-		}
+		out += FormatAssemblyCPCPalette(p, eol)
 		out += eol + "; Basic Palette " + cpcFilename + eol + ".basic_palette:" + eol + ByteToken + " "
-		for i := 0; i < len(p); i++ {
-			v, err := constants.FirmwareNumber(p[i])
-			if err == nil {
-				out += fmt.Sprintf("%0.2d", v)
-				if (i+1)%8 == 0 && i+1 < len(p) {
-					out += eol + ByteToken + " "
-				} else {
-					if i+1 < len(p) {
-						out += ", "
-					}
-				}
-			} else {
-				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
-			}
-		}
+		out += FormatAssemblyBasicPalette(p, eol)
 		out += eol
 	}
 	//fmt.Fprintf(os.Stdout,"%s",out)
@@ -332,4 +226,127 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 		return j.Save(exportType.OsFullPath(filePath, "_column.json"))
 	}
 	return nil
+}
+
+func FormatAssemblyString(data []string, eol string) string {
+	var out string
+	for i := 0; i < len(data); i += 8 {
+		out += fmt.Sprintf("%s ", ByteToken)
+		if i < len(data) {
+			out += data[i]
+		}
+		if i+1 < len(data) {
+			out += fmt.Sprintf(", %s", data[i+1])
+		}
+		if i+2 < len(data) {
+			out += fmt.Sprintf(", %s", data[i+2])
+		}
+		if i+3 < len(data) {
+			out += fmt.Sprintf(", %s", data[i+3])
+		}
+		if i+4 < len(data) {
+			out += fmt.Sprintf(", %s", data[i+4])
+		}
+		if i+5 < len(data) {
+			out += fmt.Sprintf(", %s", data[i+5])
+		}
+		if i+6 < len(data) {
+			out += fmt.Sprintf(", %s", data[i+6])
+		}
+		if i+7 < len(data) {
+			out += fmt.Sprintf(", %s", data[i+7])
+		}
+		out += eol
+	}
+	return out
+}
+
+func FormatAssemblyDatabyte(data []byte, eol string) string {
+	var out string
+	for i := 0; i < len(data); i += 8 {
+		out += fmt.Sprintf("%s ", ByteToken)
+		if i < len(data) {
+			out += fmt.Sprintf("#%0.2x", data[i])
+		}
+		if i+1 < len(data) {
+			out += fmt.Sprintf(", #%0.2x", data[i+1])
+		}
+		if i+2 < len(data) {
+			out += fmt.Sprintf(", #%0.2x", data[i+2])
+		}
+		if i+3 < len(data) {
+			out += fmt.Sprintf(", #%0.2x", data[i+3])
+		}
+		if i+4 < len(data) {
+			out += fmt.Sprintf(", #%0.2x", data[i+4])
+		}
+		if i+5 < len(data) {
+			out += fmt.Sprintf(", #%0.2x", data[i+5])
+		}
+		if i+6 < len(data) {
+			out += fmt.Sprintf(", #%0.2x", data[i+6])
+		}
+		if i+7 < len(data) {
+			out += fmt.Sprintf(", #%0.2x", data[i+7])
+		}
+		out += eol
+	}
+	return out
+}
+
+func FormatAssemblyCPCPalette(p color.Palette, eol string) string {
+	var out string
+	for i := 0; i < len(p); i++ {
+		v, err := constants.HardwareValues(p[i])
+		if err == nil {
+			out += fmt.Sprintf("#%0.2x", v[0])
+			if (i+1)%8 == 0 && i+1 < len(p) {
+				out += eol + ByteToken + " "
+			} else {
+				if i+1 < len(p) {
+					out += ", "
+				}
+			}
+		} else {
+			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+		}
+	}
+	return out
+}
+
+func FormatAssemblyBasicPalette(p color.Palette, eol string) string {
+	var out string
+	for i := 0; i < len(p); i++ {
+		v, err := constants.FirmwareNumber(p[i])
+		if err == nil {
+			out += fmt.Sprintf("%0.2d", v)
+			if (i+1)%8 == 0 && i+1 < len(p) {
+				out += eol + ByteToken + " "
+			} else {
+				if i+1 < len(p) {
+					out += ", "
+				}
+			}
+		} else {
+			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+		}
+	}
+	return out
+}
+
+func FormatAssemblyCPCPlusPalette(p color.Palette, eol string) string {
+	var out string
+	for i := 0; i < len(p); i++ {
+		cp := constants.NewCpcPlusColor(p[i])
+		v := cp.Value()
+		out += fmt.Sprintf("#%.2x, #%.2x", byte(v), byte(v>>8))
+		if (i+1)%8 == 0 && i+1 < len(p) {
+			out += eol + ByteToken + " "
+		} else {
+			if i+1 < len(p) {
+				out += ", "
+			}
+		}
+	}
+	return out
 }
