@@ -12,7 +12,7 @@ import (
 	"github.com/jeromelesaux/martine/export/file"
 )
 
-func DeltaAnimate(gitFilepath string, ex *export.ExportType, initialAddress uint16, mode uint8) error {
+func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint16, mode uint8) error {
 	var isSprite = true
 	if !ex.CustomDimension && !ex.SpriteHard {
 		isSprite = false

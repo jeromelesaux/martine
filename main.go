@@ -10,14 +10,11 @@ import (
 	_ "image/png"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 
-	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
-	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/net"
 	"github.com/jeromelesaux/martine/gfx"
@@ -108,6 +105,7 @@ var (
 	impCatcher          = flag.Bool("imp", false, "Will generate sprites as IMP-Catcher format (Impdraw V2).")
 	inkSwap             = flag.String("inkswap", "", "Swap ink:\n\tfor instance mode 4 (4 inks) : 0=3,1=0,2=1,3=2\n\twill swap in output image index 0 by 3 and 1 by 0 and so on.")
 	lineWidth           = flag.String("linewidth", "#50", "Line width in hexadecimal to compute the screen address in delta mode.")
+	deltaPacking        = flag.Bool("deltapacking", false, "Will generate all the animation code from the followed gif file.")
 	appVersion          = "0.29"
 	version             = flag.Bool("version", false, "print martine's version")
 )
@@ -131,7 +129,7 @@ func printVersion() {
 */
 
 func main() {
-	var size constants.Size
+
 	var filename, extension string
 	var screenMode uint8
 	var in image.Image
@@ -227,236 +225,28 @@ func main() {
 		*output = "./"
 	}
 
-	exportType := x.NewExportType(*picturePath, *output)
-
 	if *mode == -1 && !*deltaMode && !*reverse {
 		fmt.Fprintf(os.Stderr, "No output mode defined can not choose. Quiting\n")
 		usage()
 	}
-	if !*reverse {
-		switch *mode {
-		case 0:
-			size = constants.Mode0
-			screenMode = 0
-			if *overscan {
-				size = constants.OverscanMode0
-			}
-		case 1:
-			size = constants.Mode1
-			screenMode = 1
-			if *overscan {
-				size = constants.OverscanMode1
-			}
-		case 2:
-			screenMode = 2
-			size = constants.Mode2
-			if *overscan {
-				size = constants.OverscanMode2
-			}
-		default:
-			if *height == -1 && *width == -1 && !*deltaMode {
-				fmt.Fprintf(os.Stderr, "mode %d not defined and no custom width or height\n", *mode)
-				usage()
-			}
-		}
-		if *height != -1 {
-			exportType.CustomDimension = true
-			exportType.Win = true
-			size.Height = *height
-			if *width != -1 {
-				size.Width = *width
-			} else {
-				size.Width = 0
-			}
-		}
-		if *width != -1 {
-			exportType.Win = true
-			exportType.CustomDimension = true
-			size.Width = *width
-			if *height != -1 {
-				size.Height = *height
-			} else {
-				size.Height = 0
-			}
-		}
 
-		if size.Width > constants.WidthMax {
-			fmt.Fprintf(os.Stderr, "Max width allowed is (%d) your choice (%d), Quiting...\n", size.Width, constants.WidthMax)
-			os.Exit(-1)
-		}
-		if size.Height > constants.HeightMax {
-			fmt.Fprintf(os.Stderr, "Max height allowed is (%d) your choice (%d), Quiting...\n", size.Height, constants.HeightMax)
-			os.Exit(-1)
-		}
-	}
+	exportType, size := ExportHandler()
+	screenMode = uint8(*mode)
 
 	if *byteStatement != "" {
 		file.ByteToken = *byteStatement
 	}
 
-	var resizeAlgo imaging.ResampleFilter
-	switch *resizeAlgorithm {
-	case 1:
-		resizeAlgo = imaging.NearestNeighbor
-	case 2:
-		resizeAlgo = imaging.CatmullRom
-	case 3:
-		resizeAlgo = imaging.Lanczos
-	case 4:
-		resizeAlgo = imaging.Linear
-	case 5:
-		resizeAlgo = imaging.Box
-	case 6:
-		resizeAlgo = imaging.Hermite
-	case 7:
-		resizeAlgo = imaging.BSpline
-	case 8:
-		resizeAlgo = imaging.Hamming
-	case 9:
-		resizeAlgo = imaging.Hann
-	case 10:
-		resizeAlgo = imaging.Gaussian
-	case 11:
-		resizeAlgo = imaging.Blackman
-	case 12:
-		resizeAlgo = imaging.Bartlett
-	case 13:
-		resizeAlgo = imaging.Welch
-	case 14:
-		resizeAlgo = imaging.Cosine
-	case 15:
-		resizeAlgo = imaging.MitchellNetravali
-	default:
-		resizeAlgo = imaging.NearestNeighbor
-	}
-
-	if *scanlineSequence != "" {
-		sequence := strings.Split(*scanlineSequence, ",")
-		for _, v := range sequence {
-			line, err := strconv.Atoi(v)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Bad scanline sequence (%s) error:%v\n", *scanlineSequence, err)
-				os.Exit(-1)
-			}
-			exportType.ScanlineSequence = append(exportType.ScanlineSequence, line)
+	if *deltaPacking {
+		screenAddress, err := common.ParseHexadecimal16(*initialAddress)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error while parsing (%s) use the starting address #C000, err : %v\n", *initialAddress, err)
+			screenAddress = 0xC000
 		}
-		modulo := size.Height % len(exportType.ScanlineSequence)
-		if modulo != 0 {
-			fmt.Fprintf(os.Stderr, "height modulo scanlinesequence is not equal to 0 %d lines and the output image lines is %d\n", len(exportType.ScanlineSequence), size.Height)
-			os.Exit(-1)
+		if err := gfx.DeltaPacking(*picturePath, exportType, screenAddress, screenMode); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while deltapacking error: %v\n", err)
 		}
 	}
-	exportType.ExtendedDsk = *extendedDsk
-	exportType.TileMode = *tileMode
-	exportType.RollMode = *rollMode
-	exportType.RollIteration = *iterations
-	exportType.NoAmsdosHeader = *noAmsdosHeader
-	exportType.CpcPlus = *plusMode
-	exportType.TileIterationX = *tileIterationX
-	exportType.TileIterationY = *tileIterationY
-	exportType.Compression = *compress
-	exportType.RotationMode = *rotateMode
-	exportType.Rotation3DMode = *rotate3dMode
-	exportType.Rotation3DType = *rotate3dType
-	exportType.Rotation3DX0 = *rotate3dX0
-	exportType.Rotation3DY0 = *rotate3dY0
-	exportType.M4Host = *m4Host
-	exportType.M4RemotePath = *m4RemotePath
-	exportType.M4Autoexec = *m4Autoexec
-	exportType.ResizingAlgo = resizeAlgo
-	exportType.DitheringMultiplier = *ditheringMultiplier
-	exportType.DitheringWithQuantification = *withQuantization
-	exportType.PalettePath = *palettePath
-	exportType.InkPath = *inkPath
-	exportType.KitPath = *kitPath
-	exportType.RotationRlaBit = *rla
-	exportType.RotationSraBit = *sra
-	exportType.RotationSlaBit = *sla
-	exportType.RotationRraBit = *rra
-	exportType.RotationKeephighBit = *keephigh
-	exportType.RotationKeeplowBit = *keeplow
-	exportType.RotationLosthighBit = *losthigh
-	exportType.RotationLostlowBit = *lostlow
-	exportType.RotationIterations = *iterations
-	exportType.Flash = *flash
-	exportType.Sna = *sna
-	exportType.SpriteHard = *spriteHard
-	exportType.SplitRaster = *splitRasters
-	exportType.ZigZag = *zigzag
-	exportType.Animate = *animate
-	exportType.Reducer = *reducer
-	exportType.Json = *jsonOutput
-	exportType.Ascii = *txtOutput
-	exportType.OneLine = *oneLine
-	exportType.OneRow = *oneRow
-	if err := exportType.ImportInkSwap(*inkSwap); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot parse inkswap option with error [%s]\n", err)
-		os.Exit(-1)
-	}
-	if *lineWidth != "" {
-		if err := exportType.SetLineWith(*lineWidth); err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot parse linewidth option with error [%s]\n", err)
-			os.Exit(-1)
-		}
-	}
-
-	if *maskSprite != "" {
-
-		v, err := common.ParseHexadecimal8(*maskSprite)
-		if err == nil {
-			exportType.MaskSprite = uint8(v)
-		}
-		if exportType.MaskSprite != 0 {
-			if *maskOrOperation {
-				exportType.MaskOrOperation = true
-			}
-			if *maskAdOperation {
-				exportType.MaskAndOperation = true
-			}
-			if exportType.MaskAndOperation && exportType.MaskOrOperation {
-				fmt.Fprintf(os.Stderr, "Or and And operations are setted, will only apply And operation.\n")
-				exportType.MaskOrOperation = false
-			}
-			if !exportType.MaskAndOperation && !exportType.MaskOrOperation {
-				fmt.Fprintf(os.Stderr, "Or and And operations are not setted, will only apply And operation.\n")
-				exportType.MaskAndOperation = true
-			}
-			fmt.Fprintf(os.Stdout, "Applying sprite mask value [#%X] [%.8b] AND = %t, OR =%t\n",
-				exportType.MaskSprite,
-				exportType.MaskSprite,
-				exportType.MaskAndOperation,
-				exportType.MaskOrOperation)
-		}
-	}
-
-	if exportType.CpcPlus {
-		exportType.Kit = true
-		exportType.Pal = false
-	}
-	exportType.Overscan = *overscan
-	if exportType.Overscan {
-		exportType.Scr = false
-		exportType.Kit = true
-	}
-	if exportType.M4Host != "" {
-		exportType.M4 = true
-	}
-
-	if *egx1 {
-		exportType.EgxFormat = x.Egx1Mode
-	}
-	if *egx2 {
-		exportType.EgxFormat = x.Egx2Mode
-	}
-	if *mode != -1 {
-		exportType.EgxMode1 = uint8(*mode)
-	}
-	if *mode2 != -1 {
-		exportType.EgxMode2 = uint8(*mode2)
-	}
-
-	exportType.DeltaMode = *deltaMode
-	exportType.Dsk = *dsk
 
 	if !*reverse {
 		fmt.Fprintf(os.Stdout, "Informations :\n%s", size.ToString())
