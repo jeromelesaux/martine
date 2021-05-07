@@ -106,6 +106,7 @@ var (
 	inkSwap             = flag.String("inkswap", "", "Swap ink:\n\tfor instance mode 4 (4 inks) : 0=3,1=0,2=1,3=2\n\twill swap in output image index 0 by 3 and 1 by 0 and so on.")
 	lineWidth           = flag.String("linewidth", "#50", "Line width in hexadecimal to compute the screen address in delta mode.")
 	deltaPacking        = flag.Bool("deltapacking", false, "Will generate all the animation code from the followed gif file.")
+	filloutGif          = flag.Bool("fillout", false, "Fill out the gif frames needed some case with deltapacking")
 	appVersion          = "0.29"
 	version             = flag.Bool("version", false, "print martine's version")
 )
@@ -239,13 +240,15 @@ func main() {
 
 	if *deltaPacking {
 		screenAddress, err := common.ParseHexadecimal16(*initialAddress)
+		exportType.Size = size
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error while parsing (%s) use the starting address #C000, err : %v\n", *initialAddress, err)
 			screenAddress = 0xC000
 		}
-		if err := gfx.DeltaPacking(*picturePath, exportType, screenAddress, screenMode); err != nil {
+		if err := gfx.DeltaPacking(exportType.InputPath, exportType, screenAddress, screenMode); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while deltapacking error: %v\n", err)
 		}
+		os.Exit(0)
 	}
 
 	if !*reverse {

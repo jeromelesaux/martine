@@ -106,6 +106,7 @@ func ExportHandler() (*export.ExportType, constants.Size) {
 		resizeAlgo = imaging.NearestNeighbor
 	}
 
+	exp.FilloutGif = *filloutGif
 	exp.ExtendedDsk = *extendedDsk
 	exp.TileMode = *tileMode
 	exp.RollMode = *rollMode

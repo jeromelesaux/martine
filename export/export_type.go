@@ -100,6 +100,7 @@ type ExportType struct {
 	OneRow                      bool
 	InkSwapper                  map[int]int
 	LineWidth                   int
+	FilloutGif                  bool
 }
 
 func MaskIsAllowed(mode uint8, value uint8) bool {

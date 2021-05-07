@@ -2,7 +2,9 @@ package gfx
 
 import (
 	"fmt"
+	"image"
 	"image/color"
+	"image/draw"
 	"image/gif"
 	"os"
 	"path/filepath"
@@ -14,6 +16,7 @@ import (
 
 func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint16, mode uint8) error {
 	var isSprite = true
+	var maxImages = 22
 	if !ex.CustomDimension && !ex.SpriteHard {
 		isSprite = false
 	}
@@ -26,10 +29,11 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 	if err != nil {
 		return err
 	}
+	images := convertToImage(*gifImages)
 	var pad int = 1
-	if len(gifImages.Image) > 20 {
+	if len(images) > maxImages {
 		fmt.Fprintf(os.Stderr, "Warning gif exceed 30 images. Will corrupt the number of images.")
-		pad = len(gifImages.Image) / 20
+		pad = len(images) / maxImages
 	}
 	rawImages := make([][]byte, 0)
 	deltaData := make([]*DeltaCollection, 0)
@@ -38,19 +42,36 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 
 	// now transform images as win or scr
 	fmt.Printf("Let's go transform images files in win or scr\n")
-	_, palette, _, err = InternalApplyOneImage(gifImages.Image[0], ex, int(mode), palette, mode)
-	if err != nil {
-		return err
-	}
 
-	for i := 0; i < len(gifImages.Image); i += pad {
-		in := gifImages.Image[i]
-		raw, _, _, err = InternalApplyOneImage(in, ex, int(mode), palette, mode)
+	if ex.FilloutGif {
+		imgs := filloutGif(*gifImages, ex)
+		_, palette, _, err = InternalApplyOneImage(imgs[0], ex, int(mode), palette, mode)
 		if err != nil {
 			return err
 		}
-		rawImages = append(rawImages, raw)
-		fmt.Printf("Image [%d] proceed\n", i)
+		for i := 0; i < len(imgs); i += pad {
+			in := imgs[i]
+			raw, _, _, err = InternalApplyOneImage(in, ex, int(mode), palette, mode)
+			if err != nil {
+				return err
+			}
+			rawImages = append(rawImages, raw)
+			fmt.Printf("Image [%d] proceed\n", i)
+		}
+	} else {
+		_, palette, _, err = InternalApplyOneImage(images[0], ex, int(mode), palette, mode)
+		if err != nil {
+			return err
+		}
+		for i := 0; i < len(images); i += pad {
+			in := images[i]
+			raw, _, _, err = InternalApplyOneImage(in, ex, int(mode), palette, mode)
+			if err != nil {
+				return err
+			}
+			rawImages = append(rawImages, raw)
+			fmt.Printf("Image [%d] proceed\n", i)
+		}
 	}
 	lineOctetsWidth := ex.LineWidth
 	x0, y0, err := CpcCoordinates(initialAddress, 0xC000, lineOctetsWidth)
@@ -73,7 +94,7 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 		deltaData = append(deltaData, dc)
 		fmt.Printf("%d bytes differ from the both images\n", len(dc.Items))
 	}
-	fmt.Printf("Compare image [%d] with [%d] ", 0, len(rawImages)-1)
+	fmt.Printf("Compare image [%d] with [%d] ", len(rawImages)-1, 0)
 	d1 := rawImages[len(rawImages)-1]
 	d2 := rawImages[0]
 	dc := Delta(d1, d2, isSprite, ex.Size, mode, uint16(x0), uint16(y0), lineOctetsWidth)
@@ -81,6 +102,35 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 	fmt.Printf("%d bytes differ from the both images\n", len(dc.Items))
 
 	return exportDeltaAnimate(rawImages[0], deltaData, palette, ex, initialAddress, mode, ex.OutputPath+string(filepath.Separator)+"delta.asm")
+}
+
+func convertToImage(g gif.GIF) []image.Image {
+	c := make([]image.Image, 0)
+	width := g.Image[0].Bounds().Max.X
+	height := g.Image[0].Bounds().Max.Y
+	for i := 1; i < len(g.Image)-1; i++ {
+		img := image.NewNRGBA(image.Rect(0, 0, width, height))
+		draw.Draw(img, img.Bounds(), g.Image[i], image.Point{0, 0}, draw.Over)
+		c = append(c, img)
+	}
+	return c
+}
+
+func filloutGif(g gif.GIF, ex *export.ExportType) []image.Image {
+	c := make([]image.Image, 0)
+	width := g.Image[0].Bounds().Max.X
+	height := g.Image[0].Bounds().Max.Y
+	reference := image.NewNRGBA(image.Rect(0, 0, width, height))
+	draw.Draw(reference, reference.Bounds(), g.Image[0], image.Point{0, 0}, draw.Src)
+	for i := 1; i < len(g.Image)-1; i++ {
+		in := g.Image[i]
+		draw.Draw(reference, reference.Bounds(), in, image.Point{0, 0}, draw.Over)
+		//fw, _ := os.Create(ex.OutputPath + fmt.Sprintf("/%.2d.png", i))
+		//png.Encode(fw, reference)
+		//fw.Close()
+		c = append(c, reference)
+	}
+	return c
 }
 
 func exportDeltaAnimate(imageReference []byte, delta []*DeltaCollection, palette color.Palette, ex *export.ExportType, initialAddress uint16, mode uint8, filename string) error {
