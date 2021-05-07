@@ -166,40 +166,12 @@ func ApplyOneImage(in image.Image,
 func InternalApplyOneImage(in image.Image,
 	exportType *export.ExportType,
 	mode int,
+	palette color.Palette,
 	screenMode uint8) ([]byte, color.Palette, int, error) {
 
-	var palette color.Palette
 	var newPalette color.Palette
 	var downgraded *image.NRGBA
 	var err error
-
-	if exportType.PalettePath != "" {
-		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", exportType.PalettePath)
-		palette, _, err = file.OpenPal(exportType.PalettePath)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", exportType.PalettePath)
-		} else {
-			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
-		}
-	}
-	if exportType.InkPath != "" {
-		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", exportType.InkPath)
-		palette, _, err = file.OpenInk(exportType.InkPath)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", exportType.InkPath)
-		} else {
-			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
-		}
-	}
-	if exportType.KitPath != "" {
-		fmt.Fprintf(os.Stdout, "Input plus palette to apply : (%s)\n", exportType.KitPath)
-		palette, _, err = file.OpenKit(exportType.KitPath)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", exportType.KitPath)
-		} else {
-			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
-		}
-	}
 
 	out := convert.Resize(in, exportType.Size, exportType.ResizingAlgo)
 
@@ -231,6 +203,7 @@ func InternalApplyOneImage(in image.Image,
 	var lineSize int
 	if !exportType.CustomDimension && !exportType.SpriteHard {
 		data = InternalTransform(downgraded, newPalette, exportType.Size, exportType)
+		lineSize = exportType.Size.Width
 	} else {
 		if exportType.ZigZag {
 			// prepare zigzag transformation
@@ -242,6 +215,7 @@ func InternalApplyOneImage(in image.Image,
 		} else {
 			fmt.Fprintf(os.Stdout, "Transform image in sprite hard.\n")
 			data, _ = InternalSpriteHardTransform(downgraded, newPalette, exportType.Size, screenMode, exportType)
+			lineSize = 16
 		}
 	}
 	return data, newPalette, lineSize, err

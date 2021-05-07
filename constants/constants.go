@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"image/color"
+	"math"
 	"sort"
 	"strconv"
 )
@@ -24,6 +25,18 @@ type Size struct {
 	ColumnsNumber   int
 	ColorsAvailable int
 	GatearrayValue  uint8
+}
+
+func (s *Size) ModeWidth(mode uint8) int {
+	switch mode {
+	case 0:
+		return int(math.Ceil(float64(s.Width) / 2.))
+	case 1:
+		return int(math.Ceil(float64(s.Width) / 4.))
+	case 2:
+		return int(math.Ceil(float64(s.Width) / 8.))
+	}
+	return -1
 }
 
 type CpcColor struct {

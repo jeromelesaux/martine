@@ -27,19 +27,25 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 		return err
 	}
 	var pad int = 1
-	if len(gifImages.Image) > 30 {
+	if len(gifImages.Image) > 20 {
 		fmt.Fprintf(os.Stderr, "Warning gif exceed 30 images. Will corrupt the number of images.")
-		pad = len(gifImages.Image) / 30
+		pad = len(gifImages.Image) / 20
 	}
 	rawImages := make([][]byte, 0)
 	deltaData := make([]*DeltaCollection, 0)
 	var palette color.Palette
 	var raw []byte
+
 	// now transform images as win or scr
 	fmt.Printf("Let's go transform images files in win or scr\n")
+	_, palette, _, err = InternalApplyOneImage(gifImages.Image[0], ex, int(mode), palette, mode)
+	if err != nil {
+		return err
+	}
+
 	for i := 0; i < len(gifImages.Image); i += pad {
 		in := gifImages.Image[i]
-		raw, palette, _, err = InternalApplyOneImage(in, ex, int(mode), mode)
+		raw, _, _, err = InternalApplyOneImage(in, ex, int(mode), palette, mode)
 		if err != nil {
 			return err
 		}
@@ -53,6 +59,9 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 	}
 
 	fmt.Printf("Let's go deltapacking raw images\n")
+	realSize := &ex.Size
+	realSize.Width = realSize.ModeWidth(mode)
+	ex.Size = *realSize
 	for i := 0; i < len(rawImages)-1; i++ {
 		fmt.Printf("Compare image [%d] with [%d] ", i, i+1)
 		d1 := rawImages[i]
@@ -94,27 +103,28 @@ func exportDeltaAnimate(imageReference []byte, delta []*DeltaCollection, palette
 		dataCode += file.FormatAssemblyDatabyte(data, "\n")
 		deltaIndex = append(deltaIndex, name)
 	}
-	dataCode += DeltaCodeDeltaTable
+	dataCode += "table_delta:\n"
 	file.ByteToken = "dw"
 	dataCode += file.FormatAssemblyString(deltaIndex, "\n")
-	file.ByteToken = "db"
-	dataCode += "hardpalette:\n" + file.ByteToken + " "
-	dataCode += file.FormatAssemblyCPCPalette(palette, "\n")
 
-	// replace the color number in palette
-	nbColor := fmt.Sprintf("%d", len(palette))
-	header := strings.Replace(DeltaCodeHeader, "$NBCOLORS$", nbColor, 1)
+	file.ByteToken = "db"
+	dataCode += "palette:\n" + file.ByteToken + " "
+	dataCode += file.FormatAssemblyBasicPalette(palette, "\n")
 
 	// replace the initial address
 	address := fmt.Sprintf("#%.4x", initialAddress)
-	header = strings.Replace(header, "$INITIALADDRESS$", address, 1)
+	header := strings.Replace(DeltaCodeDelta, "$INITIALADDRESS$", address, 1)
+
+	// replace number of colors
+	nbColors := fmt.Sprintf("%d", len(palette))
+	header = strings.Replace(header, "$NBCOLORS$", nbColors, 1)
 
 	// replace the number of delta
 	nbDelta := fmt.Sprintf("%d", len(delta))
 	header = strings.Replace(header, "$NBDELTA$", nbDelta, 1)
 
 	// replace char large for the screen
-	charLarge := fmt.Sprintf("%d", ex.LineWidth)
+	charLarge := fmt.Sprintf("#%.4x", 0xC000+ex.LineWidth)
 	header = strings.Replace(header, "$LIGNELARGE$", charLarge, 1)
 
 	// replace heigth
@@ -122,38 +132,26 @@ func exportDeltaAnimate(imageReference []byte, delta []*DeltaCollection, palette
 	header = strings.Replace(header, "$HAUT$", height, 1)
 
 	// replace width
-	var width string
-	switch mode {
-	case 0:
-		width = fmt.Sprintf("%d", ex.Size.Width/2)
-	case 1:
-		width = fmt.Sprintf("%d", ex.Size.Width/4)
-	case 2:
-		width = fmt.Sprintf("%d", ex.Size.Width/8)
-	}
+	var width string = fmt.Sprintf("%d", ex.Size.Width)
 	header = strings.Replace(header, "$LARGE$", width, 1)
 
 	var modeSet string
 	switch mode {
 	case 0:
-		modeSet = "#7f8c"
+		modeSet = "0"
 	case 1:
-		modeSet = "#7f8d"
+		modeSet = "1"
 	case 2:
-		modeSet = "#7f8e"
+		modeSet = "2"
 	}
 
 	// replace mode
 	header = strings.Replace(header, "$SETMODE$", modeSet, 1)
 
 	code += header
-	code += DeltaCodeNextDelta
-	code += DeltaCodeDrawSprite
-	code += DeltaCodePalette
-	code += DeltaCodeBC26
-	code += DeltaCodeVbl
 	code += dataCode
-	code += "\nend"
+	code += "\nend\n"
+	code += "\nsave'disc.bin',#200, end - start,DSK,'delta.dsk'"
 
 	fw, err := os.Create(filename)
 	if err != nil {
@@ -164,9 +162,58 @@ func exportDeltaAnimate(imageReference []byte, delta []*DeltaCollection, palette
 	return nil
 }
 
-var DeltaCodeDeltaTable string = "table_delta:\n"
-
-var DeltaCodeNextDelta string = ";--- routine de deltapacking --------------------------\n" +
+var DeltaCodeDelta string = ";--- dimensions du sprite ----\n" +
+	"large equ $LARGE$\n" +
+	"haut equ $HAUT$\n" +
+	"loadingaddress equ #200\n" +
+	"linewidth equ $LIGNELARGE$\n" +
+	"nbdelta equ $NBDELTA$\n" +
+	"nbcolors equ $NBCOLORS$\n" +
+	";-----------------------------\n" +
+	"org loadingaddress\n" +
+	"run loadingaddress\n" +
+	";-----------------------------\n" +
+	"start\n" +
+	";--- selection du mode ---------\n" +
+	"    ld a,$SETMODE$\n" +
+	"    call #BC0E\n" +
+	";-------------------------------\n" +
+	"\n" +
+	";--- gestion de la palette ---- \n" +
+	"    call palettefirmware\n" +
+	";------------------------------\n" +
+	"\n" +
+	"call xvbl\n" +
+	"\n" +
+	";--- affichage du sprite initiale --  \n" +
+	"    ; affichage du premier sprite\n" +
+	"    ld de,$INITIALADDRESS$ ; adresse de l'ecran \n" +
+	"    ld hl,sprite ; pointeur sur l'image en memoire \n" +
+	"    ld b, haut ; hauteur de l'image \n" +
+	"    loop \n" +
+	"    push bc ; sauve le compteur hauteur dans la pile \n" +
+	"    push de ; sauvegarde de l'adresse ecran dans la pile\n" +
+	"    ld bc, large ; largeur de l'image a afficher\n" +
+	"    ldir ; remplissage de n * largeur octets a l'adresse dans de \n" +
+	"    pop de ; recuperation de l'adresse d'origine \n" +
+	"    ex de,hl ; echange des valeurs des adresses\n" +
+	"    call bc26 ; calcul de l'adresse de la ligne suivante\n" +
+	"    ex de,hl ; echange des valeurs des adresses\n" +
+	"    pop bc ; retabli le compteur \n" +
+	"    djnz loop\n" +
+	";------------------------------------\n" +
+	"\n" +
+	"mainloop    ; routine pour afficher les deltas provenant de martine \n" +
+	"\n" +
+	";call #bb06\n" +
+	"\n" +
+	"call xvbl\n" +
+	"call next_delta\n" +
+	"\n" +
+	"jp mainloop\n" +
+	"\n" +
+	"\n" +
+	";--- routine de deltapacking --------------------------\n" +
 	"next_delta:\n" +
 	"table_index:\n" +
 	"    ld a,-1\n" +
@@ -183,151 +230,101 @@ var DeltaCodeNextDelta string = ";--- routine de deltapacking ------------------
 	"    ld h,(hl)\n" +
 	"    ld l,a\n" +
 	"delta\n" +
-	"    ld a,(hl) ; nombre de byte a poker\n" +
-	"    inc hl\n" +
+	" ld a,(hl) ; nombre de byte a poker\n" +
+	" push af   ; stockage en mémoire\n" +
+	" inc hl\n" +
 	"init\n" +
-	"    ex af,af'\n" +
-	"    ld a,(hl) ; octet a poker\n" +
-	"    ld (pixel1+1),a\n" +
-	"    inc hl\n" +
-	"    ld c,(hl) ; nbfois\n" +
-	"    inc hl\n" +
-	"    ld b,(hl)\n" +
-	"    inc hl\n" +
+	" ld a,(hl) ; octet a poker\n" +
+	" ld (pixel),a\n" +
+	" inc hl\n" +
+	" ld c,(hl) ; nbfois\n" +
+	" inc hl \n" +
+	" ld b,(hl)\n" +
+	" inc hl\n" +
 	";\n" +
 	"poke_octet\n" +
-	"    ld e,(hl)\n" +
-	"    inc hl\n" +
-	"    ld d,(hl) ; de=adresse\n" +
-	"    inc hl\n" +
-	"pixel1:\n" +
-	"     ld a,0\n" +
-	"ld (de),a ; poke a l'adresse dans de\n" +
-	";------------------\n" +
-	"    dec bc\n" +
-	"    ld a,b ; test a t'on poke toutes les adresses compteur bc\n" +
-	"    or c  ; optimisation siko\n" +
-	"    jr nz, poke_octet\n" +
-	"    ex af,af'\n" +
-	"    dec a ; reste t'il d'autres bytes a poker ?\n" +
-	"    jr nz, init\n" +
-	"    ret\n" +
-	";---------------------------------------------------\n"
-
-var DeltaCodeDrawSprite string = "drawSprite:\n" +
-	".loop\n" +
-	"push af ; sauve le compteur hauteur dans la pile\n" +
-	"push de ; sauvegarde de l'adresse ecran dans la pile\n" +
-	"push bc\n" +
-	"ldir ; remplissage de n * largeur octets a l'adresse dans de\n" +
-	"pop bc\n" +
-	"pop de ; recuperation de l'adresse d'origine\n" +
-	"ex de,hl ; echange des valeurs des adresses\n" +
-	"call bc26 ; calcul de l'adresse de la ligne suivante\n" +
-	"ex de,hl ; echange des valeurs des adresses\n" +
-	"pop af ; retabli le compteur\n" +
-	"dec a\n" +
-	"jr nz, .loop\n" +
-	"ret\n"
-
-var DeltaCodeHeader string = ";--- dimensions du sprite ----\n" +
-	"large equ $LARGE$\n" +
-	"haut equ $HAUT$\n" +
-	"loadingaddress equ #200\n" +
-	"linewidth equ $LIGNELARGE$\n" +
-	"nbdelta equ $NBDELTA$\n" +
-	"nbcolors equ $NBCOLORS$\n" +
-	";-----------------------------\n" +
-	"org loadingaddress\n" +
-	"run loadingaddress\n" +
-	"start\n" +
-	"di\n" +
-	"ld bc,$SETMODE$ ; Mode 1\n" +
-	"out (c),c\n" +
-	"ld a,#c3\n" +
-	"ld (#38),a\n" +
-	"ld sp,loadingaddress\n" +
-	"ld hl,hardpalette\n" +
-	"call setpalette\n" +
-	"call xvbl\n" +
-	";--- affichage du sprite initial -\n" +
-	"ld de,$INITIALADDRESS$ ; adresse de l'ecran\n" +
-	"ld hl,sprite ; pointeur sur l'image en memoire\n" +
-	"ld bc, large ; hauteur de l'image\n" +
-	"ld a,haut\n" +
-	"call drawSprite\n" +
-	"call xvbl\n" +
-	"ei\n" +
-	";------------------------------------\n" +
-	"mainloop\n" +
-	"ld e,3\n" +
-	"call xvbl.lp\n" +
-	"call next_delta\n" +
-	"jp mainloop\n"
-
-var DeltaCodePalette string = ";--- application palette hardware ------------\n" +
-	"setpalette\n" +
-	"	ld b,#7F          ; gatearray pointer to ink 0\n" +
-	"	xor a                ; ink number start with 0\n" +
-	".loop\n" +
-	"	ld e,(hl)\n" +
-	"	out (c),a            ; on selectionne la couleur\n" +
-	"	out (c),e            ; on envoie la couleur\n" +
-	"	inc hl\n" +
-	"	inc a\n" +
-	"	cp nbcolors\n" +
-	"	jr nz,.loop\n" +
-	"	ld c,#10          ; meme chose pour le border avec la couleur 0\n" +
-	"	out (c),c\n" +
-	"	ld e,(hl)\n" +
-	"	out (c),e\n" +
-	"	ret\n" +
-	";----------------------------------------------\n"
-
-var DeltaCodeVbl string = ";---------------------------------------------------------------\n" +
+	" ld e,(hl)\n" +
+	" inc hl\n" +
+	" ld d,(hl) ; de=adresse\n" +
+	" inc hl\n" +
+	" ld a,(pixel)\n" +
+	" ld (de),a ; poke a l'adresse dans de\n" +
+	" dec bc\n" +
+	" ld a,b ; test a t'on poke toutes les adresses compteur bc\n" +
+	" or a \n" +
+	" jr nz, poke_octet\n" +
+	" ld a,c \n" +
+	" or a\n" +
+	" jr nz, poke_octet\n" +
+	" pop af \n" +
+	"; reste t'il d'autres bytes a poker ? \n" +
+	" dec a \n" +
+	" push af\n" +
+	" jr nz,init\n" +
+	" pop af\n" +
+	" ret\n" +
+	"\n" +
+	"\n" +
+	"\n" +
+	";---------------------------------------------------------------\n" +
 	";\n" +
 	"; attente de plusieurs vbl\n" +
 	";\n" +
-	"xvbl ld e,4\n" +
-	".lp:\n" +
+	"xvbl ld e,10\n" +
 	"	call waitvbl\n" +
 	"	dec e\n" +
-	"	jr nz,.lp\n" +
-	"	ret\n\n" +
+	"	jr nz,xvbl+2\n" +
+	"	ret\n" +
 	";-----------------------------------\n" +
+	"\n" +
 	";---- attente vbl ----------\n" +
 	"waitvbl\n" +
-	"	ld b,#f5 ; attente vbl\n" +
-	"vbl\n" +
-	"	in a,(c)\n" +
-	"	rra\n" +
-	"	jr nc,vbl\n" +
-	"	;ld b,#f5 ; attente vbl\n" +
-	"ret\n"
-
-var DeltaCodeBC26 string = ";---- recuperation de l'adresse de la ligne en dessous ------------\n" +
-	"; CE: hl\n" +
-	"; CS: hl contient l'adresse de la ligne suivante\n" +
-	";     A,F modifiés\n" +
-	"bc26\n" +
-	"	ld   a,h\n" +
-	"	add  8\n" +
-	"	ld   h,a\n" +
-	"	and  #38\n" +
-	"	ret  nz\n" +
-	"	ld   a,h\n" +
-	"	sub  #40\n" +
-	"	ld   h,a\n" +
-	"	ld   a,l\n" +
-	"	add  linewidth ; #60      ; 96 chars\n" +
-	"	ld   l,a\n" +
-	"	ret  nc\n" +
-	"	inc  h\n" +
-	"	ld   a,h\n" +
-	"	and  7\n" +
-	"	ret  nz\n" +
-	"	ld   a,h\n" +
-	"	sub  8\n" +
-	"	ld   h,a\n" +
-	"	ret\n" +
-	";-----------------------------------------------------------------\n"
+	"    ld b,#f5 ; attente vbl\n" +
+	"vbl     \n" +
+	"    in a,(c)\n" +
+	"    rra\n" +
+	"    jp nc,vbl\n" +
+	"    ret\n" +
+	";---------------------------\n" +
+	"\n" +
+	";--- application palette firmware -------------\n" +
+	"palettefirmware ; hl pointe sur les valeurs de la palette\n" +
+	"ld e,nbcolors\n" +
+	"ld a,0\n" +
+	"ld hl,palette\n" +
+	"\n" +
+	"paletteloop\n" +
+	"ld b,(hl)\n" +
+	"ld c,b\n" +
+	"push af\n" +
+	"push de\n" +
+	"push hl\n" +
+	"call #bc32 ; af, de, hl corrupted\n" +
+	"pop hl\n" +
+	"pop de\n" +
+	"pop af\n" +
+	"inc a\n" +
+	"inc hl\n" +
+	"dec e\n" +
+	"jr nz,paletteloop\n" +
+	"ret\n" +
+	";---------------------------------------------\n" +
+	"\n" +
+	";---------------------------------------------\n" +
+	"\n" +
+	";---- recuperation de l'adresse de la ligne en dessous ------------\n" +
+	"bc26 \n" +
+	"ld a,h\n" +
+	"add a,8 \n" +
+	"ld h,a ; <---- le fameux que tu as oublié !\n" +
+	"ret nc \n" +
+	"ld bc,linewidth ; on passe en 96 colonnes\n" +
+	"add hl,bc\n" +
+	"res 3,h\n" +
+	"ret\n" +
+	";-----------------------------------------------------------------\n" +
+	"\n" +
+	"\n" +
+	";--- variables memoires -----\n" +
+	"pixel db 0 \n" +
+	";----------------------------\n"
