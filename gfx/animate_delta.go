@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 )
@@ -80,9 +81,9 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 	}
 
 	fmt.Printf("Let's go deltapacking raw images\n")
-	realSize := &ex.Size
+	realSize := &constants.Size{Width: ex.Size.Width, Height: ex.Size.Height}
 	realSize.Width = realSize.ModeWidth(mode)
-	ex.Size = *realSize
+
 	for i := 0; i < len(rawImages)-1; i++ {
 		fmt.Printf("Compare image [%d] with [%d] ", i, i+1)
 		d1 := rawImages[i]
@@ -90,7 +91,7 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 		if len(d1) != len(d2) {
 			return ErrorSizeDiffers
 		}
-		dc := Delta(d1, d2, isSprite, ex.Size, mode, uint16(x0), uint16(y0), lineOctetsWidth)
+		dc := Delta(d1, d2, isSprite, *realSize, mode, uint16(x0), uint16(y0), lineOctetsWidth)
 		deltaData = append(deltaData, dc)
 		fmt.Printf("%d bytes differ from the both images\n", len(dc.Items))
 	}
@@ -182,7 +183,7 @@ func exportDeltaAnimate(imageReference []byte, delta []*DeltaCollection, palette
 	header = strings.Replace(header, "$HAUT$", height, 1)
 
 	// replace width
-	var width string = fmt.Sprintf("%d", ex.Size.Width)
+	var width string = fmt.Sprintf("%d", ex.Size.ModeWidth(mode))
 	header = strings.Replace(header, "$LARGE$", width, 1)
 
 	var modeSet string
