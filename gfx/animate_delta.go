@@ -52,6 +52,9 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 		}
 		for i := 0; i < len(imgs); i += pad {
 			in := imgs[i]
+			/*	fw, _ := os.Create(ex.OutputPath + fmt.Sprintf("/a%.2d.png", i))
+				png.Encode(fw, in)
+				fw.Close()*/
 			raw, _, _, err = InternalApplyOneImage(in, ex, int(mode), palette, mode)
 			if err != nil {
 				return err
@@ -126,10 +129,12 @@ func filloutGif(g gif.GIF, ex *export.ExportType) []image.Image {
 	for i := 1; i < len(g.Image)-1; i++ {
 		in := g.Image[i]
 		draw.Draw(reference, reference.Bounds(), in, image.Point{0, 0}, draw.Over)
-		//fw, _ := os.Create(ex.OutputPath + fmt.Sprintf("/%.2d.png", i))
-		//png.Encode(fw, reference)
-		//fw.Close()
-		c = append(c, reference)
+		img := image.NewNRGBA(image.Rect(0, 0, width, height))
+		draw.Draw(img, img.Bounds(), reference, image.Point{0, 0}, draw.Over)
+		/*fw, _ := os.Create(ex.OutputPath + fmt.Sprintf("/%.2d.png", i))
+		png.Encode(fw, reference)
+		fw.Close()*/
+		c = append(c, img)
 	}
 	return c
 }
