@@ -176,7 +176,7 @@ func exportDeltaAnimate(imageReference []byte, delta []*DeltaCollection, palette
 	header = strings.Replace(header, "$NBCOLORS$", nbColors, 1)
 
 	// replace the number of delta
-	nbDelta := fmt.Sprintf("%d", len(delta))
+	nbDelta := fmt.Sprintf("%d", len(delta)+1)
 	header = strings.Replace(header, "$NBDELTA$", nbDelta, 1)
 
 	// replace char large for the screen
@@ -326,7 +326,7 @@ var DeltaCodeDelta string = ";--- dimensions du sprite ----\n" +
 	";\n" +
 	"; attente de plusieurs vbl\n" +
 	";\n" +
-	"xvbl ld e,10\n" +
+	"xvbl ld e,50\n" +
 	"	call waitvbl\n" +
 	"	dec e\n" +
 	"	jr nz,xvbl+2\n" +
