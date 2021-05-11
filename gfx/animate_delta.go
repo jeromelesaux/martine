@@ -104,8 +104,8 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 	dc := Delta(d1, d2, isSprite, ex.Size, mode, uint16(x0), uint16(y0), lineOctetsWidth)
 	deltaData = append(deltaData, dc)
 	fmt.Printf("%d bytes differ from the both images\n", len(dc.Items))
-
-	return exportDeltaAnimate(rawImages[0], deltaData, palette, ex, initialAddress, mode, ex.OutputPath+string(filepath.Separator)+"delta.asm")
+	filename := string(ex.OsFilename(".asm"))
+	return exportDeltaAnimate(rawImages[0], deltaData, palette, ex, initialAddress, mode, ex.OutputPath+string(filepath.Separator)+filename)
 }
 
 func convertToImage(g gif.GIF) []image.Image {
