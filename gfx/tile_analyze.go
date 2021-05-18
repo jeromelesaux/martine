@@ -8,6 +8,7 @@ import (
 	"image/draw"
 	"image/png"
 	"os"
+	"path/filepath"
 
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/pbnjay/pixfont"
@@ -205,14 +206,56 @@ func TilesAreEquals(s1, s2 *Tile) bool {
 	return true
 }
 
+func (a *AnalyzeBoard) GetUniqTiles() []Tile {
+	tiles := make([]Tile, 0)
+	for _, v := range a.BoardTiles {
+		tiles = append(tiles, *v.Tile)
+	}
+	return tiles
+}
+
+func (a *AnalyzeBoard) SaveSprites(folderpath string) error {
+	for index, v := range a.GetUniqTiles() {
+		fw, err := os.Create(folderpath + string(filepath.Separator) + fmt.Sprintf("%.4d.png", index))
+		if err != nil {
+			return err
+		}
+		sprt := v
+		im := image.NewNRGBA(
+			image.Rectangle{
+				Min: image.Point{X: 0, Y: 0},
+				Max: image.Point{X: v.Size.Width, Y: v.Size.Height},
+			})
+		// draw the sprite
+		for y := 0; y < v.Size.Height; y++ {
+			for x := 0; x < v.Size.Width; x++ {
+				im.Set(x, y, sprt.Colors[x][y])
+			}
+		}
+		err = png.Encode(fw, im)
+		if err != nil {
+			return err
+		}
+		fw.Close()
+	}
+	return nil
+}
+
 func (a *AnalyzeBoard) SaveSchema(filePath string) error {
 	f, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	totWidth := (16 * len(a.BoardTiles)) + 20 + (20 * len(a.TileMap[0]))
-	totHeight := (20 * len(a.BoardTiles)) + 20 + (40 * len(a.TileMap))
+	spacerLarge := 16
+	spaceHeigth := 20
+
+	if len(a.BoardTiles) > 300 {
+		spacerLarge = 2
+		spaceHeigth /= 2
+	}
+	totWidth := (spacerLarge * len(a.BoardTiles)) + spaceHeigth + (spaceHeigth * len(a.TileMap[0]))
+	totHeight := (spaceHeigth * len(a.BoardTiles)) + spaceHeigth + ((spaceHeigth * 2) * len(a.TileMap))
 	im := image.NewNRGBA(
 		image.Rectangle{
 			Min: image.Point{X: 0, Y: 0},
@@ -239,7 +282,7 @@ func (a *AnalyzeBoard) SaveSchema(filePath string) error {
 
 		// draw sprite label
 		label := fmt.Sprintf(" Tile %.2d occurence %d", index, v.Occurence)
-		pixfont.DrawString(im, x0+sprt.Size.Width+5, y0+3, label, fontColor)
+		pixfont.DrawString(im, x0+sprt.Size.Width+5, y0, label, fontColor)
 		y0 += sprt.Size.Height + 5
 
 	}
@@ -256,7 +299,7 @@ func (a *AnalyzeBoard) SaveSchema(filePath string) error {
 			x0 += 30
 		}
 		x0 = 10
-		y0 += 10
+		y0 += spaceHeigth / 2
 	}
 
 	return png.Encode(f, im)
