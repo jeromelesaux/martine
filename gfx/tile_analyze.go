@@ -41,6 +41,11 @@ func (b *BoardTile) String() string {
 	return out
 }
 
+func (b *BoardTile) AddTile(tp []TilePosition) {
+	b.Occurence++
+	b.TilePositions = append(b.TilePositions, tp...)
+}
+
 func (a *AnalyzeBoard) Analyse(sprite *Tile, x, y int) int {
 	spriteExists := false
 	var spriteIndex int
@@ -214,6 +219,62 @@ func (a *AnalyzeBoard) GetUniqTiles() []Tile {
 	return tiles
 }
 
+func (a *AnalyzeBoard) Image(filePath string, bt []BoardTile, size constants.Size) error {
+	im := image.NewNRGBA(
+		image.Rectangle{
+			Min: image.Point{X: 0, Y: 0},
+			Max: image.Point{X: size.Width, Y: size.Height},
+		})
+	for _, b := range bt {
+		sprite := b.Tile
+		for _, tp := range b.TilePositions {
+			var x, y int
+			for i := tp.PixelX; i < tp.PixelX+sprite.Size.Width; i++ {
+				for j := tp.PixelY; j < tp.PixelY+sprite.Size.Height; j++ {
+					c := sprite.Colors[x][y]
+					im.Set(i, j, c)
+					y++
+				}
+				x++
+				y = 0
+			}
+		}
+	}
+	fw, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer fw.Close()
+	return png.Encode(fw, im)
+}
+
+func (a *AnalyzeBoard) SaveBoardTile(folderpath string, bt []BoardTile) error {
+	for index, v := range bt {
+		fw, err := os.Create(folderpath + string(filepath.Separator) + fmt.Sprintf("%.4d.png", index))
+		if err != nil {
+			return err
+		}
+		sprt := v.Tile
+		im := image.NewNRGBA(
+			image.Rectangle{
+				Min: image.Point{X: 0, Y: 0},
+				Max: image.Point{X: v.Tile.Size.Width, Y: v.Tile.Size.Height},
+			})
+		// draw the sprite
+		for y := 0; y < v.Tile.Size.Height; y++ {
+			for x := 0; x < v.Tile.Size.Width; x++ {
+				im.Set(x, y, sprt.Colors[x][y])
+			}
+		}
+		err = png.Encode(fw, im)
+		if err != nil {
+			return err
+		}
+		fw.Close()
+	}
+	return nil
+}
+
 func (a *AnalyzeBoard) SaveSprites(folderpath string) error {
 	for index, v := range a.GetUniqTiles() {
 		fw, err := os.Create(folderpath + string(filepath.Separator) + fmt.Sprintf("%.4d.png", index))
@@ -318,4 +379,48 @@ func (a *AnalyzeBoard) SaveTilemap(filePath string) error {
 		f.WriteString("\n")
 	}
 	return nil
+}
+
+func computeTileDistance(t0, t1 *Tile) float64 {
+	var distance float64
+	for i := 0; i < t0.Size.Width; i++ {
+		for j := 0; j < t0.Size.Height; j++ {
+			distance += constants.ColorsDistance(t0.Colors[i][j], t1.Colors[i][j])
+		}
+	}
+	return distance / (float64(t0.Size.Height) * float64(t0.Size.Width))
+}
+
+func (a *AnalyzeBoard) reduceTilesNumber(threshold float64) []BoardTile {
+
+	newBoard := make([]BoardTile, 0)
+	deleted := make([]int, 0)
+	for index, b := range a.BoardTiles {
+		skip := false
+		for i := 0; i < len(deleted); i++ {
+			if deleted[i] == index {
+				skip = true
+				break
+			}
+		}
+		if !skip {
+			t0 := b.Tile
+			isNew := true
+			for i := index + 1; i < len(a.BoardTiles); i++ {
+				t1 := a.BoardTiles[i].Tile
+				d := computeTileDistance(t0, t1)
+				if d < threshold {
+					if isNew {
+						newBoard = append(newBoard, b)
+						isNew = false
+					}
+					tp := a.BoardTiles[i].TilePositions
+					newBoard[len(newBoard)-1].AddTile(tp)
+					deleted = append(deleted, i)
+					//	fmt.Printf("Tile[%d] and tile[%d] are similar distance :%f\n", index, i, d)
+				}
+			}
+		}
+	}
+	return newBoard
 }
