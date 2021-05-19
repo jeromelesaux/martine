@@ -8,7 +8,6 @@ import (
 
 	"github.com/jeromelesaux/martine/constants"
 	x "github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
@@ -51,95 +50,21 @@ func InternalTransform(in *image.NRGBA, p color.Palette, size constants.Size, ex
 	}
 }
 
-func SpriteHardTransformAndSave(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, exportType *x.ExportType) error {
+func SpriteHardTransformAndSave(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, ex *x.ExportType) error {
 
-	data, firmwareColorUsed := common.ToSpriteHard(in, p, size, mode, exportType)
+	data, firmwareColorUsed := common.ToSpriteHard(in, p, size, mode, ex)
 	fmt.Println(firmwareColorUsed)
-	if err := file.Win(filename, data, mode, 16, size.Height, false, exportType); err != nil {
-		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
-		return err
-	}
-	if !exportType.CpcPlus {
-		if err := file.Pal(filename, p, mode, false, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
-			return err
-		}
-		filePath := exportType.OsFullPath(filename, "_palettepal.png")
-		if err := file.PalToPng(filePath, p); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-		if err := file.Ink(filename, p, mode, false, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
-			return err
-		}
-		filePath = exportType.OsFullPath(filename, "_paletteink.png")
-		if err := file.PalToPng(filePath, p); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-	} else {
-		if err := file.Kit(filename, p, mode, false, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
-			return err
-		}
-		filePath := exportType.OsFullPath(filename, "_palettekit.png")
-		if err := file.PalToPng(filePath, p); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-	}
-	if err := file.Ascii(filename, data, p, false, exportType); err != nil {
-		fmt.Fprintf(os.Stderr, "Error while saving ascii file for (%s) error :%v\n", filename, err)
-	}
-	return file.AsciiByColumn(filename, data, p, false, mode, exportType)
+	return common.ExportSprite(data, 16, p, size, mode, filename, false, ex)
 }
 
-func SpriteTransformAndSave(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, exportType *x.ExportType) error {
+func SpriteTransformAndSave(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, ex *x.ExportType) error {
 
-	data, firmwareColorUsed, lineSize, err := common.ToSprite(in, p, size, mode, exportType)
+	data, firmwareColorUsed, lineSize, err := common.ToSprite(in, p, size, mode, ex)
 	if err != nil {
 		return err
 	}
 	fmt.Println(firmwareColorUsed)
-	if err := file.Win(filename, data, mode, lineSize, size.Height, dontImportDsk, exportType); err != nil {
-		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
-		return err
-	}
-	if !exportType.CpcPlus {
-		if err := file.Pal(filename, p, mode, dontImportDsk, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
-			return err
-		}
-		filePath := exportType.OsFullPath(filename, "_palettepal.png")
-		if err := file.PalToPng(filePath, p); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-		if err := file.Ink(filename, p, 2, dontImportDsk, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
-			return err
-		}
-		filePath = exportType.OsFullPath(filename, "_paletteink.png")
-		if err := file.PalToPng(filePath, p); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-	} else {
-		if err := file.Kit(filename, p, mode, dontImportDsk, exportType); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
-			return err
-		}
-		filePath := exportType.OsFullPath(filename, "_palettekit.png")
-		if err := file.PalToPng(filePath, p); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-	}
-	if err := file.Ascii(filename, data, p, dontImportDsk, exportType); err != nil {
-		fmt.Fprintf(os.Stderr, "Error while saving ascii file for (%s) error :%v\n", filename, err)
-	}
-	return file.AsciiByColumn(filename, data, p, dontImportDsk, mode, exportType)
+	return common.ExportSprite(data, lineSize, p, size, mode, filename, dontImportDsk, ex)
 }
 
 func TransformMode0(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *x.ExportType) error {

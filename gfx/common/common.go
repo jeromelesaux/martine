@@ -308,6 +308,47 @@ func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) e
 	return file.Png(output, out)
 }
 
+func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, exportType *export.ExportType) error {
+	if err := file.Win(filename, data, mode, lineSize, size.Height, dontImportDsk, exportType); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+		return err
+	}
+	if !exportType.CpcPlus {
+		if err := file.Pal(filename, p, mode, dontImportDsk, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+			return err
+		}
+		filePath := exportType.OsFullPath(filename, "_palettepal.png")
+		if err := file.PalToPng(filePath, p); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			return err
+		}
+		if err := file.Ink(filename, p, 2, dontImportDsk, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+			return err
+		}
+		filePath = exportType.OsFullPath(filename, "_paletteink.png")
+		if err := file.PalToPng(filePath, p); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			return err
+		}
+	} else {
+		if err := file.Kit(filename, p, mode, dontImportDsk, exportType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+			return err
+		}
+		filePath := exportType.OsFullPath(filename, "_palettekit.png")
+		if err := file.PalToPng(filePath, p); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			return err
+		}
+	}
+	if err := file.Ascii(filename, data, p, dontImportDsk, exportType); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while saving ascii file for (%s) error :%v\n", filename, err)
+	}
+	return file.AsciiByColumn(filename, data, p, dontImportDsk, mode, exportType)
+}
+
 func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *export.ExportType) error {
 	if ex.Overscan {
 		if ex.EgxFormat == 0 {
