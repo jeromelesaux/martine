@@ -11,6 +11,7 @@ import (
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/filter"
 )
 
@@ -155,10 +156,10 @@ func ApplyOneImage(in image.Image,
 		}
 		if !exportType.SpriteHard {
 			fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
-			SpriteTransform(downgraded, newPalette, exportType.Size, screenMode, filename, false, exportType)
+			SpriteTransformAndSave(downgraded, newPalette, exportType.Size, screenMode, filename, false, exportType)
 		} else {
 			fmt.Fprintf(os.Stdout, "Transform image in sprite hard.\n")
-			SpriteHardTransform(downgraded, newPalette, exportType.Size, screenMode, filename, exportType)
+			SpriteHardTransformAndSave(downgraded, newPalette, exportType.Size, screenMode, filename, exportType)
 		}
 	}
 	return err
@@ -212,10 +213,10 @@ func InternalApplyOneImage(in image.Image,
 		}
 		if !exportType.SpriteHard {
 			fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
-			data, _, lineSize, err = InternalSpriteTransform(downgraded, newPalette, exportType.Size, screenMode, exportType)
+			data, _, lineSize, err = common.ToSprite(downgraded, newPalette, exportType.Size, screenMode, exportType)
 		} else {
 			fmt.Fprintf(os.Stdout, "Transform image in sprite hard.\n")
-			data, _ = InternalSpriteHardTransform(downgraded, newPalette, exportType.Size, screenMode, exportType)
+			data, _ = common.ToSpriteHard(downgraded, newPalette, exportType.Size, screenMode, exportType)
 			lineSize = 16
 		}
 	}

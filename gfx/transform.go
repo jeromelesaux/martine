@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"math"
 	"os"
 
 	"github.com/jeromelesaux/martine/constants"
@@ -36,47 +35,25 @@ func Transform(in *image.NRGBA, p color.Palette, size constants.Size, filepath s
 func InternalTransform(in *image.NRGBA, p color.Palette, size constants.Size, exportType *x.ExportType) []byte {
 	switch size {
 	case constants.Mode0:
-		return ToMode0(in, p, exportType)
+		return common.ToMode0(in, p, exportType)
 	case constants.Mode1:
-		return ToMode1(in, p, exportType)
+		return common.ToMode1(in, p, exportType)
 	case constants.Mode2:
-		return ToMode2(in, p, exportType)
+		return common.ToMode2(in, p, exportType)
 	case constants.OverscanMode0:
-		return ToMode0(in, p, exportType)
+		return common.ToMode0(in, p, exportType)
 	case constants.OverscanMode1:
-		return ToMode1(in, p, exportType)
+		return common.ToMode1(in, p, exportType)
 	case constants.OverscanMode2:
-		return ToMode2(in, p, exportType)
+		return common.ToMode2(in, p, exportType)
 	default:
 		return []byte{}
 	}
 }
 
-func InternalSpriteHardTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, exportType *x.ExportType) (data []byte, firmwareColorUsed map[int]int) {
-	size.Height = in.Bounds().Max.Y
-	size.Width = in.Bounds().Max.X
-	firmwareColorUsed = make(map[int]int)
-	offset := 0
-	data = make([]byte, 256)
-	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
-		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
-			c := in.At(x, y)
-			pp, err := common.PalettePosition(c, p)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c, x, y)
-				pp = 0
-			}
-			firmwareColorUsed[pp]++
-			data[offset] = byte(exportType.SwapInk(pp))
-			offset++
-		}
-	}
-	return data, firmwareColorUsed
-}
+func SpriteHardTransformAndSave(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, exportType *x.ExportType) error {
 
-func SpriteHardTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, exportType *x.ExportType) error {
-
-	data, firmwareColorUsed := InternalSpriteHardTransform(in, p, size, mode, exportType)
+	data, firmwareColorUsed := common.ToSpriteHard(in, p, size, mode, exportType)
 	fmt.Println(firmwareColorUsed)
 	if err := file.Win(filename, data, mode, 16, size.Height, false, exportType); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
@@ -118,295 +95,9 @@ func SpriteHardTransform(in *image.NRGBA, p color.Palette, size constants.Size, 
 	return file.AsciiByColumn(filename, data, p, false, mode, exportType)
 }
 
-func InternalSpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, exportType *x.ExportType) (data []byte, firmwareColorUsed map[int]int, lineSize int, err error) {
+func SpriteTransformAndSave(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, exportType *x.ExportType) error {
 
-	firmwareColorUsed = make(map[int]int)
-	size.Height = in.Bounds().Max.Y
-	size.Width = in.Bounds().Max.X
-	lineToAdd := 1
-
-	if exportType.OneLine {
-		lineToAdd = 2
-	}
-	if mode == 0 {
-		lineSize = int(math.Ceil(float64(size.Width) / 2.))
-		data = make([]byte, size.Height*lineSize)
-		offset := 0
-
-		for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
-			for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
-				c1 := in.At(x, y)
-				pp1, err := common.PalettePosition(c1, p)
-				if err != nil {
-					//fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
-					pp1 = 0
-				}
-				pp1 = exportType.SwapInk(pp1)
-				firmwareColorUsed[pp1]++
-				//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
-				c2 := in.At(x+1, y)
-				pp2, err := common.PalettePosition(c2, p)
-				if err != nil {
-					//fmt.Fprintf(os.Stdout, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
-					pp2 = 0
-				}
-				pp2 = exportType.SwapInk(pp2)
-				firmwareColorUsed[pp2]++
-				if exportType.OneRow {
-					pp2 = 0
-				}
-				pixel := common.PixelMode0(pp1, pp2)
-				if exportType.MaskAndOperation {
-					pixel = pixel & exportType.MaskSprite
-				}
-				if exportType.MaskOrOperation {
-					pixel = pixel | exportType.MaskSprite
-				}
-				if len(exportType.ScanlineSequence) > 0 {
-					scanlineSize := len(exportType.ScanlineSequence)
-					scanlineIndex := y % scanlineSize
-					scanlineValue := exportType.ScanlineSequence[scanlineIndex]
-					newOffset := (scanlineValue * ((y / scanlineSize) + 1) * lineSize) + (x / 2)
-					data[newOffset] = pixel
-				} else {
-					data[offset] = pixel
-				}
-				offset++
-			}
-			if exportType.OneLine {
-				y++
-				for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
-					pp := 0
-					firmwareColorUsed[pp]++
-					pixel := common.PixelMode0(pp, pp)
-					if len(exportType.ScanlineSequence) > 0 {
-						scanlineSize := len(exportType.ScanlineSequence)
-						scanlineIndex := y % scanlineSize
-						scanlineValue := exportType.ScanlineSequence[scanlineIndex]
-						newOffset := (scanlineValue * ((y / scanlineSize) + 1) * lineSize) + (x / 2)
-						data[newOffset] = pixel
-					} else {
-						data[offset] = pixel
-					}
-					offset++
-				}
-			}
-		}
-	} else {
-		if mode == 1 {
-			lineSize = int(math.Ceil(float64(size.Width) / 4.))
-			data = make([]byte, size.Height*lineSize)
-			offset := 0
-
-			for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
-				for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 4 {
-
-					c1 := in.At(x, y)
-					pp1, err := common.PalettePosition(c1, p)
-					if err != nil {
-						//	fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
-						pp1 = 0
-					}
-					pp1 = exportType.SwapInk(pp1)
-					firmwareColorUsed[pp1]++
-					//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
-					c2 := in.At(x+1, y)
-					pp2, err := common.PalettePosition(c2, p)
-					if err != nil {
-						//fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
-						pp2 = 0
-					}
-					pp2 = exportType.SwapInk(pp2)
-					firmwareColorUsed[pp2]++
-					c3 := in.At(x+2, y)
-					pp3, err := common.PalettePosition(c3, p)
-					if err != nil {
-						//	fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
-						pp3 = 0
-					}
-					pp3 = exportType.SwapInk(pp3)
-					firmwareColorUsed[pp3]++
-					c4 := in.At(x+3, y)
-					pp4, err := common.PalettePosition(c4, p)
-					if err != nil {
-						//	fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
-						pp4 = 0
-					}
-					pp4 = exportType.SwapInk(pp4)
-					firmwareColorUsed[pp4]++
-					if exportType.OneRow {
-						pp2 = 0
-						pp4 = 0
-					}
-					pixel := common.PixelMode1(pp1, pp2, pp3, pp4)
-					//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
-					// MACRO PIXM0 COL2,COL1
-					// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
-					//	MEND
-					if exportType.MaskAndOperation {
-						pixel = pixel & exportType.MaskSprite
-					}
-					if exportType.MaskOrOperation {
-						pixel = pixel | exportType.MaskSprite
-					}
-					if len(exportType.ScanlineSequence) > 0 {
-						scanlineSize := len(exportType.ScanlineSequence)
-						scanlineIndex := y % scanlineSize
-						scanlineValue := exportType.ScanlineSequence[scanlineIndex]
-						newOffset := (scanlineValue * ((y / scanlineSize) + 1) * lineSize) + (x / 4)
-						data[newOffset] = pixel
-					} else {
-						data[offset] = pixel
-					}
-					offset++
-				}
-				if exportType.OneLine {
-					y++
-					for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 4 {
-						pp := 0
-						firmwareColorUsed[pp]++
-						pixel := common.PixelMode1(pp, pp, pp, pp)
-						if len(exportType.ScanlineSequence) > 0 {
-							scanlineSize := len(exportType.ScanlineSequence)
-							scanlineIndex := y % scanlineSize
-							scanlineValue := exportType.ScanlineSequence[scanlineIndex]
-							newOffset := (scanlineValue * ((y / scanlineSize) + 1) * lineSize) + (x / 2)
-							data[newOffset] = pixel
-						} else {
-							data[offset] = pixel
-						}
-						offset++
-					}
-				}
-			}
-
-		} else {
-			if mode == 2 {
-				lineSize = int(math.Ceil(float64(size.Width) / 8.))
-				data = make([]byte, size.Height*lineSize)
-				offset := 0
-
-				for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
-					for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 8 {
-
-						c1 := in.At(x, y)
-						pp1, err := common.PalettePosition(c1, p)
-						if err != nil {
-							//		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
-							pp1 = 0
-						}
-						pp1 = exportType.SwapInk(pp1)
-						firmwareColorUsed[pp1]++
-						//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
-						c2 := in.At(x+1, y)
-						pp2, err := common.PalettePosition(c2, p)
-						if err != nil {
-							//fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
-							pp2 = 0
-						}
-						pp2 = exportType.SwapInk(pp2)
-						firmwareColorUsed[pp2]++
-						c3 := in.At(x+2, y)
-						pp3, err := common.PalettePosition(c3, p)
-						if err != nil {
-							//		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
-							pp3 = 0
-						}
-						pp3 = exportType.SwapInk(pp3)
-						firmwareColorUsed[pp3]++
-						c4 := in.At(x+3, y)
-						pp4, err := common.PalettePosition(c4, p)
-						if err != nil {
-							//		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
-							pp4 = 0
-						}
-						pp4 = exportType.SwapInk(pp4)
-						firmwareColorUsed[pp4]++
-						c5 := in.At(x+4, y)
-						pp5, err := common.PalettePosition(c5, p)
-						if err != nil {
-							//	fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
-							pp5 = 0
-						}
-						pp5 = exportType.SwapInk(pp5)
-						firmwareColorUsed[pp5]++
-						//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
-						c6 := in.At(x+5, y)
-						pp6, err := common.PalettePosition(c6, p)
-						if err != nil {
-							//	fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
-							pp6 = 0
-						}
-						pp6 = exportType.SwapInk(pp6)
-						firmwareColorUsed[pp6]++
-						c7 := in.At(x+6, y)
-						pp7, err := common.PalettePosition(c7, p)
-						if err != nil {
-							//fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
-							pp7 = 0
-						}
-						pp7 = exportType.SwapInk(pp7)
-						firmwareColorUsed[pp7]++
-						c8 := in.At(x+7, y)
-						pp8, err := common.PalettePosition(c8, p)
-						if err != nil {
-							//		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, x+7, y)
-							pp8 = 0
-						}
-						pp8 = exportType.SwapInk(pp8)
-						firmwareColorUsed[pp8]++
-						if exportType.OneRow {
-							pp2 = 0
-							pp4 = 0
-							pp6 = 0
-							pp8 = 0
-						}
-						pixel := common.PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
-						//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
-						// MACRO PIXM0 COL2,COL1
-						// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
-						//	MEND
-						if len(exportType.ScanlineSequence) > 0 {
-							scanlineSize := len(exportType.ScanlineSequence)
-							scanlineIndex := y % scanlineSize
-							scanlineValue := exportType.ScanlineSequence[scanlineIndex]
-							newOffset := (scanlineValue * ((y / scanlineSize) + 1) * lineSize) + (x / 8)
-							data[newOffset] = pixel
-						} else {
-							data[offset] = pixel
-						}
-						offset++
-					}
-					if exportType.OneLine {
-						y++
-						for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 8 {
-							pp := 0
-							firmwareColorUsed[pp]++
-							pixel := common.PixelMode2(pp, pp, pp, pp, pp, pp, pp, pp)
-							if len(exportType.ScanlineSequence) > 0 {
-								scanlineSize := len(exportType.ScanlineSequence)
-								scanlineIndex := y % scanlineSize
-								scanlineValue := exportType.ScanlineSequence[scanlineIndex]
-								newOffset := (scanlineValue * ((y / scanlineSize) + 1) * lineSize) + (x / 2)
-								data[newOffset] = pixel
-							} else {
-								data[offset] = pixel
-							}
-							offset++
-						}
-					}
-				}
-			} else {
-				return data, firmwareColorUsed, lineSize, errors.ErrorModeNotFound
-			}
-		}
-	}
-	return data, firmwareColorUsed, lineSize, nil
-}
-
-func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, exportType *x.ExportType) error {
-
-	data, firmwareColorUsed, lineSize, err := InternalSpriteTransform(in, p, size, mode, exportType)
+	data, firmwareColorUsed, lineSize, err := common.ToSprite(in, p, size, mode, exportType)
 	if err != nil {
 		return err
 	}
@@ -451,249 +142,18 @@ func SpriteTransform(in *image.NRGBA, p color.Palette, size constants.Size, mode
 	return file.AsciiByColumn(filename, data, p, dontImportDsk, mode, exportType)
 }
 
-func ToMode0(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte {
-	var bw []byte
-
-	lineToAdd := 1
-	if exportType.OneLine {
-		lineToAdd = 2
-	}
-	if exportType.Overscan {
-		bw = make([]byte, 0x8000)
-	} else {
-		bw = make([]byte, 0x4000)
-	}
-	firmwareColorUsed := make(map[int]int)
-	fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
-	fmt.Println(in.Bounds())
-
-	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
-		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
-
-			c1 := in.At(x, y)
-			pp1, err := common.PalettePosition(c1, p)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
-				pp1 = 0
-			}
-			pp1 = exportType.SwapInk(pp1)
-			firmwareColorUsed[pp1]++
-			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
-			c2 := in.At(x+1, y)
-			pp2, err := common.PalettePosition(c2, p)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
-				pp2 = 0
-			}
-			pp2 = exportType.SwapInk(pp2)
-			firmwareColorUsed[pp2]++
-			if exportType.OneRow {
-				pp2 = 0
-			}
-			pixel := common.PixelMode0(pp1, pp2)
-			//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
-			// MACRO PIXM0 COL2,COL1
-			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
-			//	MEND
-			addr := common.CpcScreenAddress(0, x, y, 0, exportType.Overscan)
-			bw[addr] = pixel
-		}
-	}
-
-	fmt.Println(firmwareColorUsed)
-	return bw
-}
-
 func TransformMode0(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *x.ExportType) error {
-	bw := ToMode0(in, p, exportType)
+	bw := common.ToMode0(in, p, exportType)
 	return common.Export(filePath, bw, p, 0, exportType)
 }
 
-func ToMode1(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte {
-	var bw []byte
-
-	lineToAdd := 1
-
-	if exportType.OneLine {
-		lineToAdd = 2
-	}
-	if exportType.Overscan {
-		bw = make([]byte, 0x8000)
-	} else {
-		bw = make([]byte, 0x4000)
-	}
-
-	firmwareColorUsed := make(map[int]int)
-	fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
-	fmt.Println(in.Bounds())
-
-	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
-		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 4 {
-
-			c1 := in.At(x, y)
-			pp1, err := common.PalettePosition(c1, p)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
-				pp1 = 0
-			}
-			pp1 = exportType.SwapInk(pp1)
-			firmwareColorUsed[pp1]++
-			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
-			c2 := in.At(x+1, y)
-			pp2, err := common.PalettePosition(c2, p)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
-				pp2 = 0
-			}
-			pp2 = exportType.SwapInk(pp2)
-			firmwareColorUsed[pp2]++
-			c3 := in.At(x+2, y)
-			pp3, err := common.PalettePosition(c3, p)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
-				pp3 = 0
-			}
-			pp3 = exportType.SwapInk(pp3)
-			firmwareColorUsed[pp3]++
-			c4 := in.At(x+3, y)
-			pp4, err := common.PalettePosition(c4, p)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
-				pp4 = 0
-			}
-			pp4 = exportType.SwapInk(pp4)
-			firmwareColorUsed[pp4]++
-			if exportType.OneRow {
-				pp4 = 0
-				pp2 = 0
-			}
-			pixel := common.PixelMode1(pp1, pp2, pp3, pp4)
-			//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
-			// MACRO PIXM0 COL2,COL1
-			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
-			//	MEND
-			addr := common.CpcScreenAddress(0, x, y, 1, exportType.Overscan)
-			bw[addr] = pixel
-		}
-	}
-	return bw
-}
-
 func TransformMode1(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *x.ExportType) error {
-	bw := ToMode1(in, p, exportType)
+	bw := common.ToMode1(in, p, exportType)
 	return common.Export(filePath, bw, p, 1, exportType)
 }
 
-func ToMode2(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte {
-	var bw []byte
-
-	lineToAdd := 1
-
-	if exportType.OneLine {
-		lineToAdd = 2
-	}
-
-	if exportType.Overscan {
-		bw = make([]byte, 0x8000)
-	} else {
-		bw = make([]byte, 0x4000)
-	}
-	firmwareColorUsed := make(map[int]int)
-	fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
-	fmt.Println(in.Bounds())
-
-	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
-		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 8 {
-
-			c1 := in.At(x, y)
-			pp1, err := common.PalettePosition(c1, p)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
-				pp1 = 0
-			}
-			pp1 = exportType.SwapInk(pp1)
-			firmwareColorUsed[pp1]++
-			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
-			c2 := in.At(x+1, y)
-			pp2, err := common.PalettePosition(c2, p)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
-				pp2 = 0
-			}
-			pp2 = exportType.SwapInk(pp2)
-			firmwareColorUsed[pp2]++
-			c3 := in.At(x+2, y)
-			pp3, err := common.PalettePosition(c3, p)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
-				pp3 = 0
-			}
-			pp3 = exportType.SwapInk(pp3)
-			firmwareColorUsed[pp3]++
-			c4 := in.At(x+3, y)
-			pp4, err := common.PalettePosition(c4, p)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
-				pp4 = 0
-			}
-			pp4 = exportType.SwapInk(pp4)
-			firmwareColorUsed[pp4]++
-			c5 := in.At(x+4, y)
-			pp5, err := common.PalettePosition(c5, p)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
-				pp5 = 0
-			}
-			pp5 = exportType.SwapInk(pp5)
-			firmwareColorUsed[pp5]++
-			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
-			c6 := in.At(x+5, y)
-			pp6, err := common.PalettePosition(c6, p)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
-				pp6 = 0
-			}
-			pp6 = exportType.SwapInk(pp6)
-			firmwareColorUsed[pp6]++
-			c7 := in.At(x+6, y)
-			pp7, err := common.PalettePosition(c7, p)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
-				pp7 = 0
-			}
-			pp7 = exportType.SwapInk(pp7)
-			firmwareColorUsed[pp7]++
-			c8 := in.At(x+7, y)
-			pp8, err := common.PalettePosition(c8, p)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, x+7, y)
-				pp8 = 0
-			}
-			pp8 = exportType.SwapInk(pp8)
-			firmwareColorUsed[pp8]++
-			if exportType.OneRow {
-				pp2 = 0
-				pp4 = 0
-				pp6 = 0
-				pp8 = 0
-			}
-			pixel := common.PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
-			//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
-			// MACRO PIXM0 COL2,COL1
-			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
-			//	MEND
-			addr := common.CpcScreenAddress(0, x, y, 2, exportType.Overscan)
-			bw[addr] = pixel
-		}
-
-	}
-
-	fmt.Println(firmwareColorUsed)
-	return bw
-}
-
 func TransformMode2(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *x.ExportType) error {
-	bw := ToMode2(in, p, exportType)
+	bw := common.ToMode2(in, p, exportType)
 	return common.Export(filePath, bw, p, 2, exportType)
 }
 

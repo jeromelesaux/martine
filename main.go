@@ -516,7 +516,7 @@ func main() {
 					if err := file.Png(tileFilepath+"_down.png", out); err != nil {
 						os.Exit(-2)
 					}
-					if err := gfx.SpriteTransform(tile, palette, exportType.Size, screenMode, tileFilepath, false, exportType); err != nil {
+					if err := gfx.SpriteTransformAndSave(tile, palette, exportType.Size, screenMode, tileFilepath, false, exportType); err != nil {
 						fmt.Fprintf(os.Stderr, "Cannot create tile from image %s, error :%v\n", tileFilepath, err)
 					}
 				}

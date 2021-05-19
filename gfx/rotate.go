@@ -50,7 +50,7 @@ func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, f
 		if err := file.Png(newFilename, rin); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create image (%s) error :%v\n", newFilename, err)
 		}
-		if err := SpriteTransform(rin, p, maxSize, mode, newFilename, false, exportType); err != nil {
+		if err := SpriteTransformAndSave(rin, p, maxSize, mode, newFilename, false, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create sprite image (%s) error %v\n", newFilename, err)
 		}
 		indice++
