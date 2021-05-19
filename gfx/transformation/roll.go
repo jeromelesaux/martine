@@ -1,4 +1,4 @@
-package gfx
+package transformation
 
 import (
 	"fmt"
@@ -13,6 +13,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/gfx/common"
 )
 
 func RollLeft(rla, sla, iterations int, screenMode uint8, size constants.Size, downgraded *image.NRGBA, newPalette color.Palette, filename string, exportType *x.ExportType) {
@@ -56,7 +57,7 @@ func RollLeft(rla, sla, iterations int, screenMode uint8, size constants.Size, d
 			fmt.Fprintf(os.Stdout, "Saving downgraded image iteration (%d) into (%s)\n", i, newFilename)
 			file.Png(filepath.Join(exportType.OutputPath, newFilename), im)
 			fmt.Fprintf(os.Stdout, "Tranform image in sprite iteration (%d)\n", i)
-			SpriteTransformAndSave(im, newPalette, size, screenMode, newFilename, false, exportType)
+			common.ToSpriteAndExport(im, newPalette, size, screenMode, newFilename, false, exportType)
 		}
 	}
 }
@@ -98,7 +99,7 @@ func RollRight(rra, sra, iterations int, screenMode uint8, size constants.Size, 
 			fmt.Fprintf(os.Stdout, "Saving downgraded image iteration (%d) into (%s)\n", i, newFilename)
 			file.Png(filepath.Join(exportType.OutputPath, newFilename), im)
 			fmt.Fprintf(os.Stdout, "Tranform image in sprite iteration (%d)\n", i)
-			SpriteTransformAndSave(im, newPalette, size, screenMode, newFilename, false, exportType)
+			common.ToSpriteAndExport(im, newPalette, size, screenMode, newFilename, false, exportType)
 		}
 	}
 }
@@ -139,7 +140,7 @@ func RollUp(keephigh, losthigh, iterations int, screenMode uint8, size constants
 			fmt.Fprintf(os.Stdout, "Saving downgraded image iteration (%d) into (%s)\n", i, newFilename)
 			file.Png(filepath.Join(exportType.OutputPath, newFilename), im)
 			fmt.Fprintf(os.Stdout, "Tranform image in sprite iteration (%d)\n", i)
-			SpriteTransformAndSave(im, newPalette, size, screenMode, newFilename, false, exportType)
+			common.ToSpriteAndExport(im, newPalette, size, screenMode, newFilename, false, exportType)
 		}
 	}
 }
@@ -180,7 +181,7 @@ func RollLow(keeplow, lostlow, iterations int, screenMode uint8, size constants.
 			fmt.Fprintf(os.Stdout, "Saving downgraded image iteration (%d) into (%s)\n", i, newFilename)
 			file.Png(filepath.Join(exportType.OutputPath, newFilename), im)
 			fmt.Fprintf(os.Stdout, "Tranform image in sprite iteration (%d)\n", i)
-			SpriteTransformAndSave(im, newPalette, size, screenMode, newFilename, false, exportType)
+			common.ToSpriteAndExport(im, newPalette, size, screenMode, newFilename, false, exportType)
 		}
 	}
 }

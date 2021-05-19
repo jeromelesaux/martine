@@ -13,6 +13,7 @@ import (
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/filter"
+	"github.com/jeromelesaux/martine/gfx/transformation"
 )
 
 func DoDithering(in *image.NRGBA, p color.Palette, exportType *export.ExportType) (*image.NRGBA, color.Palette) {
@@ -41,27 +42,27 @@ func DoTransformation(in *image.NRGBA, p color.Palette, filename, picturePath st
 	var err error
 	if exportType.RollMode {
 		if exportType.RotationRlaBit != -1 || exportType.RotationSlaBit != -1 {
-			RollLeft(exportType.RotationRlaBit, exportType.RotationSlaBit, exportType.RotationIterations, screenMode, exportType.Size, in, p, filename, exportType)
+			transformation.RollLeft(exportType.RotationRlaBit, exportType.RotationSlaBit, exportType.RotationIterations, screenMode, exportType.Size, in, p, filename, exportType)
 		} else {
 			if exportType.RotationRraBit != -1 || exportType.RotationSraBit != -1 {
-				RollRight(exportType.RotationRraBit, exportType.RotationSraBit, exportType.RotationIterations, screenMode, exportType.Size, in, p, filename, exportType)
+				transformation.RollRight(exportType.RotationRraBit, exportType.RotationSraBit, exportType.RotationIterations, screenMode, exportType.Size, in, p, filename, exportType)
 			}
 		}
 		if exportType.RotationKeephighBit != -1 || exportType.RotationLosthighBit != -1 {
-			RollUp(exportType.RotationKeephighBit, exportType.RotationLosthighBit, exportType.RotationIterations, screenMode, exportType.Size, in, p, filename, exportType)
+			transformation.RollUp(exportType.RotationKeephighBit, exportType.RotationLosthighBit, exportType.RotationIterations, screenMode, exportType.Size, in, p, filename, exportType)
 		} else {
 			if exportType.RotationKeeplowBit != -1 || exportType.RotationLostlowBit != -1 {
-				RollLow(exportType.RotationKeeplowBit, exportType.RotationLostlowBit, exportType.RotationIterations, screenMode, exportType.Size, in, p, filename, exportType)
+				transformation.RollLow(exportType.RotationKeeplowBit, exportType.RotationLostlowBit, exportType.RotationIterations, screenMode, exportType.Size, in, p, filename, exportType)
 			}
 		}
 	}
 	if exportType.RotationMode {
-		if err = Rotate(in, p, exportType.Size, uint8(mode), picturePath, exportType.ResizingAlgo, exportType); err != nil {
+		if err = transformation.Rotate(in, p, exportType.Size, uint8(mode), picturePath, exportType.ResizingAlgo, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", picturePath, err)
 		}
 	}
 	if exportType.Rotation3DMode {
-		if err = Rotate3d(in, p, exportType.Size, uint8(mode), picturePath, exportType.ResizingAlgo, exportType); err != nil {
+		if err = transformation.Rotate3d(in, p, exportType.Size, uint8(mode), picturePath, exportType.ResizingAlgo, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", picturePath, err)
 		}
 	}
@@ -152,14 +153,14 @@ func ApplyOneImage(in image.Image,
 	} else {
 		if exportType.ZigZag {
 			// prepare zigzag transformation
-			downgraded = Zigzag(downgraded)
+			downgraded = transformation.Zigzag(downgraded)
 		}
 		if !exportType.SpriteHard {
 			fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
-			SpriteTransformAndSave(downgraded, newPalette, exportType.Size, screenMode, filename, false, exportType)
+			common.ToSpriteAndExport(downgraded, newPalette, exportType.Size, screenMode, filename, false, exportType)
 		} else {
 			fmt.Fprintf(os.Stdout, "Transform image in sprite hard.\n")
-			SpriteHardTransformAndSave(downgraded, newPalette, exportType.Size, screenMode, filename, exportType)
+			common.ToSpriteHardAndExport(downgraded, newPalette, exportType.Size, screenMode, filename, exportType)
 		}
 	}
 	return err
@@ -209,7 +210,7 @@ func InternalApplyOneImage(in image.Image,
 	} else {
 		if exportType.ZigZag {
 			// prepare zigzag transformation
-			downgraded = Zigzag(downgraded)
+			downgraded = transformation.Zigzag(downgraded)
 		}
 		if !exportType.SpriteHard {
 			fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")

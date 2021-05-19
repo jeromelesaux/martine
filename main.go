@@ -474,7 +474,7 @@ func main() {
 					fmt.Fprintf(os.Stderr, "You must set height and width to define the tile dimensions (options -h and -w)\n")
 					os.Exit(-1)
 				}
-				analyze := gfx.AnalyzeTilesBoard(in, exportType.Size)
+				analyze := transformation.AnalyzeTilesBoard(in, exportType.Size)
 				if err := analyze.SaveSchema(filepath.Join(exportType.OutputPath, "tilesmap_schema.png")); err != nil {
 					fmt.Fprintf(os.Stderr, "Cannot save tilemap schema error :%v\n", err)
 					os.Exit(-1)
@@ -516,7 +516,7 @@ func main() {
 					if err := file.Png(tileFilepath+"_down.png", out); err != nil {
 						os.Exit(-2)
 					}
-					if err := gfx.SpriteTransformAndSave(tile, palette, exportType.Size, screenMode, tileFilepath, false, exportType); err != nil {
+					if err := cgfx.ToSpriteAndExport(tile, palette, exportType.Size, screenMode, tileFilepath, false, exportType); err != nil {
 						fmt.Fprintf(os.Stderr, "Cannot create tile from image %s, error :%v\n", tileFilepath, err)
 					}
 				}
@@ -528,7 +528,7 @@ func main() {
 						usage()
 						os.Exit(-1)
 					}
-					err := gfx.TileMode(exportType, uint8(*mode), exportType.TileIterationX, exportType.TileIterationY)
+					err := transformation.TileMode(exportType, uint8(*mode), exportType.TileIterationX, exportType.TileIterationY)
 					if err != nil {
 						fmt.Fprintf(os.Stderr, "Tile mode on error : error :%v\n", err)
 						os.Exit(-1)

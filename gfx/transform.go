@@ -15,17 +15,17 @@ import (
 func Transform(in *image.NRGBA, p color.Palette, size constants.Size, filepath string, exportType *x.ExportType) error {
 	switch size {
 	case constants.Mode0:
-		return TransformMode0(in, p, size, filepath, exportType)
+		return common.ToMode0AndExport(in, p, size, filepath, exportType)
 	case constants.Mode1:
-		return TransformMode1(in, p, size, filepath, exportType)
+		return common.ToMode1AndExport(in, p, size, filepath, exportType)
 	case constants.Mode2:
-		return TransformMode2(in, p, size, filepath, exportType)
+		return common.ToMode2AndExport(in, p, size, filepath, exportType)
 	case constants.OverscanMode0:
-		return TransformMode0(in, p, size, filepath, exportType)
+		return common.ToMode0AndExport(in, p, size, filepath, exportType)
 	case constants.OverscanMode1:
-		return TransformMode1(in, p, size, filepath, exportType)
+		return common.ToMode1AndExport(in, p, size, filepath, exportType)
 	case constants.OverscanMode2:
-		return TransformMode2(in, p, size, filepath, exportType)
+		return common.ToMode2AndExport(in, p, size, filepath, exportType)
 	default:
 		return errors.ErrorNotYetImplemented
 	}
@@ -48,38 +48,6 @@ func InternalTransform(in *image.NRGBA, p color.Palette, size constants.Size, ex
 	default:
 		return []byte{}
 	}
-}
-
-func SpriteHardTransformAndSave(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, ex *x.ExportType) error {
-
-	data, firmwareColorUsed := common.ToSpriteHard(in, p, size, mode, ex)
-	fmt.Println(firmwareColorUsed)
-	return common.ExportSprite(data, 16, p, size, mode, filename, false, ex)
-}
-
-func SpriteTransformAndSave(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, ex *x.ExportType) error {
-
-	data, firmwareColorUsed, lineSize, err := common.ToSprite(in, p, size, mode, ex)
-	if err != nil {
-		return err
-	}
-	fmt.Println(firmwareColorUsed)
-	return common.ExportSprite(data, lineSize, p, size, mode, filename, dontImportDsk, ex)
-}
-
-func TransformMode0(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *x.ExportType) error {
-	bw := common.ToMode0(in, p, exportType)
-	return common.Export(filePath, bw, p, 0, exportType)
-}
-
-func TransformMode1(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *x.ExportType) error {
-	bw := common.ToMode1(in, p, exportType)
-	return common.Export(filePath, bw, p, 1, exportType)
-}
-
-func TransformMode2(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *x.ExportType) error {
-	bw := common.ToMode2(in, p, exportType)
-	return common.Export(filePath, bw, p, 2, exportType)
 }
 
 func revertColor(rawColor uint8, index int, isPlus bool) color.Color {

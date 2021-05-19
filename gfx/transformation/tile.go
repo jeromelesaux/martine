@@ -1,4 +1,4 @@
-package gfx
+package transformation
 
 import (
 	"fmt"
@@ -12,6 +12,7 @@ import (
 	"github.com/jeromelesaux/martine/convert"
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/oliamb/cutter"
 )
 
@@ -78,7 +79,7 @@ func TileMode(ex *x.ExportType, mode uint8, iterationX, iterationY int) error {
 			ext = strconv.Itoa(index) + ".png"
 			ex.Size.Width = resized.Bounds().Max.X
 			ex.Size.Height = resized.Bounds().Max.Y
-			if err := SpriteTransformAndSave(downgraded, p, ex.Size, mode, ex.OsFilename(ext), false, ex); err != nil {
+			if err := common.ToSpriteAndExport(downgraded, p, ex.Size, mode, ex.OsFilename(ext), false, ex); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot create sprite from image, error :%v\n", err)
 			}
 			index++

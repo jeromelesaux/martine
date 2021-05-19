@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"os"
 
+	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
 )
 
@@ -238,4 +239,19 @@ func ToMode0(in *image.NRGBA, p color.Palette, ex *export.ExportType) []byte {
 
 	fmt.Println(firmwareColorUsed)
 	return bw
+}
+
+func ToMode0AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *export.ExportType) error {
+	bw := ToMode0(in, p, exportType)
+	return Export(filePath, bw, p, 0, exportType)
+}
+
+func ToMode1AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *export.ExportType) error {
+	bw := ToMode1(in, p, exportType)
+	return Export(filePath, bw, p, 1, exportType)
+}
+
+func ToMode2AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *export.ExportType) error {
+	bw := ToMode2(in, p, exportType)
+	return Export(filePath, bw, p, 2, exportType)
 }

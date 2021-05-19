@@ -12,6 +12,23 @@ import (
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
+func ToSpriteAndExport(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, ex *export.ExportType) error {
+
+	data, firmwareColorUsed, lineSize, err := ToSprite(in, p, size, mode, ex)
+	if err != nil {
+		return err
+	}
+	fmt.Println(firmwareColorUsed)
+	return ExportSprite(data, lineSize, p, size, mode, filename, dontImportDsk, ex)
+}
+
+func ToSpriteHardAndExport(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, ex *export.ExportType) error {
+
+	data, firmwareColorUsed := ToSpriteHard(in, p, size, mode, ex)
+	fmt.Println(firmwareColorUsed)
+	return ExportSprite(data, 16, p, size, mode, filename, false, ex)
+}
+
 func ToSprite(in *image.NRGBA,
 	p color.Palette,
 	size constants.Size,
