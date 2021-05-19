@@ -1,4 +1,4 @@
-package gfx
+package animate
 
 import (
 	"fmt"
@@ -15,6 +15,7 @@ import (
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/gfx"
 )
 
 func Animation(filepaths []string, screenMode uint8, export *export.ExportType) error {
@@ -35,7 +36,7 @@ func Animation(filepaths []string, screenMode uint8, export *export.ExportType) 
 		fmt.Fprintf(os.Stderr, "Cannot concat content of files %v error :%v\n", filepaths, err)
 		return err
 	}
-	if err := Transform(board, palette, sizeScreen, filepath.Join(export.OutputPath, "board.png"), export); err != nil {
+	if err := gfx.Transform(board, palette, sizeScreen, filepath.Join(export.OutputPath, "board.png"), export); err != nil {
 		fmt.Fprintf(os.Stderr, "Can not transform to image error : %v\n", err)
 		return err
 	}
@@ -127,7 +128,7 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 					os.Exit(-2)
 				}
 
-				if err := SpriteTransform(downgraded, newPalette, export.Size, screenMode, filename, true, export); err != nil {
+				if err := gfx.SpriteTransform(downgraded, newPalette, export.Size, screenMode, filename, true, export); err != nil {
 					fmt.Fprintf(os.Stderr, "error while transform in sprite error : %v\n", err)
 				}
 				contour := image.Rectangle{Min: image.Point{X: startX, Y: startY}, Max: image.Point{X: startX + spriteSize.Width, Y: startY + spriteSize.Height}}
@@ -178,7 +179,7 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 					os.Exit(-2)
 				}
 
-				if err := SpriteTransform(downgraded, newPalette, export.Size, screenMode, filename, true, export); err != nil {
+				if err := gfx.SpriteTransform(downgraded, newPalette, export.Size, screenMode, filename, true, export); err != nil {
 					fmt.Fprintf(os.Stderr, "error while transform in sprite error : %v\n", err)
 				}
 				contour := image.Rectangle{Min: image.Point{X: startX, Y: startY}, Max: image.Point{X: startX + spriteSize.Width, Y: startY + spriteSize.Height}}

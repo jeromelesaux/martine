@@ -1,4 +1,4 @@
-package gfx
+package animate
 
 import (
 	"fmt"
@@ -13,6 +13,8 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/gfx"
+	"github.com/jeromelesaux/martine/gfx/transformation"
 )
 
 func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint16, mode uint8) error {
@@ -30,14 +32,14 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 	if err != nil {
 		return err
 	}
-	images := convertToImage(*gifImages)
+	images := ConvertToImage(*gifImages)
 	var pad int = 1
 	if len(images) > maxImages {
 		fmt.Fprintf(os.Stderr, "Warning gif exceed 30 images. Will corrupt the number of images.")
 		pad = len(images) / maxImages
 	}
 	rawImages := make([][]byte, 0)
-	deltaData := make([]*DeltaCollection, 0)
+	deltaData := make([]*transformation.DeltaCollection, 0)
 	var palette color.Palette
 	var raw []byte
 
@@ -46,7 +48,7 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 
 	if ex.FilloutGif {
 		imgs := filloutGif(*gifImages, ex)
-		_, palette, _, err = InternalApplyOneImage(imgs[0], ex, int(mode), palette, mode)
+		_, palette, _, err = gfx.InternalApplyOneImage(imgs[0], ex, int(mode), palette, mode)
 		if err != nil {
 			return err
 		}
@@ -55,7 +57,7 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 			/*	fw, _ := os.Create(ex.OutputPath + fmt.Sprintf("/a%.2d.png", i))
 				png.Encode(fw, in)
 				fw.Close()*/
-			raw, _, _, err = InternalApplyOneImage(in, ex, int(mode), palette, mode)
+			raw, _, _, err = gfx.InternalApplyOneImage(in, ex, int(mode), palette, mode)
 			if err != nil {
 				return err
 			}
@@ -63,13 +65,13 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 			fmt.Printf("Image [%d] proceed\n", i)
 		}
 	} else {
-		_, palette, _, err = InternalApplyOneImage(images[0], ex, int(mode), palette, mode)
+		_, palette, _, err = gfx.InternalApplyOneImage(images[0], ex, int(mode), palette, mode)
 		if err != nil {
 			return err
 		}
 		for i := 0; i < len(images); i += pad {
 			in := images[i]
-			raw, _, _, err = InternalApplyOneImage(in, ex, int(mode), palette, mode)
+			raw, _, _, err = gfx.InternalApplyOneImage(in, ex, int(mode), palette, mode)
 			if err != nil {
 				return err
 			}
@@ -78,7 +80,7 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 		}
 	}
 	lineOctetsWidth := ex.LineWidth
-	x0, y0, err := CpcCoordinates(initialAddress, 0xC000, lineOctetsWidth)
+	x0, y0, err := transformation.CpcCoordinates(initialAddress, 0xC000, lineOctetsWidth)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error while computing cpc coordinates :%v\n", err)
 	}
@@ -92,23 +94,23 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 		d1 := rawImages[i]
 		d2 := rawImages[i+1]
 		if len(d1) != len(d2) {
-			return ErrorSizeDiffers
+			return transformation.ErrorSizeDiffers
 		}
-		dc := Delta(d1, d2, isSprite, *realSize, mode, uint16(x0), uint16(y0), lineOctetsWidth)
+		dc := transformation.Delta(d1, d2, isSprite, *realSize, mode, uint16(x0), uint16(y0), lineOctetsWidth)
 		deltaData = append(deltaData, dc)
 		fmt.Printf("%d bytes differ from the both images\n", len(dc.Items))
 	}
 	fmt.Printf("Compare image [%d] with [%d] ", len(rawImages)-1, 0)
 	d1 := rawImages[len(rawImages)-1]
 	d2 := rawImages[0]
-	dc := Delta(d1, d2, isSprite, ex.Size, mode, uint16(x0), uint16(y0), lineOctetsWidth)
+	dc := transformation.Delta(d1, d2, isSprite, ex.Size, mode, uint16(x0), uint16(y0), lineOctetsWidth)
 	deltaData = append(deltaData, dc)
 	fmt.Printf("%d bytes differ from the both images\n", len(dc.Items))
 	filename := string(ex.OsFilename(".asm"))
 	return exportDeltaAnimate(rawImages[0], deltaData, palette, ex, initialAddress, mode, ex.OutputPath+string(filepath.Separator)+filename)
 }
 
-func convertToImage(g gif.GIF) []image.Image {
+func ConvertToImage(g gif.GIF) []image.Image {
 	c := make([]image.Image, 0)
 	width := g.Image[0].Bounds().Max.X
 	height := g.Image[0].Bounds().Max.Y
@@ -139,7 +141,7 @@ func filloutGif(g gif.GIF, ex *export.ExportType) []image.Image {
 	return c
 }
 
-func exportDeltaAnimate(imageReference []byte, delta []*DeltaCollection, palette color.Palette, ex *export.ExportType, initialAddress uint16, mode uint8, filename string) error {
+func exportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaCollection, palette color.Palette, ex *export.ExportType, initialAddress uint16, mode uint8, filename string) error {
 
 	var dataCode string
 	var deltaIndex []string

@@ -1,4 +1,4 @@
-package gfx
+package effect
 
 import (
 	"fmt"
@@ -11,6 +11,7 @@ import (
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/gfx"
 )
 
 func DoSpliteRaster(in image.Image, screenMode uint8, filename string, exportType *export.ExportType) error {
@@ -20,7 +21,7 @@ func DoSpliteRaster(in image.Image, screenMode uint8, filename string, exportTyp
 	var rasters *constants.SplitRasterScreen
 	var err error
 	if !exportType.Overscan {
-		return ErrorNotYetImplemented
+		return gfx.ErrorNotYetImplemented
 	}
 	switch exportType.CpcPlus {
 	case false:
@@ -30,10 +31,10 @@ func DoSpliteRaster(in image.Image, screenMode uint8, filename string, exportTyp
 		}
 	default:
 		fmt.Fprintf(os.Stderr, "Not yet implemented.")
-		return ErrorNotYetImplemented
+		return gfx.ErrorNotYetImplemented
 	}
 	// export des données
-	if err := Export(filename, bw, p, screenMode, exportType); err != nil {
+	if err := gfx.Export(filename, bw, p, screenMode, exportType); err != nil {
 		return err
 	}
 	return file.ExportSplitRaster(filename, p, rasters, exportType)
@@ -79,29 +80,29 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, expo
 					if isSplitRaster(newIm, x, y, 16) {
 						srs = SetCpcOldSplitRaster(out, srIm, constants.CpcOldPalette, srs, x, y, 16)
 					}
-					pp, _ := PalettePosition(backgroundColor, p)
+					pp, _ := gfx.PalettePosition(backgroundColor, p)
 					fmt.Fprintf(os.Stdout, "X{%d,%d},Y{%d} might be a splitraster\n", x, (x + 16), y)
 					switch screenMode {
 					case 0:
 						for i := 0; i < 16; {
-							pixel := pixelMode0(pp, pp)
-							addr := CpcScreenAddress(0, x+i, y, 0, exportType.Overscan)
+							pixel := gfx.PixelMode0(pp, pp)
+							addr := gfx.CpcScreenAddress(0, x+i, y, 0, exportType.Overscan)
 							bw[addr] = pixel
 							i += 2
 							firmwareColorUsed[pp] += 2
 						}
 					case 1:
 						for i := 0; i < 16; {
-							pixel := pixelMode1(pp, pp, pp, pp)
-							addr := CpcScreenAddress(0, x+i, y, 1, exportType.Overscan)
+							pixel := gfx.PixelMode1(pp, pp, pp, pp)
+							addr := gfx.CpcScreenAddress(0, x+i, y, 1, exportType.Overscan)
 							bw[addr] = pixel
 							i += 4
 							firmwareColorUsed[pp] += 4
 						}
 					case 2:
 						for i := 0; i < 16; {
-							pixel := pixelMode2(pp, pp, pp, pp, pp, pp, pp, pp)
-							addr := CpcScreenAddress(0, x+i, y, 2, exportType.Overscan)
+							pixel := gfx.PixelMode2(pp, pp, pp, pp, pp, pp, pp, pp)
+							addr := gfx.CpcScreenAddress(0, x+i, y, 2, exportType.Overscan)
 							bw[addr] = pixel
 							i += 8
 							firmwareColorUsed[pp] += 8
@@ -209,7 +210,7 @@ func extractPixelMode0(in *image.NRGBA, p color.Palette, x, y int, exportType *e
 func setPixelMode0(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, exportType *export.ExportType) ([]byte, map[int]int) {
 	c1 := in.At(x, y)
 	out.Set(x, y, c1)
-	pp1, err := PalettePosition(c1, p)
+	pp1, err := gfx.PalettePosition(c1, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 		pp1 = 0
@@ -218,7 +219,7 @@ func setPixelMode0(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 	c2 := in.At(x+1, y)
 	out.Set(x+1, y, c2)
-	pp2, err := PalettePosition(c2, p)
+	pp2, err := gfx.PalettePosition(c2, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 		pp2 = 0
@@ -226,12 +227,12 @@ func setPixelMode0(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 
 	firmwareColorUsed[pp2]++
 
-	pixel := pixelMode0(pp1, pp2)
+	pixel := gfx.PixelMode0(pp1, pp2)
 	//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND
-	addr := CpcScreenAddress(0, x, y, 0, exportType.Overscan)
+	addr := gfx.CpcScreenAddress(0, x, y, 0, exportType.Overscan)
 	bw[addr] = pixel
 	return bw, firmwareColorUsed
 }
@@ -239,7 +240,7 @@ func setPixelMode0(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, exportType *export.ExportType) ([]byte, map[int]int) {
 	c1 := in.At(x, y)
 	out.Set(x, y, c1)
-	pp1, err := PalettePosition(c1, p)
+	pp1, err := gfx.PalettePosition(c1, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 		pp1 = 0
@@ -248,7 +249,7 @@ func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 	c2 := in.At(x+1, y)
 	out.Set(x+1, y, c2)
-	pp2, err := PalettePosition(c2, p)
+	pp2, err := gfx.PalettePosition(c2, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 		pp2 = 0
@@ -256,7 +257,7 @@ func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	firmwareColorUsed[pp2]++
 	c3 := in.At(x+2, y)
 	out.Set(x+2, y, c3)
-	pp3, err := PalettePosition(c3, p)
+	pp3, err := gfx.PalettePosition(c3, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 		pp3 = 0
@@ -264,19 +265,19 @@ func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	firmwareColorUsed[pp3]++
 	c4 := in.At(x+3, y)
 	out.Set(x+3, y, c4)
-	pp4, err := PalettePosition(c4, p)
+	pp4, err := gfx.PalettePosition(c4, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 		pp4 = 0
 	}
 	firmwareColorUsed[pp4]++
 
-	pixel := pixelMode1(pp1, pp2, pp3, pp4)
+	pixel := gfx.PixelMode1(pp1, pp2, pp3, pp4)
 	//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND
-	addr := CpcScreenAddress(0, x, y, 1, exportType.Overscan)
+	addr := gfx.CpcScreenAddress(0, x, y, 1, exportType.Overscan)
 	bw[addr] = pixel
 	return bw, firmwareColorUsed
 }
@@ -284,7 +285,7 @@ func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, exportType *export.ExportType) ([]byte, map[int]int) {
 	c1 := in.At(x, y)
 	out.Set(x, y, c1)
-	pp1, err := PalettePosition(c1, p)
+	pp1, err := gfx.PalettePosition(c1, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 		pp1 = 0
@@ -293,7 +294,7 @@ func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 	c2 := in.At(x+1, y)
 	out.Set(x+1, y, c2)
-	pp2, err := PalettePosition(c2, p)
+	pp2, err := gfx.PalettePosition(c2, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 		pp2 = 0
@@ -301,7 +302,7 @@ func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	firmwareColorUsed[pp2]++
 	c3 := in.At(x+2, y)
 	out.Set(x+2, y, c3)
-	pp3, err := PalettePosition(c3, p)
+	pp3, err := gfx.PalettePosition(c3, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 		pp3 = 0
@@ -309,7 +310,7 @@ func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	firmwareColorUsed[pp3]++
 	c4 := in.At(x+3, y)
 	out.Set(x+3, y, c4)
-	pp4, err := PalettePosition(c4, p)
+	pp4, err := gfx.PalettePosition(c4, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 		pp4 = 0
@@ -317,7 +318,7 @@ func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	firmwareColorUsed[pp4]++
 	c5 := in.At(x+4, y)
 	out.Set(x+4, y, c5)
-	pp5, err := PalettePosition(c5, p)
+	pp5, err := gfx.PalettePosition(c5, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
 		pp5 = 0
@@ -326,7 +327,7 @@ func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 	c6 := in.At(x+5, y)
 	out.Set(x+5, y, c6)
-	pp6, err := PalettePosition(c6, p)
+	pp6, err := gfx.PalettePosition(c6, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
 		pp6 = 0
@@ -334,7 +335,7 @@ func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	firmwareColorUsed[pp6]++
 	c7 := in.At(x+6, y)
 	out.Set(x+6, y, c7)
-	pp7, err := PalettePosition(c7, p)
+	pp7, err := gfx.PalettePosition(c7, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
 		pp3 = 0
@@ -342,19 +343,19 @@ func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	firmwareColorUsed[pp7]++
 	c8 := in.At(x+7, y)
 	out.Set(x+7, y, c8)
-	pp8, err := PalettePosition(c8, p)
+	pp8, err := gfx.PalettePosition(c8, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, x+7, y)
 		pp8 = 0
 	}
 	firmwareColorUsed[pp8]++
 
-	pixel := pixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
+	pixel := gfx.PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
 	//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND
-	addr := CpcScreenAddress(0, x, y, 2, exportType.Overscan)
+	addr := gfx.CpcScreenAddress(0, x, y, 2, exportType.Overscan)
 	bw[addr] = pixel
 	return bw, firmwareColorUsed
 }

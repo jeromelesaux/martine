@@ -1,4 +1,4 @@
-package gfx
+package effect
 
 import (
 	"image"
@@ -11,6 +11,7 @@ import (
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/gfx"
 )
 
 func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, exportType *export.ExportType) error {
@@ -89,7 +90,7 @@ func AutoFlash(in image.Image,
 	flashPaletteFilename1 := strings.ToUpper(name)[0:namesize] + "1.PAL"
 	flashPalettePath1 := filepath.Join(exportType.OutputPath, flashPaletteFilename1)
 
-	err = ApplyOneImage(leftIm,
+	err = gfx.ApplyOneImage(leftIm,
 		exportType,
 		filenameLeft, filepathLeft,
 		mode,
@@ -132,7 +133,7 @@ func AutoFlash(in image.Image,
 
 	exportType.PalettePath = flashPalettePath1
 
-	err = ApplyOneImage(rigthIm,
+	err = gfx.ApplyOneImage(rigthIm,
 		exportType,
 		filenameRigth, filepathRigth,
 		flashMode,

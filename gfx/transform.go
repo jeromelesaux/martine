@@ -161,7 +161,7 @@ func InternalSpriteTransform(in *image.NRGBA, p color.Palette, size constants.Si
 				if exportType.OneRow {
 					pp2 = 0
 				}
-				pixel := pixelMode0(pp1, pp2)
+				pixel := PixelMode0(pp1, pp2)
 				if exportType.MaskAndOperation {
 					pixel = pixel & exportType.MaskSprite
 				}
@@ -184,7 +184,7 @@ func InternalSpriteTransform(in *image.NRGBA, p color.Palette, size constants.Si
 				for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
 					pp := 0
 					firmwareColorUsed[pp]++
-					pixel := pixelMode0(pp, pp)
+					pixel := PixelMode0(pp, pp)
 					if len(exportType.ScanlineSequence) > 0 {
 						scanlineSize := len(exportType.ScanlineSequence)
 						scanlineIndex := y % scanlineSize
@@ -244,7 +244,7 @@ func InternalSpriteTransform(in *image.NRGBA, p color.Palette, size constants.Si
 						pp2 = 0
 						pp4 = 0
 					}
-					pixel := pixelMode1(pp1, pp2, pp3, pp4)
+					pixel := PixelMode1(pp1, pp2, pp3, pp4)
 					//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 					// MACRO PIXM0 COL2,COL1
 					// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
@@ -271,7 +271,7 @@ func InternalSpriteTransform(in *image.NRGBA, p color.Palette, size constants.Si
 					for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 4 {
 						pp := 0
 						firmwareColorUsed[pp]++
-						pixel := pixelMode1(pp, pp, pp, pp)
+						pixel := PixelMode1(pp, pp, pp, pp)
 						if len(exportType.ScanlineSequence) > 0 {
 							scanlineSize := len(exportType.ScanlineSequence)
 							scanlineIndex := y % scanlineSize
@@ -367,7 +367,7 @@ func InternalSpriteTransform(in *image.NRGBA, p color.Palette, size constants.Si
 							pp6 = 0
 							pp8 = 0
 						}
-						pixel := pixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
+						pixel := PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
 						//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 						// MACRO PIXM0 COL2,COL1
 						// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
@@ -388,7 +388,7 @@ func InternalSpriteTransform(in *image.NRGBA, p color.Palette, size constants.Si
 						for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 8 {
 							pp := 0
 							firmwareColorUsed[pp]++
-							pixel := pixelMode2(pp, pp, pp, pp, pp, pp, pp, pp)
+							pixel := PixelMode2(pp, pp, pp, pp, pp, pp, pp, pp)
 							if len(exportType.ScanlineSequence) > 0 {
 								scanlineSize := len(exportType.ScanlineSequence)
 								scanlineIndex := y % scanlineSize
@@ -470,7 +470,7 @@ func PalettePosition(c color.Color, p color.Palette) (int, error) {
 	return -1, ErrorColorNotFound
 }
 
-func pixelMode0(pp1, pp2 int) byte {
+func PixelMode0(pp1, pp2 int) byte {
 	var pixel byte
 	if uint8(pp1)&1 == 1 {
 		pixel += 128
@@ -499,7 +499,7 @@ func pixelMode0(pp1, pp2 int) byte {
 	return pixel
 }
 
-func pixelMode1(pp1, pp2, pp3, pp4 int) byte {
+func PixelMode1(pp1, pp2, pp3, pp4 int) byte {
 	var pixel byte
 	if uint8(pp1)&1 == 1 {
 		pixel += 128
@@ -528,7 +528,7 @@ func pixelMode1(pp1, pp2, pp3, pp4 int) byte {
 	return pixel
 }
 
-func pixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) byte {
+func PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) byte {
 	var pixel byte
 	if uint8(pp1)&1 == 1 {
 		pixel += 128
@@ -714,7 +714,7 @@ func ToMode0(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 			if exportType.OneRow {
 				pp2 = 0
 			}
-			pixel := pixelMode0(pp1, pp2)
+			pixel := PixelMode0(pp1, pp2)
 			//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
@@ -878,7 +878,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 				pp4 = 0
 				pp2 = 0
 			}
-			pixel := pixelMode1(pp1, pp2, pp3, pp4)
+			pixel := PixelMode1(pp1, pp2, pp3, pp4)
 			//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
@@ -988,7 +988,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, exportType *x.ExportType) []byte 
 				pp6 = 0
 				pp8 = 0
 			}
-			pixel := pixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
+			pixel := PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
 			//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)

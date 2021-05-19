@@ -11,6 +11,7 @@ import (
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/gfx/filter"
 )
 
 func DoDithering(in *image.NRGBA, p color.Palette, exportType *export.ExportType) (*image.NRGBA, color.Palette) {
@@ -18,17 +19,17 @@ func DoDithering(in *image.NRGBA, p color.Palette, exportType *export.ExportType
 		switch exportType.DitheringType {
 		case constants.ErrorDiffusionDither:
 			if exportType.DitheringWithQuantification {
-				in = QuantizeWithDither(in, exportType.DitheringMatrix, exportType.Size.ColorsAvailable, p)
+				in = filter.QuantizeWithDither(in, exportType.DitheringMatrix, exportType.Size.ColorsAvailable, p)
 			} else {
-				in = Dithering(in, exportType.DitheringMatrix, float32(exportType.DitheringMultiplier))
+				in = filter.Dithering(in, exportType.DitheringMatrix, float32(exportType.DitheringMultiplier))
 			}
 		case constants.OrderedDither:
 			//newPalette = convert.PaletteUsed(out,exportType.CpcPlus)
 			if exportType.CpcPlus {
 				p = convert.ExtractPalette(in, exportType.CpcPlus, 27)
-				in = BayerDiphering(in, exportType.DitheringMatrix, p)
+				in = filter.BayerDiphering(in, exportType.DitheringMatrix, p)
 			} else {
-				in = BayerDiphering(in, exportType.DitheringMatrix, constants.CpcOldPalette)
+				in = filter.BayerDiphering(in, exportType.DitheringMatrix, constants.CpcOldPalette)
 			}
 		}
 	}

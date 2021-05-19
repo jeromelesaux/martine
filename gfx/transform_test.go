@@ -9,7 +9,7 @@ func TestPixels(t *testing.T) {
 	//t.Logf("74:%.b 74&2:%.8b\n",74,74&2)
 	p10 := 15
 	p20 := 14
-	v := pixelMode0(p10, p20)
+	v := PixelMode0(p10, p20)
 	t.Logf("v:%d\n", v)
 	p1, p2 := rawPixelMode0(v)
 	if p1 != p10 {
@@ -25,7 +25,7 @@ func TestPixelsMode1(t *testing.T) {
 	p20 := 2
 	p30 := 0
 	p40 := 3
-	v := pixelMode1(p10, p20, p30, p40)
+	v := PixelMode1(p10, p20, p30, p40)
 	t.Logf("v:%d, %8b\n", v, v)
 	p1, p2, p3, p4 := rawPixelMode1(v)
 	if p1 != p10 {
@@ -50,7 +50,7 @@ func TestPixelsMode2(t *testing.T) {
 	p60 := 0
 	p70 := 1
 	p80 := 0
-	v := pixelMode2(p10, p20, p30, p40, p50, p60, p70, p80)
+	v := PixelMode2(p10, p20, p30, p40, p50, p60, p70, p80)
 	t.Logf("v:%d, %8b\n", v, v)
 	p1, p2, p3, p4, p5, p6, p7, p8 := rawPixelMode2(v)
 	if p1 != p10 {

@@ -18,6 +18,10 @@ import (
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/net"
 	"github.com/jeromelesaux/martine/gfx"
+	"github.com/jeromelesaux/martine/gfx/animate"
+	"github.com/jeromelesaux/martine/gfx/effect"
+	"github.com/jeromelesaux/martine/gfx/filter"
+	"github.com/jeromelesaux/martine/gfx/transformation"
 )
 
 type stringSlice []string
@@ -96,7 +100,7 @@ var (
 	zigzag              = flag.Bool("zigzag", false, "generate data in zigzag order (inc first line and dec next line for tiles)")
 	tileMap             = flag.Bool("tilemap", false, "Analyse the input image and generate the tiles, the tile map and global schema.")
 	initialAddress      = flag.String("address", "0xC000", "Starting address to display sprite in delta packing")
-	animate             = flag.Bool("animate", false, "Will produce an full screen with all sprite on the same image (add -i image.gif or -i *.png)")
+	doAnimation         = flag.Bool("animate", false, "Will produce an full screen with all sprite on the same image (add -i image.gif or -i *.png)")
 	reducer             = flag.Int("reducer", -1, "Reducer mask will reduce original image colors. Available : \n\t1 : lower\n\t2 : medium\n\t3 : strong\n")
 	jsonOutput          = flag.Bool("json", false, "Generate json format output.")
 	txtOutput           = flag.Bool("txt", false, "Generate text format output.")
@@ -245,7 +249,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Error while parsing (%s) use the starting address #C000, err : %v\n", *initialAddress, err)
 			screenAddress = 0xC000
 		}
-		if err := gfx.DeltaPacking(exportType.InputPath, exportType, screenAddress, screenMode); err != nil {
+		if err := animate.DeltaPacking(exportType.InputPath, exportType, screenAddress, screenMode); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while deltapacking error: %v\n", err)
 		}
 		os.Exit(0)
@@ -254,7 +258,7 @@ func main() {
 	if !*reverse {
 		fmt.Fprintf(os.Stdout, "Informations :\n%s", size.ToString())
 	}
-	if !*impCatcher && !exportType.DeltaMode && !*reverse && !*animate && strings.ToUpper(extension) != ".SCR" {
+	if !*impCatcher && !exportType.DeltaMode && !*reverse && !*doAnimation && strings.ToUpper(extension) != ".SCR" {
 		f, err := os.Open(*picturePath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error while opening file %s, error %v\n", *picturePath, err)
@@ -286,47 +290,47 @@ func main() {
 	if *ditheringAlgo != -1 {
 		switch *ditheringAlgo {
 		case 0:
-			exportType.DitheringMatrix = gfx.FloydSteinberg
+			exportType.DitheringMatrix = filter.FloydSteinberg
 			exportType.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:FloydSteinberg, Type:ErrorDiffusionDither\n")
 		case 1:
-			exportType.DitheringMatrix = gfx.JarvisJudiceNinke
+			exportType.DitheringMatrix = filter.JarvisJudiceNinke
 			exportType.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:JarvisJudiceNinke, Type:ErrorDiffusionDither\n")
 		case 2:
-			exportType.DitheringMatrix = gfx.Stucki
+			exportType.DitheringMatrix = filter.Stucki
 			exportType.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:Stucki, Type:ErrorDiffusionDither\n")
 		case 3:
-			exportType.DitheringMatrix = gfx.Atkinson
+			exportType.DitheringMatrix = filter.Atkinson
 			exportType.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:Atkinson, Type:ErrorDiffusionDither\n")
 		case 4:
-			exportType.DitheringMatrix = gfx.Sierra
+			exportType.DitheringMatrix = filter.Sierra
 			exportType.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:Sierra, Type:ErrorDiffusionDither\n")
 		case 5:
-			exportType.DitheringMatrix = gfx.SierraLite
+			exportType.DitheringMatrix = filter.SierraLite
 			exportType.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:SierraLite, Type:ErrorDiffusionDither\n")
 		case 6:
-			exportType.DitheringMatrix = gfx.Sierra3
+			exportType.DitheringMatrix = filter.Sierra3
 			exportType.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:Sierra3, Type:ErrorDiffusionDither\n")
 		case 7:
-			exportType.DitheringMatrix = gfx.Bayer2
+			exportType.DitheringMatrix = filter.Bayer2
 			exportType.DitheringType = constants.OrderedDither
 			fmt.Fprintf(os.Stdout, "Dither:Bayer2, Type:OrderedDither\n")
 		case 8:
-			exportType.DitheringMatrix = gfx.Bayer3
+			exportType.DitheringMatrix = filter.Bayer3
 			exportType.DitheringType = constants.OrderedDither
 			fmt.Fprintf(os.Stdout, "Dither:Bayer3, Type:OrderedDither\n")
 		case 9:
-			exportType.DitheringMatrix = gfx.Bayer4
+			exportType.DitheringMatrix = filter.Bayer4
 			exportType.DitheringType = constants.OrderedDither
 			fmt.Fprintf(os.Stdout, "Dither:Bayer4, Type:OrderedDither\n")
 		case 10:
-			exportType.DitheringMatrix = gfx.Bayer8
+			exportType.DitheringMatrix = filter.Bayer8
 			exportType.DitheringType = constants.OrderedDither
 			fmt.Fprintf(os.Stdout, "Dither:Bayer8, Type:OrderedDither\n")
 		default:
@@ -439,7 +443,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Cannot parse wildcard in argument (%s) error %v\n", *picturePath, err)
 			os.Exit(-1)
 		}
-		if err := gfx.Animation(files, screenMode, exportType); err != nil {
+		if err := animate.Animation(files, screenMode, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while proceeding to animate export error : %v\n", err)
 			os.Exit(-1)
 		}
@@ -458,7 +462,7 @@ func main() {
 				fmt.Fprintf(os.Stderr, "You must set the mode for this feature. (option -m)\n")
 				os.Exit(-1)
 			}
-			if err := gfx.ProceedDelta(deltaFiles, screenAddress, exportType, uint8(*mode)); err != nil {
+			if err := transformation.ProceedDelta(deltaFiles, screenAddress, exportType, uint8(*mode)); err != nil {
 				fmt.Fprintf(os.Stderr, "error while proceeding delta mode %v\n", err)
 				os.Exit(-1)
 			}
@@ -529,7 +533,7 @@ func main() {
 					}
 				} else {
 					if *flash {
-						if err := gfx.Flash(*picturePath, *picturePath2,
+						if err := effect.Flash(*picturePath, *picturePath2,
 							*palettePath, *palettePath2,
 							*mode,
 							*mode2,
@@ -563,7 +567,7 @@ func main() {
 								fmt.Fprintf(os.Stderr, "Now colors found in palette, give up treatment.\n")
 								os.Exit(-1)
 							}
-							if err := gfx.Egx(*picturePath, *picturePath2,
+							if err := effect.Egx(*picturePath, *picturePath2,
 								p,
 								*mode,
 								*mode2,
@@ -574,7 +578,7 @@ func main() {
 						} else {
 							if exportType.SplitRaster {
 								if exportType.Overscan {
-									if err := gfx.DoSpliteRaster(in, screenMode, filename, exportType); err != nil {
+									if err := effect.DoSpliteRaster(in, screenMode, filename, exportType); err != nil {
 										fmt.Fprintf(os.Stderr, "Error while applying splitraster on one image :%v\n", err)
 										os.Exit(-1)
 									}

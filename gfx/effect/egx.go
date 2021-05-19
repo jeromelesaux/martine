@@ -1,4 +1,4 @@
-package gfx
+package effect
 
 import (
 	"errors"
@@ -12,6 +12,7 @@ import (
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/gfx"
 )
 
 var (
@@ -39,20 +40,20 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, exportType *e
 		}
 		var in0, in1 *image.NRGBA
 		if exportType.Overscan {
-			in0, err = OverscanToImg(f0, mode0, p)
+			in0, err = gfx.OverscanToImg(f0, mode0, p)
 			if err != nil {
 				return err
 			}
-			in1, err = OverscanToImg(f1, mode1, p)
+			in1, err = gfx.OverscanToImg(f1, mode1, p)
 			if err != nil {
 				return err
 			}
 		} else {
-			in0, err = ScrToImg(f0, 0, p)
+			in0, err = gfx.ScrToImg(f0, 0, p)
 			if err != nil {
 				return err
 			}
-			in1, err = ScrToImg(f1, 1, p)
+			in1, err = gfx.ScrToImg(f1, 1, p)
 			if err != nil {
 				return err
 			}
@@ -87,20 +88,20 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, exportType *e
 			}
 			var in2, in1 *image.NRGBA
 			if exportType.Overscan {
-				in1, err = OverscanToImg(f1, mode1, p)
+				in1, err = gfx.OverscanToImg(f1, mode1, p)
 				if err != nil {
 					return err
 				}
-				in2, err = OverscanToImg(f2, mode2, p)
+				in2, err = gfx.OverscanToImg(f2, mode2, p)
 				if err != nil {
 					return err
 				}
 			} else {
-				in1, err = ScrToImg(f1, mode1, p)
+				in1, err = gfx.ScrToImg(f1, mode1, p)
 				if err != nil {
 					return err
 				}
-				in2, err = ScrToImg(f2, mode2, p)
+				in2, err = gfx.ScrToImg(f2, mode2, p)
 				if err != nil {
 					return err
 				}
@@ -158,7 +159,7 @@ func AutoEgx1(in image.Image,
 		os.Exit(-2)
 	}
 
-	downgraded, p = DoDithering(downgraded, p, exportType)
+	downgraded, p = gfx.DoDithering(downgraded, p, exportType)
 
 	return ToEgx1(downgraded, downgraded, p, 0, picturePath, exportType)
 }
@@ -201,7 +202,7 @@ func AutoEgx2(in image.Image,
 		os.Exit(-2)
 	}
 
-	downgraded, p = DoDithering(downgraded, p, exportType)
+	downgraded, p = gfx.DoDithering(downgraded, p, exportType)
 
 	return ToEgx2(downgraded, downgraded, p, 1, picturePath, exportType)
 }
@@ -224,7 +225,7 @@ func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8,
 	for y := inMode0.Bounds().Min.Y + mode0Line; y < inMode0.Bounds().Max.Y; y += 2 {
 		for x := inMode0.Bounds().Min.X; x < inMode0.Bounds().Max.X; x += 2 {
 			c1 := inMode0.At(x, y)
-			pp1, err := PalettePosition(c1, p)
+			pp1, err := gfx.PalettePosition(c1, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
@@ -232,21 +233,21 @@ func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8,
 			firmwareColorUsed[pp1]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := inMode0.At(x+1, y)
-			pp2, err := PalettePosition(c2, p)
+			pp2, err := gfx.PalettePosition(c2, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			firmwareColorUsed[pp2]++
-			pixel := pixelMode0(pp1, pp2)
-			addr := CpcScreenAddress(0, x, y, 0, exportType.Overscan)
+			pixel := gfx.PixelMode0(pp1, pp2)
+			addr := gfx.CpcScreenAddress(0, x, y, 0, exportType.Overscan)
 			bw[addr] = pixel
 		}
 	}
 	for y := inMode1.Bounds().Min.Y + mode1Line; y < inMode1.Bounds().Max.Y; y += 2 {
 		for x := inMode1.Bounds().Min.X; x < inMode1.Bounds().Max.X; x += 4 {
 			c1 := inMode1.At(x, y)
-			pp1, err := PalettePosition(c1, p)
+			pp1, err := gfx.PalettePosition(c1, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
@@ -254,35 +255,35 @@ func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8,
 			firmwareColorUsed[pp1]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := inMode1.At(x+1, y)
-			pp2, err := PalettePosition(c2, p)
+			pp2, err := gfx.PalettePosition(c2, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			firmwareColorUsed[pp2]++
 			c3 := inMode1.At(x+2, y)
-			pp3, err := PalettePosition(c3, p)
+			pp3, err := gfx.PalettePosition(c3, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
 			firmwareColorUsed[pp3]++
 			c4 := inMode1.At(x+3, y)
-			pp4, err := PalettePosition(c4, p)
+			pp4, err := gfx.PalettePosition(c4, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
 			firmwareColorUsed[pp4]++
 
-			pixel := pixelMode1(pp1, pp2, pp3, pp4)
-			addr := CpcScreenAddress(0, x, y, 1, exportType.Overscan)
+			pixel := gfx.PixelMode1(pp1, pp2, pp3, pp4)
+			addr := gfx.CpcScreenAddress(0, x, y, 1, exportType.Overscan)
 			bw[addr] = pixel
-			addr = CpcScreenAddress(0, x+1, y, 1, exportType.Overscan)
+			addr = gfx.CpcScreenAddress(0, x+1, y, 1, exportType.Overscan)
 			bw[addr] = pixel
 		}
 	}
-	return Export(picturePath, bw, p, 1, exportType)
+	return gfx.Export(picturePath, bw, p, 1, exportType)
 }
 
 func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8, picturePath string, exportType *export.ExportType) error {
@@ -303,7 +304,7 @@ func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8,
 	for y := inMode1.Bounds().Min.Y + mode1Line; y < inMode1.Bounds().Max.Y; y += 2 {
 		for x := inMode1.Bounds().Min.X; x < inMode1.Bounds().Max.X; x += 4 {
 			c1 := inMode1.At(x, y)
-			pp1, err := PalettePosition(c1, p)
+			pp1, err := gfx.PalettePosition(c1, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
@@ -311,36 +312,36 @@ func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8,
 			firmwareColorUsed[pp1]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := inMode1.At(x+1, y)
-			pp2, err := PalettePosition(c2, p)
+			pp2, err := gfx.PalettePosition(c2, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			firmwareColorUsed[pp2]++
 			c3 := inMode1.At(x+2, y)
-			pp3, err := PalettePosition(c3, p)
+			pp3, err := gfx.PalettePosition(c3, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
 			firmwareColorUsed[pp3]++
 			c4 := inMode1.At(x+3, y)
-			pp4, err := PalettePosition(c4, p)
+			pp4, err := gfx.PalettePosition(c4, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
 			firmwareColorUsed[pp4]++
 
-			pixel := pixelMode1(pp1, pp2, pp3, pp4)
-			addr := CpcScreenAddress(0, x, y, 1, exportType.Overscan)
+			pixel := gfx.PixelMode1(pp1, pp2, pp3, pp4)
+			addr := gfx.CpcScreenAddress(0, x, y, 1, exportType.Overscan)
 			bw[addr] = pixel
 		}
 	}
 	for y := inMode2.Bounds().Min.Y + mode2Line; y < inMode2.Bounds().Max.Y; y += 2 {
 		for x := inMode2.Bounds().Min.X; x < inMode2.Bounds().Max.X; x += 8 {
 			c1 := inMode2.At(x, y)
-			pp1, err := PalettePosition(c1, p)
+			pp1, err := gfx.PalettePosition(c1, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
@@ -348,28 +349,28 @@ func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8,
 			firmwareColorUsed[pp1]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := inMode2.At(x+1, y)
-			pp2, err := PalettePosition(c2, p)
+			pp2, err := gfx.PalettePosition(c2, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			firmwareColorUsed[pp2]++
 			c3 := inMode2.At(x+2, y)
-			pp3, err := PalettePosition(c3, p)
+			pp3, err := gfx.PalettePosition(c3, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
 			firmwareColorUsed[pp3]++
 			c4 := inMode2.At(x+3, y)
-			pp4, err := PalettePosition(c4, p)
+			pp4, err := gfx.PalettePosition(c4, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
 			firmwareColorUsed[pp4]++
 			c5 := inMode2.At(x+4, y)
-			pp5, err := PalettePosition(c5, p)
+			pp5, err := gfx.PalettePosition(c5, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
 				pp5 = 0
@@ -377,32 +378,32 @@ func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8,
 			firmwareColorUsed[pp5]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c6 := inMode2.At(x+5, y)
-			pp6, err := PalettePosition(c5, p)
+			pp6, err := gfx.PalettePosition(c5, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
 				pp6 = 0
 			}
 			firmwareColorUsed[pp6]++
 			c7 := inMode2.At(x+6, y)
-			pp7, err := PalettePosition(c7, p)
+			pp7, err := gfx.PalettePosition(c7, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
 				pp7 = 0
 			}
 			firmwareColorUsed[pp7]++
 			c8 := inMode2.At(x+7, y)
-			pp8, err := PalettePosition(c8, p)
+			pp8, err := gfx.PalettePosition(c8, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, x+3, y)
 				pp8 = 0
 			}
 			firmwareColorUsed[pp8]++
-			pixel := pixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
-			addr := CpcScreenAddress(0, x, y, 2, exportType.Overscan)
+			pixel := gfx.PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
+			addr := gfx.CpcScreenAddress(0, x, y, 2, exportType.Overscan)
 			bw[addr] = pixel
-			addr = CpcScreenAddress(0, x+1, y, 2, exportType.Overscan)
+			addr = gfx.CpcScreenAddress(0, x+1, y, 2, exportType.Overscan)
 			bw[addr] = pixel
 		}
 	}
-	return Export(picturePath, bw, p, 2, exportType)
+	return gfx.Export(picturePath, bw, p, 2, exportType)
 }

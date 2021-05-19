@@ -144,7 +144,7 @@ func ExportHandler() (*export.ExportType, constants.Size) {
 	exp.SpriteHard = *spriteHard
 	exp.SplitRaster = *splitRasters
 	exp.ZigZag = *zigzag
-	exp.Animate = *animate
+	exp.Animate = *doAnimation
 	exp.Reducer = *reducer
 	exp.Json = *jsonOutput
 	exp.Ascii = *txtOutput
