@@ -363,7 +363,7 @@ func main() {
 				fmt.Fprintf(os.Stderr, "Cannot decode the image %s error %v", *picturePath, err)
 				os.Exit(-2)
 			}
-			gfx.ApplyOneImage(in,
+			gfx.ApplyOneImageAndExport(in,
 				exportType,
 				filepath.Base(v),
 				v,
@@ -589,7 +589,7 @@ func main() {
 								}
 							} else {
 								if strings.ToUpper(extension) != ".SCR" {
-									if err := gfx.ApplyOneImage(in,
+									if err := gfx.ApplyOneImageAndExport(in,
 										exportType,
 										filename, *picturePath,
 										*mode,

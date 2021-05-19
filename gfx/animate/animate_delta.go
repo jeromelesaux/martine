@@ -49,7 +49,7 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 
 	if ex.FilloutGif {
 		imgs := filloutGif(*gifImages, ex)
-		_, palette, _, err = gfx.InternalApplyOneImage(imgs[0], ex, int(mode), palette, mode)
+		_, palette, _, err = gfx.ApplyOneImage(imgs[0], ex, int(mode), palette, mode)
 		if err != nil {
 			return err
 		}
@@ -58,7 +58,7 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 			/*	fw, _ := os.Create(ex.OutputPath + fmt.Sprintf("/a%.2d.png", i))
 				png.Encode(fw, in)
 				fw.Close()*/
-			raw, _, _, err = gfx.InternalApplyOneImage(in, ex, int(mode), palette, mode)
+			raw, _, _, err = gfx.ApplyOneImage(in, ex, int(mode), palette, mode)
 			if err != nil {
 				return err
 			}
@@ -66,13 +66,13 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 			fmt.Printf("Image [%d] proceed\n", i)
 		}
 	} else {
-		_, palette, _, err = gfx.InternalApplyOneImage(images[0], ex, int(mode), palette, mode)
+		_, palette, _, err = gfx.ApplyOneImage(images[0], ex, int(mode), palette, mode)
 		if err != nil {
 			return err
 		}
 		for i := 0; i < len(images); i += pad {
 			in := images[i]
-			raw, _, _, err = gfx.InternalApplyOneImage(in, ex, int(mode), palette, mode)
+			raw, _, _, err = gfx.ApplyOneImage(in, ex, int(mode), palette, mode)
 			if err != nil {
 				return err
 			}
@@ -111,8 +111,8 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 	return exportDeltaAnimate(rawImages[0], deltaData, palette, ex, initialAddress, mode, ex.OutputPath+string(filepath.Separator)+filename)
 }
 
-func ConvertToImage(g gif.GIF) []image.Image {
-	c := make([]image.Image, 0)
+func ConvertToImage(g gif.GIF) []*image.NRGBA {
+	c := make([]*image.NRGBA, 0)
 	width := g.Image[0].Bounds().Max.X
 	height := g.Image[0].Bounds().Max.Y
 	for i := 1; i < len(g.Image)-1; i++ {

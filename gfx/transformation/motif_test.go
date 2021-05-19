@@ -36,7 +36,7 @@ func TestMotifs(t *testing.T) {
 
 	a := AnalyzeTilesBoard(out, constants.Size{Width: 4, Height: 4})
 	threshold := 27
-	board := a.reduceTilesNumber(float64(threshold))
+	board := a.ReduceTilesNumber(float64(threshold))
 	fmt.Printf("number sprites inital [%d] [%d] with threshold :%d\n", len(a.BoardTiles), len(board), threshold)
 	//a.SaveBoardTile("../test/motifs/", board)
 	a.Image("../test/motifs/new.png", board, a.ImageSize)

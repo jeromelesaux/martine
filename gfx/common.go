@@ -69,7 +69,7 @@ func DoTransformation(in *image.NRGBA, p color.Palette, filename, picturePath st
 	return err
 }
 
-func ApplyOneImage(in image.Image,
+func ApplyOneImageAndExport(in image.Image,
 	exportType *export.ExportType,
 	filename, picturePath string,
 	mode int,
@@ -166,7 +166,7 @@ func ApplyOneImage(in image.Image,
 	return err
 }
 
-func InternalApplyOneImage(in image.Image,
+func ApplyOneImage(in image.Image,
 	exportType *export.ExportType,
 	mode int,
 	palette color.Palette,

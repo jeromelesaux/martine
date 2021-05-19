@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"image/draw"
 	"image/png"
+	"math"
 	"os"
 	"path/filepath"
 
@@ -156,6 +157,51 @@ func extractTile(im image.Image, size constants.Size, posX, posY int) (*Tile, er
 	return sprite, nil
 }
 
+func getCloserTile(sprt Tile, t []Tile) Tile {
+	distance := math.MaxFloat64
+	var closer Tile
+	for _, v := range t {
+		d := computeTileDistance(&sprt, &v)
+		if d < distance {
+			distance = d
+			closer = v
+		}
+	}
+	return closer
+}
+
+func AnalyzeTilesBoardWithTiles(im image.Image, size constants.Size, tiles []Tile) *AnalyzeBoard {
+	nbTileW := int(im.Bounds().Max.X / size.Width)
+	nbTileH := int(im.Bounds().Max.Y/size.Height) - 1
+	board := &AnalyzeBoard{
+		TileSize:   size,
+		ImageSize:  constants.Size{Width: im.Bounds().Max.X, Height: im.Bounds().Max.Y},
+		BoardTiles: make([]BoardTile, 0),
+		TileMap:    make([][]int, nbTileH),
+	}
+	for i := 0; i < nbTileH; i++ {
+		board.TileMap[i] = make([]int, nbTileW)
+	}
+
+	indexX := 1
+	for x := size.Width; x < im.Bounds().Max.X; x += size.Width {
+		indexY := 0
+		for y := size.Height; y < im.Bounds().Max.Y; y += size.Height {
+			sprt, err := extractTile(im, size, x, y)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
+				break
+			}
+			v := getCloserTile(*sprt, tiles)
+			index := board.Analyse(&v, x, y)
+			board.TileMap[indexY][indexX] = index
+			indexY++
+		}
+		indexX++
+	}
+	return board
+}
+
 func AnalyzeTilesBoard(im image.Image, size constants.Size) *AnalyzeBoard {
 	nbTileW := int(im.Bounds().Max.X / size.Width)
 	nbTileH := int(im.Bounds().Max.Y/size.Height) - 1
@@ -207,12 +253,16 @@ func TilesAreEquals(s1, s2 *Tile) bool {
 	return true
 }
 
-func (a *AnalyzeBoard) GetUniqTiles() []Tile {
+func GetUniqTiles(board []BoardTile) []Tile {
 	tiles := make([]Tile, 0)
-	for _, v := range a.BoardTiles {
+	for _, v := range board {
 		tiles = append(tiles, *v.Tile)
 	}
 	return tiles
+}
+
+func (a *AnalyzeBoard) GetUniqTiles() []Tile {
+	return GetUniqTiles(a.BoardTiles)
 }
 
 func (a *AnalyzeBoard) Image(filePath string, bt []BoardTile, size constants.Size) error {
@@ -387,7 +437,7 @@ func computeTileDistance(t0, t1 *Tile) float64 {
 	return distance / (float64(t0.Size.Height) * float64(t0.Size.Width))
 }
 
-func (a *AnalyzeBoard) reduceTilesNumber(threshold float64) []BoardTile {
+func (a *AnalyzeBoard) ReduceTilesNumber(threshold float64) []BoardTile {
 
 	newBoard := make([]BoardTile, 0)
 	deleted := make([]int, 0)

@@ -90,7 +90,7 @@ func AutoFlash(in image.Image,
 	flashPaletteFilename1 := strings.ToUpper(name)[0:namesize] + "1.PAL"
 	flashPalettePath1 := filepath.Join(exportType.OutputPath, flashPaletteFilename1)
 
-	err = gfx.ApplyOneImage(leftIm,
+	err = gfx.ApplyOneImageAndExport(leftIm,
 		exportType,
 		filenameLeft, filepathLeft,
 		mode,
@@ -133,7 +133,7 @@ func AutoFlash(in image.Image,
 
 	exportType.PalettePath = flashPalettePath1
 
-	err = gfx.ApplyOneImage(rigthIm,
+	err = gfx.ApplyOneImageAndExport(rigthIm,
 		exportType,
 		filenameRigth, filepathRigth,
 		flashMode,
