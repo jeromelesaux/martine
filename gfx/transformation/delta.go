@@ -3,7 +3,6 @@ package transformation
 import (
 	"bytes"
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"image"
 	"image/color"
@@ -12,17 +11,12 @@ import (
 	"strings"
 
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/gfx"
+	"github.com/jeromelesaux/martine/gfx/errors"
 
-	"github.com/jeromelesaux/martine/common"
+	cm "github.com/jeromelesaux/martine/common"
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
-)
-
-var (
-	ErrorCanNotProceed       = errors.New("can not proceed treatment")
-	ErrorSizeDiffers         = errors.New("sizes differs can not proceed treatment")
-	ErrorCoordinatesNotFound = errors.New("coordinates not found")
+	"github.com/jeromelesaux/martine/gfx/common"
 )
 
 type DeltaItem struct {
@@ -98,10 +92,10 @@ func (dc *DeltaCollection) Add(b byte, address uint16) {
 func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, exportType *x.ExportType) (*DeltaCollection, error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
-		return data, gfx.ErrorSizeMismatch
+		return data, errors.ErrorSizeMismatch
 	}
 	if current.Bounds().Max.Y != next.Bounds().Max.Y {
-		return data, gfx.ErrorSizeMismatch
+		return data, errors.ErrorSizeMismatch
 	}
 	for i := 0; i < current.Bounds().Max.X; i += 2 {
 		for j := 0; j < current.Bounds().Max.Y; j++ {
@@ -110,31 +104,31 @@ func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.
 			i++
 			c3 := current.At(i, j)
 			c4 := next.At(i, j)
-			p1, err := gfx.PalettePosition(c1, currentPalette)
+			p1, err := common.PalettePosition(c1, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, i, j)
 				p1 = 0
 			}
-			p3, err := gfx.PalettePosition(c3, currentPalette)
+			p3, err := common.PalettePosition(c3, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, i, j)
 				p3 = 0
 			}
-			pixel1 := gfx.PixelMode0(p1, p3)
+			pixel1 := common.PixelMode0(p1, p3)
 
-			p2, err := gfx.PalettePosition(c2, nextPalette)
+			p2, err := common.PalettePosition(c2, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p2 = 0
 			}
-			p4, err := gfx.PalettePosition(c4, nextPalette)
+			p4, err := common.PalettePosition(c4, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p4 = 0
 			}
-			pixel2 := gfx.PixelMode0(p2, p4)
+			pixel2 := common.PixelMode0(p2, p4)
 			if pixel1 != pixel2 {
-				addr := gfx.CpcScreenAddress(0xc000, i, j, 0, exportType.Overscan)
+				addr := common.CpcScreenAddress(0xc000, i, j, 0, exportType.Overscan)
 				data.Add(pixel2, uint16(addr))
 			}
 		}
@@ -145,10 +139,10 @@ func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.
 func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, exportType *x.ExportType) (*DeltaCollection, error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
-		return data, gfx.ErrorSizeMismatch
+		return data, errors.ErrorSizeMismatch
 	}
 	if current.Bounds().Max.Y != next.Bounds().Max.Y {
-		return data, gfx.ErrorSizeMismatch
+		return data, errors.ErrorSizeMismatch
 	}
 	for i := 0; i < current.Bounds().Max.X; i += 4 {
 		for j := 0; j < current.Bounds().Max.Y; j++ {
@@ -163,51 +157,51 @@ func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.
 			i++
 			c7 := current.At(i, j)
 			c8 := next.At(i, j)
-			p1, err := gfx.PalettePosition(c1, currentPalette)
+			p1, err := common.PalettePosition(c1, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, i, j)
 				p1 = 0
 			}
-			p3, err := gfx.PalettePosition(c3, currentPalette)
+			p3, err := common.PalettePosition(c3, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, i, j)
 				p3 = 0
 			}
-			p5, err := gfx.PalettePosition(c5, currentPalette)
+			p5, err := common.PalettePosition(c5, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, i, j)
 				p5 = 0
 			}
-			p7, err := gfx.PalettePosition(c7, currentPalette)
+			p7, err := common.PalettePosition(c7, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, i, j)
 				p7 = 0
 			}
-			pixel1 := gfx.PixelMode1(p1, p3, p5, p7)
+			pixel1 := common.PixelMode1(p1, p3, p5, p7)
 
-			p2, err := gfx.PalettePosition(c2, nextPalette)
+			p2, err := common.PalettePosition(c2, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p2 = 0
 			}
-			p4, err := gfx.PalettePosition(c4, nextPalette)
+			p4, err := common.PalettePosition(c4, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p4 = 0
 			}
-			p6, err := gfx.PalettePosition(c6, nextPalette)
+			p6, err := common.PalettePosition(c6, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, i, j)
 				p6 = 0
 			}
-			p8, err := gfx.PalettePosition(c8, nextPalette)
+			p8, err := common.PalettePosition(c8, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, i, j)
 				p8 = 0
 			}
-			pixel2 := gfx.PixelMode1(p2, p4, p6, p8)
+			pixel2 := common.PixelMode1(p2, p4, p6, p8)
 			if pixel1 != pixel2 {
-				addr := gfx.CpcScreenAddress(0xc000, i, j, 1, exportType.Overscan)
+				addr := common.CpcScreenAddress(0xc000, i, j, 1, exportType.Overscan)
 				data.Add(pixel2, uint16(addr))
 			}
 		}
@@ -218,10 +212,10 @@ func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.
 func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, exportType *x.ExportType) (*DeltaCollection, error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
-		return data, gfx.ErrorSizeMismatch
+		return data, errors.ErrorSizeMismatch
 	}
 	if current.Bounds().Max.Y != next.Bounds().Max.Y {
-		return data, gfx.ErrorSizeMismatch
+		return data, errors.ErrorSizeMismatch
 	}
 	for i := 0; i < current.Bounds().Max.X; i += 8 {
 		for j := 0; j < current.Bounds().Max.Y; j++ {
@@ -248,91 +242,91 @@ func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.
 			i++
 			c15 := current.At(i, j)
 			c16 := next.At(i, j)
-			p1, err := gfx.PalettePosition(c1, currentPalette)
+			p1, err := common.PalettePosition(c1, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, i, j)
 				p1 = 0
 			}
-			p3, err := gfx.PalettePosition(c3, currentPalette)
+			p3, err := common.PalettePosition(c3, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, i, j)
 				p3 = 0
 			}
-			p5, err := gfx.PalettePosition(c5, currentPalette)
+			p5, err := common.PalettePosition(c5, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, i, j)
 				p5 = 0
 			}
-			p7, err := gfx.PalettePosition(c7, currentPalette)
+			p7, err := common.PalettePosition(c7, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, i, j)
 				p7 = 0
 			}
-			p9, err := gfx.PalettePosition(c9, currentPalette)
+			p9, err := common.PalettePosition(c9, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c9, i, j)
 				p9 = 0
 			}
-			p11, err := gfx.PalettePosition(c11, currentPalette)
+			p11, err := common.PalettePosition(c11, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c11, i, j)
 				p11 = 0
 			}
-			p13, err := gfx.PalettePosition(c13, currentPalette)
+			p13, err := common.PalettePosition(c13, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c13, i, j)
 				p13 = 0
 			}
-			p15, err := gfx.PalettePosition(c15, currentPalette)
+			p15, err := common.PalettePosition(c15, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c15, i, j)
 				p15 = 0
 			}
-			pixel1 := gfx.PixelMode2(p1, p3, p5, p7, p9, p11, p13, p15)
+			pixel1 := common.PixelMode2(p1, p3, p5, p7, p9, p11, p13, p15)
 
-			p2, err := gfx.PalettePosition(c2, nextPalette)
+			p2, err := common.PalettePosition(c2, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p2 = 0
 			}
-			p4, err := gfx.PalettePosition(c4, nextPalette)
+			p4, err := common.PalettePosition(c4, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p4 = 0
 			}
-			p6, err := gfx.PalettePosition(c6, nextPalette)
+			p6, err := common.PalettePosition(c6, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, i, j)
 				p6 = 0
 			}
-			p8, err := gfx.PalettePosition(c8, nextPalette)
+			p8, err := common.PalettePosition(c8, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, i, j)
 				p8 = 0
 			}
-			p10, err := gfx.PalettePosition(c10, nextPalette)
+			p10, err := common.PalettePosition(c10, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c10, i, j)
 				p10 = 0
 			}
-			p12, err := gfx.PalettePosition(c12, nextPalette)
+			p12, err := common.PalettePosition(c12, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c12, i, j)
 				p12 = 0
 			}
-			p14, err := gfx.PalettePosition(c14, nextPalette)
+			p14, err := common.PalettePosition(c14, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c14, i, j)
 				p14 = 0
 			}
-			p16, err := gfx.PalettePosition(c16, nextPalette)
+			p16, err := common.PalettePosition(c16, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c16, i, j)
 				p16 = 0
 			}
-			pixel2 := gfx.PixelMode2(p2, p4, p6, p8, p10, p12, p14, p16)
+			pixel2 := common.PixelMode2(p2, p4, p6, p8, p10, p12, p14, p16)
 			if pixel1 != pixel2 {
-				addr := gfx.CpcScreenAddress(0xc000, i, j, 2, exportType.Overscan)
+				addr := common.CpcScreenAddress(0xc000, i, j, 2, exportType.Overscan)
 				data.Add(pixel2, uint16(addr))
 			}
 		}
@@ -423,7 +417,7 @@ func CpcCoordinates(address, startingAddress uint16, lineOctetWidth int) (int, i
 			}
 		}
 	}
-	return 0, 0, ErrorCoordinatesNotFound
+	return 0, 0, errors.ErrorCoordinatesNotFound
 }
 
 func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8, x0, y0 uint16, lineOctetWidth int) *DeltaCollection {
@@ -476,12 +470,12 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 
 	if len(filespath) == 1 {
 		var err error
-		filespath, err = common.WilcardedFiles(filespath)
+		filespath, err = cm.WilcardedFiles(filespath)
 		if err != nil {
 			return err
 		}
 		if len(filespath) == 1 || len(filespath) == 0 {
-			return ErrorCanNotProceed
+			return errors.ErrorCanNotProceed
 		}
 	}
 	var d1, d2 []byte
@@ -520,7 +514,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 				return err
 			}
 		default:
-			return ErrorCanNotProceed
+			return errors.ErrorCanNotProceed
 		}
 
 		switch strings.ToUpper(filepath.Ext(filespath[i+1])) {
@@ -546,11 +540,11 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 				return err
 			}
 		default:
-			return ErrorCanNotProceed
+			return errors.ErrorCanNotProceed
 		}
 
 		if len(d1) != len(d2) {
-			return ErrorSizeDiffers
+			return errors.ErrorSizeDiffers
 		}
 		dc := Delta(d1, d2, isSprite, size, mode, uint16(x0), uint16(y0), lineOctetsWidth)
 		fmt.Fprintf(os.Stdout, "files (%s) (%s)", filespath[i], filespath[i+1])
@@ -587,7 +581,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 			return err
 		}
 	default:
-		return ErrorCanNotProceed
+		return errors.ErrorCanNotProceed
 	}
 
 	switch strings.ToUpper(filepath.Ext(filespath[0])) {
@@ -612,7 +606,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 			return err
 		}
 	default:
-		return ErrorCanNotProceed
+		return errors.ErrorCanNotProceed
 	}
 
 	f1, err := os.Open(filespath[len(filespath)-1])

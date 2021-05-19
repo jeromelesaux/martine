@@ -14,6 +14,7 @@ import (
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx"
+	"github.com/jeromelesaux/martine/gfx/errors"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
 
@@ -94,7 +95,7 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 		d1 := rawImages[i]
 		d2 := rawImages[i+1]
 		if len(d1) != len(d2) {
-			return transformation.ErrorSizeDiffers
+			return errors.ErrorSizeDiffers
 		}
 		dc := transformation.Delta(d1, d2, isSprite, *realSize, mode, uint16(x0), uint16(y0), lineOctetsWidth)
 		deltaData = append(deltaData, dc)

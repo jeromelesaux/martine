@@ -1,7 +1,6 @@
 package gfx
 
 import (
-	"errors"
 	"fmt"
 	"image"
 	"image/color"
@@ -11,11 +10,8 @@ import (
 	"path/filepath"
 
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/gfx/errors"
 	"github.com/pbnjay/pixfont"
-)
-
-var (
-	ErrorSizeOverflow = errors.New("size overflow the image size capacity")
 )
 
 type TilePosition struct {
@@ -155,7 +151,7 @@ func extractTile(im image.Image, size constants.Size, posX, posY int) (*Tile, er
 		ySpr++
 	}
 	if onError {
-		return sprite, ErrorSizeOverflow
+		return sprite, errors.ErrorSizeOverflow
 	}
 	return sprite, nil
 }

@@ -1,7 +1,6 @@
 package gfx
 
 import (
-	"errors"
 	"fmt"
 	"image"
 	"image/color"
@@ -13,16 +12,12 @@ import (
 	"github.com/jeromelesaux/martine/convert"
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
-)
-
-var (
-	ErrorMissingNumberOfImageToGenerate = errors.New("iteration is not set, cannot define the number of images to generate")
-	ErrorSizeMismatch                   = errors.New("error width and height mismatch cannot perform action")
+	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
 func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filePath string, resizeAlgo imaging.ResampleFilter, exportType *x.ExportType) error {
 	if exportType.RollIteration == -1 {
-		return ErrorMissingNumberOfImageToGenerate
+		return errors.ErrorMissingNumberOfImageToGenerate
 	}
 
 	var indice int

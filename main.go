@@ -19,7 +19,9 @@ import (
 	"github.com/jeromelesaux/martine/export/net"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/animate"
+	cgfx "github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/effect"
+	"github.com/jeromelesaux/martine/gfx/errors"
 	"github.com/jeromelesaux/martine/gfx/filter"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
@@ -387,7 +389,7 @@ func main() {
 				os.Exit(-1)
 			}
 
-			if err := gfx.OverscanToPng(*picturePath, outpath, mode, p); err != nil {
+			if err := cgfx.OverscanToPng(*picturePath, outpath, mode, p); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
 				os.Exit(-1)
 			}
@@ -419,12 +421,12 @@ func main() {
 		}
 		switch strings.ToUpper(filepath.Ext(filename)) {
 		case ".WIN":
-			if err := gfx.SpriteToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
+			if err := cgfx.SpriteToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
 				os.Exit(-1)
 			}
 		case ".SCR":
-			if err := gfx.ScrToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
+			if err := cgfx.ScrToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
 				os.Exit(-1)
 			}
@@ -583,7 +585,7 @@ func main() {
 										os.Exit(-1)
 									}
 								} else {
-									fmt.Fprintf(os.Stderr, "Only overscan mode implemented for this feature, %v", gfx.ErrorNotYetImplemented)
+									fmt.Fprintf(os.Stderr, "Only overscan mode implemented for this feature, %v", errors.ErrorNotYetImplemented)
 								}
 							} else {
 								if strings.ToUpper(extension) != ".SCR" {
