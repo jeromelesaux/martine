@@ -15,3 +15,10 @@ func TestAnimate(t *testing.T) {
 
 	Animation(fs, screenMode, e)
 }
+
+func TestDeltaMotif(t *testing.T) {
+	err := DeltaMotif("/Users/jeromelesaux/Downloads/triangles.gif", &export.ExportType{}, 20, 0xc000, 1)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+}

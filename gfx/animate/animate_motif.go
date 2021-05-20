@@ -14,11 +14,7 @@ import (
 )
 
 func DeltaMotif(gitFilepath string, ex *export.ExportType, threshold int, initialAddress uint16, mode uint8) error {
-	var isSprite = true
-	var maxImages = 22
-	if !ex.CustomDimension && !ex.SpriteHard {
-		isSprite = false
-	}
+
 	fr, err := os.Open(gitFilepath)
 	if err != nil {
 		return err
@@ -29,16 +25,6 @@ func DeltaMotif(gitFilepath string, ex *export.ExportType, threshold int, initia
 		return err
 	}
 	images := ConvertToImage(*gifImages)
-	var pad int = 1
-	if len(images) > maxImages {
-		fmt.Fprintf(os.Stderr, "Warning gif exceed 30 images. Will corrupt the number of images.")
-		pad = len(images) / maxImages
-	}
-
-	if isSprite {
-		pad++
-	}
-
 	// convertion de la palette en mode 1
 	size := constants.Mode1
 
@@ -66,11 +52,13 @@ func DeltaMotif(gitFilepath string, ex *export.ExportType, threshold int, initia
 	btc := make([][]transformation.BoardTile, 0)
 	btc = append(btc, refBoard)
 	refTiles := transformation.GetUniqTiles(refBoard)
-
+	a.Image("../../test/motifs/first.png", refBoard, a.ImageSize)
 	// application des motifs sur toutes les images
 	for i := 1; i < len(screens); i++ {
 		ab := transformation.AnalyzeTilesBoardWithTiles(screens[i], constants.Size{Width: 4, Height: 4}, refTiles)
-		btc = append(btc, ab.ReduceTilesNumber(float64(threshold)))
+		board := ab.BoardTiles
+		btc = append(btc, board)
+		ab.Image(fmt.Sprintf("../../test/motifs/%.2d.png", i), board, a.ImageSize)
 	}
 
 	return nil
