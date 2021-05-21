@@ -10,6 +10,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
 
@@ -61,5 +62,15 @@ func DeltaMotif(gitFilepath string, ex *export.ExportType, threshold int, initia
 		ab.Image(fmt.Sprintf("../../test/motifs/%.2d.png", i), board, a.ImageSize)
 	}
 
+	motifs := make([][]byte, 0)
+
+	/* conversion des sprites en mode cpc */
+	for i := 0; i < len(refTiles); i++ {
+		sprt := (&refTiles[i]).Image()
+		data, _, _, _ := common.ToSprite(sprt, customPalette, refTiles[i].Size, 1, ex)
+		motifs = append(motifs, data)
+	}
+
+	/* calcul des coordonnées */
 	return nil
 }
