@@ -72,5 +72,36 @@ func DeltaMotif(gitFilepath string, ex *export.ExportType, threshold int, initia
 	}
 
 	/* calcul des coordonnées */
+	deltas := make([][]byte, len(btc))
+	for _, v := range btc {
+		//nbCoords := size.Width * size.Height / 2 / 4
+		delta := make([]byte, 0)
+		index := 0
+		pixel := 0
+		for j := 0; j < size.Height; j += 4 {
+			for i := 0; i < size.Width; i += 4 {
+				if t := transformation.GetTile(v, i, j); t != nil {
+					pos := transformation.GetTilePostion(t, refTiles)
+					if index == 2 {
+						delta = append(delta, byte(pixel))
+						pixel = 0
+						index = 0
+					}
+					if index == 0 {
+						pixel += (pos << 4)
+					} else {
+						pixel += pos
+					}
+					index++
+				}
+			}
+		}
+		//fmt.Printf("%v\n", v)
+		/*	for _, vs := range v {
+			vs.TilePositions
+		}*/
+		deltas = append(deltas, delta)
+	}
+
 	return nil
 }

@@ -157,6 +157,26 @@ func extractTile(im image.Image, size constants.Size, posX, posY int) (*Tile, er
 	return sprite, nil
 }
 
+func GetTile(boards []BoardTile, x, y int) *Tile {
+	for _, v := range boards {
+		for _, tp := range v.TilePositions {
+			if tp.PixelX == x && tp.PixelY == y {
+				return v.Tile
+			}
+		}
+	}
+	return nil
+}
+
+func GetTilePostion(t *Tile, refs []Tile) int {
+	for index, v := range refs {
+		if TilesAreEquals(t, &v) {
+			return index
+		}
+	}
+	return -1
+}
+
 func getCloserTile(sprt Tile, t []Tile) Tile {
 	distance := math.MaxFloat64
 	var closer Tile
