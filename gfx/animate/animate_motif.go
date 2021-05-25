@@ -3,15 +3,19 @@ package animate
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"image/gif"
 	"os"
+	"path/filepath"
 
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/transformation"
+	zx0 "github.com/jeromelesaux/zx0/encode"
 )
 
 func DeltaMotif(gitFilepath string, ex *export.ExportType, threshold int, initialAddress uint16, mode uint8) error {
@@ -72,7 +76,7 @@ func DeltaMotif(gitFilepath string, ex *export.ExportType, threshold int, initia
 	}
 
 	/* calcul des coordonnées */
-	deltas := make([][]byte, len(btc))
+	deltas := make([][]byte, 0)
 	for _, v := range btc {
 		//nbCoords := size.Width * size.Height / 2 / 4
 		delta := make([]byte, 0)
@@ -80,28 +84,52 @@ func DeltaMotif(gitFilepath string, ex *export.ExportType, threshold int, initia
 		pixel := 0
 		for j := 0; j < size.Height; j += 4 {
 			for i := 0; i < size.Width; i += 4 {
+				var pos int
 				if t := transformation.GetTile(v, i, j); t != nil {
-					pos := transformation.GetTilePostion(t, refTiles)
-					if index == 2 {
-						delta = append(delta, byte(pixel))
-						pixel = 0
-						index = 0
-					}
-					if index == 0 {
-						pixel += (pos << 4)
-					} else {
-						pixel += pos
-					}
-					index++
+					pos = transformation.GetTilePostion(t, refTiles)
+
 				}
+				if index == 2 {
+					delta = append(delta, byte(pixel))
+					pixel = 0
+					index = 0
+				}
+				if index == 0 {
+					pixel += (pos << 4)
+				} else {
+					pixel += pos
+				}
+				index++
 			}
 		}
-		//fmt.Printf("%v\n", v)
-		/*	for _, vs := range v {
-			vs.TilePositions
-		}*/
 		deltas = append(deltas, delta)
 	}
+	filename := string(ex.OsFilename(".asm"))
+	return exportDeltaMotif(deltas, motifs, customPalette, ex, ex.OutputPath+string(filepath.Separator)+filename)
+}
 
+func exportDeltaMotif(images [][]byte, motifs [][]byte, p color.Palette, ex *export.ExportType, filename string) error {
+	var deltaCode string
+	for i := 0; i < len(images); i++ {
+		deltaCode += fmt.Sprintf("delta%.2d\n", i)
+		encoded := zx0.Encode(images[i])
+		deltaCode += file.FormatAssemblyDatabyte(encoded, "\n")
+	}
+
+	for i := 0; i < len(motifs); i++ {
+		deltaCode += fmt.Sprintf("motif%.2d\n", i)
+		deltaCode += file.FormatAssemblyDatabyte(motifs[i], "\n")
+	}
+
+	deltaCode += "palette:\n" + file.ByteToken + " "
+	deltaCode += file.FormatAssemblyBasicPalette(p, "\n")
+
+	//	fmt.Printf("%s", deltaCode)
+	fw, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer fw.Close()
+	fw.WriteString(deltaCode)
 	return nil
 }
