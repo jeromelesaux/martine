@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"image/draw"
 	"image/gif"
+	"image/png"
 	"os"
 	"path/filepath"
 	"strings"
@@ -35,6 +36,9 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 	}
 	images := ConvertToImage(*gifImages)
 	var pad int = 1
+	if len(images) <= 1 {
+		return fmt.Errorf("need more than one image to proceed")
+	}
 	if len(images) > maxImages {
 		fmt.Fprintf(os.Stderr, "Warning gif exceed 30 images. Will corrupt the number of images.")
 		pad = len(images) / maxImages
@@ -76,6 +80,9 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 			if err != nil {
 				return err
 			}
+			fw, _ := os.Create(ex.OutputPath + fmt.Sprintf("/%.2d.png", i))
+			png.Encode(fw, in)
+			fw.Close()
 			rawImages = append(rawImages, raw)
 			fmt.Printf("Image [%d] proceed\n", i)
 		}
@@ -277,7 +284,10 @@ var DeltaCodeDelta string = ";--- dimensions du sprite ----\n" +
 	"table_index:\n" +
 	"    ld a,-1\n" +
 	"    inc a\n" +
-	"    and nbdelta\n" +
+	"    cp nbdelta\n" +
+	"    jr c, table_next\n" +
+	"    xor a\n" +
+	"table_next:\n" +
 	"    ld (table_index+1),a\n" +
 	"    add a\n" +
 	"    ld e,a\n" +
