@@ -17,6 +17,7 @@ import (
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/errors"
 	"github.com/jeromelesaux/martine/gfx/transformation"
+	zx0 "github.com/jeromelesaux/zx0/encode"
 )
 
 func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint16, mode uint8) error {
@@ -96,7 +97,7 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 	fmt.Printf("Let's go deltapacking raw images\n")
 	realSize := &constants.Size{Width: ex.Size.Width, Height: ex.Size.Height}
 	realSize.Width = realSize.ModeWidth(mode)
-
+	var lastImage []byte
 	for i := 0; i < len(rawImages)-1; i++ {
 		fmt.Printf("Compare image [%d] with [%d] ", i, i+1)
 		d1 := rawImages[i]
@@ -104,12 +105,13 @@ func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint
 		if len(d1) != len(d2) {
 			return errors.ErrorSizeDiffers
 		}
+		lastImage = d2
 		dc := transformation.Delta(d1, d2, isSprite, *realSize, mode, uint16(x0), uint16(y0), lineOctetsWidth)
 		deltaData = append(deltaData, dc)
 		fmt.Printf("%d bytes differ from the both images\n", len(dc.Items))
 	}
 	fmt.Printf("Compare image [%d] with [%d] ", len(rawImages)-1, 0)
-	d1 := rawImages[len(rawImages)-1]
+	d1 := lastImage
 	d2 := rawImages[0]
 	dc := transformation.Delta(d1, d2, isSprite, ex.Size, mode, uint16(x0), uint16(y0), lineOctetsWidth)
 	deltaData = append(deltaData, dc)
@@ -156,7 +158,13 @@ func exportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	var code string
 	// copy of the sprite
 	dataCode += "sprite:\n"
-	dataCode += file.FormatAssemblyDatabyte(imageReference, "\n")
+	if ex.Compression != -1 {
+		fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
+		data := zx0.Encode(imageReference)
+		dataCode += file.FormatAssemblyDatabyte(data, "\n")
+	} else {
+		dataCode += file.FormatAssemblyDatabyte(imageReference, "\n")
+	}
 	// copy of all delta
 	for i := 0; i < len(delta); i++ {
 		dc := delta[i]
@@ -166,7 +174,13 @@ func exportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 		}
 		name := fmt.Sprintf("delta%.2d", i)
 		dataCode += name + ":\n"
-		dataCode += file.FormatAssemblyDatabyte(data, "\n")
+		if ex.Compression != -1 {
+			fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
+			d := zx0.Encode(data)
+			dataCode += file.FormatAssemblyDatabyte(d, "\n")
+		} else {
+			dataCode += file.FormatAssemblyDatabyte(data, "\n")
+		}
 		deltaIndex = append(deltaIndex, name)
 	}
 	dataCode += "table_delta:\n"
@@ -186,7 +200,7 @@ func exportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	header = strings.Replace(header, "$NBCOLORS$", nbColors, 1)
 
 	// replace the number of delta
-	nbDelta := fmt.Sprintf("%d", len(delta)+1)
+	nbDelta := fmt.Sprintf("%d", len(delta))
 	header = strings.Replace(header, "$NBDELTA$", nbDelta, 1)
 
 	// replace char large for the screen
