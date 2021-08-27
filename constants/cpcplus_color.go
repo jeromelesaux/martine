@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"image/color"
-	"os"
 )
 
 type CpcPlusColor struct {
@@ -27,8 +26,8 @@ func (c *CpcPlusColor) ToString() string {
 
 func (c *CpcPlusColor) Value() uint16 {
 	v := c.B | c.R<<4 | c.G<<8
-	fmt.Fprintf(os.Stderr, "value(%d,%d,%d)(%b,%b,%b) #%.4x (%.b): %d\n", c.R, c.G, c.B, c.R, c.G, c.B,
-		v, v, c.B+(c.R*16)+c.G*256)
+	//fmt.Fprintf(os.Stderr, "value(%d,%d,%d)(%b,%b,%b) #%.4x (%.b): %d\n", c.R, c.G, c.B, c.R, c.G, c.B,
+	//	v, v, c.B+(c.R*16)+c.G*256)
 	return v
 }
 func (c *CpcPlusColor) Bytes() []byte {

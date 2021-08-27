@@ -234,6 +234,11 @@ func ExportHandler() (*export.ExportType, constants.Size) {
 		exp.EgxMode2 = uint8(*mode2)
 	}
 
+	if *magicPal > 0 {
+		exp.CpcPlus = true
+		exp.MagicPalette = *magicPal
+	}
+
 	exp.DeltaMode = *deltaMode
 	exp.Dsk = *dsk
 	return exp, size

@@ -138,8 +138,12 @@ func ApplyOneImageAndExport(in image.Image,
 			fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", picturePath)
 		}
 	}
-
 	newPalette = constants.SortColorsByDistance(newPalette)
+	if exportType.MagicPalette > 0 {
+		palette = convert.EnhanceBrightness(newPalette, exportType.MagicPalette)
+		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
+		newPalette = constants.SortColorsByDistance(newPalette)
+	}
 
 	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
 	if err := file.Png(filepath.Join(exportType.OutputPath, filename+"_down.png"), downgraded); err != nil {

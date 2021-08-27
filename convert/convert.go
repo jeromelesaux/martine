@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"math"
 	"os"
 	"sort"
 
 	"github.com/disintegration/imaging"
+
 	"github.com/jeromelesaux/martine/constants"
 )
 
@@ -55,6 +57,132 @@ func xorMask(v uint32, m uint8) uint8 {
 	return v2
 }
 
+func Max(v0, v1 uint32) uint32 {
+	if v0 > v1 {
+		return v0
+	}
+	return v1
+}
+
+func Min(v0, v1 uint32) uint32 {
+	if v0 < v1 {
+		return v0
+	}
+	return v1
+}
+
+func LumSaturation(c color.Color, lumi, satur float64) color.Color {
+	var r, g, b float64
+	r0, g0, b0, _ := c.RGBA()
+
+	r = float64(r0 >> 8)
+	g = float64(g0 >> 8)
+	b = float64(b0 >> 8)
+	max := math.Max(r, math.Max(g, b))
+	min := math.Min(r, math.Min(g, b))
+	dif := max - min
+	hue := 0.0
+	if max > min {
+		if max == 0 {
+			g = (b-r)/dif*60. + 120.
+		} else {
+			if b == max {
+				g = (r-g)/dif*60. + 240.
+			} else {
+				t := 0.
+				if b > g {
+					t = 360.
+				}
+				g = (g-b)/dif*60. + t
+			}
+		}
+		hue = g
+		if hue < 0 {
+			hue += 360.
+		}
+		hue *= 255. / 360.
+	}
+	sat := satur * (dif / max) * 255.
+	bri := lumi * max
+	r = bri
+	g = bri
+	b = bri
+
+	if sat != 0 {
+		max = bri
+		dif = bri * sat / 255.
+		min = bri - dif
+		h := hue * 360. / 255.
+		if h < 60. {
+			r = max
+			g = h*dif/60. + min
+			b = min
+		} else {
+			if h < 120. {
+				r = -(h-120.)*dif/60. + min
+				g = max
+				b = min
+			} else {
+				if h < 180. {
+					r = min
+					g = max
+					b = (h-120.)*dif/60. + min
+				} else {
+					if h < 240. {
+						r = min
+						g = -(h-240.)*dif/60. + min
+						b = max
+					} else {
+						if h < 300. {
+							r = (h-240.)*dif/60. + min
+							g = min
+							b = max
+						} else {
+							if h <= 360. {
+								r = max
+								g = min
+								b = -(h-360.)*dif/60 + min
+							} else {
+								r = 0
+								g = 0
+								b = 0
+
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: math.MaxUint8}
+}
+
+func EnhanceBrightness(p color.Palette, force int) color.Palette {
+	for i := 0; i < len(p); i++ {
+		p[i] = LumSaturation(p[i], 90., float64(force))
+	}
+	/*	var indice int
+		for i := 0; i < len(constants.CpcPlusPalette); i++ {
+			if constants.ColorsAreEquals(mediumColor, constants.CpcPlusPalette[i]) {
+				indice = i
+				break
+			}
+		}
+		p[0] = mediumColor
+		j := 1
+		for i := indice; indice-i < (len(p)/2) && i >= 0 && j < len(p); i -= force {
+			p[j] = constants.CpcPlusPalette[i]
+			j++
+		}
+
+		for i := indice; i-indice < (len(p)/2) && i < len(constants.CpcPlusPalette) && j < len(p); i += force {
+			p[j] = constants.CpcPlusPalette[i]
+			j++
+		}*/
+
+	return p
+}
+
 func DowngradingWithPalette(in *image.NRGBA, p color.Palette) (color.Palette, *image.NRGBA) {
 	fmt.Fprintf(os.Stdout, "Downgrading image with input palette %d\n", len(p))
 	return p, downgradeWithPalette(in, p)
@@ -68,7 +196,7 @@ func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (c
 		fmt.Fprintf(os.Stderr, "Downgraded palette size (%d) is greater than the available colors in this mode (%d)\n", len(p), size.ColorsAvailable)
 		fmt.Fprintf(os.Stderr, "Check color usage in image.\n")
 		colorUsage := computePaletteUsage(out, p)
-		fmt.Println(colorUsage)
+		//fmt.Println(colorUsage)
 		// feed sort palette colors structure
 		paletteToReduce := constants.NewPaletteReducer()
 
