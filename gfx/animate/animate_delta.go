@@ -152,13 +152,14 @@ func filloutGif(g gif.GIF, ex *export.ExportType) []image.Image {
 }
 
 func exportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaCollection, palette color.Palette, ex *export.ExportType, initialAddress uint16, mode uint8, filename string) error {
-
+	var sourceCode string = deltaCodeDelta
 	var dataCode string
 	var deltaIndex []string
 	var code string
 	// copy of the sprite
 	dataCode += "sprite:\n"
 	if ex.Compression != -1 {
+		sourceCode = depackRoutine
 		fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
 		data := zx0.Encode(imageReference)
 		dataCode += file.FormatAssemblyDatabyte(data, "\n")
@@ -193,7 +194,7 @@ func exportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 
 	// replace the initial address
 	address := fmt.Sprintf("#%.4x", initialAddress)
-	header := strings.Replace(DeltaCodeDelta, "$INITIALADDRESS$", address, 1)
+	header := strings.Replace(sourceCode, "$INITIALADDRESS$", address, 1)
 
 	// replace number of colors
 	nbColors := fmt.Sprintf("%d", len(palette))
@@ -242,172 +243,403 @@ func exportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	return nil
 }
 
-var DeltaCodeDelta string = ";--- dimensions du sprite ----\n" +
-	"large equ $LARGE$\n" +
-	"haut equ $HAUT$\n" +
-	"loadingaddress equ #200\n" +
-	"linewidth equ $LIGNELARGE$\n" +
-	"nbdelta equ $NBDELTA$\n" +
-	"nbcolors equ $NBCOLORS$\n" +
-	";-----------------------------\n" +
-	"org loadingaddress\n" +
-	"run loadingaddress\n" +
-	";-----------------------------\n" +
-	"start\n" +
-	";--- selection du mode ---------\n" +
-	"    ld a,$SETMODE$\n" +
-	"    call #BC0E\n" +
-	";-------------------------------\n" +
-	"\n" +
-	";--- gestion de la palette ---- \n" +
-	"    call palettefirmware\n" +
-	";------------------------------\n" +
-	"\n" +
-	"call xvbl\n" +
-	"\n" +
-	";--- affichage du sprite initiale --  \n" +
-	"    ; affichage du premier sprite\n" +
-	"    ld de,$INITIALADDRESS$ ; adresse de l'ecran \n" +
-	"    ld hl,sprite ; pointeur sur l'image en memoire \n" +
-	"    ld b, haut ; hauteur de l'image \n" +
-	"    loop \n" +
-	"    push bc ; sauve le compteur hauteur dans la pile \n" +
-	"    push de ; sauvegarde de l'adresse ecran dans la pile\n" +
-	"    ld bc, large ; largeur de l'image a afficher\n" +
-	"    ldir ; remplissage de n * largeur octets a l'adresse dans de \n" +
-	"    pop de ; recuperation de l'adresse d'origine \n" +
-	"    ex de,hl ; echange des valeurs des adresses\n" +
-	"    call bc26 ; calcul de l'adresse de la ligne suivante\n" +
-	"    ex de,hl ; echange des valeurs des adresses\n" +
-	"    pop bc ; retabli le compteur \n" +
-	"    djnz loop\n" +
-	";------------------------------------\n" +
-	"\n" +
-	"mainloop    ; routine pour afficher les deltas provenant de martine \n" +
-	"\n" +
-	";call #bb06\n" +
-	"\n" +
-	"call xvbl\n" +
-	"call next_delta\n" +
-	"\n" +
-	"jp mainloop\n" +
-	"\n" +
-	"\n" +
-	";--- routine de deltapacking --------------------------\n" +
-	"next_delta:\n" +
-	"table_index:\n" +
-	"    ld a,-1\n" +
-	"    inc a\n" +
-	"    cp nbdelta\n" +
-	"    jr c, table_next\n" +
-	"    xor a\n" +
-	"table_next:\n" +
-	"    ld (table_index+1),a\n" +
-	"    add a\n" +
-	"    ld e,a\n" +
-	"    ld d,0\n" +
-	"    ld hl,table_delta\n" +
-	"    add hl,de\n" +
-	"    ld a,(hl)\n" +
-	"    inc hl\n" +
-	"    ld h,(hl)\n" +
-	"    ld l,a\n" +
-	"delta\n" +
-	" ld a,(hl) ; nombre de byte a poker\n" +
-	" push af   ; stockage en mémoire\n" +
-	" inc hl\n" +
-	"init\n" +
-	" ld a,(hl) ; octet a poker\n" +
-	" ld (pixel),a\n" +
-	" inc hl\n" +
-	" ld c,(hl) ; nbfois\n" +
-	" inc hl \n" +
-	" ld b,(hl)\n" +
-	" inc hl\n" +
-	";\n" +
-	"poke_octet\n" +
-	" ld e,(hl)\n" +
-	" inc hl\n" +
-	" ld d,(hl) ; de=adresse\n" +
-	" inc hl\n" +
-	" ld a,(pixel)\n" +
-	" ld (de),a ; poke a l'adresse dans de\n" +
-	" dec bc\n" +
-	" ld a,b ; test a t'on poke toutes les adresses compteur bc\n" +
-	" or a \n" +
-	" jr nz, poke_octet\n" +
-	" ld a,c \n" +
-	" or a\n" +
-	" jr nz, poke_octet\n" +
-	" pop af \n" +
-	"; reste t'il d'autres bytes a poker ? \n" +
-	" dec a \n" +
-	" push af\n" +
-	" jr nz,init\n" +
-	" pop af\n" +
-	" ret\n" +
-	"\n" +
-	"\n" +
-	"\n" +
-	";---------------------------------------------------------------\n" +
-	";\n" +
-	"; attente de plusieurs vbl\n" +
-	";\n" +
-	"xvbl ld e,50\n" +
-	"	call waitvbl\n" +
-	"	dec e\n" +
-	"	jr nz,xvbl+2\n" +
-	"	ret\n" +
-	";-----------------------------------\n" +
-	"\n" +
-	";---- attente vbl ----------\n" +
-	"waitvbl\n" +
-	"    ld b,#f5 ; attente vbl\n" +
-	"vbl     \n" +
-	"    in a,(c)\n" +
-	"    rra\n" +
-	"    jp nc,vbl\n" +
-	"    ret\n" +
-	";---------------------------\n" +
-	"\n" +
-	";--- application palette firmware -------------\n" +
-	"palettefirmware ; hl pointe sur les valeurs de la palette\n" +
-	"ld e,nbcolors\n" +
-	"ld a,0\n" +
-	"ld hl,palette\n" +
-	"\n" +
-	"paletteloop\n" +
-	"ld b,(hl)\n" +
-	"ld c,b\n" +
-	"push af\n" +
-	"push de\n" +
-	"push hl\n" +
-	"call #bc32 ; af, de, hl corrupted\n" +
-	"pop hl\n" +
-	"pop de\n" +
-	"pop af\n" +
-	"inc a\n" +
-	"inc hl\n" +
-	"dec e\n" +
-	"jr nz,paletteloop\n" +
-	"ret\n" +
-	";---------------------------------------------\n" +
-	"\n" +
-	";---------------------------------------------\n" +
-	"\n" +
-	";---- recuperation de l'adresse de la ligne en dessous ------------\n" +
-	"bc26 \n" +
-	"ld a,h\n" +
-	"add a,8 \n" +
-	"ld h,a ; <---- le fameux que tu as oublié !\n" +
-	"ret nc \n" +
-	"ld bc,linewidth ; on passe en 96 colonnes\n" +
-	"add hl,bc\n" +
-	"res 3,h\n" +
-	"ret\n" +
-	";-----------------------------------------------------------------\n" +
-	"\n" +
-	"\n" +
-	";--- variables memoires -----\n" +
-	"pixel db 0 \n" +
-	";----------------------------\n"
+var deltaCodeDelta string = `;--- dimensions du sprite ----
+large equ $LARGE$
+haut equ $HAUT$
+loadingaddress equ #200
+linewidth equ $LIGNELARGE$
+nbdelta equ $NBDELTA$
+nbcolors equ $NBCOLORS$
+;-----------------------------
+org loadingaddress
+run loadingaddress
+;-----------------------------
+start
+;--- selection du mode ---------
+	ld a,$SETMODE$
+	call #BC0E
+;-------------------------------
+
+;--- gestion de la palette ----
+	call palettefirmware
+;------------------------------
+
+call xvbl
+
+;--- affichage du sprite initiale --
+	; affichage du premier sprite
+	ld de,$INITIALADDRESS$ ; adresse de l'ecran 
+	ld hl,sprite ; pointeur sur l'image en memoire
+	ld b, haut ; hauteur de l'image
+	loop
+	push bc ; sauve le compteur hauteur dans la pile
+	push de ; sauvegarde de l'adresse ecran dans la pile
+	ld bc, large ; largeur de l'image a afficher
+	ldir ; remplissage de n * largeur octets a l'adresse dans de
+	pop de ; recuperation de l'adresse d'origine
+	ex de,hl ; echange des valeurs des adresses
+	call bc26 ; calcul de l'adresse de la ligne suivante
+	ex de,hl ; echange des valeurs des adresses
+	pop bc ; retabli le compteur 
+	djnz loop
+;------------------------------------
+
+mainloop    ; routine pour afficher les deltas provenant de martine 
+
+;call #bb06
+
+call xvbl
+call next_delta
+
+jp mainloop
+
+
+;--- routine de deltapacking --------------------------
+next_delta:
+table_index:
+	ld a,-1
+	inc a
+	cp nbdelta
+	jr c, table_next
+	xor a
+table_next:
+	ld (table_index+1),a
+	add a
+	ld e,a
+	ld d,0
+	ld hl,table_delta
+	add hl,de
+	ld a,(hl)
+	inc hl
+	ld h,(hl)
+	ld l,a
+delta
+	ld a,(hl) ; nombre de byte a poker
+	push af   ; stockage en mémoire
+	inc hl
+init
+	ld a,(hl) ; octet a poker
+	ld (pixel),a
+	inc hl
+	ld c,(hl) ; nbfois
+	inc hl 
+	ld b,(hl)
+	inc hl
+;
+poke_octet
+	ld e,(hl)
+	inc hl
+	ld d,(hl) ; de=adresse
+	inc hl
+	ld a,(pixel)
+	ld (de),a ; poke a l'adresse dans de
+	dec bc
+	ld a,b ; test a t'on poke toutes les adresses compteur bc
+	or a 
+	jr nz, poke_octet
+	ld a,c 
+	or a
+	jr nz, poke_octet
+	pop af 
+; reste t'il d'autres bytes a poker ? 
+	dec a 
+	push af
+	jr nz,init
+	pop af
+	ret
+
+;---------------------------------------------------------------
+;
+; attente de plusieurs vbl
+;
+xvbl ld e,50
+	call waitvbl
+	dec e
+	jr nz,xvbl+2
+	ret
+;-----------------------------------
+
+;---- attente vbl ----------
+waitvbl
+	ld b,#f5 ; attente vbl
+vbl     
+	in a,(c)
+	rra
+	jp nc,vbl
+	ret
+;---------------------------
+
+;--- application palette firmware -------------
+palettefirmware ; hl pointe sur les valeurs de la palette
+ld e,nbcolors
+ld a,0
+ld hl,palette
+
+paletteloop
+ld b,(hl)
+ld c,b
+push af
+push de
+push hl
+call #bc32 ; af, de, hl corrupted
+pop hl
+pop de
+pop af
+inc a
+inc hl
+dec e
+jr nz,paletteloop
+ret
+;---------------------------------------------
+
+;---------------------------------------------
+
+;---- recuperation de l'adresse de la ligne en dessous ------------
+bc26 
+ld a,h
+add a,8 
+ld h,a ; <---- le fameux que tu as oublié !
+ret nc 
+ld bc,linewidth ; on passe en 96 colonnes
+add hl,bc
+res 3,h
+ret
+;-----------------------------------------------------------------
+
+
+;--- variables memoires -----
+pixel db 0 
+;----------------------------`
+
+var depackRoutine = `
+;--- dimensions du sprite ----
+large equ $LARGE$
+haut equ $HAUT$
+loadingaddress equ #200
+linewidth equ $LIGNELARGE$
+nbdelta equ $NBDELTA$
+nbcolors equ $NBCOLORS$
+;-----------------------------
+org loadingaddress
+run loadingaddress
+;-----------------------------
+start
+;--- selection du mode ---------
+	ld a,$SETMODE$
+	call #BC0E
+;-------------------------------
+
+;--- gestion de la palette ----
+	call palettefirmware
+;------------------------------
+
+call xvbl
+
+;--- affichage du sprite initiale --
+	; affichage du premier sprite
+	ld de,$INITIALADDRESS$ ; adresse de l'ecran 
+	ld hl,sprite ; pointeur sur l'image en memoire
+	ld b, haut ; hauteur de l'image
+	loop
+	push bc ; sauve le compteur hauteur dans la pile
+	push de ; sauvegarde de l'adresse ecran dans la pile
+	ld bc, large ; largeur de l'image a afficher
+	ldir ; remplissage de n * largeur octets a l'adresse dans de
+	pop de ; recuperation de l'adresse d'origine
+	ex de,hl ; echange des valeurs des adresses
+	call bc26 ; calcul de l'adresse de la ligne suivante
+	ex de,hl ; echange des valeurs des adresses
+	pop bc ; retabli le compteur 
+	djnz loop
+;------------------------------------
+
+mainloop    ; routine pour afficher les deltas provenant de martine 
+
+;call #bb06
+
+call xvbl
+call next_delta
+
+jp mainloop
+
+
+;--- routine de deltapacking --------------------------
+next_delta:
+table_index:
+	ld a,-1
+	inc a
+	cp nbdelta
+	jr c, table_next
+	xor a
+table_next:
+	ld (table_index+1),a
+	add a
+	ld e,a
+	ld d,0
+	ld hl,table_delta
+	add hl,de
+	ld a,(hl)
+	inc hl
+	ld h,(hl)
+	ld l,a
+	ld de,buffer
+;
+; Decompactage ZX0
+; HL = source
+; DE = destination
+;
+Depack:
+	ld    bc,#ffff        ; preserve default offset 1
+	push    bc
+	inc    bc
+	ld    a,#80
+dzx0s_literals:
+	call    dzx0s_elias        ; obtain length
+	ldir                ; copy literals
+	add    a,a            ; copy from last offset or new offset?
+	jr    c,dzx0s_new_offset
+	call    dzx0s_elias        ; obtain length
+dzx0s_copy:
+	ex    (sp),hl            ; preserve source,restore offset
+	push    hl            ; preserve offset
+	add    hl,de            ; calculate destination - offset
+	ldir                ; copy from offset
+	pop    hl            ; restore offset
+	ex    (sp),hl            ; preserve offset,restore source
+	add    a,a            ; copy from literals or new offset?
+	jr    nc,dzx0s_literals
+dzx0s_new_offset:
+	call    dzx0s_elias        ; obtain offset MSB
+	ld b,a
+	pop    af            ; discard last offset
+	xor    a            ; adjust for negative offset
+	sub    c
+	RET    Z            ; Plus d'octets a traiter = fini
+
+	ld    c,a
+	ld    a,b
+	ld    b,c
+	ld    c,(hl)            ; obtain offset LSB
+	inc    hl
+	rr    b            ; last offset bit becomes first length bit
+	rr    c
+	push    bc            ; preserve new offset
+	ld    bc,1            ; obtain length
+	call    nc,dzx0s_elias_backtrack
+	inc    bc
+	jr    dzx0s_copy
+dzx0s_elias:
+	inc    c            ; interlaced Elias gamma coding
+dzx0s_elias_loop:
+	add    a,a
+	jr    nz,dzx0s_elias_skip
+	ld    a,(hl)            ; load another group of 8 bits
+	inc    hl
+	rla
+dzx0s_elias_skip:
+	ret     c
+dzx0s_elias_backtrack:
+	add    a,a
+	rl    c
+	rl    b
+	jr    dzx0s_elias_loop
+
+	ld hl,buffer ; utilisation de la structure delta décompactée 
+delta
+	ld a,(hl) ; nombre de byte a poker
+	push af   ; stockage en mémoire
+	inc hl
+init
+	ld a,(hl) ; octet a poker
+	ld (pixel),a
+	inc hl
+	ld c,(hl) ; nbfois
+	inc hl 
+	ld b,(hl)
+	inc hl
+;
+poke_octet
+	ld e,(hl)
+	inc hl
+	ld d,(hl) ; de=adresse
+	inc hl
+	ld a,(pixel)
+	ld (de),a ; poke a l'adresse dans de
+	dec bc
+	ld a,b ; test a t'on poke toutes les adresses compteur bc
+	or a 
+	jr nz, poke_octet
+	ld a,c 
+	or a
+	jr nz, poke_octet
+	pop af 
+; reste t'il d'autres bytes a poker ? 
+	dec a 
+	push af
+	jr nz,init
+	pop af
+	ret
+
+;---------------------------------------------------------------
+;
+; attente de plusieurs vbl
+;
+xvbl ld e,50
+	call waitvbl
+	dec e
+	jr nz,xvbl+2
+	ret
+;-----------------------------------
+
+;---- attente vbl ----------
+waitvbl
+	ld b,#f5 ; attente vbl
+vbl     
+	in a,(c)
+	rra
+	jp nc,vbl
+	ret
+;---------------------------
+
+;--- application palette firmware -------------
+palettefirmware ; hl pointe sur les valeurs de la palette
+ld e,nbcolors
+ld a,0
+ld hl,palette
+
+paletteloop
+ld b,(hl)
+ld c,b
+push af
+push de
+push hl
+call #bc32 ; af, de, hl corrupted
+pop hl
+pop de
+pop af
+inc a
+inc hl
+dec e
+jr nz,paletteloop
+ret
+;---------------------------------------------
+
+;---------------------------------------------
+
+;---- recuperation de l'adresse de la ligne en dessous ------------
+bc26 
+ld a,h
+add a,8 
+ld h,a ; <---- le fameux que tu as oublié !
+ret nc 
+ld bc,linewidth ; on passe en 96 colonnes
+add hl,bc
+res 3,h
+ret
+;-----------------------------------------------------------------
+
+
+;--- variables memoires -----
+pixel db 0 
+buffer dw 0
+;----------------------------`
