@@ -157,9 +157,9 @@ func LumSaturation(c color.Color, lumi, satur float64) color.Color {
 	return color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: math.MaxUint8}
 }
 
-func EnhanceBrightness(p color.Palette, force int) color.Palette {
+func EnhanceBrightness(p color.Palette, saturation, brightness int) color.Palette {
 	for i := 0; i < len(p); i++ {
-		p[i] = LumSaturation(p[i], 90., float64(force))
+		p[i] = LumSaturation(p[i], float64(brightness), float64(saturation))
 	}
 	/*	var indice int
 		for i := 0; i < len(constants.CpcPlusPalette); i++ {

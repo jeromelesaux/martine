@@ -234,9 +234,10 @@ func ExportHandler() (*export.ExportType, constants.Size) {
 		exp.EgxMode2 = uint8(*mode2)
 	}
 
-	if *magicPal > 0 {
+	if *saturationPal > 0 || *brightnessPal > 0 {
 		exp.CpcPlus = true
-		exp.MagicPalette = *magicPal
+		exp.Saturation = *saturationPal
+		exp.Brightness = *brightnessPal
 	}
 
 	exp.DeltaMode = *deltaMode

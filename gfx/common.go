@@ -139,8 +139,8 @@ func ApplyOneImageAndExport(in image.Image,
 		}
 	}
 	newPalette = constants.SortColorsByDistance(newPalette)
-	if exportType.MagicPalette > 0 {
-		palette = convert.EnhanceBrightness(newPalette, exportType.MagicPalette)
+	if exportType.Saturation > 0 {
+		palette = convert.EnhanceBrightness(newPalette, exportType.Brightness, exportType.Saturation)
 		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
 		newPalette = constants.SortColorsByDistance(newPalette)
 	}
