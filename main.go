@@ -113,8 +113,8 @@ var (
 	lineWidth           = flag.String("linewidth", "#50", "Line width in hexadecimal to compute the screen address in delta mode.")
 	deltaPacking        = flag.Bool("deltapacking", false, "Will generate all the animation code from the followed gif file.")
 	filloutGif          = flag.Bool("fillout", false, "Fill out the gif frames needed some case with deltapacking")
-	saturationPal       = flag.Int("saturation", 0, "apply saturation on the color of the palette on amstrad plus screen. (max value 100).")
-	brightnessPal       = flag.Int("brightness", 0, "apply brightness on the color of the palette on amstrad plus screen. (max value 100).")
+	saturationPal       = flag.Int("contrast", 0, "apply contrast on the color of the palette on amstrad plus screen. (max value 100 and only on CPC PLUS).")
+	brightnessPal       = flag.Int("brightness", 0, "apply brightness on the color of the palette on amstrad plus screen. (max value 100 and only on CPC PLUS).")
 	appVersion          = "0.29"
 	version             = flag.Bool("version", false, "print martine's version")
 )
