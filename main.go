@@ -13,7 +13,6 @@ import (
 
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/net"
 	"github.com/jeromelesaux/martine/gfx"
@@ -493,60 +492,77 @@ func main() {
 				// check < 256 tiles
 				// finally export
 				// 20 tiles large 25 tiles height
-				for i, v := range analyze.Sort() {
-					tile := v.Tile.Image()
-					tileFilepath := filepath.Join(exportType.OutputPath, fmt.Sprintf("%.2d.png", i))
-					f, err := os.Create(tileFilepath)
-					if err != nil {
-						fmt.Fprintf(os.Stderr, "Cannot create tiles %.2d error %v\n", i, err)
-						os.Exit(-1)
-					}
-					defer f.Close()
-					if err := png.Encode(f, tile); err != nil {
-						fmt.Fprintf(os.Stderr, "Cannot encode in png tile %.2d error %v\n", i, err)
-						os.Exit(-1)
-					}
+				tiles := analyze.Sort()
+				/*	for i, v := range tiles {
+					if v.Occurence > 0 {
+						tile := v.Tile.Image()
+						tileFilepath := filepath.Join(exportType.OutputPath, fmt.Sprintf("%.2d.png", i))
+						f, err := os.Create(tileFilepath)
+						if err != nil {
+							fmt.Fprintf(os.Stderr, "Cannot create tiles %.2d error %v\n", i, err)
+							os.Exit(-1)
+						}
+						defer f.Close()
+						if err := png.Encode(f, tile); err != nil {
+							fmt.Fprintf(os.Stderr, "Cannot encode in png tile %.2d error %v\n", i, err)
+							os.Exit(-1)
+						}
 
-					var palette color.Palette
-					if exportType.CpcPlus {
-						palette = constants.CpcPlusPalette
-					} else {
-						palette = constants.CpcOldPalette
-					}
+						var palette color.Palette
+						if exportType.CpcPlus {
+							palette = constants.CpcPlusPalette
+						} else {
+							palette = constants.CpcOldPalette
+						}
 
-					out, _ := gfx.DoDithering(tile, palette, exportType)
-					palette, out, err = convert.DowngradingPalette(out, exportType.Size, exportType.CpcPlus)
-					if err != nil {
-						fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", tileFilepath)
-					}
+						out, _ := gfx.DoDithering(tile, palette, exportType)
+						palette, out, err = convert.DowngradingPalette(out, exportType.Size, exportType.CpcPlus)
+						if err != nil {
+							fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", tileFilepath)
+						}
 
-					palette = constants.SortColorsByDistance(palette)
+						palette = constants.SortColorsByDistance(palette)
 
-					fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
-					if err := file.Png(tileFilepath+"_down.png", out); err != nil {
-						os.Exit(-2)
+						fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
+						if err := file.Png(tileFilepath+"_down.png", out); err != nil {
+							os.Exit(-2)
+						}
+						if err := cgfx.ToSpriteAndExport(tile, palette, exportType.Size, screenMode, tileFilepath, false, exportType); err != nil {
+							fmt.Fprintf(os.Stderr, "Cannot create tile from image %s, error :%v\n", tileFilepath, err)
+						}
 					}
-					if err := cgfx.ToSpriteAndExport(tile, palette, exportType.Size, screenMode, tileFilepath, false, exportType); err != nil {
-						fmt.Fprintf(os.Stderr, "Cannot create tile from image %s, error :%v\n", tileFilepath, err)
-					}
-				}
+				}*/
 				data := make([]byte, 0)
 
 				palette := analyze.Palette()
-				tiles := analyze.Sort()
+
 				for i, v := range tiles {
-					tile := v.Tile.Image()
-					d, _, _, err := gfx.ApplyOneImage(tile,
-						exportType,
-						*mode,
-						palette,
-						screenMode)
-					if err != nil {
-						fmt.Fprintf(os.Stderr, "Error while transforming sprite error : %v\n", err)
-					}
-					data = append(data, d...)
-					if i >= 255 {
-						break
+					if v.Occurence > 0 {
+						tile := v.Tile.Image()
+						d, _, _, err := gfx.ApplyOneImage(tile,
+							exportType,
+							*mode,
+							palette,
+							screenMode)
+						if err != nil {
+							fmt.Fprintf(os.Stderr, "Error while transforming sprite error : %v\n", err)
+						}
+						data = append(data, d...)
+						scenePath := filepath.Join(exportType.OutputPath, fmt.Sprintf("tile-%.2d.png", i))
+						f, err := os.Create(scenePath)
+						if err != nil {
+							fmt.Fprintf(os.Stderr, "Cannot create scene tile-%.2d error %v\n", i, err)
+							os.Exit(-1)
+						}
+
+						if err := png.Encode(f, tile); err != nil {
+							fmt.Fprintf(os.Stderr, "Cannot encode in png scene tile-%.2d error %v\n", i, err)
+							os.Exit(-1)
+						}
+						f.Close()
+						if i >= 255 {
+							break
+						}
 					}
 				}
 				// save the file sprites
@@ -557,12 +573,13 @@ func main() {
 
 				// save the tilemap
 				maps := make([]*image.RGBA, 0)
-				for y := 0; y < in.Bounds().Max.Y; y += 25 {
-					for x := 0; x < in.Bounds().Max.X; x += 20 {
-						m := image.NewRGBA(image.Rect(0, 0, 20, 25))
+				index := 0
+				for y := 0; y < in.Bounds().Max.Y; y += (25 * analyze.TileSize.Height) {
+					for x := 0; x < in.Bounds().Max.X; x += (20 * analyze.TileSize.Width) {
+						m := image.NewRGBA(image.Rect(0, 0, 20*analyze.TileSize.Width, 25*analyze.TileSize.Height))
 						// copy of the map
-						for i := 0; i < 20; i++ {
-							for j := 0; j < 25; j++ {
+						for i := 0; i < 20*analyze.TileSize.Width; i++ {
+							for j := 0; j < 25*analyze.TileSize.Height; j++ {
 								var c color.Color = color.RGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
 								if x+i < in.Bounds().Max.X && y+j < in.Bounds().Max.Y {
 									c = in.At(x+i, y+j)
@@ -572,6 +589,19 @@ func main() {
 						}
 						// store the map in the slice
 						maps = append(maps, m)
+						scenePath := filepath.Join(exportType.OutputPath, fmt.Sprintf("scene-%.2d.png", index))
+						f, err := os.Create(scenePath)
+						if err != nil {
+							fmt.Fprintf(os.Stderr, "Cannot create scene scence-%.2d error %v\n", index, err)
+							os.Exit(-1)
+						}
+
+						if err := png.Encode(f, m); err != nil {
+							fmt.Fprintf(os.Stderr, "Cannot encode in png scene scene-%.2d error %v\n", index, err)
+							os.Exit(-1)
+						}
+						f.Close()
+						index++
 					}
 				}
 
@@ -580,7 +610,7 @@ func main() {
 				for _, v := range maps {
 					for y := 0; y < v.Bounds().Max.Y; y += analyze.TileSize.Height {
 						for x := 0; x < v.Bounds().Max.X; x += analyze.TileSize.Width {
-							sprt, err := transformation.ExtractTile(in, size, x, y)
+							sprt, err := transformation.ExtractTile(in, analyze.TileSize, x, y)
 							if err != nil {
 								fmt.Fprintf(os.Stderr, "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
 								break
@@ -594,6 +624,7 @@ func main() {
 				if err := file.TileMap(tileMaps, finalFile, exportType); err != nil {
 					fmt.Fprintf(os.Stderr, "Cannot export to Imp-TileMap the image %s error %v", *picturePath, err)
 				}
+				os.Exit(0)
 			} else {
 				if exportType.TileMode {
 					if exportType.TileIterationX == -1 || exportType.TileIterationY == -1 {

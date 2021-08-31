@@ -308,6 +308,9 @@ func AnalyzeTilesBoard(im image.Image, size constants.Size) *AnalyzeBoard {
 }
 
 func TilesAreEquals(s1, s2 *Tile) bool {
+	if s1 == nil || s2 == nil {
+		return false
+	}
 	if s1.Size.Width != s2.Size.Width || s1.Size.Height != s2.Size.Height {
 		return false
 	}
