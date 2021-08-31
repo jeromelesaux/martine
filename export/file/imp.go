@@ -50,3 +50,29 @@ func Imp(sprites []byte, width, height uint, filename string, export *x.ExportTy
 	export.AddFile(impPath)
 	return nil
 }
+
+func TileMap(data []byte, filename string, export *x.ExportType) error {
+
+	output := make([]byte, 0x4000)
+	copy(output[0:], data[:])
+	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x4000, Exec: 0x0,
+		Size:        uint16(binary.Size(output)),
+		Size2:       uint16(binary.Size(output)),
+		LogicalSize: uint16(binary.Size(output))}
+	copy(header.Filename[:], export.GetAmsdosFilename(filename, ".IMP"))
+	header.Checksum = uint16(header.ComputedChecksum16())
+	impPath := filepath.Join(export.OutputPath, export.GetAmsdosFilename(filename, ".TIL"))
+	fw, err := os.Create(impPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", impPath, err)
+		return err
+	}
+	if !export.NoAmsdosHeader {
+		binary.Write(fw, binary.LittleEndian, header)
+	}
+	binary.Write(fw, binary.LittleEndian, output)
+	fw.Close()
+	fmt.Fprintf(os.Stdout, "Imp-TileMap file exported in [%s]\n", impPath)
+	export.AddFile(impPath)
+	return nil
+}

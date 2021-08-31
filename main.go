@@ -7,7 +7,6 @@ import (
 	"image/color"
 	_ "image/jpeg"
 	"image/png"
-	_ "image/png"
 	"os"
 	"path/filepath"
 	"strings"
@@ -374,6 +373,9 @@ func main() {
 
 			spritePath := exportType.AmsdosFullPath(v, ".WIN")
 			data, err := file.RawWin(spritePath)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error while extracting raw content, err:%s\n", err)
+			}
 			sprites = append(sprites, data...)
 		}
 		finalFile := strings.ReplaceAll(filename, "?", "")
@@ -403,14 +405,14 @@ func main() {
 		}
 		var p color.Palette
 		var err error
-		if *palettePath != "" && *plusMode == false {
+		if *palettePath != "" && !*plusMode {
 			p, _, err = file.OpenPal(*palettePath)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot open palette file (%s) error %v\n", *palettePath, err)
 				os.Exit(-1)
 			}
 		} else {
-			if *kitPath != "" && *plusMode == true {
+			if *kitPath != "" && *plusMode {
 				p, _, err = file.OpenKit(*kitPath)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Cannot open kit file (%s) error %v\n", *kitPath, err)
@@ -485,7 +487,13 @@ func main() {
 					fmt.Fprintf(os.Stderr, "Cannot save tilemap csv file error :%v\n", err)
 					os.Exit(-1)
 				}
-				for i, v := range analyze.BoardTiles {
+
+				// applyOneImage
+				// sort tiles
+				// check < 256 tiles
+				// finally export
+				// 20 tiles large 25 tiles height
+				for i, v := range analyze.Sort() {
 					tile := v.Tile.Image()
 					tileFilepath := filepath.Join(exportType.OutputPath, fmt.Sprintf("%.2d.png", i))
 					f, err := os.Create(tileFilepath)
@@ -506,7 +514,7 @@ func main() {
 						palette = constants.CpcOldPalette
 					}
 
-					out, palette := gfx.DoDithering(tile, palette, exportType)
+					out, _ := gfx.DoDithering(tile, palette, exportType)
 					palette, out, err = convert.DowngradingPalette(out, exportType.Size, exportType.CpcPlus)
 					if err != nil {
 						fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", tileFilepath)
@@ -522,7 +530,70 @@ func main() {
 						fmt.Fprintf(os.Stderr, "Cannot create tile from image %s, error :%v\n", tileFilepath, err)
 					}
 				}
+				data := make([]byte, 0)
 
+				palette := analyze.Palette()
+				tiles := analyze.Sort()
+				for i, v := range tiles {
+					tile := v.Tile.Image()
+					d, _, _, err := gfx.ApplyOneImage(tile,
+						exportType,
+						*mode,
+						palette,
+						screenMode)
+					if err != nil {
+						fmt.Fprintf(os.Stderr, "Error while transforming sprite error : %v\n", err)
+					}
+					data = append(data, d...)
+					if i >= 255 {
+						break
+					}
+				}
+				// save the file sprites
+				finalFile := strings.ReplaceAll(filename, "?", "")
+				if err := file.Imp(data, uint(analyze.TileSize.Width), uint(analyze.TileSize.Height), finalFile, exportType); err != nil {
+					fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", *picturePath, err)
+				}
+
+				// save the tilemap
+				maps := make([]*image.RGBA, 0)
+				for y := 0; y < in.Bounds().Max.Y; y += 25 {
+					for x := 0; x < in.Bounds().Max.X; x += 20 {
+						m := image.NewRGBA(image.Rect(0, 0, 20, 25))
+						// copy of the map
+						for i := 0; i < 20; i++ {
+							for j := 0; j < 25; j++ {
+								var c color.Color = color.RGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
+								if x+i < in.Bounds().Max.X && y+j < in.Bounds().Max.Y {
+									c = in.At(x+i, y+j)
+								}
+								m.Set(i, j, c)
+							}
+						}
+						// store the map in the slice
+						maps = append(maps, m)
+					}
+				}
+
+				// now thread all maps images
+				tileMaps := make([]byte, 0)
+				for _, v := range maps {
+					for y := 0; y < v.Bounds().Max.Y; y += analyze.TileSize.Height {
+						for x := 0; x < v.Bounds().Max.X; x += analyze.TileSize.Width {
+							sprt, err := transformation.ExtractTile(in, size, x, y)
+							if err != nil {
+								fmt.Fprintf(os.Stderr, "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
+								break
+							}
+							index := analyze.TileIndex(sprt, tiles)
+							tileMaps = append(tileMaps, byte(index))
+						}
+					}
+				}
+
+				if err := file.TileMap(tileMaps, finalFile, exportType); err != nil {
+					fmt.Fprintf(os.Stderr, "Cannot export to Imp-TileMap the image %s error %v", *picturePath, err)
+				}
 			} else {
 				if exportType.TileMode {
 					if exportType.TileIterationX == -1 || exportType.TileIterationY == -1 {

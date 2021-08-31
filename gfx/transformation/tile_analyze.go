@@ -92,6 +92,54 @@ type AnalyzeBoard struct {
 	TileMap    [][]int
 }
 
+func (a *AnalyzeBoard) TileIndex(tile *Tile, tiles []BoardTile) int {
+	for i, v := range tiles {
+		if TilesAreEquals(v.Tile, tile) {
+			return i
+		}
+	}
+	return 0
+}
+
+func (a *AnalyzeBoard) Palette() color.Palette {
+	fmt.Fprintf(os.Stdout, "Getting global tiles palette...\n")
+	var p color.Palette
+	for _, v := range a.BoardTiles {
+		for i := 0; i < v.Tile.Size.Width; i++ {
+			for j := 0; j < v.Tile.Size.Height; j++ {
+				c := v.Tile.Image().At(i, j)
+				found := false
+				for _, cc := range p {
+					if constants.ColorsAreEquals(cc, c) {
+						found = true
+						break
+					}
+				}
+				if !found {
+					p = append(p, c)
+				}
+			}
+		}
+	}
+	return p
+}
+
+func (a *AnalyzeBoard) Sort() []BoardTile {
+	fmt.Fprintf(os.Stdout, "Sorting tiles...\n")
+	sorted := make([]BoardTile, len(a.BoardTiles))
+	for _, v0 := range a.BoardTiles {
+		var index int
+		for i, v1 := range sorted {
+			if v1.Occurence < v0.Occurence {
+				index = i
+				break
+			}
+		}
+		sorted = append(sorted[:index+1], sorted[index:]...)
+		sorted[index] = v0
+	}
+	return sorted
+}
 func (a *AnalyzeBoard) String() string {
 	out := a.TileSize.ToString()
 	for _, v := range a.BoardTiles {
@@ -130,7 +178,7 @@ func NewTile(size constants.Size) *Tile {
 	}
 }
 
-func extractTile(im image.Image, size constants.Size, posX, posY int) (*Tile, error) {
+func ExtractTile(im image.Image, size constants.Size, posX, posY int) (*Tile, error) {
 	sprite := NewTile(size)
 	var xSpr, ySpr int
 	onError := false
@@ -207,7 +255,7 @@ func AnalyzeTilesBoardWithTiles(im image.Image, size constants.Size, tiles []Til
 	for x := size.Width; x < im.Bounds().Max.X; x += size.Width {
 		indexY := 0
 		for y := size.Height; y < im.Bounds().Max.Y; y += size.Height {
-			sprt, err := extractTile(im, size, x, y)
+			sprt, err := ExtractTile(im, size, x, y)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
 				break
@@ -234,7 +282,7 @@ func AnalyzeTilesBoard(im image.Image, size constants.Size) *AnalyzeBoard {
 	for i := 0; i < nbTileH; i++ {
 		board.TileMap[i] = make([]int, nbTileW)
 	}
-	sprt0, err := extractTile(im, size, 0, 0)
+	sprt0, err := ExtractTile(im, size, 0, 0)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, 0, 0, err)
 	}
@@ -245,7 +293,7 @@ func AnalyzeTilesBoard(im image.Image, size constants.Size) *AnalyzeBoard {
 	for x := size.Width; x < im.Bounds().Max.X; x += size.Width {
 		indexY := 0
 		for y := size.Height; y < im.Bounds().Max.Y; y += size.Height {
-			sprt, err := extractTile(im, size, x, y)
+			sprt, err := ExtractTile(im, size, x, y)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
 				break

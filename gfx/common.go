@@ -139,7 +139,7 @@ func ApplyOneImageAndExport(in image.Image,
 		}
 	}
 	newPalette = constants.SortColorsByDistance(newPalette)
-	if exportType.Saturation > 0 {
+	if exportType.Saturation > 0 || exportType.Brightness > 0 {
 		palette = convert.EnhanceBrightness(newPalette, exportType.Brightness, exportType.Saturation)
 		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
 		newPalette = constants.SortColorsByDistance(newPalette)
@@ -205,7 +205,11 @@ func ApplyOneImage(in image.Image,
 	}
 
 	newPalette = constants.SortColorsByDistance(newPalette)
-
+	if exportType.Saturation > 0 || exportType.Brightness > 0 {
+		palette = convert.EnhanceBrightness(newPalette, exportType.Brightness, exportType.Saturation)
+		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
+		newPalette = constants.SortColorsByDistance(newPalette)
+	}
 	var data []byte
 	var lineSize int
 	if !exportType.CustomDimension && !exportType.SpriteHard {
