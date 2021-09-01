@@ -8520,8 +8520,11 @@ func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 	osFilepath := filepath.Join(exportType.OutputPath, exportType.GetAmsdosFilename(filePath, ".KIT"))
 	fmt.Fprintf(os.Stdout, "Saving Kit file (%s)\n", osFilepath)
 	data := [16]uint16{}
-
-	for i := 0; i < len(p); i++ {
+	paletteSize := len(p)
+	if len(p) > 16 {
+		paletteSize = 16
+	}
+	for i := 0; i < paletteSize; i++ {
 		cp := constants.NewCpcPlusColor(p[i])
 		data[i] = cp.Value()
 	}
