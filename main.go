@@ -473,6 +473,32 @@ func main() {
 			}
 		} else {
 			if *tileMap {
+				/*
+					8x8 : 40x25
+					16x8 : 20x25
+					16x16 : 20x24
+				*/
+				if exportType.Size.Width != 4 && exportType.Size.Width != 8 {
+					fmt.Fprintf(os.Stderr, "Width accepted 4 or 8 pixels")
+					os.Exit(-1)
+				}
+				if exportType.Size.Height != 16 && exportType.Size.Height != 8 {
+					fmt.Fprintf(os.Stderr, "Height accepted 16 or 8 pixels")
+					os.Exit(-1)
+				}
+				nbTileLarge := 20
+				nbTileHigh := 25
+				maxTiles := 255
+				switch exportType.Size.Width {
+				case 8:
+					nbTileLarge = 20
+					if exportType.Size.Height == 16 {
+						maxTiles = 240
+					}
+				case 4:
+					nbTileLarge = 40
+				}
+
 				if !exportType.CustomDimension {
 					fmt.Fprintf(os.Stderr, "You must set height and width to define the tile dimensions (options -h and -w)\n")
 					os.Exit(-1)
@@ -566,7 +592,8 @@ func main() {
 						}
 						f.Close()
 						nbFrames++
-						if i >= 255 {
+						if i >= maxTiles {
+							fmt.Fprintf(os.Stderr, "Maximum of %d tiles accepted, skipping...\n", maxTiles)
 							break
 						}
 					}
@@ -580,12 +607,12 @@ func main() {
 				// save the tilemap
 				maps := make([]*image.RGBA, 0)
 				index := 0
-				for y := 0; y < in.Bounds().Max.Y; y += (25 * analyze.TileSize.Height) {
-					for x := 0; x < in.Bounds().Max.X; x += (20 * analyze.TileSize.Width) {
-						m := image.NewRGBA(image.Rect(0, 0, 20*analyze.TileSize.Width, 25*analyze.TileSize.Height))
+				for y := 0; y < in.Bounds().Max.Y; y += (nbTileHigh * analyze.TileSize.Height) {
+					for x := 0; x < in.Bounds().Max.X; x += (nbTileLarge * analyze.TileSize.Width) {
+						m := image.NewRGBA(image.Rect(0, 0, nbTileLarge*analyze.TileSize.Width, nbTileHigh*analyze.TileSize.Height))
 						// copy of the map
-						for i := 0; i < 20*analyze.TileSize.Width; i++ {
-							for j := 0; j < 25*analyze.TileSize.Height; j++ {
+						for i := 0; i < nbTileLarge*analyze.TileSize.Width; i++ {
+							for j := 0; j < nbTileHigh*analyze.TileSize.Height; j++ {
 								var c color.Color = color.RGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
 								if x+i < in.Bounds().Max.X && y+j < in.Bounds().Max.Y {
 									c = in.At(x+i, y+j)
@@ -616,7 +643,7 @@ func main() {
 				for _, v := range maps {
 					for y := 0; y < v.Bounds().Max.Y; y += analyze.TileSize.Height {
 						for x := 0; x < v.Bounds().Max.X; x += analyze.TileSize.Width {
-							sprt, err := transformation.ExtractTile(in, analyze.TileSize, x, y)
+							sprt, err := transformation.ExtractTile(v, analyze.TileSize, x, y)
 							if err != nil {
 								fmt.Fprintf(os.Stderr, "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
 								break
