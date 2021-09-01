@@ -12,22 +12,33 @@ import (
 )
 
 type ImpFooter struct {
-	NbFrames uint
-	Height   uint
-	Width    uint
+	Height   byte
+	Width    byte
+	NbFrames byte
 }
 
-func Imp(sprites []byte, width, height uint, filename string, export *x.ExportType) error {
-	impHeader := &ImpFooter{
-		NbFrames: uint(len(sprites)),
-		Height:   height,
-		Width:    width,
+func Imp(sprites []byte, nbFrames, width, height, mode uint, filename string, export *x.ExportType) error {
+	h := height
+	switch mode {
+	case 0:
+		h /= 2
+	case 1:
+		h /= 4
+	case 2:
+		h /= 8
+	}
+	impHeader := ImpFooter{
+		Height:   byte(h),
+		Width:    byte(width),
+		NbFrames: byte(nbFrames),
 	}
 	output := make([]byte, 0)
 	output = append(output, sprites...)
 
 	buf := new(bytes.Buffer)
-	binary.Write(buf, binary.LittleEndian, impHeader)
+	if err := binary.Write(buf, binary.LittleEndian, impHeader); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while feeding imp header. error :%v\n", err)
+	}
 	output = append(output, buf.Bytes()...)
 	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x4000, Exec: 0x0,
 		Size:        uint16(binary.Size(output)),

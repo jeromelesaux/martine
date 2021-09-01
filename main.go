@@ -378,7 +378,7 @@ func main() {
 			sprites = append(sprites, data...)
 		}
 		finalFile := strings.ReplaceAll(filename, "?", "")
-		if err = file.Imp(sprites, uint(exportType.Size.Width), uint(exportType.Size.Height), finalFile, exportType); err != nil {
+		if err = file.Imp(sprites, uint(len(spritesPaths)), uint(exportType.Size.Width), uint(exportType.Size.Height), uint(screenMode), finalFile, exportType); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", *picturePath, err)
 		}
 		os.Exit(0)
@@ -535,7 +535,12 @@ func main() {
 				data := make([]byte, 0)
 
 				palette := analyze.Palette()
-
+				finalFile := strings.ReplaceAll(filename, "?", "")
+				if err := file.Kit(finalFile, palette, screenMode, false, exportType); err != nil {
+					fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", finalFile, err)
+					os.Exit(-1)
+				}
+				nbFrames := 0
 				for i, v := range tiles {
 					if v.Occurence > 0 {
 						tile := v.Tile.Image()
@@ -560,14 +565,15 @@ func main() {
 							os.Exit(-1)
 						}
 						f.Close()
+						nbFrames++
 						if i >= 255 {
 							break
 						}
 					}
 				}
 				// save the file sprites
-				finalFile := strings.ReplaceAll(filename, "?", "")
-				if err := file.Imp(data, uint(analyze.TileSize.Width), uint(analyze.TileSize.Height), finalFile, exportType); err != nil {
+				finalFile = strings.ReplaceAll(filename, "?", "")
+				if err := file.Imp(data, uint(nbFrames), uint(analyze.TileSize.Width), uint(analyze.TileSize.Height), uint(screenMode), finalFile, exportType); err != nil {
 					fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", *picturePath, err)
 				}
 

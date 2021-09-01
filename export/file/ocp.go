@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 
 	rawlz4 "github.com/bkaradzic/go-lz4"
@@ -8516,7 +8517,7 @@ func OpenKit(filePath string) (color.Palette, *KitPalette, error) {
 }
 
 func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, exportType *x.ExportType) error {
-	osFilepath := exportType.AmsdosFullPath(filePath, ".Kit")
+	osFilepath := filepath.Join(exportType.OutputPath, exportType.GetAmsdosFilename(filePath, ".KIT"))
 	fmt.Fprintf(os.Stdout, "Saving Kit file (%s)\n", osFilepath)
 	data := [16]uint16{}
 
