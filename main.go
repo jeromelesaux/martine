@@ -567,6 +567,7 @@ func main() {
 					os.Exit(-1)
 				}
 				nbFrames := 0
+				os.Mkdir(exportType.OutputPath+string(filepath.Separator)+"tiles", os.ModePerm)
 				for i, v := range tiles {
 					if v.Occurence > 0 {
 						tile := v.Tile.Image()
@@ -579,7 +580,7 @@ func main() {
 							fmt.Fprintf(os.Stderr, "Error while transforming sprite error : %v\n", err)
 						}
 						data = append(data, d...)
-						scenePath := filepath.Join(exportType.OutputPath, fmt.Sprintf("tile-%.2d.png", i))
+						scenePath := filepath.Join(exportType.OutputPath, fmt.Sprintf("%stiles%stile-%.2d.png", string(filepath.Separator), string(filepath.Separator), i))
 						f, err := os.Create(scenePath)
 						if err != nil {
 							fmt.Fprintf(os.Stderr, "Cannot create scene tile-%.2d error %v\n", i, err)
@@ -606,6 +607,7 @@ func main() {
 
 				// save the tilemap
 				maps := make([]*image.RGBA, 0)
+				os.Mkdir(exportType.OutputPath+string(filepath.Separator)+"scenes", os.ModePerm)
 				index := 0
 				for y := 0; y < in.Bounds().Max.Y; y += (nbTileHigh * analyze.TileSize.Height) {
 					for x := 0; x < in.Bounds().Max.X; x += (nbTileLarge * analyze.TileSize.Width) {
@@ -622,7 +624,7 @@ func main() {
 						}
 						// store the map in the slice
 						maps = append(maps, m)
-						scenePath := filepath.Join(exportType.OutputPath, fmt.Sprintf("scene-%.2d.png", index))
+						scenePath := filepath.Join(exportType.OutputPath, fmt.Sprintf("%sscenes%scene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
 						f, err := os.Create(scenePath)
 						if err != nil {
 							fmt.Fprintf(os.Stderr, "Cannot create scene scence-%.2d error %v\n", index, err)
