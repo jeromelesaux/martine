@@ -13,6 +13,7 @@ import (
 
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/net"
 	"github.com/jeromelesaux/martine/gfx"
@@ -503,7 +504,17 @@ func main() {
 					fmt.Fprintf(os.Stderr, "You must set height and width to define the tile dimensions (options -h and -w)\n")
 					os.Exit(-1)
 				}
-				analyze := transformation.AnalyzeTilesBoard(in, exportType.Size)
+				mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
+				m := convert.Resize(in, mapSize, exportType.ResizingAlgo)
+				var palette color.Palette
+				var err error
+				palette, m, err = convert.DowngradingPalette(m, mapSize, true)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", exportType.InputPath)
+				}
+				file.Png(exportType.OutputPath+"/map.png", m)
+
+				analyze := transformation.AnalyzeTilesBoard(m, exportType.Size)
 				if err := analyze.SaveSchema(filepath.Join(exportType.OutputPath, "tilesmap_schema.png")); err != nil {
 					fmt.Fprintf(os.Stderr, "Cannot save tilemap schema error :%v\n", err)
 					os.Exit(-1)
@@ -560,7 +571,7 @@ func main() {
 				}*/
 				data := make([]byte, 0)
 
-				palette := analyze.Palette()
+				//palette := analyze.Palette()
 				finalFile := strings.ReplaceAll(filename, "?", "")
 				if err := file.Kit(finalFile, palette, screenMode, false, exportType); err != nil {
 					fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", finalFile, err)
@@ -606,32 +617,32 @@ func main() {
 				}
 
 				// save the tilemap
-				maps := make([]*image.RGBA, 0)
+				scenes := make([]*image.NRGBA, 0)
 				os.Mkdir(exportType.OutputPath+string(filepath.Separator)+"scenes", os.ModePerm)
 				index := 0
-				for y := 0; y < in.Bounds().Max.Y; y += (nbTileHigh * analyze.TileSize.Height) {
-					for x := 0; x < in.Bounds().Max.X; x += (nbTileLarge * analyze.TileSize.Width) {
-						m := image.NewRGBA(image.Rect(0, 0, nbTileLarge*analyze.TileSize.Width, nbTileHigh*analyze.TileSize.Height))
+				for y := 0; y < m.Bounds().Max.Y; y += (nbTileHigh * analyze.TileSize.Height) {
+					for x := 0; x < m.Bounds().Max.X; x += (nbTileLarge * analyze.TileSize.Width) {
+						m1 := image.NewNRGBA(image.Rect(0, 0, nbTileLarge*analyze.TileSize.Width, nbTileHigh*analyze.TileSize.Height))
 						// copy of the map
 						for i := 0; i < nbTileLarge*analyze.TileSize.Width; i++ {
 							for j := 0; j < nbTileHigh*analyze.TileSize.Height; j++ {
 								var c color.Color = color.RGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
-								if x+i < in.Bounds().Max.X && y+j < in.Bounds().Max.Y {
-									c = in.At(x+i, y+j)
+								if x+i < m.Bounds().Max.X && y+j < m.Bounds().Max.Y {
+									c = m.At(x+i, y+j)
 								}
-								m.Set(i, j, c)
+								m1.Set(i, j, c)
 							}
 						}
 						// store the map in the slice
-						maps = append(maps, m)
-						scenePath := filepath.Join(exportType.OutputPath, fmt.Sprintf("%sscenes%scene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
+						scenes = append(scenes, m1)
+						scenePath := filepath.Join(exportType.OutputPath, fmt.Sprintf("%sscenes%sscene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
 						f, err := os.Create(scenePath)
 						if err != nil {
 							fmt.Fprintf(os.Stderr, "Cannot create scene scence-%.2d error %v\n", index, err)
 							os.Exit(-1)
 						}
 
-						if err := png.Encode(f, m); err != nil {
+						if err := png.Encode(f, m1); err != nil {
 							fmt.Fprintf(os.Stderr, "Cannot encode in png scene scene-%.2d error %v\n", index, err)
 							os.Exit(-1)
 						}
@@ -642,7 +653,7 @@ func main() {
 
 				// now thread all maps images
 				tileMaps := make([]byte, 0)
-				for _, v := range maps {
+				for _, v := range scenes {
 					for y := 0; y < v.Bounds().Max.Y; y += analyze.TileSize.Height {
 						for x := 0; x < v.Bounds().Max.X; x += analyze.TileSize.Width {
 							sprt, err := transformation.ExtractTile(v, analyze.TileSize, x, y)

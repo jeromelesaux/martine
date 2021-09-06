@@ -302,8 +302,10 @@ func AnalyzeTilesBoard(im image.Image, size constants.Size) *AnalyzeBoard {
 			board.TileMap[indexY][indexX] = index
 			indexY++
 		}
+		fmt.Printf(".")
 		indexX++
 	}
+	fmt.Printf("\n")
 	return board
 }
 
