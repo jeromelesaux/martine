@@ -495,7 +495,7 @@ func main() {
 					fmt.Fprintf(os.Stderr, "Mode %d  not available\n", *mode)
 				}
 
-				if nbPixelWidth != 8 && nbPixelWidth != 16 {
+				if nbPixelWidth != 4 && nbPixelWidth != 8 {
 					fmt.Fprintf(os.Stderr, "Width accepted  8 or 16 pixels")
 					os.Exit(-1)
 				}
@@ -525,6 +525,12 @@ func main() {
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", exportType.InputPath)
 				}
+				refPalette := constants.CpcOldPalette
+				if exportType.CpcPlus {
+					refPalette = constants.CpcPlusPalette
+				}
+				palette = convert.ToCPCPalette(palette, refPalette)
+				file.PalToPng(exportType.OutputPath+"/palette.png", palette)
 				file.Png(exportType.OutputPath+"/map.png", m)
 
 				analyze := transformation.AnalyzeTilesBoard(m, exportType.Size)

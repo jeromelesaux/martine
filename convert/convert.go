@@ -390,3 +390,12 @@ func ConvertPalette(p color.Palette, p0 color.Palette) color.Palette {
 	}
 	return nP
 }
+
+func ToCPCPalette(p color.Palette, cpcPalette color.Palette) color.Palette {
+	var out color.Palette
+	for _, v := range p {
+		c := cpcPalette.Convert(v)
+		out = append(out, c)
+	}
+	return out
+}
