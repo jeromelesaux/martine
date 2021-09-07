@@ -479,25 +479,38 @@ func main() {
 					16x8 : 20x25
 					16x16 : 20x24
 				*/
-				if exportType.Size.Width != 4 && exportType.Size.Width != 8 {
-					fmt.Fprintf(os.Stderr, "Width accepted 4 or 8 pixels")
+
+				nbTilePixelLarge := 20
+				nbTilePixelHigh := 25
+				maxTiles := 255
+				nbPixelWidth := 0
+				switch *mode {
+				case 0:
+					nbPixelWidth = exportType.Size.Width / 2
+				case 1:
+					nbPixelWidth = exportType.Size.Width / 4
+				case 2:
+					nbPixelWidth = exportType.Size.Width / 8
+				default:
+					fmt.Fprintf(os.Stderr, "Mode %d  not available\n", *mode)
+				}
+
+				if nbPixelWidth != 8 && nbPixelWidth != 16 {
+					fmt.Fprintf(os.Stderr, "Width accepted  8 or 16 pixels")
 					os.Exit(-1)
 				}
 				if exportType.Size.Height != 16 && exportType.Size.Height != 8 {
 					fmt.Fprintf(os.Stderr, "Height accepted 16 or 8 pixels")
 					os.Exit(-1)
 				}
-				nbTileLarge := 20
-				nbTileHigh := 25
-				maxTiles := 255
-				switch exportType.Size.Width {
+				switch nbPixelWidth {
 				case 8:
-					nbTileLarge = 20
+					nbTilePixelLarge = 20
 					if exportType.Size.Height == 16 {
 						maxTiles = 240
 					}
 				case 4:
-					nbTileLarge = 40
+					nbTilePixelLarge = 40
 				}
 
 				if !exportType.CustomDimension {
@@ -620,12 +633,12 @@ func main() {
 				scenes := make([]*image.NRGBA, 0)
 				os.Mkdir(exportType.OutputPath+string(filepath.Separator)+"scenes", os.ModePerm)
 				index := 0
-				for y := 0; y < m.Bounds().Max.Y; y += (nbTileHigh * analyze.TileSize.Height) {
-					for x := 0; x < m.Bounds().Max.X; x += (nbTileLarge * analyze.TileSize.Width) {
-						m1 := image.NewNRGBA(image.Rect(0, 0, nbTileLarge*analyze.TileSize.Width, nbTileHigh*analyze.TileSize.Height))
+				for y := 0; y < m.Bounds().Max.Y; y += (nbTilePixelHigh * analyze.TileSize.Height) {
+					for x := 0; x < m.Bounds().Max.X; x += (nbTilePixelLarge * analyze.TileSize.Width) {
+						m1 := image.NewNRGBA(image.Rect(0, 0, nbTilePixelLarge*analyze.TileSize.Width, nbTilePixelHigh*analyze.TileSize.Height))
 						// copy of the map
-						for i := 0; i < nbTileLarge*analyze.TileSize.Width; i++ {
-							for j := 0; j < nbTileHigh*analyze.TileSize.Height; j++ {
+						for i := 0; i < nbTilePixelLarge*analyze.TileSize.Width; i++ {
+							for j := 0; j < nbTilePixelHigh*analyze.TileSize.Height; j++ {
 								var c color.Color = color.RGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
 								if x+i < m.Bounds().Max.X && y+j < m.Bounds().Max.Y {
 									c = m.At(x+i, y+j)
