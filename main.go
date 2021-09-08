@@ -503,7 +503,7 @@ func main() {
 					fmt.Fprintf(os.Stderr, "Height accepted 16 or 8 pixels")
 					os.Exit(-1)
 				}
-				switch nbPixelWidth {
+				switch exportType.Size.Width {
 				case 8:
 					nbTilePixelLarge = 20
 					if exportType.Size.Height == 16 {
@@ -530,6 +530,8 @@ func main() {
 					refPalette = constants.CpcPlusPalette
 				}
 				palette = convert.ToCPCPalette(palette, refPalette)
+				palette = constants.SortColorsByDistance(palette)
+				_, m = convert.DowngradingWithPalette(m, palette)
 				file.PalToPng(exportType.OutputPath+"/palette.png", palette)
 				file.Png(exportType.OutputPath+"/map.png", m)
 
