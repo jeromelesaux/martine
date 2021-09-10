@@ -161,25 +161,6 @@ func EnhanceBrightness(p color.Palette, saturation, brightness int) color.Palett
 	for i := 0; i < len(p); i++ {
 		p[i] = LumSaturation(p[i], float64(brightness), float64(saturation))
 	}
-	/*	var indice int
-		for i := 0; i < len(constants.CpcPlusPalette); i++ {
-			if constants.ColorsAreEquals(mediumColor, constants.CpcPlusPalette[i]) {
-				indice = i
-				break
-			}
-		}
-		p[0] = mediumColor
-		j := 1
-		for i := indice; indice-i < (len(p)/2) && i >= 0 && j < len(p); i -= force {
-			p[j] = constants.CpcPlusPalette[i]
-			j++
-		}
-
-		for i := indice; i-indice < (len(p)/2) && i < len(constants.CpcPlusPalette) && j < len(p); i += force {
-			p[j] = constants.CpcPlusPalette[i]
-			j++
-		}*/
-
 	return p
 }
 
@@ -205,42 +186,6 @@ func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (c
 		}
 		// launch analyse
 		newPalette := paletteToReduce.Reduce(size.ColorsAvailable)
-
-		/*	n := map[int][]color.Color{}
-			var a []int
-			for k, v := range colorUsage {
-				n[v] = append(n[v], k)
-			}
-			for k := range n {
-				a = append(a, k)
-			}
-			newPalette := []color.Color{}
-			sort.Sort(sort.Reverse(sort.IntSlice(a)))
-			var distance = -1.
-			for i, k := range a {
-				if len(newPalette) >= size.ColorsAvailable {
-					break
-				}
-				if isCpcPlus {
-					if i > 0 {
-						distance = constants.ColorsDistance(n[a[i]][0], n[a[i-1]][0])
-					}
-					if distance == -1 {
-						fmt.Fprintf(os.Stdout, "distance(color:%v): accepted\n", n[a[i]][0])
-						newPalette = append(newPalette, n[k][0])
-					} else {
-						if distance > 10. {
-							fmt.Fprintf(os.Stdout, "distance(colors:%v,%v): %.2f accepted\n", n[a[i]][0], n[a[i-1]][0], distance)
-							newPalette = append(newPalette, n[k][0])
-						} else {
-							fmt.Fprintf(os.Stdout, "distance(colors:%v,%v): %.2f skipped\n", n[a[i]][0], n[a[i-1]][0], distance)
-						}
-					}
-				} else {
-					newPalette = append(newPalette, n[k][0])
-				}
-			} */
-
 		fmt.Fprintf(os.Stdout, "Phasis downgrade colors palette palette (%d)\n", len(newPalette))
 		return newPalette, downgradeWithPalette(out, newPalette), nil
 

@@ -551,48 +551,8 @@ func main() {
 				// finally export
 				// 20 tiles large 25 tiles height
 				tiles := analyze.Sort()
-				/*	for i, v := range tiles {
-					if v.Occurence > 0 {
-						tile := v.Tile.Image()
-						tileFilepath := filepath.Join(exportType.OutputPath, fmt.Sprintf("%.2d.png", i))
-						f, err := os.Create(tileFilepath)
-						if err != nil {
-							fmt.Fprintf(os.Stderr, "Cannot create tiles %.2d error %v\n", i, err)
-							os.Exit(-1)
-						}
-						defer f.Close()
-						if err := png.Encode(f, tile); err != nil {
-							fmt.Fprintf(os.Stderr, "Cannot encode in png tile %.2d error %v\n", i, err)
-							os.Exit(-1)
-						}
-
-						var palette color.Palette
-						if exportType.CpcPlus {
-							palette = constants.CpcPlusPalette
-						} else {
-							palette = constants.CpcOldPalette
-						}
-
-						out, _ := gfx.DoDithering(tile, palette, exportType)
-						palette, out, err = convert.DowngradingPalette(out, exportType.Size, exportType.CpcPlus)
-						if err != nil {
-							fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", tileFilepath)
-						}
-
-						palette = constants.SortColorsByDistance(palette)
-
-						fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
-						if err := file.Png(tileFilepath+"_down.png", out); err != nil {
-							os.Exit(-2)
-						}
-						if err := cgfx.ToSpriteAndExport(tile, palette, exportType.Size, screenMode, tileFilepath, false, exportType); err != nil {
-							fmt.Fprintf(os.Stderr, "Cannot create tile from image %s, error :%v\n", tileFilepath, err)
-						}
-					}
-				}*/
 				data := make([]byte, 0)
 
-				//palette := analyze.Palette()
 				finalFile := strings.ReplaceAll(filename, "?", "")
 				if err := file.Kit(finalFile, palette, screenMode, false, exportType); err != nil {
 					fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", finalFile, err)
