@@ -43,7 +43,7 @@ build:
 compile:
 	@echo "Compilation for ${ARCH} ${OS} bits"
 	mkdir ${BINARY}/martine-${OS}-${ARCH}
-	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/martine $(SOURCEDIR)/main.go $(SOURCEDIR)/process.go
+	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/martine $(SOURCEDIR)/main.go $(SOURCEDIR)/process.go $(SOURCEDIR)/export_handler.go
 	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/prepare_delta $(SOURCEDIR)/resources/formatter/delta/prepare_delta.go
 	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/format_sprite $(SOURCEDIR)/resources/formatter/sprites/format_sprite.go
 	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/format_data $(SOURCEDIR)/resources/formatter/data/format_data.go
