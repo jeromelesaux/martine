@@ -114,7 +114,7 @@ var (
 	filloutGif          = flag.Bool("fillout", false, "Fill out the gif frames needed some case with deltapacking")
 	saturationPal       = flag.Int("contrast", 0, "apply contrast on the color of the palette on amstrad plus screen. (max value 100 and only on CPC PLUS).")
 	brightnessPal       = flag.Int("brightness", 0, "apply brightness on the color of the palette on amstrad plus screen. (max value 100 and only on CPC PLUS).")
-	appVersion          = "0.30"
+	appVersion          = "0.31"
 	version             = flag.Bool("version", false, "print martine's version")
 )
 
@@ -584,11 +584,11 @@ func main() {
 							os.Exit(-1)
 						}
 						f.Close()
-						nbFrames++
 						if i >= maxTiles {
 							fmt.Fprintf(os.Stderr, "Maximum of %d tiles accepted, skipping...\n", maxTiles)
 							break
 						}
+						nbFrames++
 					}
 				}
 				// save the file sprites

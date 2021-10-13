@@ -12,24 +12,24 @@ import (
 )
 
 type ImpFooter struct {
-	Height   byte
 	Width    byte
+	Height   byte
 	NbFrames byte
 }
 
 func Imp(sprites []byte, nbFrames, width, height, mode uint, filename string, export *x.ExportType) error {
-	h := height
+	w := width
 	switch mode {
 	case 0:
-		h /= 2
+		w /= 2
 	case 1:
-		h /= 4
+		w /= 4
 	case 2:
-		h /= 8
+		w /= 8
 	}
 	impHeader := ImpFooter{
-		Height:   byte(h),
-		Width:    byte(width),
+		Width:    byte(w),
+		Height:   byte(height),
 		NbFrames: byte(nbFrames),
 	}
 	output := make([]byte, 0)
@@ -70,7 +70,7 @@ func TileMap(data []byte, filename string, export *x.ExportType) error {
 		Size:        uint16(binary.Size(output)),
 		Size2:       uint16(binary.Size(output)),
 		LogicalSize: uint16(binary.Size(output))}
-	copy(header.Filename[:], export.GetAmsdosFilename(filename, ".IMP"))
+	copy(header.Filename[:], export.GetAmsdosFilename(filename, ".TIL"))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	impPath := filepath.Join(export.OutputPath, export.GetAmsdosFilename(filename, ".TIL"))
 	fw, err := os.Create(impPath)
