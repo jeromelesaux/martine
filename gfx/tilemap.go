@@ -37,7 +37,7 @@ func AnalyzeTilemap(mode uint8, filename, picturePath string, in image.Image, co
 	_, m = convert.DowngradingWithPalette(m, palette)
 	file.PalToPng(cont.OutputPath+"/palette.png", palette)
 	file.Png(cont.OutputPath+"/map.png", m)
-	size := constants.Size{Width: 8, Height: 8}
+	size := constants.Size{Width: 2, Height: 8}
 	var sizeIteration int
 	switch mode {
 	case 0:
@@ -146,9 +146,9 @@ func AnalyzeTilemap(mode uint8, filename, picturePath string, in image.Image, co
 	nbTilePixelLarge := 20
 	nbTilePixelHigh := 25
 	switch choosenBoard.TileSize.Width {
-	case 8:
-		nbTilePixelLarge = 20
 	case 4:
+		nbTilePixelLarge = 20
+	case 2:
 		nbTilePixelLarge = 40
 	}
 	scenes := make([]*image.NRGBA, 0)
@@ -241,7 +241,7 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 		fmt.Fprintf(os.Stderr, "Mode %d  not available\n", mode)
 	}
 
-	if nbPixelWidth != 4 && nbPixelWidth != 8 {
+	if nbPixelWidth != 4 && nbPixelWidth != 2 {
 		fmt.Fprintf(os.Stderr, "%v\n", errors.ErrorWidthSizeNotAccepted)
 		return errors.ErrorWidthSizeNotAccepted
 	}
@@ -250,12 +250,12 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 		return errors.ErrorWidthSizeNotAccepted
 	}
 	switch cont.Size.Width {
-	case 8:
+	case 4:
 		nbTilePixelLarge = 20
 		if cont.Size.Height == 16 {
 			maxTiles = 240
 		}
-	case 4:
+	case 2:
 		nbTilePixelLarge = 40
 	}
 
@@ -282,6 +282,8 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 	file.Png(cont.OutputPath+"/map.png", m)
 
 	analyze := transformation.AnalyzeTilesBoard(m, cont.Size)
+	tilesSize := sizeOctet(analyze.TileSize, mode) * len(analyze.BoardTiles)
+	fmt.Printf("board with number of tiles [%d] and size [width:%d, height:%d] size:#%X\n", len(analyze.BoardTiles), analyze.TileSize.Width, analyze.TileSize.Height, tilesSize)
 	if err := analyze.SaveSchema(filepath.Join(cont.OutputPath, "tilesmap_schema.png")); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot save tilemap schema error :%v\n", err)
 		return err

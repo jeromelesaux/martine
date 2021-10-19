@@ -159,10 +159,10 @@ func ApplyOneImageAndExport(in image.Image,
 			downgraded = transformation.Zigzag(downgraded)
 		}
 		if !cont.SpriteHard {
-			fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
+			//fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
 			common.ToSpriteAndExport(downgraded, newPalette, cont.Size, screenMode, filename, false, cont)
 		} else {
-			fmt.Fprintf(os.Stdout, "Transform image in sprite hard.\n")
+			//fmt.Fprintf(os.Stdout, "Transform image in sprite hard.\n")
 			common.ToSpriteHardAndExport(downgraded, newPalette, cont.Size, screenMode, filename, cont)
 		}
 	}
@@ -220,10 +220,10 @@ func ApplyOneImage(in image.Image,
 			downgraded = transformation.Zigzag(downgraded)
 		}
 		if !cont.SpriteHard {
-			fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
+			//fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
 			data, _, lineSize, err = common.ToSprite(downgraded, newPalette, cont.Size, screenMode, cont)
 		} else {
-			fmt.Fprintf(os.Stdout, "Transform image in sprite hard.\n")
+			//	fmt.Fprintf(os.Stdout, "Transform image in sprite hard.\n")
 			data, _ = common.ToSpriteHard(downgraded, newPalette, cont.Size, screenMode, cont)
 			lineSize = 16
 		}

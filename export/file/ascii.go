@@ -63,7 +63,7 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, co
 
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
-	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
+	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	fw, err := os.Create(osFilepath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
@@ -186,7 +186,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
-	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
+	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	fw, err := os.Create(osFilepath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)

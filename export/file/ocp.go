@@ -8268,7 +8268,7 @@ func Ink(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 	cpcFilename := cont.OsFilename(".INK")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
-	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
+	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	osFilepath := cont.AmsdosFullPath(filePath, ".INK")
 	fw, err := os.Create(osFilepath)
 	if err != nil {
@@ -8431,7 +8431,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 	cpcFilename := cont.OsFilename(".SCR")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
-	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
+	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	fw, err := os.Create(osFilepath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
@@ -8536,7 +8536,7 @@ func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 	cpcFilename := cont.OsFilename(".KIT")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
-	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
+	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	fw, err := os.Create(osFilepath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
@@ -8756,7 +8756,7 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cont *
 	cpcFilename := cont.GetAmsdosFilename(filePath, ".SCR")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
-	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
+	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	fw, err := os.Create(osFilepath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
@@ -8875,7 +8875,7 @@ func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 	cpcFilename := cont.GetAmsdosFilename(filePath, ".PAL")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
-	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
+	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	osFilepath := cont.AmsdosFullPath(filePath, ".PAL")
 	fw, err := os.Create(osFilepath)
 	if err != nil {
@@ -9012,7 +9012,7 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, dont
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "filesize:%d,#%.2x\n", filesize, filesize)
-	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
+	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	fmt.Fprintf(os.Stderr, "Data length %d\n", binary.Size(data))
 	fmt.Fprintf(os.Stderr, "Footer length %d\n", binary.Size(win))
 	osFilename := cont.Fullpath(".WIN")
@@ -9046,7 +9046,7 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 	cpcFilename := cont.OsFilename(".SCR")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
-	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
+	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	fw, err := os.Create(osFilepath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
