@@ -15,4 +15,7 @@ var (
 	ErrorNotYetImplemented              = errors.New("function is not yet implemented")
 	ErrorModeNotFound                   = errors.New("mode not found or not implemented")
 	ErrorBadSize                        = errors.New("width height does not correspond to data size")
+	ErrorWidthSizeNotAccepted           = errors.New("width accepted  8 or 16 pixels")
+	ErrorCustomDimensionMustBeSet       = errors.New("you must set custom width and height")
+	ErrorCriteriaNotFound               = errors.New("criteria not found")
 )
