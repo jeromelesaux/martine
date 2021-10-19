@@ -17,13 +17,13 @@ import (
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
-func Rotate3d(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filePath string, resizeAlgo imaging.ResampleFilter, exportType *x.ExportType) error {
-	if exportType.RollIteration == -1 {
+func Rotate3d(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filePath string, resizeAlgo imaging.ResampleFilter, cont *x.MartineContext) error {
+	if cont.RollIteration == -1 {
 		return errors.ErrorMissingNumberOfImageToGenerate
 	}
 
 	var indice int
-	angle := 360. / float64(exportType.RollIteration)
+	angle := 360. / float64(cont.RollIteration)
 	//targetSize := in.Bounds().Max.X
 	//if in.Bounds().Max.Y > in.Bounds().Max.X {
 	//	targetSize = in.Bounds().Max.Y
@@ -32,14 +32,14 @@ func Rotate3d(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8,
 	for i := 0.; i < 360.; i += angle {
 		background := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: size.Width, Y: size.Height}})
 		draw.Draw(background, background.Bounds(), &image.Uniform{p[0]}, image.Point{0, 0}, draw.Src)
-		rin := rotateImage(in, background, i, exportType)
+		rin := rotateImage(in, background, i, cont)
 		_, rin = convert.DowngradingWithPalette(rin, p)
 
-		newFilename := exportType.OsFullPath(filePath, fmt.Sprintf("%.2d", indice)+".png")
+		newFilename := cont.OsFullPath(filePath, fmt.Sprintf("%.2d", indice)+".png")
 		if err := file.Png(newFilename, rin); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create image (%s) error :%v\n", newFilename, err)
 		}
-		if err := common.ToSpriteAndExport(rin, p, constants.Size{Width: size.Width, Height: size.Height}, mode, newFilename, false, exportType); err != nil {
+		if err := common.ToSpriteAndExport(rin, p, constants.Size{Width: size.Width, Height: size.Height}, mode, newFilename, false, cont); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create sprite image (%s) error %v\n", newFilename, err)
 		}
 		indice++
@@ -48,15 +48,15 @@ func Rotate3d(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8,
 	return nil
 }
 
-func rotateImage(in, out *image.NRGBA, angle float64, exportType *x.ExportType) *image.NRGBA {
+func rotateImage(in, out *image.NRGBA, angle float64, cont *x.MartineContext) *image.NRGBA {
 	var xc, yc int
-	if exportType.Rotation3DX0 != -1 {
-		xc = exportType.Rotation3DX0
+	if cont.Rotation3DX0 != -1 {
+		xc = cont.Rotation3DX0
 	} else {
 		xc = out.Bounds().Max.X / 2
 	}
-	if exportType.Rotation3DY0 != -1 {
-		yc = exportType.Rotation3DY0
+	if cont.Rotation3DY0 != -1 {
+		yc = cont.Rotation3DY0
 	} else {
 		yc = out.Bounds().Max.Y / 2
 	}
@@ -64,7 +64,7 @@ func rotateImage(in, out *image.NRGBA, angle float64, exportType *x.ExportType) 
 		for y := 0; y < in.Bounds().Max.Y; y++ {
 			c := in.At(x, y)
 			var x3d, y3d int
-			switch exportType.Rotation3DType {
+			switch cont.Rotation3DType {
 			case 1:
 				x3d, y3d = rotateXAxisCoordinates(x, y, xc, yc, angle)
 			case 2:

@@ -20,7 +20,7 @@ import (
 	zx0 "github.com/jeromelesaux/zx0/encode"
 )
 
-func DeltaPacking(gitFilepath string, ex *export.ExportType, initialAddress uint16, mode uint8) error {
+func DeltaPacking(gitFilepath string, ex *export.MartineContext, initialAddress uint16, mode uint8) error {
 	var isSprite = true
 	var maxImages = 22
 	if !ex.CustomDimension && !ex.SpriteHard {
@@ -132,7 +132,7 @@ func ConvertToImage(g gif.GIF) []*image.NRGBA {
 	return c
 }
 
-func filloutGif(g gif.GIF, ex *export.ExportType) []image.Image {
+func filloutGif(g gif.GIF, ex *export.MartineContext) []image.Image {
 	c := make([]image.Image, 0)
 	width := g.Image[0].Bounds().Max.X
 	height := g.Image[0].Bounds().Max.Y
@@ -151,7 +151,7 @@ func filloutGif(g gif.GIF, ex *export.ExportType) []image.Image {
 	return c
 }
 
-func exportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaCollection, palette color.Palette, ex *export.ExportType, initialAddress uint16, mode uint8, filename string) error {
+func exportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaCollection, palette color.Palette, ex *export.MartineContext, initialAddress uint16, mode uint8, filename string) error {
 	var sourceCode string = deltaCodeDelta
 	var dataCode string
 	var deltaIndex []string

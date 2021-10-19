@@ -16,7 +16,7 @@ import (
 	"github.com/oliamb/cutter"
 )
 
-func TileMode(ex *x.ExportType, mode uint8, iterationX, iterationY int) error {
+func TileMode(ex *x.MartineContext, mode uint8, iterationX, iterationY int) error {
 	fr, err := os.Open(ex.InputPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot open (%s),error :%v\n", ex.InputPath, err)

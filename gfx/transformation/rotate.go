@@ -16,13 +16,13 @@ import (
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
-func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filePath string, resizeAlgo imaging.ResampleFilter, exportType *x.ExportType) error {
-	if exportType.RollIteration == -1 {
+func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filePath string, resizeAlgo imaging.ResampleFilter, cont *x.MartineContext) error {
+	if cont.RollIteration == -1 {
 		return errors.ErrorMissingNumberOfImageToGenerate
 	}
 
 	var indice int
-	angle := 360. / float64(exportType.RollIteration)
+	angle := 360. / float64(cont.RollIteration)
 	var maxSize constants.Size
 	for i := 0.; i < 360.; i += angle {
 		rin := imaging.Rotate(in, float64(i), color.Transparent)
@@ -47,11 +47,11 @@ func Rotate(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, f
 		}
 		_, rin = convert.DowngradingWithPalette(rin, p)
 
-		newFilename := exportType.OsFullPath(filePath, fmt.Sprintf("%.2d", indice)+".png")
+		newFilename := cont.OsFullPath(filePath, fmt.Sprintf("%.2d", indice)+".png")
 		if err := file.Png(newFilename, rin); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create image (%s) error :%v\n", newFilename, err)
 		}
-		if err := common.ToSpriteAndExport(rin, p, maxSize, mode, newFilename, false, exportType); err != nil {
+		if err := common.ToSpriteAndExport(rin, p, maxSize, mode, newFilename, false, cont); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create sprite image (%s) error %v\n", newFilename, err)
 		}
 		indice++

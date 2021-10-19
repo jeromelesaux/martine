@@ -237,7 +237,7 @@ func main() {
 		usage()
 	}
 
-	exportType, size := ExportHandler()
+	cont, size := ExportHandler()
 	screenMode = uint8(*mode)
 
 	if *byteStatement != "" {
@@ -246,12 +246,12 @@ func main() {
 
 	if *deltaPacking {
 		screenAddress, err := common.ParseHexadecimal16(*initialAddress)
-		exportType.Size = size
+		cont.Size = size
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error while parsing (%s) use the starting address #C000, err : %v\n", *initialAddress, err)
 			screenAddress = 0xC000
 		}
-		if err := animate.DeltaPacking(exportType.InputPath, exportType, screenAddress, screenMode); err != nil {
+		if err := animate.DeltaPacking(cont.InputPath, cont, screenAddress, screenMode); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while deltapacking error: %v\n", err)
 		}
 		os.Exit(0)
@@ -260,7 +260,7 @@ func main() {
 	if !*reverse {
 		fmt.Fprintf(os.Stdout, "Informations :\n%s", size.ToString())
 	}
-	if !*impCatcher && !exportType.DeltaMode && !*reverse && !*doAnimation && strings.ToUpper(extension) != ".SCR" {
+	if !*impCatcher && !cont.DeltaMode && !*reverse && !*doAnimation && strings.ToUpper(extension) != ".SCR" {
 		f, err := os.Open(*picturePath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error while opening file %s, error %v\n", *picturePath, err)
@@ -275,7 +275,7 @@ func main() {
 	}
 
 	// gestion de la taille de l'image en sortie
-	if !exportType.CustomDimension && *rotateMode && !exportType.SpriteHard {
+	if !cont.CustomDimension && *rotateMode && !cont.SpriteHard {
 		size.Width = in.Bounds().Max.X
 		size.Height = in.Bounds().Max.Y
 	}
@@ -283,7 +283,7 @@ func main() {
 		size.Width = 16
 		size.Height = 16
 	}
-	exportType.Size = size
+	cont.Size = size
 
 	if !*deltaMode {
 		fmt.Fprintf(os.Stdout, "Filename :%s, extension:%s\n", filename, extension)
@@ -292,48 +292,48 @@ func main() {
 	if *ditheringAlgo != -1 {
 		switch *ditheringAlgo {
 		case 0:
-			exportType.DitheringMatrix = filter.FloydSteinberg
-			exportType.DitheringType = constants.ErrorDiffusionDither
+			cont.DitheringMatrix = filter.FloydSteinberg
+			cont.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:FloydSteinberg, Type:ErrorDiffusionDither\n")
 		case 1:
-			exportType.DitheringMatrix = filter.JarvisJudiceNinke
-			exportType.DitheringType = constants.ErrorDiffusionDither
+			cont.DitheringMatrix = filter.JarvisJudiceNinke
+			cont.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:JarvisJudiceNinke, Type:ErrorDiffusionDither\n")
 		case 2:
-			exportType.DitheringMatrix = filter.Stucki
-			exportType.DitheringType = constants.ErrorDiffusionDither
+			cont.DitheringMatrix = filter.Stucki
+			cont.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:Stucki, Type:ErrorDiffusionDither\n")
 		case 3:
-			exportType.DitheringMatrix = filter.Atkinson
-			exportType.DitheringType = constants.ErrorDiffusionDither
+			cont.DitheringMatrix = filter.Atkinson
+			cont.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:Atkinson, Type:ErrorDiffusionDither\n")
 		case 4:
-			exportType.DitheringMatrix = filter.Sierra
-			exportType.DitheringType = constants.ErrorDiffusionDither
+			cont.DitheringMatrix = filter.Sierra
+			cont.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:Sierra, Type:ErrorDiffusionDither\n")
 		case 5:
-			exportType.DitheringMatrix = filter.SierraLite
-			exportType.DitheringType = constants.ErrorDiffusionDither
+			cont.DitheringMatrix = filter.SierraLite
+			cont.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:SierraLite, Type:ErrorDiffusionDither\n")
 		case 6:
-			exportType.DitheringMatrix = filter.Sierra3
-			exportType.DitheringType = constants.ErrorDiffusionDither
+			cont.DitheringMatrix = filter.Sierra3
+			cont.DitheringType = constants.ErrorDiffusionDither
 			fmt.Fprintf(os.Stdout, "Dither:Sierra3, Type:ErrorDiffusionDither\n")
 		case 7:
-			exportType.DitheringMatrix = filter.Bayer2
-			exportType.DitheringType = constants.OrderedDither
+			cont.DitheringMatrix = filter.Bayer2
+			cont.DitheringType = constants.OrderedDither
 			fmt.Fprintf(os.Stdout, "Dither:Bayer2, Type:OrderedDither\n")
 		case 8:
-			exportType.DitheringMatrix = filter.Bayer3
-			exportType.DitheringType = constants.OrderedDither
+			cont.DitheringMatrix = filter.Bayer3
+			cont.DitheringType = constants.OrderedDither
 			fmt.Fprintf(os.Stdout, "Dither:Bayer3, Type:OrderedDither\n")
 		case 9:
-			exportType.DitheringMatrix = filter.Bayer4
-			exportType.DitheringType = constants.OrderedDither
+			cont.DitheringMatrix = filter.Bayer4
+			cont.DitheringType = constants.OrderedDither
 			fmt.Fprintf(os.Stdout, "Dither:Bayer4, Type:OrderedDither\n")
 		case 10:
-			exportType.DitheringMatrix = filter.Bayer8
-			exportType.DitheringType = constants.OrderedDither
+			cont.DitheringMatrix = filter.Bayer8
+			cont.DitheringType = constants.OrderedDither
 			fmt.Fprintf(os.Stdout, "Dither:Bayer8, Type:OrderedDither\n")
 		default:
 			fmt.Fprintf(os.Stderr, "Dithering matrix not available.")
@@ -341,7 +341,7 @@ func main() {
 		}
 	}
 	if *impCatcher {
-		if !exportType.CustomDimension {
+		if !cont.CustomDimension {
 			fmt.Fprintf(os.Stderr, "You must set custom width and height.")
 			os.Exit(-1)
 		}
@@ -364,13 +364,13 @@ func main() {
 				os.Exit(-2)
 			}
 			gfx.ApplyOneImageAndExport(in,
-				exportType,
+				cont,
 				filepath.Base(v),
 				v,
 				*mode,
 				screenMode)
 
-			spritePath := exportType.AmsdosFullPath(v, ".WIN")
+			spritePath := cont.AmsdosFullPath(v, ".WIN")
 			data, err := file.RawWin(spritePath)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error while extracting raw content, err:%s\n", err)
@@ -378,14 +378,14 @@ func main() {
 			sprites = append(sprites, data...)
 		}
 		finalFile := strings.ReplaceAll(filename, "?", "")
-		if err = file.Imp(sprites, uint(len(spritesPaths)), uint(exportType.Size.Width), uint(exportType.Size.Height), uint(screenMode), finalFile, exportType); err != nil {
+		if err = file.Imp(sprites, uint(len(spritesPaths)), uint(cont.Size.Width), uint(cont.Size.Height), uint(screenMode), finalFile, cont); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", *picturePath, err)
 		}
 		os.Exit(0)
 	} else if *reverse {
 
 		outpath := filepath.Join(*output, strings.Replace(strings.ToLower(filename), ".scr", ".png", 1))
-		if exportType.Overscan {
+		if cont.Overscan {
 			p, mode, err := file.OverscanPalette(*picturePath)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot get the palette from file (%s) error %v\n", *picturePath, err)
@@ -436,8 +436,8 @@ func main() {
 		}
 		os.Exit(1)
 	}
-	if exportType.Animate {
-		if !exportType.CustomDimension {
+	if cont.Animate {
+		if !cont.CustomDimension {
 			fmt.Fprintf(os.Stderr, "You must set sprite dimensions with option -w and -h (mandatory)\n")
 			os.Exit(-1)
 		}
@@ -448,12 +448,12 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Cannot parse wildcard in argument (%s) error %v\n", *picturePath, err)
 			os.Exit(-1)
 		}
-		if err := animate.Animation(files, screenMode, exportType); err != nil {
+		if err := animate.Animation(files, screenMode, cont); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while proceeding to animate export error : %v\n", err)
 			os.Exit(-1)
 		}
 	} else {
-		if exportType.DeltaMode {
+		if cont.DeltaMode {
 			fmt.Fprintf(os.Stdout, "delta files to proceed.\n")
 			for i, v := range deltaFiles {
 				fmt.Fprintf(os.Stdout, "[%d]:%s\n", i, v)
@@ -467,7 +467,7 @@ func main() {
 				fmt.Fprintf(os.Stderr, "You must set the mode for this feature. (option -m)\n")
 				os.Exit(-1)
 			}
-			if err := transformation.ProceedDelta(deltaFiles, screenAddress, exportType, uint8(*mode)); err != nil {
+			if err := transformation.ProceedDelta(deltaFiles, screenAddress, cont, uint8(*mode)); err != nil {
 				fmt.Fprintf(os.Stderr, "error while proceeding delta mode %v\n", err)
 				os.Exit(-1)
 			}
@@ -485,7 +485,7 @@ func main() {
 					fmt.Fprintf(os.Stderr, "Error tilemap analyze option not found : choose between (%s,%s)\n", string(common.SizeTilemapOption), string(common.NumberTilemapOption))
 					os.Exit(-1)
 				}
-				if err := gfx.AnalyzeTilemap(screenMode, filename, *picturePath, in, exportType, criteria); err != nil {
+				if err := gfx.AnalyzeTilemap(screenMode, filename, *picturePath, in, cont, criteria); err != nil {
 					fmt.Fprintf(os.Stderr, "Error whie do tilemap action with error :%v\n", err)
 					os.Exit(-1)
 				}
@@ -498,19 +498,19 @@ func main() {
 						16x16 : 20x24
 					*/
 
-					if err := gfx.Tilemap(screenMode, filename, *picturePath, size, in, exportType); err != nil {
+					if err := gfx.Tilemap(screenMode, filename, *picturePath, size, in, cont); err != nil {
 						fmt.Fprintf(os.Stderr, "Error whie do tilemap action with error :%v\n", err)
 						os.Exit(-1)
 					}
 					os.Exit(0)
 				} else {
-					if exportType.TileMode {
-						if exportType.TileIterationX == -1 || exportType.TileIterationY == -1 {
+					if cont.TileMode {
+						if cont.TileIterationX == -1 || cont.TileIterationY == -1 {
 							fmt.Fprintf(os.Stderr, "missing arguments iterx and itery to use with tile mode.\n")
 							usage()
 							os.Exit(-1)
 						}
-						err := transformation.TileMode(exportType, uint8(*mode), exportType.TileIterationX, exportType.TileIterationY)
+						err := transformation.TileMode(cont, uint8(*mode), cont.TileIterationX, cont.TileIterationY)
 						if err != nil {
 							fmt.Fprintf(os.Stderr, "Tile mode on error : error :%v\n", err)
 							os.Exit(-1)
@@ -521,14 +521,14 @@ func main() {
 								*palettePath, *palettePath2,
 								*mode,
 								*mode2,
-								exportType); err != nil {
+								cont); err != nil {
 								fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
 								os.Exit(-1)
 							}
 						} else {
 							var p color.Palette
 							var err error
-							if exportType.CpcPlus {
+							if cont.CpcPlus {
 								if *kitPath != "" {
 									p, _, err = file.OpenKit(*kitPath)
 									if err != nil {
@@ -546,7 +546,7 @@ func main() {
 								}
 							}
 
-							if exportType.EgxFormat > 0 {
+							if cont.EgxFormat > 0 {
 								if len(p) == 0 {
 									fmt.Fprintf(os.Stderr, "Now colors found in palette, give up treatment.\n")
 									os.Exit(-1)
@@ -555,14 +555,14 @@ func main() {
 									p,
 									*mode,
 									*mode2,
-									exportType); err != nil {
+									cont); err != nil {
 									fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
 									os.Exit(-1)
 								}
 							} else {
-								if exportType.SplitRaster {
-									if exportType.Overscan {
-										if err := effect.DoSpliteRaster(in, screenMode, filename, exportType); err != nil {
+								if cont.SplitRaster {
+									if cont.Overscan {
+										if err := effect.DoSpliteRaster(in, screenMode, filename, cont); err != nil {
 											fmt.Fprintf(os.Stderr, "Error while applying splitraster on one image :%v\n", err)
 											os.Exit(-1)
 										}
@@ -572,7 +572,7 @@ func main() {
 								} else {
 									if strings.ToUpper(extension) != ".SCR" {
 										if err := gfx.ApplyOneImageAndExport(in,
-											exportType,
+											cont,
 											filename, *picturePath,
 											*mode,
 											screenMode); err != nil {
@@ -592,32 +592,32 @@ func main() {
 		}
 	}
 	// export into bundle DSK or SNA
-	if exportType.Dsk {
-		if err := file.ImportInDsk(*picturePath, exportType); err != nil {
+	if cont.Dsk {
+		if err := file.ImportInDsk(*picturePath, cont); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create or write into dsk file error :%v\n", err)
 		}
 	}
-	if exportType.Sna {
-		if exportType.Overscan {
+	if cont.Sna {
+		if cont.Overscan {
 			var gfxFile string
-			for _, v := range exportType.DskFiles {
+			for _, v := range cont.DskFiles {
 				if filepath.Ext(v) == ".SCR" {
 					gfxFile = v
 					break
 				}
 			}
-			exportType.SnaPath = filepath.Join(*output, "test.sna")
-			if err := file.ImportInSna(gfxFile, exportType.SnaPath, screenMode); err != nil {
+			cont.SnaPath = filepath.Join(*output, "test.sna")
+			if err := file.ImportInSna(gfxFile, cont.SnaPath, screenMode); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot create or write into sna file error :%v\n", err)
 			}
-			fmt.Fprintf(os.Stdout, "Sna saved in file %s\n", exportType.SnaPath)
+			fmt.Fprintf(os.Stdout, "Sna saved in file %s\n", cont.SnaPath)
 		} else {
 			fmt.Fprintf(os.Stderr, "Feature not implemented for this file.")
 			os.Exit(-1)
 		}
 	}
-	if exportType.M4 {
-		if err := net.ImportInM4(exportType); err != nil {
+	if cont.M4 {
+		if err := net.ImportInM4(cont); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot send to M4 error :%v\n", err)
 		}
 	}

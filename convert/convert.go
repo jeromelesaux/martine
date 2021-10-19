@@ -17,7 +17,7 @@ import (
 var ErrorCannotDowngradePalette = errors.New("Cannot Downgrade colors palette.")
 
 func Resize(in image.Image, size constants.Size, algo imaging.ResampleFilter) *image.NRGBA {
-	fmt.Fprintf(os.Stdout, "* Step 1 * Resizing image to width %d pixels heigh %d\n", size.Width, size.Height)
+	//fmt.Fprintf(os.Stdout, "* Step 1 * Resizing image to width %d pixels heigh %d\n", size.Width, size.Height)
 	return imaging.Resize(in, size.Width, size.Height, algo)
 }
 
@@ -165,14 +165,14 @@ func EnhanceBrightness(p color.Palette, saturation, brightness int) color.Palett
 }
 
 func DowngradingWithPalette(in *image.NRGBA, p color.Palette) (color.Palette, *image.NRGBA) {
-	fmt.Fprintf(os.Stdout, "Downgrading image with input palette %d\n", len(p))
+	//	fmt.Fprintf(os.Stdout, "Downgrading image with input palette %d\n", len(p))
 	return p, downgradeWithPalette(in, p)
 }
 
 func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (color.Palette, *image.NRGBA, error) {
-	fmt.Fprintf(os.Stdout, "* Step 2 * Downgrading palette image\n")
+	//	fmt.Fprintf(os.Stdout, "* Step 2 * Downgrading palette image\n")
 	p, out := downgrade(in, isCpcPlus)
-	fmt.Fprintf(os.Stdout, "Downgraded palette contains (%d) colors\n", len(p))
+	//	fmt.Fprintf(os.Stdout, "Downgraded palette contains (%d) colors\n", len(p))
 	if len(p) > size.ColorsAvailable {
 		fmt.Fprintf(os.Stderr, "Downgraded palette size (%d) is greater than the available colors in this mode (%d)\n", len(p), size.ColorsAvailable)
 		fmt.Fprintf(os.Stderr, "Check color usage in image.\n")

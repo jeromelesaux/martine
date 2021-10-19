@@ -17,7 +17,7 @@ type ImpFooter struct {
 	NbFrames byte
 }
 
-func Imp(sprites []byte, nbFrames, width, height, mode uint, filename string, export *x.ExportType) error {
+func Imp(sprites []byte, nbFrames, width, height, mode uint, filename string, export *x.MartineContext) error {
 	w := width
 	switch mode {
 	case 0:
@@ -62,7 +62,7 @@ func Imp(sprites []byte, nbFrames, width, height, mode uint, filename string, ex
 	return nil
 }
 
-func TileMap(data []byte, filename string, export *x.ExportType) error {
+func TileMap(data []byte, filename string, export *x.MartineContext) error {
 
 	output := make([]byte, 0x4000)
 	copy(output[0:], data[:])

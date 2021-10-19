@@ -18,7 +18,7 @@ import (
 	zx0 "github.com/jeromelesaux/zx0/encode"
 )
 
-func DeltaMotif(gitFilepath string, ex *export.ExportType, threshold int, initialAddress uint16, mode uint8) error {
+func DeltaMotif(gitFilepath string, ex *export.MartineContext, threshold int, initialAddress uint16, mode uint8) error {
 
 	fr, err := os.Open(gitFilepath)
 	if err != nil {
@@ -108,7 +108,7 @@ func DeltaMotif(gitFilepath string, ex *export.ExportType, threshold int, initia
 	return exportDeltaMotif(deltas, motifs, customPalette, ex, ex.OutputPath+string(filepath.Separator)+filename)
 }
 
-func exportDeltaMotif(images [][]byte, motifs [][]byte, p color.Palette, ex *export.ExportType, filename string) error {
+func exportDeltaMotif(images [][]byte, motifs [][]byte, p color.Palette, ex *export.MartineContext, filename string) error {
 	var deltaCode string
 	for i := 0; i < len(images); i++ {
 		deltaCode += fmt.Sprintf("delta%.2d\n", i)

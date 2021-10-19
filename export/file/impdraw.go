@@ -63,7 +63,7 @@ var splitRasterSetColor = []byte{0x3E, 0x54, 0xED, 0x79}
 */
 var splitRasterRestore = []byte{0x0A, 0xED, 0x79, 0xED, 0x61}
 
-func ExportSplitRaster(filename string, p color.Palette, rasters *constants.SplitRasterScreen, exportType *export.ExportType) error {
+func ExportSplitRaster(filename string, p color.Palette, rasters *constants.SplitRasterScreen, cont *export.MartineContext) error {
 
 	output := make([]byte, 0)
 	// set the init split raster routine assembled opcode
@@ -91,20 +91,20 @@ func ExportSplitRaster(filename string, p color.Palette, rasters *constants.Spli
 		Size:        uint16(binary.Size(output)),
 		Size2:       uint16(binary.Size(output)),
 		LogicalSize: uint16(binary.Size(output))}
-	copy(header.Filename[:], exportType.GetAmsdosFilename(filename, ".SPL"))
+	copy(header.Filename[:], cont.GetAmsdosFilename(filename, ".SPL"))
 	header.Checksum = uint16(header.ComputedChecksum16())
-	basicPath := filepath.Join(exportType.OutputPath, exportType.GetAmsdosFilename(filename, ".SPL"))
+	basicPath := filepath.Join(cont.OutputPath, cont.GetAmsdosFilename(filename, ".SPL"))
 	fw, err := os.Create(basicPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", basicPath, err)
 		return err
 	}
-	if !exportType.NoAmsdosHeader {
+	if !cont.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	binary.Write(fw, binary.LittleEndian, output)
 	fw.Close()
 
-	exportType.AddFile(basicPath)
+	cont.AddFile(basicPath)
 	return nil
 }

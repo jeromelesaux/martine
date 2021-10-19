@@ -12,39 +12,39 @@ import (
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
-func Transform(in *image.NRGBA, p color.Palette, size constants.Size, filepath string, exportType *x.ExportType) error {
+func Transform(in *image.NRGBA, p color.Palette, size constants.Size, filepath string, cont *x.MartineContext) error {
 	switch size {
 	case constants.Mode0:
-		return common.ToMode0AndExport(in, p, size, filepath, exportType)
+		return common.ToMode0AndExport(in, p, size, filepath, cont)
 	case constants.Mode1:
-		return common.ToMode1AndExport(in, p, size, filepath, exportType)
+		return common.ToMode1AndExport(in, p, size, filepath, cont)
 	case constants.Mode2:
-		return common.ToMode2AndExport(in, p, size, filepath, exportType)
+		return common.ToMode2AndExport(in, p, size, filepath, cont)
 	case constants.OverscanMode0:
-		return common.ToMode0AndExport(in, p, size, filepath, exportType)
+		return common.ToMode0AndExport(in, p, size, filepath, cont)
 	case constants.OverscanMode1:
-		return common.ToMode1AndExport(in, p, size, filepath, exportType)
+		return common.ToMode1AndExport(in, p, size, filepath, cont)
 	case constants.OverscanMode2:
-		return common.ToMode2AndExport(in, p, size, filepath, exportType)
+		return common.ToMode2AndExport(in, p, size, filepath, cont)
 	default:
 		return errors.ErrorNotYetImplemented
 	}
 }
 
-func InternalTransform(in *image.NRGBA, p color.Palette, size constants.Size, exportType *x.ExportType) []byte {
+func InternalTransform(in *image.NRGBA, p color.Palette, size constants.Size, cont *x.MartineContext) []byte {
 	switch size {
 	case constants.Mode0:
-		return common.ToMode0(in, p, exportType)
+		return common.ToMode0(in, p, cont)
 	case constants.Mode1:
-		return common.ToMode1(in, p, exportType)
+		return common.ToMode1(in, p, cont)
 	case constants.Mode2:
-		return common.ToMode2(in, p, exportType)
+		return common.ToMode2(in, p, cont)
 	case constants.OverscanMode0:
-		return common.ToMode0(in, p, exportType)
+		return common.ToMode0(in, p, cont)
 	case constants.OverscanMode1:
-		return common.ToMode1(in, p, exportType)
+		return common.ToMode1(in, p, cont)
 	case constants.OverscanMode2:
-		return common.ToMode2(in, p, exportType)
+		return common.ToMode2(in, p, cont)
 	default:
 		return []byte{}
 	}

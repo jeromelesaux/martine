@@ -1376,14 +1376,14 @@ var (
 	egxPlusMode2Offset         = 0x121e
 )
 
-func Loader(filePath string, p color.Palette, mode uint8, exportType *x.ExportType) error {
-	if exportType.CpcPlus {
-		return BasicLoaderCPCPlus(filePath, p, mode, exportType)
+func Loader(filePath string, p color.Palette, mode uint8, cont *x.MartineContext) error {
+	if cont.CpcPlus {
+		return BasicLoaderCPCPlus(filePath, p, mode, cont)
 	}
-	return BasicLoader(filePath, p, exportType)
+	return BasicLoader(filePath, p, cont)
 }
 
-func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, exportType *x.ExportType) error {
+func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cont *x.MartineContext) error {
 	// export de la palette assemblée
 	loader := paletteCPCPlusLoader
 
@@ -1410,7 +1410,7 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, exportType
 	}
 	copy(loader[0:128], data)
 
-	osFilepath := exportType.AmsdosFullPath("PALPLUS", ".BIN")
+	osFilepath := cont.AmsdosFullPath("PALPLUS", ".BIN")
 	// modifier checksum amsdos header
 	fw, err := os.Create(osFilepath)
 	if err != nil {
@@ -1420,11 +1420,11 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, exportType
 	binary.Write(fw, binary.LittleEndian, loader)
 	fw.Close()
 
-	exportType.AddFile(osFilepath)
+	cont.AddFile(osFilepath)
 
 	// export fichier basic loader
 	loader = basicCPCPlusLoaderBasic
-	filename := exportType.GetAmsdosFilename(filePath, "")
+	filename := cont.GetAmsdosFilename(filePath, "")
 	copy(loader[startScreenPlusName:], filename[:])
 	switch mode {
 	case 0:
@@ -1443,24 +1443,24 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, exportType
 	file := string(filename) + ".BAS"
 	copy(header.Filename[:], file)
 	header.Checksum = uint16(header.ComputedChecksum16())
-	osFilepath = exportType.AmsdosFullPath(filePath, ".BAS")
+	osFilepath = cont.AmsdosFullPath(filePath, ".BAS")
 	fw, err = os.Create(osFilepath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
 		return err
 	}
-	if !exportType.NoAmsdosHeader {
+	if !cont.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	binary.Write(fw, binary.LittleEndian, loader)
 	fw.Close()
 
-	exportType.AddFile(osFilepath)
+	cont.AddFile(osFilepath)
 
 	return nil
 }
 
-func BasicLoader(filePath string, p color.Palette, exportType *x.ExportType) error {
+func BasicLoader(filePath string, p color.Palette, cont *x.MartineContext) error {
 	var out string
 	for i := 0; i < len(p); i++ {
 		v, err := constants.FirmwareNumber(p[i])
@@ -1477,7 +1477,7 @@ func BasicLoader(filePath string, p color.Palette, exportType *x.ExportType) err
 
 	var loader []byte = basicLoaderBasic
 	copy(loader[startPaletteValues:], out[0:])
-	basicFile := exportType.AmsdosFullPath(filePath, "")
+	basicFile := cont.AmsdosFullPath(filePath, "")
 	filename := filepath.Base(basicFile) // exportType.GetAmsdosFilename(filePath, "")
 	copy(loader[startPaletteName:], filename[:])
 	copy(loader[startScreenName:], filename[:])
@@ -1486,26 +1486,26 @@ func BasicLoader(filePath string, p color.Palette, exportType *x.ExportType) err
 		Size:        uint16(binary.Size(loader)),
 		Size2:       uint16(binary.Size(loader)),
 		LogicalSize: uint16(binary.Size(loader))}
-	file := exportType.GetAmsdosFilename(string(filename), ".BAS")
+	file := cont.GetAmsdosFilename(string(filename), ".BAS")
 	copy(header.Filename[:], file)
 	header.Checksum = uint16(header.ComputedChecksum16())
-	osFilepath := exportType.AmsdosFullPath(filePath, ".BAS")
+	osFilepath := cont.AmsdosFullPath(filePath, ".BAS")
 	fw, err := os.Create(osFilepath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
 		return err
 	}
-	if !exportType.NoAmsdosHeader {
+	if !cont.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	binary.Write(fw, binary.LittleEndian, loader)
 	fw.Close()
 
-	exportType.AddFile(osFilepath)
+	cont.AddFile(osFilepath)
 	return nil
 }
 
-func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, m1, m2 uint8, exportType *x.ExportType) error {
+func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, m1, m2 uint8, cont *x.MartineContext) error {
 	// modification du binaire flash
 	pal1 := make([]byte, 16)
 	pal2 := make([]byte, 16)
@@ -1557,47 +1557,47 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 		LogicalSize: uint16(binary.Size(flashLoader))}
 	copy(binaryHeader.Filename[:], "FLASH   BIN")
 	binaryHeader.Checksum = uint16(binaryHeader.ComputedChecksum16())
-	flashBinPath := filepath.Join(exportType.OutputPath, "FLASH.BIN")
+	flashBinPath := filepath.Join(cont.OutputPath, "FLASH.BIN")
 	fw, err := os.Create(flashBinPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", flashBinPath, err)
 		return err
 	}
-	if !exportType.NoAmsdosHeader {
+	if !cont.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, binaryHeader)
 	}
 	binary.Write(fw, binary.LittleEndian, flashLoader)
 	fw.Close()
 
-	exportType.AddFile(flashBinPath)
+	cont.AddFile(flashBinPath)
 
 	// modification du flash loader en basic
 	var basicLoader []byte = flashBasicLoader
-	copy(basicLoader[flashScreen1Offset:], exportType.GetAmsdosFilename(screenFilename2, ""))
-	copy(basicLoader[flashScreen2Offset:], exportType.GetAmsdosFilename(screenFilename1, ""))
+	copy(basicLoader[flashScreen1Offset:], cont.GetAmsdosFilename(screenFilename2, ""))
+	copy(basicLoader[flashScreen2Offset:], cont.GetAmsdosFilename(screenFilename1, ""))
 	basicHeader := cpc.CpcHead{Type: 0, User: 0, Address: 0x170, Exec: 0x0,
 		Size:        uint16(binary.Size(basicLoader)),
 		Size2:       uint16(binary.Size(basicLoader)),
 		LogicalSize: uint16(binary.Size(basicLoader))}
 	copy(binaryHeader.Filename[:], "-SWITCH.BAS")
 	basicHeader.Checksum = uint16(basicHeader.ComputedChecksum16())
-	basicPath := filepath.Join(exportType.OutputPath, "-SWITCH.BAS")
+	basicPath := filepath.Join(cont.OutputPath, "-SWITCH.BAS")
 	fw2, err := os.Create(basicPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", basicPath, err)
 		return err
 	}
-	if !exportType.NoAmsdosHeader {
+	if !cont.NoAmsdosHeader {
 		binary.Write(fw2, binary.LittleEndian, basicHeader)
 	}
 	binary.Write(fw2, binary.LittleEndian, basicLoader)
 	fw2.Close()
 
-	exportType.AddFile(basicPath)
+	cont.AddFile(basicPath)
 	return nil
 }
 
-func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, exportType *x.ExportType) error {
+func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cont *x.MartineContext) error {
 	var out string
 	for i := 0; i < len(p); i++ {
 		v, err := constants.FirmwareNumber(p[i])
@@ -1612,9 +1612,9 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, exportType 
 
 	}
 
-	filename := exportType.GetAmsdosFilename(filePath, "")
+	filename := cont.GetAmsdosFilename(filePath, "")
 	var loader []byte
-	if exportType.CpcPlus {
+	if cont.CpcPlus {
 		loader = egxPlusBasicLoader
 		copy(loader[startPlusScreenName:], filename[:])
 
@@ -1630,26 +1630,26 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, exportType 
 		Size:        uint16(binary.Size(loader)),
 		Size2:       uint16(binary.Size(loader)),
 		LogicalSize: uint16(binary.Size(loader))}
-	file := exportType.GetAmsdosFilename(string(filename), ".BAS")
+	file := cont.GetAmsdosFilename(string(filename), ".BAS")
 	copy(header.Filename[:], file)
 	header.Checksum = uint16(header.ComputedChecksum16())
-	osFilepath := exportType.AmsdosFullPath(filePath, ".BAS")
+	osFilepath := cont.AmsdosFullPath(filePath, ".BAS")
 	fw, err := os.Create(osFilepath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
 		return err
 	}
-	if !exportType.NoAmsdosHeader {
+	if !cont.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	binary.Write(fw, binary.LittleEndian, loader)
 	fw.Close()
 
-	exportType.AddFile(osFilepath)
+	cont.AddFile(osFilepath)
 	var egxLoader []byte
 
 	var egxHeaderStartAddress uint16
-	if !exportType.CpcPlus {
+	if !cont.CpcPlus {
 		egxLoader = egxBinary
 		pal := make([]byte, 16)
 		index := 15
@@ -1720,19 +1720,19 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, exportType 
 		LogicalSize: uint16(binary.Size(egxLoader))}
 	copy(binaryHeader.Filename[:], "EGX     BIN")
 	binaryHeader.Checksum = uint16(binaryHeader.ComputedChecksum16())
-	egxBinPath := filepath.Join(exportType.OutputPath, "EGX.BIN")
+	egxBinPath := filepath.Join(cont.OutputPath, "EGX.BIN")
 	fw, err = os.Create(egxBinPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", egxBinPath, err)
 		return err
 	}
-	if !exportType.NoAmsdosHeader {
+	if !cont.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, binaryHeader)
 	}
 	binary.Write(fw, binary.LittleEndian, egxLoader)
 	fw.Close()
 
-	exportType.AddFile(egxBinPath)
+	cont.AddFile(egxBinPath)
 
 	return nil
 }

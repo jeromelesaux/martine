@@ -10,7 +10,7 @@ import (
 	"github.com/jeromelesaux/martine/export"
 )
 
-func ToMode2(in *image.NRGBA, p color.Palette, ex *export.ExportType) []byte {
+func ToMode2(in *image.NRGBA, p color.Palette, ex *export.MartineContext) []byte {
 	var bw []byte
 
 	lineToAdd := 1
@@ -25,8 +25,8 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *export.ExportType) []byte {
 		bw = make([]byte, 0x4000)
 	}
 	firmwareColorUsed := make(map[int]int)
-	fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
-	fmt.Println(in.Bounds())
+	//fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
+	//fmt.Println(in.Bounds())
 
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 8 {
@@ -114,11 +114,11 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *export.ExportType) []byte {
 
 	}
 
-	fmt.Println(firmwareColorUsed)
+	//fmt.Println(firmwareColorUsed)
 	return bw
 }
 
-func ToMode1(in *image.NRGBA, p color.Palette, ex *export.ExportType) []byte {
+func ToMode1(in *image.NRGBA, p color.Palette, ex *export.MartineContext) []byte {
 	var bw []byte
 
 	lineToAdd := 1
@@ -133,8 +133,8 @@ func ToMode1(in *image.NRGBA, p color.Palette, ex *export.ExportType) []byte {
 	}
 
 	firmwareColorUsed := make(map[int]int)
-	fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
-	fmt.Println(in.Bounds())
+	//fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
+	//fmt.Println(in.Bounds())
 
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 4 {
@@ -188,7 +188,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, ex *export.ExportType) []byte {
 	return bw
 }
 
-func ToMode0(in *image.NRGBA, p color.Palette, ex *export.ExportType) []byte {
+func ToMode0(in *image.NRGBA, p color.Palette, ex *export.MartineContext) []byte {
 	var bw []byte
 
 	lineToAdd := 1
@@ -201,8 +201,8 @@ func ToMode0(in *image.NRGBA, p color.Palette, ex *export.ExportType) []byte {
 		bw = make([]byte, 0x4000)
 	}
 	firmwareColorUsed := make(map[int]int)
-	fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
-	fmt.Println(in.Bounds())
+	//fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
+	//fmt.Println(in.Bounds())
 
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
@@ -237,21 +237,21 @@ func ToMode0(in *image.NRGBA, p color.Palette, ex *export.ExportType) []byte {
 		}
 	}
 
-	fmt.Println(firmwareColorUsed)
+	//	fmt.Println(firmwareColorUsed)
 	return bw
 }
 
-func ToMode0AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *export.ExportType) error {
-	bw := ToMode0(in, p, exportType)
-	return Export(filePath, bw, p, 0, exportType)
+func ToMode0AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, cont *export.MartineContext) error {
+	bw := ToMode0(in, p, cont)
+	return Export(filePath, bw, p, 0, cont)
 }
 
-func ToMode1AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *export.ExportType) error {
-	bw := ToMode1(in, p, exportType)
-	return Export(filePath, bw, p, 1, exportType)
+func ToMode1AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, cont *export.MartineContext) error {
+	bw := ToMode1(in, p, cont)
+	return Export(filePath, bw, p, 1, cont)
 }
 
-func ToMode2AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, exportType *export.ExportType) error {
-	bw := ToMode2(in, p, exportType)
-	return Export(filePath, bw, p, 2, exportType)
+func ToMode2AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, cont *export.MartineContext) error {
+	bw := ToMode2(in, p, cont)
+	return Export(filePath, bw, p, 2, cont)
 }

@@ -22,7 +22,7 @@ var (
 
 var ErrorNotAllowed = errors.New("Error not allowed.")
 
-type ExportType struct {
+type MartineContext struct {
 	InputPath                   string
 	OutputPath                  string
 	PalettePath                 string
@@ -130,8 +130,8 @@ func ModeMaskSprite(mode uint8) (error, []uint8) {
 	}
 }
 
-func NewExportType(input, output string) *ExportType {
-	return &ExportType{
+func NewMartineContext(input, output string) *MartineContext {
+	return &MartineContext{
 		Scr:            true,
 		Pal:            true,
 		Ink:            true,
@@ -146,11 +146,11 @@ func NewExportType(input, output string) *ExportType {
 		LineWidth:      0x50}
 }
 
-func (e *ExportType) AddFile(file string) {
+func (e *MartineContext) AddFile(file string) {
 	e.DskFiles = append(e.DskFiles, file)
 }
 
-func (e *ExportType) ImportInkSwap(s string) error {
+func (e *MartineContext) ImportInkSwap(s string) error {
 	if s == "" {
 		return nil
 	}
@@ -177,7 +177,7 @@ func (e *ExportType) ImportInkSwap(s string) error {
 	return nil
 }
 
-func (e *ExportType) SwapInk(inkIndex int) int {
+func (e *MartineContext) SwapInk(inkIndex int) int {
 	if v, ok := e.InkSwapper[inkIndex]; ok {
 		return v
 	}
@@ -191,7 +191,7 @@ func RemoveUnsupportedChar(s string) string {
 	return s
 }
 
-func (e *ExportType) AmsdosFilename() []byte {
+func (e *MartineContext) AmsdosFilename() []byte {
 	for i := 0; i < 8; i++ {
 		e.amsdosFilename[i] = ' '
 	}
@@ -206,15 +206,15 @@ func (e *ExportType) AmsdosFilename() []byte {
 	return e.amsdosFilename
 }
 
-func (e *ExportType) Filename() string {
+func (e *MartineContext) Filename() string {
 	return string(e.AmsdosFilename())
 }
 
-func (e *ExportType) Fullpath(ext string) string {
+func (e *MartineContext) Fullpath(ext string) string {
 	return filepath.Join(e.OutputPath, e.OsFilename(ext))
 }
 
-func (e *ExportType) TransformToAmsdosFile(filePath string) string {
+func (e *MartineContext) TransformToAmsdosFile(filePath string) string {
 	amsdosFile := make([]byte, 8)
 	file := strings.ToUpper(filepath.Base(e.InputPath))
 	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
@@ -227,7 +227,7 @@ func (e *ExportType) TransformToAmsdosFile(filePath string) string {
 
 }
 
-func (e *ExportType) OsFilename(ext string) string {
+func (e *MartineContext) OsFilename(ext string) string {
 	file := strings.ToUpper(filepath.Base(e.InputPath))
 	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
 	filenameSize := len(filename)
@@ -239,7 +239,7 @@ func (e *ExportType) OsFilename(ext string) string {
 	return string(osFile) + ext
 }
 
-func (e *ExportType) GetAmsdosFilename(filePath string, ext string) string {
+func (e *MartineContext) GetAmsdosFilename(filePath string, ext string) string {
 	file := strings.ToUpper(filepath.Base(filePath))
 	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
 	filenameSize := 7
@@ -251,7 +251,7 @@ func (e *ExportType) GetAmsdosFilename(filePath string, ext string) string {
 	return osFile + ext
 }
 
-func (e *ExportType) AmsdosFullPath(filePath string, newExtension string) string {
+func (e *MartineContext) AmsdosFullPath(filePath string, newExtension string) string {
 	filename := filepath.Base(filePath)
 	file := RemoveUnsupportedChar(strings.TrimSuffix(filename, filepath.Ext(filename)))
 	length := 6
@@ -264,14 +264,14 @@ func (e *ExportType) AmsdosFullPath(filePath string, newExtension string) string
 	return filepath.Join(e.OutputPath, strings.ToUpper(newFilename))
 }
 
-func (e *ExportType) OsFullPath(filePath string, newExtension string) string {
+func (e *MartineContext) OsFullPath(filePath string, newExtension string) string {
 	filename := filepath.Base(filePath)
 	file := RemoveUnsupportedChar(strings.TrimSuffix(filename, filepath.Ext(filename)))
 	newFilename := file + newExtension
 	return filepath.Join(e.OutputPath, newFilename)
 }
 
-func (e *ExportType) SetLineWith(i string) error {
+func (e *MartineContext) SetLineWith(i string) error {
 	v, err := common.ParseHexadecimal8(i)
 	if err != nil {
 		return err

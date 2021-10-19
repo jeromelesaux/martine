@@ -8246,7 +8246,7 @@ func (i *InkPalette) ToString() string {
 	return out
 }
 
-func Ink(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, exportType *x.ExportType) error {
+func Ink(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cont *x.MartineContext) error {
 	fmt.Fprintf(os.Stdout, "Saving INK file (%s)\n", filePath)
 	data := make([]uint8, 16)
 	fmt.Fprintf(os.Stdout, "Palette size %d\n", len(p))
@@ -8265,23 +8265,23 @@ func Ink(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 		Size2:       uint16(binary.Size(data)),
 		LogicalSize: uint16(binary.Size(data))}
 
-	cpcFilename := exportType.OsFilename(".INK")
+	cpcFilename := cont.OsFilename(".INK")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
-	osFilepath := exportType.AmsdosFullPath(filePath, ".INK")
+	osFilepath := cont.AmsdosFullPath(filePath, ".INK")
 	fw, err := os.Create(osFilepath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
 		return err
 	}
-	if !exportType.NoAmsdosHeader {
+	if !cont.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	binary.Write(fw, binary.LittleEndian, data)
 	fw.Close()
 	if !dontImportDsk {
-		exportType.AddFile(osFilepath)
+		cont.AddFile(osFilepath)
 	}
 	return nil
 }
@@ -8404,16 +8404,16 @@ func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 	return palette, mode, nil
 }
 
-func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, exportType *x.ExportType) error {
+func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, cont *x.MartineContext) error {
 	// remove first line to keep #38 address free
 	var width int
 	switch screenMode {
 	case 0:
-		width = exportType.Size.Width / 2
+		width = cont.Size.Width / 2
 	case 1:
-		width = exportType.Size.Width / 4
+		width = cont.Size.Width / 4
 	case 2:
-		width = exportType.Size.Width / 8
+		width = cont.Size.Width / 8
 	}
 	for i := 0; i < width; i++ {
 		data[i] = 0
@@ -8421,14 +8421,14 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, e
 	// end of the hack
 
 	o := make([]byte, 0x7e90-0x80)
-	osFilepath := exportType.AmsdosFullPath(filePath, ".SCR")
+	osFilepath := cont.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", osFilepath)
 	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x170, Exec: 0x0,
 		Size:        uint16(binary.Size(o)),
 		Size2:       uint16(binary.Size(o)),
 		LogicalSize: uint16(binary.Size(o))}
 
-	cpcFilename := exportType.OsFilename(".SCR")
+	cpcFilename := cont.OsFilename(".SCR")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
@@ -8437,13 +8437,13 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, e
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
 		return err
 	}
-	if !exportType.NoAmsdosHeader {
+	if !cont.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	copy(o, OverscanBoot[:])
 	copy(o[0x200-0x170:], data[:])
 	//o[(0x1ac-0x170)] = 0 // cpc old
-	switch exportType.CpcPlus {
+	switch cont.CpcPlus {
 	case true:
 		o[(0x1ac - 0x170)] = 1
 	case false:
@@ -8458,7 +8458,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, e
 		o[0x184-0x170] = 0x10
 	}
 	// affectation de la palette CPC old
-	if exportType.CpcPlus {
+	if cont.CpcPlus {
 		offset := 0
 		for i := 0; i < len(p); i++ {
 			cp := constants.NewCpcPlusColor(p[i])
@@ -8479,7 +8479,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, e
 	}
 	binary.Write(fw, binary.LittleEndian, o)
 	fw.Close()
-	exportType.AddFile(osFilepath)
+	cont.AddFile(osFilepath)
 	return nil
 }
 
@@ -8516,8 +8516,8 @@ func OpenKit(filePath string) (color.Palette, *KitPalette, error) {
 	return p, KitPalette, nil
 }
 
-func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, exportType *x.ExportType) error {
-	osFilepath := filepath.Join(exportType.OutputPath, exportType.GetAmsdosFilename(filePath, ".KIT"))
+func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cont *x.MartineContext) error {
+	osFilepath := filepath.Join(cont.OutputPath, cont.GetAmsdosFilename(filePath, ".KIT"))
 	fmt.Fprintf(os.Stdout, "Saving Kit file (%s)\n", osFilepath)
 	data := [16]uint16{}
 	paletteSize := len(p)
@@ -8533,7 +8533,7 @@ func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 		Size2:       uint16(binary.Size(data)),
 		LogicalSize: uint16(binary.Size(data))}
 
-	cpcFilename := exportType.OsFilename(".KIT")
+	cpcFilename := cont.OsFilename(".KIT")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
@@ -8542,13 +8542,13 @@ func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
 		return err
 	}
-	if !exportType.NoAmsdosHeader {
+	if !cont.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	binary.Write(fw, binary.LittleEndian, data)
 	fw.Close()
 	if !dontImportDsk {
-		exportType.AddFile(osFilepath)
+		cont.AddFile(osFilepath)
 	}
 	return nil
 }
@@ -8672,11 +8672,11 @@ func RawOverscan(filePath string) ([]byte, error) {
 	return data, nil
 }
 
-func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, exportType *x.ExportType) error {
-	osFilepath := exportType.AmsdosFullPath(filePath, ".SCR")
+func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cont *x.MartineContext) error {
+	osFilepath := cont.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving SCR file (%s)\n", osFilepath)
 	var exec uint16
-	if exportType.CpcPlus {
+	if cont.CpcPlus {
 		exec = 0x821
 		switch screenMode {
 		case 0:
@@ -8719,8 +8719,8 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, export
 		}
 		copy(data[0x07d0:], codeScrStandard[:])
 	}
-	if exportType.Compression != -1 {
-		switch exportType.Compression {
+	if cont.Compression != -1 {
+		switch cont.Compression {
 		case 1:
 			fmt.Fprintf(os.Stdout, "Using RLE compression\n")
 			data = rle.Encode(data)
@@ -8753,7 +8753,7 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, export
 		Size2:       uint16(binary.Size(data)),
 		LogicalSize: uint16(binary.Size(data))}
 
-	cpcFilename := exportType.GetAmsdosFilename(filePath, ".SCR")
+	cpcFilename := cont.GetAmsdosFilename(filePath, ".SCR")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
@@ -8762,12 +8762,12 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, export
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
 		return err
 	}
-	if !exportType.NoAmsdosHeader {
+	if !cont.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	binary.Write(fw, binary.LittleEndian, data)
 	fw.Close()
-	exportType.AddFile(osFilepath)
+	cont.AddFile(osFilepath)
 	return nil
 }
 
@@ -8848,7 +8848,7 @@ func OpenPal(filePath string) (color.Palette, *OcpPalette, error) {
 	return p, ocpPalette, nil
 }
 
-func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, exportType *x.ExportType) error {
+func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cont *x.MartineContext) error {
 	fmt.Fprintf(os.Stdout, "Saving PAL file (%s)\n", filePath)
 	data := OcpPalette{ScreenMode: screenMode, ColorAnimation: 0, ColorAnimationDelay: 0}
 	for i := 0; i < 16; i++ {
@@ -8872,23 +8872,23 @@ func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 		Size2:       uint16(binary.Size(data)),
 		LogicalSize: uint16(binary.Size(data))}
 
-	cpcFilename := exportType.GetAmsdosFilename(filePath, ".PAL")
+	cpcFilename := cont.GetAmsdosFilename(filePath, ".PAL")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
-	osFilepath := exportType.AmsdosFullPath(filePath, ".PAL")
+	osFilepath := cont.AmsdosFullPath(filePath, ".PAL")
 	fw, err := os.Create(osFilepath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
 		return err
 	}
-	if !exportType.NoAmsdosHeader {
+	if !cont.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	binary.Write(fw, binary.LittleEndian, data)
 	fw.Close()
 	if !dontImportDsk {
-		exportType.AddFile(osFilepath)
+		cont.AddFile(osFilepath)
 	}
 	return nil
 }
@@ -8969,12 +8969,12 @@ func OpenWin(filePath string) (*OcpWinFooter, error) {
 	return ocpWinFooter, nil
 }
 
-func Win(filePath string, data []byte, screenMode uint8, width, height int, dontImportDsk bool, exportType *x.ExportType) error {
-	osFilepath := exportType.AmsdosFullPath(filePath, ".WIN")
+func Win(filePath string, data []byte, screenMode uint8, width, height int, dontImportDsk bool, cont *x.MartineContext) error {
+	osFilepath := cont.AmsdosFullPath(filePath, ".WIN")
 	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", osFilepath, screenMode, width, height)
 	win := OcpWinFooter{Unused: 3, Height: byte(height), Unused2: 0, Width: uint16(width * 8)}
-	if exportType.Compression != -1 {
-		switch exportType.Compression {
+	if cont.Compression != -1 {
+		switch cont.Compression {
 		case 1:
 			fmt.Fprintf(os.Stdout, "Using RLE compression\n")
 			data = rle.Encode(data)
@@ -9008,42 +9008,42 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, dont
 		Size2:       uint16(filesize),
 		LogicalSize: uint16(filesize)}
 
-	cpcFilename := exportType.OsFilename(".WIN")
+	cpcFilename := cont.OsFilename(".WIN")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "filesize:%d,#%.2x\n", filesize, filesize)
 	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	fmt.Fprintf(os.Stderr, "Data length %d\n", binary.Size(data))
 	fmt.Fprintf(os.Stderr, "Footer length %d\n", binary.Size(win))
-	osFilename := exportType.Fullpath(".WIN")
+	osFilename := cont.Fullpath(".WIN")
 	fw, err := os.Create(osFilepath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilename, err)
 		return err
 	}
 	fmt.Fprintf(os.Stdout, "%s, data size :%d\n", win.ToString(), len(data))
-	if !exportType.NoAmsdosHeader {
+	if !cont.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	binary.Write(fw, binary.LittleEndian, data)
 	binary.Write(fw, binary.LittleEndian, win)
 	fw.Close()
 	if !dontImportDsk {
-		exportType.AddFile(osFilepath)
+		cont.AddFile(osFilepath)
 	}
 	return nil
 }
 
-func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uint8, exportType *x.ExportType) error {
+func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uint8, cont *x.MartineContext) error {
 	o := make([]byte, 0x8000-0x80)
-	osFilepath := exportType.AmsdosFullPath(filePath, ".SCR")
+	osFilepath := cont.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", osFilepath)
 	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x170, Exec: 0x0,
 		Size:        uint16(binary.Size(o)),
 		Size2:       uint16(binary.Size(o)),
 		LogicalSize: uint16(binary.Size(o))}
 
-	cpcFilename := exportType.OsFilename(".SCR")
+	cpcFilename := cont.OsFilename(".SCR")
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
@@ -9052,11 +9052,11 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
 		return err
 	}
-	if !exportType.NoAmsdosHeader {
+	if !cont.NoAmsdosHeader {
 		binary.Write(fw, binary.LittleEndian, header)
 	}
 	var overscanTemplate []byte
-	if exportType.CpcPlus {
+	if cont.CpcPlus {
 		overscanTemplate = egxPlusOverscanTemplate
 	} else {
 		overscanTemplate = egxOverscanTemplate
@@ -9064,7 +9064,7 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 	copy(o[:], overscanTemplate[:])
 	copy(o[0x200-0x170:], data[:]) //  - 0x170  to have the file offset
 	//o[(0x1ac-0x170)] = 0 // cpc old
-	switch exportType.CpcPlus {
+	switch cont.CpcPlus {
 	case true:
 		o[(0x1ac - 0x170)] = 1
 	case false:
@@ -9101,7 +9101,7 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 	o[0x8f] = byte(extraFlag)
 
 	// affectation de la palette CPC old
-	if exportType.CpcPlus {
+	if cont.CpcPlus {
 		offset := 0
 		for i := 0; i < len(p); i++ {
 			cp := constants.NewCpcPlusColor(p[i])
@@ -9120,7 +9120,7 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 			}
 		}
 	}
-	if exportType.CpcPlus {
+	if cont.CpcPlus {
 		copy(o[0x6b2:0x6c8], egxPlusOverscanTemplate[0x6b2:0x6c8])
 		copy(o[0x7da0:], egxPlusOverscanTemplate[0x7da0:]) // copy egx routine
 	} else {
@@ -9129,6 +9129,6 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 
 	binary.Write(fw, binary.LittleEndian, o)
 	fw.Close()
-	exportType.AddFile(osFilepath)
+	cont.AddFile(osFilepath)
 	return nil
 }

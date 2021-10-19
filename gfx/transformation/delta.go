@@ -89,7 +89,7 @@ func (dc *DeltaCollection) Add(b byte, address uint16) {
 	dc.Items = append(dc.Items, item)
 }
 
-func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, exportType *x.ExportType) (*DeltaCollection, error) {
+func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, cont *x.MartineContext) (*DeltaCollection, error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
 		return data, errors.ErrorSizeMismatch
@@ -128,7 +128,7 @@ func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.
 			}
 			pixel2 := common.PixelMode0(p2, p4)
 			if pixel1 != pixel2 {
-				addr := common.CpcScreenAddress(0xc000, i, j, 0, exportType.Overscan)
+				addr := common.CpcScreenAddress(0xc000, i, j, 0, cont.Overscan)
 				data.Add(pixel2, uint16(addr))
 			}
 		}
@@ -136,7 +136,7 @@ func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.
 	return data, nil
 }
 
-func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, exportType *x.ExportType) (*DeltaCollection, error) {
+func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, cont *x.MartineContext) (*DeltaCollection, error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
 		return data, errors.ErrorSizeMismatch
@@ -201,7 +201,7 @@ func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.
 			}
 			pixel2 := common.PixelMode1(p2, p4, p6, p8)
 			if pixel1 != pixel2 {
-				addr := common.CpcScreenAddress(0xc000, i, j, 1, exportType.Overscan)
+				addr := common.CpcScreenAddress(0xc000, i, j, 1, cont.Overscan)
 				data.Add(pixel2, uint16(addr))
 			}
 		}
@@ -209,7 +209,7 @@ func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.
 	return data, nil
 }
 
-func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, exportType *x.ExportType) (*DeltaCollection, error) {
+func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, cont *x.MartineContext) (*DeltaCollection, error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
 		return data, errors.ErrorSizeMismatch
@@ -326,7 +326,7 @@ func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.
 			}
 			pixel2 := common.PixelMode2(p2, p4, p6, p8, p10, p12, p14, p16)
 			if pixel1 != pixel2 {
-				addr := common.CpcScreenAddress(0xc000, i, j, 2, exportType.Overscan)
+				addr := common.CpcScreenAddress(0xc000, i, j, 2, cont.Overscan)
 				data.Add(pixel2, uint16(addr))
 			}
 		}
@@ -441,7 +441,7 @@ func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8, x0
 	return data
 }
 
-func ExportDelta(filename string, dc *DeltaCollection, mode uint8, exportType *x.ExportType) error {
+func ExportDelta(filename string, dc *DeltaCollection, mode uint8, cont *x.MartineContext) error {
 	if err := dc.Save(filename + ".bin"); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file (%s) error %v \n", filename+".bin", err)
 		return err
@@ -453,20 +453,20 @@ func ExportDelta(filename string, dc *DeltaCollection, mode uint8, exportType *x
 	}
 
 	var emptyPalette []color.Color
-	outFilepath := filepath.Join(exportType.OutputPath, filename+".txt")
-	if err = file.Ascii(outFilepath, data, emptyPalette, false, exportType); err != nil {
+	outFilepath := filepath.Join(cont.OutputPath, filename+".txt")
+	if err = file.Ascii(outFilepath, data, emptyPalette, false, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while exporting data as ascii mode file (%s) error :%v\n", outFilepath, err)
 		return err
 	}
-	outFilepath = filepath.Join(exportType.OutputPath, filename+"c.txt")
-	if err = file.AsciiByColumn(outFilepath, data, emptyPalette, false, mode, exportType); err != nil {
+	outFilepath = filepath.Join(cont.OutputPath, filename+"c.txt")
+	if err = file.AsciiByColumn(outFilepath, data, emptyPalette, false, mode, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while exporting data as ascii by column mode file (%s) error :%v\n", outFilepath, err)
 		return err
 	}
 	return nil
 }
 
-func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.ExportType, mode uint8) error {
+func ProceedDelta(filespath []string, initialAddress uint16, cont *x.MartineContext, mode uint8) error {
 
 	if len(filespath) == 1 {
 		var err error
@@ -483,7 +483,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 	var isSprite = false
 	var size constants.Size
 	//var x0, y0 uint16
-	lineOctetsWidth := exportType.LineWidth
+	lineOctetsWidth := cont.LineWidth
 	x0, y0, err := CpcCoordinates(initialAddress, 0xC000, lineOctetsWidth)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error while computing cpc coordinates :%v\n", err)
@@ -552,8 +552,8 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 		fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
 		fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
 		if dc.OccurencePerFrame != 0 {
-			out := filepath.Join(exportType.OutputPath, fmt.Sprintf("%.2dto%.2d", i, (i+1)))
-			if err := ExportDelta(out, dc, mode, exportType); err != nil {
+			out := filepath.Join(cont.OutputPath, fmt.Sprintf("%.2dto%.2d", i, (i+1)))
+			if err := ExportDelta(out, dc, mode, cont); err != nil {
 				return err
 			}
 		}
@@ -625,8 +625,8 @@ func ProceedDelta(filespath []string, initialAddress uint16, exportType *x.Expor
 	fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
 	fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
 	if dc.OccurencePerFrame != 0 {
-		out := filepath.Join(exportType.OutputPath, fmt.Sprintf("%.2dto00", len(filespath)-1))
-		if err := ExportDelta(out, dc, mode, exportType); err != nil {
+		out := filepath.Join(cont.OutputPath, fmt.Sprintf("%.2dto00", len(filespath)-1))
+		if err := ExportDelta(out, dc, mode, cont); err != nil {
 			return err
 		}
 	}

@@ -14,7 +14,7 @@ import (
 	"github.com/jeromelesaux/martine/gfx"
 )
 
-func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, exportType *export.ExportType) error {
+func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, cont *export.MartineContext) error {
 	if filepath2 == "" && filepath1 != "" {
 		filename := filepath.Base(filepath1)
 		f, err := os.Open(filepath1)
@@ -26,7 +26,7 @@ func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, exportTy
 		if err != nil {
 			return err
 		}
-		return AutoFlash(in, exportType, filename, filepath1, m1, uint8(m1))
+		return AutoFlash(in, cont, filename, filepath1, m1, uint8(m1))
 	}
 	filename1 := filepath.Base(filepath1)
 	filename2 := filepath.Base(filepath2)
@@ -38,26 +38,26 @@ func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, exportTy
 	if err != nil {
 		return err
 	}
-	exportType.AddFile(filepath1)
-	exportType.AddFile(filepath2)
-	exportType.AddFile(palpath1)
-	exportType.AddFile(palpath2)
-	return file.FlashLoader(filename1, filename2, p1, p2, uint8(m1), uint8(m2), exportType)
+	cont.AddFile(filepath1)
+	cont.AddFile(filepath2)
+	cont.AddFile(palpath1)
+	cont.AddFile(palpath2)
+	return file.FlashLoader(filename1, filename2, p1, p2, uint8(m1), uint8(m2), cont)
 }
 
 func AutoFlash(in image.Image,
-	exportType *export.ExportType,
+	cont *export.MartineContext,
 	filename, picturePath string,
 	mode int,
 	screenMode uint8) error {
 
 	var err error
 	size := constants.Size{
-		Width:  exportType.Size.Width * 2,
-		Height: exportType.Size.Height * 2}
-	im := convert.Resize(in, size, exportType.ResizingAlgo)
-	leftIm := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{exportType.Size.Width, exportType.Size.Height}})
-	rigthIm := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{exportType.Size.Width, exportType.Size.Height}})
+		Width:  cont.Size.Width * 2,
+		Height: cont.Size.Height * 2}
+	im := convert.Resize(in, size, cont.ResizingAlgo)
+	leftIm := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{cont.Size.Width, cont.Size.Height}})
+	rigthIm := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{cont.Size.Width, cont.Size.Height}})
 	indexExtFilename := strings.LastIndex(filename, ".")
 	indexExtPath := strings.LastIndex(picturePath, ".")
 
@@ -88,10 +88,10 @@ func AutoFlash(in image.Image,
 		namesize = 7
 	}
 	flashPaletteFilename1 := strings.ToUpper(name)[0:namesize] + "1.PAL"
-	flashPalettePath1 := filepath.Join(exportType.OutputPath, flashPaletteFilename1)
+	flashPalettePath1 := filepath.Join(cont.OutputPath, flashPaletteFilename1)
 
 	err = gfx.ApplyOneImageAndExport(leftIm,
-		exportType,
+		cont,
 		filenameLeft, filepathLeft,
 		mode,
 		screenMode)
@@ -121,20 +121,20 @@ func AutoFlash(in image.Image,
 
 	switch flashMode {
 	case 0:
-		exportType.Size = constants.Mode0
+		cont.Size = constants.Mode0
 	case 1:
-		exportType.Size = constants.Mode1
+		cont.Size = constants.Mode1
 	case 2:
-		exportType.Size = constants.Mode2
+		cont.Size = constants.Mode2
 	}
 
 	flashPaletteFilename2 := strings.ToUpper(name)[0:namesize] + "2.PAL"
-	flashPalettePath2 := filepath.Join(exportType.OutputPath, flashPaletteFilename2)
+	flashPalettePath2 := filepath.Join(cont.OutputPath, flashPaletteFilename2)
 
-	exportType.PalettePath = flashPalettePath1
+	cont.PalettePath = flashPalettePath1
 
 	err = gfx.ApplyOneImageAndExport(rigthIm,
-		exportType,
+		cont,
 		filenameRigth, filepathRigth,
 		flashMode,
 		uint8(flashMode))
@@ -145,5 +145,5 @@ func AutoFlash(in image.Image,
 	if err != nil {
 		return err
 	}
-	return file.FlashLoader(filenameLeft, filenameRigth, p1, p2, uint8(mode), uint8(flashMode), exportType)
+	return file.FlashLoader(filenameLeft, filenameRigth, p1, p2, uint8(mode), uint8(flashMode), cont)
 }

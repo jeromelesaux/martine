@@ -19,7 +19,7 @@ import (
 	"github.com/jeromelesaux/martine/gfx/common"
 )
 
-func Animation(filepaths []string, screenMode uint8, export *export.ExportType) error {
+func Animation(filepaths []string, screenMode uint8, export *export.MartineContext) error {
 	var sizeScreen constants.Size
 	switch screenMode {
 	case 0:
@@ -44,7 +44,7 @@ func Animation(filepaths []string, screenMode uint8, export *export.ExportType) 
 	return nil
 }
 
-func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, screenMode uint8, export *export.ExportType) (*image.NRGBA, color.Palette, error) {
+func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, screenMode uint8, export *export.MartineContext) (*image.NRGBA, color.Palette, error) {
 	nbImgWidth := int(sizeScreen.Width / spriteSize.Width)
 	//nbImgHeight := int(sizeScreen.Height / size.Height)
 	largeMarge := (sizeScreen.Width - (spriteSize.Width * nbImgWidth)) / nbImgWidth

@@ -16,7 +16,7 @@ import (
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
-func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, exportType *export.ExportType) error {
+func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cont *export.MartineContext) error {
 	p = constants.SortColorsByDistance(p)
 	if m1 == 0 && m2 == 1 || m2 == 0 && m1 == 1 {
 		var f0, f1 string
@@ -25,18 +25,14 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, exportType *e
 		mode0 = 0
 		mode1 = 1
 		if m1 == 0 {
-			//filename := filepath.Base(filepath1)
-			//filePath = exportType.OutputPath + string(filepath.Separator) + filename
 			f0 = filepath1
 			f1 = filepath2
 		} else {
-			//filename := filepath.Base(filepath2)
-			//filePath = exportType.OutputPath + string(filepath.Separator) + filename
 			f0 = filepath2
 			f1 = filepath1
 		}
 		var in0, in1 *image.NRGBA
-		if exportType.Overscan {
+		if cont.Overscan {
 			in0, err = common.OverscanToImg(f0, mode0, p)
 			if err != nil {
 				return err
@@ -55,11 +51,11 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, exportType *e
 				return err
 			}
 		}
-		if err = ToEgx1(in0, in1, p, uint8(m1), "egx.scr", exportType); err != nil {
+		if err = ToEgx1(in0, in1, p, uint8(m1), "egx.scr", cont); err != nil {
 			return err
 		}
-		if !exportType.Overscan {
-			if err = file.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), exportType); err != nil {
+		if !cont.Overscan {
+			if err = file.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), cont); err != nil {
 				return err
 			}
 		}
@@ -84,7 +80,7 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, exportType *e
 				f2 = filepath1
 			}
 			var in2, in1 *image.NRGBA
-			if exportType.Overscan {
+			if cont.Overscan {
 				in1, err = common.OverscanToImg(f1, mode1, p)
 				if err != nil {
 					return err
@@ -103,11 +99,11 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, exportType *e
 					return err
 				}
 			}
-			if err = ToEgx2(in1, in2, p, uint8(m1), "egx.scr", exportType); err != nil {
+			if err = ToEgx2(in1, in2, p, uint8(m1), "egx.scr", cont); err != nil {
 				return err
 			}
-			if !exportType.Overscan {
-				if err = file.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), exportType); err != nil {
+			if !cont.Overscan {
+				if err = file.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), cont); err != nil {
 					return err
 				}
 			}
@@ -120,24 +116,24 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, exportType *e
 }
 
 func AutoEgx1(in image.Image,
-	exportType *export.ExportType,
+	cont *export.MartineContext,
 	filename, picturePath string) error {
 	var err error
 
 	size := constants.Size{
-		Width:  exportType.Size.Width,
-		Height: exportType.Size.Height}
+		Width:  cont.Size.Width,
+		Height: cont.Size.Height}
 
-	im := convert.Resize(in, size, exportType.ResizingAlgo)
+	im := convert.Resize(in, size, cont.ResizingAlgo)
 	var palette color.Palette // palette de l'image
 	var p color.Palette       // palette cpc de l'image
 	var downgraded *image.NRGBA
 
-	if exportType.PalettePath != "" {
-		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", exportType.PalettePath)
-		palette, _, err = file.OpenPal(exportType.PalettePath)
+	if cont.PalettePath != "" {
+		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", cont.PalettePath)
+		palette, _, err = file.OpenPal(cont.PalettePath)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", exportType.PalettePath)
+			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", cont.PalettePath)
 		} else {
 			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
 		}
@@ -145,41 +141,41 @@ func AutoEgx1(in image.Image,
 	if len(palette) > 0 {
 		p, downgraded = convert.DowngradingWithPalette(im, palette)
 	} else {
-		p, downgraded, err = convert.DowngradingPalette(im, exportType.Size, exportType.CpcPlus)
+		p, downgraded, err = convert.DowngradingPalette(im, cont.Size, cont.CpcPlus)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", picturePath)
 		}
 	}
 	p = constants.SortColorsByDistance(p)
 	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
-	if err := file.Png(filepath.Join(exportType.OutputPath, filename+"_down.png"), downgraded); err != nil {
+	if err := file.Png(filepath.Join(cont.OutputPath, filename+"_down.png"), downgraded); err != nil {
 		os.Exit(-2)
 	}
 
-	downgraded, p = gfx.DoDithering(downgraded, p, exportType)
+	downgraded, p = gfx.DoDithering(downgraded, p, cont)
 
-	return ToEgx1(downgraded, downgraded, p, 0, picturePath, exportType)
+	return ToEgx1(downgraded, downgraded, p, 0, picturePath, cont)
 }
 
 func AutoEgx2(in image.Image,
-	exportType *export.ExportType,
+	cont *export.MartineContext,
 	filename, picturePath string) error {
 	var err error
 
 	size := constants.Size{
-		Width:  exportType.Size.Width,
-		Height: exportType.Size.Height}
+		Width:  cont.Size.Width,
+		Height: cont.Size.Height}
 
-	im := convert.Resize(in, size, exportType.ResizingAlgo)
+	im := convert.Resize(in, size, cont.ResizingAlgo)
 	var palette color.Palette // palette de l'image
 	var p color.Palette       // palette cpc de l'image
 	var downgraded *image.NRGBA
 
-	if exportType.PalettePath != "" {
-		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", exportType.PalettePath)
-		palette, _, err = file.OpenPal(exportType.PalettePath)
+	if cont.PalettePath != "" {
+		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", cont.PalettePath)
+		palette, _, err = file.OpenPal(cont.PalettePath)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", exportType.PalettePath)
+			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", cont.PalettePath)
 		} else {
 			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
 		}
@@ -188,25 +184,25 @@ func AutoEgx2(in image.Image,
 	if len(palette) > 0 {
 		p, downgraded = convert.DowngradingWithPalette(im, palette)
 	} else {
-		p, downgraded, err = convert.DowngradingPalette(im, exportType.Size, exportType.CpcPlus)
+		p, downgraded, err = convert.DowngradingPalette(im, cont.Size, cont.CpcPlus)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", picturePath)
 		}
 	}
 	p = constants.SortColorsByDistance(p)
 	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
-	if err := file.Png(filepath.Join(exportType.OutputPath, filename+"_down.png"), downgraded); err != nil {
+	if err := file.Png(filepath.Join(cont.OutputPath, filename+"_down.png"), downgraded); err != nil {
 		os.Exit(-2)
 	}
 
-	downgraded, p = gfx.DoDithering(downgraded, p, exportType)
+	downgraded, p = gfx.DoDithering(downgraded, p, cont)
 
-	return ToEgx2(downgraded, downgraded, p, 1, picturePath, exportType)
+	return ToEgx2(downgraded, downgraded, p, 1, picturePath, cont)
 }
 
-func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8, picturePath string, exportType *export.ExportType) error {
+func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8, picturePath string, cont *export.MartineContext) error {
 	var bw []byte
-	if exportType.Overscan {
+	if cont.Overscan {
 		bw = make([]byte, 0x8000)
 	} else {
 		bw = make([]byte, 0x4000)
@@ -237,7 +233,7 @@ func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8,
 			}
 			firmwareColorUsed[pp2]++
 			pixel := common.PixelMode0(pp1, pp2)
-			addr := common.CpcScreenAddress(0, x, y, 0, exportType.Overscan)
+			addr := common.CpcScreenAddress(0, x, y, 0, cont.Overscan)
 			bw[addr] = pixel
 		}
 	}
@@ -274,18 +270,18 @@ func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8,
 			firmwareColorUsed[pp4]++
 
 			pixel := common.PixelMode1(pp1, pp2, pp3, pp4)
-			addr := common.CpcScreenAddress(0, x, y, 1, exportType.Overscan)
+			addr := common.CpcScreenAddress(0, x, y, 1, cont.Overscan)
 			bw[addr] = pixel
-			addr = common.CpcScreenAddress(0, x+1, y, 1, exportType.Overscan)
+			addr = common.CpcScreenAddress(0, x+1, y, 1, cont.Overscan)
 			bw[addr] = pixel
 		}
 	}
-	return common.Export(picturePath, bw, p, 1, exportType)
+	return common.Export(picturePath, bw, p, 1, cont)
 }
 
-func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8, picturePath string, exportType *export.ExportType) error {
+func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8, picturePath string, cont *export.MartineContext) error {
 	var bw []byte
-	if exportType.Overscan {
+	if cont.Overscan {
 		bw = make([]byte, 0x8000)
 	} else {
 		bw = make([]byte, 0x4000)
@@ -331,7 +327,7 @@ func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8,
 			firmwareColorUsed[pp4]++
 
 			pixel := common.PixelMode1(pp1, pp2, pp3, pp4)
-			addr := common.CpcScreenAddress(0, x, y, 1, exportType.Overscan)
+			addr := common.CpcScreenAddress(0, x, y, 1, cont.Overscan)
 			bw[addr] = pixel
 		}
 	}
@@ -396,11 +392,11 @@ func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8,
 			}
 			firmwareColorUsed[pp8]++
 			pixel := common.PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
-			addr := common.CpcScreenAddress(0, x, y, 2, exportType.Overscan)
+			addr := common.CpcScreenAddress(0, x, y, 2, cont.Overscan)
 			bw[addr] = pixel
-			addr = common.CpcScreenAddress(0, x+1, y, 2, exportType.Overscan)
+			addr = common.CpcScreenAddress(0, x+1, y, 2, cont.Overscan)
 			bw[addr] = pixel
 		}
 	}
-	return common.Export(picturePath, bw, p, 2, exportType)
+	return common.Export(picturePath, bw, p, 2, cont)
 }
