@@ -41,11 +41,11 @@ func AnalyzeTilemap(mode uint8, filename, picturePath string, in image.Image, co
 	var sizeIteration int
 	switch mode {
 	case 0:
-		sizeIteration += 8
+		sizeIteration += 2
 	case 1:
 		sizeIteration += 4
 	case 2:
-		sizeIteration += 2
+		sizeIteration += 8
 	}
 	boards := make([]*transformation.AnalyzeBoard, 0)
 	for size.Width <= 32 || size.Height <= 32 {
@@ -77,11 +77,11 @@ func AnalyzeTilemap(mode uint8, filename, picturePath string, in image.Image, co
 	case common.NumberTilemapOption:
 		choosenBoard = boards[numberTilesIndex]
 		tilesSize := sizeOctet(choosenBoard.TileSize, mode) * len(choosenBoard.BoardTiles)
-		fmt.Printf("choose the [%d]board with number tiles [%d] and size [width:%d, height:%d] size:#%X\n", numberTilesIndex, len(choosenBoard.BoardTiles), choosenBoard.TileSize.Width, choosenBoard.TileSize.Height, tilesSize)
+		fmt.Printf("choose the [%d]board with number of tiles [%d] and size [width:%d, height:%d] size:#%X\n", numberTilesIndex, len(choosenBoard.BoardTiles), choosenBoard.TileSize.Width, choosenBoard.TileSize.Height, tilesSize)
 	case common.SizeTilemapOption:
 		choosenBoard = boards[lowerSizeIndex]
 		tilesSize := sizeOctet(choosenBoard.TileSize, mode) * len(choosenBoard.BoardTiles)
-		fmt.Printf("choose the [%d]board with number tiles [%d] and size [width:%d, height:%d] size:#%X\n", numberTilesIndex, len(choosenBoard.BoardTiles), choosenBoard.TileSize.Width, choosenBoard.TileSize.Height, tilesSize)
+		fmt.Printf("choose the [%d]board with number of tiles [%d] and size [width:%d, height:%d] size:#%X\n", numberTilesIndex, len(choosenBoard.BoardTiles), choosenBoard.TileSize.Width, choosenBoard.TileSize.Height, tilesSize)
 	default:
 		return errors.ErrorCriteriaNotFound
 	}
