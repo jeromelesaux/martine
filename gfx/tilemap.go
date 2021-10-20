@@ -19,6 +19,15 @@ import (
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
 
+var (
+	impTilesSizes = []constants.Size{
+		constants.Size{Width: 4, Height: 8},
+		constants.Size{Width: 8, Height: 8},
+		constants.Size{Width: 8, Height: 16},
+	}
+	impTileFlag = true
+)
+
 func AnalyzeTilemap(mode uint8, filename, picturePath string, in image.Image, cont *export.MartineContext, criteria common.AnalyseTilemapOption) error {
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
 	m := convert.Resize(in, mapSize, cont.ResizingAlgo)
@@ -48,15 +57,25 @@ func AnalyzeTilemap(mode uint8, filename, picturePath string, in image.Image, co
 		sizeIteration += 8
 	}
 	boards := make([]*transformation.AnalyzeBoard, 0)
-	for size.Width <= 32 || size.Height <= 32 {
-		fmt.Printf("Analyse the image for size [width:%d,height:%d]", size.Width, size.Height)
-		board := transformation.AnalyzeTilesBoard(m, size)
-		fmt.Printf(" found [%d] tiles\n", len(board.BoardTiles))
-		boards = append(boards, board)
-		size.Width += sizeIteration
-		size.Height += sizeIteration
+	if !impTileFlag {
+		for size.Width <= 32 || size.Height <= 32 {
+			fmt.Printf("Analyse the image for size [width:%d,height:%d]", size.Width, size.Height)
+			board := transformation.AnalyzeTilesBoard(m, size)
+			tilesSize := sizeOctet(board.TileSize, mode) * len(board.BoardTiles)
+			fmt.Printf(" found [%d] tiles full length [#%X]\n", len(board.BoardTiles), tilesSize)
+			boards = append(boards, board)
+			size.Width += sizeIteration
+			size.Height += sizeIteration
+		}
+	} else {
+		for _, s := range impTilesSizes {
+			fmt.Printf("Analyse the image for size [width:%d,height:%d]", s.Width, s.Height)
+			board := transformation.AnalyzeTilesBoard(m, s)
+			tilesSize := sizeOctet(board.TileSize, mode) * len(board.BoardTiles)
+			fmt.Printf(" found [%d] tiles full length [#%X]\n", len(board.BoardTiles), tilesSize)
+			boards = append(boards, board)
+		}
 	}
-
 	// analyze the results and apply criteria
 	var lowerSizeIndex, numberTilesIndex int
 	lowerSizeValue := math.MaxInt64
@@ -68,8 +87,8 @@ func AnalyzeTilemap(mode uint8, filename, picturePath string, in image.Image, co
 		}
 		tilesSize := sizeOctet(v.TileSize, mode) * len(v.BoardTiles)
 		if tilesSize < lowerSizeValue {
-			tilesSize = lowerSizeValue
-			lowerSizeIndex = 1
+			lowerSizeValue = tilesSize
+			lowerSizeIndex = i
 		}
 	}
 	var choosenBoard *transformation.AnalyzeBoard
@@ -81,7 +100,7 @@ func AnalyzeTilemap(mode uint8, filename, picturePath string, in image.Image, co
 	case common.SizeTilemapOption:
 		choosenBoard = boards[lowerSizeIndex]
 		tilesSize := sizeOctet(choosenBoard.TileSize, mode) * len(choosenBoard.BoardTiles)
-		fmt.Printf("choose the [%d]board with number of tiles [%d] and size [width:%d, height:%d] size:#%X\n", numberTilesIndex, len(choosenBoard.BoardTiles), choosenBoard.TileSize.Width, choosenBoard.TileSize.Height, tilesSize)
+		fmt.Printf("choose the [%d]board with number of tiles [%d] and size [width:%d, height:%d] size:#%X\n", lowerSizeIndex, len(choosenBoard.BoardTiles), choosenBoard.TileSize.Width, choosenBoard.TileSize.Height, tilesSize)
 	default:
 		return errors.ErrorCriteriaNotFound
 	}

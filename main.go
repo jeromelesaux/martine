@@ -489,7 +489,6 @@ func main() {
 					fmt.Fprintf(os.Stderr, "Error whie do tilemap action with error :%v\n", err)
 					os.Exit(-1)
 				}
-				os.Exit(0)
 			} else {
 				if *tileMap {
 					/*
@@ -502,7 +501,6 @@ func main() {
 						fmt.Fprintf(os.Stderr, "Error whie do tilemap action with error :%v\n", err)
 						os.Exit(-1)
 					}
-					os.Exit(0)
 				} else {
 					if cont.TileMode {
 						if cont.TileIterationX == -1 || cont.TileIterationY == -1 {
