@@ -21,9 +21,9 @@ import (
 
 var (
 	impTilesSizes = []constants.Size{
-		constants.Size{Width: 4, Height: 8},
-		constants.Size{Width: 8, Height: 8},
-		constants.Size{Width: 8, Height: 16},
+		{Width: 4, Height: 8},
+		{Width: 8, Height: 8},
+		{Width: 8, Height: 16},
 	}
 	impTileFlag = true
 )
@@ -104,6 +104,9 @@ func AnalyzeTilemap(mode uint8, filename, picturePath string, in image.Image, co
 	default:
 		return errors.ErrorCriteriaNotFound
 	}
+	cont.Size.Width = choosenBoard.BoardTiles[0].Tile.Size.Width
+	cont.Size.Height = choosenBoard.BoardTiles[0].Tile.Size.Height
+	cont.CustomDimension = true
 	if err := choosenBoard.SaveSchema(filepath.Join(cont.OutputPath, "tilesmap_schema.png")); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot save tilemap schema error :%v\n", err)
 		return err
@@ -139,19 +142,23 @@ func AnalyzeTilemap(mode uint8, filename, picturePath string, in image.Image, co
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error while transforming sprite error : %v\n", err)
 			}
-			data = append(data, d...)
-			scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%stiles%stile-%.2d.png", string(filepath.Separator), string(filepath.Separator), i))
-			f, err := os.Create(scenePath)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot create scene tile-%.2d error %v\n", i, err)
-				return err
+			if nbFrames < 255 {
+				data = append(data, d...)
+				scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%stiles%stile-%.2d.png", string(filepath.Separator), string(filepath.Separator), i))
+				f, err := os.Create(scenePath)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Cannot create scene tile-%.2d error %v\n", i, err)
+					return err
+				}
+				if err := png.Encode(f, tile); err != nil {
+					fmt.Fprintf(os.Stderr, "Cannot encode in png scene tile-%.2d error %v\n", i, err)
+					return err
+				}
+				f.Close()
+			} else {
+				fmt.Println("skipping number of frames exceed 255.")
+				break
 			}
-
-			if err := png.Encode(f, tile); err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot encode in png scene tile-%.2d error %v\n", i, err)
-				return err
-			}
-			f.Close()
 			nbFrames++
 		}
 	}
