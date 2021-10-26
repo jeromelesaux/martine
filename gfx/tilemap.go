@@ -78,8 +78,8 @@ func AnalyzeTilemap(mode uint8, filename, picturePath string, in image.Image, co
 	}
 	// analyze the results and apply criteria
 	var lowerSizeIndex, numberTilesIndex int
-	lowerSizeValue := math.MaxInt64
-	numberTilesValue := math.MaxInt64
+	lowerSizeValue := math.MaxInt32
+	numberTilesValue := math.MaxInt32
 	for i, v := range boards {
 		if len(v.BoardTiles) < numberTilesValue {
 			numberTilesIndex = i
