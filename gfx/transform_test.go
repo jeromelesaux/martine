@@ -91,7 +91,7 @@ func TestMaskChoice(t *testing.T) {
 	t.Logf("%b\n", (c & a))
 	d := 2
 	t.Logf("%b\n", (d & a))
-	if (a & d) != 0 {
-		t.Fatalf("expected value %b and gets %b, comparison with %b\n", 0, (a & d), a)
+	if (a & d) != 2 {
+		t.Fatalf("expected value %b and gets %b, comparison with %b\n", 2, (a & d), a)
 	}
 }

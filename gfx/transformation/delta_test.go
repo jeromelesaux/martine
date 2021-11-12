@@ -8,6 +8,7 @@ import (
 
 func TestSaveDelta(t *testing.T) {
 	d := NewDeltaCollection()
+	d.OccurencePerFrame = 1
 	for i := 0; i < 320; i++ {
 		d.Add(0xFF, uint16(i))
 	}
@@ -30,21 +31,21 @@ func TestSaveDelta(t *testing.T) {
 func TestXandY(t *testing.T) {
 
 	for i := 0; i < 0x4000; i++ {
-		y := Y(uint16(i), 0)
-		x := X(uint16(i), 0)
-		addr := DeltaAddress(int(x), int(y), 0)
+		y := Y(uint16(i), 0x50)
+		x := X(uint16(i), 0x50)
+		addr := DeltaAddress(int(x), int(y), 0x50)
 		if addr != i {
 			t.Fatalf("expected #%.4x and gets #%.4x for x:%d y:%d\n", i, addr, x, y)
 		}
 	}
 
 	add := 0xe010 //- 0xC000
-	x, y, err := CpcCoordinates(0xe010, 0xC000, 0)
+	x, y, err := CpcCoordinates(0xe010, 0xC000, 0x50)
 	if err != nil {
 		t.Fatal()
 	}
-	res := DeltaAddress(x, y, 0) + 0xC000
-	a := DeltaAddress(16, 3, 0) + 0xC000
+	res := DeltaAddress(x, y, 0x50) + 0xC000
+	a := DeltaAddress(16, 3, 0x50) + 0xC000
 	fmt.Println(a)
 	if res != add {
 		t.Fatalf("does not match")

@@ -12,8 +12,8 @@ import (
 )
 
 func TestOpenGif(t *testing.T) {
-
-	fr, err := os.Open("../triangles.gif")
+	os.Mkdir("tests", os.ModePerm)
+	fr, err := os.Open("../../images/triangles.gif")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,6 +36,7 @@ func TestOpenGif(t *testing.T) {
 		}
 		fw.Close()
 	}
+	os.RemoveAll("tests")
 }
 
 func TestInternalDelta(t *testing.T) {
