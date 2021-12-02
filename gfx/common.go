@@ -173,7 +173,7 @@ func ApplyOneImage(in image.Image,
 	cont *export.MartineContext,
 	mode int,
 	palette color.Palette,
-	screenMode uint8) ([]byte, color.Palette, int, error) {
+	screenMode uint8) ([]byte, *image.NRGBA, color.Palette, int, error) {
 
 	var newPalette color.Palette
 	var downgraded *image.NRGBA
@@ -228,5 +228,5 @@ func ApplyOneImage(in image.Image,
 			lineSize = 16
 		}
 	}
-	return data, newPalette, lineSize, err
+	return data, downgraded, newPalette, lineSize, err
 }

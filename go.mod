@@ -3,6 +3,7 @@ module github.com/jeromelesaux/martine
 go 1.16
 
 require (
+	fyne.io/fyne/v2 v2.1.1 // indirect
 	github.com/bkaradzic/go-lz4 v1.0.0
 	github.com/disintegration/imaging v1.6.2
 	github.com/esimov/colorquant v1.0.0

@@ -113,13 +113,13 @@ var (
 	saturationPal       = flag.Int("contrast", 0, "apply contrast on the color of the palette on amstrad plus screen. (max value 100 and only on CPC PLUS).")
 	brightnessPal       = flag.Int("brightness", 0, "apply brightness on the color of the palette on amstrad plus screen. (max value 100 and only on CPC PLUS).")
 	analyzeTilemap      = flag.String("analyzetilemap", "", "analyse the image to get the most accurate tilemap according to the  criteria :\n\tsize : lower export size\n\tnumber : lower number of tiles")
-	appVersion          = "0.32"
-	version             = flag.Bool("version", false, "print martine's version")
+
+	version = flag.Bool("version", false, "print martine's version")
 )
 
 func usage() {
 	fmt.Fprintf(os.Stdout, "martine convert (jpeg, png format) image to Amstrad cpc screen (even overscan)\n")
-	fmt.Fprintf(os.Stdout, "By Impact Sid (Version:%s)\n", appVersion)
+	fmt.Fprintf(os.Stdout, "By Impact Sid (Version:%s)\n", common.AppVersion)
 	fmt.Fprintf(os.Stdout, "Special thanks to @Ast (for his support), @Siko and @Tronic for ideas\n")
 	fmt.Fprintf(os.Stdout, "usage :\n\n")
 	flag.PrintDefaults()
@@ -127,7 +127,7 @@ func usage() {
 }
 
 func printVersion() {
-	fmt.Fprintf(os.Stdout, "%s\n", appVersion)
+	fmt.Fprintf(os.Stdout, "%s\n", common.AppVersion)
 	os.Exit(-1)
 }
 

@@ -134,7 +134,7 @@ func AnalyzeTilemap(mode uint8, filename, picturePath string, in image.Image, co
 	for i, v := range tiles {
 		if v.Occurence > 0 {
 			tile := v.Tile.Image()
-			d, _, _, err := ApplyOneImage(tile,
+			d, _, _, _, err := ApplyOneImage(tile,
 				cont,
 				int(mode),
 				palette,
@@ -337,7 +337,7 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 	for i, v := range tiles {
 		if v.Occurence > 0 {
 			tile := v.Tile.Image()
-			d, _, _, err := ApplyOneImage(tile,
+			d, _, _, _, err := ApplyOneImage(tile,
 				cont,
 				int(mode),
 				palette,
