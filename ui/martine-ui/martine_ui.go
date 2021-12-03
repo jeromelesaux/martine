@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/validation"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/storage"
@@ -39,8 +40,8 @@ type MartineUI struct {
 	isSprite            bool
 	isHardSprite        bool
 	mode                int
-	width               widget.Entry
-	height              widget.Entry
+	width               *widget.Entry
+	height              *widget.Entry
 	palette             color.Palette
 	data                []byte
 	downgraded          *image.NRGBA
@@ -415,10 +416,12 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 	modeLabel := widget.NewLabel("Mode:")
 
 	widthLabel := widget.NewLabel("Width")
-	m.width = *widget.NewEntry()
+	m.width = widget.NewEntry()
+	m.width.Validator = validation.NewRegexp("\\d+", "Must contain a number")
 
 	heightLabel := widget.NewLabel("Height")
-	m.height = *widget.NewEntry()
+	m.height = widget.NewEntry()
+	m.height.Validator = validation.NewRegexp("\\d+", "Must contain a number")
 
 	brightness := widget.NewSlider(0.0, 1.0)
 	brightness.SetValue(1.)
@@ -467,12 +470,12 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 					container.New(
 						layout.NewHBoxLayout(),
 						widthLabel,
-						&m.width,
+						m.width,
 					),
 					container.New(
 						layout.NewHBoxLayout(),
 						heightLabel,
-						&m.height,
+						m.height,
 					),
 				),
 			),
