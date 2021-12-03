@@ -53,6 +53,7 @@ type MartineUI struct {
 	ditheringMultiplier float64
 	brightness          float64
 	saturation          float64
+	reducer             int
 }
 
 func NewMartineUI() *MartineUI {
@@ -85,6 +86,7 @@ func (m *MartineUI) ApplyOneImage() {
 	context.DitheringMultiplier = m.ditheringMultiplier
 	context.Brightness = m.brightness
 	context.Saturation = m.saturation
+	context.Reducer = m.reducer
 	var size constants.Size
 	switch m.mode {
 	case 0:
@@ -148,6 +150,7 @@ func (m *MartineUI) ApplyOneImage() {
 	}
 	m.data = out
 	m.downgraded = downgraded
+
 	m.palette = palette
 
 	m.cpcImage = *canvas.NewImageFromImage(m.downgraded)
@@ -271,6 +274,19 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 		}
 	})
 	winFormat.SetSelected("Normal")
+
+	colorReducerLabel := widget.NewLabel("Color reducer")
+	colorReducer := widget.NewSelect([]string{"Lower", "Medium", "Strong"}, func(s string) {
+		switch s {
+		case "Lower":
+			m.reducer = 1
+		case "Medium":
+			m.reducer = 2
+		case "Strong":
+			m.reducer = 3
+		}
+	})
+	colorReducer.SetSelected("Lower")
 
 	resize := widget.NewSelect([]string{"NearestNeighbor",
 		"CatmullRom",
@@ -442,19 +458,19 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 				winFormat,
 
 				container.New(
-					layout.NewGridLayoutWithRows(3),
+					layout.NewVBoxLayout(),
 					container.New(
-						layout.NewGridLayoutWithRows(2),
+						layout.NewHBoxLayout(),
 						modeLabel,
 						modes,
 					),
 					container.New(
-						layout.NewGridLayoutWithColumns(2),
+						layout.NewHBoxLayout(),
 						widthLabel,
 						&m.width,
 					),
 					container.New(
-						layout.NewGridLayoutWithColumns(2),
+						layout.NewHBoxLayout(),
 						heightLabel,
 						&m.height,
 					),
@@ -481,6 +497,11 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 					paletteOpen,
 					&m.paletteImage,
 					forcePalette,
+				),
+				container.New(
+					layout.NewGridLayoutWithColumns(2),
+					colorReducerLabel,
+					colorReducer,
 				),
 				container.New(
 					layout.NewGridLayoutWithColumns(2),
