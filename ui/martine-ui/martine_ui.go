@@ -49,6 +49,7 @@ type MartineUI struct {
 	applyDithering    bool
 	resizeAlgo        imaging.ResampleFilter
 	paletteImage      canvas.Image
+	usePalette        bool
 }
 
 func NewMartineUI() *MartineUI {
@@ -120,9 +121,20 @@ func (m *MartineUI) ApplyOneImage() {
 		context.DitheringMatrix = m.ditheringMatrix
 		context.DitheringType = m.ditheringType
 	}
+	var inPalette color.Palette
+	if m.usePalette {
+		inPalette = m.palette
+		switch m.mode {
+		case 1:
+			inPalette = inPalette[0:4]
+		case 2:
+			inPalette = inPalette[0:2]
+		}
+
+	}
 	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
 	pi.Show()
-	out, downgraded, palette, _, err := gfx.ApplyOneImage(m.originalImage.Image, context, m.mode, color.Palette{}, uint8(m.mode))
+	out, downgraded, palette, _, err := gfx.ApplyOneImage(m.originalImage.Image, context, m.mode, inPalette, uint8(m.mode))
 	pi.Hide()
 	if err != nil {
 		dialog.NewError(err, m.window).Show()
@@ -174,6 +186,22 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 		}, m.window)
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".pal", ".kit"}))
 		d.Show()
+	})
+
+	forcePalette := widget.NewCheck("force palette", func(b bool) {
+		m.usePalette = b
+	})
+
+	forceUIRefresh := widget.NewButtonWithIcon("Refresh UI", theme.ComputerIcon(), func() {
+		s := m.window.Content().Size()
+		s.Height += 10.
+		s.Width += 10.
+		m.window.Resize(s)
+		m.window.Canvas().Refresh(&m.originalImage)
+		m.window.Canvas().Refresh(&m.paletteImage)
+		m.window.Canvas().Refresh(&m.originalImage)
+		m.window.Resize(m.window.Content().Size())
+		m.window.Content().Refresh()
 	})
 	openFileWidget := widget.NewButton("Open image", func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
@@ -374,12 +402,13 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 				&m.cpcImage),
 		),
 		container.New(
-			layout.NewGridLayoutWithRows(3),
+			layout.NewVBoxLayout(),
 			container.New(
 				layout.NewHBoxLayout(),
 				openFileWidget,
 				applyButton,
 				exportButton,
+				forceUIRefresh,
 			),
 			container.New(
 				layout.NewHBoxLayout(),
@@ -421,9 +450,10 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 					),
 				),
 				container.New(
-					layout.NewGridLayoutWithColumns(2),
+					layout.NewGridLayoutWithColumns(3),
 					paletteOpen,
 					&m.paletteImage,
+					forcePalette,
 				),
 			),
 		),
