@@ -8,7 +8,9 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -22,6 +24,7 @@ import (
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/filter"
 )
@@ -45,6 +48,7 @@ type MartineUI struct {
 	ditheringType     constants.DitheringType
 	applyDithering    bool
 	resizeAlgo        imaging.ResampleFilter
+	paletteImage      canvas.Image
 }
 
 func NewMartineUI() *MartineUI {
@@ -130,11 +134,47 @@ func (m *MartineUI) ApplyOneImage() {
 
 	m.cpcImage = *canvas.NewImageFromImage(m.downgraded)
 	m.cpcImage.FillMode = canvas.ImageFillContain
+	m.paletteImage = *canvas.NewImageFromImage(file.PalToImage(m.palette))
+	m.window.Canvas().Refresh(&m.paletteImage)
 	m.window.Canvas().Refresh(&m.cpcImage)
 	m.window.Resize(m.window.Content().Size())
 }
 
 func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
+	paletteOpen := widget.NewButton("Open palette", func() {
+		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+			if err != nil {
+				dialog.ShowError(err, m.window)
+				return
+			}
+			if reader == nil {
+				return
+			}
+			palettePath := reader.URI().Path()
+			switch strings.ToLower(filepath.Ext(palettePath)) {
+			case ".pal":
+				p, _, err := file.OpenPal(palettePath)
+				if err != nil {
+					dialog.ShowError(err, m.window)
+					return
+				}
+				m.palette = p
+				m.paletteImage = *canvas.NewImageFromImage(file.PalToImage(p))
+			case ".kit":
+				p, _, err := file.OpenKit(palettePath)
+				if err != nil {
+					dialog.ShowError(err, m.window)
+					return
+				}
+				m.palette = p
+				m.paletteImage = *canvas.NewImageFromImage(file.PalToImage(p))
+			}
+			m.window.Canvas().Refresh(&m.paletteImage)
+			m.window.Resize(m.window.Content().Size())
+		}, m.window)
+		d.SetFilter(storage.NewExtensionFileFilter([]string{".pal", ".kit"}))
+		d.Show()
+	})
 	openFileWidget := widget.NewButton("Open image", func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {
@@ -174,6 +214,7 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 
 	m.cpcImage = canvas.Image{}
 	m.originalImage = canvas.Image{}
+	m.paletteImage = canvas.Image{}
 
 	winFormat := widget.NewRadioGroup([]string{"Normal", "Fullscreen", "Sprite", "Sprite Hard"}, func(s string) {
 		switch s {
@@ -365,16 +406,24 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 				),
 			),
 			container.New(
-				layout.NewGridLayoutWithColumns(2),
+				layout.NewGridLayoutWithRows(3),
 				container.New(
 					layout.NewGridLayoutWithColumns(2),
-					resizeLabel,
-					resize,
+					container.New(
+						layout.NewGridLayoutWithColumns(2),
+						resizeLabel,
+						resize,
+					),
+					container.New(
+						layout.NewGridLayoutWithColumns(2),
+						enableDithering,
+						dithering,
+					),
 				),
 				container.New(
 					layout.NewGridLayoutWithColumns(2),
-					enableDithering,
-					dithering,
+					paletteOpen,
+					&m.paletteImage,
 				),
 			),
 		),

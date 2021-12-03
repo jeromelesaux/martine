@@ -47,3 +47,24 @@ func PalToPng(filePath string, palette color.Palette) error {
 
 	return Png(filePath, im)
 }
+
+func PalToImage(palette color.Palette) *image.NRGBA {
+	colorWidth := 20
+
+	im := image.NewNRGBA(image.Rectangle{
+		Min: image.Point{X: 0, Y: 0},
+		Max: image.Point{X: (16*5 + 5 + (colorWidth * 16)), Y: 30},
+	})
+
+	for i := 0; i < len(palette); i++ {
+		if i >= 16 {
+			break
+		}
+		contour := image.Rectangle{
+			Min: image.Point{X: 5 + (i*colorWidth + i*5), Y: 5},
+			Max: image.Point{X: colorWidth + 5 + (i*colorWidth + i*5), Y: colorWidth + 5},
+		}
+		draw.Draw(im, contour, &image.Uniform{palette[i]}, image.Point{0, 0}, draw.Src)
+	}
+	return im
+}
