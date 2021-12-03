@@ -30,26 +30,29 @@ import (
 )
 
 type MartineUI struct {
-	window            fyne.Window
-	originalImage     canvas.Image
-	cpcImage          canvas.Image
-	originalImagePath fyne.URI
-	isCpcPlus         bool
-	isFullScreen      bool
-	isSprite          bool
-	isHardSprite      bool
-	mode              int
-	width             widget.Entry
-	height            widget.Entry
-	palette           color.Palette
-	data              []byte
-	downgraded        *image.NRGBA
-	ditheringMatrix   [][]float32
-	ditheringType     constants.DitheringType
-	applyDithering    bool
-	resizeAlgo        imaging.ResampleFilter
-	paletteImage      canvas.Image
-	usePalette        bool
+	window              fyne.Window
+	originalImage       canvas.Image
+	cpcImage            canvas.Image
+	originalImagePath   fyne.URI
+	isCpcPlus           bool
+	isFullScreen        bool
+	isSprite            bool
+	isHardSprite        bool
+	mode                int
+	width               widget.Entry
+	height              widget.Entry
+	palette             color.Palette
+	data                []byte
+	downgraded          *image.NRGBA
+	ditheringMatrix     [][]float32
+	ditheringType       constants.DitheringType
+	applyDithering      bool
+	resizeAlgo          imaging.ResampleFilter
+	paletteImage        canvas.Image
+	usePalette          bool
+	ditheringMultiplier float64
+	brightness          float64
+	saturation          float64
 }
 
 func NewMartineUI() *MartineUI {
@@ -79,6 +82,9 @@ func (m *MartineUI) ApplyOneImage() {
 	context := export.NewMartineContext(m.originalImagePath.Path(), "")
 	context.CpcPlus = m.isCpcPlus
 	context.Overscan = m.isFullScreen
+	context.DitheringMultiplier = m.ditheringMultiplier
+	context.Brightness = int(m.brightness)
+	context.Saturation = int(m.saturation)
 	var size constants.Size
 	switch m.mode {
 	case 0:
@@ -319,6 +325,12 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 	resize.SetSelected("NearestNeighbor")
 	resizeLabel := widget.NewLabel("Resize algorithm")
 
+	ditheringMultiplier := widget.NewSlider(0., 2.5)
+	ditheringMultiplier.Step = 0.1
+	ditheringMultiplier.SetValue(1.18)
+	ditheringMultiplier.OnChanged = func(f float64) {
+		m.ditheringMultiplier = f
+	}
 	dithering := widget.NewSelect([]string{"FloydSteinberg",
 		"JarvisJudiceNinke",
 		"Stucki",
@@ -392,6 +404,20 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 	heightLabel := widget.NewLabel("Height")
 	m.height = *widget.NewEntry()
 
+	brightness := widget.NewSlider(0.0, 10.0)
+	brightness.SetValue(0.)
+	brightness.Step = 1.0
+	brightness.OnChanged = func(f float64) {
+		m.brightness = f
+	}
+	saturationLabel := widget.NewLabel("Saturation")
+	saturation := widget.NewSlider(0.0, 10.0)
+	saturation.SetValue(0.)
+	saturation.Step = 1.0
+	saturation.OnChanged = func(f float64) {
+		m.saturation = f
+	}
+	brightnessLabel := widget.NewLabel("Brightness")
 	return container.New(
 		layout.NewGridLayoutWithColumns(2),
 		container.New(
@@ -435,18 +461,19 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 				),
 			),
 			container.New(
-				layout.NewGridLayoutWithRows(3),
+				layout.NewGridLayoutWithRows(5),
 				container.New(
-					layout.NewGridLayoutWithColumns(2),
+					layout.NewGridLayoutWithRows(2),
 					container.New(
 						layout.NewGridLayoutWithColumns(2),
 						resizeLabel,
 						resize,
 					),
 					container.New(
-						layout.NewGridLayoutWithColumns(2),
+						layout.NewGridLayoutWithColumns(3),
 						enableDithering,
 						dithering,
+						ditheringMultiplier,
 					),
 				),
 				container.New(
@@ -454,6 +481,16 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 					paletteOpen,
 					&m.paletteImage,
 					forcePalette,
+				),
+				container.New(
+					layout.NewGridLayoutWithColumns(2),
+					brightnessLabel,
+					brightness,
+				),
+				container.New(
+					layout.NewGridLayoutWithColumns(2),
+					saturationLabel,
+					saturation,
 				),
 			),
 		),
