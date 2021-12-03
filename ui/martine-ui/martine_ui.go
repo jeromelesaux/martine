@@ -69,8 +69,8 @@ func (m *MartineUI) Load(app fyne.App) {
 
 func (m *MartineUI) NewTabs() *container.AppTabs {
 	return container.NewAppTabs(
-		container.NewTabItem("Image treatment", m.newImageTransfertTab()),
-		container.NewTabItem("Animation treatment", widget.NewLabel("Animation")),
+		container.NewTabItem("Image", m.newImageTransfertTab()),
+		container.NewTabItem("Animation", widget.NewLabel("Animation")),
 	)
 }
 
@@ -83,8 +83,8 @@ func (m *MartineUI) ApplyOneImage() {
 	context.CpcPlus = m.isCpcPlus
 	context.Overscan = m.isFullScreen
 	context.DitheringMultiplier = m.ditheringMultiplier
-	context.Brightness = int(m.brightness)
-	context.Saturation = int(m.saturation)
+	context.Brightness = m.brightness
+	context.Saturation = m.saturation
 	var size constants.Size
 	switch m.mode {
 	case 0:
@@ -404,16 +404,16 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 	heightLabel := widget.NewLabel("Height")
 	m.height = *widget.NewEntry()
 
-	brightness := widget.NewSlider(0.0, 10.0)
-	brightness.SetValue(0.)
-	brightness.Step = 1.0
+	brightness := widget.NewSlider(0.0, 1.0)
+	brightness.SetValue(1.)
+	brightness.Step = .01
 	brightness.OnChanged = func(f float64) {
 		m.brightness = f
 	}
 	saturationLabel := widget.NewLabel("Saturation")
-	saturation := widget.NewSlider(0.0, 10.0)
-	saturation.SetValue(0.)
-	saturation.Step = 1.0
+	saturation := widget.NewSlider(0.0, 1.0)
+	saturation.SetValue(1.)
+	saturation.Step = .01
 	saturation.OnChanged = func(f float64) {
 		m.saturation = f
 	}

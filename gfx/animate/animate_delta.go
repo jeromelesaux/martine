@@ -54,7 +54,7 @@ func DeltaPacking(gitFilepath string, ex *export.MartineContext, initialAddress 
 
 	if ex.FilloutGif {
 		imgs := filloutGif(*gifImages, ex)
-		_, palette, _, err = gfx.ApplyOneImage(imgs[0], ex, int(mode), palette, mode)
+		_, _, palette, _, err = gfx.ApplyOneImage(imgs[0], ex, int(mode), palette, mode)
 		if err != nil {
 			return err
 		}
@@ -63,7 +63,7 @@ func DeltaPacking(gitFilepath string, ex *export.MartineContext, initialAddress 
 			/*	fw, _ := os.Create(ex.OutputPath + fmt.Sprintf("/a%.2d.png", i))
 				png.Encode(fw, in)
 				fw.Close()*/
-			raw, _, _, err = gfx.ApplyOneImage(in, ex, int(mode), palette, mode)
+			raw, _, _, _, err = gfx.ApplyOneImage(in, ex, int(mode), palette, mode)
 			if err != nil {
 				return err
 			}
@@ -71,13 +71,13 @@ func DeltaPacking(gitFilepath string, ex *export.MartineContext, initialAddress 
 			fmt.Printf("Image [%d] proceed\n", i)
 		}
 	} else {
-		_, palette, _, err = gfx.ApplyOneImage(images[0], ex, int(mode), palette, mode)
+		_, _, palette, _, err = gfx.ApplyOneImage(images[0], ex, int(mode), palette, mode)
 		if err != nil {
 			return err
 		}
 		for i := 0; i < len(images); i += pad {
 			in := images[i]
-			raw, _, _, err = gfx.ApplyOneImage(in, ex, int(mode), palette, mode)
+			raw, _, _, _, err = gfx.ApplyOneImage(in, ex, int(mode), palette, mode)
 			if err != nil {
 				return err
 			}

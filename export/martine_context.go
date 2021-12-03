@@ -101,8 +101,8 @@ type MartineContext struct {
 	InkSwapper                  map[int]int
 	LineWidth                   int
 	FilloutGif                  bool
-	Saturation                  int
-	Brightness                  int
+	Saturation                  float64
+	Brightness                  float64
 }
 
 func MaskIsAllowed(mode uint8, value uint8) bool {
