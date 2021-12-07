@@ -13,16 +13,17 @@ import (
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
-func SpriteToPng(winPath string, output string, mode uint8, p color.Palette) error {
+func SpriteToImg(winPath string, mode uint8, p color.Palette) (*image.NRGBA, constants.Size, error) {
+	var s constants.Size
 	footer, err := file.OpenWin(winPath)
 	if err != nil {
-		return err
+		return nil, s, err
 	}
 	var out *image.NRGBA
 
 	d, err := file.RawWin(winPath)
 	if err != nil {
-		return err
+		return nil, s, err
 	}
 	switch mode {
 	case 0:
@@ -30,7 +31,8 @@ func SpriteToPng(winPath string, output string, mode uint8, p color.Palette) err
 			Min: image.Point{X: 0, Y: 0},
 			Max: image.Point{X: int(footer.Width * 2), Y: int(footer.Height)}})
 		index := 0
-
+		s.Width = int(footer.Width * 2)
+		s.Height = int(footer.Height)
 		for y := 0; y < int(footer.Height); y++ {
 			indexX := 0
 			for x := 0; x < int(footer.Width); x++ {
@@ -50,6 +52,8 @@ func SpriteToPng(winPath string, output string, mode uint8, p color.Palette) err
 			Min: image.Point{X: 0, Y: 0},
 			Max: image.Point{X: int(footer.Width * 4), Y: int(footer.Height)}})
 		index := 0
+		s.Width = int(footer.Width * 4)
+		s.Height = int(footer.Height)
 		for y := 0; y < int(footer.Height); y++ {
 			indexX := 0
 			for x := 0; x < int(footer.Width); x++ {
@@ -75,6 +79,8 @@ func SpriteToPng(winPath string, output string, mode uint8, p color.Palette) err
 			Min: image.Point{X: 0, Y: 0},
 			Max: image.Point{X: int(footer.Width * 8), Y: int(footer.Height)}})
 		index := 0
+		s.Width = int(footer.Width * 8)
+		s.Height = int(footer.Height)
 		for y := 0; y < int(footer.Width); y++ {
 			indexX := 0
 			for x := 0; x < int(footer.Width/8); x++ {
@@ -107,6 +113,14 @@ func SpriteToPng(winPath string, output string, mode uint8, p color.Palette) err
 				index++
 			}
 		}
+	}
+	return out, s, err
+}
+
+func SpriteToPng(winPath string, output string, mode uint8, p color.Palette) error {
+	out, _, err := SpriteToImg(winPath, mode, p)
+	if err != nil {
+		return err
 	}
 	return file.Png(output+".png", out)
 }

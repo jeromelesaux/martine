@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
@@ -27,8 +28,11 @@ import (
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx"
+	cgfx "github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/filter"
 )
+
+var ()
 
 type MartineUI struct {
 	window              fyne.Window
@@ -151,9 +155,9 @@ func (m *MartineUI) ApplyOneImage() {
 	}
 	m.data = out
 	m.downgraded = downgraded
-
-	m.palette = palette
-
+	if !m.usePalette {
+		m.palette = palette
+	}
 	m.cpcImage = *canvas.NewImageFromImage(m.downgraded)
 	m.cpcImage.FillMode = canvas.ImageFillContain
 	m.paletteImage = *canvas.NewImageFromImage(file.PalToImage(m.palette))
@@ -163,6 +167,80 @@ func (m *MartineUI) ApplyOneImage() {
 }
 
 func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
+	importOpen := widget.NewButtonWithIcon("Import CPC Image", theme.FileImageIcon(), func() {
+		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+			if err != nil {
+				dialog.ShowError(err, m.window)
+				return
+			}
+			if reader == nil {
+				return
+			}
+			m.originalImagePath = reader.URI()
+			if m.isFullScreen {
+
+				// open palette widget to get palette
+				p, mode, err := file.OverscanPalette(m.originalImagePath.Path())
+				if err != nil {
+					dialog.ShowError(err, m.window)
+					return
+				}
+				img, err := cgfx.OverscanToImg(m.originalImagePath.Path(), mode, p)
+				if err != nil {
+					dialog.ShowError(err, m.window)
+					return
+				}
+				if len(p) == 0 {
+					dialog.ShowError(errors.New("palette is empty"), m.window)
+					return
+				}
+				m.palette = p
+				m.paletteImage = *canvas.NewImageFromImage(file.PalToImage(p))
+				m.originalImage = *canvas.NewImageFromImage(img)
+				m.originalImage.FillMode = canvas.ImageFillContain
+				m.window.Canvas().Refresh(&m.paletteImage)
+				m.window.Canvas().Refresh(&m.originalImage)
+				m.window.Resize(m.window.Content().Size())
+			} else if m.isSprite {
+				// loading sprite file
+				//	paletteDialog.OnTapped()
+				if len(m.palette) == 0 {
+					dialog.ShowError(errors.New("palette is empty, please import palette first"), m.window)
+					return
+				}
+				img, size, err := cgfx.SpriteToImg(m.originalImagePath.Path(), uint8(m.mode), m.palette)
+				if err != nil {
+					dialog.ShowError(err, m.window)
+					return
+				}
+				m.width.SetText(strconv.Itoa(size.Width))
+				m.height.SetText(strconv.Itoa(size.Height))
+				m.originalImage = *canvas.NewImageFromImage(img)
+				m.originalImage.FillMode = canvas.ImageFillContain
+				m.window.Canvas().Refresh(&m.originalImage)
+				m.window.Resize(m.window.Content().Size())
+			} else {
+				//loading classical screen
+				//	paletteDialog.OnTapped()
+				if len(m.palette) == 0 {
+					dialog.ShowError(errors.New("palette is empty,  please import palette first"), m.window)
+					return
+				}
+				img, err := cgfx.ScrToImg(m.originalImagePath.Path(), uint8(m.mode), m.palette)
+				if err != nil {
+					dialog.ShowError(err, m.window)
+					return
+				}
+				m.originalImage = *canvas.NewImageFromImage(img)
+				m.originalImage.FillMode = canvas.ImageFillContain
+				m.window.Canvas().Refresh(&m.originalImage)
+				m.window.Resize(m.window.Content().Size())
+			}
+		}, m.window)
+		d.SetFilter(storage.NewExtensionFileFilter([]string{".scr", ".win", ".bin"}))
+		d.Show()
+	})
+
 	paletteOpen := widget.NewButton("Open palette", func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {
@@ -194,7 +272,9 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 			m.window.Canvas().Refresh(&m.paletteImage)
 			m.window.Resize(m.window.Content().Size())
 		}, m.window)
+
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".pal", ".kit"}))
+
 		d.Show()
 	})
 
@@ -277,8 +357,10 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 	winFormat.SetSelected("Normal")
 
 	colorReducerLabel := widget.NewLabel("Color reducer")
-	colorReducer := widget.NewSelect([]string{"Lower", "Medium", "Strong"}, func(s string) {
+	colorReducer := widget.NewSelect([]string{"none", "Lower", "Medium", "Strong"}, func(s string) {
 		switch s {
+		case "none":
+			m.reducer = 0
 		case "Lower":
 			m.reducer = 1
 		case "Medium":
@@ -287,7 +369,7 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 			m.reducer = 3
 		}
 	})
-	colorReducer.SetSelected("Lower")
+	colorReducer.SetSelected("none")
 
 	resize := widget.NewSelect([]string{"NearestNeighbor",
 		"CatmullRom",
@@ -453,6 +535,7 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 				openFileWidget,
 				applyButton,
 				exportButton,
+				importOpen,
 				forceUIRefresh,
 			),
 			container.New(
@@ -502,17 +585,17 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 					forcePalette,
 				),
 				container.New(
-					layout.NewGridLayoutWithColumns(2),
+					layout.NewVBoxLayout(),
 					colorReducerLabel,
 					colorReducer,
 				),
 				container.New(
-					layout.NewGridLayoutWithColumns(2),
+					layout.NewVBoxLayout(),
 					brightnessLabel,
 					brightness,
 				),
 				container.New(
-					layout.NewGridLayoutWithColumns(2),
+					layout.NewVBoxLayout(),
 					saturationLabel,
 					saturation,
 				),
