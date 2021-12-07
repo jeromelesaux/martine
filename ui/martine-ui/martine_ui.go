@@ -32,7 +32,10 @@ import (
 	"github.com/jeromelesaux/martine/gfx/filter"
 )
 
-var ()
+var (
+	refreshUI     *widget.Button
+	modeSelection *widget.Select
+)
 
 type MartineUI struct {
 	window              fyne.Window
@@ -82,8 +85,6 @@ func (m *MartineUI) NewTabs() *container.AppTabs {
 
 func (m *MartineUI) ApplyOneImage() {
 	m.cpcImage = canvas.Image{}
-	m.window.Canvas().Refresh(&m.cpcImage)
-	m.window.Resize(m.window.Content().Size())
 
 	context := export.NewMartineContext(m.originalImagePath.Path(), "")
 	context.CpcPlus = m.isCpcPlus
@@ -161,13 +162,11 @@ func (m *MartineUI) ApplyOneImage() {
 	m.cpcImage = *canvas.NewImageFromImage(m.downgraded)
 	m.cpcImage.FillMode = canvas.ImageFillContain
 	m.paletteImage = *canvas.NewImageFromImage(file.PalToImage(m.palette))
-	m.window.Canvas().Refresh(&m.paletteImage)
-	m.window.Canvas().Refresh(&m.cpcImage)
-	m.window.Resize(m.window.Content().Size())
+	refreshUI.OnTapped()
 }
 
 func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
-	importOpen := widget.NewButtonWithIcon("Import CPC Image", theme.FileImageIcon(), func() {
+	importOpen := widget.NewButtonWithIcon("Import", theme.FileImageIcon(), func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {
 				dialog.ShowError(err, m.window)
@@ -195,12 +194,11 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 					return
 				}
 				m.palette = p
+				m.mode = int(mode)
+				modeSelection.SetSelectedIndex(m.mode)
 				m.paletteImage = *canvas.NewImageFromImage(file.PalToImage(p))
 				m.originalImage = *canvas.NewImageFromImage(img)
 				m.originalImage.FillMode = canvas.ImageFillContain
-				m.window.Canvas().Refresh(&m.paletteImage)
-				m.window.Canvas().Refresh(&m.originalImage)
-				m.window.Resize(m.window.Content().Size())
 			} else if m.isSprite {
 				// loading sprite file
 				//	paletteDialog.OnTapped()
@@ -217,8 +215,6 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 				m.height.SetText(strconv.Itoa(size.Height))
 				m.originalImage = *canvas.NewImageFromImage(img)
 				m.originalImage.FillMode = canvas.ImageFillContain
-				m.window.Canvas().Refresh(&m.originalImage)
-				m.window.Resize(m.window.Content().Size())
 			} else {
 				//loading classical screen
 				//	paletteDialog.OnTapped()
@@ -233,15 +229,14 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 				}
 				m.originalImage = *canvas.NewImageFromImage(img)
 				m.originalImage.FillMode = canvas.ImageFillContain
-				m.window.Canvas().Refresh(&m.originalImage)
-				m.window.Resize(m.window.Content().Size())
 			}
+			refreshUI.OnTapped()
 		}, m.window)
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".scr", ".win", ".bin"}))
 		d.Show()
 	})
 
-	paletteOpen := widget.NewButton("Open palette", func() {
+	paletteOpen := widget.NewButtonWithIcon("Palette", theme.ColorChromaticIcon(), func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {
 				dialog.ShowError(err, m.window)
@@ -269,8 +264,7 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 				m.palette = p
 				m.paletteImage = *canvas.NewImageFromImage(file.PalToImage(p))
 			}
-			m.window.Canvas().Refresh(&m.paletteImage)
-			m.window.Resize(m.window.Content().Size())
+			refreshUI.OnTapped()
 		}, m.window)
 
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".pal", ".kit"}))
@@ -289,11 +283,12 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 		m.window.Resize(s)
 		m.window.Canvas().Refresh(&m.originalImage)
 		m.window.Canvas().Refresh(&m.paletteImage)
-		m.window.Canvas().Refresh(&m.originalImage)
+		m.window.Canvas().Refresh(&m.cpcImage)
 		m.window.Resize(m.window.Content().Size())
 		m.window.Content().Refresh()
 	})
-	openFileWidget := widget.NewButton("Open image", func() {
+	refreshUI = forceUIRefresh
+	openFileWidget := widget.NewButton("Image", func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {
 				dialog.ShowError(err, m.window)
@@ -495,6 +490,7 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 		m.mode = mode
 	})
 	modes.SetSelected("0")
+	modeSelection = modes
 	modeLabel := widget.NewLabel("Mode:")
 
 	widthLabel := widget.NewLabel("Width")
@@ -533,6 +529,7 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 			container.New(
 				layout.NewHBoxLayout(),
 				openFileWidget,
+				paletteOpen,
 				applyButton,
 				exportButton,
 				importOpen,
@@ -579,8 +576,7 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 					),
 				),
 				container.New(
-					layout.NewGridLayoutWithColumns(3),
-					paletteOpen,
+					layout.NewGridLayoutWithColumns(2),
 					&m.paletteImage,
 					forcePalette,
 				),

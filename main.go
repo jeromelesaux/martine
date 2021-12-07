@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"fyne.io/fyne/v2/app"
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/file"
@@ -21,6 +22,7 @@ import (
 	"github.com/jeromelesaux/martine/gfx/errors"
 	"github.com/jeromelesaux/martine/gfx/filter"
 	"github.com/jeromelesaux/martine/gfx/transformation"
+	ui "github.com/jeromelesaux/martine/ui/martine-ui"
 )
 
 type stringSlice []string
@@ -144,6 +146,15 @@ func main() {
 	flag.Var(&deltaFiles, "df", "scr file path to add in delta mode comparison. (wildcard accepted such as ? or * file filename.) ")
 
 	flag.Parse()
+	if len(flag.Args()) == 0 {
+		os.Setenv("FYNE_SCALE", "0.6")
+		/* main application */
+		app := app.NewWithID("Martine @IMPact")
+		martineUI := ui.NewMartineUI()
+		martineUI.Load(app)
+		app.Run()
+		os.Exit(0)
+	}
 	if len(flag.Args()) > 0 {
 		firstArg := flag.Args()[0]
 		if firstArg[0] != '-' {
