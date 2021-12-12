@@ -99,8 +99,7 @@ func (m *MartineUI) NewTabs() *container.AppTabs {
 	)
 }
 
-func (m *MartineUI) ApplyOneImage() {
-	m.cpcImage = canvas.Image{}
+func (m *MartineUI) NewContext() *export.MartineContext {
 
 	context := export.NewMartineContext(m.originalImagePath.Path(), "")
 	context.CpcPlus = m.isCpcPlus
@@ -132,12 +131,12 @@ func (m *MartineUI) ApplyOneImage() {
 		width, err := strconv.Atoi(m.width.Text)
 		if err != nil {
 			dialog.NewError(err, m.window).Show()
-			return
+			return nil
 		}
 		height, err := strconv.Atoi(m.height.Text)
 		if err != nil {
 			dialog.NewError(err, m.window).Show()
-			return
+			return nil
 		}
 		context.Size.Height = height
 		context.Size.Width = width
@@ -151,6 +150,16 @@ func (m *MartineUI) ApplyOneImage() {
 		context.DitheringMatrix = m.ditheringMatrix
 		context.DitheringType = m.ditheringType
 	}
+	return context
+}
+
+func (m *MartineUI) ApplyOneImage() {
+	m.cpcImage = canvas.Image{}
+	context := m.NewContext()
+	if context == nil {
+		return
+	}
+
 	var inPalette color.Palette
 	if m.usePalette {
 		inPalette = m.palette
