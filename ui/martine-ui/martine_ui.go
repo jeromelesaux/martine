@@ -63,6 +63,14 @@ type MartineUI struct {
 	brightness          float64
 	saturation          float64
 	reducer             int
+
+	exportDsk              bool
+	exportText             bool
+	exportWithAmsdosHeader bool
+	exportZigzag           bool
+	exportJson             bool
+	exportCompression      int
+	exportFolderPath       string
 }
 
 func NewMartineUI() *MartineUI {
@@ -87,7 +95,7 @@ func (m *MartineUI) Load(app fyne.App) {
 func (m *MartineUI) NewTabs() *container.AppTabs {
 	return container.NewAppTabs(
 		container.NewTabItem("Image", m.newImageTransfertTab()),
-		container.NewTabItem("Animation", widget.NewLabel("Animation")),
+		//container.NewTabItem("Animation", widget.NewLabel("Animation")),
 	)
 }
 
@@ -284,7 +292,7 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 		d.Show()
 	})
 
-	forcePalette := widget.NewCheck("force palette", func(b bool) {
+	forcePalette := widget.NewCheck("use palette", func(b bool) {
 		m.usePalette = b
 	})
 
@@ -327,7 +335,7 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 	})
 
 	exportButton := widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
-
+		m.exportDialog(m.window)
 	})
 
 	applyButton := widget.NewButtonWithIcon("Apply", theme.VisibilityIcon(), func() {
@@ -555,7 +563,7 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 				container.New(
 					layout.NewVBoxLayout(),
 					container.New(
-						layout.NewHBoxLayout(),
+						layout.NewVBoxLayout(),
 						modeLabel,
 						modes,
 					),
