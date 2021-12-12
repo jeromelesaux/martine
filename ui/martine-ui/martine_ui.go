@@ -613,12 +613,16 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 								if uc == nil {
 									return
 								}
+
 								paletteExportPath := uc.URI().Path()
-								context := export.NewMartineContext("", paletteExportPath)
-								if err := file.Ink(paletteExportPath+".kit", m.palette, uint8(m.mode), true, context); err != nil {
+								uc.Close()
+								os.Remove(uc.URI().Path())
+								context := export.NewMartineContext(filepath.Base(paletteExportPath), paletteExportPath)
+								context.NoAmsdosHeader = false
+								if err := file.SaveKit(paletteExportPath+".kit", m.palette, false); err != nil {
 									dialog.ShowError(err, m.window)
 								}
-								if err := file.Pal(paletteExportPath+".pal", m.palette, uint8(m.mode), true, context); err != nil {
+								if err := file.SavePal(paletteExportPath+".pal", m.palette, uint8(m.mode), false); err != nil {
 									dialog.ShowError(err, m.window)
 								}
 							}, m.window)

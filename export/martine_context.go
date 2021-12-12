@@ -227,6 +227,18 @@ func (e *MartineContext) TransformToAmsdosFile(filePath string) string {
 
 }
 
+func AmsdosFilename(inputPath, ext string) string {
+	file := strings.ToUpper(filepath.Base(inputPath))
+	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
+	filenameSize := len(filename)
+	if filenameSize > 8 {
+		filenameSize = 8
+	}
+	osFile := make([]byte, filenameSize)
+	copy(osFile, filename[0:filenameSize])
+	return string(osFile) + ext
+}
+
 func (e *MartineContext) OsFilename(ext string) string {
 	file := strings.ToUpper(filepath.Base(e.InputPath))
 	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))

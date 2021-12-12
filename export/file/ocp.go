@@ -14,6 +14,7 @@ import (
 	rawlz4 "github.com/bkaradzic/go-lz4"
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/export"
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/lz4"
 	"github.com/jeromelesaux/martine/rle"
@@ -8516,6 +8517,41 @@ func OpenKit(filePath string) (color.Palette, *KitPalette, error) {
 	return p, KitPalette, nil
 }
 
+func SaveKit(filePath string, p color.Palette, noAmsdosHeader bool) error {
+
+	fmt.Fprintf(os.Stdout, "Saving Kit file (%s)\n", filePath)
+	data := [16]uint16{}
+	paletteSize := len(p)
+	if len(p) > 16 {
+		paletteSize = 16
+	}
+	for i := 0; i < paletteSize; i++ {
+		cp := constants.NewCpcPlusColor(p[i])
+		data[i] = cp.Value()
+	}
+	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x8809, Exec: 0x8809,
+		Size:        uint16(binary.Size(data)),
+		Size2:       uint16(binary.Size(data)),
+		LogicalSize: uint16(binary.Size(data))}
+
+	cpcFilename := export.AmsdosFilename(filePath, ".KIT")
+	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
+	header.Checksum = uint16(header.ComputedChecksum16())
+	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
+	fw, err := os.Create(filePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", filePath, err)
+		return err
+	}
+	if !noAmsdosHeader {
+		binary.Write(fw, binary.LittleEndian, header)
+	}
+	binary.Write(fw, binary.LittleEndian, data)
+	fw.Close()
+
+	return nil
+}
+
 func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cont *x.MartineContext) error {
 	osFilepath := filepath.Join(cont.OutputPath, cont.GetAmsdosFilename(filePath, ".KIT"))
 	fmt.Fprintf(os.Stdout, "Saving Kit file (%s)\n", osFilepath)
@@ -8846,6 +8882,48 @@ func OpenPal(filePath string) (color.Palette, *OcpPalette, error) {
 	}
 
 	return p, ocpPalette, nil
+}
+
+func SavePal(filePath string, p color.Palette, screenMode uint8, noAmsdosHeader bool) error {
+	fmt.Fprintf(os.Stdout, "Saving PAL file (%s)\n", filePath)
+	data := OcpPalette{ScreenMode: screenMode, ColorAnimation: 0, ColorAnimationDelay: 0}
+	for i := 0; i < 16; i++ {
+		for j := 0; j < 12; j++ {
+			data.PaletteColors[i][j] = 54
+		}
+	}
+	fmt.Fprintf(os.Stdout, "Palette size %d\n", len(p))
+	for i := 0; i < len(p); i++ {
+		v, err := constants.HardwareValues(p[i])
+		if err == nil {
+			for j := 0; j < 12; j++ {
+				data.PaletteColors[i][j] = v[0]
+			}
+		} else {
+			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+		}
+	}
+	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x8809, Exec: 0x8809,
+		Size:        uint16(binary.Size(data)),
+		Size2:       uint16(binary.Size(data)),
+		LogicalSize: uint16(binary.Size(data))}
+
+	cpcFilename := export.AmsdosFilename(filePath, ".PAL")
+	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
+	header.Checksum = uint16(header.ComputedChecksum16())
+
+	fw, err := os.Create(filePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
+		return err
+	}
+	if !noAmsdosHeader {
+		binary.Write(fw, binary.LittleEndian, header)
+	}
+	binary.Write(fw, binary.LittleEndian, data)
+	fw.Close()
+
+	return nil
 }
 
 func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cont *x.MartineContext) error {
