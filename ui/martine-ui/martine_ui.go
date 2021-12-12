@@ -33,8 +33,9 @@ import (
 )
 
 var (
-	refreshUI     *widget.Button
-	modeSelection *widget.Select
+	refreshUI        *widget.Button
+	modeSelection    *widget.Select
+	paletteSelection *widget.Select
 )
 
 type MartineUI struct {
@@ -68,10 +69,17 @@ func NewMartineUI() *MartineUI {
 	return &MartineUI{}
 }
 
+func (m *MartineUI) SetPalette(p color.Palette) {
+
+	m.palette = p
+	m.paletteImage = *canvas.NewImageFromImage(file.PalToImage(p))
+	refreshUI.OnTapped()
+}
+
 func (m *MartineUI) Load(app fyne.App) {
 	m.window = app.NewWindow("Martine @IMPact v" + common.AppVersion)
 	m.window.SetContent(m.NewTabs())
-	m.window.Resize(fyne.NewSize(1200, 800))
+	m.window.Resize(fyne.NewSize(1400, 1000))
 	m.window.SetTitle("Martine @IMPact v" + common.AppVersion)
 	m.window.Show()
 }
@@ -160,7 +168,7 @@ func (m *MartineUI) ApplyOneImage() {
 		m.palette = palette
 	}
 	m.cpcImage = *canvas.NewImageFromImage(m.downgraded)
-	m.cpcImage.FillMode = canvas.ImageFillContain
+	m.cpcImage.FillMode = canvas.ImageFillStretch
 	m.paletteImage = *canvas.NewImageFromImage(file.PalToImage(m.palette))
 	refreshUI.OnTapped()
 }
@@ -182,6 +190,10 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 				p, mode, err := file.OverscanPalette(m.originalImagePath.Path())
 				if err != nil {
 					dialog.ShowError(err, m.window)
+					return
+				}
+				if len(p) == 0 {
+					dialog.ShowError(fmt.Errorf("no palette found"), m.window)
 					return
 				}
 				img, err := cgfx.OverscanToImg(m.originalImagePath.Path(), mode, p)
@@ -578,7 +590,13 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 				container.New(
 					layout.NewGridLayoutWithColumns(2),
 					&m.paletteImage,
-					forcePalette,
+					container.New(
+						layout.NewHBoxLayout(),
+						forcePalette,
+						widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
+							swapColor(m.SetPalette, m.palette, m.window)
+						}),
+					),
 				),
 				container.New(
 					layout.NewVBoxLayout(),

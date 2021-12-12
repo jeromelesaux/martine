@@ -9,11 +9,13 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func swapColor(p color.Palette, w fyne.Window) {
-	var colorIndex int
-	pt := NewPaletteTable(p, nil, nil, nil)
+var colorIndex int
+var colorToChange color.Color
+
+func swapColor(setPalette func(color.Palette), p color.Palette, w fyne.Window) {
+
+	pt := NewPaletteTable(p, colorChanged, indexColor, nil)
 	var cont *fyne.Container
-	var colorToChange color.Color
 
 	cont = container.NewVBox(
 		pt,
@@ -26,12 +28,23 @@ func swapColor(p color.Palette, w fyne.Window) {
 		}),
 		widget.NewButton("swap", func() {
 			p[colorIndex] = colorToChange
-			npt := NewPaletteTable(p, nil, nil, nil)
+			npt := NewPaletteTable(p, colorChanged, indexColor, nil)
 			pt = npt
+			if setPalette != nil {
+				setPalette(pt.Palette)
+			}
 			cont.Refresh()
 		}))
 	cont.Resize(fyne.NewSize(200, 200))
 	d := dialog.NewCustom("Swap color", "Ok", cont, w)
 	d.Resize(w.Canvas().Size())
 	d.Show()
+}
+
+func indexColor(index int) {
+	colorIndex = index
+}
+
+func colorChanged(c color.Color) {
+	colorToChange = c
 }
