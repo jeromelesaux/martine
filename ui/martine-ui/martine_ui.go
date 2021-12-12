@@ -604,6 +604,26 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 						widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
 							swapColor(m.SetPalette, m.palette, m.window)
 						}),
+						widget.NewButtonWithIcon("export", theme.DocumentSaveIcon(), func() {
+							d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
+								if err != nil {
+									dialog.ShowError(err, m.window)
+									return
+								}
+								if uc == nil {
+									return
+								}
+								paletteExportPath := uc.URI().Path()
+								context := export.NewMartineContext("", paletteExportPath)
+								if err := file.Ink(paletteExportPath+".kit", m.palette, uint8(m.mode), true, context); err != nil {
+									dialog.ShowError(err, m.window)
+								}
+								if err := file.Pal(paletteExportPath+".pal", m.palette, uint8(m.mode), true, context); err != nil {
+									dialog.ShowError(err, m.window)
+								}
+							}, m.window)
+							d.Show()
+						}),
 					),
 				),
 				container.New(
