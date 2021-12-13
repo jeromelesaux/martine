@@ -150,7 +150,34 @@ func (m *MartineUI) NewContext() *export.MartineContext {
 		context.DitheringMatrix = m.ditheringMatrix
 		context.DitheringType = m.ditheringType
 	}
+
+	context.Dsk = m.exportDsk
+	context.Json = m.exportJson
+	context.Ascii = m.exportText
+	context.NoAmsdosHeader = !m.exportWithAmsdosHeader
+	context.ZigZag = m.exportZigzag
+	context.Compression = m.exportCompression
 	return context
+}
+
+func (m *MartineUI) ExportOneImage() {
+	pi := dialog.NewProgressInfinite("Saving....", "Please wait.", m.window)
+	pi.Show()
+	context := m.NewContext()
+	// palette export
+	defer func() {
+		os.Remove("temporary_palette.kit")
+	}()
+	if err := file.SaveKit("temporary_palette.kit", m.palette, false); err != nil {
+		pi.Hide()
+		dialog.ShowError(err, m.window)
+	}
+	context.KitPath = "temporary_palette.kit"
+	if err := gfx.ApplyOneImageAndExport(m.originalImage.Image, context, filepath.Base(m.exportFolderPath), m.exportFolderPath, m.mode, uint8(m.mode)); err != nil {
+		pi.Hide()
+		dialog.NewError(err, m.window).Show()
+	}
+	pi.Hide()
 }
 
 func (m *MartineUI) ApplyOneImage() {
