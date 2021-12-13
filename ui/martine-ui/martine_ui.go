@@ -150,13 +150,14 @@ func (m *MartineUI) NewContext() *export.MartineContext {
 		context.DitheringMatrix = m.ditheringMatrix
 		context.DitheringType = m.ditheringType
 	}
-
-	context.Dsk = m.exportDsk
+	context.OutputPath = m.exportFolderPath
+	context.InputPath = m.originalImagePath.Path()
 	context.Json = m.exportJson
 	context.Ascii = m.exportText
 	context.NoAmsdosHeader = !m.exportWithAmsdosHeader
 	context.ZigZag = m.exportZigzag
 	context.Compression = m.exportCompression
+	context.Dsk = m.exportDsk
 	return context
 }
 
@@ -176,8 +177,33 @@ func (m *MartineUI) ExportOneImage() {
 	if err := gfx.ApplyOneImageAndExport(m.originalImage.Image, context, filepath.Base(m.exportFolderPath), m.exportFolderPath, m.mode, uint8(m.mode)); err != nil {
 		pi.Hide()
 		dialog.NewError(err, m.window).Show()
+		return
+	}
+	if context.Dsk {
+		if err := file.ImportInDsk(m.originalImagePath.Path(), context); err != nil {
+			dialog.NewError(err, m.window).Show()
+			return
+		}
+	}
+	if context.Sna {
+		if context.Overscan {
+			var gfxFile string
+			for _, v := range context.DskFiles {
+				if filepath.Ext(v) == ".SCR" {
+					gfxFile = v
+					break
+				}
+			}
+			context.SnaPath = filepath.Join(m.exportFolderPath, "test.sna")
+			if err := file.ImportInSna(gfxFile, context.SnaPath, uint8(m.mode)); err != nil {
+				dialog.NewError(err, m.window).Show()
+				return
+			}
+		}
 	}
 	pi.Hide()
+	dialog.ShowConfirm("Save", "Your files are save in foler \n"+m.exportFolderPath, func(b bool) {}, m.window)
+
 }
 
 func (m *MartineUI) ApplyOneImage() {

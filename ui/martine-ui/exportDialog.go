@@ -50,7 +50,7 @@ func (m *MartineUI) exportDialog(w fyne.Window) {
 				}
 			}),
 		widget.NewButtonWithIcon("Export into folder", theme.DocumentSaveIcon(), func() {
-			fo := dialog.NewFileSave(func(lu fyne.URIWriteCloser, err error) {
+			fo := dialog.NewFolderOpen(func(lu fyne.ListableURI, err error) {
 				if err != nil {
 					dialog.ShowError(err, m.window)
 					return
@@ -59,8 +59,9 @@ func (m *MartineUI) exportDialog(w fyne.Window) {
 					// cancel button
 					return
 				}
-				m.exportFolderPath = lu.URI().Path()
+				m.exportFolderPath = lu.Path()
 				fmt.Println(m.exportFolderPath)
+				m.ExportOneImage()
 				// apply and export
 			}, m.window)
 			fo.Show()
