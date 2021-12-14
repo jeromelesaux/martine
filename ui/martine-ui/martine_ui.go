@@ -216,11 +216,18 @@ func (m *MartineUI) ApplyOneImage() {
 	var inPalette color.Palette
 	if m.usePalette {
 		inPalette = m.palette
+		maxPalette := len(inPalette)
 		switch m.mode {
 		case 1:
-			inPalette = inPalette[0:4]
+			if maxPalette > 4 {
+				maxPalette = 4
+			}
+			inPalette = inPalette[0:maxPalette]
 		case 2:
-			inPalette = inPalette[0:2]
+			if maxPalette > 2 {
+				maxPalette = 2
+			}
+			inPalette = inPalette[0:maxPalette]
 		}
 
 	}
