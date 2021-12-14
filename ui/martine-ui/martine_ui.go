@@ -202,7 +202,7 @@ func (m *MartineUI) ExportOneImage() {
 		}
 	}
 	pi.Hide()
-	dialog.ShowConfirm("Save", "Your files are save in foler \n"+m.exportFolderPath, func(b bool) {}, m.window)
+	dialog.ShowInformation("Save", "Your files are save in foler \n"+m.exportFolderPath, m.window)
 
 }
 
