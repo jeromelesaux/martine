@@ -25,6 +25,7 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx"
@@ -255,6 +256,10 @@ func (m *MartineUI) ApplyOneImage() {
 	m.downgraded = downgraded
 	if !m.usePalette {
 		m.palette = palette
+	}
+	if m.isSprite || m.isHardSprite {
+		newSize := constants.Size{Width: context.Size.Width * 50, Height: context.Size.Height * 50}
+		m.downgraded = convert.Resize(m.downgraded, newSize, m.resizeAlgo)
 	}
 	m.cpcImage = *canvas.NewImageFromImage(m.downgraded)
 	m.cpcImage.FillMode = canvas.ImageFillStretch
