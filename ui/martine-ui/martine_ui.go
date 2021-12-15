@@ -109,6 +109,12 @@ func (m *MartineUI) NewContext() *export.MartineContext {
 	context.DitheringMultiplier = m.ditheringMultiplier
 	context.Brightness = m.brightness
 	context.Saturation = m.saturation
+	if m.brightness > 0 && m.saturation == 0 {
+		context.Saturation = m.brightness
+	}
+	if m.brightness == 0 && m.saturation > 0 {
+		context.Brightness = m.saturation
+	}
 	context.Reducer = m.reducer
 	var size constants.Size
 	switch m.mode {
