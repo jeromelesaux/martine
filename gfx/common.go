@@ -113,7 +113,7 @@ func ApplyOneImageAndExport(in image.Image,
 		os.Exit(-2)
 	}
 
-	if cont.Reducer > -1 {
+	if cont.Reducer > 0 {
 		out = convert.Reducer(out, cont.Reducer)
 		if err := file.Png(filepath.Join(cont.OutputPath, filename+"_resized.png"), out); err != nil {
 			os.Exit(-2)
@@ -127,7 +127,6 @@ func ApplyOneImageAndExport(in image.Image,
 			newPalette = constants.CpcOldPalette
 		}
 	}
-	out, _ = DoDithering(out, newPalette, cont)
 
 	if len(palette) > 0 {
 		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
@@ -138,6 +137,7 @@ func ApplyOneImageAndExport(in image.Image,
 		}
 	}
 	newPalette = constants.SortColorsByDistance(newPalette)
+	out, _ = DoDithering(out, newPalette, cont)
 	if cont.Saturation > 0 || cont.Brightness > 0 {
 		palette = convert.EnhanceBrightness(newPalette, cont.Brightness, cont.Saturation)
 		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
@@ -192,7 +192,6 @@ func ApplyOneImage(in image.Image,
 			newPalette = constants.CpcOldPalette
 		}
 	}
-	out, _ = DoDithering(out, newPalette, cont)
 
 	if len(palette) > 0 {
 		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
@@ -204,6 +203,8 @@ func ApplyOneImage(in image.Image,
 	}
 
 	newPalette = constants.SortColorsByDistance(newPalette)
+	out, _ = DoDithering(out, newPalette, cont)
+
 	if cont.Saturation > 0 || cont.Brightness > 0 {
 		palette = convert.EnhanceBrightness(newPalette, cont.Brightness, cont.Saturation)
 		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)

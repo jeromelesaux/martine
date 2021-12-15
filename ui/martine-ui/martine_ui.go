@@ -36,6 +36,7 @@ var (
 	refreshUI        *widget.Button
 	modeSelection    *widget.Select
 	paletteSelection *widget.Select
+	dialogSize       = fyne.NewSize(800, 800)
 )
 
 type MartineUI struct {
@@ -60,6 +61,7 @@ type MartineUI struct {
 	paletteImage        canvas.Image
 	usePalette          bool
 	ditheringMultiplier float64
+	withQuantification  bool
 	brightness          float64
 	saturation          float64
 	reducer             int
@@ -147,9 +149,13 @@ func (m *MartineUI) NewContext() *export.MartineContext {
 	}
 
 	if m.applyDithering {
+		context.DitheringAlgo = 0
 		context.DitheringMatrix = m.ditheringMatrix
 		context.DitheringType = m.ditheringType
+	} else {
+		context.DitheringAlgo = -1
 	}
+	context.DitheringWithQuantification = m.withQuantification
 	context.OutputPath = m.exportFolderPath
 	context.InputPath = m.originalImagePath.Path()
 	context.Json = m.exportJson
@@ -322,6 +328,7 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 			refreshUI.OnTapped()
 		}, m.window)
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".scr", ".win", ".bin"}))
+		d.Resize(dialogSize)
 		d.Show()
 	})
 
@@ -357,7 +364,7 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 		}, m.window)
 
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".pal", ".kit"}))
-
+		d.Resize(dialogSize)
 		d.Show()
 	})
 
@@ -400,6 +407,7 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 			m.window.Resize(m.window.Content().Size())
 		}, m.window)
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".jpg", ".gif", ".png", ".jpeg"}))
+		d.Resize(dialogSize)
 		d.Show()
 	})
 
@@ -564,6 +572,10 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 	})
 	dithering.SetSelected("FloydSteinberg")
 
+	ditheringWithQuantification := widget.NewCheck("With quantification", func(b bool) {
+		m.withQuantification = b
+	})
+
 	enableDithering := widget.NewCheck("Enable dithering", func(b bool) {
 		m.applyDithering = b
 	})
@@ -658,10 +670,11 @@ func (m *MartineUI) newImageTransfertTab() fyne.CanvasObject {
 						resize,
 					),
 					container.New(
-						layout.NewGridLayoutWithColumns(3),
+						layout.NewGridLayoutWithColumns(4),
 						enableDithering,
 						dithering,
 						ditheringMultiplier,
+						ditheringWithQuantification,
 					),
 				),
 				container.New(
