@@ -77,7 +77,9 @@ func (m *MartineUI) NewTabs() *container.AppTabs {
 }
 
 func (m *MartineUI) NewContext(me *ImageMenu) *export.MartineContext {
-
+	if m.main.originalImagePath == nil {
+		return nil
+	}
 	context := export.NewMartineContext(m.main.originalImagePath.Path(), "")
 	context.CpcPlus = m.main.isCpcPlus
 	context.Overscan = m.main.isFullScreen
@@ -359,34 +361,49 @@ func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
 	}, func(s string) {
 		switch s {
 		case "NearestNeighbor":
+			me.resizeAlgoNumber = 0
 			me.resizeAlgo = imaging.NearestNeighbor
 		case "CatmullRom":
+			me.resizeAlgoNumber = 1
 			me.resizeAlgo = imaging.CatmullRom
 		case "Lanczos":
+			me.resizeAlgoNumber = 2
 			me.resizeAlgo = imaging.Lanczos
 		case "Linear":
+			me.resizeAlgoNumber = 3
 			me.resizeAlgo = imaging.Linear
 		case "Box":
+			me.resizeAlgoNumber = 4
 			me.resizeAlgo = imaging.Box
 		case "Hermite":
+			me.resizeAlgoNumber = 5
 			me.resizeAlgo = imaging.Hermite
 		case "BSpline":
+			me.resizeAlgoNumber = 6
 			me.resizeAlgo = imaging.BSpline
 		case "Hamming":
+			me.resizeAlgoNumber = 7
 			me.resizeAlgo = imaging.Hamming
 		case "Hann":
+			me.resizeAlgoNumber = 8
 			me.resizeAlgo = imaging.Hann
 		case "Gaussian":
+			me.resizeAlgoNumber = 9
 			me.resizeAlgo = imaging.Gaussian
 		case "Blackman":
+			me.resizeAlgoNumber = 10
 			me.resizeAlgo = imaging.Blackman
 		case "Bartlett":
+			me.resizeAlgoNumber = 11
 			me.resizeAlgo = imaging.Bartlett
 		case "Welch":
+			me.resizeAlgoNumber = 12
 			me.resizeAlgo = imaging.Welch
 		case "Cosine":
+			me.resizeAlgoNumber = 13
 			me.resizeAlgo = imaging.Cosine
 		case "MitchellNetravali":
+			me.resizeAlgoNumber = 14
 			me.resizeAlgo = imaging.MitchellNetravali
 		}
 	})
@@ -414,36 +431,47 @@ func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
 	}, func(s string) {
 		switch s {
 		case "FloydSteinberg":
+			me.ditheringAlgoNumber = 0
 			me.ditheringMatrix = filter.FloydSteinberg
 			me.ditheringType = constants.ErrorDiffusionDither
 		case "JarvisJudiceNinke":
+			me.ditheringAlgoNumber = 1
 			me.ditheringMatrix = filter.JarvisJudiceNinke
 			me.ditheringType = constants.ErrorDiffusionDither
 		case "Stucki":
+			me.ditheringAlgoNumber = 2
 			me.ditheringMatrix = filter.Stucki
 			me.ditheringType = constants.ErrorDiffusionDither
 		case "Atkinson":
+			me.ditheringAlgoNumber = 3
 			me.ditheringMatrix = filter.Atkinson
 			me.ditheringType = constants.ErrorDiffusionDither
 		case "Sierra":
+			me.ditheringAlgoNumber = 4
 			me.ditheringMatrix = filter.Sierra
 			me.ditheringType = constants.ErrorDiffusionDither
 		case "SierraLite":
+			me.ditheringAlgoNumber = 5
 			me.ditheringMatrix = filter.SierraLite
 			me.ditheringType = constants.ErrorDiffusionDither
 		case "Sierra3":
+			me.ditheringAlgoNumber = 6
 			me.ditheringMatrix = filter.Sierra3
 			me.ditheringType = constants.ErrorDiffusionDither
 		case "Bayer2":
+			me.ditheringAlgoNumber = 7
 			me.ditheringMatrix = filter.Bayer2
 			me.ditheringType = constants.OrderedDither
 		case "Bayer3":
+			me.ditheringAlgoNumber = 8
 			me.ditheringMatrix = filter.Bayer3
 			me.ditheringType = constants.OrderedDither
 		case "Bayer4":
+			me.ditheringAlgoNumber = 9
 			me.ditheringMatrix = filter.Bayer4
 			me.ditheringType = constants.OrderedDither
 		case "Bayer8":
+			me.ditheringAlgoNumber = 10
 			me.ditheringMatrix = filter.Bayer8
 			me.ditheringType = constants.OrderedDither
 		}
@@ -604,6 +632,20 @@ func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
 					layout.NewVBoxLayout(),
 					saturationLabel,
 					saturation,
+					widget.NewButton("show cmd", func() {
+						e := widget.NewMultiLineEntry()
+						e.SetText(me.CmdLine())
+
+						d := dialog.NewCustom("Command line generated",
+							"Ok",
+							e,
+							m.window)
+						fmt.Printf("%s\n", me.CmdLine())
+						size := m.window.Content().Size()
+						size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
+						d.Resize(size)
+						d.Show()
+					}),
 				),
 			),
 		),
