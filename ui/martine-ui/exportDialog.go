@@ -61,7 +61,7 @@ func (m *MartineUI) exportDialog(w fyne.Window) {
 				}
 				m.exportFolderPath = lu.Path()
 				fmt.Println(m.exportFolderPath)
-				m.ExportOneImage()
+				m.ExportOneImage(m.main)
 				// apply and export
 			}, m.window)
 			fo.Show()
