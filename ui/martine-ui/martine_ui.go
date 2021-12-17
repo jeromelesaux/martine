@@ -20,14 +20,12 @@ import (
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx"
-	"github.com/jeromelesaux/martine/gfx/filter"
 )
 
 var (
@@ -306,27 +304,7 @@ func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
 	me.originalImage = canvas.Image{}
 	me.paletteImage = canvas.Image{}
 
-	winFormat := widget.NewRadioGroup([]string{"Normal", "Fullscreen", "Sprite", "Sprite Hard"}, func(s string) {
-		switch s {
-		case "Normal":
-			me.isFullScreen = false
-			me.isSprite = false
-			me.isHardSprite = false
-		case "Fullscreen":
-			me.isFullScreen = true
-			me.isSprite = false
-			me.isHardSprite = false
-		case "Sprite":
-			me.isFullScreen = false
-			me.isSprite = true
-			me.isHardSprite = false
-		case "Sprite Hard":
-			me.isFullScreen = false
-			me.isSprite = false
-			me.isHardSprite = true
-		}
-	})
-	winFormat.SetSelected("Normal")
+	winFormat := NewWinFormatRadio(me)
 
 	colorReducerLabel := widget.NewLabel("Color reducer")
 	colorReducer := widget.NewSelect([]string{"none", "Lower", "Medium", "Strong"}, func(s string) {
@@ -343,72 +321,7 @@ func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
 	})
 	colorReducer.SetSelected("none")
 
-	resize := widget.NewSelect([]string{"NearestNeighbor",
-		"CatmullRom",
-		"Lanczos",
-		"Linear",
-		"Box",
-		"Hermite",
-		"BSpline",
-		"Hamming",
-		"Hann",
-		"Gaussian",
-		"Blackman",
-		"Bartlett",
-		"Welch",
-		"Cosine",
-		"MitchellNetravali",
-	}, func(s string) {
-		switch s {
-		case "NearestNeighbor":
-			me.resizeAlgoNumber = 0
-			me.resizeAlgo = imaging.NearestNeighbor
-		case "CatmullRom":
-			me.resizeAlgoNumber = 1
-			me.resizeAlgo = imaging.CatmullRom
-		case "Lanczos":
-			me.resizeAlgoNumber = 2
-			me.resizeAlgo = imaging.Lanczos
-		case "Linear":
-			me.resizeAlgoNumber = 3
-			me.resizeAlgo = imaging.Linear
-		case "Box":
-			me.resizeAlgoNumber = 4
-			me.resizeAlgo = imaging.Box
-		case "Hermite":
-			me.resizeAlgoNumber = 5
-			me.resizeAlgo = imaging.Hermite
-		case "BSpline":
-			me.resizeAlgoNumber = 6
-			me.resizeAlgo = imaging.BSpline
-		case "Hamming":
-			me.resizeAlgoNumber = 7
-			me.resizeAlgo = imaging.Hamming
-		case "Hann":
-			me.resizeAlgoNumber = 8
-			me.resizeAlgo = imaging.Hann
-		case "Gaussian":
-			me.resizeAlgoNumber = 9
-			me.resizeAlgo = imaging.Gaussian
-		case "Blackman":
-			me.resizeAlgoNumber = 10
-			me.resizeAlgo = imaging.Blackman
-		case "Bartlett":
-			me.resizeAlgoNumber = 11
-			me.resizeAlgo = imaging.Bartlett
-		case "Welch":
-			me.resizeAlgoNumber = 12
-			me.resizeAlgo = imaging.Welch
-		case "Cosine":
-			me.resizeAlgoNumber = 13
-			me.resizeAlgo = imaging.Cosine
-		case "MitchellNetravali":
-			me.resizeAlgoNumber = 14
-			me.resizeAlgo = imaging.MitchellNetravali
-		}
-	})
-
-	resize.SetSelected("NearestNeighbor")
+	resize := NewResizeAlgorithmSelect(me)
 	resizeLabel := widget.NewLabel("Resize algorithm")
 
 	ditheringMultiplier := widget.NewSlider(0., 2.5)
@@ -417,66 +330,7 @@ func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
 	ditheringMultiplier.OnChanged = func(f float64) {
 		me.ditheringMultiplier = f
 	}
-	dithering := widget.NewSelect([]string{"FloydSteinberg",
-		"JarvisJudiceNinke",
-		"Stucki",
-		"Atkinson",
-		"Sierra",
-		"SierraLite",
-		"Sierra3",
-		"Bayer2",
-		"Bayer3",
-		"Bayer4",
-		"Bayer8",
-	}, func(s string) {
-		switch s {
-		case "FloydSteinberg":
-			me.ditheringAlgoNumber = 0
-			me.ditheringMatrix = filter.FloydSteinberg
-			me.ditheringType = constants.ErrorDiffusionDither
-		case "JarvisJudiceNinke":
-			me.ditheringAlgoNumber = 1
-			me.ditheringMatrix = filter.JarvisJudiceNinke
-			me.ditheringType = constants.ErrorDiffusionDither
-		case "Stucki":
-			me.ditheringAlgoNumber = 2
-			me.ditheringMatrix = filter.Stucki
-			me.ditheringType = constants.ErrorDiffusionDither
-		case "Atkinson":
-			me.ditheringAlgoNumber = 3
-			me.ditheringMatrix = filter.Atkinson
-			me.ditheringType = constants.ErrorDiffusionDither
-		case "Sierra":
-			me.ditheringAlgoNumber = 4
-			me.ditheringMatrix = filter.Sierra
-			me.ditheringType = constants.ErrorDiffusionDither
-		case "SierraLite":
-			me.ditheringAlgoNumber = 5
-			me.ditheringMatrix = filter.SierraLite
-			me.ditheringType = constants.ErrorDiffusionDither
-		case "Sierra3":
-			me.ditheringAlgoNumber = 6
-			me.ditheringMatrix = filter.Sierra3
-			me.ditheringType = constants.ErrorDiffusionDither
-		case "Bayer2":
-			me.ditheringAlgoNumber = 7
-			me.ditheringMatrix = filter.Bayer2
-			me.ditheringType = constants.OrderedDither
-		case "Bayer3":
-			me.ditheringAlgoNumber = 8
-			me.ditheringMatrix = filter.Bayer3
-			me.ditheringType = constants.OrderedDither
-		case "Bayer4":
-			me.ditheringAlgoNumber = 9
-			me.ditheringMatrix = filter.Bayer4
-			me.ditheringType = constants.OrderedDither
-		case "Bayer8":
-			me.ditheringAlgoNumber = 10
-			me.ditheringMatrix = filter.Bayer8
-			me.ditheringType = constants.OrderedDither
-		}
-	})
-	dithering.SetSelected("FloydSteinberg")
+	dithering := NewDitheringSelect(me)
 
 	ditheringWithQuantification := widget.NewCheck("With quantification", func(b bool) {
 		me.withQuantification = b
