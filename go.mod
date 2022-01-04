@@ -9,6 +9,7 @@ require (
 	github.com/esimov/colorquant v1.0.0
 	github.com/esimov/dithergo v0.0.0-20210215145655-7f9ddf55e848
 	github.com/jeromelesaux/dsk v0.0.0-20210511082123-7bd4dd146192
+	github.com/jeromelesaux/fyne-io v0.0.0-20220104171609-085c4c348faf // indirect
 	github.com/jeromelesaux/m4client v0.0.0-20200309212559-efb59c22369c
 	github.com/jeromelesaux/zx0 v0.0.0-20210525121323-2b58599f38e7
 	github.com/oliamb/cutter v0.2.2

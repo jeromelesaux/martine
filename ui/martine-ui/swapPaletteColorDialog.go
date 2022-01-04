@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
+	ui "github.com/jeromelesaux/fyne-io/custom_widget"
 )
 
 var colorIndex int
@@ -14,7 +15,7 @@ var colorToChange color.Color
 
 func swapColor(setPalette func(color.Palette), p color.Palette, w fyne.Window) {
 
-	pt := NewPaletteTable(p, colorChanged, indexColor, nil)
+	pt := ui.NewPaletteTable(p, colorChanged, indexColor, nil)
 	var cont *fyne.Container
 
 	cont = container.NewVBox(
@@ -28,7 +29,7 @@ func swapColor(setPalette func(color.Palette), p color.Palette, w fyne.Window) {
 		}),
 		widget.NewButton("swap", func() {
 			p[colorIndex] = colorToChange
-			npt := NewPaletteTable(p, colorChanged, indexColor, nil)
+			npt := ui.NewPaletteTable(p, colorChanged, indexColor, nil)
 			pt = npt
 			if setPalette != nil {
 				setPalette(pt.Palette)

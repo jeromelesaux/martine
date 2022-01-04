@@ -32,6 +32,8 @@ github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff/go.mod h1:wfqRWLHRBs
 github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526/go.mod h1:UQkeMHVoNcyXYq9otUupF7/h/2tmHlhrS2zw7ZVvUqc=
 github.com/jeromelesaux/dsk v0.0.0-20210511082123-7bd4dd146192 h1:nZ/UzB17XNovutjNbaAg+g/LSINROD4+uEuGYeEAmKY=
 github.com/jeromelesaux/dsk v0.0.0-20210511082123-7bd4dd146192/go.mod h1:WTXQ8pDV2tubU5FrXdId3MoGMOBAm117x36pQcmWchA=
+github.com/jeromelesaux/fyne-io v0.0.0-20220104171609-085c4c348faf h1:9E7YqOa1FATtGlHmsjg3+6dw9GGBV9qX8Y3Q9H3sYSM=
+github.com/jeromelesaux/fyne-io v0.0.0-20220104171609-085c4c348faf/go.mod h1:UdVRp4TTJupLXHNsG7ikrHc5rpJKivhU78JB87pIsYs=
 github.com/jeromelesaux/m4client v0.0.0-20200309212559-efb59c22369c h1:4X+oOjzaO6OKBLX8a3TCywm3htzQGyCsi+czrc3E5X8=
 github.com/jeromelesaux/m4client v0.0.0-20200309212559-efb59c22369c/go.mod h1:JO0ijl8YXO6FxogJoC3yAFbBjSAnkwFquc8W6C7k94E=
 github.com/jeromelesaux/zx0 v0.0.0-20210525121323-2b58599f38e7 h1:PLeFwdzUSb9ZByyhBGmnM2DoLJcfNqSi9EKWIcYpyPo=
