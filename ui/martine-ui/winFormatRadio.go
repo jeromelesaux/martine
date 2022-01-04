@@ -1,26 +1,29 @@
 package ui
 
-import "fyne.io/fyne/v2/widget"
+import (
+	"fyne.io/fyne/v2/widget"
+	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
+)
 
-func NewWinFormatRadio(me *ImageMenu) *widget.RadioGroup {
+func NewWinFormatRadio(me *menu.ImageMenu) *widget.RadioGroup {
 	winFormat := widget.NewRadioGroup([]string{"Normal", "Fullscreen", "Sprite", "Sprite Hard"}, func(s string) {
 		switch s {
 		case "Normal":
-			me.isFullScreen = false
-			me.isSprite = false
-			me.isHardSprite = false
+			me.IsFullScreen = false
+			me.IsSprite = false
+			me.IsHardSprite = false
 		case "Fullscreen":
-			me.isFullScreen = true
-			me.isSprite = false
-			me.isHardSprite = false
+			me.IsFullScreen = true
+			me.IsSprite = false
+			me.IsHardSprite = false
 		case "Sprite":
-			me.isFullScreen = false
-			me.isSprite = true
-			me.isHardSprite = false
+			me.IsFullScreen = false
+			me.IsSprite = true
+			me.IsHardSprite = false
 		case "Sprite Hard":
-			me.isFullScreen = false
-			me.isSprite = false
-			me.isHardSprite = true
+			me.IsFullScreen = false
+			me.IsSprite = false
+			me.IsHardSprite = true
 		}
 	})
 	winFormat.SetSelected("Normal")

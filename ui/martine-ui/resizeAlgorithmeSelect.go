@@ -3,9 +3,10 @@ package ui
 import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/disintegration/imaging"
+	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
-func NewResizeAlgorithmSelect(me *ImageMenu) *widget.Select {
+func NewResizeAlgorithmSelect(me *menu.ImageMenu) *widget.Select {
 	resize := widget.NewSelect([]string{"NearestNeighbor",
 		"CatmullRom",
 		"Lanczos",
@@ -24,50 +25,50 @@ func NewResizeAlgorithmSelect(me *ImageMenu) *widget.Select {
 	}, func(s string) {
 		switch s {
 		case "NearestNeighbor":
-			me.resizeAlgoNumber = 0
-			me.resizeAlgo = imaging.NearestNeighbor
+			me.ResizeAlgoNumber = 0
+			me.ResizeAlgo = imaging.NearestNeighbor
 		case "CatmullRom":
-			me.resizeAlgoNumber = 1
-			me.resizeAlgo = imaging.CatmullRom
+			me.ResizeAlgoNumber = 1
+			me.ResizeAlgo = imaging.CatmullRom
 		case "Lanczos":
-			me.resizeAlgoNumber = 2
-			me.resizeAlgo = imaging.Lanczos
+			me.ResizeAlgoNumber = 2
+			me.ResizeAlgo = imaging.Lanczos
 		case "Linear":
-			me.resizeAlgoNumber = 3
-			me.resizeAlgo = imaging.Linear
+			me.ResizeAlgoNumber = 3
+			me.ResizeAlgo = imaging.Linear
 		case "Box":
-			me.resizeAlgoNumber = 4
-			me.resizeAlgo = imaging.Box
+			me.ResizeAlgoNumber = 4
+			me.ResizeAlgo = imaging.Box
 		case "Hermite":
-			me.resizeAlgoNumber = 5
-			me.resizeAlgo = imaging.Hermite
+			me.ResizeAlgoNumber = 5
+			me.ResizeAlgo = imaging.Hermite
 		case "BSpline":
-			me.resizeAlgoNumber = 6
-			me.resizeAlgo = imaging.BSpline
+			me.ResizeAlgoNumber = 6
+			me.ResizeAlgo = imaging.BSpline
 		case "Hamming":
-			me.resizeAlgoNumber = 7
-			me.resizeAlgo = imaging.Hamming
+			me.ResizeAlgoNumber = 7
+			me.ResizeAlgo = imaging.Hamming
 		case "Hann":
-			me.resizeAlgoNumber = 8
-			me.resizeAlgo = imaging.Hann
+			me.ResizeAlgoNumber = 8
+			me.ResizeAlgo = imaging.Hann
 		case "Gaussian":
-			me.resizeAlgoNumber = 9
-			me.resizeAlgo = imaging.Gaussian
+			me.ResizeAlgoNumber = 9
+			me.ResizeAlgo = imaging.Gaussian
 		case "Blackman":
-			me.resizeAlgoNumber = 10
-			me.resizeAlgo = imaging.Blackman
+			me.ResizeAlgoNumber = 10
+			me.ResizeAlgo = imaging.Blackman
 		case "Bartlett":
-			me.resizeAlgoNumber = 11
-			me.resizeAlgo = imaging.Bartlett
+			me.ResizeAlgoNumber = 11
+			me.ResizeAlgo = imaging.Bartlett
 		case "Welch":
-			me.resizeAlgoNumber = 12
-			me.resizeAlgo = imaging.Welch
+			me.ResizeAlgoNumber = 12
+			me.ResizeAlgo = imaging.Welch
 		case "Cosine":
-			me.resizeAlgoNumber = 13
-			me.resizeAlgo = imaging.Cosine
+			me.ResizeAlgoNumber = 13
+			me.ResizeAlgo = imaging.Cosine
 		case "MitchellNetravali":
-			me.resizeAlgoNumber = 14
-			me.resizeAlgo = imaging.MitchellNetravali
+			me.ResizeAlgoNumber = 14
+			me.ResizeAlgo = imaging.MitchellNetravali
 		}
 	})
 

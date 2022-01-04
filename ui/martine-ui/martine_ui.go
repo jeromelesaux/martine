@@ -26,6 +26,7 @@ import (
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx"
+	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
 var (
@@ -37,7 +38,7 @@ var (
 
 type MartineUI struct {
 	window fyne.Window
-	main   *ImageMenu
+	main   *menu.ImageMenu
 
 	exportDsk              bool
 	exportText             bool
@@ -49,13 +50,13 @@ type MartineUI struct {
 }
 
 func NewMartineUI() *MartineUI {
-	return &MartineUI{main: &ImageMenu{}}
+	return &MartineUI{main: &menu.ImageMenu{}}
 }
 
 func (m *MartineUI) SetPalette(p color.Palette) {
 
-	m.main.palette = p
-	m.main.paletteImage = *canvas.NewImageFromImage(file.PalToImage(p))
+	m.main.Palette = p
+	m.main.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(p))
 	refreshUI.OnTapped()
 }
 
@@ -74,49 +75,49 @@ func (m *MartineUI) NewTabs() *container.AppTabs {
 	)
 }
 
-func (m *MartineUI) NewContext(me *ImageMenu) *export.MartineContext {
-	if m.main.originalImagePath == nil {
+func (m *MartineUI) NewContext(me *menu.ImageMenu) *export.MartineContext {
+	if m.main.OriginalImagePath == nil {
 		return nil
 	}
-	context := export.NewMartineContext(m.main.originalImagePath.Path(), "")
-	context.CpcPlus = m.main.isCpcPlus
-	context.Overscan = m.main.isFullScreen
-	context.DitheringMultiplier = m.main.ditheringMultiplier
-	context.Brightness = m.main.brightness
-	context.Saturation = m.main.saturation
-	if m.main.brightness > 0 && m.main.saturation == 0 {
-		context.Saturation = me.brightness
+	context := export.NewMartineContext(m.main.OriginalImagePath.Path(), "")
+	context.CpcPlus = m.main.IsCpcPlus
+	context.Overscan = m.main.IsFullScreen
+	context.DitheringMultiplier = m.main.DitheringMultiplier
+	context.Brightness = m.main.Brightness
+	context.Saturation = m.main.Saturation
+	if m.main.Brightness > 0 && m.main.Saturation == 0 {
+		context.Saturation = me.Brightness
 	}
-	if me.brightness == 0 && me.saturation > 0 {
-		context.Brightness = me.saturation
+	if me.Brightness == 0 && me.Saturation > 0 {
+		context.Brightness = me.Saturation
 	}
-	context.Reducer = me.reducer
+	context.Reducer = me.Reducer
 	var size constants.Size
-	switch me.mode {
+	switch me.Mode {
 	case 0:
 		size = constants.Mode0
-		if me.isFullScreen {
+		if me.IsFullScreen {
 			size = constants.OverscanMode0
 		}
 	case 1:
 		size = constants.Mode1
-		if me.isFullScreen {
+		if me.IsFullScreen {
 			size = constants.OverscanMode1
 		}
 	case 2:
 		size = constants.Mode2
-		if me.isFullScreen {
+		if me.IsFullScreen {
 			size = constants.OverscanMode2
 		}
 	}
 	context.Size = size
-	if me.isSprite {
-		width, err := strconv.Atoi(me.width.Text)
+	if me.IsSprite {
+		width, err := strconv.Atoi(me.Width.Text)
 		if err != nil {
 			dialog.NewError(err, m.window).Show()
 			return nil
 		}
-		height, err := strconv.Atoi(me.height.Text)
+		height, err := strconv.Atoi(me.Height.Text)
 		if err != nil {
 			dialog.NewError(err, m.window).Show()
 			return nil
@@ -124,21 +125,21 @@ func (m *MartineUI) NewContext(me *ImageMenu) *export.MartineContext {
 		context.Size.Height = height
 		context.Size.Width = width
 	}
-	if me.isHardSprite {
+	if me.IsHardSprite {
 		context.Size.Height = 16
 		context.Size.Width = 16
 	}
 
-	if me.applyDithering {
+	if me.ApplyDithering {
 		context.DitheringAlgo = 0
-		context.DitheringMatrix = me.ditheringMatrix
-		context.DitheringType = me.ditheringType
+		context.DitheringMatrix = me.DitheringMatrix
+		context.DitheringType = me.DitheringType
 	} else {
 		context.DitheringAlgo = -1
 	}
-	context.DitheringWithQuantification = me.withQuantification
+	context.DitheringWithQuantification = me.WithQuantification
 	context.OutputPath = m.exportFolderPath
-	context.InputPath = me.originalImagePath.Path()
+	context.InputPath = me.OriginalImagePath.Path()
 	context.Json = m.exportJson
 	context.Ascii = m.exportText
 	context.NoAmsdosHeader = !m.exportWithAmsdosHeader
@@ -148,7 +149,7 @@ func (m *MartineUI) NewContext(me *ImageMenu) *export.MartineContext {
 	return context
 }
 
-func (m *MartineUI) ExportOneImage(me *ImageMenu) {
+func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 	pi := dialog.NewProgressInfinite("Saving....", "Please wait.", m.window)
 	pi.Show()
 	context := m.NewContext(me)
@@ -156,18 +157,18 @@ func (m *MartineUI) ExportOneImage(me *ImageMenu) {
 	defer func() {
 		os.Remove("temporary_palette.kit")
 	}()
-	if err := file.SaveKit("temporary_palette.kit", me.palette, false); err != nil {
+	if err := file.SaveKit("temporary_palette.kit", me.Palette, false); err != nil {
 		pi.Hide()
 		dialog.ShowError(err, m.window)
 	}
 	context.KitPath = "temporary_palette.kit"
-	if err := gfx.ApplyOneImageAndExport(me.originalImage.Image, context, filepath.Base(m.exportFolderPath), m.exportFolderPath, me.mode, uint8(me.mode)); err != nil {
+	if err := gfx.ApplyOneImageAndExport(me.OriginalImage.Image, context, filepath.Base(m.exportFolderPath), m.exportFolderPath, me.Mode, uint8(me.Mode)); err != nil {
 		pi.Hide()
 		dialog.NewError(err, m.window).Show()
 		return
 	}
 	if context.Dsk {
-		if err := file.ImportInDsk(me.originalImagePath.Path(), context); err != nil {
+		if err := file.ImportInDsk(me.OriginalImagePath.Path(), context); err != nil {
 			dialog.NewError(err, m.window).Show()
 			return
 		}
@@ -182,7 +183,7 @@ func (m *MartineUI) ExportOneImage(me *ImageMenu) {
 				}
 			}
 			context.SnaPath = filepath.Join(m.exportFolderPath, "test.sna")
-			if err := file.ImportInSna(gfxFile, context.SnaPath, uint8(me.mode)); err != nil {
+			if err := file.ImportInSna(gfxFile, context.SnaPath, uint8(me.Mode)); err != nil {
 				dialog.NewError(err, m.window).Show()
 				return
 			}
@@ -193,18 +194,18 @@ func (m *MartineUI) ExportOneImage(me *ImageMenu) {
 
 }
 
-func (m *MartineUI) ApplyOneImage(me *ImageMenu) {
-	me.cpcImage = canvas.Image{}
+func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
+	me.CpcImage = canvas.Image{}
 	context := m.NewContext(me)
 	if context == nil {
 		return
 	}
 
 	var inPalette color.Palette
-	if me.usePalette {
-		inPalette = me.palette
+	if me.UsePalette {
+		inPalette = me.Palette
 		maxPalette := len(inPalette)
-		switch me.mode {
+		switch me.Mode {
 		case 1:
 			if maxPalette > 4 {
 				maxPalette = 4
@@ -220,34 +221,34 @@ func (m *MartineUI) ApplyOneImage(me *ImageMenu) {
 	}
 	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
 	pi.Show()
-	out, downgraded, palette, _, err := gfx.ApplyOneImage(me.originalImage.Image, context, me.mode, inPalette, uint8(me.mode))
+	out, downgraded, palette, _, err := gfx.ApplyOneImage(me.OriginalImage.Image, context, me.Mode, inPalette, uint8(me.Mode))
 	pi.Hide()
 	if err != nil {
 		dialog.NewError(err, m.window).Show()
 		return
 	}
-	me.data = out
-	me.downgraded = downgraded
-	if !me.usePalette {
-		me.palette = palette
+	me.Data = out
+	me.Downgraded = downgraded
+	if !me.UsePalette {
+		me.Palette = palette
 	}
-	if me.isSprite || me.isHardSprite {
+	if me.IsSprite || me.IsHardSprite {
 		newSize := constants.Size{Width: context.Size.Width * 50, Height: context.Size.Height * 50}
-		me.downgraded = convert.Resize(me.downgraded, newSize, me.resizeAlgo)
+		me.Downgraded = convert.Resize(me.Downgraded, newSize, me.ResizeAlgo)
 	}
-	me.cpcImage = *canvas.NewImageFromImage(me.downgraded)
-	me.cpcImage.FillMode = canvas.ImageFillStretch
-	me.paletteImage = *canvas.NewImageFromImage(file.PalToImage(me.palette))
+	me.CpcImage = *canvas.NewImageFromImage(me.Downgraded)
+	me.CpcImage.FillMode = canvas.ImageFillStretch
+	me.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(me.Palette))
 	refreshUI.OnTapped()
 }
 
-func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
+func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 	importOpen := NewImportButton(m, me)
 
 	paletteOpen := NewOpenPaletteButton(me, m.window)
 
 	forcePalette := widget.NewCheck("use palette", func(b bool) {
-		me.usePalette = b
+		me.UsePalette = b
 	})
 
 	forceUIRefresh := widget.NewButtonWithIcon("Refresh UI", theme.ComputerIcon(), func() {
@@ -255,9 +256,9 @@ func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
 		s.Height += 10.
 		s.Width += 10.
 		m.window.Resize(s)
-		m.window.Canvas().Refresh(&me.originalImage)
-		m.window.Canvas().Refresh(&me.paletteImage)
-		m.window.Canvas().Refresh(&me.cpcImage)
+		m.window.Canvas().Refresh(&me.OriginalImage)
+		m.window.Canvas().Refresh(&me.PaletteImage)
+		m.window.Canvas().Refresh(&me.CpcImage)
 		m.window.Resize(m.window.Content().Size())
 		m.window.Content().Refresh()
 	})
@@ -272,16 +273,16 @@ func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
 				return
 			}
 
-			me.originalImagePath = reader.URI()
-			img, err := openImage(me.originalImagePath.Path())
+			me.OriginalImagePath = reader.URI()
+			img, err := openImage(me.OriginalImagePath.Path())
 			if err != nil {
 				dialog.ShowError(err, m.window)
 				return
 			}
 			canvasImg := canvas.NewImageFromImage(img)
-			me.originalImage = *canvas.NewImageFromImage(canvasImg.Image)
-			me.originalImage.FillMode = canvas.ImageFillContain
-			m.window.Canvas().Refresh(&me.originalImage)
+			me.OriginalImage = *canvas.NewImageFromImage(canvasImg.Image)
+			me.OriginalImage.FillMode = canvas.ImageFillContain
+			m.window.Canvas().Refresh(&me.OriginalImage)
 			m.window.Resize(m.window.Content().Size())
 		}, m.window)
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".jpg", ".gif", ".png", ".jpeg"}))
@@ -300,9 +301,9 @@ func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
 
 	openFileWidget.Icon = theme.FileImageIcon()
 
-	me.cpcImage = canvas.Image{}
-	me.originalImage = canvas.Image{}
-	me.paletteImage = canvas.Image{}
+	me.CpcImage = canvas.Image{}
+	me.OriginalImage = canvas.Image{}
+	me.PaletteImage = canvas.Image{}
 
 	winFormat := NewWinFormatRadio(me)
 
@@ -310,13 +311,13 @@ func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
 	colorReducer := widget.NewSelect([]string{"none", "Lower", "Medium", "Strong"}, func(s string) {
 		switch s {
 		case "none":
-			me.reducer = 0
+			me.Reducer = 0
 		case "Lower":
-			me.reducer = 1
+			me.Reducer = 1
 		case "Medium":
-			me.reducer = 2
+			me.Reducer = 2
 		case "Strong":
-			me.reducer = 3
+			me.Reducer = 3
 		}
 	})
 	colorReducer.SetSelected("none")
@@ -328,19 +329,19 @@ func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
 	ditheringMultiplier.Step = 0.1
 	ditheringMultiplier.SetValue(1.18)
 	ditheringMultiplier.OnChanged = func(f float64) {
-		me.ditheringMultiplier = f
+		me.DitheringMultiplier = f
 	}
 	dithering := NewDitheringSelect(me)
 
 	ditheringWithQuantification := widget.NewCheck("With quantification", func(b bool) {
-		me.withQuantification = b
+		me.WithQuantification = b
 	})
 
 	enableDithering := widget.NewCheck("Enable dithering", func(b bool) {
-		me.applyDithering = b
+		me.ApplyDithering = b
 	})
 	isPlus := widget.NewCheck("CPC Plus", func(b bool) {
-		me.isCpcPlus = b
+		me.IsCpcPlus = b
 	})
 
 	modes := widget.NewSelect([]string{"0", "1", "2"}, func(s string) {
@@ -348,32 +349,32 @@ func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error %s cannot be cast in int\n", s)
 		}
-		me.mode = mode
+		me.Mode = mode
 	})
 	modes.SetSelected("0")
 	modeSelection = modes
 	modeLabel := widget.NewLabel("Mode:")
 
 	widthLabel := widget.NewLabel("Width")
-	me.width = widget.NewEntry()
-	me.width.Validator = validation.NewRegexp("\\d+", "Must contain a number")
+	me.Width = widget.NewEntry()
+	me.Width.Validator = validation.NewRegexp("\\d+", "Must contain a number")
 
 	heightLabel := widget.NewLabel("Height")
-	me.height = widget.NewEntry()
-	me.height.Validator = validation.NewRegexp("\\d+", "Must contain a number")
+	me.Height = widget.NewEntry()
+	me.Height.Validator = validation.NewRegexp("\\d+", "Must contain a number")
 
 	brightness := widget.NewSlider(0.0, 1.0)
 	brightness.SetValue(1.)
 	brightness.Step = .01
 	brightness.OnChanged = func(f float64) {
-		me.brightness = f
+		me.Brightness = f
 	}
 	saturationLabel := widget.NewLabel("Saturation")
 	saturation := widget.NewSlider(0.0, 1.0)
 	saturation.SetValue(1.)
 	saturation.Step = .01
 	saturation.OnChanged = func(f float64) {
-		me.saturation = f
+		me.Saturation = f
 	}
 	brightnessLabel := widget.NewLabel("Brightness")
 
@@ -385,9 +386,9 @@ func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
 		container.New(
 			layout.NewGridLayoutWithRows(2),
 			container.NewScroll(
-				&me.originalImage),
+				&me.OriginalImage),
 			container.NewScroll(
-				&me.cpcImage),
+				&me.CpcImage),
 		),
 		container.New(
 			layout.NewVBoxLayout(),
@@ -415,12 +416,12 @@ func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
 					container.New(
 						layout.NewHBoxLayout(),
 						widthLabel,
-						me.width,
+						me.Width,
 					),
 					container.New(
 						layout.NewHBoxLayout(),
 						heightLabel,
-						me.height,
+						me.Height,
 					),
 				),
 			),
@@ -443,12 +444,12 @@ func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
 				),
 				container.New(
 					layout.NewGridLayoutWithColumns(2),
-					&me.paletteImage,
+					&me.PaletteImage,
 					container.New(
 						layout.NewHBoxLayout(),
 						forcePalette,
 						widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
-							swapColor(m.SetPalette, me.palette, m.window)
+							swapColor(m.SetPalette, me.Palette, m.window)
 						}),
 						widget.NewButtonWithIcon("export", theme.DocumentSaveIcon(), func() {
 							d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
@@ -465,10 +466,10 @@ func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
 								os.Remove(uc.URI().Path())
 								context := export.NewMartineContext(filepath.Base(paletteExportPath), paletteExportPath)
 								context.NoAmsdosHeader = false
-								if err := file.SaveKit(paletteExportPath+".kit", me.palette, false); err != nil {
+								if err := file.SaveKit(paletteExportPath+".kit", me.Palette, false); err != nil {
 									dialog.ShowError(err, m.window)
 								}
-								if err := file.SavePal(paletteExportPath+".pal", me.palette, uint8(me.mode), false); err != nil {
+								if err := file.SavePal(paletteExportPath+".pal", me.Palette, uint8(me.Mode), false); err != nil {
 									dialog.ShowError(err, m.window)
 								}
 							}, m.window)

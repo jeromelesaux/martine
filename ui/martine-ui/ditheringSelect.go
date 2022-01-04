@@ -4,9 +4,10 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/gfx/filter"
+	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
-func NewDitheringSelect(me *ImageMenu) *widget.Select {
+func NewDitheringSelect(me *menu.ImageMenu) *widget.Select {
 	dithering := widget.NewSelect([]string{"FloydSteinberg",
 		"JarvisJudiceNinke",
 		"Stucki",
@@ -21,49 +22,49 @@ func NewDitheringSelect(me *ImageMenu) *widget.Select {
 	}, func(s string) {
 		switch s {
 		case "FloydSteinberg":
-			me.ditheringAlgoNumber = 0
-			me.ditheringMatrix = filter.FloydSteinberg
-			me.ditheringType = constants.ErrorDiffusionDither
+			me.DitheringAlgoNumber = 0
+			me.DitheringMatrix = filter.FloydSteinberg
+			me.DitheringType = constants.ErrorDiffusionDither
 		case "JarvisJudiceNinke":
-			me.ditheringAlgoNumber = 1
-			me.ditheringMatrix = filter.JarvisJudiceNinke
-			me.ditheringType = constants.ErrorDiffusionDither
+			me.DitheringAlgoNumber = 1
+			me.DitheringMatrix = filter.JarvisJudiceNinke
+			me.DitheringType = constants.ErrorDiffusionDither
 		case "Stucki":
-			me.ditheringAlgoNumber = 2
-			me.ditheringMatrix = filter.Stucki
-			me.ditheringType = constants.ErrorDiffusionDither
+			me.DitheringAlgoNumber = 2
+			me.DitheringMatrix = filter.Stucki
+			me.DitheringType = constants.ErrorDiffusionDither
 		case "Atkinson":
-			me.ditheringAlgoNumber = 3
-			me.ditheringMatrix = filter.Atkinson
-			me.ditheringType = constants.ErrorDiffusionDither
+			me.DitheringAlgoNumber = 3
+			me.DitheringMatrix = filter.Atkinson
+			me.DitheringType = constants.ErrorDiffusionDither
 		case "Sierra":
-			me.ditheringAlgoNumber = 4
-			me.ditheringMatrix = filter.Sierra
-			me.ditheringType = constants.ErrorDiffusionDither
+			me.DitheringAlgoNumber = 4
+			me.DitheringMatrix = filter.Sierra
+			me.DitheringType = constants.ErrorDiffusionDither
 		case "SierraLite":
-			me.ditheringAlgoNumber = 5
-			me.ditheringMatrix = filter.SierraLite
-			me.ditheringType = constants.ErrorDiffusionDither
+			me.DitheringAlgoNumber = 5
+			me.DitheringMatrix = filter.SierraLite
+			me.DitheringType = constants.ErrorDiffusionDither
 		case "Sierra3":
-			me.ditheringAlgoNumber = 6
-			me.ditheringMatrix = filter.Sierra3
-			me.ditheringType = constants.ErrorDiffusionDither
+			me.DitheringAlgoNumber = 6
+			me.DitheringMatrix = filter.Sierra3
+			me.DitheringType = constants.ErrorDiffusionDither
 		case "Bayer2":
-			me.ditheringAlgoNumber = 7
-			me.ditheringMatrix = filter.Bayer2
-			me.ditheringType = constants.OrderedDither
+			me.DitheringAlgoNumber = 7
+			me.DitheringMatrix = filter.Bayer2
+			me.DitheringType = constants.OrderedDither
 		case "Bayer3":
-			me.ditheringAlgoNumber = 8
-			me.ditheringMatrix = filter.Bayer3
-			me.ditheringType = constants.OrderedDither
+			me.DitheringAlgoNumber = 8
+			me.DitheringMatrix = filter.Bayer3
+			me.DitheringType = constants.OrderedDither
 		case "Bayer4":
-			me.ditheringAlgoNumber = 9
-			me.ditheringMatrix = filter.Bayer4
-			me.ditheringType = constants.OrderedDither
+			me.DitheringAlgoNumber = 9
+			me.DitheringMatrix = filter.Bayer4
+			me.DitheringType = constants.OrderedDither
 		case "Bayer8":
-			me.ditheringAlgoNumber = 10
-			me.ditheringMatrix = filter.Bayer8
-			me.ditheringType = constants.OrderedDither
+			me.DitheringAlgoNumber = 10
+			me.DitheringMatrix = filter.Bayer8
+			me.DitheringType = constants.OrderedDither
 		}
 	})
 	dithering.SetSelected("FloydSteinberg")
