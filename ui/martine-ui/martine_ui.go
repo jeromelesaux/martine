@@ -38,8 +38,9 @@ var (
 )
 
 type MartineUI struct {
-	window fyne.Window
-	main   *menu.ImageMenu
+	window  fyne.Window
+	main    *menu.ImageMenu
+	tilemap *menu.TilemapMenu
 
 	exportDsk              bool
 	exportText             bool
@@ -53,7 +54,10 @@ type MartineUI struct {
 }
 
 func NewMartineUI() *MartineUI {
-	return &MartineUI{main: &menu.ImageMenu{}}
+	return &MartineUI{
+		main:    &menu.ImageMenu{},
+		tilemap: &menu.TilemapMenu{},
+	}
 }
 
 func (m *MartineUI) SetPalette(p color.Palette) {
@@ -74,7 +78,198 @@ func (m *MartineUI) Load(app fyne.App) {
 func (m *MartineUI) NewTabs() *container.AppTabs {
 	return container.NewAppTabs(
 		container.NewTabItem("Image", m.newImageTransfertTab(m.main)),
-		//container.NewTabItem("Animation", widget.NewLabel("Animation")),
+		container.NewTabItem("Tile", m.newTilemapTab(m.tilemap)),
+	)
+}
+
+func (m *MartineUI) ComputeTilemap(tm *menu.TilemapMenu) {
+
+}
+
+func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
+	importOpen := NewImportButton(m, &tm.ImageMenu)
+
+	paletteOpen := NewOpenPaletteButton(&tm.ImageMenu, m.window)
+
+	forcePalette := widget.NewCheck("use palette", func(b bool) {
+		tm.UsePalette = b
+	})
+
+	forceUIRefresh := widget.NewButtonWithIcon("Refresh UI", theme.ComputerIcon(), func() {
+		s := m.window.Content().Size()
+		s.Height += 10.
+		s.Width += 10.
+		m.window.Resize(s)
+		m.window.Canvas().Refresh(&tm.OriginalImage)
+		m.window.Canvas().Refresh(&tm.PaletteImage)
+		m.window.Resize(m.window.Content().Size())
+		m.window.Content().Refresh()
+	})
+	refreshUI = forceUIRefresh
+	openFileWidget := widget.NewButton("Image", func() {
+		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+			if err != nil {
+				dialog.ShowError(err, m.window)
+				return
+			}
+			if reader == nil {
+				return
+			}
+
+			tm.OriginalImagePath = reader.URI()
+			img, err := openImage(tm.OriginalImagePath.Path())
+			if err != nil {
+				dialog.ShowError(err, m.window)
+				return
+			}
+			canvasImg := canvas.NewImageFromImage(img)
+			tm.OriginalImage = *canvas.NewImageFromImage(canvasImg.Image)
+			tm.OriginalImage.FillMode = canvas.ImageFillContain
+			m.window.Canvas().Refresh(&tm.OriginalImage)
+			m.window.Resize(m.window.Content().Size())
+		}, m.window)
+		d.SetFilter(storage.NewExtensionFileFilter([]string{".jpg", ".gif", ".png", ".jpeg"}))
+		d.Resize(dialogSize)
+		d.Show()
+	})
+
+	exportButton := widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
+		m.exportDialog(m.window)
+	})
+
+	applyButton := widget.NewButtonWithIcon("Compute", theme.VisibilityIcon(), func() {
+		fmt.Println("compute.")
+		m.ComputeTilemap(tm)
+	})
+
+	openFileWidget.Icon = theme.FileImageIcon()
+
+	tm.OriginalImage = canvas.Image{}
+	tm.PaletteImage = canvas.Image{}
+
+	isPlus := widget.NewCheck("CPC Plus", func(b bool) {
+		tm.IsCpcPlus = b
+	})
+
+	modes := widget.NewSelect([]string{"0", "1", "2"}, func(s string) {
+		mode, err := strconv.Atoi(s)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error %s cannot be cast in int\n", s)
+		}
+		tm.Mode = mode
+	})
+	modes.SetSelected("0")
+	modeSelection = modes
+	modeLabel := widget.NewLabel("Mode:")
+
+	widthLabel := widget.NewLabel("Width")
+	tm.Width = widget.NewEntry()
+	tm.Width.Validator = validation.NewRegexp("\\d+", "Must contain a number")
+
+	heightLabel := widget.NewLabel("Height")
+	tm.Height = widget.NewEntry()
+	tm.Height.Validator = validation.NewRegexp("\\d+", "Must contain a number")
+
+	return container.New(
+		layout.NewGridLayoutWithColumns(2),
+		container.New(
+			layout.NewGridLayoutWithRows(2),
+			container.NewScroll(
+				&tm.OriginalImage),
+			container.NewScroll(
+				&tm.TileImages),
+		),
+		container.New(
+			layout.NewVBoxLayout(),
+			container.New(
+				layout.NewHBoxLayout(),
+				openFileWidget,
+				paletteOpen,
+				applyButton,
+				exportButton,
+				importOpen,
+				forceUIRefresh,
+			),
+			container.New(
+				layout.NewHBoxLayout(),
+				isPlus,
+				container.New(
+					layout.NewVBoxLayout(),
+					container.New(
+						layout.NewVBoxLayout(),
+						modeLabel,
+						modes,
+					),
+					container.New(
+						layout.NewHBoxLayout(),
+						widthLabel,
+						tm.Width,
+					),
+					container.New(
+						layout.NewHBoxLayout(),
+						heightLabel,
+						tm.Height,
+					),
+				),
+			),
+			container.New(
+				layout.NewGridLayoutWithRows(6),
+
+				container.New(
+					layout.NewGridLayoutWithColumns(2),
+					&tm.PaletteImage,
+					container.New(
+						layout.NewHBoxLayout(),
+						forcePalette,
+						widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
+							swapColor(m.SetPalette, tm.Palette, m.window)
+						}),
+						widget.NewButtonWithIcon("export", theme.DocumentSaveIcon(), func() {
+							d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
+								if err != nil {
+									dialog.ShowError(err, m.window)
+									return
+								}
+								if uc == nil {
+									return
+								}
+
+								paletteExportPath := uc.URI().Path()
+								uc.Close()
+								os.Remove(uc.URI().Path())
+								context := export.NewMartineContext(filepath.Base(paletteExportPath), paletteExportPath)
+								context.NoAmsdosHeader = false
+								if err := file.SaveKit(paletteExportPath+".kit", tm.Palette, false); err != nil {
+									dialog.ShowError(err, m.window)
+								}
+								if err := file.SavePal(paletteExportPath+".pal", tm.Palette, uint8(tm.Mode), false); err != nil {
+									dialog.ShowError(err, m.window)
+								}
+							}, m.window)
+							d.Show()
+						}),
+					),
+				),
+
+				container.New(
+					layout.NewVBoxLayout(),
+					widget.NewButton("show cmd", func() {
+						e := widget.NewMultiLineEntry()
+						e.SetText(tm.CmdLine())
+
+						d := dialog.NewCustom("Command line generated",
+							"Ok",
+							e,
+							m.window)
+						fmt.Printf("%s\n", tm.CmdLine())
+						size := m.window.Content().Size()
+						size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
+						d.Resize(size)
+						d.Show()
+					}),
+				),
+			),
+		),
 	)
 }
 

@@ -5,17 +5,20 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
 
 type TilemapMenu struct {
 	ImageMenu
-	result *transformation.AnalyzeBoard
+	result     *transformation.AnalyzeBoard
+	TileImages custom_widget.ImageTable
 }
 
 func NewTilemapMenu() *TilemapMenu {
 	return &TilemapMenu{
-		result: &transformation.AnalyzeBoard{},
+		result:     &transformation.AnalyzeBoard{},
+		TileImages: custom_widget.ImageTable{},
 	}
 }
 
