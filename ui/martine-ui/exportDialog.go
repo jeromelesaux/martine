@@ -11,6 +11,8 @@ import (
 )
 
 func (m *MartineUI) exportDialog(w fyne.Window) {
+	m2host := widget.NewEntry()
+	m2host.SetPlaceHolder("Set your M2 IP here.")
 
 	cont := container.NewVBox(
 		container.NewHBox(
@@ -28,6 +30,10 @@ func (m *MartineUI) exportDialog(w fyne.Window) {
 			}),
 			widget.NewCheck("apply zigzag", func(b bool) {
 				m.exportZigzag = b
+			}),
+			widget.NewCheck("export to M2", func(b bool) {
+				m.exportToM2 = b
+				m.m2IP = m2host.Text
 			}),
 		),
 
@@ -49,6 +55,7 @@ func (m *MartineUI) exportDialog(w fyne.Window) {
 					m.exportCompression = 5
 				}
 			}),
+		m2host,
 		widget.NewButtonWithIcon("Export into folder", theme.DocumentSaveIcon(), func() {
 			fo := dialog.NewFolderOpen(func(lu fyne.ListableURI, err error) {
 				if err != nil {
@@ -67,6 +74,7 @@ func (m *MartineUI) exportDialog(w fyne.Window) {
 			fo.Show()
 		}),
 	)
+
 	d := dialog.NewCustom("Export options", "Ok", cont, w)
 	d.Resize(w.Canvas().Size())
 	d.Show()

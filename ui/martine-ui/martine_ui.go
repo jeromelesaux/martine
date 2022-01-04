@@ -25,6 +25,7 @@ import (
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/net"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
@@ -47,6 +48,8 @@ type MartineUI struct {
 	exportJson             bool
 	exportCompression      int
 	exportFolderPath       string
+	m2IP                   string
+	exportToM2             bool
 }
 
 func NewMartineUI() *MartineUI {
@@ -187,6 +190,12 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 				dialog.NewError(err, m.window).Show()
 				return
 			}
+		}
+	}
+	if m.exportToM2 {
+		if err := net.ImportInM4(context); err != nil {
+			dialog.NewError(err, m.window).Show()
+			fmt.Fprintf(os.Stderr, "Cannot send to M4 error :%v\n", err)
 		}
 	}
 	pi.Hide()
