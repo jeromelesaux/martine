@@ -376,6 +376,10 @@ func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
 		me.saturation = f
 	}
 	brightnessLabel := widget.NewLabel("Brightness")
+
+	warningLabel := widget.NewLabel("Setting thoses parameters will affect your palette, you can't force palette.")
+	warningLabel.TextStyle = fyne.TextStyle{Bold: true}
+
 	return container.New(
 		layout.NewGridLayoutWithColumns(2),
 		container.New(
@@ -421,7 +425,7 @@ func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
 				),
 			),
 			container.New(
-				layout.NewGridLayoutWithRows(5),
+				layout.NewGridLayoutWithRows(6),
 				container.New(
 					layout.NewGridLayoutWithRows(2),
 					container.New(
@@ -471,6 +475,10 @@ func (m *MartineUI) newImageTransfertTab(me *ImageMenu) fyne.CanvasObject {
 							d.Show()
 						}),
 					),
+				),
+				container.New(
+					layout.NewVBoxLayout(),
+					warningLabel,
 				),
 				container.New(
 					layout.NewVBoxLayout(),

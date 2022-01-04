@@ -120,14 +120,6 @@ func ApplyOneImageAndExport(in image.Image,
 		}
 	}
 
-	if newPalette == nil { // in case of dithering without input palette
-		if cont.CpcPlus {
-			newPalette = constants.CpcPlusPalette
-		} else {
-			newPalette = constants.CpcOldPalette
-		}
-	}
-
 	if len(palette) > 0 {
 		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
 	} else {
@@ -183,14 +175,6 @@ func ApplyOneImage(in image.Image,
 
 	if cont.Reducer > -1 {
 		out = convert.Reducer(out, cont.Reducer)
-	}
-
-	if newPalette == nil { // in case of dithering without input palette
-		if cont.CpcPlus {
-			newPalette = constants.CpcPlusPalette
-		} else {
-			newPalette = constants.CpcOldPalette
-		}
 	}
 
 	if len(palette) > 0 {
