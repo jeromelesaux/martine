@@ -50,6 +50,7 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 	}
 	me.TileImages.Update(&tilesCanvas, len(tiles)-1, len(tiles[0])-1)
 	me.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(me.Palette))
+	canvas.Refresh(&me.TileImages.Table)
 	refreshUI.OnTapped()
 }
 
@@ -103,7 +104,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 	})
 
 	exportButton := widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
-		m.exportDialog(m.window)
+		m.exportTilemapDialog(m.window)
 	})
 
 	applyButton := widget.NewButtonWithIcon("Compute", theme.VisibilityIcon(), func() {
@@ -139,7 +140,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 	tm.Height = widget.NewEntry()
 	tm.Height.Validator = validation.NewRegexp("\\d+", "Must contain a number")
 
-	tm.TileImages = custom_widget.NewEmptyImageTable(fyne.NewSize(20, 20))
+	tm.TileImages = custom_widget.NewEmptyImageTable(fyne.NewSize(15., 15.))
 
 	return container.New(
 		layout.NewGridLayoutWithColumns(2),
