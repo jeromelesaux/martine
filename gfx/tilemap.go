@@ -437,8 +437,6 @@ func TilemapMemory(mode uint8, size constants.Size, in image.Image, cont *export
 	var palette color.Palette
 	var tilesImagesTilemap [][]image.Image
 	nbPixelWidth := 0
-	nbTilePixelLarge := 20
-	nbTilePixelHigh := 25
 
 	switch mode {
 	case 0:
@@ -458,12 +456,6 @@ func TilemapMemory(mode uint8, size constants.Size, in image.Image, cont *export
 	if cont.Size.Height != 16 && cont.Size.Height != 8 {
 		fmt.Fprintf(os.Stderr, "%v\n", errors.ErrorWidthSizeNotAccepted)
 		return nil, tilesImagesTilemap, palette, errors.ErrorWidthSizeNotAccepted
-	}
-	switch cont.Size.Width {
-	case 4:
-		nbTilePixelLarge = 20
-	case 2:
-		nbTilePixelLarge = 40
 	}
 	if !cont.CustomDimension {
 		fmt.Fprintf(os.Stderr, "You must set height and width to define the tile dimensions (options -h and -w) error:%v\n", errors.ErrorCustomDimensionMustBeSet)
@@ -486,43 +478,19 @@ func TilemapMemory(mode uint8, size constants.Size, in image.Image, cont *export
 	_, m = convert.DowngradingWithPalette(m, palette)
 
 	analyze := transformation.AnalyzeTilesBoard(m, cont.Size)
-	scenes := make([]*image.NRGBA, 0)
-	os.Mkdir(cont.OutputPath+string(filepath.Separator)+"scenes", os.ModePerm)
-	index := 0
-	for y := 0; y < m.Bounds().Max.Y; y += (nbTilePixelHigh * analyze.TileSize.Height) {
-		for x := 0; x < m.Bounds().Max.X; x += (nbTilePixelLarge * analyze.TileSize.Width) {
-			m1 := image.NewNRGBA(image.Rect(0, 0, nbTilePixelLarge*analyze.TileSize.Width, nbTilePixelHigh*analyze.TileSize.Height))
-			// copy of the map
-			for i := 0; i < nbTilePixelLarge*analyze.TileSize.Width; i++ {
-				for j := 0; j < nbTilePixelHigh*analyze.TileSize.Height; j++ {
-					var c color.Color = color.RGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
-					if x+i < m.Bounds().Max.X && y+j < m.Bounds().Max.Y {
-						c = m.At(x+i, y+j)
-					}
-					m1.Set(i, j, c)
-				}
-			}
-			// store the map in the slice
-			scenes = append(scenes, m1)
-			index++
-		}
-	}
 
 	// now thread all maps images
-
-	for _, v := range scenes {
-		for y := 0; y < v.Bounds().Max.Y; y += analyze.TileSize.Height {
-			tilesmap := make([]image.Image, 0)
-			for x := 0; x < v.Bounds().Max.X; x += analyze.TileSize.Width {
-				sprt, err := transformation.ExtractTile(v, analyze.TileSize, x, y)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
-					break
-				}
-				tilesmap = append(tilesmap, sprt.Image())
+	for y := 0; y < m.Bounds().Max.Y; y += analyze.TileSize.Height {
+		tilesmap := make([]image.Image, 0)
+		for x := 0; x < m.Bounds().Max.X; x += analyze.TileSize.Width {
+			sprt, err := transformation.ExtractTile(m, analyze.TileSize, x, y)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
+				break
 			}
-			tilesImagesTilemap = append(tilesImagesTilemap, tilesmap)
+			tilesmap = append(tilesmap, sprt.Image())
 		}
+		tilesImagesTilemap = append(tilesImagesTilemap, tilesmap)
 	}
 
 	// applyOneImage
