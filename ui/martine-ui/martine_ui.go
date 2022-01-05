@@ -28,6 +28,7 @@ import (
 	"github.com/jeromelesaux/martine/export/net"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
+	w2 "github.com/jeromelesaux/martine/ui/martine-ui/widget"
 )
 
 var (
@@ -222,7 +223,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 						layout.NewHBoxLayout(),
 						forcePalette,
 						widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
-							swapColor(m.SetPalette, tm.Palette, m.window)
+							w2.SwapColor(m.SetPalette, tm.Palette, m.window)
 						}),
 						widget.NewButtonWithIcon("export", theme.DocumentSaveIcon(), func() {
 							d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
@@ -509,7 +510,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 	me.OriginalImage = canvas.Image{}
 	me.PaletteImage = canvas.Image{}
 
-	winFormat := NewWinFormatRadio(me)
+	winFormat := w2.NewWinFormatRadio(me)
 
 	colorReducerLabel := widget.NewLabel("Color reducer")
 	colorReducer := widget.NewSelect([]string{"none", "Lower", "Medium", "Strong"}, func(s string) {
@@ -526,7 +527,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 	})
 	colorReducer.SetSelected("none")
 
-	resize := NewResizeAlgorithmSelect(me)
+	resize := w2.NewResizeAlgorithmSelect(me)
 	resizeLabel := widget.NewLabel("Resize algorithm")
 
 	ditheringMultiplier := widget.NewSlider(0., 2.5)
@@ -535,7 +536,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 	ditheringMultiplier.OnChanged = func(f float64) {
 		me.DitheringMultiplier = f
 	}
-	dithering := NewDitheringSelect(me)
+	dithering := w2.NewDitheringSelect(me)
 
 	ditheringWithQuantification := widget.NewCheck("With quantification", func(b bool) {
 		me.WithQuantification = b
@@ -653,7 +654,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 						layout.NewHBoxLayout(),
 						forcePalette,
 						widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
-							swapColor(m.SetPalette, me.Palette, m.window)
+							w2.SwapColor(m.SetPalette, me.Palette, m.window)
 						}),
 						widget.NewButtonWithIcon("export", theme.DocumentSaveIcon(), func() {
 							d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {

@@ -1,4 +1,4 @@
-package ui
+package widget
 
 import (
 	"fyne.io/fyne/v2/widget"

@@ -1,4 +1,4 @@
-package ui
+package widget
 
 import (
 	"image/color"
@@ -13,7 +13,7 @@ import (
 var colorIndex int
 var colorToChange color.Color
 
-func swapColor(setPalette func(color.Palette), p color.Palette, w fyne.Window) {
+func SwapColor(setPalette func(color.Palette), p color.Palette, w fyne.Window) {
 
 	pt := ui.NewPaletteTable(p, colorChanged, indexColor, nil)
 	var cont *fyne.Container
