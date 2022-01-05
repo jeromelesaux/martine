@@ -5,20 +5,21 @@ import (
 	"os"
 	"strconv"
 
+	"fyne.io/fyne/v2"
 	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
 
 type TilemapMenu struct {
 	ImageMenu
-	result     *transformation.AnalyzeBoard
-	TileImages custom_widget.ImageTable
+	Result     *transformation.AnalyzeBoard
+	TileImages *custom_widget.ImageTable
 }
 
 func NewTilemapMenu() *TilemapMenu {
 	return &TilemapMenu{
-		result:     &transformation.AnalyzeBoard{},
-		TileImages: custom_widget.ImageTable{},
+		Result:     &transformation.AnalyzeBoard{},
+		TileImages: custom_widget.NewEmptyImageTable(fyne.NewSize(40, 40)),
 	}
 }
 
