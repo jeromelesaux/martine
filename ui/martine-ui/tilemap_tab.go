@@ -140,7 +140,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 	tm.Height = widget.NewEntry()
 	tm.Height.Validator = validation.NewRegexp("\\d+", "Must contain a number")
 
-	tm.TileImages = custom_widget.NewEmptyImageTable(fyne.NewSize(15., 15.))
+	tm.TileImages = custom_widget.NewEmptyImageTable(fyne.NewSize(menu.TileSize, menu.TileSize))
 
 	return container.New(
 		layout.NewGridLayoutWithColumns(2),

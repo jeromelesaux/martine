@@ -10,7 +10,7 @@ import (
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
 
-var sizeTile float32 = 15.
+var TileSize float32 = 20.
 
 type TilemapMenu struct {
 	ImageMenu
@@ -29,7 +29,7 @@ type TilemapMenu struct {
 func NewTilemapMenu() *TilemapMenu {
 	return &TilemapMenu{
 		Result:     &transformation.AnalyzeBoard{},
-		TileImages: custom_widget.NewEmptyImageTable(fyne.NewSize(sizeTile, sizeTile)),
+		TileImages: custom_widget.NewEmptyImageTable(fyne.NewSize(TileSize, TileSize)),
 	}
 }
 
