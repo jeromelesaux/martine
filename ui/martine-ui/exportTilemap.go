@@ -8,6 +8,8 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
@@ -84,5 +86,34 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 }
 
 func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
-
+	pi := dialog.NewProgressInfinite("Saving....", "Please wait.", m.window)
+	pi.Show()
+	context := m.NewContext(&t.ImageMenu)
+	if t.ExportImpdraw {
+		if err := gfx.ExportImpdrawTilemap(t.Result, "tilemap", t.Palette, uint8(t.Mode), context.Size, t.CpcImage.Image, context); err != nil {
+			pi.Hide()
+			dialog.NewError(err, m.window).Show()
+		}
+		if context.Dsk {
+			if err := file.ImportInDsk(t.OriginalImagePath.Path(), context); err != nil {
+				pi.Hide()
+				dialog.NewError(err, m.window).Show()
+				return
+			}
+		}
+		pi.Hide()
+	} else {
+		if err := gfx.ExportTilemap(t.Result, "tilemap", t.Palette, uint8(t.Mode), t.CpcImage.Image, context); err != nil {
+			pi.Hide()
+			dialog.NewError(err, m.window).Show()
+		}
+		if context.Dsk {
+			if err := file.ImportInDsk(t.OriginalImagePath.Path(), context); err != nil {
+				pi.Hide()
+				dialog.NewError(err, m.window).Show()
+				return
+			}
+		}
+		pi.Hide()
+	}
 }

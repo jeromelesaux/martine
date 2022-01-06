@@ -28,6 +28,9 @@ func SwapColor(setPalette func(color.Palette), p color.Palette, w fyne.Window) {
 			picker.Show()
 		}),
 		widget.NewButton("swap", func() {
+			if p == nil {
+				return
+			}
 			p[colorIndex] = colorToChange
 			npt := ui.NewPaletteTable(p, colorChanged, indexColor, nil)
 			pt = npt
