@@ -12,7 +12,7 @@ import (
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
 
-var AnimateSize float32 = 20.
+var AnimateSize float32 = 150.
 
 type AnimateMenu struct {
 	ImageMenu
