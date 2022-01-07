@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
@@ -18,6 +19,8 @@ type AnimateMenu struct {
 	Originalmages          []canvas.Image
 	AnimateImages          *custom_widget.ImageTable
 	DeltaCollection        *transformation.DeltaCollection
+	InitialAddress         *widget.Entry
+	RawImages              [][]byte
 	ExportDsk              bool
 	ExportText             bool
 	ExportWithAmsdosHeader bool
@@ -92,7 +95,7 @@ func (i *AnimateMenu) CmdLine() string {
 		exec += " -saturation " + fmt.Sprintf("%.2f", i.Saturation)
 	}
 
-	exec += " -tilemap"
+	exec += " -animate"
 	i.CmdLineGenerate = exec
 	return exec
 }

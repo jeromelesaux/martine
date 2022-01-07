@@ -32,6 +32,7 @@ type MartineUI struct {
 	window  fyne.Window
 	main    *menu.ImageMenu
 	tilemap *menu.TilemapMenu
+	animate *menu.AnimateMenu
 
 	exportDsk              bool
 	exportText             bool
@@ -48,6 +49,7 @@ func NewMartineUI() *MartineUI {
 	return &MartineUI{
 		main:    &menu.ImageMenu{},
 		tilemap: &menu.TilemapMenu{},
+		animate: &menu.AnimateMenu{},
 	}
 }
 
@@ -70,6 +72,7 @@ func (m *MartineUI) NewTabs() *container.AppTabs {
 	return container.NewAppTabs(
 		container.NewTabItem("Image", m.newImageTransfertTab(m.main)),
 		container.NewTabItem("Tile", m.newTilemapTab(m.tilemap)),
+		container.NewTabItem("Animate", m.newAnimateTab(m.animate)),
 	)
 }
 

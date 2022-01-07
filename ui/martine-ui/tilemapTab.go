@@ -143,104 +143,110 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 	tm.TileImages = custom_widget.NewEmptyImageTable(fyne.NewSize(menu.TileSize, menu.TileSize))
 
 	return container.New(
-		layout.NewGridLayoutWithColumns(2),
+		layout.NewGridLayoutWithRows(2),
 		container.New(
-			layout.NewGridLayoutWithRows(2),
-			container.NewScroll(
-				&tm.OriginalImage),
-			container.NewScroll(
-				tm.TileImages),
-		),
-		container.New(
-			layout.NewVBoxLayout(),
+			layout.NewGridLayoutWithColumns(2),
 			container.New(
-				layout.NewHBoxLayout(),
-				openFileWidget,
-				paletteOpen,
-				applyButton,
-				exportButton,
-				importOpen,
-				forceUIRefresh,
+				layout.NewGridLayoutWithColumns(1),
+				container.NewScroll(
+					&tm.OriginalImage),
 			),
 			container.New(
-				layout.NewHBoxLayout(),
-				isPlus,
+				layout.NewVBoxLayout(),
 				container.New(
 					layout.NewVBoxLayout(),
 					container.New(
-						layout.NewVBoxLayout(),
-						modeLabel,
-						modes,
+						layout.NewHBoxLayout(),
+						openFileWidget,
+						paletteOpen,
+						applyButton,
+						exportButton,
+						importOpen,
+						forceUIRefresh,
 					),
 					container.New(
 						layout.NewHBoxLayout(),
-						widthLabel,
-						tm.Width,
+						isPlus,
+						container.New(
+							layout.NewVBoxLayout(),
+							container.New(
+								layout.NewVBoxLayout(),
+								modeLabel,
+								modes,
+							),
+							container.New(
+								layout.NewHBoxLayout(),
+								widthLabel,
+								tm.Width,
+							),
+							container.New(
+								layout.NewHBoxLayout(),
+								heightLabel,
+								tm.Height,
+							),
+						),
 					),
 					container.New(
-						layout.NewHBoxLayout(),
-						heightLabel,
-						tm.Height,
+						layout.NewGridLayoutWithRows(6),
+
+						container.New(
+							layout.NewGridLayoutWithColumns(2),
+							&tm.PaletteImage,
+							container.New(
+								layout.NewHBoxLayout(),
+								forcePalette,
+								widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
+									w2.SwapColor(m.SetPalette, tm.Palette, m.window)
+								}),
+								widget.NewButtonWithIcon("export", theme.DocumentSaveIcon(), func() {
+									d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
+										if err != nil {
+											dialog.ShowError(err, m.window)
+											return
+										}
+										if uc == nil {
+											return
+										}
+
+										paletteExportPath := uc.URI().Path()
+										uc.Close()
+										os.Remove(uc.URI().Path())
+										context := export.NewMartineContext(filepath.Base(paletteExportPath), paletteExportPath)
+										context.NoAmsdosHeader = false
+										if err := file.SaveKit(paletteExportPath+".kit", tm.Palette, false); err != nil {
+											dialog.ShowError(err, m.window)
+										}
+										if err := file.SavePal(paletteExportPath+".pal", tm.Palette, uint8(tm.Mode), false); err != nil {
+											dialog.ShowError(err, m.window)
+										}
+									}, m.window)
+									d.Show()
+								}),
+							),
+						),
+
+						container.New(
+							layout.NewVBoxLayout(),
+							widget.NewButton("show cmd", func() {
+								e := widget.NewMultiLineEntry()
+								e.SetText(tm.CmdLine())
+
+								d := dialog.NewCustom("Command line generated",
+									"Ok",
+									e,
+									m.window)
+								fmt.Printf("%s\n", tm.CmdLine())
+								size := m.window.Content().Size()
+								size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
+								d.Resize(size)
+								d.Show()
+							}),
+						),
 					),
-				),
-			),
-			container.New(
-				layout.NewGridLayoutWithRows(6),
-
-				container.New(
-					layout.NewGridLayoutWithColumns(2),
-					&tm.PaletteImage,
-					container.New(
-						layout.NewHBoxLayout(),
-						forcePalette,
-						widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
-							w2.SwapColor(m.SetPalette, tm.Palette, m.window)
-						}),
-						widget.NewButtonWithIcon("export", theme.DocumentSaveIcon(), func() {
-							d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
-								if err != nil {
-									dialog.ShowError(err, m.window)
-									return
-								}
-								if uc == nil {
-									return
-								}
-
-								paletteExportPath := uc.URI().Path()
-								uc.Close()
-								os.Remove(uc.URI().Path())
-								context := export.NewMartineContext(filepath.Base(paletteExportPath), paletteExportPath)
-								context.NoAmsdosHeader = false
-								if err := file.SaveKit(paletteExportPath+".kit", tm.Palette, false); err != nil {
-									dialog.ShowError(err, m.window)
-								}
-								if err := file.SavePal(paletteExportPath+".pal", tm.Palette, uint8(tm.Mode), false); err != nil {
-									dialog.ShowError(err, m.window)
-								}
-							}, m.window)
-							d.Show()
-						}),
-					),
-				),
-
-				container.New(
-					layout.NewVBoxLayout(),
-					widget.NewButton("show cmd", func() {
-						e := widget.NewMultiLineEntry()
-						e.SetText(tm.CmdLine())
-
-						d := dialog.NewCustom("Command line generated",
-							"Ok",
-							e,
-							m.window)
-						fmt.Printf("%s\n", tm.CmdLine())
-						size := m.window.Content().Size()
-						size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
-						d.Resize(size)
-						d.Show()
-					}),
 				),
 			),
 		),
+		container.NewScroll(
+			tm.TileImages),
 	)
 }
