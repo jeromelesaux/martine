@@ -29,6 +29,7 @@ type AnimateMenu struct {
 	ExportCompression      int
 	ExportFolderPath       string
 	ExportImpdraw          bool
+	IsEmpty                bool
 }
 
 func NewAnimateMenu() *AnimateMenu {

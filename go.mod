@@ -14,7 +14,7 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20211213063430-748e38ca8aec // indirect
 	github.com/godbus/dbus/v5 v5.0.6 // indirect
 	github.com/jeromelesaux/dsk v0.0.0-20211026081936-b5ada60f4119
-	github.com/jeromelesaux/fyne-io v0.0.0-20220107131213-4acefb413178
+	github.com/jeromelesaux/fyne-io v0.0.0-20220107135903-880b32df29da
 	github.com/jeromelesaux/m4client v0.0.0-20210622081436-71b6d2b1adf9
 	github.com/jeromelesaux/zx0 v0.0.0-20210531105834-67f70577550f
 	github.com/oliamb/cutter v0.2.2

@@ -2,8 +2,6 @@ package ui
 
 import (
 	"fmt"
-	"image"
-	"image/draw"
 	"image/gif"
 	"os"
 	"path/filepath"
@@ -71,7 +69,12 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 					dialog.ShowError(err, m.window)
 					return
 				}
-				a.AnimateImages.AppendImage(*canvas.NewImageFromImage(img), 0)
+				if a.IsEmpty {
+					a.AnimateImages.SubstitueImage(0, 0, *canvas.NewImageFromImage(img))
+				} else {
+					a.AnimateImages.AppendImage(*canvas.NewImageFromImage(img), 0)
+				}
+				a.IsEmpty = false
 				pi.Hide()
 			} else {
 				fr, err := os.Open(path.Path())
@@ -88,8 +91,13 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 					return
 				}
 				imgs := animate.ConvertToImage(*gifImages)
-				for _, img := range imgs {
-					a.AnimateImages.AppendImage(*canvas.NewImageFromImage(img), 0)
+				for index, img := range imgs {
+					if index == 0 {
+						a.AnimateImages.SubstitueImage(0, 0, *canvas.NewImageFromImage(img))
+					} else {
+						a.AnimateImages.AppendImage(*canvas.NewImageFromImage(img), 0)
+					}
+					a.IsEmpty = false
 				}
 				pi.Hide()
 			}
@@ -101,14 +109,8 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	})
 
 	resetButton := widget.NewButtonWithIcon("Reset", theme.CancelIcon(), func() {
-		img := image.NewRGBA(image.Rectangle{image.Point{0, 0}, image.Point{int(menu.AnimateSize), int(menu.AnimateSize)}})
-		bg := theme.BackgroundColor()
-		draw.Draw(img, img.Bounds(), &image.Uniform{bg}, image.Point{0, 0}, draw.Src)
-		canvasImg := canvas.NewImageFromImage(img)
-		images := make([][]canvas.Image, 1)
-		images[0] = make([]canvas.Image, 1)
-		images[0][0] = *canvasImg
-		a.AnimateImages.Update(&images, 1, 1)
+		a.AnimateImages.Reset()
+		a.IsEmpty = true
 	})
 
 	exportButton := widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
@@ -152,7 +154,6 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 
 	initalAddressLabel := widget.NewLabel("initial address")
 	a.InitialAddress = widget.NewEntry()
-	a.InitialAddress.Validator = validation.NewRegexp("#\\s+", "Must be a hexadecimal address")
 
 	return container.New(
 		layout.NewGridLayoutWithRows(2),
@@ -184,7 +185,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 				container.New(
 					layout.NewVBoxLayout(),
 					container.New(
-						layout.NewVBoxLayout(),
+						layout.NewHBoxLayout(),
 						modeLabel,
 						modes,
 					),
