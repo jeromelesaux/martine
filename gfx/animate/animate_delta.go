@@ -20,6 +20,77 @@ import (
 	zx0 "github.com/jeromelesaux/zx0/encode"
 )
 
+func DeltaPackingMemory(images []image.Image, ex *export.MartineContext, initialAddress uint16, mode uint8) ([]*transformation.DeltaCollection, [][]byte, error) {
+	var isSprite bool
+	var maxImages = 22
+	var pad int = 1
+	var err error
+	if !ex.CustomDimension && !ex.SpriteHard {
+		isSprite = false
+	}
+	if len(images) <= 1 {
+		return nil, nil, fmt.Errorf("need more than one image to proceed")
+	}
+	if len(images) > maxImages {
+		fmt.Fprintf(os.Stderr, "Warning gif exceed 30 images. Will corrupt the number of images.")
+		pad = len(images) / maxImages
+	}
+	rawImages := make([][]byte, 0)
+	deltaData := make([]*transformation.DeltaCollection, 0)
+	var palette color.Palette
+	var raw []byte
+
+	// now transform images as win or scr
+	fmt.Printf("Let's go transform images files in win or scr\n")
+
+	_, _, palette, _, err = gfx.ApplyOneImage(images[0], ex, int(mode), palette, mode)
+	if err != nil {
+		return nil, nil, err
+	}
+	for i := 0; i < len(images); i += pad {
+		in := images[i]
+		raw, _, _, _, err = gfx.ApplyOneImage(in, ex, int(mode), palette, mode)
+		if err != nil {
+			return nil, nil, err
+		}
+		fw, _ := os.Create(ex.OutputPath + fmt.Sprintf("/%.2d.png", i))
+		png.Encode(fw, in)
+		fw.Close()
+		rawImages = append(rawImages, raw)
+		fmt.Printf("Image [%d] proceed\n", i)
+	}
+
+	lineOctetsWidth := ex.LineWidth
+	x0, y0, err := transformation.CpcCoordinates(initialAddress, 0xC000, lineOctetsWidth)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error while computing cpc coordinates :%v\n", err)
+	}
+
+	fmt.Printf("Let's go deltapacking raw images\n")
+	realSize := &constants.Size{Width: ex.Size.Width, Height: ex.Size.Height}
+	realSize.Width = realSize.ModeWidth(mode)
+	var lastImage []byte
+	for i := 0; i < len(rawImages)-1; i++ {
+		fmt.Printf("Compare image [%d] with [%d] ", i, i+1)
+		d1 := rawImages[i]
+		d2 := rawImages[i+1]
+		if len(d1) != len(d2) {
+			return nil, nil, errors.ErrorSizeDiffers
+		}
+		lastImage = d2
+		dc := transformation.Delta(d1, d2, isSprite, *realSize, mode, uint16(x0), uint16(y0), lineOctetsWidth)
+		deltaData = append(deltaData, dc)
+		fmt.Printf("%d bytes differ from the both images\n", len(dc.Items))
+	}
+	fmt.Printf("Compare image [%d] with [%d] ", len(rawImages)-1, 0)
+	d1 := lastImage
+	d2 := rawImages[0]
+	dc := transformation.Delta(d1, d2, isSprite, ex.Size, mode, uint16(x0), uint16(y0), lineOctetsWidth)
+	deltaData = append(deltaData, dc)
+	fmt.Printf("%d bytes differ from the both images\n", len(dc.Items))
+	return deltaData, rawImages, nil
+}
+
 func DeltaPacking(gitFilepath string, ex *export.MartineContext, initialAddress uint16, mode uint8) error {
 	var isSprite = true
 	var maxImages = 22
@@ -149,6 +220,92 @@ func filloutGif(g gif.GIF, ex *export.MartineContext) []image.Image {
 		c = append(c, img)
 	}
 	return c
+}
+
+func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaCollection, palette color.Palette, ex *export.MartineContext, initialAddress uint16, mode uint8) (string, error) {
+	var sourceCode string = deltaCodeDelta
+	var dataCode string
+	var deltaIndex []string
+	var code string
+	// copy of the sprite
+	dataCode += "sprite:\n"
+	if ex.Compression != -1 {
+		sourceCode = depackRoutine
+		fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
+		data := zx0.Encode(imageReference)
+		dataCode += file.FormatAssemblyDatabyte(data, "\n")
+	} else {
+		dataCode += file.FormatAssemblyDatabyte(imageReference, "\n")
+	}
+	// copy of all delta
+	for i := 0; i < len(delta); i++ {
+		dc := delta[i]
+		data, err := dc.Marshall()
+		if err != nil {
+			return "", err
+		}
+		name := fmt.Sprintf("delta%.2d", i)
+		dataCode += name + ":\n"
+		if ex.Compression != -1 {
+			fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
+			d := zx0.Encode(data)
+			dataCode += file.FormatAssemblyDatabyte(d, "\n")
+		} else {
+			dataCode += file.FormatAssemblyDatabyte(data, "\n")
+		}
+		deltaIndex = append(deltaIndex, name)
+	}
+	dataCode += "table_delta:\n"
+	file.ByteToken = "dw"
+	dataCode += file.FormatAssemblyString(deltaIndex, "\n")
+
+	file.ByteToken = "db"
+	dataCode += "palette:\n" + file.ByteToken + " "
+	dataCode += file.FormatAssemblyBasicPalette(palette, "\n")
+
+	// replace the initial address
+	address := fmt.Sprintf("#%.4x", initialAddress)
+	header := strings.Replace(sourceCode, "$INITIALADDRESS$", address, 1)
+
+	// replace number of colors
+	nbColors := fmt.Sprintf("%d", len(palette))
+	header = strings.Replace(header, "$NBCOLORS$", nbColors, 1)
+
+	// replace the number of delta
+	nbDelta := fmt.Sprintf("%d", len(delta))
+	header = strings.Replace(header, "$NBDELTA$", nbDelta, 1)
+
+	// replace char large for the screen
+	charLarge := fmt.Sprintf("#%.4x", 0xC000+ex.LineWidth)
+	header = strings.Replace(header, "$LIGNELARGE$", charLarge, 1)
+
+	// replace heigth
+	height := fmt.Sprintf("%d", ex.Size.Height)
+	header = strings.Replace(header, "$HAUT$", height, 1)
+
+	// replace width
+	var width string = fmt.Sprintf("%d", ex.Size.ModeWidth(mode))
+	header = strings.Replace(header, "$LARGE$", width, 1)
+
+	var modeSet string
+	switch mode {
+	case 0:
+		modeSet = "0"
+	case 1:
+		modeSet = "1"
+	case 2:
+		modeSet = "2"
+	}
+
+	// replace mode
+	header = strings.Replace(header, "$SETMODE$", modeSet, 1)
+
+	code += header
+	code += dataCode
+	code += "\nend\n"
+	code += "\nsave'disc.bin',#200, end - start,DSK,'delta.dsk'"
+
+	return code, nil
 }
 
 func exportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaCollection, palette color.Palette, ex *export.MartineContext, initialAddress uint16, mode uint8, filename string) error {
