@@ -53,9 +53,6 @@ func DeltaPackingMemory(images []image.Image, ex *export.MartineContext, initial
 		if err != nil {
 			return nil, nil, err
 		}
-		fw, _ := os.Create(ex.OutputPath + fmt.Sprintf("/%.2d.png", i))
-		png.Encode(fw, in)
-		fw.Close()
 		rawImages = append(rawImages, raw)
 		fmt.Printf("Image [%d] proceed\n", i)
 	}
@@ -228,7 +225,7 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	var deltaIndex []string
 	var code string
 	// copy of the sprite
-	dataCode += "sprite:\n"
+	dataCode += "\nsprite:\n"
 	if ex.Compression != -1 {
 		sourceCode = depackRoutine
 		fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
@@ -799,4 +796,5 @@ ret
 ;--- variables memoires -----
 pixel db 0 
 buffer dw 0
-;----------------------------`
+;----------------------------
+`

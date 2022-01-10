@@ -34,9 +34,10 @@ type AnimateMenu struct {
 
 func NewAnimateMenu() *AnimateMenu {
 	return &AnimateMenu{
-		Originalmages:   make([]canvas.Image, 0),
-		AnimateImages:   custom_widget.NewEmptyImageTable(fyne.NewSize(AnimateSize, AnimateSize)),
-		DeltaCollection: make([]*transformation.DeltaCollection, 1),
+		Originalmages:     make([]canvas.Image, 0),
+		AnimateImages:     custom_widget.NewEmptyImageTable(fyne.NewSize(AnimateSize, AnimateSize)),
+		DeltaCollection:   make([]*transformation.DeltaCollection, 1),
+		ExportCompression: -1,
 	}
 }
 
@@ -94,6 +95,11 @@ func (i *AnimateMenu) CmdLine() string {
 	}
 	if i.Saturation != 0 {
 		exec += " -saturation " + fmt.Sprintf("%.2f", i.Saturation)
+	}
+
+	if i.IsSprite {
+		address := fmt.Sprintf("%x", i.InitialAddress.Text)
+		exec += " -address 0x" + address
 	}
 
 	exec += " -animate"

@@ -130,6 +130,7 @@ func (m *MartineUI) NewContext(me *menu.ImageMenu, checkOriginalImage bool) *exp
 		}
 		context.Size.Height = height
 		context.Size.Width = width
+		context.CustomDimension = true
 	}
 	if me.IsHardSprite {
 		context.Size.Height = 16

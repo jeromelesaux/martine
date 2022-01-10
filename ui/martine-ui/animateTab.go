@@ -43,6 +43,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 					if context == nil {
 						return
 					}
+					context.Compression = a.ExportCompression
 					hexa := fmt.Sprintf("%x", a.InitialAddress.Text)
 					address, err := strconv.Atoi(hexa)
 					if err != nil {
@@ -94,6 +95,7 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 	if context == nil {
 		return
 	}
+	context.Compression = a.ExportCompression
 	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
 	pi.Show()
 	hexa := fmt.Sprintf("%x", a.InitialAddress.Text)
@@ -243,6 +245,18 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	a.InitialAddress = widget.NewEntry()
 	a.InitialAddress.SetText("c000")
 
+	isSprite := widget.NewCheck("Is sprite", func(b bool) {
+		a.IsSprite = b
+	})
+	a.ExportCompression = -1
+	compressData := widget.NewCheck("Compress data", func(b bool) {
+		if b {
+			a.ExportCompression = 0
+		} else {
+			a.ExportCompression = -1
+		}
+	})
+
 	return container.New(
 		layout.NewGridLayoutWithRows(2),
 		container.New(
@@ -271,21 +285,29 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 					a.InitialAddress,
 				),
 				container.New(
-					layout.NewVBoxLayout(),
+					layout.NewGridLayoutWithColumns(2),
 					container.New(
-						layout.NewHBoxLayout(),
-						modeLabel,
-						modes,
+						layout.NewVBoxLayout(),
+						isSprite,
+						compressData,
 					),
 					container.New(
-						layout.NewHBoxLayout(),
-						widthLabel,
-						a.Width,
-					),
-					container.New(
-						layout.NewHBoxLayout(),
-						heightLabel,
-						a.Height,
+						layout.NewVBoxLayout(),
+						container.New(
+							layout.NewHBoxLayout(),
+							modeLabel,
+							modes,
+						),
+						container.New(
+							layout.NewHBoxLayout(),
+							widthLabel,
+							a.Width,
+						),
+						container.New(
+							layout.NewHBoxLayout(),
+							heightLabel,
+							a.Height,
+						),
 					),
 				),
 			),
