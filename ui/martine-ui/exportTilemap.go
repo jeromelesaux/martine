@@ -88,7 +88,7 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 	pi := dialog.NewProgressInfinite("Saving....", "Please wait.", m.window)
 	pi.Show()
-	context := m.NewContext(&t.ImageMenu)
+	context := m.NewContext(&t.ImageMenu, true)
 	if t.ExportImpdraw {
 		if err := gfx.ExportImpdrawTilemap(t.Result, "tilemap", t.Palette, uint8(t.Mode), context.Size, t.CpcImage.Image, context); err != nil {
 			pi.Hide()

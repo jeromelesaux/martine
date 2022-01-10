@@ -24,7 +24,7 @@ import (
 )
 
 func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
-	context := m.NewContext(&me.ImageMenu)
+	context := m.NewContext(&me.ImageMenu, true)
 	if context == nil {
 		return
 	}

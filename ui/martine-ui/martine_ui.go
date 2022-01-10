@@ -76,11 +76,16 @@ func (m *MartineUI) NewTabs() *container.AppTabs {
 	)
 }
 
-func (m *MartineUI) NewContext(me *menu.ImageMenu) *export.MartineContext {
-	if me.OriginalImagePath == nil {
+func (m *MartineUI) NewContext(me *menu.ImageMenu, checkOriginalImage bool) *export.MartineContext {
+	if checkOriginalImage && me.OriginalImagePath == nil {
 		return nil
 	}
-	context := export.NewMartineContext(me.OriginalImagePath.Path(), "")
+	var context *export.MartineContext
+	if checkOriginalImage {
+		context = export.NewMartineContext(me.OriginalImagePath.Path(), "")
+	} else {
+		context = export.NewMartineContext("", "")
+	}
 	context.CpcPlus = me.IsCpcPlus
 	context.Overscan = me.IsFullScreen
 	context.DitheringMultiplier = me.DitheringMultiplier
@@ -140,7 +145,9 @@ func (m *MartineUI) NewContext(me *menu.ImageMenu) *export.MartineContext {
 	}
 	context.DitheringWithQuantification = me.WithQuantification
 	context.OutputPath = m.exportFolderPath
-	context.InputPath = me.OriginalImagePath.Path()
+	if checkOriginalImage {
+		context.InputPath = me.OriginalImagePath.Path()
+	}
 	context.Json = m.exportJson
 	context.Ascii = m.exportText
 	context.NoAmsdosHeader = !m.exportWithAmsdosHeader

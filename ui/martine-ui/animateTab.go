@@ -25,7 +25,94 @@ import (
 	w2 "github.com/jeromelesaux/martine/ui/martine-ui/widget"
 )
 
+func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
+	cont := container.NewVBox(
+		container.NewHBox(
+			widget.NewButtonWithIcon("Export into folder", theme.DocumentSaveIcon(), func() {
+				fo := dialog.NewFolderOpen(func(lu fyne.ListableURI, err error) {
+					if err != nil {
+						dialog.ShowError(err, m.window)
+						return
+					}
+					if lu == nil {
+						// cancel button
+						return
+					}
+
+					context := m.NewContext(&m.animate.ImageMenu, false)
+					if context == nil {
+						return
+					}
+					hexa := fmt.Sprintf("%x", a.InitialAddress.Text)
+					address, err := strconv.Atoi(hexa)
+					if err != nil {
+						dialog.ShowError(err, m.window)
+						return
+					}
+					m.exportFolderPath = lu.Path()
+					fmt.Println(m.exportFolderPath)
+					pi := dialog.NewProgressInfinite("Exporting", "Please wait.", m.window)
+					pi.Show()
+					code, err := animate.ExportDeltaAnimate(
+						a.RawImages[0],
+						a.DeltaCollection,
+						a.Palette,
+						context,
+						uint16(address),
+						uint8(a.Mode),
+					)
+					pi.Hide()
+					if err != nil {
+						dialog.ShowError(err, m.window)
+						return
+					}
+					f, err := os.Create(m.exportFolderPath + string(filepath.Separator) + "code.asm")
+					if err != nil {
+						dialog.ShowError(err, m.window)
+						return
+					}
+					defer f.Close()
+					_, err = f.Write([]byte(code))
+					if err != nil {
+						dialog.ShowError(err, m.window)
+						return
+					}
+					dialog.NewInformation("Export animation", "Your export ended", m.window)
+				}, m.window)
+				fo.Show()
+			}),
+		),
+	)
+
+	d := dialog.NewCustom("Export  animation", "Ok", cont, w)
+	d.Resize(w.Canvas().Size())
+	d.Show()
+}
+
 func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
+	context := m.NewContext(&a.ImageMenu, false)
+	if context == nil {
+		return
+	}
+	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
+	pi.Show()
+	hexa := fmt.Sprintf("%x", a.InitialAddress.Text)
+	address, err := strconv.Atoi(hexa)
+	if err != nil {
+		pi.Hide()
+		dialog.ShowError(err, m.window)
+		return
+	}
+	// get all images from widget imagetable
+	imgs := a.AnimateImages.Images()[0]
+	deltaCollection, rawImages, err := animate.DeltaPackingMemory(imgs, context, uint16(address), uint8(a.Mode))
+	pi.Hide()
+	if err != nil {
+		dialog.NewError(err, m.window).Show()
+		return
+	}
+	a.DeltaCollection = deltaCollection
+	a.RawImages = rawImages
 
 }
 
@@ -114,7 +201,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	})
 
 	exportButton := widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
-		m.exportTilemapDialog(m.window)
+		m.exportAnimationDialog(a, m.window)
 	})
 
 	applyButton := widget.NewButtonWithIcon("Compute", theme.VisibilityIcon(), func() {
@@ -154,6 +241,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 
 	initalAddressLabel := widget.NewLabel("initial address")
 	a.InitialAddress = widget.NewEntry()
+	a.InitialAddress.SetText("c000")
 
 	return container.New(
 		layout.NewGridLayoutWithRows(2),

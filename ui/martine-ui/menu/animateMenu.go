@@ -18,7 +18,7 @@ type AnimateMenu struct {
 	ImageMenu
 	Originalmages          []canvas.Image
 	AnimateImages          *custom_widget.ImageTable
-	DeltaCollection        *transformation.DeltaCollection
+	DeltaCollection        []*transformation.DeltaCollection
 	InitialAddress         *widget.Entry
 	RawImages              [][]byte
 	ExportDsk              bool
@@ -36,7 +36,7 @@ func NewAnimateMenu() *AnimateMenu {
 	return &AnimateMenu{
 		Originalmages:   make([]canvas.Image, 0),
 		AnimateImages:   custom_widget.NewEmptyImageTable(fyne.NewSize(AnimateSize, AnimateSize)),
-		DeltaCollection: transformation.NewDeltaCollection(),
+		DeltaCollection: make([]*transformation.DeltaCollection, 1),
 	}
 }
 

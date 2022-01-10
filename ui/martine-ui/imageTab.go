@@ -29,7 +29,7 @@ import (
 func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 	pi := dialog.NewProgressInfinite("Saving....", "Please wait.", m.window)
 	pi.Show()
-	context := m.NewContext(me)
+	context := m.NewContext(me, true)
 	// palette export
 	defer func() {
 		os.Remove("temporary_palette.kit")
@@ -79,7 +79,7 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 
 func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 	me.CpcImage = canvas.Image{}
-	context := m.NewContext(me)
+	context := m.NewContext(me, true)
 	if context == nil {
 		return
 	}
