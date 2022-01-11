@@ -279,12 +279,15 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 				forceUIRefresh,
 			),
 			container.New(
-				layout.NewVBoxLayout(),
+				layout.NewGridLayoutWithColumns(2),
 				container.New(
-					layout.NewHBoxLayout(),
+					layout.NewVBoxLayout(),
 					isPlus,
-					initalAddressLabel,
-					a.InitialAddress,
+					container.New(
+						layout.NewVBoxLayout(),
+						initalAddressLabel,
+						a.InitialAddress,
+					),
 				),
 				container.New(
 					layout.NewGridLayoutWithColumns(2),

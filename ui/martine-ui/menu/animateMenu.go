@@ -89,8 +89,7 @@ func (i *AnimateMenu) CmdLine() string {
 	}
 
 	if i.IsSprite {
-		address := fmt.Sprintf("%x", i.InitialAddress.Text)
-		exec += " -address 0x" + address
+		exec += " -address 0x" + i.InitialAddress.Text
 	}
 
 	exec += " -animate"
