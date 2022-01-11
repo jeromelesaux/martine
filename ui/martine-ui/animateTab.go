@@ -78,7 +78,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						dialog.ShowError(err, m.window)
 						return
 					}
-					dialog.NewInformation("Export animation", "Your export ended", m.window)
+					dialog.ShowInformation("Save", "Your files are save in foler \n"+m.animateExport.ExportFolderPath, m.window)
 				}, m.window)
 				fo.Show()
 			}),
@@ -107,15 +107,17 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 	}
 	// get all images from widget imagetable
 	imgs := a.AnimateImages.Images()[0]
-	deltaCollection, rawImages, err := animate.DeltaPackingMemory(imgs, context, uint16(address), uint8(a.Mode))
+	deltaCollection, rawImages, palette, err := animate.DeltaPackingMemory(imgs, context, uint16(address), uint8(a.Mode))
 	pi.Hide()
 	if err != nil {
 		dialog.NewError(err, m.window).Show()
 		return
 	}
 	a.DeltaCollection = deltaCollection
+	a.Palette = palette
 	a.RawImages = rawImages
-
+	a.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(a.Palette))
+	refreshUI.OnTapped()
 }
 
 func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {

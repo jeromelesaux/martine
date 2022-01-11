@@ -20,16 +20,17 @@ import (
 	zx0 "github.com/jeromelesaux/zx0/encode"
 )
 
-func DeltaPackingMemory(images []image.Image, ex *export.MartineContext, initialAddress uint16, mode uint8) ([]*transformation.DeltaCollection, [][]byte, error) {
+func DeltaPackingMemory(images []image.Image, ex *export.MartineContext, initialAddress uint16, mode uint8) ([]*transformation.DeltaCollection, [][]byte, color.Palette, error) {
 	var isSprite bool
 	var maxImages = 22
 	var pad int = 1
 	var err error
+	var palette color.Palette
 	if !ex.CustomDimension && !ex.SpriteHard {
 		isSprite = false
 	}
 	if len(images) <= 1 {
-		return nil, nil, fmt.Errorf("need more than one image to proceed")
+		return nil, nil, palette, fmt.Errorf("need more than one image to proceed")
 	}
 	if len(images) > maxImages {
 		fmt.Fprintf(os.Stderr, "Warning gif exceed 30 images. Will corrupt the number of images.")
@@ -37,7 +38,7 @@ func DeltaPackingMemory(images []image.Image, ex *export.MartineContext, initial
 	}
 	rawImages := make([][]byte, 0)
 	deltaData := make([]*transformation.DeltaCollection, 0)
-	var palette color.Palette
+
 	var raw []byte
 
 	// now transform images as win or scr
@@ -45,13 +46,13 @@ func DeltaPackingMemory(images []image.Image, ex *export.MartineContext, initial
 
 	_, _, palette, _, err = gfx.ApplyOneImage(images[0], ex, int(mode), palette, mode)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, palette, err
 	}
 	for i := 0; i < len(images); i += pad {
 		in := images[i]
 		raw, _, _, _, err = gfx.ApplyOneImage(in, ex, int(mode), palette, mode)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, palette, err
 		}
 		rawImages = append(rawImages, raw)
 		fmt.Printf("Image [%d] proceed\n", i)
@@ -72,7 +73,7 @@ func DeltaPackingMemory(images []image.Image, ex *export.MartineContext, initial
 		d1 := rawImages[i]
 		d2 := rawImages[i+1]
 		if len(d1) != len(d2) {
-			return nil, nil, errors.ErrorSizeDiffers
+			return nil, nil, palette, errors.ErrorSizeDiffers
 		}
 		lastImage = d2
 		dc := transformation.Delta(d1, d2, isSprite, *realSize, mode, uint16(x0), uint16(y0), lineOctetsWidth)
@@ -85,7 +86,7 @@ func DeltaPackingMemory(images []image.Image, ex *export.MartineContext, initial
 	dc := transformation.Delta(d1, d2, isSprite, ex.Size, mode, uint16(x0), uint16(y0), lineOctetsWidth)
 	deltaData = append(deltaData, dc)
 	fmt.Printf("%d bytes differ from the both images\n", len(dc.Items))
-	return deltaData, rawImages, nil
+	return deltaData, rawImages, palette, nil
 }
 
 func DeltaPacking(gitFilepath string, ex *export.MartineContext, initialAddress uint16, mode uint8) error {
