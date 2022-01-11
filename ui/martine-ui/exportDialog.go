@@ -8,32 +8,33 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
-func (m *MartineUI) exportDialog(w fyne.Window) {
+func (m *MartineUI) exportDialog(ie *menu.ImageExport, w fyne.Window) {
 	m2host := widget.NewEntry()
 	m2host.SetPlaceHolder("Set your M2 IP here.")
 
 	cont := container.NewVBox(
 		container.NewHBox(
 			widget.NewCheck("import all file in Dsk", func(b bool) {
-				m.exportDsk = b
+				ie.ExportDsk = b
 			}),
 			widget.NewCheck("export text file", func(b bool) {
-				m.exportText = b
+				ie.ExportText = b
 			}),
 			widget.NewCheck("export Json file", func(b bool) {
-				m.exportJson = b
+				ie.ExportJson = b
 			}),
 			widget.NewCheck("add amsdos header", func(b bool) {
-				m.exportWithAmsdosHeader = b
+				ie.ExportWithAmsdosHeader = b
 			}),
 			widget.NewCheck("apply zigzag", func(b bool) {
-				m.exportZigzag = b
+				ie.ExportZigzag = b
 			}),
 			widget.NewCheck("export to M2", func(b bool) {
-				m.exportToM2 = b
-				m.m2IP = m2host.Text
+				ie.ExportToM2 = b
+				ie.M2IP = m2host.Text
 			}),
 		),
 
@@ -42,17 +43,17 @@ func (m *MartineUI) exportDialog(w fyne.Window) {
 			func(s string) {
 				switch s {
 				case "none":
-					m.exportCompression = 0
+					ie.ExportCompression = 0
 				case "rle":
-					m.exportCompression = 1
+					ie.ExportCompression = 1
 				case "rle 16bits":
-					m.exportCompression = 2
+					ie.ExportCompression = 2
 				case "Lz4 Classic":
-					m.exportCompression = 3
+					ie.ExportCompression = 3
 				case "Lz4 Raw":
-					m.exportCompression = 4
+					ie.ExportCompression = 4
 				case "zx0 crunch":
-					m.exportCompression = 5
+					ie.ExportCompression = 5
 				}
 			}),
 		m2host,
@@ -66,8 +67,8 @@ func (m *MartineUI) exportDialog(w fyne.Window) {
 					// cancel button
 					return
 				}
-				m.exportFolderPath = lu.Path()
-				fmt.Println(m.exportFolderPath)
+				ie.ExportFolderPath = lu.Path()
+				fmt.Println(ie.ExportFolderPath)
 				m.ExportOneImage(m.main)
 
 				// apply and export

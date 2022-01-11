@@ -34,23 +34,22 @@ type MartineUI struct {
 	tilemap *menu.TilemapMenu
 	animate *menu.AnimateMenu
 
-	exportDsk              bool
-	exportText             bool
-	exportWithAmsdosHeader bool
-	exportZigzag           bool
-	exportJson             bool
-	exportCompression      int
-	exportFolderPath       string
-	m2IP                   string
-	exportToM2             bool
+	imageExport   *menu.ImageExport
+	tilemapExport *menu.ImageExport
+	animateExport *menu.AnimateExport
 }
 
 func NewMartineUI() *MartineUI {
-	return &MartineUI{
-		main:    &menu.ImageMenu{},
-		tilemap: &menu.TilemapMenu{},
-		animate: &menu.AnimateMenu{},
+	m := &MartineUI{
+		main:          &menu.ImageMenu{},
+		tilemap:       &menu.TilemapMenu{},
+		animate:       &menu.AnimateMenu{},
+		imageExport:   &menu.ImageExport{},
+		tilemapExport: &menu.ImageExport{},
+		animateExport: &menu.AnimateExport{},
 	}
+	m.animateExport.ExportCompression = -1
+	return m
 }
 
 func (m *MartineUI) SetPalette(p color.Palette) {
@@ -145,16 +144,16 @@ func (m *MartineUI) NewContext(me *menu.ImageMenu, checkOriginalImage bool) *exp
 		context.DitheringAlgo = -1
 	}
 	context.DitheringWithQuantification = me.WithQuantification
-	context.OutputPath = m.exportFolderPath
+	context.OutputPath = m.imageExport.ExportFolderPath
 	if checkOriginalImage {
 		context.InputPath = me.OriginalImagePath.Path()
 	}
-	context.Json = m.exportJson
-	context.Ascii = m.exportText
-	context.NoAmsdosHeader = !m.exportWithAmsdosHeader
-	context.ZigZag = m.exportZigzag
-	context.Compression = m.exportCompression
-	context.Dsk = m.exportDsk
+	context.Json = m.imageExport.ExportJson
+	context.Ascii = m.imageExport.ExportText
+	context.NoAmsdosHeader = !m.imageExport.ExportWithAmsdosHeader
+	context.ZigZag = m.imageExport.ExportZigzag
+	context.Compression = m.imageExport.ExportCompression
+	context.Dsk = m.imageExport.ExportDsk
 	return context
 }
 

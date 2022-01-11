@@ -72,7 +72,7 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 					return
 				}
 				m.tilemap.ExportFolderPath = lu.Path()
-				fmt.Println(m.exportFolderPath)
+				fmt.Println(m.tilemapExport.ExportFolderPath)
 				m.ExportTilemap(m.tilemap)
 				// apply and export
 			}, m.window)

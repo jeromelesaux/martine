@@ -16,28 +16,19 @@ var AnimateSize float32 = 150.
 
 type AnimateMenu struct {
 	ImageMenu
-	Originalmages          []canvas.Image
-	AnimateImages          *custom_widget.ImageTable
-	DeltaCollection        []*transformation.DeltaCollection
-	InitialAddress         *widget.Entry
-	RawImages              [][]byte
-	ExportDsk              bool
-	ExportText             bool
-	ExportWithAmsdosHeader bool
-	ExportZigzag           bool
-	ExportJson             bool
-	ExportCompression      int
-	ExportFolderPath       string
-	ExportImpdraw          bool
-	IsEmpty                bool
+	Originalmages   []canvas.Image
+	AnimateImages   *custom_widget.ImageTable
+	DeltaCollection []*transformation.DeltaCollection
+	InitialAddress  *widget.Entry
+	RawImages       [][]byte
+	IsEmpty         bool
 }
 
 func NewAnimateMenu() *AnimateMenu {
 	return &AnimateMenu{
-		Originalmages:     make([]canvas.Image, 0),
-		AnimateImages:     custom_widget.NewEmptyImageTable(fyne.NewSize(AnimateSize, AnimateSize)),
-		DeltaCollection:   make([]*transformation.DeltaCollection, 1),
-		ExportCompression: -1,
+		Originalmages:   make([]canvas.Image, 0),
+		AnimateImages:   custom_widget.NewEmptyImageTable(fyne.NewSize(AnimateSize, AnimateSize)),
+		DeltaCollection: make([]*transformation.DeltaCollection, 1),
 	}
 }
 

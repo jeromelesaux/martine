@@ -39,7 +39,7 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 		dialog.ShowError(err, m.window)
 	}
 	context.KitPath = "temporary_palette.kit"
-	if err := gfx.ApplyOneImageAndExport(me.OriginalImage.Image, context, filepath.Base(m.exportFolderPath), m.exportFolderPath, me.Mode, uint8(me.Mode)); err != nil {
+	if err := gfx.ApplyOneImageAndExport(me.OriginalImage.Image, context, filepath.Base(m.imageExport.ExportFolderPath), m.imageExport.ExportFolderPath, me.Mode, uint8(me.Mode)); err != nil {
 		pi.Hide()
 		dialog.NewError(err, m.window).Show()
 		return
@@ -59,21 +59,21 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 					break
 				}
 			}
-			context.SnaPath = filepath.Join(m.exportFolderPath, "test.sna")
+			context.SnaPath = filepath.Join(m.imageExport.ExportFolderPath, "test.sna")
 			if err := file.ImportInSna(gfxFile, context.SnaPath, uint8(me.Mode)); err != nil {
 				dialog.NewError(err, m.window).Show()
 				return
 			}
 		}
 	}
-	if m.exportToM2 {
+	if m.imageExport.ExportToM2 {
 		if err := net.ImportInM4(context); err != nil {
 			dialog.NewError(err, m.window).Show()
 			fmt.Fprintf(os.Stderr, "Cannot send to M4 error :%v\n", err)
 		}
 	}
 	pi.Hide()
-	dialog.ShowInformation("Save", "Your files are save in foler \n"+m.exportFolderPath, m.window)
+	dialog.ShowInformation("Save", "Your files are save in foler \n"+m.imageExport.ExportFolderPath, m.window)
 
 }
 
@@ -174,7 +174,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 	})
 
 	exportButton := widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
-		m.exportDialog(m.window)
+		m.exportDialog(m.imageExport, m.window)
 	})
 
 	applyButton := widget.NewButtonWithIcon("Apply", theme.VisibilityIcon(), func() {

@@ -43,15 +43,15 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 					if context == nil {
 						return
 					}
-					context.Compression = a.ExportCompression
+					context.Compression = m.animateExport.ExportCompression
 					hexa := fmt.Sprintf("%x", a.InitialAddress.Text)
 					address, err := strconv.Atoi(hexa)
 					if err != nil {
 						dialog.ShowError(err, m.window)
 						return
 					}
-					m.exportFolderPath = lu.Path()
-					fmt.Println(m.exportFolderPath)
+					m.animateExport.ExportFolderPath = lu.Path()
+					fmt.Println(m.animateExport.ExportFolderPath)
 					pi := dialog.NewProgressInfinite("Exporting", "Please wait.", m.window)
 					pi.Show()
 					code, err := animate.ExportDeltaAnimate(
@@ -67,7 +67,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						dialog.ShowError(err, m.window)
 						return
 					}
-					f, err := os.Create(m.exportFolderPath + string(filepath.Separator) + "code.asm")
+					f, err := os.Create(m.animateExport.ExportFolderPath + string(filepath.Separator) + "code.asm")
 					if err != nil {
 						dialog.ShowError(err, m.window)
 						return
@@ -95,7 +95,7 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 	if context == nil {
 		return
 	}
-	context.Compression = a.ExportCompression
+	context.Compression = m.animateExport.ExportCompression
 	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
 	pi.Show()
 	hexa := fmt.Sprintf("%x", a.InitialAddress.Text)
@@ -248,12 +248,12 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	isSprite := widget.NewCheck("Is sprite", func(b bool) {
 		a.IsSprite = b
 	})
-	a.ExportCompression = -1
+	m.animateExport.ExportCompression = -1
 	compressData := widget.NewCheck("Compress data", func(b bool) {
 		if b {
-			a.ExportCompression = 0
+			m.animateExport.ExportCompression = 0
 		} else {
-			a.ExportCompression = -1
+			m.animateExport.ExportCompression = -1
 		}
 	})
 
