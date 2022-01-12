@@ -33,7 +33,7 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 
 	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
 	pi.Show()
-	analyze, tiles, palette, err := gfx.TilemapMemory(uint8(me.Mode), context.Size, me.OriginalImage.Image, context)
+	analyze, tiles, palette, err := gfx.TilemapMemory(uint8(me.Mode), me.IsCpcPlus, context.Size, me.OriginalImage.Image, context)
 	pi.Hide()
 	if err != nil {
 		dialog.NewError(err, m.window).Show()
@@ -95,6 +95,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 			canvasImg := canvas.NewImageFromImage(img)
 			tm.OriginalImage = *canvas.NewImageFromImage(canvasImg.Image)
 			tm.OriginalImage.FillMode = canvas.ImageFillContain
+			tm.OriginalImage.Refresh()
 			m.window.Canvas().Refresh(&tm.OriginalImage)
 			m.window.Resize(m.window.Content().Size())
 		}, m.window)

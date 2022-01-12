@@ -28,15 +28,12 @@ var (
 	impTileFlag = true
 )
 
-func AnalyzeTilemap(mode uint8, filename, picturePath string, in image.Image, cont *export.MartineContext, criteria common.AnalyseTilemapOption) error {
+func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in image.Image, cont *export.MartineContext, criteria common.AnalyseTilemapOption) error {
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
 	m := convert.Resize(in, mapSize, cont.ResizingAlgo)
 	var palette color.Palette
 	var err error
-	palette, m, err = convert.DowngradingPalette(m, mapSize, true)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", cont.InputPath)
-	}
+	palette = convert.ExtractPalette(m, isCpcPlus, cont.Size.ColorsAvailable)
 	refPalette := constants.CpcOldPalette
 	if cont.CpcPlus {
 		refPalette = constants.CpcPlusPalette
@@ -428,7 +425,7 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 	return err
 }
 
-func TilemapMemory(mode uint8, size constants.Size, in image.Image, cont *export.MartineContext) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette, error) {
+func TilemapMemory(mode uint8, isCpcPlus bool, size constants.Size, in image.Image, cont *export.MartineContext) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette, error) {
 	/*
 		8x8 : 40x25
 		16x8 : 20x25
@@ -464,11 +461,8 @@ func TilemapMemory(mode uint8, size constants.Size, in image.Image, cont *export
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
 	m := convert.Resize(in, mapSize, cont.ResizingAlgo)
 
-	var err error
-	palette, m, err = convert.DowngradingPalette(m, mapSize, true)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", cont.InputPath)
-	}
+	palette = convert.ExtractPalette(m, isCpcPlus, cont.Size.ColorsAvailable)
+
 	refPalette := constants.CpcOldPalette
 	if cont.CpcPlus {
 		refPalette = constants.CpcPlusPalette

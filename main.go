@@ -496,7 +496,7 @@ func main() {
 					fmt.Fprintf(os.Stderr, "Error tilemap analyze option not found : choose between (%s,%s)\n", string(common.SizeTilemapOption), string(common.NumberTilemapOption))
 					os.Exit(-1)
 				}
-				if err := gfx.AnalyzeTilemap(screenMode, filename, *picturePath, in, cont, criteria); err != nil {
+				if err := gfx.AnalyzeTilemap(screenMode, *plusMode, filename, *picturePath, in, cont, criteria); err != nil {
 					fmt.Fprintf(os.Stderr, "Error whie do tilemap action with error :%v\n", err)
 					os.Exit(-1)
 				}
