@@ -388,6 +388,9 @@ func exportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	code += dataCode
 	code += "\nend\n"
 	code += "\nsave'disc.bin',#200, end - start,DSK,'delta.dsk'"
+	if ex.Compression != -1 {
+		code += "\nbuffer dw 0\n"
+	}
 
 	fw, err := os.Create(filename)
 	if err != nil {
@@ -796,6 +799,6 @@ ret
 
 ;--- variables memoires -----
 pixel db 0 
-buffer dw 0
+
 ;----------------------------
 `
