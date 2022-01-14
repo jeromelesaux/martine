@@ -13,11 +13,13 @@ type DoubleImageMenu struct {
 }
 
 type MergedImageMenu struct {
-	CpcLeftImage   canvas.Image
-	CpcRightImage  canvas.Image
-	CpcResultImage canvas.Image
-	LeftPalette    color.Palette
-	RightPalette   color.Palette
+	CpcLeftImage      canvas.Image
+	CpcRightImage     canvas.Image
+	CpcResultImage    canvas.Image
+	LeftPalette       color.Palette
+	RightPalette      color.Palette
+	LeftPaletteImage  canvas.Image
+	RightPaletteImage canvas.Image
 
 	CmdLineGenerate string
 }
