@@ -1,8 +1,11 @@
 package ui
 
 import (
+	"fmt"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -15,6 +18,26 @@ func (m *MartineUI) newEgxTab(di *menu.DoubleImageMenu) fyne.CanvasObject {
 		container.NewTabItem("Image 2", m.newImageTransfertTab(&di.RightImage)),
 		container.NewTabItem("Egx", m.newEgxTabItem(di)),
 	)
+}
+
+func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
+	if di.RightImage.Mode == di.LeftImage.Mode {
+		dialog.ShowError(fmt.Errorf("mode between the images must differ"), m.window)
+		return
+	}
+	if di.RightImage.IsCpcPlus != di.LeftImage.IsCpcPlus {
+		dialog.ShowError(fmt.Errorf("plus mode between the images must differ"), m.window)
+		return
+	}
+	if di.RightImage.IsHardSprite != di.LeftImage.IsHardSprite {
+		dialog.ShowError(fmt.Errorf("sprite hard mode between the images must differ"), m.window)
+		return
+	}
+	if di.RightImage.IsFullScreen != di.LeftImage.IsFullScreen {
+		dialog.ShowError(fmt.Errorf("fullscreen mode between the images must  differ"), m.window)
+		return
+	}
+
 }
 
 func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) fyne.CanvasObject {

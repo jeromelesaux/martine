@@ -201,6 +201,11 @@ func AutoEgx2(in image.Image,
 }
 
 func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8, picturePath string, cont *export.MartineContext) error {
+	bw, p := ToEgx1Memory(inMode0, inMode1, p, firstLineMode, cont)
+	return common.Export(picturePath, bw, p, 1, cont)
+}
+
+func ToEgx1Memory(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8, cont *export.MartineContext) ([]byte, color.Palette) {
 	var bw []byte
 	if cont.Overscan {
 		bw = make([]byte, 0x8000)
@@ -276,10 +281,15 @@ func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8,
 			bw[addr] = pixel
 		}
 	}
-	return common.Export(picturePath, bw, p, 1, cont)
+	return bw, p
 }
 
 func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8, picturePath string, cont *export.MartineContext) error {
+	bw, p := ToEgx2Memory(inMode1, inMode2, p, firstLineMode, cont)
+	return common.Export(picturePath, bw, p, 2, cont)
+}
+
+func ToEgx2Memory(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8, cont *export.MartineContext) ([]byte, color.Palette) {
 	var bw []byte
 	if cont.Overscan {
 		bw = make([]byte, 0x8000)
@@ -398,5 +408,5 @@ func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8,
 			bw[addr] = pixel
 		}
 	}
-	return common.Export(picturePath, bw, p, 2, cont)
+	return bw, p
 }
