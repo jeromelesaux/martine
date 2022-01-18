@@ -67,8 +67,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	if context == nil {
 		return
 	}
-	ctx1 := m.NewContext(secondIm, false)
-	out, downgraded, _, _, err := gfx.ApplyOneImage(secondIm.CpcImage.Image, ctx1, 1, palette, 1)
+	out, downgraded, _, _, err := gfx.ApplyOneImage(secondIm.CpcImage.Image, context, 1, palette, 1)
 	if err != nil {
 		dialog.ShowError(err, m.window)
 		return
@@ -77,7 +76,6 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	secondIm.CpcImage = *canvas.NewImageFromImage(downgraded)
 	secondIm.Palette = palette
 	secondIm.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(secondIm.Palette))
-
 	out, downgraded, _, _, err = gfx.ApplyOneImage(im.CpcImage.Image, context, 0, palette, 0)
 	if err != nil {
 		dialog.ShowError(err, m.window)
@@ -128,12 +126,8 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) fyne.CanvasObject {
 		layout.NewGridLayoutWithRows(3),
 		container.New(
 			layout.NewGridLayoutWithColumns(2),
-			container.NewScroll(
-				&di.LeftImage.CpcImage,
-			),
-			container.NewScroll(
-				&di.RightImage.CpcImage,
-			),
+			&di.LeftImage.CpcImage,
+			&di.RightImage.CpcImage,
 		),
 
 		container.New(
