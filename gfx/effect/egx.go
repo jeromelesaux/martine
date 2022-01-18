@@ -412,7 +412,7 @@ func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uin
 }
 
 func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cont *export.MartineContext) ([]byte, color.Palette, error) {
-	//	p = constants.SortColorsByDistance(p)
+	p = constants.SortColorsByDistance(p)
 	if mode1 == 0 && mode2 == 1 || mode2 == 0 && mode1 == 1 {
 		var f0, f1 []byte
 		var mode0, mode1 uint8

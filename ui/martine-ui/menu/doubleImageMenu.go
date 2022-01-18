@@ -22,6 +22,7 @@ type MergedImageMenu struct {
 	RightPaletteImage canvas.Image
 	Data              []byte
 	Palette           color.Palette
+	PaletteImage      canvas.Image
 	CmdLineGenerate   string
 }
 

@@ -18,6 +18,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/effect"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
@@ -51,21 +52,45 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	}
 
 	var im *menu.ImageMenu
+	var secondIm *menu.ImageMenu
 	var palette color.Palette
 	if di.LeftImage.Mode == 0 {
 		im = &di.LeftImage
 		palette = di.LeftImage.Palette
+		secondIm = &di.RightImage
 	} else {
 		im = &di.RightImage
 		palette = di.RightImage.Palette
+		secondIm = &di.LeftImage
 	}
 	context := m.NewContext(im, false)
 	if context == nil {
 		return
 	}
+	ctx1 := m.NewContext(secondIm, false)
+	out, downgraded, _, _, err := gfx.ApplyOneImage(secondIm.CpcImage.Image, ctx1, 1, palette, 1)
+	if err != nil {
+		dialog.ShowError(err, m.window)
+		return
+	}
+	secondIm.Data = out
+	secondIm.CpcImage = *canvas.NewImageFromImage(downgraded)
+	secondIm.Palette = palette
+	secondIm.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(secondIm.Palette))
+
+	out, downgraded, _, _, err = gfx.ApplyOneImage(im.CpcImage.Image, context, 0, palette, 0)
+	if err != nil {
+		dialog.ShowError(err, m.window)
+		return
+	}
+	im.Data = out
+	im.CpcImage = *canvas.NewImageFromImage(downgraded)
+	im.Palette = palette
+	im.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(im.Palette))
+
 	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
 	pi.Show()
-	res, palette, err := effect.EgxRaw(di.LeftImage.Data, di.RightImage.Data, palette, di.LeftImage.Mode, di.RightImage.Mode, context)
+	res, _, err := effect.EgxRaw(di.LeftImage.Data, di.RightImage.Data, palette, di.LeftImage.Mode, di.RightImage.Mode, context)
 	pi.Hide()
 	if err != nil {
 		dialog.ShowError(err, m.window)
@@ -88,10 +113,8 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 		}
 	}
 	di.ResultImage.CpcResultImage = *canvas.NewImageFromImage(img)
-	di.ResultImage.CpcResultImage.Refresh()
-	m.window.Canvas().Refresh(&di.ResultImage.CpcResultImage)
-	m.window.Resize(m.window.Content().Size())
-	m.window.Content().Refresh()
+	di.ResultImage.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(di.ResultImage.Palette))
+	refreshUI.OnTapped()
 }
 
 func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) fyne.CanvasObject {
@@ -105,8 +128,12 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) fyne.CanvasObject {
 		layout.NewGridLayoutWithRows(3),
 		container.New(
 			layout.NewGridLayoutWithColumns(2),
-			&di.LeftImage.CpcImage,
-			&di.RightImage.CpcImage,
+			container.NewScroll(
+				&di.LeftImage.CpcImage,
+			),
+			container.NewScroll(
+				&di.RightImage.CpcImage,
+			),
 		),
 
 		container.New(
@@ -133,6 +160,7 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) fyne.CanvasObject {
 					di.ResultImage.RightPalette = di.RightImage.Palette
 					di.ResultImage.LeftPaletteImage = di.LeftImage.PaletteImage
 					di.ResultImage.RightPaletteImage = di.RightImage.PaletteImage
+					di.ResultImage.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(di.ResultImage.Palette))
 					s := m.window.Content().Size()
 					s.Height += 10.
 					s.Width += 10.
@@ -142,6 +170,7 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) fyne.CanvasObject {
 					m.window.Canvas().Refresh(&di.ResultImage.CpcResultImage)
 					m.window.Canvas().Refresh(&di.ResultImage.LeftPaletteImage)
 					m.window.Canvas().Refresh(&di.ResultImage.RightPaletteImage)
+					m.window.Canvas().Refresh(&di.ResultImage.PaletteImage)
 					m.window.Resize(m.window.Content().Size())
 					m.window.Content().Refresh()
 				}),
@@ -153,6 +182,10 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) fyne.CanvasObject {
 		container.New(
 			layout.NewGridLayoutWithColumns(2),
 			&di.ResultImage.CpcResultImage,
+			container.New(
+				layout.NewGridLayoutWithRows(3),
+				&di.ResultImage.PaletteImage,
+			),
 		),
 	)
 }
