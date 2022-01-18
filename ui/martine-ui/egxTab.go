@@ -54,7 +54,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	var im *menu.ImageMenu
 	var secondIm *menu.ImageMenu
 	var palette color.Palette
-	if di.LeftImage.Mode == 0 {
+	if di.LeftImage.Mode < di.RightImage.Mode {
 		im = &di.LeftImage
 		palette = di.LeftImage.Palette
 		secondIm = &di.RightImage
@@ -67,7 +67,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	if context == nil {
 		return
 	}
-	out, downgraded, _, _, err := gfx.ApplyOneImage(secondIm.CpcImage.Image, context, 1, palette, 1)
+	out, downgraded, _, _, err := gfx.ApplyOneImage(secondIm.CpcImage.Image, context, secondIm.Mode, palette, uint8(secondIm.Mode))
 	if err != nil {
 		dialog.ShowError(err, m.window)
 		return
@@ -76,7 +76,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	secondIm.CpcImage = *canvas.NewImageFromImage(downgraded)
 	secondIm.Palette = palette
 	secondIm.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(secondIm.Palette))
-	out, downgraded, _, _, err = gfx.ApplyOneImage(im.CpcImage.Image, context, 0, palette, 0)
+	out, downgraded, _, _, err = gfx.ApplyOneImage(im.CpcImage.Image, context, im.Mode, palette, uint8(im.Mode))
 	if err != nil {
 		dialog.ShowError(err, m.window)
 		return

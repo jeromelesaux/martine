@@ -10,11 +10,14 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/net"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
+
+var egxFilename = "aa.scr"
 
 func (m *MartineUI) exportEgxDialog(ie *menu.ImageExport, w fyne.Window) {
 	m2host := widget.NewEntry()
@@ -103,6 +106,13 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	} else {
 		context.NoAmsdosHeader = true
 	}
+	if me.ResultImage.EgxType == 1 {
+		context.EgxFormat = export.Egx1Mode
+	} else {
+		context.EgxFormat = export.Egx2Mode
+	}
+	context.EgxMode1 = uint8(me.LeftImage.Mode)
+	context.EgxMode2 = uint8(me.RightImage.Mode)
 
 	// palette export
 	defer func() {
@@ -114,13 +124,15 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	}
 	context.KitPath = "temporary_palette.kit"
 
-	if err := common.Export(me.ResultImage.Path+string(filepath.Separator)+"egx.scr", me.ResultImage.Data, me.ResultImage.Palette, uint8(me.ResultImage.EgxType), context); err != nil {
-		pi.Hide()
-		dialog.ShowError(err, m.window)
-	}
-	pi.Hide()
 	if !context.Overscan {
-		if err := file.EgxLoader(me.ResultImage.Path+string(filepath.Separator)+"egx.scr", me.ResultImage.Palette, uint8(me.LeftImage.Mode), uint8(me.RightImage.Mode), context); err != nil {
+		if err := file.EgxLoader(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Palette, uint8(me.LeftImage.Mode), uint8(me.RightImage.Mode), context); err != nil {
+			pi.Hide()
+			dialog.ShowError(err, m.window)
+			return
+		}
+	} else {
+		if err := common.Export(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Data, me.ResultImage.Palette, uint8(me.ResultImage.EgxType), context); err != nil {
+			pi.Hide()
 			dialog.ShowError(err, m.window)
 			return
 		}
