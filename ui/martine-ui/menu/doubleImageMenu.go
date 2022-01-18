@@ -20,8 +20,9 @@ type MergedImageMenu struct {
 	RightPalette      color.Palette
 	LeftPaletteImage  canvas.Image
 	RightPaletteImage canvas.Image
-
-	CmdLineGenerate string
+	Data              []byte
+	Palette           color.Palette
+	CmdLineGenerate   string
 }
 
 func (m *MergedImageMenu) CmdLine() string {

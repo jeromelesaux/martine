@@ -201,11 +201,11 @@ func AutoEgx2(in image.Image,
 }
 
 func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8, picturePath string, cont *export.MartineContext) error {
-	bw, p := ToEgx1Memory(inMode0, inMode1, p, firstLineMode, cont)
+	bw, p := ToEgx1Raw(inMode0, inMode1, p, firstLineMode, cont)
 	return common.Export(picturePath, bw, p, 1, cont)
 }
 
-func ToEgx1Memory(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8, cont *export.MartineContext) ([]byte, color.Palette) {
+func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8, cont *export.MartineContext) ([]byte, color.Palette) {
 	var bw []byte
 	if cont.Overscan {
 		bw = make([]byte, 0x8000)
@@ -285,11 +285,11 @@ func ToEgx1Memory(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode 
 }
 
 func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8, picturePath string, cont *export.MartineContext) error {
-	bw, p := ToEgx2Memory(inMode1, inMode2, p, firstLineMode, cont)
+	bw, p := ToEgx2Raw(inMode1, inMode2, p, firstLineMode, cont)
 	return common.Export(picturePath, bw, p, 2, cont)
 }
 
-func ToEgx2Memory(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8, cont *export.MartineContext) ([]byte, color.Palette) {
+func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8, cont *export.MartineContext) ([]byte, color.Palette) {
 	var bw []byte
 	if cont.Overscan {
 		bw = make([]byte, 0x8000)
@@ -409,4 +409,89 @@ func ToEgx2Memory(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode 
 		}
 	}
 	return bw, p
+}
+
+func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cont *export.MartineContext) ([]byte, color.Palette, error) {
+	//	p = constants.SortColorsByDistance(p)
+	if mode1 == 0 && mode2 == 1 || mode2 == 0 && mode1 == 1 {
+		var f0, f1 []byte
+		var mode0, mode1 uint8
+		var err error
+		mode0 = 0
+		mode1 = 1
+		if mode1 == 0 {
+			f0 = img1
+			f1 = img2
+		} else {
+			f0 = img2
+			f1 = img1
+		}
+		var in0, in1 *image.NRGBA
+		if cont.Overscan {
+			in0, err = common.OverscanRawToImg(f0, mode0, p)
+			if err != nil {
+				return nil, p, err
+			}
+			in1, err = common.OverscanRawToImg(f1, mode1, p)
+			if err != nil {
+				return nil, p, err
+			}
+		} else {
+			in0, err = common.ScrRawToImg(f0, 0, p)
+			if err != nil {
+				return nil, p, err
+			}
+			in1, err = common.ScrRawToImg(f1, 1, p)
+			if err != nil {
+				return nil, p, err
+			}
+		}
+		res, p := ToEgx1Raw(in0, in1, p, uint8(mode1), cont)
+		return res, p, nil
+	} else {
+		if mode1 == 1 && mode2 == 2 || mode2 == 1 && mode1 == 2 {
+			var f2, f1 []byte
+			var mode2, mode1 uint8
+			var err error
+			mode1 = 1
+			mode2 = 2
+			if mode1 == 1 {
+				//filename := filepath.Base(filepath1)
+				//filePath = exportType.OutputPath + string(filepath.Separator) + filename
+
+				f1 = img1
+				f2 = img2
+			} else {
+				//filename := filepath.Base(filepath2)
+				//filePath = exportType.OutputPath + string(filepath.Separator) + filename
+				f1 = img2
+				f2 = img1
+			}
+			var in2, in1 *image.NRGBA
+			if cont.Overscan {
+				in1, err = common.OverscanRawToImg(f1, mode1, p)
+				if err != nil {
+					return nil, p, err
+				}
+				in2, err = common.OverscanRawToImg(f2, mode2, p)
+				if err != nil {
+					return nil, p, err
+				}
+			} else {
+				in1, err = common.ScrRawToImg(f1, mode1, p)
+				if err != nil {
+					return nil, p, err
+				}
+				in2, err = common.ScrRawToImg(f2, mode2, p)
+				if err != nil {
+					return nil, p, err
+				}
+			}
+			res, p := ToEgx2Raw(in1, in2, p, uint8(mode1), cont)
+			return res, p, err
+
+		} else {
+			return nil, p, errors.ErrorFeatureNotImplemented
+		}
+	}
 }

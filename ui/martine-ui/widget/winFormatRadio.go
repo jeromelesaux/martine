@@ -5,6 +5,23 @@ import (
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
+func NewScreenFormatRadio(me *menu.ImageMenu) *widget.RadioGroup {
+	winFormat := widget.NewRadioGroup([]string{"Normal", "Fullscreen"}, func(s string) {
+		switch s {
+		case "Normal":
+			me.IsFullScreen = false
+			me.IsSprite = false
+			me.IsHardSprite = false
+		case "Fullscreen":
+			me.IsFullScreen = true
+			me.IsSprite = false
+			me.IsHardSprite = false
+		}
+	})
+	winFormat.SetSelected("Normal")
+	return winFormat
+}
+
 func NewWinFormatRadio(me *menu.ImageMenu) *widget.RadioGroup {
 	winFormat := widget.NewRadioGroup([]string{"Normal", "Fullscreen", "Sprite", "Sprite Hard"}, func(s string) {
 		switch s {
