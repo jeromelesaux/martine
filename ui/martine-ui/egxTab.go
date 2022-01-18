@@ -169,7 +169,8 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) fyne.CanvasObject {
 					m.window.Content().Refresh()
 				}),
 				widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
-
+					// export the egx image
+					m.exportEgxDialog(m.egxExport, m.window)
 				}),
 			),
 		),

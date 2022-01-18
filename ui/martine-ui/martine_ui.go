@@ -38,6 +38,7 @@ type MartineUI struct {
 	imageExport   *menu.ImageExport
 	tilemapExport *menu.ImageExport
 	animateExport *menu.AnimateExport
+	egxExport     *menu.ImageExport
 }
 
 func NewMartineUI() *MartineUI {
@@ -49,6 +50,7 @@ func NewMartineUI() *MartineUI {
 		imageExport:   &menu.ImageExport{},
 		tilemapExport: &menu.ImageExport{},
 		animateExport: &menu.AnimateExport{},
+		egxExport:     &menu.ImageExport{},
 	}
 	m.animateExport.ExportCompression = -1
 	return m

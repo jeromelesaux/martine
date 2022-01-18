@@ -78,7 +78,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						dialog.ShowError(err, m.window)
 						return
 					}
-					dialog.ShowInformation("Save", "Your files are save in foler \n"+m.animateExport.ExportFolderPath, m.window)
+					dialog.ShowInformation("Save", "Your files are save in folder \n"+m.animateExport.ExportFolderPath, m.window)
 				}, m.window)
 				fo.Show()
 			}),
@@ -141,7 +141,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 		m.window.Content().Refresh()
 	})
 	refreshUI = forceUIRefresh
-	openFileWidget := widget.NewButton("Add mage", func() {
+	openFileWidget := widget.NewButton("Add image", func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {
 				dialog.ShowError(err, m.window)

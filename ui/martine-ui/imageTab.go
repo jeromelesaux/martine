@@ -30,6 +30,9 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 	pi := dialog.NewProgressInfinite("Saving....", "Please wait.", m.window)
 	pi.Show()
 	context := m.NewContext(me, true)
+	if context == nil {
+		return
+	}
 	// palette export
 	defer func() {
 		os.Remove("temporary_palette.kit")
@@ -73,7 +76,7 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 		}
 	}
 	pi.Hide()
-	dialog.ShowInformation("Save", "Your files are save in foler \n"+m.imageExport.ExportFolderPath, m.window)
+	dialog.ShowInformation("Save", "Your files are save in folder \n"+m.imageExport.ExportFolderPath, m.window)
 
 }
 
