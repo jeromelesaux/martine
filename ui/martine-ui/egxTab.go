@@ -88,7 +88,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 
 	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
 	pi.Show()
-	res, _, err := effect.EgxRaw(di.LeftImage.Data, di.RightImage.Data, palette, di.LeftImage.Mode, di.RightImage.Mode, context)
+	res, _, egxType, err := effect.EgxRaw(di.LeftImage.Data, di.RightImage.Data, palette, di.LeftImage.Mode, di.RightImage.Mode, context)
 	pi.Hide()
 	if err != nil {
 		dialog.ShowError(err, m.window)
@@ -96,6 +96,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	}
 	di.ResultImage.Data = res
 	di.ResultImage.Palette = palette
+	di.ResultImage.EgxType = egxType
 	var img image.Image
 	if context.Overscan {
 		img, err = common.OverscanRawToImg(di.ResultImage.Data, 0, di.ResultImage.Palette)
@@ -171,6 +172,19 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) fyne.CanvasObject {
 				widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
 					// export the egx image
 					m.exportEgxDialog(m.egxExport, m.window)
+				}),
+				widget.NewButton("show cmd", func() {
+					e := widget.NewMultiLineEntry()
+					e.SetText(di.CmdLine())
+					d := dialog.NewCustom("Command line generated",
+						"Ok",
+						e,
+						m.window)
+					fmt.Printf("%s\n", di.CmdLine())
+					size := m.window.Content().Size()
+					size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
+					d.Resize(size)
+					d.Show()
 				}),
 			),
 		),
@@ -287,7 +301,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 		me.IsCpcPlus = b
 	})
 
-	modes := widget.NewSelect([]string{"0", "1"}, func(s string) {
+	modes := widget.NewSelect([]string{"0", "1", "2"}, func(s string) {
 		mode, err := strconv.Atoi(s)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error %s cannot be cast in int\n", s)

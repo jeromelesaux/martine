@@ -98,6 +98,11 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	}
 	context.OutputPath = me.ResultImage.Path
 	context.Dsk = m.egxExport.ExportDsk
+	if m.egxExport.ExportWithAmsdosHeader {
+		context.NoAmsdosHeader = false
+	} else {
+		context.NoAmsdosHeader = true
+	}
 
 	// palette export
 	defer func() {
@@ -109,11 +114,17 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	}
 	context.KitPath = "temporary_palette.kit"
 
-	if err := common.Export(me.ResultImage.Path+string(filepath.Separator)+"egx.scr", me.ResultImage.Data, me.ResultImage.Palette, 1, context); err != nil {
+	if err := common.Export(me.ResultImage.Path+string(filepath.Separator)+"egx.scr", me.ResultImage.Data, me.ResultImage.Palette, uint8(me.ResultImage.EgxType), context); err != nil {
 		pi.Hide()
 		dialog.ShowError(err, m.window)
 	}
 	pi.Hide()
+	if !context.Overscan {
+		if err := file.EgxLoader(me.ResultImage.Path+string(filepath.Separator)+"egx.scr", me.ResultImage.Palette, uint8(me.LeftImage.Mode), uint8(me.RightImage.Mode), context); err != nil {
+			dialog.ShowError(err, m.window)
+			return
+		}
+	}
 	if m.egxExport.ExportDsk {
 		if err := file.ImportInDsk(me.ResultImage.Path, context); err != nil {
 			dialog.NewError(err, m.window).Show()

@@ -146,7 +146,8 @@ func main() {
 	flag.Var(&deltaFiles, "df", "scr file path to add in delta mode comparison. (wildcard accepted such as ? or * file filename.) ")
 
 	flag.Parse()
-	if len(flag.Args()) == 0 {
+
+	if len(os.Args) == 0 {
 		os.Setenv("FYNE_SCALE", "0.6")
 		/* main application */
 		app := app.NewWithID("Martine @IMPact")

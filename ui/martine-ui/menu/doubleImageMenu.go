@@ -25,6 +25,7 @@ type MergedImageMenu struct {
 	PaletteImage      canvas.Image
 	CmdLineGenerate   string
 	Path              string
+	EgxType           int
 }
 
 func (m *MergedImageMenu) CmdLine() string {

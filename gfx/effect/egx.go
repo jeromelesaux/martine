@@ -411,7 +411,7 @@ func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uin
 	return bw, p
 }
 
-func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cont *export.MartineContext) ([]byte, color.Palette, error) {
+func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cont *export.MartineContext) ([]byte, color.Palette, int, error) {
 	p = constants.SortColorsByDistance(p)
 	if mode1 == 0 && mode2 == 1 || mode2 == 0 && mode1 == 1 {
 		var f0, f1 []byte
@@ -430,24 +430,24 @@ func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cont *export.M
 		if cont.Overscan {
 			in0, err = common.OverscanRawToImg(f0, mode0, p)
 			if err != nil {
-				return nil, p, err
+				return nil, p, 0, err
 			}
 			in1, err = common.OverscanRawToImg(f1, mode1, p)
 			if err != nil {
-				return nil, p, err
+				return nil, p, 0, err
 			}
 		} else {
 			in0, err = common.ScrRawToImg(f0, 0, p)
 			if err != nil {
-				return nil, p, err
+				return nil, p, 0, err
 			}
 			in1, err = common.ScrRawToImg(f1, 1, p)
 			if err != nil {
-				return nil, p, err
+				return nil, p, 0, err
 			}
 		}
 		res, p := ToEgx1Raw(in0, in1, p, uint8(mode1), cont)
-		return res, p, nil
+		return res, p, 1, nil
 	} else {
 		if mode1 == 1 && mode2 == 2 || mode2 == 1 && mode1 == 2 {
 			var f2, f1 []byte
@@ -471,27 +471,27 @@ func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cont *export.M
 			if cont.Overscan {
 				in1, err = common.OverscanRawToImg(f1, mode1, p)
 				if err != nil {
-					return nil, p, err
+					return nil, p, 0, err
 				}
 				in2, err = common.OverscanRawToImg(f2, mode2, p)
 				if err != nil {
-					return nil, p, err
+					return nil, p, 0, err
 				}
 			} else {
 				in1, err = common.ScrRawToImg(f1, mode1, p)
 				if err != nil {
-					return nil, p, err
+					return nil, p, 0, err
 				}
 				in2, err = common.ScrRawToImg(f2, mode2, p)
 				if err != nil {
-					return nil, p, err
+					return nil, p, 0, err
 				}
 			}
 			res, p := ToEgx2Raw(in1, in2, p, uint8(mode1), cont)
-			return res, p, err
+			return res, p, 2, err
 
 		} else {
-			return nil, p, errors.ErrorFeatureNotImplemented
+			return nil, p, 0, errors.ErrorFeatureNotImplemented
 		}
 	}
 }
