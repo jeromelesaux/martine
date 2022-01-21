@@ -42,7 +42,14 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 		dialog.ShowError(err, m.window)
 	}
 	context.KitPath = "temporary_palette.kit"
-	if err := gfx.ApplyOneImageAndExport(me.OriginalImage.Image, context, "img", m.imageExport.ExportFolderPath, me.Mode, uint8(me.Mode)); err != nil {
+	filename := filepath.Base(me.OriginalImagePath.Path())
+	if err := gfx.ApplyOneImageAndExport(
+		me.OriginalImage.Image,
+		context,
+		filename,
+		m.imageExport.ExportFolderPath+string(filepath.Separator)+filename,
+		me.Mode,
+		uint8(me.Mode)); err != nil {
 		pi.Hide()
 		dialog.NewError(err, m.window).Show()
 		return

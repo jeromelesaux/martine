@@ -23,6 +23,15 @@ import (
 	w2 "github.com/jeromelesaux/martine/ui/martine-ui/widget"
 )
 
+func (m *MartineUI) IsClassicalTilemap(width, height int) bool {
+	if width == 4 || width == 8 {
+		if height == 8 || height == 16 {
+			return true
+		}
+	}
+	return false
+}
+
 func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 	context := m.NewContext(&me.ImageMenu, true)
 	if context == nil {
@@ -33,7 +42,7 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 
 	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
 	pi.Show()
-	analyze, tiles, palette, err := gfx.TilemapMemory(uint8(me.Mode), me.IsCpcPlus, context.Size, me.OriginalImage.Image, context)
+	analyze, tiles, palette, err := gfx.TilemapRaw(uint8(me.Mode), me.IsCpcPlus, context.Size, me.OriginalImage.Image, context)
 	pi.Hide()
 	if err != nil {
 		dialog.NewError(err, m.window).Show()

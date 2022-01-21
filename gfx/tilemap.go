@@ -425,7 +425,7 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 	return err
 }
 
-func TilemapMemory(mode uint8, isCpcPlus bool, size constants.Size, in image.Image, cont *export.MartineContext) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette, error) {
+func TilemapRaw(mode uint8, isCpcPlus bool, size constants.Size, in image.Image, cont *export.MartineContext) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette, error) {
 	/*
 		8x8 : 40x25
 		16x8 : 20x25
