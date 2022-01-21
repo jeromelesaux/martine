@@ -2,6 +2,8 @@ package ui
 
 import (
 	"fmt"
+	"image"
+	"image/color"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -19,6 +21,7 @@ import (
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx"
+	"github.com/jeromelesaux/martine/gfx/transformation"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 	w2 "github.com/jeromelesaux/martine/ui/martine-ui/widget"
 )
@@ -42,12 +45,23 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 
 	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
 	pi.Show()
-	analyze, tiles, palette, err := gfx.TilemapRaw(uint8(me.Mode), me.IsCpcPlus, context.Size, me.OriginalImage.Image, context)
-	pi.Hide()
-	if err != nil {
-		dialog.NewError(err, m.window).Show()
-		return
+	var analyze *transformation.AnalyzeBoard
+	var palette color.Palette
+	var tiles [][]image.Image
+	var err error
+	if m.IsClassicalTilemap(context.Size.Width, context.Size.Height) {
+		filename := filepath.Base(me.OriginalImagePath.Path())
+		analyze, tiles, palette = gfx.TilemapClassical(uint8(me.Mode), me.IsCpcPlus, filename, me.OriginalImagePath.Path(), me.OriginalImage.Image, context.Size, context)
+		pi.Hide()
+	} else {
+		analyze, tiles, palette, err = gfx.TilemapRaw(uint8(me.Mode), me.IsCpcPlus, context.Size, me.OriginalImage.Image, context)
+		pi.Hide()
+		if err != nil {
+			dialog.NewError(err, m.window).Show()
+			return
+		}
 	}
+
 	me.Result = analyze
 	me.Palette = palette
 	tilesCanvas := make([][]canvas.Image, len(tiles))

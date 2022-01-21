@@ -230,6 +230,112 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 	return err
 }
 
+func ExportTilemapClassical(m image.Image, filename string, board *transformation.AnalyzeBoard, size constants.Size, cont *export.MartineContext) error {
+	finalFile := strings.ReplaceAll(filename, "?", "")
+	if err := board.SaveSchema(filepath.Join(cont.OutputPath, "tilesmap_schema.png")); err != nil {
+		fmt.Fprintf(os.Stderr, "Cannot save tilemap schema error :%v\n", err)
+		return err
+	}
+	if err := board.SaveTilemap(filepath.Join(cont.OutputPath, "tilesmap.map")); err != nil {
+		fmt.Fprintf(os.Stderr, "Cannot save tilemap csv file error :%v\n", err)
+		return err
+	}
+	nbTilePixelLarge := 20
+	nbTilePixelHigh := 25
+	switch board.TileSize.Width {
+	case 4:
+		nbTilePixelLarge = 20
+	case 2:
+		nbTilePixelLarge = 40
+	}
+	scenes := make([]*image.NRGBA, 0)
+	os.Mkdir(cont.OutputPath+string(filepath.Separator)+"scenes", os.ModePerm)
+	index := 0
+	for y := 0; y < m.Bounds().Max.Y; y += (nbTilePixelHigh * board.TileSize.Height) {
+		for x := 0; x < m.Bounds().Max.X; x += (nbTilePixelLarge * board.TileSize.Width) {
+			m1 := image.NewNRGBA(image.Rect(0, 0, nbTilePixelLarge*board.TileSize.Width, nbTilePixelHigh*board.TileSize.Height))
+			// copy of the map
+			for i := 0; i < nbTilePixelLarge*board.TileSize.Width; i++ {
+				for j := 0; j < nbTilePixelHigh*board.TileSize.Height; j++ {
+					var c color.Color = color.RGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
+					if x+i < m.Bounds().Max.X && y+j < m.Bounds().Max.Y {
+						c = m.At(x+i, y+j)
+					}
+					m1.Set(i, j, c)
+				}
+			}
+			// store the map in the slice
+			scenes = append(scenes, m1)
+			scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%sscenes%sscene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
+			f, err := os.Create(scenePath)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Cannot create scene scence-%.2d error %v\n", index, err)
+				return err
+			}
+
+			if err := png.Encode(f, m1); err != nil {
+				fmt.Fprintf(os.Stderr, "Cannot encode in png scene scene-%.2d error %v\n", index, err)
+				return err
+			}
+			f.Close()
+			index++
+		}
+	}
+
+	// now thread all maps images
+	tiles := board.Sort()
+	tileMaps := make([]byte, 0)
+	for _, v := range scenes {
+		for y := 0; y < v.Bounds().Max.Y; y += board.TileSize.Height {
+			for x := 0; x < v.Bounds().Max.X; x += board.TileSize.Width {
+				sprt, err := transformation.ExtractTile(v, board.TileSize, x, y)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
+					break
+				}
+				index := board.TileIndex(sprt, tiles)
+				tileMaps = append(tileMaps, byte(index))
+			}
+		}
+	}
+
+	if err := file.TileMap(tileMaps, finalFile, cont); err != nil {
+		fmt.Fprintf(os.Stderr, "Cannot export to Imp-TileMap the image %s error %v", cont.OutputPath, err)
+		return err
+	}
+	return nil
+}
+
+func TilemapClassical(mode uint8, isCpcPlus bool, filename, picturePath string, in image.Image, size constants.Size, cont *export.MartineContext) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette) {
+	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
+	m := convert.Resize(in, mapSize, cont.ResizingAlgo)
+	var palette color.Palette
+	palette = convert.ExtractPalette(m, isCpcPlus, cont.Size.ColorsAvailable)
+	refPalette := constants.CpcOldPalette
+	if cont.CpcPlus {
+		refPalette = constants.CpcPlusPalette
+	}
+	palette = convert.ToCPCPalette(palette, refPalette)
+	palette = constants.SortColorsByDistance(palette)
+	_, m = convert.DowngradingWithPalette(m, palette)
+	tilemap := transformation.AnalyzeTilesBoard(m, size)
+	var tilesImagesTilemap [][]image.Image
+	for y := 0; y < m.Bounds().Max.Y; y += tilemap.TileSize.Height {
+		tilesmap := make([]image.Image, 0)
+		for x := 0; x < m.Bounds().Max.X; x += tilemap.TileSize.Width {
+			sprt, err := transformation.ExtractTile(m, tilemap.TileSize, x, y)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
+				break
+			}
+			tilesmap = append(tilesmap, sprt.Image())
+		}
+		tilesImagesTilemap = append(tilesImagesTilemap, tilesmap)
+	}
+
+	return tilemap, tilesImagesTilemap, palette
+}
+
 func sizeOctet(size constants.Size, mode uint8) int {
 	switch mode {
 	case 0:

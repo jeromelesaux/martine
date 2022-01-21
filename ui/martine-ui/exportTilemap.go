@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -89,10 +90,12 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 	pi := dialog.NewProgressInfinite("Saving....", "Please wait.", m.window)
 	pi.Show()
 	context := m.NewContext(&t.ImageMenu, true)
-	if t.ExportImpdraw {
-		if err := gfx.ExportImpdrawTilemap(t.Result, "tilemap", t.Palette, uint8(t.Mode), context.Size, t.CpcImage.Image, context); err != nil {
+	if m.IsClassicalTilemap(context.Size.Width, context.Size.Height) {
+		filename := filepath.Base(t.OriginalImagePath.Path())
+		if err := gfx.ExportTilemapClassical(t.CpcImage.Image, filename, t.Result, context.Size, context); err != nil {
 			pi.Hide()
 			dialog.NewError(err, m.window).Show()
+			return
 		}
 		if context.Dsk {
 			if err := file.ImportInDsk(t.OriginalImagePath.Path(), context); err != nil {
@@ -103,17 +106,32 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 		}
 		pi.Hide()
 	} else {
-		if err := gfx.ExportTilemap(t.Result, "tilemap", t.Palette, uint8(t.Mode), t.CpcImage.Image, context); err != nil {
-			pi.Hide()
-			dialog.NewError(err, m.window).Show()
-		}
-		if context.Dsk {
-			if err := file.ImportInDsk(t.OriginalImagePath.Path(), context); err != nil {
+		if t.ExportImpdraw {
+			if err := gfx.ExportImpdrawTilemap(t.Result, "tilemap", t.Palette, uint8(t.Mode), context.Size, t.CpcImage.Image, context); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
-				return
 			}
+			if context.Dsk {
+				if err := file.ImportInDsk(t.OriginalImagePath.Path(), context); err != nil {
+					pi.Hide()
+					dialog.NewError(err, m.window).Show()
+					return
+				}
+			}
+			pi.Hide()
+		} else {
+			if err := gfx.ExportTilemap(t.Result, "tilemap", t.Palette, uint8(t.Mode), t.CpcImage.Image, context); err != nil {
+				pi.Hide()
+				dialog.NewError(err, m.window).Show()
+			}
+			if context.Dsk {
+				if err := file.ImportInDsk(t.OriginalImagePath.Path(), context); err != nil {
+					pi.Hide()
+					dialog.NewError(err, m.window).Show()
+					return
+				}
+			}
+			pi.Hide()
 		}
-		pi.Hide()
 	}
 }
