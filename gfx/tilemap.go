@@ -564,11 +564,13 @@ func TilemapRaw(mode uint8, isCpcPlus bool, size constants.Size, in image.Image,
 		fmt.Fprintf(os.Stderr, "You must set height and width to define the tile dimensions (options -h and -w) error:%v\n", errors.ErrorCustomDimensionMustBeSet)
 		return nil, tilesImagesTilemap, palette, errors.ErrorCustomDimensionMustBeSet
 	}
-	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
+	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: cont.Size.ColorsAvailable}
 	m := convert.Resize(in, mapSize, cont.ResizingAlgo)
-
-	palette = convert.ExtractPalette(m, isCpcPlus, cont.Size.ColorsAvailable)
-
+	if isCpcPlus {
+		palette, _, _ = convert.DowngradingPalette(m, mapSize, isCpcPlus)
+	} else {
+		palette = convert.ExtractPalette(m, isCpcPlus, cont.Size.ColorsAvailable)
+	}
 	refPalette := constants.CpcOldPalette
 	if cont.CpcPlus {
 		refPalette = constants.CpcPlusPalette
