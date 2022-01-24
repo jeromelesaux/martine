@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"path/filepath"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -24,7 +25,26 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 				case "sprite":
 					m.tilemap.ExportImpdraw = false
 				case "impdraw":
-					m.tilemap.ExportImpdraw = true
+					var width, height int
+					var err error
+					width, err = strconv.Atoi(m.tilemap.Width.Text)
+					if err != nil {
+						dialog.NewError(err, m.window).Show()
+						return
+					}
+					height, err = strconv.Atoi(m.tilemap.Height.Text)
+					if err != nil {
+						dialog.NewError(err, m.window).Show()
+						return
+					}
+
+					if !m.IsClassicalTilemap(width, height) {
+						m.tilemap.ExportImpdraw = true
+					} else {
+						err = fmt.Errorf("can not apply impdraw for tiles size. (8x8, 4x8, 4x16 or 8x16)")
+						dialog.NewError(err, m.window).Show()
+						return
+					}
 				}
 			}),
 			widget.NewCheck("import all file in Dsk", func(b bool) {

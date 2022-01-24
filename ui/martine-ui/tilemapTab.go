@@ -29,10 +29,10 @@ import (
 func (m *MartineUI) IsClassicalTilemap(width, height int) bool {
 	if width == 4 || width == 8 {
 		if height == 8 || height == 16 {
-			return true
+			return false
 		}
 	}
-	return false
+	return true
 }
 
 func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
