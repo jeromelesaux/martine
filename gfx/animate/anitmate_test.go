@@ -2,6 +2,10 @@ package animate
 
 import (
 	"fmt"
+	"image"
+	"image/draw"
+	"image/gif"
+	"image/png"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -48,4 +52,44 @@ func TestCompressZx0(t *testing.T) {
 
 func TestDisplayCode(t *testing.T) {
 	fmt.Printf("%s", depackRoutine)
+}
+
+func TestMergeGifImages(t *testing.T) {
+	fr, err := os.Open("/Users/jeromelesaux/Downloads/Files_Gif/sablier-8.gif")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer fr.Close()
+	gifs, err := gif.DecodeAll(fr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	imgRect := image.Rectangle{Min: image.Point{X: 0, Y: 0}, Max: image.Point{X: gifs.Config.Width, Y: gifs.Config.Height}}
+	origImg := image.NewRGBA(imgRect)
+	draw.Draw(origImg, gifs.Image[0].Bounds(), gifs.Image[0], gifs.Image[0].Bounds().Min, 0)
+	savePng("origin.png", origImg)
+	previousImg := origImg
+
+	for i := 1; i < len(gifs.Image); i++ {
+		img := image.NewRGBA(imgRect)
+		draw.Draw(img, previousImg.Bounds(), previousImg, previousImg.Bounds().Min, draw.Over)
+		currImg := gifs.Image[i]
+		draw.Draw(img, currImg.Bounds(), currImg, currImg.Bounds().Min, draw.Over)
+		filename := fmt.Sprintf("origin-%.2d.png", i)
+		savePng(filename, img)
+		previousImg = img
+	}
+	t.Log(gifs)
+}
+
+func savePng(filename string, img image.Image) error {
+	w, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+	if err := png.Encode(w, img); err != nil {
+		return err
+	}
+	return nil
 }

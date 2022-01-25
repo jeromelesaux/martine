@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"image/gif"
+	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -175,10 +176,18 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 					return
 				}
 				defer fr.Close()
+				gifCfg, err := gif.DecodeConfig(fr)
+				if err != nil {
+					pi.Hide()
+					dialog.ShowError(err, m.window)
+					return
+				}
+				fmt.Println(gifCfg.Height)
+				fr.Seek(0, io.SeekStart)
 				gifImages, err := gif.DecodeAll(fr)
 				if err != nil {
-					dialog.ShowError(err, m.window)
 					pi.Hide()
+					dialog.ShowError(err, m.window)
 					return
 				}
 				imgs := animate.ConvertToImage(*gifImages)

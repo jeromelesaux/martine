@@ -15,13 +15,14 @@ func (m *MartineUI) newGreedings() fyne.CanvasObject {
 		Ast, CMP, Demoniak, Kris and Drill
 		Specials thanks for support to : 
 		*** Tronic ***
-		*** Siko ***
+		***   Siko   ***
 		and thanks a lot to all users^^
 		for more informations about this tool, go to https://github.com/jeromelesaux/martine
 		for more informations about my tool go to https://github.com/jeromelesaux
 		to follow me on my old website https://http://koaks.amstrad.free.fr/amstrad/
 		to chat with us got to https://amstradplus.forumforever.com/index.php  or
-		https://discord.com/channels/453480213032992768/454619697485447169 on discord`),
+		https://discord.com/channels/453480213032992768/454619697485447169 on discord
+		`),
 		layout.NewSpacer(),
 	)
 }

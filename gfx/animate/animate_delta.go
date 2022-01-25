@@ -191,12 +191,20 @@ func DeltaPacking(gitFilepath string, ex *export.MartineContext, initialAddress 
 
 func ConvertToImage(g gif.GIF) []*image.NRGBA {
 	c := make([]*image.NRGBA, 0)
-	width := g.Image[0].Bounds().Max.X
-	height := g.Image[0].Bounds().Max.Y
-	for i := 1; i < len(g.Image)-1; i++ {
-		img := image.NewNRGBA(image.Rect(0, 0, width, height))
-		draw.Draw(img, img.Bounds(), g.Image[i], image.Point{0, 0}, draw.Over)
-		c = append(c, img)
+	imgRect := image.Rectangle{Min: image.Point{X: 0, Y: 0}, Max: image.Point{X: g.Config.Width, Y: g.Config.Height}}
+	origImg := image.NewRGBA(imgRect)
+	draw.Draw(origImg, g.Image[0].Bounds(), g.Image[0], g.Image[0].Bounds().Min, 0)
+	c = append(c, (*image.NRGBA)(origImg))
+
+	previousImg := origImg
+
+	for i := 1; i < len(g.Image); i++ {
+		img := image.NewRGBA(imgRect)
+		draw.Draw(img, previousImg.Bounds(), previousImg, previousImg.Bounds().Min, draw.Over)
+		currImg := g.Image[i]
+		draw.Draw(img, currImg.Bounds(), currImg, currImg.Bounds().Min, draw.Over)
+		c = append(c, (*image.NRGBA)(img))
+		previousImg = img
 	}
 	return c
 }
