@@ -36,7 +36,7 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 					return
 				}
 				if len(p) == 0 {
-					dialog.ShowError(fmt.Errorf("no palette found"), m.window)
+					dialog.ShowError(fmt.Errorf("no palette found in selected file, try to normal option and open the associated palette"), m.window)
 					return
 				}
 				img, err := cgfx.OverscanToImg(me.OriginalImagePath.Path(), mode, p)
@@ -74,7 +74,7 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 				//loading classical screen
 				//	paletteDialog.OnTapped()
 				if len(me.Palette) == 0 {
-					dialog.ShowError(errors.New("palette is empty,  please import palette first"), m.window)
+					dialog.ShowError(errors.New("palette is empty,  please import palette first, or select fullscreen option to open a fullscreen option"), m.window)
 					return
 				}
 				img, err := cgfx.ScrToImg(me.OriginalImagePath.Path(), uint8(me.Mode), me.Palette)
