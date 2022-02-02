@@ -21,7 +21,7 @@ import (
 )
 
 func DeltaPackingMemory(images []image.Image, ex *export.MartineContext, initialAddress uint16, mode uint8) ([]*transformation.DeltaCollection, [][]byte, color.Palette, error) {
-	var isSprite bool
+	var isSprite bool = true
 	var maxImages = 22
 	var pad int = 1
 	var err error
@@ -309,7 +309,7 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	code += header
 	code += dataCode
 	code += "\nend\n"
-	code += "\nsave'disc.bin',#200, end - start,DSK,'delta.dsk'"
+	code += "\nsave'disc.bin',#200, end - start,DSK,'martine-animate.dsk'"
 
 	return code, nil
 }

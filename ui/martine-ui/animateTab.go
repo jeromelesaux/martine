@@ -39,14 +39,12 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						// cancel button
 						return
 					}
-
-					context := m.NewContext(&m.animate.ImageMenu, false)
+					context := m.NewContext(&a.ImageMenu, false)
 					if context == nil {
 						return
 					}
 					context.Compression = m.animateExport.ExportCompression
-					hexa := fmt.Sprintf("%x", a.InitialAddress.Text)
-					address, err := strconv.Atoi(hexa)
+					address, err := strconv.ParseUint(a.InitialAddress.Text, 16, 64)
 					if err != nil {
 						dialog.ShowError(err, m.window)
 						return
@@ -91,6 +89,21 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 	d.Show()
 }
 
+func CheckWidthSize(width, mode int) bool {
+	var colorPerPixel int
+
+	switch mode {
+	case 0:
+		colorPerPixel = 2
+	case 1:
+		colorPerPixel = 4
+	case 2:
+		colorPerPixel = 8
+	}
+	remain := width % colorPerPixel
+	return remain == 0
+}
+
 func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 	context := m.NewContext(&a.ImageMenu, false)
 	if context == nil {
@@ -99,14 +112,21 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 	context.Compression = m.animateExport.ExportCompression
 	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
 	pi.Show()
-	hexa := fmt.Sprintf("%x", a.InitialAddress.Text)
-	address, err := strconv.Atoi(hexa)
+	address, err := strconv.ParseUint(a.InitialAddress.Text, 16, 64)
 	if err != nil {
 		pi.Hide()
 		dialog.ShowError(err, m.window)
 		return
 	}
+	// controle de de la taille de la largeur en fonction du mode
+	width := context.Size.Width
+	mode := a.Mode
 	// get all images from widget imagetable
+	if !CheckWidthSize(width, mode) {
+		pi.Hide()
+		dialog.ShowError(fmt.Errorf("the width in not a multiple of color per pixel, increase the width"), m.window)
+		return
+	}
 	imgs := a.AnimateImages.Images()[0]
 	deltaCollection, rawImages, palette, err := animate.DeltaPackingMemory(imgs, context, uint16(address), uint8(a.Mode))
 	pi.Hide()

@@ -13,6 +13,8 @@ import (
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
+// spriteToImg load a OCP win filepath to image.NRGBA
+// using the mode and palette as arguments
 func SpriteToImg(winPath string, mode uint8, p color.Palette) (*image.NRGBA, constants.Size, error) {
 	var s constants.Size
 	footer, err := file.OpenWin(winPath)
@@ -117,6 +119,8 @@ func SpriteToImg(winPath string, mode uint8, p color.Palette) (*image.NRGBA, con
 	return out, s, err
 }
 
+// spriteToPng will save the sprite OCP win filepath in a png file
+// output will be the png filpath, using the mode and palette as arguments
 func SpriteToPng(winPath string, output string, mode uint8, p color.Palette) error {
 	out, _, err := SpriteToImg(winPath, mode, p)
 	if err != nil {
@@ -125,6 +129,8 @@ func SpriteToPng(winPath string, output string, mode uint8, p color.Palette) err
 	return file.Png(output+".png", out)
 }
 
+// scrRawToImg will convert the classical OCP screen slice of bytes  into image.NRGBA structure
+// using the mode and the palette as arguments
 func ScrRawToImg(d []byte, mode uint8, p color.Palette) (*image.NRGBA, error) {
 	var m constants.Size
 	switch mode {
@@ -206,6 +212,8 @@ func ScrRawToImg(d []byte, mode uint8, p color.Palette) (*image.NRGBA, error) {
 	return out, nil
 }
 
+// SrcToImg load the amstrad classical 17ko  screen image to image.NRBGA
+// using the mode and palette as arguments
 func ScrToImg(scrPath string, mode uint8, p color.Palette) (*image.NRGBA, error) {
 	var m constants.Size
 	switch mode {
@@ -300,6 +308,8 @@ func ScrToPng(scrPath string, output string, mode uint8, p color.Palette) error 
 	return file.Png(output, out)
 }
 
+// overscanRawToImg will convert fullscreen amstrad screen slice of bytes in image.NRGBA
+// using the  screen mode  and the palette as arguments
 func OverscanRawToImg(d []byte, mode uint8, p color.Palette) (*image.NRGBA, error) {
 	var m constants.Size
 	switch mode {
@@ -390,6 +400,8 @@ func OverscanRawToImg(d []byte, mode uint8, p color.Palette) (*image.NRGBA, erro
 	return out, nil
 }
 
+// overscanToImg will convert fullscreen amstrad screen filepath 'srcPath' in image.NRGBA
+// using the  screen mode  and the palette as arguments
 func OverscanToImg(scrPath string, mode uint8, p color.Palette) (*image.NRGBA, error) {
 	var m constants.Size
 	switch mode {
@@ -485,6 +497,8 @@ func OverscanToImg(scrPath string, mode uint8, p color.Palette) (*image.NRGBA, e
 	return out, nil
 }
 
+// overscanToPng will convert fullscreen amstrad screen filepath in png file 'output'
+// using the  screen mode  and the palette as arguments
 func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) error {
 	out, err := OverscanToImg(scrPath, mode, p)
 	if err != nil {
@@ -591,6 +605,8 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *e
 	return file.Ascii(filePath, bw, p, false, ex)
 }
 
+// PalettePosition returns the position of the color c in the palette
+// overwise ErrorColorNotFound error
 func PalettePosition(c color.Color, p color.Palette) (int, error) {
 	r, g, b, a := c.RGBA()
 	for index, cp := range p {
@@ -604,6 +620,7 @@ func PalettePosition(c color.Color, p color.Palette) (int, error) {
 	return -1, errors.ErrorColorNotFound
 }
 
+// PixelMode0 converts palette position into byte in  screen mode 0
 func PixelMode0(pp1, pp2 int) byte {
 	var pixel byte
 	if uint8(pp1)&1 == 1 {
@@ -633,6 +650,7 @@ func PixelMode0(pp1, pp2 int) byte {
 	return pixel
 }
 
+// PixelMode1 converts palette position into byte in  screen mode 1
 func PixelMode1(pp1, pp2, pp3, pp4 int) byte {
 	var pixel byte
 	if uint8(pp1)&1 == 1 {
@@ -662,6 +680,7 @@ func PixelMode1(pp1, pp2, pp3, pp4 int) byte {
 	return pixel
 }
 
+// PixelMode converts palette position into byte in screen mode 2
 func PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) byte {
 	var pixel byte
 	if uint8(pp1)&1 == 1 {
@@ -691,6 +710,7 @@ func PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) byte {
 	return pixel
 }
 
+// RawPixelMode2 converts color  byte in palette position in  screen mode 2
 func RawPixelMode2(b byte) (pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) {
 	val := int(b)
 	if val-128 >= 0 {
@@ -727,6 +747,7 @@ func RawPixelMode2(b byte) (pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) {
 	return
 }
 
+// RawPixelMode1 converts color  byte in palette position in screen mode 1
 func RawPixelMode1(b byte) (pp1, pp2, pp3, pp4 int) {
 	val := int(b)
 	if val-128 >= 0 {
@@ -764,6 +785,7 @@ func RawPixelMode1(b byte) (pp1, pp2, pp3, pp4 int) {
 	return
 }
 
+// RawPixelMode0 converts color  byte in palette position in screen mode 0
 func RawPixelMode0(b byte) (pp1, pp2 int) {
 	val := int(b)
 	//fmt.Fprintf(os.Stderr,"v:%.8b\n",val)
@@ -809,6 +831,8 @@ func RawPixelMode0(b byte) (pp1, pp2 int) {
 	return
 }
 
+// CpcScreenAddress returns the screen address according the screen mode, the initialAddress (always #C000)
+// x the column number and y the line number on the screen
 func CpcScreenAddress(intialeAddresse int, x, y int, mode uint8, isOverscan bool) int {
 	var addr int
 	var adjustMode int

@@ -56,7 +56,6 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 				me.OriginalImage.FillMode = canvas.ImageFillContain
 			} else if me.IsSprite {
 				// loading sprite file
-				//	paletteDialog.OnTapped()
 				if len(me.Palette) == 0 {
 					dialog.ShowError(errors.New("palette is empty, please import palette first"), m.window)
 					return
@@ -72,7 +71,6 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 				me.OriginalImage.FillMode = canvas.ImageFillContain
 			} else {
 				//loading classical screen
-				//	paletteDialog.OnTapped()
 				if len(me.Palette) == 0 {
 					dialog.ShowError(errors.New("palette is empty,  please import palette first, or select fullscreen option to open a fullscreen option"), m.window)
 					return
