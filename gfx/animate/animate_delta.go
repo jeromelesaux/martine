@@ -308,6 +308,9 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 
 	code += header
 	code += dataCode
+	if ex.Compression != -1 {
+		code += "\nbuffer:\n"
+	}
 	code += "\nend\n"
 	code += "\nsave'disc.bin',#200, end - start,DSK,'martine-animate.dsk'"
 
@@ -603,8 +606,12 @@ call xvbl
 
 ;--- affichage du sprite initiale --
 	; affichage du premier sprite
+	ld de,buffer
+	ld hl,sprite
+	call Depack
+
 	ld de,$INITIALADDRESS$ ; adresse de l'ecran 
-	ld hl,sprite ; pointeur sur l'image en memoire
+	ld hl,buffer ; pointeur sur l'image en memoire
 	ld b, haut ; hauteur de l'image
 	loop
 	push bc ; sauve le compteur hauteur dans la pile
@@ -649,68 +656,11 @@ table_next:
 	ld h,(hl)
 	ld l,a
 	ld de,buffer
-;
-; Decompactage ZX0
-; HL = source
-; DE = destination
-;
-Depack:
-	ld    bc,#ffff        ; preserve default offset 1
-	push    bc
-	inc    bc
-	ld    a,#80
-dzx0s_literals:
-	call    dzx0s_elias        ; obtain length
-	ldir                ; copy literals
-	add    a,a            ; copy from last offset or new offset?
-	jr    c,dzx0s_new_offset
-	call    dzx0s_elias        ; obtain length
-dzx0s_copy:
-	ex    (sp),hl            ; preserve source,restore offset
-	push    hl            ; preserve offset
-	add    hl,de            ; calculate destination - offset
-	ldir                ; copy from offset
-	pop    hl            ; restore offset
-	ex    (sp),hl            ; preserve offset,restore source
-	add    a,a            ; copy from literals or new offset?
-	jr    nc,dzx0s_literals
-dzx0s_new_offset:
-	call    dzx0s_elias        ; obtain offset MSB
-	ld b,a
-	pop    af            ; discard last offset
-	xor    a            ; adjust for negative offset
-	sub    c
-	RET    Z            ; Plus d'octets a traiter = fini
 
-	ld    c,a
-	ld    a,b
-	ld    b,c
-	ld    c,(hl)            ; obtain offset LSB
-	inc    hl
-	rr    b            ; last offset bit becomes first length bit
-	rr    c
-	push    bc            ; preserve new offset
-	ld    bc,1            ; obtain length
-	call    nc,dzx0s_elias_backtrack
-	inc    bc
-	jr    dzx0s_copy
-dzx0s_elias:
-	inc    c            ; interlaced Elias gamma coding
-dzx0s_elias_loop:
-	add    a,a
-	jr    nz,dzx0s_elias_skip
-	ld    a,(hl)            ; load another group of 8 bits
-	inc    hl
-	rla
-dzx0s_elias_skip:
-	ret     c
-dzx0s_elias_backtrack:
-	add    a,a
-	rl    c
-	rl    b
-	jr    dzx0s_elias_loop
+	call Depack
 
 	ld hl,buffer ; utilisation de la structure delta décompactée 
+
 delta
 	ld a,(hl) ; nombre de byte a poker
 	push af   ; stockage en mémoire
@@ -744,6 +694,70 @@ poke_octet
 	push af
 	jr nz,init
 	pop af
+	ret
+
+
+
+	;
+	; Decompactage ZX0
+	; HL = source
+	; DE = destination
+	;
+	Depack:
+		ld    bc,#ffff        ; preserve default offset 1
+		push    bc
+		inc    bc
+		ld    a,#80
+	dzx0s_literals:
+		call    dzx0s_elias        ; obtain length
+		ldir                ; copy literals
+		add    a,a            ; copy from last offset or new offset?
+		jr    c,dzx0s_new_offset
+		call    dzx0s_elias        ; obtain length
+	dzx0s_copy:
+		ex    (sp),hl            ; preserve source,restore offset
+		push    hl            ; preserve offset
+		add    hl,de            ; calculate destination - offset
+		ldir                ; copy from offset
+		pop    hl            ; restore offset
+		ex    (sp),hl            ; preserve offset,restore source
+		add    a,a            ; copy from literals or new offset?
+		jr    nc,dzx0s_literals
+	dzx0s_new_offset:
+		call    dzx0s_elias        ; obtain offset MSB
+		ld b,a
+		pop    af            ; discard last offset
+		xor    a            ; adjust for negative offset
+		sub    c
+		RET    Z            ; Plus d'octets a traiter = fini
+	
+		ld    c,a
+		ld    a,b
+		ld    b,c
+		ld    c,(hl)            ; obtain offset LSB
+		inc    hl
+		rr    b            ; last offset bit becomes first length bit
+		rr    c
+		push    bc            ; preserve new offset
+		ld    bc,1            ; obtain length
+		call    nc,dzx0s_elias_backtrack
+		inc    bc
+		jr    dzx0s_copy
+	dzx0s_elias:
+		inc    c            ; interlaced Elias gamma coding
+	dzx0s_elias_loop:
+		add    a,a
+		jr    nz,dzx0s_elias_skip
+		ld    a,(hl)            ; load another group of 8 bits
+		inc    hl
+		rla
+	dzx0s_elias_skip:
+		ret     c
+	dzx0s_elias_backtrack:
+		add    a,a
+		rl    c
+		rl    b
+		jr    dzx0s_elias_loop
 	ret
 
 ;---------------------------------------------------------------
