@@ -13,7 +13,6 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
-	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/export"
@@ -242,7 +241,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 			m.window.Canvas().Refresh(&me.OriginalImage)
 			m.window.Resize(m.window.Content().Size())
 		}, m.window)
-		d.SetFilter(storage.NewExtensionFileFilter([]string{".jpg", ".gif", ".png", ".jpeg"}))
+		d.SetFilter(imagesFilesFilter)
 		d.Resize(dialogSize)
 		d.Show()
 	})

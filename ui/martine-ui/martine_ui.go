@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
@@ -22,10 +23,11 @@ import (
 )
 
 var (
-	refreshUI        *widget.Button
-	modeSelection    *widget.Select
-	paletteSelection *widget.Select
-	dialogSize       = fyne.NewSize(800, 800)
+	refreshUI         *widget.Button
+	modeSelection     *widget.Select
+	paletteSelection  *widget.Select
+	dialogSize        = fyne.NewSize(800, 800)
+	imagesFilesFilter = storage.NewExtensionFileFilter([]string{".jpg", ".gif", ".png", ".jpeg", ".JPG", ".JPEG", ".GIF", ".PNG"})
 )
 
 type MartineUI struct {

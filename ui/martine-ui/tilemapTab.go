@@ -14,7 +14,6 @@ import (
 	"fyne.io/fyne/v2/data/validation"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
-	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/fyne-io/custom_widget"
@@ -122,7 +121,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 			m.window.Canvas().Refresh(&tm.OriginalImage)
 			m.window.Resize(m.window.Content().Size())
 		}, m.window)
-		d.SetFilter(storage.NewExtensionFileFilter([]string{".jpg", ".gif", ".png", ".jpeg"}))
+		d.SetFilter(imagesFilesFilter)
 		d.Resize(dialogSize)
 		d.Show()
 	})
