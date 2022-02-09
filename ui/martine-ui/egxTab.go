@@ -329,6 +329,13 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 	warningLabel := widget.NewLabel("Setting thoses parameters will affect your palette, you can't force palette.")
 	warningLabel.TextStyle = fyne.TextStyle{Bold: true}
 
+	oneLine := widget.NewCheck("Every other line", func(b bool) {
+		me.OneLine = b
+	})
+	oneRow := widget.NewCheck("Every other row", func(b bool) {
+		me.OneRow = b
+	})
+
 	return container.New(
 		layout.NewGridLayoutWithColumns(2),
 		container.New(
@@ -364,7 +371,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 				),
 			),
 			container.New(
-				layout.NewGridLayoutWithRows(6),
+				layout.NewGridLayoutWithRows(7),
 				container.New(
 					layout.NewGridLayoutWithRows(2),
 					container.New(
@@ -414,6 +421,11 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 							d.Show()
 						}),
 					),
+				),
+				container.New(
+					layout.NewVBoxLayout(),
+					oneLine,
+					oneRow,
 				),
 				container.New(
 					layout.NewVBoxLayout(),

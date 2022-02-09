@@ -265,5 +265,19 @@ func ApplyOneImage(in image.Image,
 			lineSize = 16
 		}
 	}
+	if cont.OneRow {
+		for y := 0; y < downgraded.Bounds().Max.Y; y += 2 {
+			for x := 0; x < downgraded.Bounds().Max.X; x++ {
+				downgraded.Set(x, y, newPalette[0])
+			}
+		}
+	}
+	if cont.OneLine {
+		for y := 0; y < downgraded.Bounds().Max.Y; y++ {
+			for x := 0; x < downgraded.Bounds().Max.X; x += 2 {
+				downgraded.Set(x, y, newPalette[0])
+			}
+		}
+	}
 	return data, downgraded, newPalette, lineSize, err
 }

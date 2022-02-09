@@ -162,6 +162,8 @@ func (m *MartineUI) NewContext(me *menu.ImageMenu, checkOriginalImage bool) *exp
 	context.ZigZag = m.imageExport.ExportZigzag
 	context.Compression = m.imageExport.ExportCompression
 	context.Dsk = m.imageExport.ExportDsk
+	context.OneLine = me.OneLine
+	context.OneRow = me.OneRow
 	return context
 }
 

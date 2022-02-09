@@ -22,6 +22,8 @@ type AnimateMenu struct {
 	InitialAddress  *widget.Entry
 	RawImages       [][]byte
 	IsEmpty         bool
+	OneLine         bool
+	OneRow          bool
 }
 
 func NewAnimateMenu() *AnimateMenu {
@@ -92,7 +94,15 @@ func (i *AnimateMenu) CmdLine() string {
 		exec += " -address 0x" + i.InitialAddress.Text
 	}
 
+	if i.OneLine {
+		exec += " -oneline"
+	}
+	if i.OneRow {
+		exec += " -onerow"
+	}
+
 	exec += " -animate"
+
 	i.CmdLineGenerate = exec
 	return exec
 }

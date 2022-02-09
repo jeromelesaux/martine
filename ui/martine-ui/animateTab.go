@@ -287,6 +287,13 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 		}
 	})
 
+	oneLine := widget.NewCheck("Every other line", func(b bool) {
+		a.OneLine = b
+	})
+	oneRow := widget.NewCheck("Every other row", func(b bool) {
+		a.OneRow = b
+	})
+
 	return container.New(
 		layout.NewGridLayoutWithRows(2),
 		container.New(
@@ -345,8 +352,12 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 				),
 			),
 			container.New(
-				layout.NewGridLayoutWithRows(6),
-
+				layout.NewGridLayoutWithRows(3),
+				container.New(
+					layout.NewVBoxLayout(),
+					oneLine,
+					oneRow,
+				),
 				container.New(
 					layout.NewGridLayoutWithColumns(2),
 					&a.PaletteImage,

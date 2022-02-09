@@ -236,6 +236,12 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 		me.IsCpcPlus = b
 	})
 
+	oneLine := widget.NewCheck("Every other line", func(b bool) {
+		me.OneLine = b
+	})
+	oneRow := widget.NewCheck("Every other row", func(b bool) {
+		me.OneRow = b
+	})
 	modes := widget.NewSelect([]string{"0", "1", "2"}, func(s string) {
 		mode, err := strconv.Atoi(s)
 		if err != nil {
@@ -318,7 +324,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 				),
 			),
 			container.New(
-				layout.NewGridLayoutWithRows(6),
+				layout.NewGridLayoutWithRows(7),
 				container.New(
 					layout.NewGridLayoutWithRows(2),
 					container.New(
@@ -333,6 +339,11 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 						ditheringMultiplier,
 						ditheringWithQuantification,
 					),
+				),
+				container.New(
+					layout.NewGridLayoutWithRows(2),
+					oneLine,
+					oneRow,
 				),
 				container.New(
 					layout.NewGridLayoutWithColumns(2),

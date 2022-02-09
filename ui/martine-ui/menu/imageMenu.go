@@ -41,6 +41,8 @@ type ImageMenu struct {
 	Brightness          float64
 	Saturation          float64
 	Reducer             int
+	OneLine             bool
+	OneRow              bool
 	CmdLineGenerate     string
 }
 
@@ -98,6 +100,12 @@ func (i *ImageMenu) CmdLine() string {
 	}
 	if i.Saturation != 0 {
 		exec += " -saturation " + fmt.Sprintf("%.2f", i.Saturation)
+	}
+	if i.OneLine {
+		exec += " -oneline"
+	}
+	if i.OneRow {
+		exec += " -onerow"
 	}
 	i.CmdLineGenerate = exec
 	return exec
