@@ -152,7 +152,7 @@ func AutoEgx1(in image.Image,
 		os.Exit(-2)
 	}
 
-	downgraded, p = gfx.DoDithering(downgraded, p, cont)
+	downgraded, p = gfx.DoDithering(downgraded, p, cont.DitheringAlgo, cont.DitheringType, cont.DitheringWithQuantification, cont.DitheringMatrix, float32(cont.DitheringMultiplier), cont.CpcPlus, cont.Size)
 
 	return ToEgx1(downgraded, downgraded, p, 0, picturePath, cont)
 }
@@ -195,7 +195,7 @@ func AutoEgx2(in image.Image,
 		os.Exit(-2)
 	}
 
-	downgraded, p = gfx.DoDithering(downgraded, p, cont)
+	downgraded, p = gfx.DoDithering(downgraded, p, cont.DitheringAlgo, cont.DitheringType, cont.DitheringWithQuantification, cont.DitheringMatrix, float32(cont.DitheringMultiplier), cont.CpcPlus, cont.Size)
 
 	return ToEgx2(downgraded, downgraded, p, 1, picturePath, cont)
 }

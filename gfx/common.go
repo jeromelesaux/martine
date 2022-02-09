@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
@@ -16,56 +17,87 @@ import (
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
 
-func DoDithering(in *image.NRGBA, p color.Palette, cont *export.MartineContext) (*image.NRGBA, color.Palette) {
-	if cont.DitheringAlgo != -1 {
-		switch cont.DitheringType {
+func DoDithering(in *image.NRGBA,
+	p color.Palette,
+	ditheringAlgo int,
+	ditheringType constants.DitheringType,
+	ditheringWithQuantification bool,
+	ditheringMatrix [][]float32,
+	ditheringMultiplier float32,
+	isCpcPlus bool,
+	size constants.Size) (*image.NRGBA, color.Palette) {
+	if ditheringAlgo != -1 {
+		switch ditheringType {
 		case constants.ErrorDiffusionDither:
-			if cont.DitheringWithQuantification {
-				in = filter.QuantizeWithDither(in, cont.DitheringMatrix, cont.Size.ColorsAvailable, p)
+			if ditheringWithQuantification {
+				in = filter.QuantizeWithDither(in, ditheringMatrix, size.ColorsAvailable, p)
 			} else {
-				in = filter.Dithering(in, cont.DitheringMatrix, float32(cont.DitheringMultiplier))
+				in = filter.Dithering(in, ditheringMatrix, ditheringMultiplier)
 			}
 		case constants.OrderedDither:
-			if cont.CpcPlus {
-				p = convert.ExtractPalette(in, cont.CpcPlus, 27)
-				in = filter.BayerDiphering(in, cont.DitheringMatrix, p)
+			if isCpcPlus {
+				p = convert.ExtractPalette(in, isCpcPlus, 27)
+				in = filter.BayerDiphering(in, ditheringMatrix, p)
 			} else {
-				in = filter.BayerDiphering(in, cont.DitheringMatrix, constants.CpcOldPalette)
+				in = filter.BayerDiphering(in, ditheringMatrix, constants.CpcOldPalette)
 			}
 		}
 	}
 	return in, p
 }
 
-func DoTransformation(in *image.NRGBA, p color.Palette, filename, picturePath string, screenMode uint8, mode int, cont *export.MartineContext) error {
+func DoTransformation(in *image.NRGBA,
+	p color.Palette,
+	screenMode uint8,
+	rollMode,
+	rotationMode,
+	rotation3DMode bool,
+	rotationRlaBit,
+	rotationSlaBit,
+	rotationRraBit,
+	rotationSraBit,
+	rotationKeephighBit,
+	rotationLosthighBit,
+	rotationKeeplowBit,
+	rotationLostlowBit,
+	rotationIterations,
+	rollIterations int,
+	rotation3DX0,
+	rotation3DY0,
+	rotation3DType int,
+	resizingAlgo imaging.ResampleFilter,
+	size constants.Size) ([]*image.NRGBA, error) {
 	var err error
-	if cont.RollMode {
-		if cont.RotationRlaBit != -1 || cont.RotationSlaBit != -1 {
-			transformation.RollLeft(cont.RotationRlaBit, cont.RotationSlaBit, cont.RotationIterations, screenMode, cont.Size, in, p, filename, cont)
+
+	var images []*image.NRGBA
+	if rollMode {
+		if rotationRlaBit != -1 || rotationSlaBit != -1 {
+			images = transformation.RollLeft(rotationRlaBit, rotationSlaBit, rotationIterations, screenMode, size, in, p)
 		} else {
-			if cont.RotationRraBit != -1 || cont.RotationSraBit != -1 {
-				transformation.RollRight(cont.RotationRraBit, cont.RotationSraBit, cont.RotationIterations, screenMode, cont.Size, in, p, filename, cont)
+			if rotationRraBit != -1 || rotationSraBit != -1 {
+				images = transformation.RollRight(rotationRraBit, rotationSraBit, rotationIterations, screenMode, size, in, p)
 			}
 		}
-		if cont.RotationKeephighBit != -1 || cont.RotationLosthighBit != -1 {
-			transformation.RollUp(cont.RotationKeephighBit, cont.RotationLosthighBit, cont.RotationIterations, screenMode, cont.Size, in, p, filename, cont)
+		if rotationKeephighBit != -1 || rotationLosthighBit != -1 {
+			images = transformation.RollUp(rotationKeephighBit, rotationLosthighBit, rotationIterations, screenMode, size, in, p)
 		} else {
-			if cont.RotationKeeplowBit != -1 || cont.RotationLostlowBit != -1 {
-				transformation.RollLow(cont.RotationKeeplowBit, cont.RotationLostlowBit, cont.RotationIterations, screenMode, cont.Size, in, p, filename, cont)
+			if rotationKeeplowBit != -1 || rotationLostlowBit != -1 {
+				images = transformation.RollLow(rotationKeeplowBit, rotationLostlowBit, rotationIterations, screenMode, size, in, p)
 			}
 		}
 	}
-	if cont.RotationMode {
-		if err = transformation.Rotate(in, p, cont.Size, uint8(mode), picturePath, cont.ResizingAlgo, cont); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", picturePath, err)
+	if rotationMode {
+		if images, err = transformation.Rotate(in, p, size, screenMode, rollIterations, resizingAlgo); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while perform rotation on image error :%v\n", err)
 		}
 	}
-	if cont.Rotation3DMode {
-		if err = transformation.Rotate3d(in, p, cont.Size, uint8(mode), picturePath, cont.ResizingAlgo, cont); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while perform rotation on image (%s) error :%v\n", picturePath, err)
+	if rotation3DMode {
+		if images, err = transformation.Rotate3d(in, p, size, screenMode, resizingAlgo, rollIterations, rotation3DX0, rotation3DY0, rotation3DType); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while perform rotation on image error :%v\n", err)
 		}
 	}
-	return err
+
+	return images, err
 }
 
 func ApplyOneImageAndExport(in image.Image,
@@ -129,7 +161,7 @@ func ApplyOneImageAndExport(in image.Image,
 		}
 	}
 	newPalette = constants.SortColorsByDistance(newPalette)
-	out, _ = DoDithering(out, newPalette, cont)
+	out, _ = DoDithering(out, newPalette, cont.DitheringAlgo, cont.DitheringType, cont.DitheringWithQuantification, cont.DitheringMatrix, float32(cont.DitheringMultiplier), cont.CpcPlus, cont.Size)
 	if cont.Saturation > 0 || cont.Brightness > 0 {
 		palette = convert.EnhanceBrightness(newPalette, cont.Brightness, cont.Saturation)
 		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
@@ -141,7 +173,27 @@ func ApplyOneImageAndExport(in image.Image,
 		os.Exit(-2)
 	}
 
-	DoTransformation(downgraded, newPalette, filename, picturePath, screenMode, mode, cont)
+	images, err := DoTransformation(downgraded, newPalette,
+		screenMode, cont.RollMode, cont.RotationMode, cont.Rotation3DMode,
+		cont.RotationRlaBit, cont.RotationSlaBit, cont.RotationRraBit, cont.RotationSraBit,
+		cont.RotationKeephighBit, cont.RotationLosthighBit,
+		cont.RotationKeeplowBit, cont.RotationLostlowBit, cont.RotationIterations,
+		cont.RollIteration, cont.Rotation3DX0, cont.Rotation3DY0, cont.Rotation3DType, cont.ResizingAlgo, cont.Size)
+	if err != nil {
+		os.Exit(-2)
+	} else {
+
+		for indice := 0; indice < cont.RollIteration; indice++ {
+			img := images[indice]
+			newFilename := cont.OsFullPath(filename, fmt.Sprintf("%.2d", indice)+".png")
+			if err := file.Png(newFilename, img); err != nil {
+				fmt.Fprintf(os.Stderr, "Cannot create image (%s) error :%v\n", newFilename, err)
+			}
+			if err := common.ToSpriteAndExport(img, newPalette, constants.Size{Width: cont.Size.Width, Height: cont.Size.Height}, screenMode, newFilename, false, cont); err != nil {
+				fmt.Fprintf(os.Stderr, "Cannot create sprite image (%s) error %v\n", newFilename, err)
+			}
+		}
+	}
 
 	if !cont.CustomDimension && !cont.SpriteHard {
 		Transform(downgraded, newPalette, cont.Size, picturePath, cont)
@@ -187,7 +239,7 @@ func ApplyOneImage(in image.Image,
 	}
 
 	newPalette = constants.SortColorsByDistance(newPalette)
-	out, _ = DoDithering(out, newPalette, cont)
+	out, _ = DoDithering(out, newPalette, cont.DitheringAlgo, cont.DitheringType, cont.DitheringWithQuantification, cont.DitheringMatrix, float32(cont.DitheringMultiplier), cont.CpcPlus, cont.Size)
 
 	if cont.Saturation > 0 || cont.Brightness > 0 {
 		palette = convert.EnhanceBrightness(newPalette, cont.Brightness, cont.Saturation)
