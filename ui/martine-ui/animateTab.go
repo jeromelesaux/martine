@@ -288,10 +288,10 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	})
 
 	oneLine := widget.NewCheck("Every other line", func(b bool) {
-		a.OneLine = b
+		a.ImageMenu.OneLine = b
 	})
 	oneRow := widget.NewCheck("Every other row", func(b bool) {
-		a.OneRow = b
+		a.ImageMenu.OneRow = b
 	})
 
 	return container.New(
