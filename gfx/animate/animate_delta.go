@@ -83,7 +83,7 @@ func DeltaPackingMemory(images []image.Image, ex *export.MartineContext, initial
 	fmt.Printf("Compare image [%d] with [%d] ", len(rawImages)-1, 0)
 	d1 := lastImage
 	d2 := rawImages[0]
-	dc := transformation.Delta(d1, d2, isSprite, ex.Size, mode, uint16(x0), uint16(y0), lineOctetsWidth)
+	dc := transformation.Delta(d1, d2, isSprite, *realSize, mode, uint16(x0), uint16(y0), lineOctetsWidth)
 	deltaData = append(deltaData, dc)
 	fmt.Printf("%d bytes differ from the both images\n", len(dc.Items))
 	return deltaData, rawImages, palette, nil
@@ -182,7 +182,7 @@ func DeltaPacking(gitFilepath string, ex *export.MartineContext, initialAddress 
 	fmt.Printf("Compare image [%d] with [%d] ", len(rawImages)-1, 0)
 	d1 := lastImage
 	d2 := rawImages[0]
-	dc := transformation.Delta(d1, d2, isSprite, ex.Size, mode, uint16(x0), uint16(y0), lineOctetsWidth)
+	dc := transformation.Delta(d1, d2, isSprite, *realSize, mode, uint16(x0), uint16(y0), lineOctetsWidth)
 	deltaData = append(deltaData, dc)
 	fmt.Printf("%d bytes differ from the both images\n", len(dc.Items))
 	filename := string(ex.OsFilename(".asm"))
@@ -278,7 +278,7 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	header = strings.Replace(header, "$NBCOLORS$", nbColors, 1)
 
 	// replace the number of delta
-	nbDelta := fmt.Sprintf("%d", len(delta)-1)
+	nbDelta := fmt.Sprintf("%d", len(delta))
 	header = strings.Replace(header, "$NBDELTA$", nbDelta, 1)
 
 	// replace char large for the screen
