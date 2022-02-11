@@ -278,7 +278,7 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	header = strings.Replace(header, "$NBCOLORS$", nbColors, 1)
 
 	// replace the number of delta
-	nbDelta := fmt.Sprintf("%d", len(delta))
+	nbDelta := fmt.Sprintf("%d", len(delta)-1)
 	header = strings.Replace(header, "$NBDELTA$", nbDelta, 1)
 
 	// replace char large for the screen
