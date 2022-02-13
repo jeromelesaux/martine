@@ -140,6 +140,10 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 	refreshUI.OnTapped()
 }
 
+func (m *MartineUI) ImageIndexToRemove(row, col int) {
+	m.animate.ImageToRemoveIndex = col
+}
+
 func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	importOpen := NewImportButton(m, &a.ImageMenu)
 
@@ -241,6 +245,22 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 		m.AnimateApply(a)
 	})
 
+	removeButton := widget.NewButtonWithIcon("Remove", theme.DeleteIcon(), func() {
+		fmt.Printf("image index to remove %d\n", a.ImageToRemoveIndex)
+		images := a.AnimateImages.Images()
+		images[0] = append(images[0][:a.ImageToRemoveIndex], images[0][a.ImageToRemoveIndex+1:]...)
+		canvasImages := make([][]canvas.Image, 0)
+		for i := 0; i < len(images); i++ {
+			canvasImagesRow := make([]canvas.Image, 0)
+			for y := 0; y < len(images[i]); y++ {
+				canvasImagesRow = append(canvasImagesRow, *canvas.NewImageFromImage(images[i][y]))
+			}
+			canvasImages = append(canvasImages, canvasImagesRow)
+		}
+		a.AnimateImages.Update(&canvasImages, len(canvasImages), len(canvasImages[0]))
+		a.AnimateImages.Refresh()
+	})
+
 	openFileWidget.Icon = theme.FileImageIcon()
 
 	a.OriginalImage = canvas.Image{}
@@ -270,6 +290,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	a.Height.Validator = validation.NewRegexp("\\d+", "Must contain a number")
 
 	a.AnimateImages = custom_widget.NewEmptyImageTable(fyne.NewSize(menu.AnimateSize, menu.AnimateSize))
+	a.AnimateImages.IndexCallbackFunc = m.ImageIndexToRemove
 
 	initalAddressLabel := widget.NewLabel("initial address")
 	a.InitialAddress = widget.NewEntry()
@@ -307,6 +328,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 				layout.NewHBoxLayout(),
 				openFileWidget,
 				resetButton,
+				removeButton,
 				paletteOpen,
 				applyButton,
 				exportButton,

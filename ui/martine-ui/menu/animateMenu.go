@@ -16,14 +16,15 @@ var AnimateSize float32 = 150.
 
 type AnimateMenu struct {
 	ImageMenu
-	Originalmages   []canvas.Image
-	AnimateImages   *custom_widget.ImageTable
-	DeltaCollection []*transformation.DeltaCollection
-	InitialAddress  *widget.Entry
-	RawImages       [][]byte
-	IsEmpty         bool
-	OneLine         bool
-	OneRow          bool
+	Originalmages      []canvas.Image
+	AnimateImages      *custom_widget.ImageTable
+	DeltaCollection    []*transformation.DeltaCollection
+	InitialAddress     *widget.Entry
+	RawImages          [][]byte
+	IsEmpty            bool
+	OneLine            bool
+	OneRow             bool
+	ImageToRemoveIndex int
 }
 
 func NewAnimateMenu() *AnimateMenu {
