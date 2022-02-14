@@ -235,6 +235,7 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	var dataCode string
 	var deltaIndex []string
 	var code string
+	var nbDelta = len(delta)
 	if !isSprite {
 		if ex.Compression != -1 {
 			sourceCode = deltaScreenCompressCodeDelta
@@ -267,8 +268,12 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 		dataCode += name + ":\n"
 		if ex.Compression != -1 {
 			fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
-			d := zx0.Encode(data)
-			dataCode += file.FormatAssemblyDatabyte(d, "\n")
+			if dc.OccurencePerFrame != 0 {
+				d := zx0.Encode(data)
+				dataCode += file.FormatAssemblyDatabyte(d, "\n")
+			} else {
+				nbDelta--
+			}
 		} else {
 			dataCode += file.FormatAssemblyDatabyte(data, "\n")
 		}
@@ -293,8 +298,8 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	header = strings.Replace(header, "$NBCOLORS$", nbColors, 1)
 
 	// replace the number of delta
-	nbDelta := fmt.Sprintf("%d", len(delta))
-	header = strings.Replace(header, "$NBDELTA$", nbDelta, 1)
+	nbDeltaLabel := fmt.Sprintf("%d", nbDelta)
+	header = strings.Replace(header, "$NBDELTA$", nbDeltaLabel, 1)
 
 	// replace char large for the screen
 	charLarge := fmt.Sprintf("#%.4x", 0xC000+ex.LineWidth)
@@ -337,6 +342,7 @@ func exportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	var dataCode string
 	var deltaIndex []string
 	var code string
+	nbDelta := len(delta)
 	if !isSprite {
 		if ex.Compression != -1 {
 			sourceCode = deltaScreenCompressCodeDelta
@@ -367,8 +373,13 @@ func exportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 		dataCode += name + ":\n"
 		if ex.Compression != -1 {
 			fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
-			d := zx0.Encode(data)
-			dataCode += file.FormatAssemblyDatabyte(d, "\n")
+			if dc.OccurencePerFrame != 0 {
+				d := zx0.Encode(data)
+				dataCode += file.FormatAssemblyDatabyte(d, "\n")
+				dataCode += file.FormatAssemblyDatabyte(d, "\n")
+			} else {
+				nbDelta--
+			}
 		} else {
 			dataCode += file.FormatAssemblyDatabyte(data, "\n")
 		}
@@ -393,8 +404,9 @@ func exportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	header = strings.Replace(header, "$NBCOLORS$", nbColors, 1)
 
 	// replace the number of delta
-	nbDelta := fmt.Sprintf("%d", len(delta))
-	header = strings.Replace(header, "$NBDELTA$", nbDelta, 1)
+	// replace the number of delta
+	nbDeltaLabel := fmt.Sprintf("%d", nbDelta)
+	header = strings.Replace(header, "$NBDELTA$", nbDeltaLabel, 1)
 
 	// replace char large for the screen
 	charLarge := fmt.Sprintf("#%.4x", 0xC000+ex.LineWidth)
