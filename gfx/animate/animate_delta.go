@@ -231,7 +231,7 @@ func filloutGif(g gif.GIF, ex *export.MartineContext) []image.Image {
 }
 
 func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaCollection, palette color.Palette, isSprite bool, ex *export.MartineContext, initialAddress uint16, mode uint8) (string, error) {
-	var sourceCode string = deltaCodeDelta
+	var sourceCode string
 	var dataCode string
 	var deltaIndex []string
 	var code string
@@ -241,11 +241,15 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 		} else {
 			sourceCode = deltaScreenCodeDelta
 		}
+	} else {
+		sourceCode = deltaCodeDelta
 	}
 	// copy of the sprite
 	dataCode += "\nsprite:\n"
 	if ex.Compression != -1 {
-		sourceCode = depackRoutine
+		if isSprite {
+			sourceCode = depackRoutine
+		}
 		fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
 		data := zx0.Encode(imageReference)
 		dataCode += file.FormatAssemblyDatabyte(data, "\n")
@@ -278,7 +282,7 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	dataCode += "palette:\n" + file.ByteToken + " "
 	dataCode += file.FormatAssemblyBasicPalette(palette, "\n")
 
-	var header string
+	header := sourceCode
 	// replace the initial address
 	if isSprite {
 		address := fmt.Sprintf("#%.4x", initialAddress)
@@ -343,7 +347,9 @@ func exportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	// copy of the sprite
 	dataCode += "sprite:\n"
 	if ex.Compression != -1 {
-		sourceCode = depackRoutine
+		if isSprite {
+			sourceCode = depackRoutine
+		}
 		fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
 		data := zx0.Encode(imageReference)
 		dataCode += file.FormatAssemblyDatabyte(data, "\n")
@@ -376,7 +382,7 @@ func exportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	dataCode += "palette:\n" + file.ByteToken + " "
 	dataCode += file.FormatAssemblyBasicPalette(palette, "\n")
 
-	var header string
+	var header string = sourceCode
 	if isSprite {
 		// replace the initial address
 		address := fmt.Sprintf("#%.4x", initialAddress)
@@ -446,7 +452,7 @@ run loadingaddress
 ;-----------------------------
 start
 ;--- selection du mode ---------
-	ld a,1
+	ld a,$SETMODE$
 	call #BC0E
 ;-------------------------------
 
@@ -613,7 +619,7 @@ run loadingaddress
 ;-----------------------------
 start
 ;--- selection du mode ---------
-	ld a,1
+	ld a,$SETMODE$
 	call #BC0E
 ;-------------------------------
 
