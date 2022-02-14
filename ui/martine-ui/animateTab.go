@@ -56,6 +56,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						a.RawImages[0],
 						a.DeltaCollection,
 						a.Palette,
+						a.IsSprite,
 						context,
 						uint16(address),
 						uint8(a.Mode),
