@@ -249,6 +249,9 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	removeButton := widget.NewButtonWithIcon("Remove", theme.DeleteIcon(), func() {
 		fmt.Printf("image index to remove %d\n", a.ImageToRemoveIndex)
 		images := a.AnimateImages.Images()
+		if len(images[0]) <= a.ImageToRemoveIndex {
+			return
+		}
 		images[0] = append(images[0][:a.ImageToRemoveIndex], images[0][a.ImageToRemoveIndex+1:]...)
 		canvasImages := make([][]canvas.Image, 0)
 		for i := 0; i < len(images); i++ {
