@@ -13,7 +13,7 @@ import (
 var colorIndex int
 var colorToChange color.Color
 
-func SwapColor(setPalette func(color.Palette), p color.Palette, w fyne.Window) {
+func SwapColor(setPalette func(color.Palette), p color.Palette, w fyne.Window, performActionAfter func()) {
 
 	pt := ui.NewPaletteTable(p, colorChanged, indexColor, nil)
 	var cont *fyne.Container
@@ -36,6 +36,9 @@ func SwapColor(setPalette func(color.Palette), p color.Palette, w fyne.Window) {
 			pt = npt
 			if setPalette != nil {
 				setPalette(pt.Palette)
+			}
+			if performActionAfter != nil {
+				performActionAfter()
 			}
 			cont.Refresh()
 		}))

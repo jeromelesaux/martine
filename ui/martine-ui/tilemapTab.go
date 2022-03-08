@@ -219,7 +219,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 								layout.NewHBoxLayout(),
 								forcePalette,
 								widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
-									w2.SwapColor(m.SetPalette, tm.Palette, m.window)
+									w2.SwapColor(m.SetPalette, tm.Palette, m.window, nil)
 								}),
 								widget.NewButtonWithIcon("export", theme.DocumentSaveIcon(), func() {
 									d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {

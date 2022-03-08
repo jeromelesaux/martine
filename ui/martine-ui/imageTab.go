@@ -352,7 +352,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 						layout.NewHBoxLayout(),
 						forcePalette,
 						widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
-							w2.SwapColor(m.SetPalette, me.Palette, m.window)
+							w2.SwapColor(m.SetPalette, me.Palette, m.window, nil)
 						}),
 						widget.NewButtonWithIcon("export", theme.DocumentSaveIcon(), func() {
 							d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {

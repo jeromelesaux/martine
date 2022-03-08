@@ -89,6 +89,11 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 	d.Show()
 }
 
+func (m *MartineUI) refreshAnimatePalette() {
+	m.animate.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(m.animate.Palette))
+	refreshUI.OnTapped()
+}
+
 func CheckWidthSize(width, mode int) bool {
 	var colorPerPixel int
 
@@ -391,7 +396,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 						layout.NewHBoxLayout(),
 						forcePalette,
 						widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
-							w2.SwapColor(m.SetPalette, a.Palette, m.window)
+							w2.SwapColor(m.SetPalette, a.Palette, m.window, m.refreshAnimatePalette)
 						}),
 						widget.NewButtonWithIcon("export", theme.DocumentSaveIcon(), func() {
 							d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
