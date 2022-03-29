@@ -608,32 +608,7 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 	tilesSize := sizeOctet(analyze.TileSize, mode) * len(analyze.BoardTiles)
 	nbTilePixelLarge := 20
 	nbTilePixelHigh := 25
-	nbPixelWidth := 0
-	switch mode {
-	case 0:
-		nbPixelWidth = cont.Size.Width / 2
-	case 1:
-		nbPixelWidth = cont.Size.Width / 4
-	case 2:
-		nbPixelWidth = cont.Size.Width / 8
-	default:
-		fmt.Fprintf(os.Stderr, "Mode %d  not available\n", mode)
-	}
 
-	if nbPixelWidth != 4 && nbPixelWidth != 2 {
-		fmt.Fprintf(os.Stderr, "%v\n", errors.ErrorWidthSizeNotAccepted)
-		return errors.ErrorWidthSizeNotAccepted
-	}
-	if cont.Size.Height != 16 && cont.Size.Height != 8 {
-		fmt.Fprintf(os.Stderr, "%v\n", errors.ErrorWidthSizeNotAccepted)
-		return errors.ErrorWidthSizeNotAccepted
-	}
-	switch cont.Size.Width {
-	case 4:
-		nbTilePixelLarge = 20
-	case 2:
-		nbTilePixelLarge = 40
-	}
 	fmt.Printf("board with number of tiles [%d] and size [width:%d, height:%d] size:#%X\n", len(analyze.BoardTiles), analyze.TileSize.Width, analyze.TileSize.Height, tilesSize)
 	if err = analyze.SaveSchema(filepath.Join(cont.OutputPath, "tilesmap_schema.png")); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot save tilemap schema error :%v\n", err)
@@ -650,7 +625,7 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 		return err
 	}
 
-	if err = analyze.SaveSprites(cont.OutputPath); err != nil {
+	if err = analyze.SaveSprites(cont.OutputPath, palette, mode, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving sprites in folder %s error :%v", cont.OutputPath, err)
 	}
 	scenes := make([]*image.NRGBA, 0)

@@ -110,9 +110,10 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 	pi := dialog.NewProgressInfinite("Saving....", "Please wait.", m.window)
 	pi.Show()
 	context := m.NewContext(&t.ImageMenu, true)
-	if m.IsClassicalTilemap(context.Size.Width, context.Size.Height) {
+	context.OutputPath = t.ExportFolderPath
+	if m.IsClassicalTilemap(context.Size.Width, context.Size.Height) && !m.tilemap.IsSprite {
 		filename := filepath.Base(t.OriginalImagePath.Path())
-		if err := gfx.ExportTilemapClassical(t.CpcImage.Image, filename, t.Result, context.Size, context); err != nil {
+		if err := gfx.ExportTilemapClassical(t.OriginalImage.Image, filename, t.Result, context.Size, context); err != nil {
 			pi.Hide()
 			dialog.NewError(err, m.window).Show()
 			return
@@ -140,7 +141,7 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 			}
 			pi.Hide()
 		} else {
-			if err := gfx.ExportTilemap(t.Result, "tilemap", t.Palette, uint8(t.Mode), t.CpcImage.Image, context); err != nil {
+			if err := gfx.ExportTilemap(t.Result, "tilemap", t.Palette, uint8(t.Mode), t.OriginalImage.Image, context); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 			}

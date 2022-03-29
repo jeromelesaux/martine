@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/errors"
 	"github.com/pbnjay/pixfont"
 )
@@ -392,9 +394,11 @@ func (a *AnalyzeBoard) SaveBoardTile(folderpath string, bt []BoardTile) error {
 	return nil
 }
 
-func (a *AnalyzeBoard) SaveSprites(folderpath string) error {
+func (a *AnalyzeBoard) SaveSprites(folderpath string, palette color.Palette, mode uint8, cont *export.MartineContext) error {
+	spriteFolder := filepath.Join(folderpath, "sprites")
+	os.Mkdir(spriteFolder, os.ModePerm)
 	for index, v := range a.GetUniqTiles() {
-		fw, err := os.Create(folderpath + string(filepath.Separator) + fmt.Sprintf("%.4d.png", index))
+		fw, err := os.Create(filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", index)))
 		if err != nil {
 			return err
 		}
@@ -415,6 +419,11 @@ func (a *AnalyzeBoard) SaveSprites(folderpath string) error {
 			return err
 		}
 		fw.Close()
+		filename := filepath.Join(spriteFolder, fmt.Sprintf("%d.win", index))
+		err = common.ToSpriteAndExport(im, palette, v.Size, mode, filename, true, cont)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
