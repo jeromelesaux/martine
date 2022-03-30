@@ -48,3 +48,16 @@ compile:
 	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/format_sprite${EXT} $(SOURCEDIR)/resources/formatter/sprites/format_sprite.go
 	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/format_data${EXT} $(SOURCEDIR)/resources/formatter/data/format_data.go
 	zip ${BINARY}/martine-$(appversion)-${OS}-${ARCH}.zip ${BINARY}/martine-${OS}-${ARCH}/* ./resources/*
+
+package-darwin:
+	@echo "Compilation and packaging for darwin"
+	fyne package -os darwin -icon martine-logo.png -sourceDir ./
+
+package-windows:
+	@echo "Compilation and packaging for darwin"
+	fyne package -os windows -icon martine-logo.png -sourceDir ./
+
+package-linux:
+	@echo "Compilation and packaging for darwin"
+	fyne package -os linux -icon martine-logo.png -sourceDir ./
+		

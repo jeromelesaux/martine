@@ -419,7 +419,7 @@ func (a *AnalyzeBoard) SaveSprites(folderpath string, palette color.Palette, mod
 			return err
 		}
 		fw.Close()
-		filename := filepath.Join(spriteFolder, fmt.Sprintf("%d.win", index))
+		filename := filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", index))
 		err = common.ToSpriteAndExport(im, palette, v.Size, mode, filename, true, cont)
 		if err != nil {
 			return err

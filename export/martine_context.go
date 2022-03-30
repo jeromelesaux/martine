@@ -268,7 +268,7 @@ func (e *MartineContext) AmsdosFullPath(filePath string, newExtension string) st
 	file := RemoveUnsupportedChar(strings.TrimSuffix(filename, filepath.Ext(filename)))
 	length := 6
 	if len(file) < 8 {
-		length = len(file) - 1
+		length = len(file)
 	}
 
 	newFilename := file[0:length] + newExtension
