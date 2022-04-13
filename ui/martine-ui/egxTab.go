@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx"
@@ -388,7 +389,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 					),
 				),
 				container.New(
-					layout.NewGridLayoutWithColumns(2),
+					layout.NewGridLayoutWithRows(2),
 					&me.PaletteImage,
 					container.New(
 						layout.NewHBoxLayout(),
@@ -419,6 +420,14 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 								}
 							}, m.window)
 							d.Show()
+						}),
+						widget.NewButton("Gray", func() {
+							if me.IsCpcPlus {
+								me.Palette = convert.MonochromePalette(me.Palette)
+								me.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(me.Palette))
+								forcePalette.SetChecked(true)
+								refreshUI.OnTapped()
+							}
 						}),
 					),
 				),

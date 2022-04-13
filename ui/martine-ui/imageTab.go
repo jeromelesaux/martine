@@ -346,7 +346,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 					oneRow,
 				),
 				container.New(
-					layout.NewGridLayoutWithColumns(2),
+					layout.NewGridLayoutWithRows(2),
 					&me.PaletteImage,
 					container.New(
 						layout.NewHBoxLayout(),
@@ -378,6 +378,23 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 							}, m.window)
 							d.Show()
 						}),
+						widget.NewButton("Gray", func() {
+							if me.IsCpcPlus {
+								me.Palette = convert.MonochromePalette(me.Palette)
+								me.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(me.Palette))
+								forcePalette.SetChecked(true)
+								refreshUI.OnTapped()
+							}
+						}),
+
+						/*		widget.NewButton("Monochome", func() {
+								if me.IsCpcPlus {
+									me.Palette = convert.ColorMonochromePalette(me.Palette[0], me.Palette)
+									me.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(me.Palette))
+									forcePalette.SetChecked(true)
+									refreshUI.OnTapped()
+								}
+							}),*/
 					),
 				),
 				container.New(

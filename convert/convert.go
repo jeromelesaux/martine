@@ -164,6 +164,28 @@ func EnhanceBrightness(p color.Palette, saturation, brightness float64) color.Pa
 	return p
 }
 
+func MonochromePalette(p color.Palette) color.Palette {
+	var newPalette color.Palette
+	for _, c := range p {
+		r, g, b, _ := c.RGBA()
+
+		lum := (19595*r + 38470*g + 7471*b + 1<<15) >> 24
+		newPalette = append(newPalette, color.Gray{uint8(lum)})
+	}
+	return newPalette
+}
+
+func ColorMonochromePalette(co color.Color, p color.Palette) color.Palette {
+	var newPalette color.Palette
+	r0, g0, b0, a0 := co.RGBA()
+	for _, s := range p {
+		r, g, b, _ := s.RGBA()
+		nc := color.NRGBA{R: uint8((r + (r0-r)*50) >> 8), G: uint8((g + (g0-g)*50) >> 8), B: uint8((b + (b0 - b*50)) >> 8), A: uint8(a0 >> 8)}
+		newPalette = append(newPalette, nc)
+	}
+	return newPalette
+}
+
 func DowngradingWithPalette(in *image.NRGBA, p color.Palette) (color.Palette, *image.NRGBA) {
 	//	fmt.Fprintf(os.Stdout, "Downgrading image with input palette %d\n", len(p))
 	return p, downgradeWithPalette(in, p)
