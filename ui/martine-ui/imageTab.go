@@ -86,6 +86,14 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 
 }
 
+func (m *MartineUI) monochromeColor(c color.Color) {
+
+	m.main.Palette = convert.ColorMonochromePalette(c, m.main.Palette)
+	m.main.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(m.main.Palette))
+
+	refreshUI.OnTapped()
+}
+
 func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 	me.CpcImage = canvas.Image{}
 	context := m.NewContext(me, true)
@@ -387,14 +395,13 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 							}
 						}),
 
-						/*		widget.NewButton("Monochome", func() {
-								if me.IsCpcPlus {
-									me.Palette = convert.ColorMonochromePalette(me.Palette[0], me.Palette)
-									me.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(me.Palette))
+						widget.NewButton("Monochome", func() {
+							if me.IsCpcPlus {
+								w2.ColorSelector(m.monochromeColor, me.Palette, m.window, func() {
 									forcePalette.SetChecked(true)
-									refreshUI.OnTapped()
-								}
-							}),*/
+								})
+							}
+						}),
 					),
 				),
 				container.New(

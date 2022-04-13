@@ -178,9 +178,10 @@ func MonochromePalette(p color.Palette) color.Palette {
 func ColorMonochromePalette(co color.Color, p color.Palette) color.Palette {
 	var newPalette color.Palette
 	r0, g0, b0, a0 := co.RGBA()
+	p = MonochromePalette(p)
 	for _, s := range p {
 		r, g, b, _ := s.RGBA()
-		nc := color.NRGBA{R: uint8((r + (r0-r)*50) >> 8), G: uint8((g + (g0-g)*50) >> 8), B: uint8((b + (b0 - b*50)) >> 8), A: uint8(a0 >> 8)}
+		nc := color.NRGBA{R: uint8((r + r0) >> 8), G: uint8((g + g0) >> 8), B: uint8((b + b0) >> 8), A: uint8(a0 >> 8)}
 		newPalette = append(newPalette, nc)
 	}
 	return newPalette
