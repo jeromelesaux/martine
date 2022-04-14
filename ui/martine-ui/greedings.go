@@ -14,8 +14,9 @@ func (m *MartineUI) newGreedings() fyne.CanvasObject {
 		Thanks a lot to all the Impact members.
 		Ast, CMP, Demoniak, Kris and Drill
 		Specials thanks for support to : 
-		*** Tronic ***
-		***   Siko   ***
+		***      Tronic        ***
+		***        Siko          ***
+		*** Roudoudou ***
 		and thanks a lot to all users^^
 		for more informations about this tool, go to https://github.com/jeromelesaux/martine
 		for more informations about my tool go to https://github.com/jeromelesaux
