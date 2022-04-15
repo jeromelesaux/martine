@@ -160,12 +160,31 @@ func ApplyOneImageAndExport(in image.Image,
 			fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", picturePath)
 		}
 	}
-	newPalette = constants.SortColorsByDistance(newPalette)
+	var paletteToSort color.Palette
+	switch mode {
+	case 1:
+		paletteToSort = newPalette[0:4]
+	case 2:
+		paletteToSort = newPalette[0:2]
+	default:
+		paletteToSort = newPalette
+	}
+	newPalette = constants.SortColorsByDistance(paletteToSort)
+
 	out, _ = DoDithering(out, newPalette, cont.DitheringAlgo, cont.DitheringType, cont.DitheringWithQuantification, cont.DitheringMatrix, float32(cont.DitheringMultiplier), cont.CpcPlus, cont.Size)
 	if cont.Saturation > 0 || cont.Brightness > 0 {
 		palette = convert.EnhanceBrightness(newPalette, cont.Brightness, cont.Saturation)
 		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
-		newPalette = constants.SortColorsByDistance(newPalette)
+		var paletteToSort color.Palette
+		switch mode {
+		case 1:
+			paletteToSort = newPalette[0:4]
+		case 2:
+			paletteToSort = newPalette[0:2]
+		default:
+			paletteToSort = newPalette
+		}
+		newPalette = constants.SortColorsByDistance(paletteToSort)
 	}
 
 	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
@@ -238,13 +257,31 @@ func ApplyOneImage(in image.Image,
 		}
 	}
 
-	newPalette = constants.SortColorsByDistance(newPalette)
+	var paletteToSort color.Palette
+	switch mode {
+	case 1:
+		paletteToSort = newPalette[0:4]
+	case 2:
+		paletteToSort = newPalette[0:2]
+	default:
+		paletteToSort = newPalette
+	}
+	newPalette = constants.SortColorsByDistance(paletteToSort)
 	out, _ = DoDithering(out, newPalette, cont.DitheringAlgo, cont.DitheringType, cont.DitheringWithQuantification, cont.DitheringMatrix, float32(cont.DitheringMultiplier), cont.CpcPlus, cont.Size)
 
 	if cont.Saturation > 0 || cont.Brightness > 0 {
 		palette = convert.EnhanceBrightness(newPalette, cont.Brightness, cont.Saturation)
 		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
-		newPalette = constants.SortColorsByDistance(newPalette)
+		var paletteToSort color.Palette
+		switch mode {
+		case 1:
+			paletteToSort = newPalette[0:4]
+		case 2:
+			paletteToSort = newPalette[0:2]
+		default:
+			paletteToSort = newPalette
+		}
+		newPalette = constants.SortColorsByDistance(paletteToSort)
 	}
 	var data []byte
 	var lineSize int

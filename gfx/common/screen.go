@@ -15,7 +15,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *export.MartineContext) []byte
 
 	lineToAdd := 1
 
-	if ex.OneLine {
+	if ex.OneRow {
 		lineToAdd = 2
 	}
 
@@ -97,7 +97,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *export.MartineContext) []byte
 			}
 			pp8 = ex.SwapInk(pp8)
 			firmwareColorUsed[pp8]++
-			if ex.OneRow {
+			if ex.OneLine {
 				pp2 = 0
 				pp4 = 0
 				pp6 = 0
@@ -123,7 +123,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, ex *export.MartineContext) []byte
 
 	lineToAdd := 1
 
-	if ex.OneLine {
+	if ex.OneRow {
 		lineToAdd = 2
 	}
 	if ex.Overscan {
@@ -172,7 +172,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, ex *export.MartineContext) []byte
 			}
 			pp4 = ex.SwapInk(pp4)
 			firmwareColorUsed[pp4]++
-			if ex.OneRow {
+			if ex.OneLine {
 				pp4 = 0
 				pp2 = 0
 			}
@@ -192,7 +192,7 @@ func ToMode0(in *image.NRGBA, p color.Palette, ex *export.MartineContext) []byte
 	var bw []byte
 
 	lineToAdd := 1
-	if ex.OneLine {
+	if ex.OneRow {
 		lineToAdd = 2
 	}
 	if ex.Overscan {
@@ -224,7 +224,7 @@ func ToMode0(in *image.NRGBA, p color.Palette, ex *export.MartineContext) []byte
 			}
 			pp2 = ex.SwapInk(pp2)
 			firmwareColorUsed[pp2]++
-			if ex.OneRow {
+			if ex.OneLine {
 				pp2 = 0
 			}
 			pixel := PixelMode0(pp1, pp2)
