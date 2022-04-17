@@ -127,6 +127,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 	})
 
 	exportButton := widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
+		m.tilemap.ResetExport()
 		m.exportTilemapDialog(m.window)
 	})
 

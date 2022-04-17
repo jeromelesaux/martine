@@ -26,6 +26,16 @@ type TilemapMenu struct {
 	ExportImpdraw          bool
 }
 
+func (tm *TilemapMenu) ResetExport() {
+	tm.ExportDsk = false
+	tm.ExportText = false
+	tm.ExportWithAmsdosHeader = false
+	tm.ExportZigzag = false
+	tm.ExportJson = false
+	tm.ExportCompression = -1
+	tm.ExportImpdraw = false
+}
+
 func NewTilemapMenu() *TilemapMenu {
 	return &TilemapMenu{
 		Result:     &transformation.AnalyzeBoard{},
