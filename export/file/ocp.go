@@ -8406,6 +8406,8 @@ func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 }
 
 func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, cont *x.MartineContext) error {
+	o := make([]byte, 0x7e90-0x80)
+
 	// remove first line to keep #38 address free
 	var width int
 	switch screenMode {
@@ -8421,26 +8423,6 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 	}
 	// end of the hack
 
-	o := make([]byte, 0x7e90-0x80)
-	osFilepath := cont.AmsdosFullPath(filePath, ".SCR")
-	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", osFilepath)
-	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x170, Exec: 0x0,
-		Size:        uint16(binary.Size(o)),
-		Size2:       uint16(binary.Size(o)),
-		LogicalSize: uint16(binary.Size(o))}
-
-	cpcFilename := cont.OsFilename(".SCR")
-	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
-	header.Checksum = uint16(header.ComputedChecksum16())
-	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
-	fw, err := os.Create(osFilepath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
-		return err
-	}
-	if !cont.NoAmsdosHeader {
-		binary.Write(fw, binary.LittleEndian, header)
-	}
 	copy(o, OverscanBoot[:])
 	copy(o[0x200-0x170:], data[:])
 	//o[(0x1ac-0x170)] = 0 // cpc old
@@ -8477,6 +8459,56 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
+	}
+
+	if cont.Compression != -1 {
+		switch cont.Compression {
+		case 1:
+			fmt.Fprintf(os.Stdout, "Using RLE compression\n")
+			o = rle.Encode(o)
+		case 2:
+			fmt.Fprintf(os.Stdout, "Using RLE 16 bits compression\n")
+			o = rle.Encode16(o)
+		case 3:
+			fmt.Fprintf(os.Stdout, "Using LZ4-classic compression\n")
+			var dst []byte
+			dst, err := lz4.Encode(dst, o)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
+			}
+			o = dst
+		case 4:
+			fmt.Fprintf(os.Stdout, "Using LZ4-Raw compression\n")
+			var dst []byte
+			dst, err := rawlz4.Encode(dst, o)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
+			}
+			o = dst[4:]
+		case 5:
+			fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
+			o = zx0.Encode(o)
+		}
+	}
+
+	osFilepath := cont.AmsdosFullPath(filePath, ".SCR")
+	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", osFilepath)
+	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x170, Exec: 0x0,
+		Size:        uint16(binary.Size(o)),
+		Size2:       uint16(binary.Size(o)),
+		LogicalSize: uint16(binary.Size(o))}
+
+	cpcFilename := cont.OsFilename(".SCR")
+	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
+	header.Checksum = uint16(header.ComputedChecksum16())
+	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
+	fw, err := os.Create(osFilepath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
+		return err
+	}
+	if !cont.NoAmsdosHeader {
+		binary.Write(fw, binary.LittleEndian, header)
 	}
 	binary.Write(fw, binary.LittleEndian, o)
 	fw.Close()
