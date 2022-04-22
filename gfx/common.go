@@ -169,6 +169,7 @@ func ApplyOneImageAndExport(in image.Image,
 	default:
 		paletteToSort = newPalette
 	}
+	paletteToSort = fillColorPalette(paletteToSort)
 	newPalette = constants.SortColorsByDistance(paletteToSort)
 
 	out, _ = DoDithering(out, newPalette, cont.DitheringAlgo, cont.DitheringType, cont.DitheringWithQuantification, cont.DitheringMatrix, float32(cont.DitheringMultiplier), cont.CpcPlus, cont.Size)
@@ -184,6 +185,7 @@ func ApplyOneImageAndExport(in image.Image,
 		default:
 			paletteToSort = newPalette
 		}
+		paletteToSort = fillColorPalette(paletteToSort)
 		newPalette = constants.SortColorsByDistance(paletteToSort)
 	}
 
@@ -266,6 +268,7 @@ func ApplyOneImage(in image.Image,
 	default:
 		paletteToSort = newPalette
 	}
+	paletteToSort = fillColorPalette(paletteToSort)
 	newPalette = constants.SortColorsByDistance(paletteToSort)
 	out, _ = DoDithering(out, newPalette, cont.DitheringAlgo, cont.DitheringType, cont.DitheringWithQuantification, cont.DitheringMatrix, float32(cont.DitheringMultiplier), cont.CpcPlus, cont.Size)
 
@@ -281,6 +284,7 @@ func ApplyOneImage(in image.Image,
 		default:
 			paletteToSort = newPalette
 		}
+		paletteToSort = fillColorPalette(paletteToSort)
 		newPalette = constants.SortColorsByDistance(paletteToSort)
 	}
 	var data []byte
@@ -317,4 +321,13 @@ func ApplyOneImage(in image.Image,
 		}
 	}
 	return data, downgraded, newPalette, lineSize, err
+}
+
+func fillColorPalette(p color.Palette) color.Palette {
+	for i, v := range p {
+		if v == nil {
+			p[i] = color.Black
+		}
+	}
+	return p
 }

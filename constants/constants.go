@@ -263,6 +263,9 @@ func ColorsDistance(c1, c2 color.Color) float64 {
 }
 
 func ColorDistance2(c1, c2 color.Color) int64 {
+	if c1 == nil || c2 == nil {
+		return 0
+	}
 	r1, g1, b1, _ := c1.RGBA()
 	r2, g2, b2, _ := c2.RGBA()
 	rmean := int64(r1>>8+r2>>8) / 2
