@@ -16,7 +16,7 @@ func TestExportHsp(t *testing.T) {
 	item.Byte = 15
 	item.Offsets = []uint16{0xC001, 0xC002, 0xC050, 0xD000}
 	c.Items = append(c.Items, item)
-	code := ExportHsp(c)
+	code := ExportCompiledSprite(c)
 	fmt.Println(code)
 
 }

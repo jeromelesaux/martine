@@ -6,7 +6,7 @@ import (
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
 
-func ExportHsp(c *transformation.DeltaCollection) string {
+func ExportCompiledSprite(c *transformation.DeltaCollection) string {
 	var code string
 	var previous uint16 = 0
 	var previousHB uint8 = 0
