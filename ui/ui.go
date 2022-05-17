@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	os.Setenv("FYNE_SCALE", "0.6")
+	os.Setenv("FYNE_SCALE", "1.0")
 	/* main application */
 	app := app.NewWithID("Martine @IMPact")
 	martineUI := ui.NewMartineUI()
