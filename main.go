@@ -111,6 +111,7 @@ var (
 	inkSwap             = flag.String("inkswap", "", "Swap ink:\n\tfor instance mode 4 (4 inks) : 0=3,1=0,2=1,3=2\n\twill swap in output image index 0 by 3 and 1 by 0 and so on.")
 	lineWidth           = flag.String("linewidth", "#50", "Line width in hexadecimal to compute the screen address in delta mode.")
 	deltaPacking        = flag.Bool("deltapacking", false, "Will generate all the animation code from the followed gif file.")
+	deltaPacking2       = flag.Bool("deltapacking2", false, "Will generate all the animation code from the followed gif file (and optimize export).")
 	filloutGif          = flag.Bool("fillout", false, "Fill out the gif frames needed some case with deltapacking")
 	saturationPal       = flag.Float64("contrast", 0., "apply contrast on the color of the palette on amstrad plus screen. (max value 100 and only on CPC PLUS).")
 	brightnessPal       = flag.Float64("brightness", 0., "apply brightness on the color of the palette on amstrad plus screen. (max value 100 and only on CPC PLUS).")
@@ -256,14 +257,19 @@ func main() {
 		file.ByteToken = *byteStatement
 	}
 
-	if *deltaPacking {
+	if *deltaPacking || *deltaPacking2 {
 		screenAddress, err := common.ParseHexadecimal16(*initialAddress)
 		cont.Size = size
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error while parsing (%s) use the starting address #C000, err : %v\n", *initialAddress, err)
 			screenAddress = 0xC000
 		}
-		if err := animate.DeltaPacking(cont.InputPath, cont, screenAddress, screenMode); err != nil {
+		var exportVersion animate.DeltaExportFormat = animate.DeltaExportV1
+
+		if *deltaPacking2 {
+			exportVersion = animate.DeltaExportV2
+		}
+		if err := animate.DeltaPacking(cont.InputPath, cont, screenAddress, screenMode, exportVersion); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while deltapacking error: %v\n", err)
 		}
 		os.Exit(0)

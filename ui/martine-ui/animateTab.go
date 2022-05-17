@@ -60,6 +60,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						context,
 						uint16(address),
 						uint8(a.Mode),
+						a.ExportVersion,
 					)
 					pi.Hide()
 					if err != nil {
@@ -80,6 +81,17 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 					dialog.ShowInformation("Save", "Your files are save in folder \n"+m.animateExport.ExportFolderPath, m.window)
 				}, m.window)
 				fo.Show()
+			}),
+			widget.NewLabel("Export version (V1 not optimized, V2 optimized)"),
+			widget.NewSelect([]string{"Version 1", "Version 2"}, func(v string) {
+				switch v {
+				case "Version 1":
+					a.ExportVersion = animate.DeltaExportV1
+				case "Version 2":
+					a.ExportVersion = animate.DeltaExportV2
+				default:
+					a.ExportVersion = animate.DeltaExportV1
+				}
 			}),
 		),
 	)

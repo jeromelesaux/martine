@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/fyne-io/custom_widget"
+	"github.com/jeromelesaux/martine/gfx/animate"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
 
@@ -25,6 +26,7 @@ type AnimateMenu struct {
 	OneLine            bool
 	OneRow             bool
 	ImageToRemoveIndex int
+	ExportVersion      animate.DeltaExportFormat
 }
 
 func NewAnimateMenu() *AnimateMenu {

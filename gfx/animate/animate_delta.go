@@ -20,6 +20,13 @@ import (
 	zx0 "github.com/jeromelesaux/zx0/encode"
 )
 
+type DeltaExportFormat int
+
+var (
+	DeltaExportV1 DeltaExportFormat = 1
+	DeltaExportV2 DeltaExportFormat = 2
+)
+
 func DeltaPackingMemory(images []image.Image, ex *export.MartineContext, initialAddress uint16, mode uint8) ([]*transformation.DeltaCollection, [][]byte, color.Palette, error) {
 	var isSprite bool = true
 	var maxImages = 22
@@ -91,7 +98,7 @@ func DeltaPackingMemory(images []image.Image, ex *export.MartineContext, initial
 	return deltaData, rawImages, palette, nil
 }
 
-func DeltaPacking(gitFilepath string, ex *export.MartineContext, initialAddress uint16, mode uint8) error {
+func DeltaPacking(gitFilepath string, ex *export.MartineContext, initialAddress uint16, mode uint8, exportVersion DeltaExportFormat) error {
 	var isSprite = true
 	var maxImages = 22
 	if !ex.CustomDimension && !ex.SpriteHard {
@@ -188,7 +195,7 @@ func DeltaPacking(gitFilepath string, ex *export.MartineContext, initialAddress 
 	deltaData = append(deltaData, dc)
 	fmt.Printf("%d bytes differ from the both images\n", len(dc.Items))
 	filename := string(ex.OsFilename(".asm"))
-	return exportDeltaAnimate(rawImages[0], deltaData, palette, isSprite, ex, initialAddress, mode, ex.OutputPath+string(filepath.Separator)+filename)
+	return exportDeltaAnimate(rawImages[0], deltaData, palette, isSprite, ex, initialAddress, mode, ex.OutputPath+string(filepath.Separator)+filename, exportVersion)
 }
 
 func ConvertToImage(g gif.GIF) []*image.NRGBA {
@@ -230,7 +237,7 @@ func filloutGif(g gif.GIF, ex *export.MartineContext) []image.Image {
 	return c
 }
 
-func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaCollection, palette color.Palette, isSprite bool, ex *export.MartineContext, initialAddress uint16, mode uint8) (string, error) {
+func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaCollection, palette color.Palette, isSprite bool, ex *export.MartineContext, initialAddress uint16, mode uint8, exportVersion DeltaExportFormat) (string, error) {
 	var sourceCode string
 	var dataCode string
 	var deltaIndex []string
@@ -337,7 +344,17 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	return code, nil
 }
 
-func exportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaCollection, palette color.Palette, isSprite bool, ex *export.MartineContext, initialAddress uint16, mode uint8, filename string) error {
+func exportDeltaAnimate(
+	imageReference []byte,
+	delta []*transformation.DeltaCollection,
+	palette color.Palette,
+	isSprite bool,
+	ex *export.MartineContext,
+	initialAddress uint16,
+	mode uint8,
+	filename string,
+	exportVersion DeltaExportFormat) error {
+
 	var sourceCode string = deltaCodeDelta
 	var dataCode string
 	var deltaIndex []string
@@ -365,9 +382,19 @@ func exportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	// copy of all delta
 	for i := 0; i < len(delta); i++ {
 		dc := delta[i]
-		data, err := dc.Marshall()
-		if err != nil {
-			return err
+		var data []byte
+		var err error
+		if exportVersion == DeltaExportV2 {
+			v2 := &transformation.DeltaCollectionV2{DeltaCollection: dc}
+			data, err = v2.Marshall()
+			if err != nil {
+				return err
+			}
+		} else {
+			data, err = dc.Marshall()
+			if err != nil {
+				return err
+			}
 		}
 		name := fmt.Sprintf("delta%.2d", i)
 		dataCode += name + ":\n"
