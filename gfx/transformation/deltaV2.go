@@ -56,29 +56,31 @@ func (dc *DeltaCollectionV2) Marshall() ([]byte, error) {
 		}
 		sort.Sort(offset(item.Offsets))
 		var previousHB uint8 = 0
-		lbs := make([]uint8, 0)
+		lowBytes := make([]uint8, 0)
 		for i := 0; i < occ; i++ {
 			value := item.Offsets[i]
 			currentHB := uint8(value >> 8)
 			currentLB := uint8(value)
 			if currentHB == previousHB {
-				lbs = append(lbs, currentHB)
+				lowBytes = append(lowBytes, currentHB)
 			} else {
-				// export all the value
+				// export all the value HB
 				if err := binary.Write(&b, binary.LittleEndian, currentHB); err != nil {
 					return b.Bytes(), err
 				}
-				if err := binary.Write(&b, binary.LittleEndian, uint16(len(lbs))); err != nil {
+				// export the number of LB
+				if err := binary.Write(&b, binary.LittleEndian, uint16(len(lowBytes))); err != nil {
 					return b.Bytes(), err
 				}
-				for j := 0; j < len(lbs); j++ {
-					if err := binary.Write(&b, binary.LittleEndian, lbs[j]); err != nil {
+				// export the LB values
+				for j := 0; j < len(lowBytes); j++ {
+					if err := binary.Write(&b, binary.LittleEndian, lowBytes[j]); err != nil {
 						return b.Bytes(), err
 					}
 				}
-				lbs = make([]uint8, 0)
+				lowBytes = make([]uint8, 0)
 				previousHB = currentHB
-				lbs = append(lbs, currentLB)
+				lowBytes = append(lowBytes, currentLB)
 			}
 			//			fmt.Fprintf(os.Stdout, "Value[%d]:%.4x\n", j, value)
 
