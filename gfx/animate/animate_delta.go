@@ -951,7 +951,8 @@ ret
 
 ;--- variables memoires -----
 pixel db 0 
-
+mb db 0
+occ dw 0
 ;----------------------------
 `
 var deltaScreenCodeDelta = `
