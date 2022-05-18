@@ -247,7 +247,7 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 		if ex.Compression != -1 {
 			sourceCode = deltaScreenCompressCodeDelta
 			if exportVersion == DeltaExportV2 {
-				sourceCode = deltaScreenCodeDeltaV2
+				sourceCode = deltaScreenCompressCodeDeltaV2
 			}
 		} else {
 			sourceCode = deltaScreenCodeDelta
@@ -273,9 +273,19 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	// copy of all delta
 	for i := 0; i < len(delta); i++ {
 		dc := delta[i]
-		data, err := dc.Marshall()
-		if err != nil {
-			return "", err
+		var data []byte
+		var err error
+		if exportVersion == DeltaExportV1 {
+			data, err = dc.Marshall()
+			if err != nil {
+				return "", err
+			}
+		} else {
+			v2 := transformation.DeltaCollectionV2{DeltaCollection: dc}
+			data, err = v2.Marshall()
+			if err != nil {
+				return "", err
+			}
 		}
 		name := fmt.Sprintf("delta%.2d", i)
 		dataCode += name + ":\n"
@@ -366,11 +376,14 @@ func exportDeltaAnimate(
 	var deltaIndex []string
 	var code string
 	nbDelta := len(delta)
+	if exportVersion == DeltaExportV2 {
+		sourceCode = deltaScreenCodeDeltaV2
+	}
 	if !isSprite {
 		if ex.Compression != -1 {
 			sourceCode = deltaScreenCompressCodeDelta
 		} else {
-			sourceCode = deltaScreenCodeDelta
+			sourceCode = deltaScreenCompressCodeDeltaV2
 		}
 	}
 	// copy of the sprite
@@ -484,7 +497,7 @@ func exportDeltaAnimate(
 }
 
 var deltaScreenCodeDeltaV2 = `
---- dimensions du sprite ----
+;--- dimensions du sprite ----
 large equ $LARGE$
 haut equ $HAUT$
 loadingaddress equ #200
@@ -674,7 +687,7 @@ ret
 ;--- variables memoires -----
 pixel db 0 
 mb db 0
-nbLb dw 0
+occ dw 0
 ;----------------------------
 
 

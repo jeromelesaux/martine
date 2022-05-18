@@ -61,11 +61,12 @@ func (dc *DeltaCollectionV2) Marshall() ([]byte, error) {
 			value := item.Offsets[i]
 			currentHB := uint8(value >> 8)
 			currentLB := uint8(value)
-			if currentHB == previousHB {
-				lowBytes = append(lowBytes, currentHB)
+			if currentHB == previousHB || i == 0 {
+				lowBytes = append(lowBytes, currentLB)
+				previousHB = currentHB
 			} else {
 				// export all the value HB
-				if err := binary.Write(&b, binary.LittleEndian, currentHB); err != nil {
+				if err := binary.Write(&b, binary.LittleEndian, previousHB); err != nil {
 					return b.Bytes(), err
 				}
 				// export the number of LB
