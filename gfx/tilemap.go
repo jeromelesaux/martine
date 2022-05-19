@@ -600,7 +600,7 @@ func TilemapRaw(mode uint8, isCpcPlus bool, size constants.Size, in image.Image,
 	// check < 256 tiles
 	// finally export
 	// 20 tiles large 25 tiles height
-	return nil, tilesImagesTilemap, palette, nil
+	return analyze, tilesImagesTilemap, palette, nil
 }
 
 func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palette color.Palette, mode uint8, in image.Image, cont *export.MartineContext) (err error) {
