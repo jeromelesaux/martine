@@ -29,6 +29,18 @@ type DeltaCollection struct {
 	Items             []DeltaItem
 }
 
+/*
+	details de la structure
+	nombre d'occurence par frame occ
+	0	byte à poker (uint8) |  nombre d'offsets  uint16 |  offset 0 uint16 ....... offset (nombre d'offset)
+	1
+	2
+	.
+	.
+	.
+	occ
+*/
+
 func (d *DeltaCollection) Occurences() int {
 	occurence := 0
 	occurence += len(d.Items)

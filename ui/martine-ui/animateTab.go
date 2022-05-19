@@ -43,6 +43,9 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						return
 					}
 					context.Compression = m.animateExport.ExportCompression
+					if a.ExportVersion == 0 {
+						a.ExportVersion = animate.DeltaExportV1
+					}
 					address, err := strconv.ParseUint(a.InitialAddress.Text, 16, 64)
 					if err != nil {
 						dialog.ShowError(err, m.window)

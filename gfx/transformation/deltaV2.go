@@ -11,6 +11,18 @@ type DeltaCollectionV2 struct {
 	*DeltaCollection
 }
 
+/*
+	details de la structure
+	nombre d'occurence par frame occ
+	0	byte à poker uint8 |  valeur du HB uint8  | nombre de LB uint16 |  LB[0] ..... LB[nombre de LB] uint8
+	1
+	2
+	.
+	.
+	.
+	occ
+*/
+
 type offset []uint16
 
 func (f offset) Len() int {

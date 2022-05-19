@@ -382,8 +382,14 @@ func exportDeltaAnimate(
 	if !isSprite {
 		if ex.Compression != -1 {
 			sourceCode = deltaScreenCompressCodeDelta
+			if exportVersion == DeltaExportV2 {
+				sourceCode = deltaScreenCompressCodeDeltaV2
+			}
 		} else {
-			sourceCode = deltaScreenCompressCodeDeltaV2
+			sourceCode = deltaScreenCodeDelta
+			if exportVersion == DeltaExportV2 {
+				sourceCode = deltaScreenCodeDeltaV2
+			}
 		}
 	}
 	// copy of the sprite
@@ -586,7 +592,8 @@ iter_address
 	; recuperation des LB des adresses
 poke_octet
 	ld e,(hl)
-	ld d,(mb) ; de=adresse
+	ld a,(mb)
+	ld d,a ; de=adresse
 	inc hl
 	ld a,(pixel)
 	push hl ; on ajoute l'adresse ecran
