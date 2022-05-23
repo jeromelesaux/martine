@@ -20,11 +20,16 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 	cont := container.NewVBox(
 		container.NewHBox(
 			widget.NewLabel("export type:"),
-			widget.NewSelect([]string{"sprite", "impdraw"}, func(s string) {
+			widget.NewSelect([]string{"sprite", "impdraw", "flat"}, func(s string) {
 				switch s {
 				case "sprite":
 					m.tilemap.ExportImpdraw = false
+					m.tilemap.ExportFlat = false
+				case "flat":
+					m.tilemap.ExportImpdraw = false
+					m.tilemap.ExportFlat = true
 				case "impdraw":
+					m.tilemap.ExportFlat = false
 					var width, height int
 					var err error
 					width, err = strconv.Atoi(m.tilemap.Width.Text)
@@ -141,7 +146,8 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 			}
 			pi.Hide()
 		} else {
-			if err := gfx.ExportTilemap(t.Result, "tilemap", t.Palette, uint8(t.Mode), t.OriginalImage.Image, context); err != nil {
+
+			if err := gfx.ExportTilemap(t.Result, "tilemap", t.Palette, uint8(t.Mode), t.OriginalImage.Image, t.ExportFlat, context); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 			}

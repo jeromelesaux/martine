@@ -24,6 +24,7 @@ type TilemapMenu struct {
 	ExportCompression      int
 	ExportFolderPath       string
 	ExportImpdraw          bool
+	ExportFlat             bool
 }
 
 func (tm *TilemapMenu) ResetExport() {

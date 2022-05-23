@@ -603,7 +603,7 @@ func TilemapRaw(mode uint8, isCpcPlus bool, size constants.Size, in image.Image,
 	return analyze, tilesImagesTilemap, palette, nil
 }
 
-func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palette color.Palette, mode uint8, in image.Image, cont *export.MartineContext) (err error) {
+func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palette color.Palette, mode uint8, in image.Image, flatExport bool, cont *export.MartineContext) (err error) {
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
 	tilesSize := sizeOctet(analyze.TileSize, mode) * len(analyze.BoardTiles)
 	nbTilePixelLarge := 20
@@ -625,8 +625,14 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 		return err
 	}
 
-	if err = analyze.SaveSprites(cont.OutputPath, palette, mode, cont); err != nil {
-		fmt.Fprintf(os.Stderr, "Error while saving sprites in folder %s error :%v", cont.OutputPath, err)
+	if flatExport {
+		if err = analyze.SaveFlatFile(cont.OutputPath, palette, mode, cont); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving sprites in folder %s error :%v", cont.OutputPath, err)
+		}
+	} else {
+		if err = analyze.SaveSprites(cont.OutputPath, palette, mode, cont); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while saving sprites in folder %s error :%v", cont.OutputPath, err)
+		}
 	}
 	scenes := make([]*image.NRGBA, 0)
 	os.Mkdir(cont.OutputPath+string(filepath.Separator)+"scenes", os.ModePerm)
