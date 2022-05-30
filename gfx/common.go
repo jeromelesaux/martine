@@ -179,9 +179,17 @@ func ApplyOneImageAndExport(in image.Image,
 		var paletteToSort color.Palette
 		switch mode {
 		case 1:
-			paletteToSort = newPalette[0:4]
+			end := len(newPalette)
+			if len(newPalette) >= 4 {
+				end = 4
+			}
+			paletteToSort = newPalette[0:end]
 		case 2:
-			paletteToSort = newPalette[0:2]
+			end := len(newPalette)
+			if len(newPalette) >= 2 {
+				end = 2
+			}
+			paletteToSort = newPalette[0:end]
 		default:
 			paletteToSort = newPalette
 		}
@@ -262,9 +270,17 @@ func ApplyOneImage(in image.Image,
 	var paletteToSort color.Palette
 	switch mode {
 	case 1:
-		paletteToSort = newPalette[0:4]
+		end := len(newPalette)
+		if len(newPalette) >= 4 {
+			end = 4
+		}
+		paletteToSort = newPalette[0:end]
 	case 2:
-		paletteToSort = newPalette[0:2]
+		end := len(newPalette)
+		if len(newPalette) >= 2 {
+			end = 2
+		}
+		paletteToSort = newPalette[0:end]
 	default:
 		paletteToSort = newPalette
 	}
