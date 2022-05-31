@@ -563,38 +563,33 @@ table_next:
 	inc hl
 	ld h,(hl)
 	ld l,a
+
 delta
-	ld a,(hl) ; nombre de byte a poker
-	push af   ; stockage en mémoire
+	ld c,(hl) ; nombre de frame 
 	inc hl
+	ld b,(hl)
+	ld (nbdeltas),bc
+
 init
+	inc hl
 	ld a,(hl) ; octet a poker
 	ld (pixel),a
+	inc hl
+	ld a,(hl) ; 
+
+	ld (highbyte_value+1),a ; valeur du HighByte
 	inc hl
 	ld c,(hl) ; nbfois
 	inc hl 
 	ld b,(hl)
-	ld (occ), bc
+	ld (nblb), bc ; nombre de LowByte 
 	
-	; combien d'occurence avec le meme MB 
-	; a faire 
-iter_address
+iter_lowbytes
+	; 
 	inc hl
-	push af
-	ld a,(hl)
-	ld (mb),a // stocke le MB de l'adresse 
-	pop af 
-	ld c,(hl)
-	inc hl
-	ld b,(hl)
-	inc hl
-
-	; recuperation des LB des adresses
-poke_octet
-	ld e,(hl)
-	ld a,(mb)
-	ld d,a ; de=adresse
-	inc hl
+	ld e,(hl) ; recuperation du lowbyte
+highbyte_value 	ld d,0
+	
 	ld a,(pixel)
 	push hl ; on ajoute l'adresse ecran
 	ld hl,#c000
@@ -604,31 +599,28 @@ poke_octet
 	pop hl
 	ld (de),a ; poke a l'adresse dans de
 
+	ld bc,(nblb)
 	dec bc
-	ld a,b ; test a t'on poke toutes les adresses compteur bc
+	ld (nblb),bc
+	ld a,b ; test a t'on poke toutes les lowbytes  
 	or a 
-	jr nz, poke_octet
+	jr nz, iter_lowbytes 
 	ld a,c 
 	or a
-	jr nz, poke_octet
-
-	; reste t'il des LBs a traiter 
-	ld bc,(occ)
-	dec bc 
-	ld (occ),bc
-	ld a,b ; test a t'on poke toutes les adresses compteur bc
+	jr nz, iter_lowbytes
+	
+	ld bc,(nbdeltas)
+	dec bc
+	ld (nbdeltas),bc
+	ld a,b
 	or a 
-	jr nz, iter_address
+	jr nz,init 
 	ld a,c 
-	or a
-	jr nz, iter_address
+	or a 
+	jr nz, init
+	
+	; a t'on encore des frames a traite
 
-	pop af 
-; reste t'il d'autres bytes a poker ? 
-	dec a 
-	push af
-	jr nz,init
-	pop af
 	
 	ret
 
@@ -692,9 +684,9 @@ ret
 ;-----------------------------------------------------------------
 
 ;--- variables memoires -----
-pixel db 0 
-mb db 0
-occ dw 0
+pixel db 0
+nblb dw 0
+nbdeltas dw 0
 ;----------------------------
 
 
@@ -766,38 +758,32 @@ table_next:
 	call Depack
 
 	ld hl,buffer ; utilisation de la structure delta décompactée 
-
 	delta
-	ld a,(hl) ; nombre de byte a poker
-	push af   ; stockage en mémoire
+	ld c,(hl) ; nombre de frame 
 	inc hl
+	ld b,(hl)
+	ld (nbdeltas),bc
+
 init
+	inc hl
 	ld a,(hl) ; octet a poker
 	ld (pixel),a
+	inc hl
+	ld a,(hl) ; 
+
+	ld (highbyte_value+1),a ; valeur du HighByte
 	inc hl
 	ld c,(hl) ; nbfois
 	inc hl 
 	ld b,(hl)
-	ld (occ), bc
+	ld (nblb), bc ; nombre de LowByte 
 	
-	; combien d'occurence avec le meme MB 
-	; a faire 
-iter_address
+iter_lowbytes
+	; 
 	inc hl
-	push af
-	ld a,(hl)
-	ld (mb),a // stocke le MB de l'adresse 
-	pop af 
-	ld c,(hl)
-	inc hl
-	ld b,(hl)
-	inc hl
-
-	; recuperation des LB des adresses
-poke_octet
-	ld e,(hl)
-	ld d,(mb) ; de=adresse
-	inc hl
+	ld e,(hl) ; recuperation du lowbyte
+highbyte_value 	ld d,0
+	
 	ld a,(pixel)
 	push hl ; on ajoute l'adresse ecran
 	ld hl,#c000
@@ -807,31 +793,28 @@ poke_octet
 	pop hl
 	ld (de),a ; poke a l'adresse dans de
 
+	ld bc,(nblb)
 	dec bc
-	ld a,b ; test a t'on poke toutes les adresses compteur bc
+	ld (nblb),bc
+	ld a,b ; test a t'on poke toutes les lowbytes  
 	or a 
-	jr nz, poke_octet
+	jr nz, iter_lowbytes 
 	ld a,c 
 	or a
-	jr nz, poke_octet
-
-	; reste t'il des LBs a traiter 
-	ld bc,(occ)
-	dec bc 
-	ld (occ),bc
-	ld a,b ; test a t'on poke toutes les adresses compteur bc
+	jr nz, iter_lowbytes
+	
+	ld bc,(nbdeltas)
+	dec bc
+	ld (nbdeltas),bc
+	ld a,b
 	or a 
-	jr nz, iter_address
+	jr nz,init 
 	ld a,c 
-	or a
-	jr nz, iter_address
+	or a 
+	jr nz, init
+	
+	; a t'on encore des frames a traite
 
-	pop af 
-; reste t'il d'autres bytes a poker ? 
-	dec a 
-	push af
-	jr nz,init
-	pop af
 	
 	ret
 
@@ -957,9 +940,9 @@ ret
 
 
 ;--- variables memoires -----
-pixel db 0 
-mb db 0
-occ dw 0
+pixel db 0
+nblb dw 0
+nbdeltas dw 0
 ;----------------------------
 `
 var deltaScreenCodeDelta = `
