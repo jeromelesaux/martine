@@ -340,7 +340,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	})
 
 	return container.New(
-		layout.NewGridLayoutWithRows(2),
+		layout.NewGridLayout(1),
 		container.New(
 			layout.NewGridLayoutWithRows(1),
 			container.NewScroll(

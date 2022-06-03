@@ -49,7 +49,7 @@ func TestInternalDelta(t *testing.T) {
 		OneRow:          false,
 		FilloutGif:      false,
 	}
-	err := DeltaPacking("/Users/jeromelesaux/Downloads/cigarette-femme.gif", ex, 0xc010, 1)
+	err := DeltaPacking("/Users/jeromelesaux/Downloads/cigarette-femme.gif", ex, 0xc010, 1, DeltaExportV1)
 	if err != nil {
 		t.Fatal(err)
 	}

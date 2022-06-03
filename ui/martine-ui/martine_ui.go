@@ -36,6 +36,7 @@ type MartineUI struct {
 	tilemap *menu.TilemapMenu
 	animate *menu.AnimateMenu
 	egx     *menu.DoubleImageMenu
+	sprite  *menu.SpriteMenu
 
 	imageExport   *menu.ImageExport
 	tilemapExport *menu.ImageExport
@@ -49,6 +50,7 @@ func NewMartineUI() *MartineUI {
 		tilemap:       &menu.TilemapMenu{},
 		animate:       &menu.AnimateMenu{},
 		egx:           &menu.DoubleImageMenu{},
+		sprite:        menu.NewSpriteMenu(),
 		imageExport:   &menu.ImageExport{},
 		tilemapExport: &menu.ImageExport{},
 		animateExport: &menu.AnimateExport{},
@@ -79,6 +81,7 @@ func (m *MartineUI) NewTabs() *container.AppTabs {
 		container.NewTabItem("Egx", m.newEgxTab(m.egx)),
 		container.NewTabItem("Tile", m.newTilemapTab(m.tilemap)),
 		container.NewTabItem("Animate", m.newAnimateTab(m.animate)),
+		container.NewTabItem("Sprite Board", m.newSpriteTab(m.sprite)),
 		container.NewTabItem("Greedings", m.newGreedings()),
 	)
 }
