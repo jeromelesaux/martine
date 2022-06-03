@@ -6,7 +6,7 @@ import (
 
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/gfx/common"
+	"github.com/jeromelesaux/martine/gfx"
 )
 
 func SplitBoardToSprite(
@@ -32,12 +32,16 @@ func SplitBoardToSprite(
 		}
 	}
 	cont := export.NewMartineContext("", "")
+	rawSprites := make([]*image.NRGBA, 0)
+	cont.Size = constants.Size{Width: spriteWidth, Height: spriteHeight}
 	for _, v := range sprites {
-		r, _, _, err := common.ToSprite(v, p, constants.Size{Width: spriteWidth, Height: spriteHeight}, mode, cont)
+		r, sp, _, _, err := gfx.ApplyOneImage(v, cont, int(mode), p, mode)
 		if err != nil {
 			return results, sprites, err
 		}
+
 		results = append(results, r)
+		rawSprites = append(rawSprites, sp)
 	}
-	return results, sprites, nil
+	return results, rawSprites, nil
 }
