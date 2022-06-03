@@ -17,11 +17,11 @@ type SpriteMenu struct {
 	OriginalPalette canvas.Image
 
 	Palette               color.Palette
-	SpritesData           [][]byte
+	SpritesData           [][][]byte
 	CompileSprite         bool
 	IsCpcPlus             bool
 	OriginalImages        *custom_widget.ImageTable
-	SpritesCollection     []*image.NRGBA
+	SpritesCollection     [][]*image.NRGBA
 	SpriteNumberPerRow    int
 	SpriteNumberPerColumn int
 	Mode                  int
@@ -31,7 +31,7 @@ func NewSpriteMenu() *SpriteMenu {
 	return &SpriteMenu{
 		OriginalBoard:     canvas.Image{},
 		OriginalImages:    custom_widget.NewEmptyImageTable(fyne.NewSize(SpriteSize, SpriteSize)),
-		SpritesCollection: make([]*image.NRGBA, 0),
-		SpritesData:       make([][]byte, 0),
+		SpritesCollection: make([][]*image.NRGBA, 0),
+		SpritesData:       make([][][]byte, 0),
 	}
 }
