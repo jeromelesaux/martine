@@ -11,22 +11,38 @@ import (
 
 var SpriteSize float32 = 80.
 
+type SpriteExportFormat string
+
+var (
+	SpriteFlatExport  SpriteExportFormat = "Flat"
+	SpriteFilesExport SpriteExportFormat = "Files"
+	SpriteImpCatcher  SpriteExportFormat = "Impcatcher"
+)
+
 type SpriteMenu struct {
 	IsHardSprite    bool
 	OriginalBoard   canvas.Image
 	OriginalPalette canvas.Image
 
-	Palette               color.Palette
-	SpritesData           [][][]byte
-	CompileSprite         bool
-	IsCpcPlus             bool
-	OriginalImages        *custom_widget.ImageTable
-	SpritesCollection     [][]*image.NRGBA
-	SpriteNumberPerRow    int
-	SpriteNumberPerColumn int
-	Mode                  int
-	SpriteWidth           int
-	SpriteHeight          int
+	Palette                color.Palette
+	SpritesData            [][][]byte
+	CompileSprite          bool
+	IsCpcPlus              bool
+	OriginalImages         *custom_widget.ImageTable
+	SpritesCollection      [][]*image.NRGBA
+	SpriteNumberPerRow     int
+	SpriteNumberPerColumn  int
+	Mode                   int
+	SpriteWidth            int
+	SpriteHeight           int
+	ExportFormat           SpriteExportFormat
+	ExportDsk              bool
+	ExportText             bool
+	ExportWithAmsdosHeader bool
+	ExportZigzag           bool
+	ExportJson             bool
+	ExportCompression      int
+	ExportFolderPath       string
 }
 
 func NewSpriteMenu() *SpriteMenu {

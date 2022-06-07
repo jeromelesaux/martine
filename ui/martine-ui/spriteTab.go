@@ -95,7 +95,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 	})
 
 	exportButton := widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
-		m.exportDialog(m.imageExport, m.window)
+		m.exportSpriteBoard(m.sprite, m.window)
 	})
 
 	applyButton := widget.NewButtonWithIcon("Apply", theme.VisibilityIcon(), func() {
