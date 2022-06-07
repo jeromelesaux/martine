@@ -46,9 +46,9 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 		imagesCanvas[i] = make([]canvas.Image, s.SpriteNumberPerColumn)
 	}
 
-	for y := 0; y < s.SpriteNumberPerColumn; y++ {
-		for x := 0; x < s.SpriteNumberPerRow; x++ {
-			imagesCanvas[x][y] = *canvas.NewImageFromImage(s.SpritesCollection[x][y])
+	for y := 0; y < s.SpriteNumberPerRow; y++ {
+		for x := 0; x < s.SpriteNumberPerColumn; x++ {
+			imagesCanvas[y][x] = *canvas.NewImageFromImage(s.SpritesCollection[x][y])
 		}
 	}
 	s.OriginalImages.Update(&imagesCanvas, s.SpriteNumberPerRow, s.SpriteNumberPerColumn)
