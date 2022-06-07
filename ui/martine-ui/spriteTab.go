@@ -160,6 +160,10 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 
 	isSpriteHard := widget.NewCheck("is sprite hard", func(b bool) {
 		s.IsHardSprite = b
+		if s.IsHardSprite {
+			s.SpriteHeight = 16
+			s.SpriteWidth = 16
+		}
 	})
 
 	IsCpcPlus := widget.NewCheck("is CPC Plus", func(b bool) {
