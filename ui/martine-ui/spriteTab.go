@@ -34,7 +34,8 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 		return
 	}
 	s.Palette = pal
-	raw, sprites, err := sprite.SplitBoardToSprite(s.OriginalBoard.Image, s.Palette, s.SpriteNumberPerRow, s.SpriteNumberPerColumn, uint8(s.Mode), s.IsHardSprite)
+	size := constants.Size{Width: s.SpriteWidth, Height: s.SpriteHeight}
+	raw, sprites, err := sprite.SplitBoardToSprite(s.OriginalBoard.Image, s.Palette, s.SpriteNumberPerRow, s.SpriteNumberPerColumn, uint8(s.Mode), s.IsHardSprite, size)
 	if err != nil {
 		return
 	}
@@ -135,6 +136,28 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 		s.SpriteNumberPerRow = r
 	}
 
+	spriteWidthSizeLabel := widget.NewLabel("sprite width")
+	spriteHeightSizeLabel := widget.NewLabel("sprite height")
+	spriteWidthSizeEntry := widget.NewEntry()
+	spriteWidthSizeEntry.OnChanged = func(v string) {
+		r, err := strconv.Atoi(v)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error %s cannot be cast in int\n", v)
+			return
+		}
+		s.SpriteWidth = r
+	}
+
+	spriteHeightSizeEntry := widget.NewEntry()
+	spriteHeightSizeEntry.OnChanged = func(v string) {
+		r, err := strconv.Atoi(v)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error %s cannot be cast in int\n", v)
+			return
+		}
+		s.SpriteHeight = r
+	}
+
 	isSpriteHard := widget.NewCheck("is sprite hard", func(b bool) {
 		s.IsHardSprite = b
 	})
@@ -173,6 +196,17 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 				layout.NewHBoxLayout(),
 				spriteNumberPerColumnLabel,
 				spriteNumberPerRowEntry,
+			),
+			container.New(
+				layout.NewHBoxLayout(),
+				spriteWidthSizeLabel,
+				spriteWidthSizeEntry,
+			),
+
+			container.New(
+				layout.NewHBoxLayout(),
+				spriteHeightSizeLabel,
+				spriteHeightSizeEntry,
 			),
 			container.New(
 				layout.NewHBoxLayout(),

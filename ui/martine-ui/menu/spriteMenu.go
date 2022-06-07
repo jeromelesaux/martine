@@ -25,6 +25,8 @@ type SpriteMenu struct {
 	SpriteNumberPerRow    int
 	SpriteNumberPerColumn int
 	Mode                  int
+	SpriteWidth           int
+	SpriteHeight          int
 }
 
 func NewSpriteMenu() *SpriteMenu {
