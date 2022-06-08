@@ -33,7 +33,6 @@ func SaveAmsdosFile(filename, extension string, data []byte, fileType, user byte
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
 	fmt.Fprintf(os.Stderr, "filesize:%d,#%.2x\n", filesize, filesize)
-	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	fmt.Fprintf(os.Stderr, "Data length %d\n", binary.Size(data))
 	fw, err := os.Create(filename)
 	if err != nil {
@@ -42,6 +41,15 @@ func SaveAmsdosFile(filename, extension string, data []byte, fileType, user byte
 	}
 	binary.Write(fw, binary.LittleEndian, header)
 	binary.Write(fw, binary.LittleEndian, data)
-	fw.Close()
-	return nil
+	return fw.Close()
+}
+
+func SaveOSFile(filename string, data []byte) error {
+	fw, err := os.Create(filename)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", filename, err)
+		return err
+	}
+	binary.Write(fw, binary.LittleEndian, data)
+	return fw.Close()
 }

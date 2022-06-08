@@ -91,6 +91,8 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 }
 
 func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
+	pi := dialog.NewProgressInfinite("Saving....", "Please wait.", m.window)
+	pi.Show()
 	switch s.ExportFormat {
 	case menu.SpriteFilesExport:
 		for idxX, v := range s.SpritesData {
@@ -117,17 +119,20 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		if s.ExportWithAmsdosHeader {
 			err = file.SaveAmsdosFile(filename, ".WIN", buf, 2, 0, 0x4000, 0x4000)
 			if err != nil {
+				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 				fmt.Fprintf(os.Stderr, "Error while saving flat sprites file error %s\n", err.Error())
 			}
 		} else {
 			fw, err := os.Create(filename)
 			if err != nil {
+				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 				fmt.Fprintf(os.Stderr, "Error while saving flat sprites file error %s\n", err.Error())
 			}
 			_, err = fw.Write(buf)
 			if err != nil {
+				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 				fmt.Fprintf(os.Stderr, "Error while saving flat sprites file error %s\n", err.Error())
 			}
@@ -145,9 +150,11 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		cont.Compression = s.ExportCompression
 		cont.NoAmsdosHeader = !s.ExportWithAmsdosHeader
 		if err := file.Imp(buf, uint(s.SpriteNumberPerColumn*s.SpriteNumberPerRow), uint(s.SpriteWidth), uint(s.SpriteHeight), uint(s.Mode), filename, cont); err != nil {
+			pi.Hide()
 			dialog.NewError(err, m.window).Show()
 			fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", filename, err)
 		}
+		pi.Hide()
 	}
 
 }
