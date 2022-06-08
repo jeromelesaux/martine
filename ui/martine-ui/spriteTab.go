@@ -21,6 +21,8 @@ import (
 )
 
 func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
+	pi := dialog.NewProgressInfinite("Computing....", "Please wait.", m.window)
+	pi.Show()
 	var colorsAvailable int
 	switch s.Mode {
 	case 0:
@@ -35,12 +37,16 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 	draw.Draw(img, img.Bounds(), b, b.Bounds().Min, draw.Src)
 	pal, _, err := convert.DowngradingPalette(img, constants.Size{ColorsAvailable: colorsAvailable, Width: img.Bounds().Max.X, Height: img.Bounds().Max.Y}, s.IsCpcPlus)
 	if err != nil {
+		pi.Hide()
+		dialog.NewError(err, m.window).Show()
 		return
 	}
 	s.Palette = pal
 	size := constants.Size{Width: s.SpriteWidth, Height: s.SpriteHeight}
 	raw, sprites, err := sprite.SplitBoardToSprite(s.OriginalBoard.Image, s.Palette, s.SpriteNumberPerRow, s.SpriteNumberPerColumn, uint8(s.Mode), s.IsHardSprite, size)
 	if err != nil {
+		pi.Hide()
+		dialog.NewError(err, m.window).Show()
 		return
 	}
 	s.SpritesCollection = sprites
@@ -57,6 +63,7 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 		}
 	}
 	s.OriginalImages.Update(&imagesCanvas, s.SpriteNumberPerRow, s.SpriteNumberPerColumn)
+	pi.Hide()
 	refreshUI.OnTapped()
 }
 
