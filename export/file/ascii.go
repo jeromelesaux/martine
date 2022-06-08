@@ -11,8 +11,6 @@ import (
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/constants"
 	x "github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/rle"
-	zx0 "github.com/jeromelesaux/zx0/encode"
 )
 
 // ByteToken is the token by default
@@ -25,20 +23,9 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, co
 	}
 
 	var out string
-	if cont.Compression != -1 {
-		switch cont.Compression {
-		case 1:
-			fmt.Fprintf(os.Stdout, "Using RLE compression\n")
-			data = rle.Encode(data)
-		case 2:
-			fmt.Fprintf(os.Stdout, "Using RLE 16 bits compression\n")
-			data = rle.Encode16(data)
-		case 5:
-			fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
-			data = zx0.Encode(data)
-		}
 
-	}
+	data, _ = Compress(data, cont.Compression)
+
 	cpcFilename := string(cont.AmsdosFilename()) + ".TXT"
 	osFilepath := cont.AmsdosFullPath(filePath, ".TXT")
 	fmt.Fprintf(os.Stdout, "Writing ascii file (%s) data length (%d)\n", osFilepath, len(data))

@@ -11,14 +11,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	rawlz4 "github.com/bkaradzic/go-lz4"
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
 	x "github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/lz4"
-	"github.com/jeromelesaux/martine/rle"
-	zx0 "github.com/jeromelesaux/zx0/encode"
 )
 
 var ErrorBadFileFormat = errors.New("bad file format")
@@ -8461,35 +8457,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 		}
 	}
 
-	if cont.Compression != -1 {
-		switch cont.Compression {
-		case 1:
-			fmt.Fprintf(os.Stdout, "Using RLE compression\n")
-			o = rle.Encode(o)
-		case 2:
-			fmt.Fprintf(os.Stdout, "Using RLE 16 bits compression\n")
-			o = rle.Encode16(o)
-		case 3:
-			fmt.Fprintf(os.Stdout, "Using LZ4-classic compression\n")
-			var dst []byte
-			dst, err := lz4.Encode(dst, o)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
-			}
-			o = dst
-		case 4:
-			fmt.Fprintf(os.Stdout, "Using LZ4-Raw compression\n")
-			var dst []byte
-			dst, err := rawlz4.Encode(dst, o)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
-			}
-			o = dst[4:]
-		case 5:
-			fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
-			o = zx0.Encode(o)
-		}
-	}
+	o, _ = Compress(o, cont.Compression)
 
 	osFilepath := cont.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", osFilepath)
@@ -8787,35 +8755,8 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cont *
 		}
 		copy(data[0x07d0:], codeScrStandard[:])
 	}
-	if cont.Compression != -1 {
-		switch cont.Compression {
-		case 1:
-			fmt.Fprintf(os.Stdout, "Using RLE compression\n")
-			data = rle.Encode(data)
-		case 2:
-			fmt.Fprintf(os.Stdout, "Using RLE 16 bits compression\n")
-			data = rle.Encode16(data)
-		case 3:
-			fmt.Fprintf(os.Stdout, "Using LZ4-classic compression\n")
-			var dst []byte
-			dst, err := lz4.Encode(dst, data)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
-			}
-			data = dst
-		case 4:
-			fmt.Fprintf(os.Stdout, "Using LZ4-Raw compression\n")
-			var dst []byte
-			dst, err := rawlz4.Encode(dst, data)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
-			}
-			data = dst[4:]
-		case 5:
-			fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
-			data = zx0.Encode(data)
-		}
-	}
+	data, _ = Compress(data, cont.Compression)
+
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0xc000, Exec: exec,
 		Size:        uint16(binary.Size(data)),
 		Size2:       uint16(binary.Size(data)),
@@ -9083,35 +9024,9 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, dont
 	osFilepath := cont.AmsdosFullPath(filePath, ".WIN")
 	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", osFilepath, screenMode, width, height)
 	win := OcpWinFooter{Unused: 3, Height: byte(height), Unused2: 0, Width: uint16(width * 8)}
-	if cont.Compression != -1 {
-		switch cont.Compression {
-		case 1:
-			fmt.Fprintf(os.Stdout, "Using RLE compression\n")
-			data = rle.Encode(data)
-		case 2:
-			fmt.Fprintf(os.Stdout, "Using RLE 16 bits compression\n")
-			data = rle.Encode16(data)
-		case 3:
-			fmt.Fprintf(os.Stdout, "Using LZ4 compression\n")
-			var dst []byte
-			dst, err := lz4.Encode(dst, data)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
-			}
-			data = dst
-		case 4:
-			fmt.Fprintf(os.Stdout, "Using LZ4-Raw compression\n")
-			var dst []byte
-			dst, err := rawlz4.Encode(dst, data)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
-			}
-			data = dst[4:]
-		case 5:
-			fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
-			data = zx0.Encode(data)
-		}
-	}
+
+	data, _ = Compress(data, cont.Compression)
+
 	filesize := binary.Size(data) + binary.Size(win)
 	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x4000, Exec: 0x4000,
 		Size:        uint16(filesize),
