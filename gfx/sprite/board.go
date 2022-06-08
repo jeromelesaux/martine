@@ -33,10 +33,10 @@ func SplitBoardToSprite(
 				}
 			}
 			sprites[index] = append(sprites[index], i)
-			y += spriteWidth
+			y += spriteHeight
 		}
 		index++
-		x += spriteHeight
+		x += spriteWidth
 		y = 0
 	}
 	cont := export.NewMartineContext("", "")
