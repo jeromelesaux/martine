@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"image"
+	"image/draw"
 	"os"
 	"strconv"
 
@@ -29,7 +30,10 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 	case 2:
 		colorsAvailable = constants.Mode2.ColorsAvailable
 	}
-	pal, _, err := convert.DowngradingPalette(s.OriginalBoard.Image.(*image.NRGBA), constants.Size{ColorsAvailable: colorsAvailable, Width: s.OriginalBoard.Image.Bounds().Max.X, Height: s.OriginalBoard.Image.Bounds().Max.Y}, s.IsCpcPlus)
+	b := s.OriginalBoard.Image
+	img := image.NewNRGBA(image.Rect(0, 0, b.Bounds().Dx(), b.Bounds().Dx()))
+	draw.Draw(img, img.Bounds(), b, b.Bounds().Min, draw.Src)
+	pal, _, err := convert.DowngradingPalette(img, constants.Size{ColorsAvailable: colorsAvailable, Width: img.Bounds().Max.X, Height: img.Bounds().Max.Y}, s.IsCpcPlus)
 	if err != nil {
 		return
 	}
