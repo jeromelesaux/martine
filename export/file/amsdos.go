@@ -41,6 +41,7 @@ func SaveAmsdosFile(filename, extension string, data []byte, fileType, user byte
 	}
 	binary.Write(fw, binary.LittleEndian, header)
 	binary.Write(fw, binary.LittleEndian, data)
+
 	return fw.Close()
 }
 
@@ -51,5 +52,6 @@ func SaveOSFile(filename string, data []byte) error {
 		return err
 	}
 	binary.Write(fw, binary.LittleEndian, data)
+
 	return fw.Close()
 }

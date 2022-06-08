@@ -1,14 +1,11 @@
 package file
 
 import (
-	"encoding/binary"
 	"fmt"
 	"image/color"
 	"os"
 	"runtime"
-	"strings"
 
-	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/constants"
 	x "github.com/jeromelesaux/martine/export"
 )
@@ -42,25 +39,17 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, co
 		out += FormatAssemblyBasicPalette(p, eol)
 		out += eol
 	}
-	//fmt.Fprintf(os.Stdout,"%s",out)
-	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x0, Exec: 0x0,
-		Size:        uint16(len(out)),
-		Size2:       uint16(len(out)),
-		LogicalSize: uint16(len(out))}
-
-	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
-	header.Checksum = uint16(header.ComputedChecksum16())
-	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
-	fw, err := os.Create(osFilepath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
-		return err
-	}
 	if !cont.NoAmsdosHeader {
-		binary.Write(fw, binary.LittleEndian, header)
+
+		if err := SaveAmsdosFile(osFilepath, ".TXT", []byte(out), 0, 0, 0, 0); err != nil {
+			return err
+		}
+	} else {
+		if err := SaveOSFile(osFilepath, []byte(out)); err != nil {
+			return err
+		}
 	}
-	binary.Write(fw, binary.LittleEndian, []byte(out))
-	fw.Close()
+
 	if !dontImportDsk {
 		cont.AddFile(osFilepath)
 	}
@@ -165,25 +154,18 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 		out += FormatAssemblyBasicPalette(p, eol)
 		out += eol
 	}
-	//fmt.Fprintf(os.Stdout,"%s",out)
-	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x0, Exec: 0x0,
-		Size:        uint16(len(out)),
-		Size2:       uint16(len(out)),
-		LogicalSize: uint16(len(out))}
 
-	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
-	header.Checksum = uint16(header.ComputedChecksum16())
-	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
-	fw, err := os.Create(osFilepath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
-		return err
-	}
 	if !cont.NoAmsdosHeader {
-		binary.Write(fw, binary.LittleEndian, header)
+		if err := SaveAmsdosFile(osFilepath, ".TXT", []byte(out), 0, 0, 0, 0); err != nil {
+			return err
+		}
+		//binary.Write(fw, binary.LittleEndian, header)
+	} else {
+		if err := SaveOSFile(osFilepath, []byte(out)); err != nil {
+			return err
+		}
 	}
-	binary.Write(fw, binary.LittleEndian, []byte(out))
-	fw.Close()
+
 	if !dontImportDsk {
 		cont.AddFile(osFilepath)
 	}

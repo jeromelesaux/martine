@@ -1,13 +1,11 @@
 package file
 
 import (
-	"encoding/binary"
 	"fmt"
 	"image/color"
 	"os"
 	"path/filepath"
 
-	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
 )
@@ -87,23 +85,17 @@ func ExportSplitRaster(filename string, p color.Palette, rasters *constants.Spli
 	}
 	output = append(output, splitRasterRestore...)
 
-	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x170, Exec: 0x0,
-		Size:        uint16(binary.Size(output)),
-		Size2:       uint16(binary.Size(output)),
-		LogicalSize: uint16(binary.Size(output))}
-	copy(header.Filename[:], cont.GetAmsdosFilename(filename, ".SPL"))
-	header.Checksum = uint16(header.ComputedChecksum16())
 	basicPath := filepath.Join(cont.OutputPath, cont.GetAmsdosFilename(filename, ".SPL"))
-	fw, err := os.Create(basicPath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", basicPath, err)
-		return err
-	}
+
 	if !cont.NoAmsdosHeader {
-		binary.Write(fw, binary.LittleEndian, header)
+		if err := SaveAmsdosFile(basicPath, ".SPL", output, 0, 0, 0x170, 0); err != nil {
+			return err
+		}
+	} else {
+		if err := SaveOSFile(basicPath, output); err != nil {
+			return err
+		}
 	}
-	binary.Write(fw, binary.LittleEndian, output)
-	fw.Close()
 
 	cont.AddFile(basicPath)
 	return nil
