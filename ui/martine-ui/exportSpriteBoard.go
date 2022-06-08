@@ -97,8 +97,8 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 	case menu.SpriteFilesExport:
 		for idxX, v := range s.SpritesData {
 			for idxY, v0 := range v {
-				filename := s.ExportFolderPath + string(filepath.Separator) + fmt.Sprintf("%d-%d.win", idxX, idxY)
-				cont := export.NewMartineContext("", filename)
+				filename := s.ExportFolderPath + string(filepath.Separator) + fmt.Sprintf("L%.2dC%.2d.WIN", idxX, idxY)
+				cont := export.NewMartineContext("", s.ExportFolderPath)
 				cont.Compression = s.ExportCompression
 				cont.NoAmsdosHeader = !s.ExportWithAmsdosHeader
 				if err := file.Win(filename, v0, uint8(s.Mode), s.SpriteWidth, s.SpriteHeight, s.ExportDsk, cont); err != nil {
@@ -106,6 +106,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 				}
 			}
 		}
+		pi.Hide()
 	case menu.SpriteFlatExport:
 		buf := make([]byte, 0)
 		for _, v := range s.SpritesData {
@@ -113,7 +114,8 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 				buf = append(buf, v0...)
 			}
 		}
-		filename := s.ExportFolderPath + string(filepath.Separator) + "sprites.win"
+		filename := s.ExportFolderPath + string(filepath.Separator) + "SPRITES.BIN"
+		buf, _ = file.Compress(buf, s.ExportCompression)
 		var err error
 		//TODO add amsdos header
 		if s.ExportWithAmsdosHeader {
@@ -138,6 +140,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			}
 			fw.Close()
 		}
+		pi.Hide()
 	case menu.SpriteImpCatcher:
 		buf := make([]byte, 0)
 		for _, v := range s.SpritesData {
@@ -146,7 +149,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			}
 		}
 		filename := s.ExportFolderPath + string(filepath.Separator) + "sprites.imp"
-		cont := export.NewMartineContext("", filename)
+		cont := export.NewMartineContext("", s.ExportFolderPath)
 		cont.Compression = s.ExportCompression
 		cont.NoAmsdosHeader = !s.ExportWithAmsdosHeader
 		if err := file.Imp(buf, uint(s.SpriteNumberPerColumn*s.SpriteNumberPerRow), uint(s.SpriteWidth), uint(s.SpriteHeight), uint(s.Mode), filename, cont); err != nil {

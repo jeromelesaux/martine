@@ -8757,25 +8757,16 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cont *
 	}
 	data, _ = Compress(data, cont.Compression)
 
-	header := cpc.CpcHead{Type: 2, User: 0, Address: 0xc000, Exec: exec,
-		Size:        uint16(binary.Size(data)),
-		Size2:       uint16(binary.Size(data)),
-		LogicalSize: uint16(binary.Size(data))}
-
-	cpcFilename := cont.GetAmsdosFilename(filePath, ".SCR")
-	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
-	header.Checksum = uint16(header.ComputedChecksum16())
-	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
-	fw, err := os.Create(osFilepath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
-		return err
-	}
 	if !cont.NoAmsdosHeader {
-		binary.Write(fw, binary.LittleEndian, header)
+		if err := SaveAmsdosFile(osFilepath, ".SCR", data, 2, 0, 0xc000, exec); err != nil {
+			return err
+		}
+	} else {
+		if err := SaveOSFile(osFilepath, data); err != nil {
+			return err
+		}
 	}
-	binary.Write(fw, binary.LittleEndian, data)
-	fw.Close()
+
 	cont.AddFile(osFilepath)
 	return nil
 }
