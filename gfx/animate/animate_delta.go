@@ -485,13 +485,7 @@ func exportDeltaAnimate(
 		code += "\nbuffer dw 0\n"
 	}
 
-	fw, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer fw.Close()
-	fw.WriteString(code)
-	return nil
+	return file.SaveStringOSFile(filename, code)
 }
 
 var deltaScreenCodeDeltaV2 = `

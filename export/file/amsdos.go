@@ -55,3 +55,16 @@ func SaveOSFile(filename string, data []byte) error {
 
 	return fw.Close()
 }
+
+func SaveStringOSFile(filename string, data string) error {
+	fw, err := os.Create(filename)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", filename, err)
+		return err
+	}
+	_, err = fw.WriteString(data)
+	if err != nil {
+		return err
+	}
+	return fw.Close()
+}

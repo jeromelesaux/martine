@@ -8455,25 +8455,16 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 
 	osFilepath := cont.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", osFilepath)
-	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x170, Exec: 0x0,
-		Size:        uint16(binary.Size(o)),
-		Size2:       uint16(binary.Size(o)),
-		LogicalSize: uint16(binary.Size(o))}
-
-	cpcFilename := cont.OsFilename(".SCR")
-	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
-	header.Checksum = uint16(header.ComputedChecksum16())
-	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
-	fw, err := os.Create(osFilepath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
-		return err
-	}
 	if !cont.NoAmsdosHeader {
-		binary.Write(fw, binary.LittleEndian, header)
+		if err := SaveAmsdosFile(osFilepath, ".SCR", o, 0, 0, 0x170, 0); err != nil {
+			return err
+		}
+	} else {
+		if err := SaveOSFile(filePath, o); err != nil {
+			return err
+		}
 	}
-	binary.Write(fw, binary.LittleEndian, o)
-	fw.Close()
+
 	cont.AddFile(osFilepath)
 	return nil
 }

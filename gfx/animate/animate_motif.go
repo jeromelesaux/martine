@@ -125,11 +125,5 @@ func exportDeltaMotif(images [][]byte, motifs [][]byte, p color.Palette, ex *exp
 	deltaCode += file.FormatAssemblyBasicPalette(p, "\n")
 
 	//	fmt.Printf("%s", deltaCode)
-	fw, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer fw.Close()
-	fw.WriteString(deltaCode)
-	return nil
+	return file.SaveStringOSFile(filename, deltaCode)
 }
