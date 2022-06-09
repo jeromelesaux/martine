@@ -26,6 +26,8 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 			s.ExportFormat = menu.SpriteFilesExport
 		case menu.SpriteImpCatcher:
 			s.ExportFormat = menu.SpriteImpCatcher
+		case menu.SpriteCompiled:
+			s.ExportFormat = menu.SpriteCompiled
 		default:
 			fmt.Fprintf(os.Stderr, "error while getting sprite export format %s\n", v)
 		}
@@ -94,6 +96,8 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 	pi := dialog.NewProgressInfinite("Saving....", "Please wait.", m.window)
 	pi.Show()
 	switch s.ExportFormat {
+	case menu.SpriteCompiled:
+
 	case menu.SpriteFilesExport:
 		for idxX, v := range s.SpritesData {
 			for idxY, v0 := range v {
