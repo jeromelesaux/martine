@@ -8257,26 +8257,20 @@ func Ink(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
-	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x8809, Exec: 0x8809,
-		Size:        uint16(binary.Size(data)),
-		Size2:       uint16(binary.Size(data)),
-		LogicalSize: uint16(binary.Size(data))}
 
-	cpcFilename := cont.OsFilename(".INK")
-	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
-	header.Checksum = uint16(header.ComputedChecksum16())
 	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	osFilepath := cont.AmsdosFullPath(filePath, ".INK")
-	fw, err := os.Create(osFilepath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
-		return err
-	}
+
 	if !cont.NoAmsdosHeader {
-		binary.Write(fw, binary.LittleEndian, header)
+		if err := SaveAmsdosFile(osFilepath, ".INK", data, 2, 0, 0x8809, 0x8809); err != nil {
+			return err
+		}
+	} else {
+		if err := SaveOSFile(osFilepath, data); err != nil {
+			return err
+		}
 	}
-	binary.Write(fw, binary.LittleEndian, data)
-	fw.Close()
+
 	if !dontImportDsk {
 		cont.AddFile(osFilepath)
 	}

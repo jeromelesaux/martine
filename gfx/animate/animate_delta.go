@@ -6,7 +6,6 @@ import (
 	"image/color"
 	"image/draw"
 	"image/gif"
-	"image/png"
 	"os"
 	"path/filepath"
 	"strings"
@@ -138,9 +137,6 @@ func DeltaPacking(gitFilepath string, ex *export.MartineContext, initialAddress 
 		}
 		for i := 0; i < len(imgs); i += pad {
 			in := imgs[i]
-			/*	fw, _ := os.Create(ex.OutputPath + fmt.Sprintf("/a%.2d.png", i))
-				png.Encode(fw, in)
-				fw.Close()*/
 			raw, _, _, _, err = gfx.ApplyOneImage(in, ex, int(mode), palette, mode)
 			if err != nil {
 				return err
@@ -159,9 +155,8 @@ func DeltaPacking(gitFilepath string, ex *export.MartineContext, initialAddress 
 			if err != nil {
 				return err
 			}
-			fw, _ := os.Create(ex.OutputPath + fmt.Sprintf("/%.2d.png", i))
-			png.Encode(fw, in)
-			fw.Close()
+			file.Png(ex.OutputPath+fmt.Sprintf("/%.2d.png", i), in)
+
 			rawImages = append(rawImages, raw)
 			fmt.Printf("Image [%d] proceed\n", i)
 		}
@@ -229,9 +224,6 @@ func filloutGif(g gif.GIF, ex *export.MartineContext) []image.Image {
 		draw.Draw(reference, reference.Bounds(), in, image.Point{0, 0}, draw.Over)
 		img := image.NewNRGBA(image.Rect(0, 0, width, height))
 		draw.Draw(img, img.Bounds(), reference, image.Point{0, 0}, draw.Over)
-		/*fw, _ := os.Create(ex.OutputPath + fmt.Sprintf("/%.2d.png", i))
-		png.Encode(fw, reference)
-		fw.Close()*/
 		c = append(c, img)
 	}
 	return c

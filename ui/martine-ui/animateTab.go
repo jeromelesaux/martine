@@ -70,13 +70,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						dialog.ShowError(err, m.window)
 						return
 					}
-					f, err := os.Create(m.animateExport.ExportFolderPath + string(filepath.Separator) + "code.asm")
-					if err != nil {
-						dialog.ShowError(err, m.window)
-						return
-					}
-					defer f.Close()
-					_, err = f.Write([]byte(code))
+					err = file.SaveOSFile(m.animateExport.ExportFolderPath+string(filepath.Separator)+"code.asm", []byte(code))
 					if err != nil {
 						dialog.ShowError(err, m.window)
 						return

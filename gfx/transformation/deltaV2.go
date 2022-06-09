@@ -3,8 +3,9 @@ package transformation
 import (
 	"bytes"
 	"encoding/binary"
-	"os"
 	"sort"
+
+	"github.com/jeromelesaux/martine/export/file"
 )
 
 type DeltaCollectionV2 struct {
@@ -52,17 +53,11 @@ func (f offset) Swap(i, j int) {
 }
 
 func (dc *DeltaCollectionV2) Save(filename string) error {
-	f, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
 	b, err := dc.Marshall()
 	if err != nil {
 		return err
 	}
-	_, err = f.Write(b)
-	return err
+	return file.SaveOSFile(filename, b)
 }
 
 func (dc *DeltaCollectionV2) Marshall() ([]byte, error) {

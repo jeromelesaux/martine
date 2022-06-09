@@ -5,13 +5,13 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-	"image/png"
 	"math"
 	"os"
 	"path/filepath"
 
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/errors"
 	"github.com/pbnjay/pixfont"
@@ -359,20 +359,11 @@ func (a *AnalyzeBoard) Image(filePath string, bt []BoardTile, size constants.Siz
 			}
 		}
 	}
-	fw, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
-	defer fw.Close()
-	return png.Encode(fw, im)
+	return file.Png(filePath, im)
 }
 
 func (a *AnalyzeBoard) SaveBoardTile(folderpath string, bt []BoardTile) error {
 	for index, v := range bt {
-		fw, err := os.Create(folderpath + string(filepath.Separator) + fmt.Sprintf("%.4d.png", index))
-		if err != nil {
-			return err
-		}
 		sprt := v.Tile
 		im := image.NewNRGBA(
 			image.Rectangle{
@@ -385,11 +376,10 @@ func (a *AnalyzeBoard) SaveBoardTile(folderpath string, bt []BoardTile) error {
 				im.Set(x, y, sprt.Colors[x][y])
 			}
 		}
-		err = png.Encode(fw, im)
+		err := file.Png(folderpath+string(filepath.Separator)+fmt.Sprintf("%.4d.png", index), im)
 		if err != nil {
 			return err
 		}
-		fw.Close()
 	}
 	return nil
 }
@@ -406,23 +396,13 @@ func (a *AnalyzeBoard) SaveFlatFile(folderpath string, palette color.Palette, mo
 	}
 	spriteFolder := filepath.Join(folderpath, "sprites")
 	os.Mkdir(spriteFolder, os.ModePerm)
-	fw, err := os.Create(filepath.Join(spriteFolder, "tiles.bin"))
-	if err != nil {
-		return err
-	}
-	defer fw.Close()
-	_, err = fw.Write(flatFile)
-	return err
+	return file.SaveOSFile(filepath.Join(spriteFolder, "tiles.bin"), flatFile)
 }
 
 func (a *AnalyzeBoard) SaveSprites(folderpath string, palette color.Palette, mode uint8, cont *export.MartineContext) error {
 	spriteFolder := filepath.Join(folderpath, "sprites")
 	os.Mkdir(spriteFolder, os.ModePerm)
 	for index, v := range a.GetUniqTiles() {
-		fw, err := os.Create(filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", index)))
-		if err != nil {
-			return err
-		}
 		sprt := v
 		im := image.NewNRGBA(
 			image.Rectangle{
@@ -435,11 +415,11 @@ func (a *AnalyzeBoard) SaveSprites(folderpath string, palette color.Palette, mod
 				im.Set(x, y, sprt.Colors[x][y])
 			}
 		}
-		err = png.Encode(fw, im)
+		err := file.Png(filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", index)), im)
 		if err != nil {
 			return err
 		}
-		fw.Close()
+
 		filename := filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", index))
 		err = common.ToSpriteAndExport(im, palette, v.Size, mode, filename, true, cont)
 		if err != nil {
@@ -450,11 +430,6 @@ func (a *AnalyzeBoard) SaveSprites(folderpath string, palette color.Palette, mod
 }
 
 func (a *AnalyzeBoard) SaveSchema(filePath string) error {
-	f, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
 	spacerLarge := 16
 	spaceHeigth := 20
 
@@ -509,8 +484,7 @@ func (a *AnalyzeBoard) SaveSchema(filePath string) error {
 		x0 = 10
 		y0 += spaceHeigth / 2
 	}
-
-	return png.Encode(f, im)
+	return file.Png(filePath, im)
 }
 
 func (a *AnalyzeBoard) SaveTilemap(filePath string) error {

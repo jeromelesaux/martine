@@ -126,19 +126,12 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 				fmt.Fprintf(os.Stderr, "Error while saving flat sprites file error %s\n", err.Error())
 			}
 		} else {
-			fw, err := os.Create(filename)
+			err = file.SaveOSFile(filename, buf)
 			if err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 				fmt.Fprintf(os.Stderr, "Error while saving flat sprites file error %s\n", err.Error())
 			}
-			_, err = fw.Write(buf)
-			if err != nil {
-				pi.Hide()
-				dialog.NewError(err, m.window).Show()
-				fmt.Fprintf(os.Stderr, "Error while saving flat sprites file error %s\n", err.Error())
-			}
-			fw.Close()
 		}
 		pi.Hide()
 	case menu.SpriteImpCatcher:

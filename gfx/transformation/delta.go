@@ -379,17 +379,11 @@ func (dc *DeltaCollection) Marshall() ([]byte, error) {
 }
 
 func (dc *DeltaCollection) Save(filename string) error {
-	f, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
 	b, err := dc.Marshall()
 	if err != nil {
 		return err
 	}
-	_, err = f.Write(b)
-	return err
+	return file.SaveOSFile(filename, b)
 }
 
 func DeltaAddress(x, y, lineOctetWidth int) int {

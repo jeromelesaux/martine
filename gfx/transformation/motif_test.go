@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"image/color"
 	"image/jpeg"
-	"image/png"
 	"os"
 	"testing"
 
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
+	"github.com/jeromelesaux/martine/export/file"
 )
 
 func TestMotifs(t *testing.T) {
@@ -26,14 +26,7 @@ func TestMotifs(t *testing.T) {
 	var p color.Palette = constants.CpcOldPalette
 	out := convert.Resize(in, constants.Size{Width: 320, Height: 200}, imaging.NearestNeighbor)
 	_, out = convert.DowngradingWithPalette(out, p)
-
-	fw, err := os.Create("../test/motifs/orig.png")
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-	png.Encode(fw, out)
-	fw.Close()
-
+	file.Png("../test/motifs/orig.png", out)
 	a := AnalyzeTilesBoard(out, constants.Size{Width: 4, Height: 4})
 	threshold := 27
 	board := a.ReduceTilesNumber(float64(threshold))

@@ -12,6 +12,7 @@ import (
 
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/zx0/encode"
 )
 
@@ -42,12 +43,10 @@ func TestCompressZx0(t *testing.T) {
 		t.Fatalf("%v", err)
 	}
 	compressed := encode.Encode(b)
-	fw, err := os.Create("/Users/jeromelesaux/Downloads/test.zx0")
+	err = file.SaveOSFile("/Users/jeromelesaux/Downloads/test.zx0", compressed)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
-	defer fw.Close()
-	fw.Write(compressed)
 }
 
 func TestDisplayCode(t *testing.T) {

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"image/png"
 	"math"
 	"os"
 	"path/filepath"
@@ -142,16 +141,10 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 			if nbFrames < 255 {
 				data = append(data, d...)
 				scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%stiles%stile-%.2d.png", string(filepath.Separator), string(filepath.Separator), i))
-				f, err := os.Create(scenePath)
-				if err != nil {
+				if err := file.Png(scenePath, tile); err != nil {
 					fmt.Fprintf(os.Stderr, "Cannot create scene tile-%.2d error %v\n", i, err)
 					return err
 				}
-				if err := png.Encode(f, tile); err != nil {
-					fmt.Fprintf(os.Stderr, "Cannot encode in png scene tile-%.2d error %v\n", i, err)
-					return err
-				}
-				f.Close()
 			} else {
 				fmt.Println("skipping number of frames exceed 255.")
 				break
@@ -193,17 +186,10 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 			// store the map in the slice
 			scenes = append(scenes, m1)
 			scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%sscenes%sscene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
-			f, err := os.Create(scenePath)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot create scene scence-%.2d error %v\n", index, err)
+			if err := file.Png(scenePath, m1); err != nil {
+				fmt.Fprintf(os.Stderr, "Cannot create sscene-%.2d.png error %v\n", index, err)
 				return err
 			}
-
-			if err := png.Encode(f, m1); err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot encode in png scene scene-%.2d error %v\n", index, err)
-				return err
-			}
-			f.Close()
 			index++
 		}
 	}
@@ -267,17 +253,10 @@ func ExportTilemapClassical(m image.Image, filename string, board *transformatio
 			// store the map in the slice
 			scenes = append(scenes, m1)
 			scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%sscenes%sscene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
-			f, err := os.Create(scenePath)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot create scene scence-%.2d error %v\n", index, err)
-				return err
-			}
-
-			if err := png.Encode(f, m1); err != nil {
+			if err := file.Png(scenePath, m1); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot encode in png scene scene-%.2d error %v\n", index, err)
 				return err
 			}
-			f.Close()
 			index++
 		}
 	}
@@ -450,17 +429,10 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 			}
 			data = append(data, d...)
 			scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%stiles%stile-%.2d.png", string(filepath.Separator), string(filepath.Separator), i))
-			f, err := os.Create(scenePath)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot create scene tile-%.2d error %v\n", i, err)
-				return err
-			}
-
-			if err := png.Encode(f, tile); err != nil {
+			if err := file.Png(scenePath, tile); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot encode in png scene tile-%.2d error %v\n", i, err)
 				return err
 			}
-			f.Close()
 			if i >= maxTiles {
 				fmt.Fprintf(os.Stderr, "Maximum of %d tiles accepted, skipping...\n", maxTiles)
 				break
@@ -494,17 +466,10 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 			// store the map in the slice
 			scenes = append(scenes, m1)
 			scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%sscenes%sscene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
-			f, err := os.Create(scenePath)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot create scene scence-%.2d error %v\n", index, err)
-				return err
-			}
-
-			if err := png.Encode(f, m1); err != nil {
+			if err := file.Png(scenePath, m1); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot encode in png scene scene-%.2d error %v\n", index, err)
 				return err
 			}
-			f.Close()
 			index++
 		}
 	}
@@ -654,17 +619,10 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 			// store the map in the slice
 			scenes = append(scenes, m1)
 			scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%sscenes%sscene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
-			f, err := os.Create(scenePath)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot create scene scence-%.2d error %v\n", index, err)
-				return err
-			}
-
-			if err := png.Encode(f, m1); err != nil {
+			if err := file.Png(scenePath, m1); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot encode in png scene scene-%.2d error %v\n", index, err)
 				return err
 			}
-			f.Close()
 			index++
 		}
 	}
@@ -744,17 +702,10 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 			}
 			data = append(data, d...)
 			scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%stiles%stile-%.2d.png", string(filepath.Separator), string(filepath.Separator), i))
-			f, err := os.Create(scenePath)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot create scene tile-%.2d error %v\n", i, err)
-				return err
-			}
-
-			if err := png.Encode(f, tile); err != nil {
+			if err := file.Png(scenePath, tile); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot encode in png scene tile-%.2d error %v\n", i, err)
 				return err
 			}
-			f.Close()
 			if i >= maxTiles {
 				fmt.Fprintf(os.Stderr, "Maximum of %d tiles accepted, skipping...\n", maxTiles)
 				break
@@ -788,17 +739,10 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 			// store the map in the slice
 			scenes = append(scenes, m1)
 			scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%sscenes%sscene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
-			f, err := os.Create(scenePath)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot create scene scence-%.2d error %v\n", index, err)
-				return err
-			}
-
-			if err := png.Encode(f, m1); err != nil {
+			if err := file.Png(scenePath, m1); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot encode in png scene scene-%.2d error %v\n", index, err)
 				return err
 			}
-			f.Close()
 			index++
 		}
 	}
