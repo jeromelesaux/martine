@@ -9,11 +9,10 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/jeromelesaux/m4client/cpc"
+	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/export"
 	x "github.com/jeromelesaux/martine/export"
 )
 
@@ -8514,25 +8513,22 @@ func SaveKit(filePath string, p color.Palette, noAmsdosHeader bool) error {
 		cp := constants.NewCpcPlusColor(p[i])
 		data[i] = cp.Value()
 	}
-	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x8809, Exec: 0x8809,
-		Size:        uint16(binary.Size(data)),
-		Size2:       uint16(binary.Size(data)),
-		LogicalSize: uint16(binary.Size(data))}
 
-	cpcFilename := export.AmsdosFilename(filePath, ".KIT")
-	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
-	header.Checksum = uint16(header.ComputedChecksum16())
 	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
-	fw, err := os.Create(filePath)
+
+	v, err := common.StructToBytes(data)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", filePath, err)
 		return err
 	}
 	if !noAmsdosHeader {
-		binary.Write(fw, binary.LittleEndian, header)
+		if err = SaveAmsdosFile(filePath, ".KIT", v, 2, 0, 0x8809, 0x8809); err != nil {
+			return err
+		}
+	} else {
+		if err := SaveOSFile(filePath, v); err != nil {
+			return err
+		}
 	}
-	binary.Write(fw, binary.LittleEndian, data)
-	fw.Close()
 
 	return nil
 }
@@ -8549,25 +8545,21 @@ func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 		cp := constants.NewCpcPlusColor(p[i])
 		data[i] = cp.Value()
 	}
-	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x8809, Exec: 0x8809,
-		Size:        uint16(binary.Size(data)),
-		Size2:       uint16(binary.Size(data)),
-		LogicalSize: uint16(binary.Size(data))}
 
-	cpcFilename := cont.OsFilename(".KIT")
-	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
-	header.Checksum = uint16(header.ComputedChecksum16())
-	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
-	fw, err := os.Create(osFilepath)
+	res, err := common.StructToBytes(data)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
 		return err
 	}
 	if !cont.NoAmsdosHeader {
-		binary.Write(fw, binary.LittleEndian, header)
+		if err := SaveAmsdosFile(osFilepath, ".KIT", res, 2, 0, 0x8809, 0x8809); err != nil {
+			return err
+		}
+	} else {
+		if err := SaveOSFile(osFilepath, res); err != nil {
+			return err
+		}
 	}
-	binary.Write(fw, binary.LittleEndian, data)
-	fw.Close()
+
 	if !dontImportDsk {
 		cont.AddFile(osFilepath)
 	}
@@ -8852,25 +8844,21 @@ func SavePal(filePath string, p color.Palette, screenMode uint8, noAmsdosHeader 
 			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
-	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x8809, Exec: 0x8809,
-		Size:        uint16(binary.Size(data)),
-		Size2:       uint16(binary.Size(data)),
-		LogicalSize: uint16(binary.Size(data))}
 
-	cpcFilename := export.AmsdosFilename(filePath, ".PAL")
-	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
-	header.Checksum = uint16(header.ComputedChecksum16())
-
-	fw, err := os.Create(filePath)
+	res, err := common.StructToBytes(data)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
 		return err
 	}
+
 	if !noAmsdosHeader {
-		binary.Write(fw, binary.LittleEndian, header)
+		if err := SaveAmsdosFile(filePath, ".PAL", res, 2, 0, 0x8809, 0x8809); err != nil {
+			return err
+		}
+	} else {
+		if err := SaveOSFile(filePath, res); err != nil {
+			return err
+		}
 	}
-	binary.Write(fw, binary.LittleEndian, data)
-	fw.Close()
 
 	return nil
 }
@@ -8894,26 +8882,21 @@ func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
-	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x8809, Exec: 0x8809,
-		Size:        uint16(binary.Size(data)),
-		Size2:       uint16(binary.Size(data)),
-		LogicalSize: uint16(binary.Size(data))}
-
-	cpcFilename := cont.GetAmsdosFilename(filePath, ".PAL")
-	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
-	header.Checksum = uint16(header.ComputedChecksum16())
-	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	osFilepath := cont.AmsdosFullPath(filePath, ".PAL")
-	fw, err := os.Create(osFilepath)
+
+	res, err := common.StructToBytes(data)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", cpcFilename, err)
 		return err
 	}
 	if !cont.NoAmsdosHeader {
-		binary.Write(fw, binary.LittleEndian, header)
+		if err := SaveAmsdosFile(osFilepath, ".PAL", res, 2, 0, 0x8809, 0x8809); err != nil {
+			return err
+		}
+	} else {
+		if err := SaveOSFile(osFilepath, res); err != nil {
+			return err
+		}
 	}
-	binary.Write(fw, binary.LittleEndian, data)
-	fw.Close()
 	if !dontImportDsk {
 		cont.AddFile(osFilepath)
 	}
@@ -9003,32 +8986,33 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, dont
 
 	data, _ = Compress(data, cont.Compression)
 
-	filesize := binary.Size(data) + binary.Size(win)
-	header := cpc.CpcHead{Type: 2, User: 0, Address: 0x4000, Exec: 0x4000,
-		Size:        uint16(filesize),
-		Size2:       uint16(filesize),
-		LogicalSize: uint16(filesize)}
-
-	cpcFilename := cont.OsFilename(".WIN")
-	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
-	header.Checksum = uint16(header.ComputedChecksum16())
-	fmt.Fprintf(os.Stderr, "filesize:%d,#%.2x\n", filesize, filesize)
 	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	fmt.Fprintf(os.Stderr, "Data length %d\n", binary.Size(data))
 	fmt.Fprintf(os.Stderr, "Footer length %d\n", binary.Size(win))
 	osFilename := cont.Fullpath(".WIN")
-	fw, err := os.Create(osFilepath)
+
+	body, err := common.StructToBytes(data)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilename, err)
 		return err
 	}
+	footer, err := common.StructToBytes(win)
+	if err != nil {
+		return err
+	}
+	content := body
+	content = append(content, footer...)
+
 	fmt.Fprintf(os.Stdout, "%s, data size :%d\n", win.ToString(), len(data))
 	if !cont.NoAmsdosHeader {
-		binary.Write(fw, binary.LittleEndian, header)
+		if err := SaveAmsdosFile(osFilename, ".WIN", content, 2, 0, 0x4000, 0x4000); err != nil {
+			return err
+		}
+	} else {
+		if err := SaveOSFile(osFilename, content); err != nil {
+			return err
+		}
 	}
-	binary.Write(fw, binary.LittleEndian, data)
-	binary.Write(fw, binary.LittleEndian, win)
-	fw.Close()
+
 	if !dontImportDsk {
 		cont.AddFile(osFilepath)
 	}
@@ -9039,23 +9023,9 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 	o := make([]byte, 0x8000-0x80)
 	osFilepath := cont.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", osFilepath)
-	header := cpc.CpcHead{Type: 0, User: 0, Address: 0x170, Exec: 0x0,
-		Size:        uint16(binary.Size(o)),
-		Size2:       uint16(binary.Size(o)),
-		LogicalSize: uint16(binary.Size(o))}
 
-	cpcFilename := cont.OsFilename(".SCR")
-	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
-	header.Checksum = uint16(header.ComputedChecksum16())
 	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
-	fw, err := os.Create(osFilepath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
-		return err
-	}
-	if !cont.NoAmsdosHeader {
-		binary.Write(fw, binary.LittleEndian, header)
-	}
+
 	var overscanTemplate []byte
 	if cont.CpcPlus {
 		overscanTemplate = egxPlusOverscanTemplate
@@ -9127,9 +9097,16 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 	} else {
 		copy(o[0x7da0:], egxOverscanTemplate[0x7da0:]) // copy egx routine
 	}
+	if !cont.NoAmsdosHeader {
+		if err := SaveAmsdosFile(osFilepath, ".SCR", o, 0, 0, 0x170, 0x170); err != nil {
+			return err
+		}
+	} else {
+		if err := SaveOSFile(osFilepath, o); err != nil {
+			return err
+		}
+	}
 
-	binary.Write(fw, binary.LittleEndian, o)
-	fw.Close()
 	cont.AddFile(osFilepath)
 	return nil
 }

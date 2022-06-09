@@ -1,6 +1,7 @@
 package common
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"io/ioutil"
@@ -81,4 +82,10 @@ func sortName(filename string) string {
 	}
 	// prefix + numeric-suffix + ext
 	return name[:i] + string(b64) + ext
+}
+
+func StructToBytes(v interface{}) ([]byte, error) {
+	var b bytes.Buffer
+	err := binary.Write(&b, binary.LittleEndian, v)
+	return b.Bytes(), err
 }
