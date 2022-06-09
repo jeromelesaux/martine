@@ -18,7 +18,7 @@ import (
 
 func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 
-	formatSelect := widget.NewSelect([]string{string(menu.SpriteImpCatcher), string(menu.SpriteFlatExport), string(menu.SpriteFilesExport)}, func(v string) {
+	formatSelect := widget.NewSelect([]string{string(menu.SpriteImpCatcher), string(menu.SpriteFlatExport), string(menu.SpriteFilesExport), string(menu.SpriteCompiled)}, func(v string) {
 		switch menu.SpriteExportFormat(v) {
 		case menu.SpriteFlatExport:
 			s.ExportFormat = menu.SpriteFlatExport
@@ -97,7 +97,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 	pi.Show()
 	switch s.ExportFormat {
 	case menu.SpriteCompiled:
-
+		pi.Hide()
 	case menu.SpriteFilesExport:
 		for idxX, v := range s.SpritesData {
 			for idxY, v0 := range v {
