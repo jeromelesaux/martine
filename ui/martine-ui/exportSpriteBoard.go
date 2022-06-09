@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/gfx/animate"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
@@ -97,6 +98,24 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 	pi.Show()
 	switch s.ExportFormat {
 	case menu.SpriteCompiled:
+		spr := make([][]byte, 0)
+		for _, v := range s.SpritesData {
+			for _, v0 := range v {
+				spr = append(spr, v0)
+			}
+		}
+		diffs := animate.AnalyzeSpriteBoard(spr)
+		var code string
+		for idx, diff := range diffs {
+			routine := animate.ExportCompiledSprite(diff)
+			code += fmt.Sprintf("spr_%.2d:\n", idx)
+			code += routine
+		}
+
+		if err := file.SaveStringOSFile(s.ExportFolderPath+string(filepath.Separator)+"compiled_sprites.asm", code); err != nil {
+			pi.Hide()
+			dialog.NewError(err, m.window).Show()
+		}
 		pi.Hide()
 	case menu.SpriteFilesExport:
 		for idxX, v := range s.SpritesData {

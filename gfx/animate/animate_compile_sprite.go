@@ -37,3 +37,19 @@ func ExportCompiledSprite(c *transformation.DeltaCollection) string {
 	code += "ret\n"
 	return code
 }
+
+func AnalyzeSpriteBoard(spr [][]byte) []*transformation.DeltaCollection {
+	dc := make([]*transformation.DeltaCollection, 0)
+	for i := 1; i < len(spr); i++ {
+		l := spr[i-1]
+		r := spr[i]
+		c := transformation.NewDeltaCollection()
+		for x := 0; x < len(l); x++ {
+			if r[x] != l[x] {
+				c.Add(r[x], uint16(x))
+			}
+		}
+		dc = append(dc, c)
+	}
+	return dc
+}
