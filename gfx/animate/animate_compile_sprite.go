@@ -6,6 +6,11 @@ import (
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
 
+func ExportCompiledSpriteHard(c *transformation.DeltaCollection) string {
+	var code string
+	return code
+}
+
 func ExportCompiledSprite(c *transformation.DeltaCollection) string {
 	var code string
 	var previous uint16 = 0

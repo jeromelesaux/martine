@@ -107,7 +107,12 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		diffs := animate.AnalyzeSpriteBoard(spr)
 		var code string
 		for idx, diff := range diffs {
-			routine := animate.ExportCompiledSprite(diff)
+			var routine string
+			if s.IsHardSprite {
+				routine = animate.ExportCompiledSpriteHard(diff)
+			} else {
+				routine = animate.ExportCompiledSprite(diff)
+			}
 			code += fmt.Sprintf("spr_%.2d:\n", idx)
 			code += routine
 		}
