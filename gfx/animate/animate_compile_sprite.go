@@ -11,11 +11,14 @@ func ExportCompiledSpriteHard(c *transformation.DeltaCollection) string {
 	return code
 }
 
+// sprite width, size to change the line
 func ExportCompiledSprite(c *transformation.DeltaCollection) string {
 	var code string
 	var previous uint16 = 0
 	var previousHB uint8 = 0
 
+	code += `; HL contains the start screen address
+	ld ix,hl`
 	for _, v := range c.Items {
 		if v.Byte == 0 {
 			code += "xor a"
@@ -29,9 +32,11 @@ func ExportCompiledSprite(c *transformation.DeltaCollection) string {
 				currentHB := uint8(v1 >> 8)
 				currentLB := uint8(v1)
 				if previousHB == currentHB {
-					code += fmt.Sprintf("ld l,#%.2x : ", currentLB)
+					code += fmt.Sprintf("ld d,#%.2x : ", currentLB)
+					code += "ld e,0 : ld hl, ix : add hl,de\n"
 				} else {
-					code += fmt.Sprintf("ld hl,#%.4x : ", v1)
+					code += fmt.Sprintf("ld de,#%.4x : ", v1)
+					code += "ld hl, ix : add hl,de\n"
 				}
 				previousHB = currentHB
 			}

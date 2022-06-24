@@ -2,6 +2,8 @@ package animate
 
 import (
 	"fmt"
+	"image"
+	"image/draw"
 	"image/gif"
 	"os"
 	"testing"
@@ -26,7 +28,10 @@ func TestOpenGif(t *testing.T) {
 
 	for i, v := range g.Image {
 		t.Logf("%v", v.Bounds())
-		if err := file.Png(fmt.Sprintf("tests/%d.png", i), v); err != nil {
+		rect := image.Rect(0, 0, v.Bounds().Max.X, v.Bounds().Max.Y)
+		img := image.NewNRGBA(rect)
+		draw.Draw(img, rect, v, rect.Min, draw.Over)
+		if err := file.Png(fmt.Sprintf("tests/%d.png", i), img); err != nil {
 			t.Fatal(err)
 		}
 	}
