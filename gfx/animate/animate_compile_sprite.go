@@ -8,6 +8,22 @@ import (
 
 func ExportCompiledSpriteHard(c *transformation.DeltaCollection) string {
 	var code string
+	var previous uint8 = 0
+	for _, v := range c.Items {
+		if v.Byte == 0 {
+			code += "xor a"
+		} else {
+			code += fmt.Sprintf("ld a,#%.2x\n", v.Byte)
+		}
+		for _, v1 := range v.Offsets {
+			if previous == uint8(v1-1) {
+				code += "inc l : "
+			}
+			code += "ld (hl),a\n"
+			previous = uint8(v1)
+		}
+	}
+	code += "ret\n"
 	return code
 }
 
