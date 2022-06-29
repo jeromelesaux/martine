@@ -6,15 +6,6 @@ import (
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
 
-func contains(s []Z80Register, e Z80Register) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
-}
-
 type Z80Register string
 
 var (
@@ -91,41 +82,58 @@ func (z *Z80HspNode) internalNextRegister(registers []Z80Register) Z80Register {
 }
 
 func (z *Z80HspNode) InitOpcode() string {
-	if !z.samePreviousValue {
-		switch z.register {
-		case A:
-			return fmt.Sprintf("ld a,%d\n", z.byte)
-		case B:
-			if z.next != nil && z.next.register == C {
-				return fmt.Sprintf("ld bc,#%.4x\n", (uint16(z.byte)<<8)+uint16(z.next.byte))
-			}
-			return fmt.Sprintf("ld b,%d\n", z.byte)
-		case C:
-			if z.previous != nil && z.previous.register == B {
-				return ""
-			}
-			return fmt.Sprintf("ld c,%d\n", z.byte)
-		case D:
-			if z.next != nil && z.next.register == E {
-				return fmt.Sprintf("ld de,#%.4x\n", (uint16(z.byte)<<8)+uint16(z.next.byte))
-			}
-			return fmt.Sprintf("ld d,%d\n", z.byte)
-		case E:
-			if z.previous != nil && z.previous.register == D {
-				return ""
-			}
-			return fmt.Sprintf("ld e,%d\n", z.byte)
-		case H:
-			if z.next != nil && z.next.register == L {
-				return fmt.Sprintf("ld hl,#%.4x\n", (uint16(z.byte)<<8)+uint16(z.next.byte))
-			}
-			return fmt.Sprintf("ld h,%d\n", z.byte)
-		case L:
-			if z.previous != nil && z.previous.register == H {
-				return ""
-			}
-			return fmt.Sprintf("ld l,%d\n", z.byte)
+
+	switch z.register {
+	case A:
+		if z.samePreviousValue {
+			return ""
 		}
+		return fmt.Sprintf("ld a,%d\n", z.byte)
+	case B:
+		if z.next != nil && z.next.register == C {
+			return fmt.Sprintf("ld bc,#%.4x\n", (uint16(z.byte)<<8)+uint16(z.next.byte))
+		}
+		if z.samePreviousValue {
+			return ""
+		}
+		return fmt.Sprintf("ld b,%d\n", z.byte)
+	case C:
+		if z.previous != nil && z.previous.register == B {
+			return ""
+		}
+		return fmt.Sprintf("ld c,%d\n", z.byte)
+	case D:
+		if z.next != nil && z.next.register == E {
+			return fmt.Sprintf("ld de,#%.4x\n", (uint16(z.byte)<<8)+uint16(z.next.byte))
+		}
+		if z.samePreviousValue {
+			return ""
+		}
+		return fmt.Sprintf("ld d,%d\n", z.byte)
+	case E:
+		if z.previous != nil && z.previous.register == D {
+			return ""
+		}
+		if z.samePreviousValue {
+			return ""
+		}
+		return fmt.Sprintf("ld e,%d\n", z.byte)
+	case H:
+		if z.next != nil && z.next.register == L {
+			return fmt.Sprintf("ld hl,#%.4x\n", (uint16(z.byte)<<8)+uint16(z.next.byte))
+		}
+		if z.samePreviousValue {
+			return ""
+		}
+		return fmt.Sprintf("ld h,%d\n", z.byte)
+	case L:
+		if z.previous != nil && z.previous.register == H {
+			return ""
+		}
+		if z.samePreviousValue {
+			return ""
+		}
+		return fmt.Sprintf("ld l,%d\n", z.byte)
 	}
 	return ""
 }
@@ -133,12 +141,12 @@ func (z *Z80HspNode) InitOpcode() string {
 func (z *Z80HspNode) OffsetInit() string {
 	if z.previous != nil {
 		if z.offset-1 != z.previous.offset {
-			return fmt.Sprintf("ld hl,#%.4x\n", z.offset)
+			return fmt.Sprintf("ld l,#%.2x\n", uint8(z.offset))
 		} else {
 			return "inc l\n"
 		}
 	}
-	return fmt.Sprintf("ld hl,#%.4x\n", z.offset)
+	return fmt.Sprintf("ld l,#%.2x\n", uint8(z.offset))
 }
 
 func (z *Z80HspNode) ValueOpcode() string {
@@ -194,40 +202,18 @@ func ExportCompiledSpriteHard(c *transformation.DeltaCollection) string {
 
 // sprite width, size to change the line
 func ExportCompiledSprite(c *transformation.DeltaCollection) string {
-	// les offsets doivent être triés
-	// mais aussi les items par valeur de byte
-	var code string
-	var previous uint16 = 0
-	var previousHB uint8 = 0
-
-	code += "; HL contains the start screen address\nld ix,hl\n"
 	items := c.ItemsSortByByte()
-
+	optim := NewZ80HspNode(0, 0, true, NoneRegister, nil)
 	for _, v := range items {
-		if v.Byte == 0 {
-			code += "xor a"
-		} else {
-			code += fmt.Sprintf("ld a,#%.2x\n", v.Byte)
-		}
-		for _, v1 := range v.Offsets {
-			if previous == (v1 - 1) {
-				code += "inc l : "
-			} else {
-				currentHB := uint8(v1 >> 8)
-				currentLB := uint8(v1)
-				if previousHB == currentHB {
-					code += fmt.Sprintf("ld d,#%.2x : ", currentLB)
-					code += "ld e,0 : ld hl, ix : add hl,de\n"
-				} else {
-					code += fmt.Sprintf("ld de,#%.4x : ", v1)
-					code += "ld hl, ix : add hl,de\n"
-				}
-				previousHB = currentHB
-			}
-			code += "ld (hl),a\n"
-			previous = v1
+		var already = false
+		reg := optim.NextRegister()
+		for _, offset := range v.Offsets {
+			node := NewZ80HspNode(v.Byte, offset, already, reg, nil)
+			optim.SetLastNode(node)
+			already = true
 		}
 	}
+	code := optim.Code()
 	code += "ret\n"
 	return code
 }
