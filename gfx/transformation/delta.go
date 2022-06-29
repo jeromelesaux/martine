@@ -29,6 +29,21 @@ type DeltaCollection struct {
 	Items             []DeltaItem
 }
 
+func (d *DeltaCollection) ItemsSortByByte() []DeltaItem {
+	var items []DeltaItem
+	items = append(items, d.Items...)
+
+	for i := 0; i < len(d.Items)-1; i++ {
+		for j := 0; j < len(d.Items)-1-i; j++ {
+			if items[j].Byte > items[j+1].Byte {
+				items[j], items[j+1] = items[j+1], items[j]
+			}
+		}
+	}
+
+	return items
+}
+
 /*
 	details de la structure
 	nombre d'occurence par frame occ
