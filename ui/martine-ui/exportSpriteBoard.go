@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -100,9 +101,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 	case menu.SpriteCompiled:
 		spr := make([][]byte, 0)
 		for _, v := range s.SpritesData {
-			for _, v0 := range v {
-				spr = append(spr, v0)
-			}
+			spr = append(spr, v...)
 		}
 		diffs := animate.AnalyzeSpriteBoard(spr)
 		var code string
@@ -111,7 +110,10 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			if s.IsHardSprite {
 				routine = animate.ExportCompiledSpriteHard(diff)
 			} else {
-				routine = animate.ExportCompiledSprite(diff)
+				pi.Hide()
+				dialog.NewError(errors.New("no yet implemented, try another option"), m.window).Show()
+				//routine = animate.ExportCompiledSprite(diff)
+				return
 			}
 			code += fmt.Sprintf("spr_%.2d:\n", idx)
 			code += routine
