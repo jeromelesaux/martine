@@ -163,6 +163,14 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 				fmt.Fprintf(os.Stderr, "Error while saving flat sprites file error %s\n", err.Error())
 			}
 		}
+		if s.ExportDsk {
+			cont := export.NewMartineContext("", s.ExportFolderPath)
+			if err := file.ImportInDsk(filename, cont); err != nil {
+				pi.Hide()
+				dialog.NewError(err, m.window).Show()
+				fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", filename, err)
+			}
+		}
 		pi.Hide()
 	case menu.SpriteImpCatcher:
 		buf := make([]byte, 0)
@@ -179,6 +187,13 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			pi.Hide()
 			dialog.NewError(err, m.window).Show()
 			fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", filename, err)
+		}
+		if s.ExportDsk {
+			if err := file.ImportInDsk(filename, cont); err != nil {
+				pi.Hide()
+				dialog.NewError(err, m.window).Show()
+				fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", filename, err)
+			}
 		}
 		pi.Hide()
 	}
