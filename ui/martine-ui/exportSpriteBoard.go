@@ -122,7 +122,9 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		if err := file.SaveStringOSFile(s.ExportFolderPath+string(filepath.Separator)+"compiled_sprites.asm", code); err != nil {
 			pi.Hide()
 			dialog.NewError(err, m.window).Show()
+			return
 		}
+
 		pi.Hide()
 	case menu.SpriteFilesExport:
 		for idxX, v := range s.SpritesData {
@@ -154,6 +156,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 				fmt.Fprintf(os.Stderr, "Error while saving flat sprites file error %s\n", err.Error())
+				return
 			}
 		} else {
 			err = file.SaveOSFile(filename, buf)
@@ -161,6 +164,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 				fmt.Fprintf(os.Stderr, "Error while saving flat sprites file error %s\n", err.Error())
+				return
 			}
 		}
 		if s.ExportDsk {
@@ -169,6 +173,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 				fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", filename, err)
+				return
 			}
 		}
 		pi.Hide()
@@ -187,15 +192,18 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			pi.Hide()
 			dialog.NewError(err, m.window).Show()
 			fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", filename, err)
+			return
 		}
 		if s.ExportDsk {
 			if err := file.ImportInDsk(filename, cont); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 				fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", filename, err)
+				return
 			}
 		}
 		pi.Hide()
+		dialog.ShowInformation("Saved", "Your export ended in the folder : "+s.ExportFolderPath, m.window)
 	}
 
 }
