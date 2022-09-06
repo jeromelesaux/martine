@@ -8486,10 +8486,17 @@ func OpenKit(filePath string) (color.Palette, *KitPalette, error) {
 	}
 
 	KitPalette := &KitPalette{}
-	buf := make([]uint16, 16)
-	if err := binary.Read(fr, binary.LittleEndian, buf); err != nil {
-		fmt.Fprintf(os.Stderr, "Error while reading Ocp Palette from file (%s) error %v\n", filePath, err)
-		return color.Palette{}, KitPalette, err
+	buf := make([]uint16, 0)
+	for {
+		var b uint16
+		if err := binary.Read(fr, binary.LittleEndian, &b); err != nil {
+			if err != io.EOF {
+				fmt.Fprintf(os.Stderr, "Error while reading Ocp Palette from file (%s) error %v\n", filePath, err)
+				return color.Palette{}, KitPalette, err
+			}
+			break
+		}
+		buf = append(buf, b)
 	}
 	p := color.Palette{}
 	for i, v := range buf {
