@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/constants"
@@ -1412,12 +1413,24 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cont *x.Ma
 
 	osFilepath := cont.AmsdosFullPath("PALPLUS", ".BIN")
 	// modifier checksum amsdos header
+	// the header already in the static file
 	cont.AddFile(osFilepath)
+	if err := SaveOSFile(osFilepath, loader); err != nil {
+		return err
+	}
 
 	// export fichier basic loader
 	loader = basicCPCPlusLoaderBasic
-	filename := cont.GetAmsdosFilename(filePath, "")
-	copy(loader[startScreenPlusName:], filename[:])
+	filename := cont.AmsdosFullPath(filePath, ".SCR")
+	filename = AmsdosFilename(filename, ".SCR")
+	var scrFile [12]byte
+	for i := 0; i < 12; i++ {
+		scrFile[i] = ' '
+	}
+	i := strings.Index(filename, ".")
+	copy(scrFile[0:], filename[0:i])
+	copy(scrFile[8:], filename[i:])
+	copy(loader[startScreenPlusName:], scrFile[:])
 	switch mode {
 	case 0:
 		loader[13] = 0x0e
@@ -1431,10 +1444,6 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cont *x.Ma
 
 	osFilepath = cont.AmsdosFullPath(filePath, ".BAS")
 
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", osFilepath, err)
-		return err
-	}
 	if !cont.NoAmsdosHeader {
 		if err := SaveAmsdosFile(osFilepath, ".BAS", loader, 0, 0, 0x170, 0); err != nil {
 			return err

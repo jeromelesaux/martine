@@ -17,7 +17,7 @@ var (
 	SpriteFlatExport  SpriteExportFormat = "Flat"
 	SpriteFilesExport SpriteExportFormat = "Files"
 	SpriteImpCatcher  SpriteExportFormat = "Impcatcher"
-	SpriteCompiled    SpriteExportFormat = "compiled"
+	SpriteCompiled    SpriteExportFormat = "Compiled"
 )
 
 type SpriteMenu struct {

@@ -294,7 +294,7 @@ func TestRollKeephighMode1(t *testing.T) {
 }
 
 func TestRollKeephighMode2(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-i", "samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keephigh", "1", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keephigh", "1", "-out", "test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
