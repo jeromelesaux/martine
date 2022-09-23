@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	ErrorNoHostDefined = errors.New("No host defined.")
+	ErrorNoHostDefined = errors.New("no host defined")
 )
 
 func ImportInM4(cont *x.MartineContext) error {

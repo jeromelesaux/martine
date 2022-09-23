@@ -42,30 +42,30 @@ func main() {
 	for i := 0; i < len(s.Screen); i += 8 {
 		out += fmt.Sprintf("%s ", file.ByteToken)
 		if i < len(s.Screen) {
-			out += fmt.Sprintf("%s", toDamsByte(s.Screen[i]))
+			out += toDamsByte(s.Screen[i])
 		}
 		if i+1 < len(s.Screen) {
-			out += fmt.Sprintf(", %s", toDamsByte(s.Screen[i+1]))
+			out += ", " + toDamsByte(s.Screen[i+1])
 		}
 		if i+2 < len(s.Screen) {
-			out += fmt.Sprintf(", %s", toDamsByte(s.Screen[i+2]))
+			out += ", " + toDamsByte(s.Screen[i+2])
 		}
 		if i+3 < len(s.Screen) {
-			out += fmt.Sprintf(", %s", toDamsByte(s.Screen[i+3]))
+			out += ", " + toDamsByte(s.Screen[i+3])
 		}
 		if i+4 < len(s.Screen) {
-			out += fmt.Sprintf(", %s", toDamsByte(s.Screen[i+4]))
+			out += ", " + toDamsByte(s.Screen[i+4])
 		}
 		if i+5 < len(s.Screen) {
-			out += fmt.Sprintf(", %s", toDamsByte(s.Screen[i+5]))
+			out += ", " + toDamsByte(s.Screen[i+5])
 		}
 		if i+6 < len(s.Screen) {
-			out += fmt.Sprintf(", %s", toDamsByte(s.Screen[i+6]))
+			out += ", " + toDamsByte(s.Screen[i+6])
 		}
 		if i+7 < len(s.Screen) {
-			out += fmt.Sprintf(", %s", toDamsByte(s.Screen[i+7]))
+			out += ", " + toDamsByte(s.Screen[i+7])
 		}
-		out += fmt.Sprintf("%s", eol)
+		out += eol
 	}
 	fl := []string{*deltafiles}
 	datafiles, err := common.WilcardedFiles(fl)
@@ -90,30 +90,30 @@ func main() {
 			for i := 0; i < len(d.Screen); i += 8 {
 				out += fmt.Sprintf("%s ", file.ByteToken)
 				if i < len(d.Screen) {
-					out += fmt.Sprintf("%s", toDamsByte(d.Screen[i]))
+					out += toDamsByte(d.Screen[i])
 				}
 				if i+1 < len(d.Screen) {
-					out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+1]))
+					out += ", " + toDamsByte(d.Screen[i+1])
 				}
 				if i+2 < len(d.Screen) {
-					out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+2]))
+					out += ", " + toDamsByte(d.Screen[i+2])
 				}
 				if i+3 < len(d.Screen) {
-					out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+3]))
+					out += ", " + toDamsByte(d.Screen[i+3])
 				}
 				if i+4 < len(d.Screen) {
-					out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+4]))
+					out += ", " + toDamsByte(d.Screen[i+4])
 				}
 				if i+5 < len(d.Screen) {
-					out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+5]))
+					out += ", " + toDamsByte(d.Screen[i+5])
 				}
 				if i+6 < len(d.Screen) {
-					out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+6]))
+					out += ", " + toDamsByte(d.Screen[i+6])
 				}
 				if i+7 < len(d.Screen) {
-					out += fmt.Sprintf(", %s", toDamsByte(d.Screen[i+7]))
+					out += ", " + toDamsByte(d.Screen[i+7])
 				}
-				out += fmt.Sprintf("%s", eol)
+				out += eol
 			}
 		}
 	}

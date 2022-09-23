@@ -7,9 +7,9 @@ import (
 )
 
 var (
-	mask10000000 = 0xFF
-	mask00000010 = 0x02
-	mask4        = 0x04
+	//mask10000000 = 0xFF
+	//mask00000010 = 0x02
+	mask4 = 0x04
 )
 
 func TestInit(t *testing.T) {

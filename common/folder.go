@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-var ErrorIsNotDirectory = errors.New("Is not a directory, Quiting.")
+var ErrorIsNotDirectory = errors.New("is not a directory, Quiting")
 
 func CheckOutput(out string) error {
 	infos, err := os.Stat(out)

@@ -599,7 +599,7 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 			fmt.Fprintf(os.Stderr, "Error while saving sprites in folder %s error :%v", cont.OutputPath, err)
 		}
 	}
-	scenes := make([]*image.NRGBA, 0)
+	//scenes := make([]*image.NRGBA, 0)
 	os.Mkdir(cont.OutputPath+string(filepath.Separator)+"scenes", os.ModePerm)
 	index := 0
 	m := convert.Resize(in, mapSize, cont.ResizingAlgo)
@@ -617,7 +617,7 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 				}
 			}
 			// store the map in the slice
-			scenes = append(scenes, m1)
+			//	scenes = append(scenes, m1)
 			scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%sscenes%sscene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
 			if err := file.Png(scenePath, m1); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot encode in png scene scene-%.2d error %v\n", index, err)

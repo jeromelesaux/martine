@@ -23,9 +23,9 @@ import (
 )
 
 var (
-	refreshUI         *widget.Button
-	modeSelection     *widget.Select
-	paletteSelection  *widget.Select
+	refreshUI     *widget.Button
+	modeSelection *widget.Select
+	//paletteSelection  *widget.Select
 	dialogSize        = fyne.NewSize(800, 800)
 	imagesFilesFilter = storage.NewExtensionFileFilter([]string{".jpg", ".gif", ".png", ".jpeg", ".JPG", ".JPEG", ".GIF", ".PNG"})
 )

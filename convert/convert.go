@@ -14,7 +14,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 )
 
-var ErrorCannotDowngradePalette = errors.New("Cannot Downgrade colors palette.")
+var ErrorCannotDowngradePalette = errors.New("cannot Downgrade colors palette")
 
 func Resize(in image.Image, size constants.Size, algo imaging.ResampleFilter) *image.NRGBA {
 	//fmt.Fprintf(os.Stdout, "* Step 1 * Resizing image to width %d pixels heigh %d\n", size.Width, size.Height)

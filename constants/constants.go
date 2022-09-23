@@ -76,7 +76,7 @@ var (
 	HeightMax     = 272
 )
 var (
-	ErrorCpcColorNotFound = errors.New("Cpc color not found")
+	ErrorCpcColorNotFound = errors.New("cpc color not found")
 )
 
 // values 50% RGB = 0x7F
@@ -724,10 +724,7 @@ func (p ByDistance) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
 
 func (p ByDistance) Less(i, j int) bool {
 	d := ColorDistance2(p[i], p[j])
-	if d > 0. {
-		return true
-	}
-	return false
+	return d > 0.
 }
 
 func SortColorsByDistance(p color.Palette) color.Palette {
@@ -752,10 +749,7 @@ func (srs *SplitRasterScreen) Add(s SplitRaster) bool {
 }
 
 func (srs *SplitRasterScreen) IsFull() bool {
-	if len(srs.Values) >= 256 {
-		return true
-	}
-	return false
+	return len(srs.Values) >= 256
 }
 
 type SplitRaster struct {

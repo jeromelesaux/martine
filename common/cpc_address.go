@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	ErrorCannotBeParsed = errors.New("Can not be parsed.")
+	ErrorCannotBeParsed = errors.New("can not be parsed")
 )
 
 func ParseHexadecimal16(address string) (uint16, error) {

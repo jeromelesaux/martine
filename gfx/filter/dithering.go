@@ -192,13 +192,11 @@ func DeviseBestMixingPlan(color uint, pal []uint, matrixLenght uint) MixingPlan 
 				                            + (g2 != g1 ? 587 : 0)
 											+ (b2 != b1 ? 114 : 0));
 				*/
-				if ratio < 0 {
-					ratio = 0
-				} else {
-					if ratio > (matrixLenght - 1) {
-						ratio = matrixLenght - 1
-					}
+
+				if ratio > (matrixLenght - 1) {
+					ratio = matrixLenght - 1
 				}
+
 			}
 			// Determine what mixing them in this proportion will produce
 			r0 := r1 + ratio*(r2-r1)/matrixLenght

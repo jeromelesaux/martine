@@ -7,20 +7,19 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
 )
 
-var amsdosFilenameOnce sync.Once
+//var amsdosFilenameOnce sync.Once
 var (
 	Egx1Mode = 1
 	Egx2Mode = 2
 )
 
-var ErrorNotAllowed = errors.New("Error not allowed.")
+var ErrorNotAllowed = errors.New("error not allowed")
 
 type MartineContext struct {
 	InputPath                   string
@@ -106,7 +105,7 @@ type MartineContext struct {
 }
 
 func MaskIsAllowed(mode uint8, value uint8) bool {
-	err, values := ModeMaskSprite(mode)
+	values, err := ModeMaskSprite(mode)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error with mode %d error :%v\n", mode, err)
 		return false
@@ -119,14 +118,14 @@ func MaskIsAllowed(mode uint8, value uint8) bool {
 	return false
 }
 
-func ModeMaskSprite(mode uint8) (error, []uint8) {
+func ModeMaskSprite(mode uint8) ([]uint8, error) {
 	switch mode {
 	case 0:
-		return nil, []uint8{0xAA, 0x55}
+		return []uint8{0xAA, 0x55}, nil
 	case 1:
-		return nil, []uint8{0x88, 0x44, 0x24, 0x11}
+		return []uint8{0x88, 0x44, 0x24, 0x11}, nil
 	default:
-		return ErrorNotAllowed, make([]uint8, 0)
+		return make([]uint8, 0), ErrorNotAllowed
 	}
 }
 
@@ -159,7 +158,7 @@ func (e *MartineContext) ImportInkSwap(s string) error {
 		var key, val int
 		values := strings.Split(v, "=")
 		if len(values) != 2 {
-			return fmt.Errorf("Expects two values parsed and gets %d, from [%s]",
+			return fmt.Errorf("expects two values parsed and gets %d, from [%s]",
 				len(values),
 				v)
 		}
