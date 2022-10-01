@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"image/color"
 	"path/filepath"
 	"strings"
 
@@ -11,10 +12,14 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/export/file"
-	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
-func NewOpenPaletteButton(m *menu.ImageMenu, win fyne.Window) *widget.Button {
+type PaletteInterface interface {
+	SetPalette(color.Palette)
+	SetPaletteImage(canvas.Image)
+}
+
+func NewOpenPaletteButton(m PaletteInterface, win fyne.Window) *widget.Button {
 	return widget.NewButtonWithIcon("Palette", theme.ColorChromaticIcon(), func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {
@@ -32,16 +37,16 @@ func NewOpenPaletteButton(m *menu.ImageMenu, win fyne.Window) *widget.Button {
 					dialog.ShowError(err, win)
 					return
 				}
-				m.Palette = p
-				m.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(p))
+				m.SetPalette(p)
+				m.SetPaletteImage(*canvas.NewImageFromImage(file.PalToImage(p)))
 			case ".kit":
 				p, _, err := file.OpenKit(palettePath)
 				if err != nil {
 					dialog.ShowError(err, win)
 					return
 				}
-				m.Palette = p
-				m.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(p))
+				m.SetPalette(p)
+				m.SetPaletteImage(*canvas.NewImageFromImage(file.PalToImage(p)))
 			}
 			refreshUI.OnTapped()
 		}, win)

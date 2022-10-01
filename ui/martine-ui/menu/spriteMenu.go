@@ -1,12 +1,20 @@
 package menu
 
 import (
+	"errors"
+	"fmt"
 	"image"
 	"image/color"
+	"strconv"
 
+	"fyne.io/fyne/dialog"
+	"fyne.io/fyne/storage"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/fyne-io/custom_widget"
+	"github.com/jeromelesaux/martine/export/file"
 )
 
 var SpriteSize float32 = 80.
@@ -24,8 +32,9 @@ type SpriteMenu struct {
 	IsHardSprite    bool
 	OriginalBoard   canvas.Image
 	OriginalPalette canvas.Image
+	Palette         color.Palette
+	PaletteImage    canvas.Image
 
-	Palette                color.Palette
 	SpritesData            [][][]byte
 	CompileSprite          bool
 	IsCpcPlus              bool
@@ -46,6 +55,13 @@ type SpriteMenu struct {
 	ExportFolderPath       string
 }
 
+func (s *SpriteMenu) SetPalette(p color.Palette) {
+	s.Palette = p
+}
+
+func (s *SpriteMenu) SetPaletteImage(c canvas.Image) {
+	s.PaletteImage = c
+}
 func NewSpriteMenu() *SpriteMenu {
 	return &SpriteMenu{
 		OriginalBoard:     canvas.Image{},
@@ -53,4 +69,22 @@ func NewSpriteMenu() *SpriteMenu {
 		SpritesCollection: make([][]*image.NRGBA, 0),
 		SpritesData:       make([][][]byte, 0),
 	}
+}
+
+func (s *SpriteMenu) ImportSprite(win fyne.Window) *widget.Button {
+	return widget.NewButtonWithIcon("Import", theme.FileImageIcon(), func() {
+		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+			if err != nil {
+				dialog.ShowError(err, win)
+				return
+			}
+			if reader == nil {
+				return
+			}
+			filename := reader.URI()
+		d.SetFilter(storage.NewExtensionFileFilter([]string{".scr", ".win", ".bin"}))
+		d.Resize(dialogSize)
+		d.Show()
+
+	})
 }

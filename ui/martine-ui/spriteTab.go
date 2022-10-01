@@ -181,6 +181,9 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 		s.IsCpcPlus = b
 	})
 
+	paletteOpen := NewOpenPaletteButton(s, m.window)
+	s.PaletteImage = canvas.Image{}
+
 	return container.New(
 		layout.NewGridLayoutWithColumns(2),
 		container.New(
@@ -189,47 +192,62 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 			s.OriginalImages,
 		),
 		container.New(
-			layout.NewVBoxLayout(),
+			layout.NewGridLayoutWithRows(2),
 			container.New(
-				layout.NewHBoxLayout(),
-				openFileWidget,
-				applyButton,
-				exportButton,
-				refreshUI,
-			),
-			container.New(
-				layout.NewHBoxLayout(),
-				modeLabel,
-				modes,
-			),
-			container.New(
-				layout.NewHBoxLayout(),
-				spriteNumberPerRowLabel,
-				spriteNumberPerColumnEntry,
-			),
-			container.New(
-				layout.NewHBoxLayout(),
-				spriteNumberPerColumnLabel,
-				spriteNumberPerRowEntry,
-			),
-			container.New(
-				layout.NewHBoxLayout(),
-				spriteWidthSizeLabel,
-				spriteWidthSizeEntry,
-			),
+				layout.NewVBoxLayout(),
+				container.New(
+					layout.NewHBoxLayout(),
+					openFileWidget,
+					applyButton,
+					exportButton,
+					paletteOpen,
+					refreshUI,
+				),
+				container.New(
+					layout.NewHBoxLayout(),
+					modeLabel,
+					modes,
+				),
+				container.New(
+					layout.NewHBoxLayout(),
+					spriteNumberPerRowLabel,
+					spriteNumberPerColumnEntry,
+				),
+				container.New(
+					layout.NewHBoxLayout(),
+					spriteNumberPerColumnLabel,
+					spriteNumberPerRowEntry,
+				),
+				container.New(
+					layout.NewHBoxLayout(),
+					spriteWidthSizeLabel,
+					spriteWidthSizeEntry,
+				),
 
-			container.New(
-				layout.NewHBoxLayout(),
-				spriteHeightSizeLabel,
-				spriteHeightSizeEntry,
+				container.New(
+					layout.NewHBoxLayout(),
+					spriteHeightSizeLabel,
+					spriteHeightSizeEntry,
+				),
+				container.New(
+					layout.NewHBoxLayout(),
+					isSpriteHard,
+				),
+				container.New(
+					layout.NewHBoxLayout(),
+					IsCpcPlus,
+				),
 			),
 			container.New(
-				layout.NewHBoxLayout(),
-				isSpriteHard,
-			),
-			container.New(
-				layout.NewHBoxLayout(),
-				IsCpcPlus,
+				layout.NewGridLayoutWithRows(2),
+				container.New(
+					layout.NewVBoxLayout(),
+					widget.NewLabel("Palette"),
+				),
+				container.New(
+					layout.NewGridLayoutWithRows(2),
+					&s.PaletteImage,
+				),
 			),
 		),
 	)

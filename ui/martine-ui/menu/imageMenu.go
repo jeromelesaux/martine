@@ -46,6 +46,14 @@ type ImageMenu struct {
 	CmdLineGenerate     string
 }
 
+func (i *ImageMenu) SetPalette(p color.Palette) {
+	i.Palette = p
+}
+
+func (i *ImageMenu) SetPaletteImage(c canvas.Image) {
+	i.PaletteImage = c
+}
+
 func (i *ImageMenu) CmdLine() string {
 	exec, err := os.Executable()
 	if err != nil {
