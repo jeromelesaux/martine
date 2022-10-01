@@ -4,10 +4,10 @@ import (
 	"image"
 	"image/color"
 
-	"fyne.io/fyne/dialog"
-	"fyne.io/fyne/storage"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/fyne-io/custom_widget"
@@ -79,7 +79,7 @@ func (s *SpriteMenu) ImportSprite(win fyne.Window) *widget.Button {
 			}
 			//filename := reader.URI()
 
-		})
+		}, win)
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".scr", ".win", ".bin"}))
 		//d.Resize(dialogSize)
 		d.Show()
