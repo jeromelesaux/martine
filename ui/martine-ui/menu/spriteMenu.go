@@ -1,11 +1,8 @@
 package menu
 
 import (
-	"errors"
-	"fmt"
 	"image"
 	"image/color"
-	"strconv"
 
 	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/storage"
@@ -14,7 +11,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/fyne-io/custom_widget"
-	"github.com/jeromelesaux/martine/export/file"
 )
 
 var SpriteSize float32 = 80.
@@ -81,10 +77,11 @@ func (s *SpriteMenu) ImportSprite(win fyne.Window) *widget.Button {
 			if reader == nil {
 				return
 			}
-			filename := reader.URI()
-		d.SetFilter(storage.NewExtensionFileFilter([]string{".scr", ".win", ".bin"}))
-		d.Resize(dialogSize)
-		d.Show()
+			//filename := reader.URI()
 
+		})
+		d.SetFilter(storage.NewExtensionFileFilter([]string{".scr", ".win", ".bin"}))
+		//d.Resize(dialogSize)
+		d.Show()
 	})
 }
