@@ -21,20 +21,20 @@ type SprImpdraw struct {
 	Data []SpriteHard
 }
 
-func (s *SprImpdraw) Images(pal color.Palette) []image.Image {
-	imgs := make([]image.Image, 0)
+func (s *SprImpdraw) Images(pal color.Palette) []*image.NRGBA {
+	imgs := make([]*image.NRGBA, 0)
 	for _, v := range s.Data {
 		imgs = append(imgs, v.Image(pal))
 	}
 	return imgs
 }
 
-func (s *SpriteHard) Image(pal color.Palette) image.Image {
-	img := image.NewRGBA(image.Rectangle{Min: image.Point{0, 0}, Max: image.Point{16, 16}})
+func (s *SpriteHard) Image(pal color.Palette) *image.NRGBA {
+	img := image.NewNRGBA(image.Rectangle{Min: image.Point{0, 0}, Max: image.Point{16, 16}})
 	var index int
 	for y := 0; y < 16; y++ {
 		for x := 0; x < 16; x++ {
-			var c color.Color
+			var c color.Color = color.Black
 			if index < len(s.Data) && int(s.Data[index]) < len(pal) {
 				c = pal[int(s.Data[index])]
 			}
