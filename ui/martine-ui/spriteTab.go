@@ -12,10 +12,12 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
+	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx/sprite"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
@@ -182,6 +184,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 	})
 
 	paletteOpen := NewOpenPaletteButton(s, m.window)
+	importOpen := ImportSpriteBoard(m)
 	s.PaletteImage = canvas.Image{}
 
 	return container.New(
@@ -201,6 +204,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 					applyButton,
 					exportButton,
 					paletteOpen,
+					importOpen,
 					refreshUI,
 				),
 				container.New(
@@ -251,4 +255,69 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 			),
 		),
 	)
+}
+
+func ImportSpriteBoard(m *MartineUI) fyne.Widget {
+	return widget.NewButtonWithIcon("Import", theme.FileImageIcon(), func() {
+		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+			if err != nil {
+				dialog.ShowError(err, m.window)
+				return
+			}
+			if reader == nil {
+				return
+			}
+			filePath := reader.URI()
+			if m.sprite.IsHardSprite {
+				spritesHard, err := file.OpenSpr(filePath.Path())
+				if err != nil {
+					dialog.ShowError(err, m.window)
+					return
+				}
+				m.sprite.SpriteHeight = 16
+				m.sprite.SpriteWidth = 16
+				m.sprite.SpriteNumberPerRow = 8
+				var row, col int
+				nbRow := len(spritesHard.Data) / m.sprite.SpriteNumberPerRow
+				m.sprite.SpriteNumberPerColumn = nbRow
+				m.sprite.SpritesCollection = make([][]*image.NRGBA, nbRow)
+				m.sprite.SpritesData = make([][][]byte, nbRow)
+
+				for i := 0; i < nbRow; i++ {
+					m.sprite.SpritesCollection[i] = make([]*image.NRGBA, m.sprite.SpriteNumberPerRow)
+					m.sprite.SpritesData[i] = make([][]byte, m.sprite.SpriteNumberPerRow)
+				}
+
+				for i := 0; i < len(spritesHard.Data); i++ {
+					m.sprite.SpritesData[row][col] = append(m.sprite.SpritesData[row][col], spritesHard.Data[i].Data[:]...)
+					m.sprite.SpritesCollection[row][col] = spritesHard.Data[i].Image(m.sprite.Palette)
+					col++
+					if col%m.sprite.SpriteNumberPerRow == 0 {
+						col = 0
+						row++
+					}
+				}
+				imagesCanvas := make([][]canvas.Image, m.sprite.SpriteNumberPerRow)
+				for i := 0; i < m.sprite.SpriteNumberPerRow; i++ {
+					imagesCanvas[i] = make([]canvas.Image, m.sprite.SpriteNumberPerColumn)
+				}
+
+				for y := 0; y < m.sprite.SpriteNumberPerRow; y++ {
+					for x := 0; x < m.sprite.SpriteNumberPerColumn; x++ {
+						imagesCanvas[y][x] = *canvas.NewImageFromImage(m.sprite.SpritesCollection[x][y])
+					}
+				}
+				m.sprite.OriginalImages.Update(&imagesCanvas, m.sprite.SpriteNumberPerRow, m.sprite.SpriteNumberPerColumn)
+				//len(spritesHard.Data)/m.sprite.SpriteNumberPerColumn
+			} else {
+				// load and display .imp file content
+			}
+			refreshUI.OnTapped()
+
+		}, m.window)
+		d.SetFilter(storage.NewExtensionFileFilter([]string{".spr", ".imp"}))
+		d.Resize(dialogSize)
+		d.Show()
+
+	})
 }
