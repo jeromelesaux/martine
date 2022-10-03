@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/gfx/sprite"
@@ -52,17 +53,14 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 	s.SpritesCollection = sprites
 	s.SpritesData = raw
 
-	imagesCanvas := make([][]canvas.Image, s.SpriteNumberPerRow)
-	for i := 0; i < s.SpriteNumberPerRow; i++ {
-		imagesCanvas[i] = make([]canvas.Image, s.SpriteNumberPerColumn)
-	}
+	imagesCanvas := custom_widget.NewImageTableCache(s.SpriteNumberPerRow, s.SpriteNumberPerColumn, fyne.NewSize(50, 50))
 
 	for y := 0; y < s.SpriteNumberPerRow; y++ {
 		for x := 0; x < s.SpriteNumberPerColumn; x++ {
-			imagesCanvas[y][x] = *canvas.NewImageFromImage(s.SpritesCollection[x][y])
+			imagesCanvas.Set(y, x, canvas.NewImageFromImage(s.SpritesCollection[x][y]))
 		}
 	}
-	s.OriginalImages.Update(&imagesCanvas, s.SpriteNumberPerRow, s.SpriteNumberPerColumn)
+	s.OriginalImages.Update(imagesCanvas, s.SpriteNumberPerRow, s.SpriteNumberPerColumn)
 	pi.Hide()
 	refreshUI.OnTapped()
 }

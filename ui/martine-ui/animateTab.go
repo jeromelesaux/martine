@@ -200,9 +200,9 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 					return
 				}
 				if a.IsEmpty {
-					a.AnimateImages.SubstitueImage(0, 0, *canvas.NewImageFromImage(img))
+					a.AnimateImages.SubstitueImage(0, 0, canvas.NewImageFromImage(img))
 				} else {
-					a.AnimateImages.AppendImage(*canvas.NewImageFromImage(img), 0)
+					a.AnimateImages.AppendImage(0, canvas.NewImageFromImage(img))
 				}
 				a.IsEmpty = false
 				pi.Hide()
@@ -231,9 +231,9 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 				imgs := animate.ConvertToImage(*gifImages)
 				for index, img := range imgs {
 					if index == 0 {
-						a.AnimateImages.SubstitueImage(0, 0, *canvas.NewImageFromImage(img))
+						a.AnimateImages.SubstitueImage(0, 0, canvas.NewImageFromImage(img))
 					} else {
-						a.AnimateImages.AppendImage(*canvas.NewImageFromImage(img), 0)
+						a.AnimateImages.AppendImage(0, canvas.NewImageFromImage(img))
 					}
 					a.IsEmpty = false
 				}
@@ -267,15 +267,13 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 			return
 		}
 		images[0] = append(images[0][:a.ImageToRemoveIndex], images[0][a.ImageToRemoveIndex+1:]...)
-		canvasImages := make([][]canvas.Image, 0)
-		for i := 0; i < len(images); i++ {
-			canvasImagesRow := make([]canvas.Image, 0)
-			for y := 0; y < len(images[i]); y++ {
-				canvasImagesRow = append(canvasImagesRow, *canvas.NewImageFromImage(images[i][y]))
+		canvasImages := custom_widget.NewImageTableCache(len(images), len(images[0]), fyne.NewSize(50, 50))
+		for x := 0; x < len(images); x++ {
+			for y := 0; y < len(images[x]); y++ {
+				canvasImages.Set(x, y, canvas.NewImageFromImage(images[x][y]))
 			}
-			canvasImages = append(canvasImages, canvasImagesRow)
 		}
-		a.AnimateImages.Update(&canvasImages, len(canvasImages), len(canvasImages[0]))
+		a.AnimateImages.Update(canvasImages, canvasImages.ImagesPerRow, canvasImages.ImagesPerColumn)
 		a.AnimateImages.Refresh()
 	})
 

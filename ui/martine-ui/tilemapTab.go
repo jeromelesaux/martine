@@ -63,14 +63,13 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 
 	me.Result = analyze
 	me.Palette = palette
-	tilesCanvas := make([][]canvas.Image, len(tiles))
+	tilesCanvas := custom_widget.NewImageTableCache(len(tiles), len(tiles[0]), fyne.NewSize(50, 50))
 	for i, v := range tiles {
-		tilesCanvas[i] = make([]canvas.Image, len(v))
 		for i2, v2 := range v {
-			tilesCanvas[i][i2] = *canvas.NewImageFromImage(v2)
+			tilesCanvas.Set(i, i2, canvas.NewImageFromImage(v2))
 		}
 	}
-	me.TileImages.Update(&tilesCanvas, len(tiles)-1, len(tiles[0])-1)
+	me.TileImages.Update(tilesCanvas, len(tiles)-1, len(tiles[0])-1)
 	me.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(me.Palette))
 	canvas.Refresh(&me.TileImages.Table)
 	refreshUI.OnTapped()
