@@ -3,6 +3,7 @@ package file
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -58,6 +59,9 @@ func OpenImp(filePath string, mode int) (*ImpFooter, error) {
 		footer.Width = 8
 	}
 
+	if footer.Width == 0 || footer.Height == 0 {
+		return footer, errors.New("empty footer")
+	}
 	return footer, nil
 }
 
