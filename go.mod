@@ -11,8 +11,6 @@ require (
 	github.com/frankban/quicktest v1.14.0 // indirect
 	github.com/fredbi/uri v0.0.0-20221002085739-62643c0df0c8 // indirect
 	github.com/fyne-io/gl-js v0.0.0-20220802150000-8e339395f381 // indirect
-	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6 // indirect
-	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20211213063430-748e38ca8aec // indirect
 	github.com/goki/freetype v0.0.0-20220119013949-7a161fd3728c // indirect
 	github.com/jeromelesaux/dsk v0.0.0-20211026081936-b5ada60f4119
 	github.com/jeromelesaux/fyne-io v0.0.0-20221003210038-a4398ef4f076
@@ -26,5 +24,4 @@ require (
 	github.com/yuin/goldmark v1.5.2 // indirect
 	golang.org/x/image v0.0.0-20220902085622-e7cb96979f69 // indirect
 	golang.org/x/net v0.0.0-20221002022538-bcab6841153b // indirect
-	golang.org/x/text v0.3.7 // indirect
 )
