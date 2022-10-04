@@ -19,6 +19,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/sprite"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
@@ -307,6 +308,61 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 				//len(spritesHard.Data)/m.sprite.SpriteNumberPerColumn
 			} else {
 				// load and display .imp file content
+				mode := m.sprite.Mode
+				footer, err := file.OpenImp(filePath.Path(), mode)
+				if err != nil {
+					dialog.ShowError(err, m.window)
+					return
+				}
+
+				m.sprite.SpriteWidth = int(footer.Width)
+				m.sprite.SpriteHeight = int(footer.Height)
+				m.sprite.SpriteNumberPerRow = 8
+				data, err := file.RawImp(filePath.Path())
+				if err != nil {
+					dialog.ShowError(err, m.window)
+					return
+				}
+				spriteLength := int(footer.Height) * int(footer.Width)
+				nbRow := len(data) / spriteLength
+
+				m.sprite.SpriteNumberPerColumn = nbRow
+				m.sprite.SpritesCollection = make([][]*image.NRGBA, nbRow)
+				m.sprite.SpritesData = make([][][]byte, nbRow)
+
+				for i := 0; i < nbRow; i++ {
+					m.sprite.SpritesCollection[i] = make([]*image.NRGBA, m.sprite.SpriteNumberPerRow)
+					m.sprite.SpritesData[i] = make([][]byte, m.sprite.SpriteNumberPerRow)
+				}
+				var row, col int
+				w := footer.Width
+				switch mode {
+				case 0:
+					w /= 2
+				case 1:
+					w /= 4
+				case 2:
+					w /= 8
+				}
+				for i := 0; i < len(data); i += spriteLength {
+					m.sprite.SpritesData[row][col] = append(m.sprite.SpritesData[row][col], data[i:spriteLength]...)
+					m.sprite.SpritesCollection[row][col] = common.RawSpriteToImg(data[i:spriteLength], footer.Height, w, uint8(m.sprite.Mode), m.sprite.Palette)
+					col++
+					if col%m.sprite.SpriteNumberPerRow == 0 {
+						col = 0
+						row++
+					}
+				}
+
+				icache := custom_widget.NewImageTableCache(m.sprite.SpriteNumberPerRow, m.sprite.SpriteNumberPerColumn, fyne.NewSize(50, 50))
+
+				for y := 0; y < m.sprite.SpriteNumberPerRow; y++ {
+					for x := 0; x < m.sprite.SpriteNumberPerColumn; x++ {
+						icache.Set(x, y, canvas.NewImageFromImage(m.sprite.SpritesCollection[x][y]))
+					}
+				}
+				m.sprite.OriginalImages.Update(icache, icache.ImagesPerRow, icache.ImagesPerColumn)
+
 			}
 			refreshUI.OnTapped()
 

@@ -13,6 +13,95 @@ import (
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
+func RawSpriteToImg(data []byte, height, width, mode uint8, p color.Palette) *image.NRGBA {
+	var out *image.NRGBA
+	switch mode {
+	case 0:
+		out = image.NewNRGBA(image.Rectangle{
+			Min: image.Point{X: 0, Y: 0},
+			Max: image.Point{X: int(width * 2), Y: int(height)}})
+		index := 0
+
+		for y := 0; y < int(height); y++ {
+			indexX := 0
+			for x := 0; x < int(width); x++ {
+				val := data[index]
+				pp1, pp2 := RawPixelMode0(val)
+				c1 := p[pp1]
+				c2 := p[pp2]
+				out.Set(indexX, y, c1)
+				indexX++
+				out.Set(indexX, y, c2)
+				indexX++
+				index++
+			}
+		}
+	case 1:
+		out = image.NewNRGBA(image.Rectangle{
+			Min: image.Point{X: 0, Y: 0},
+			Max: image.Point{X: int(width * 4), Y: int(height)}})
+		index := 0
+		for y := 0; y < int(height); y++ {
+			indexX := 0
+			for x := 0; x < int(width); x++ {
+				val := data[index]
+				pp1, pp2, pp3, pp4 := RawPixelMode1(val)
+				c1 := p[pp1]
+				c2 := p[pp2]
+				c3 := p[pp3]
+				c4 := p[pp4]
+				out.Set(indexX, y, c1)
+				indexX++
+				out.Set(indexX, y, c2)
+				indexX++
+				out.Set(indexX, y, c3)
+				indexX++
+				out.Set(indexX, y, c4)
+				indexX++
+				index++
+			}
+		}
+	case 2:
+		out = image.NewNRGBA(image.Rectangle{
+			Min: image.Point{X: 0, Y: 0},
+			Max: image.Point{X: int(width * 8), Y: int(height)}})
+		index := 0
+		for y := 0; y < int(width); y++ {
+			indexX := 0
+			for x := 0; x < int(width/8); x++ {
+				val := data[index]
+				pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 := RawPixelMode2(val)
+				c1 := p[pp1]
+				c2 := p[pp2]
+				c3 := p[pp3]
+				c4 := p[pp4]
+				c5 := p[pp5]
+				c6 := p[pp6]
+				c7 := p[pp7]
+				c8 := p[pp8]
+				out.Set(indexX, y, c1)
+				indexX++
+				out.Set(indexX, y, c2)
+				indexX++
+				out.Set(indexX, y, c3)
+				indexX++
+				out.Set(indexX, y, c4)
+				indexX++
+				out.Set(indexX, y, c5)
+				indexX++
+				out.Set(indexX, y, c6)
+				indexX++
+				out.Set(indexX, y, c7)
+				indexX++
+				out.Set(indexX, y, c8)
+				indexX++
+				index++
+			}
+		}
+	}
+	return out
+}
+
 // spriteToImg load a OCP win filepath to image.NRGBA
 // using the mode and palette as arguments
 func SpriteToImg(winPath string, mode uint8, p color.Palette) (*image.NRGBA, constants.Size, error) {
