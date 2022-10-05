@@ -47,7 +47,7 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 	}
 	s.Palette = pal
 	size := constants.Size{Width: s.SpriteWidth, Height: s.SpriteHeight}
-	raw, sprites, err := sprite.SplitBoardToSprite(s.OriginalBoard.Image, s.Palette, s.SpriteNumberPerRow, s.SpriteNumberPerColumn, uint8(s.Mode), s.IsHardSprite, size)
+	raw, sprites, err := sprite.SplitBoardToSprite(s.OriginalBoard.Image, s.Palette, s.SpriteNumberOfRow, s.SpriteNumberOfColumn, uint8(s.Mode), s.IsHardSprite, size)
 	if err != nil {
 		pi.Hide()
 		dialog.NewError(err, m.window).Show()
@@ -56,10 +56,10 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 	s.SpritesCollection = sprites
 	s.SpritesData = raw
 
-	icache := custom_widget.NewImageTableCache(s.SpriteNumberPerRow, s.SpriteNumberPerColumn, fyne.NewSize(50, 50))
+	icache := custom_widget.NewImageTableCache(s.SpriteNumberOfColumn, s.SpriteNumberOfRow, fyne.NewSize(50, 50))
 
-	for y := 0; y < s.SpriteNumberPerRow; y++ {
-		for x := 0; x < s.SpriteNumberPerColumn; x++ {
+	for x := 0; x < s.SpriteNumberOfColumn; x++ {
+		for y := 0; y < s.SpriteNumberOfRow; y++ {
 			icache.Set(x, y, canvas.NewImageFromImage(s.SpritesCollection[x][y]))
 		}
 	}
@@ -136,7 +136,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 			fmt.Fprintf(os.Stderr, "Error %s cannot be cast in int\n", v)
 			return
 		}
-		s.SpriteNumberPerColumn = r
+		s.SpriteNumberOfRow = r
 	}
 	spriteNumberPerRowEntry := widget.NewEntry()
 	spriteNumberPerRowEntry.OnChanged = func(v string) {
@@ -145,7 +145,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 			fmt.Fprintf(os.Stderr, "Error %s cannot be cast in int\n", v)
 			return
 		}
-		s.SpriteNumberPerRow = r
+		s.SpriteNumberOfColumn = r
 	}
 
 	spriteWidthSizeLabel := widget.NewLabel("sprite width")
@@ -275,32 +275,32 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 				}
 				m.sprite.SpriteHeight = 16
 				m.sprite.SpriteWidth = 16
-				m.sprite.SpriteNumberPerRow = 8
+				m.sprite.SpriteNumberOfColumn = 8
 				var row, col int
-				nbRow := len(spritesHard.Data) / m.sprite.SpriteNumberPerRow
-				m.sprite.SpriteNumberPerColumn = nbRow
+				nbRow := len(spritesHard.Data) / m.sprite.SpriteNumberOfColumn
+				m.sprite.SpriteNumberOfRow = nbRow
 				m.sprite.SpritesCollection = make([][]*image.NRGBA, nbRow)
 				m.sprite.SpritesData = make([][][]byte, nbRow)
 
 				for i := 0; i < nbRow; i++ {
-					m.sprite.SpritesCollection[i] = make([]*image.NRGBA, m.sprite.SpriteNumberPerRow)
-					m.sprite.SpritesData[i] = make([][]byte, m.sprite.SpriteNumberPerRow)
+					m.sprite.SpritesCollection[i] = make([]*image.NRGBA, m.sprite.SpriteNumberOfColumn)
+					m.sprite.SpritesData[i] = make([][]byte, m.sprite.SpriteNumberOfColumn)
 				}
 
 				for i := 0; i < len(spritesHard.Data); i++ {
 					m.sprite.SpritesData[row][col] = append(m.sprite.SpritesData[row][col], spritesHard.Data[i].Data[:]...)
 					m.sprite.SpritesCollection[row][col] = spritesHard.Data[i].Image(m.sprite.Palette)
 					col++
-					if col%m.sprite.SpriteNumberPerRow == 0 {
+					if col%m.sprite.SpriteNumberOfColumn == 0 {
 						col = 0
 						row++
 					}
 				}
 
-				icache := custom_widget.NewImageTableCache(m.sprite.SpriteNumberPerRow, m.sprite.SpriteNumberPerColumn, fyne.NewSize(50, 50))
+				icache := custom_widget.NewImageTableCache(m.sprite.SpriteNumberOfColumn, m.sprite.SpriteNumberOfRow, fyne.NewSize(50, 50))
 
-				for y := 0; y < m.sprite.SpriteNumberPerRow; y++ {
-					for x := 0; x < m.sprite.SpriteNumberPerColumn; x++ {
+				for y := 0; y < m.sprite.SpriteNumberOfColumn; y++ {
+					for x := 0; x < m.sprite.SpriteNumberOfRow; x++ {
 						icache.Set(x, y, canvas.NewImageFromImage(m.sprite.SpritesCollection[x][y]))
 					}
 				}
@@ -317,7 +317,7 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 
 				m.sprite.SpriteWidth = int(footer.Width)
 				m.sprite.SpriteHeight = int(footer.Height)
-				m.sprite.SpriteNumberPerRow = 8
+				m.sprite.SpriteNumberOfColumn = 8
 				data, err := file.RawImp(filePath.Path())
 				if err != nil {
 					dialog.ShowError(err, m.window)
@@ -326,13 +326,13 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 				spriteLength := int(footer.Height) * int(footer.Width)
 				nbRow := len(data) / spriteLength
 
-				m.sprite.SpriteNumberPerColumn = nbRow
+				m.sprite.SpriteNumberOfRow = nbRow
 				m.sprite.SpritesCollection = make([][]*image.NRGBA, nbRow)
 				m.sprite.SpritesData = make([][][]byte, nbRow)
 
 				for i := 0; i < nbRow; i++ {
-					m.sprite.SpritesCollection[i] = make([]*image.NRGBA, m.sprite.SpriteNumberPerRow)
-					m.sprite.SpritesData[i] = make([][]byte, m.sprite.SpriteNumberPerRow)
+					m.sprite.SpritesCollection[i] = make([]*image.NRGBA, m.sprite.SpriteNumberOfColumn)
+					m.sprite.SpritesData[i] = make([][]byte, m.sprite.SpriteNumberOfColumn)
 				}
 				var row, col int
 				w := footer.Width
@@ -348,16 +348,16 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 					m.sprite.SpritesData[row][col] = append(m.sprite.SpritesData[row][col], data[i:spriteLength]...)
 					m.sprite.SpritesCollection[row][col] = common.RawSpriteToImg(data[i:spriteLength], footer.Height, w, uint8(m.sprite.Mode), m.sprite.Palette)
 					col++
-					if col%m.sprite.SpriteNumberPerRow == 0 {
+					if col%m.sprite.SpriteNumberOfColumn == 0 {
 						col = 0
 						row++
 					}
 				}
 
-				icache := custom_widget.NewImageTableCache(m.sprite.SpriteNumberPerRow, m.sprite.SpriteNumberPerColumn, fyne.NewSize(50, 50))
+				icache := custom_widget.NewImageTableCache(m.sprite.SpriteNumberOfColumn, m.sprite.SpriteNumberOfRow, fyne.NewSize(50, 50))
 
-				for y := 0; y < m.sprite.SpriteNumberPerRow; y++ {
-					for x := 0; x < m.sprite.SpriteNumberPerColumn; x++ {
+				for y := 0; y < m.sprite.SpriteNumberOfColumn; y++ {
+					for x := 0; x < m.sprite.SpriteNumberOfRow; x++ {
 						icache.Set(x, y, canvas.NewImageFromImage(m.sprite.SpritesCollection[x][y]))
 					}
 				}
