@@ -188,7 +188,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		cont := export.NewMartineContext("", s.ExportFolderPath)
 		cont.Compression = s.ExportCompression
 		cont.NoAmsdosHeader = !s.ExportWithAmsdosHeader
-		if err := file.Imp(buf, uint(s.SpriteNumberOfRow*s.SpriteNumberOfColumn), uint(s.SpriteWidth), uint(s.SpriteHeight), uint(s.Mode), filename, cont); err != nil {
+		if err := file.Imp(buf, uint(s.SpriteRows*s.SpriteColumns), uint(s.SpriteWidth), uint(s.SpriteHeight), uint(s.Mode), filename, cont); err != nil {
 			pi.Hide()
 			dialog.NewError(err, m.window).Show()
 			fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", filename, err)

@@ -12,42 +12,43 @@ import (
 func SplitBoardToSprite(
 	im image.Image,
 	p color.Palette,
-	nbSpritePerRow, nbSpritePerColmun int,
+	row, col int,
 	mode uint8,
 	isSpriteHard bool,
 	size constants.Size) ([][][]byte, [][]*image.NRGBA, error) {
 
 	results := make([][][]byte, 0)
-	spriteWidth := im.Bounds().Max.X / nbSpritePerColmun
-	spriteHeight := im.Bounds().Max.Y / nbSpritePerRow
-	sprites := make([][]*image.NRGBA, nbSpritePerColmun)
+	spriteWidth := im.Bounds().Max.X / col
+	spriteHeight := im.Bounds().Max.Y / row
+	sprites := make([][]*image.NRGBA, row)
 	x := 0
 	y := 0
 	index := 0
-	for i := 0; i < nbSpritePerColmun; i++ {
-		for j := 0; j < nbSpritePerRow; j++ {
-			i := image.NewNRGBA(image.Rect(0, 0, spriteWidth, spriteHeight))
+
+	for j := 0; j < row; j++ {
+		for i := 0; i < col; i++ {
+			img := image.NewNRGBA(image.Rect(0, 0, spriteWidth, spriteHeight))
 			for x0 := 0; x0 < spriteWidth; x0++ {
 				for y0 := 0; y0 < spriteHeight; y0++ {
-					i.Set(x0, y0, im.At(x+x0, y+y0))
+					img.Set(x0, y0, im.At(x+x0, y+y0))
 				}
 			}
-			sprites[index] = append(sprites[index], i)
-			y += spriteHeight
+			sprites[index] = append(sprites[index], img)
+			x += spriteWidth
 		}
 		index++
-		x += spriteWidth
-		y = 0
+		y += spriteHeight
+		x = 0
 	}
 	cont := export.NewMartineContext("", "")
 	cont.CustomDimension = true
-	rawSprites := make([][]*image.NRGBA, nbSpritePerColmun)
-	results = make([][][]byte, nbSpritePerColmun)
+	rawSprites := make([][]*image.NRGBA, len(sprites))
+	results = make([][][]byte, len(sprites))
 
 	cont.Size = size
-	for i := 0; i < nbSpritePerColmun; i++ {
-		results[i] = make([][]byte, nbSpritePerRow)
-		for j := 0; j < nbSpritePerRow; j++ {
+	for i := 0; i < len(sprites); i++ {
+		results[i] = make([][]byte, len(sprites[i]))
+		for j := 0; j < len(sprites[i]); j++ {
 			v := sprites[i][j]
 			r, sp, _, _, err := gfx.ApplyOneImage(v, cont, int(mode), p, mode)
 			if err != nil {

@@ -36,8 +36,8 @@ type SpriteMenu struct {
 	IsCpcPlus              bool
 	OriginalImages         *custom_widget.ImageTable
 	SpritesCollection      [][]*image.NRGBA
-	SpriteNumberOfColumn   int
-	SpriteNumberOfRow      int
+	SpriteColumns          int
+	SpriteRows             int
 	Mode                   int
 	SpriteWidth            int
 	SpriteHeight           int
