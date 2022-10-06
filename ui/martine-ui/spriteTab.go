@@ -175,7 +175,8 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 		s.IsHardSprite = b
 		if s.IsHardSprite {
 			s.SpriteHeight = 16
-			s.SpriteWidth = 16
+			s.SpriteWidth = 32
+			s.Mode = 0
 		}
 	})
 
@@ -274,11 +275,15 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 					dialog.ShowError(err, m.window)
 					return
 				}
+				m.sprite.Mode = 0
 				m.sprite.SpriteHeight = 16
-				m.sprite.SpriteWidth = 16
+				m.sprite.SpriteWidth = 32
 				m.sprite.SpriteColumns = 8
 				var row, col int
 				nbRow := len(spritesHard.Data) / m.sprite.SpriteColumns
+				if len(spritesHard.Data)%m.sprite.SpriteColumns != 0 {
+					nbRow++
+				}
 				m.sprite.SpriteRows = nbRow
 				m.sprite.SpritesCollection = make([][]*image.NRGBA, nbRow)
 				m.sprite.SpritesData = make([][][]byte, nbRow)
@@ -302,7 +307,9 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 
 				for y := 0; y < m.sprite.SpriteColumns; y++ {
 					for x := 0; x < m.sprite.SpriteRows; x++ {
-						icache.Set(x, y, canvas.NewImageFromImage(m.sprite.SpritesCollection[x][y]))
+						if m.sprite.SpritesCollection[x][y] != nil {
+							icache.Set(x, y, canvas.NewImageFromImage(m.sprite.SpritesCollection[x][y]))
+						}
 					}
 				}
 				m.sprite.OriginalImages.Update(icache, icache.ImagesPerRow, icache.ImagesPerColumn)

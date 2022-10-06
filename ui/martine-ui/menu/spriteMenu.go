@@ -22,6 +22,7 @@ var (
 	SpriteFilesExport SpriteExportFormat = "Files"
 	SpriteImpCatcher  SpriteExportFormat = "Impcatcher"
 	SpriteCompiled    SpriteExportFormat = "Compiled"
+	SpriteHard        SpriteExportFormat = "Sprite Hard"
 )
 
 type SpriteMenu struct {

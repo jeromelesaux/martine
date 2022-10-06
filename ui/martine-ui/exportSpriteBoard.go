@@ -20,20 +20,29 @@ import (
 
 func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 
-	formatSelect := widget.NewSelect([]string{string(menu.SpriteImpCatcher), string(menu.SpriteFlatExport), string(menu.SpriteFilesExport), string(menu.SpriteCompiled)}, func(v string) {
-		switch menu.SpriteExportFormat(v) {
-		case menu.SpriteFlatExport:
-			s.ExportFormat = menu.SpriteFlatExport
-		case menu.SpriteFilesExport:
-			s.ExportFormat = menu.SpriteFilesExport
-		case menu.SpriteImpCatcher:
-			s.ExportFormat = menu.SpriteImpCatcher
-		case menu.SpriteCompiled:
-			s.ExportFormat = menu.SpriteCompiled
-		default:
-			fmt.Fprintf(os.Stderr, "error while getting sprite export format %s\n", v)
-		}
-	})
+	formatSelect := widget.NewSelect(
+		[]string{
+			string(menu.SpriteImpCatcher),
+			string(menu.SpriteFlatExport),
+			string(menu.SpriteFilesExport),
+			string(menu.SpriteCompiled),
+			string(menu.SpriteHard),
+		}, func(v string) {
+			switch menu.SpriteExportFormat(v) {
+			case menu.SpriteFlatExport:
+				s.ExportFormat = menu.SpriteFlatExport
+			case menu.SpriteFilesExport:
+				s.ExportFormat = menu.SpriteFilesExport
+			case menu.SpriteImpCatcher:
+				s.ExportFormat = menu.SpriteImpCatcher
+			case menu.SpriteCompiled:
+				s.ExportFormat = menu.SpriteCompiled
+			case menu.SpriteHard:
+				s.ExportFormat = menu.SpriteHard
+			default:
+				fmt.Fprintf(os.Stderr, "error while getting sprite export format %s\n", v)
+			}
+		})
 	cont := container.New(
 		layout.NewVBoxLayout(),
 		widget.NewLabel("export type:"),
@@ -203,7 +212,35 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			}
 		}
 		pi.Hide()
-		dialog.ShowInformation("Saved", "Your export ended in the folder : "+s.ExportFolderPath, m.window)
+	case menu.SpriteHard:
+		data := file.SprImpdraw{}
+		for _, v := range s.SpritesData {
+			sh := file.SpriteHard{}
+			for _, v0 := range v {
+				copy(sh.Data[:], v0[:256])
+				data.Data = append(data.Data, sh)
+			}
+		}
+		filename := s.ExportFolderPath + string(filepath.Separator) + "sprites.spr"
+		cont := export.NewMartineContext("", s.ExportFolderPath)
+		cont.Compression = s.ExportCompression
+		cont.NoAmsdosHeader = !s.ExportWithAmsdosHeader
+		if err := file.Spr(filename, data, cont); err != nil {
+			pi.Hide()
+			dialog.NewError(err, m.window).Show()
+			fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", filename, err)
+			return
+		}
+		if s.ExportDsk {
+			if err := file.ImportInDsk(filename, cont); err != nil {
+				pi.Hide()
+				dialog.NewError(err, m.window).Show()
+				fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", filename, err)
+				return
+			}
+		}
+		pi.Hide()
 	}
+	dialog.ShowInformation("Saved", "Your export ended in the folder : "+s.ExportFolderPath, m.window)
 
 }
