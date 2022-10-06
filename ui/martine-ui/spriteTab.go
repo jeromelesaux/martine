@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"errors"
 	"fmt"
 	"image"
 	"image/draw"
@@ -25,6 +26,11 @@ import (
 )
 
 func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
+
+	if s.SpriteColumns == 0 || s.SpriteRows == 0 {
+		dialog.NewError(errors.New("number of sprites per row or column are not set."), m.window).Show()
+		return
+	}
 	pi := dialog.NewProgressInfinite("Computing....", "Please wait.", m.window)
 	pi.Show()
 	var colorsAvailable int
@@ -303,7 +309,7 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 					}
 				}
 
-				icache := custom_widget.NewImageTableCache(m.sprite.SpriteColumns, m.sprite.SpriteRows, fyne.NewSize(50, 50))
+				icache := custom_widget.NewImageTableCache(m.sprite.SpriteRows, m.sprite.SpriteColumns, fyne.NewSize(50, 50))
 
 				for y := 0; y < m.sprite.SpriteColumns; y++ {
 					for x := 0; x < m.sprite.SpriteRows; x++ {
