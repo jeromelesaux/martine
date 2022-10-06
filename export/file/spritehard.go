@@ -83,8 +83,13 @@ func Spr(filePath string, spr SprImpdraw, cont *x.MartineContext) error {
 	for _, v := range spr.Data {
 		content = append(content, v.Data[:]...)
 	}
+	content, _ = Compress(content, cont.Compression)
+	ext := ".SPR"
+	if cont.Compression != -1 {
+		ext = ".SPR.zxo"
+	}
 	if !cont.NoAmsdosHeader {
-		if err := SaveAmsdosFile(osFilename, ".SPR", content, 2, 0, 0x0, 0x4000); err != nil {
+		if err := SaveAmsdosFile(osFilename, ext, content, 2, 0, 0x0, 0x4000); err != nil {
 			return err
 		}
 	} else {
