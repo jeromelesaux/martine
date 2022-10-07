@@ -106,6 +106,11 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 	pi := dialog.NewProgressInfinite("Saving....", "Please wait.", m.window)
 	pi.Show()
+	if err := file.SavePal(s.ExportFolderPath+string(filepath.Separator)+"SPRITES.PAL", s.Palette, uint8(s.Mode), false); err != nil {
+		pi.Hide()
+		dialog.ShowError(err, m.window)
+		return
+	}
 	switch s.ExportFormat {
 	case menu.SpriteCompiled:
 		spr := make([][]byte, 0)
