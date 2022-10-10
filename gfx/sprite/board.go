@@ -46,6 +46,7 @@ func SplitBoardToSprite(
 	results = make([][][]byte, len(sprites))
 
 	cont.Size = size
+	cont.SpriteHard = isSpriteHard
 	for i := 0; i < len(sprites); i++ {
 		results[i] = make([][]byte, len(sprites[i]))
 		for j := 0; j < len(sprites[i]); j++ {

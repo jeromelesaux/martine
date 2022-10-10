@@ -185,7 +185,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 		s.IsHardSprite = b
 		if s.IsHardSprite {
 			s.SpriteHeight = 16
-			s.SpriteWidth = 32
+			s.SpriteWidth = 16
 			s.Mode = 0
 		}
 	})
@@ -287,7 +287,7 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 				}
 				m.sprite.Mode = 0
 				m.sprite.SpriteHeight = 16
-				m.sprite.SpriteWidth = 32
+				m.sprite.SpriteWidth = 16
 				m.sprite.SpriteColumns = 8
 				var row, col int
 				nbRow := len(spritesHard.Data) / m.sprite.SpriteColumns
