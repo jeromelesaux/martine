@@ -43,6 +43,10 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 		colorsAvailable = constants.Mode2.ColorsAvailable
 	}
 	b := s.OriginalBoard.Image
+	if b == nil {
+		pi.Hide()
+		return
+	}
 	img := image.NewNRGBA(image.Rect(0, 0, b.Bounds().Max.X, b.Bounds().Max.Y))
 	draw.Draw(img, img.Bounds(), b, b.Bounds().Min, draw.Src)
 	pal, _, err := convert.DowngradingPalette(img, constants.Size{ColorsAvailable: colorsAvailable, Width: img.Bounds().Max.X, Height: img.Bounds().Max.Y}, s.IsCpcPlus)
