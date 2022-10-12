@@ -133,7 +133,7 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 		pi.Hide()
 	} else {
 		if t.ExportImpdraw {
-			if err := gfx.ExportImpdrawTilemap(t.Result, "tilemap", t.Palette, uint8(t.Mode), context.Size, t.CpcImage.Image, context); err != nil {
+			if err := gfx.ExportImpdrawTilemap(t.Result, "tilemap", t.Palette, uint8(t.Mode), context.Size, t.OriginalImage.Image, context); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 			}

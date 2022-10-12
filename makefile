@@ -61,26 +61,32 @@ compile:
 
 build-linux:
 	@echo "Compilation for linux"
+	mkdir ${BINARY}/martine-${OS}-${ARCH}
 	(make compile ARCH=amd64 OS=linux)
 
 build-windows:
 	@echo "Compilation for windows"
+	mkdir ${BINARY}/martine-${OS}-${ARCH}
 	(make compile ARCH=amd64 OS=windows EXT=.exe)
 
 build-darwin:
 	@echo "Compilation for macos"
+	mkdir ${BINARY}/martine-${OS}-${ARCH}
 	(make compile ARCH=amd64 OS=darwin)
 
 build-raspbian:
 	@echo "Compilation for raspberry pi Raspbian 64 bits"
+	mkdir ${BINARY}/martine-${OS}-${ARCH}
 	(make compile ARCH=arm64 OS=linux)
 
 build-raspbian-i386:
 	@echo "Compilation for raspberry pi Raspbian 32 bits"
+	mkdir ${BINARY}/martine-${OS}-${ARCH}
 	(make compile ARCH=arm OS=linux GOARM=5)
 
 build-windows-i386:
 	@echo "Compilation for windows 32bits"
+	mkdir ${BINARY}/martine-${OS}-${ARCH}
 	(make compile ARCH=386 OS=windows  EXT=.exe)
 
 package-darwin:

@@ -341,9 +341,9 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 					dialog.ShowError(err, m.window)
 					return
 				}
-				spriteLength := int(footer.Height) * int(footer.Width)
-				nbRow := len(data) / spriteLength
 
+				spriteLength := int(footer.Height) * int(footer.Width)
+				nbRow := (len(data) / spriteLength) / m.sprite.SpriteColumns
 				m.sprite.SpriteRows = nbRow
 				m.sprite.SpritesCollection = make([][]*image.NRGBA, nbRow)
 				m.sprite.SpritesData = make([][][]byte, nbRow)
@@ -353,18 +353,9 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 					m.sprite.SpritesData[i] = make([][]byte, m.sprite.SpriteColumns)
 				}
 				var row, col int
-				w := footer.Width
-				switch mode {
-				case 0:
-					w /= 2
-				case 1:
-					w /= 4
-				case 2:
-					w /= 8
-				}
 				for i := 0; i < len(data); i += spriteLength {
-					m.sprite.SpritesData[row][col] = append(m.sprite.SpritesData[row][col], data[i:spriteLength]...)
-					m.sprite.SpritesCollection[row][col] = common.RawSpriteToImg(data[i:spriteLength], footer.Height, w, uint8(m.sprite.Mode), m.sprite.Palette)
+					m.sprite.SpritesData[row][col] = append(m.sprite.SpritesData[row][col], data[i:(i+spriteLength)]...)
+					m.sprite.SpritesCollection[row][col] = common.RawSpriteToImg(data[i:(i+spriteLength)], footer.Height, footer.Width, uint8(m.sprite.Mode), m.sprite.Palette)
 					col++
 					if col%m.sprite.SpriteColumns == 0 {
 						col = 0
@@ -372,7 +363,7 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 					}
 				}
 
-				icache := custom_widget.NewImageTableCache(m.sprite.SpriteColumns, m.sprite.SpriteRows, fyne.NewSize(50, 50))
+				icache := custom_widget.NewImageTableCache(m.sprite.SpriteRows, m.sprite.SpriteColumns, fyne.NewSize(50, 50))
 
 				for y := 0; y < m.sprite.SpriteColumns; y++ {
 					for x := 0; x < m.sprite.SpriteRows; x++ {

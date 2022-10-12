@@ -30,16 +30,16 @@ func OpenImp(filePath string, mode int) (*ImpFooter, error) {
 	}
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fmt.Fprintf(os.Stderr, "Cannot read the Imp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		fr.Seek(0, io.SeekStart)
 	}
 	if header.Checksum != header.ComputedChecksum16() {
-		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		fmt.Fprintf(os.Stderr, "Cannot read the Imp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fr.Seek(-3, io.SeekEnd)
+	} else {
+		fmt.Fprintf(os.Stdout, "LogicalSize=%d\n", header.LogicalSize)
+		_, err = fr.Seek(0x80+int64(header.LogicalSize)-3, io.SeekStart)
 	}
-
-	fmt.Fprintf(os.Stdout, "LogicalSize=%d\n", header.LogicalSize)
-	_, err = fr.Seek(0x80+int64(header.LogicalSize)-5, io.SeekStart)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while seek in the file (%s) with error %v\n", filePath, err)
@@ -47,7 +47,7 @@ func OpenImp(filePath string, mode int) (*ImpFooter, error) {
 	}
 
 	if err := binary.Read(fr, binary.LittleEndian, footer); err != nil {
-		fmt.Fprintf(os.Stderr, "Error while reading Ocp Win from file (%s) error %v\n", filePath, err)
+		fmt.Fprintf(os.Stderr, "Error while reading Imp Win from file (%s) error %v\n", filePath, err)
 		return footer, err
 	}
 	switch mode {
@@ -73,11 +73,11 @@ func RawImp(filePath string) ([]byte, error) {
 	}
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Win Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fmt.Fprintf(os.Stderr, "Cannot read the Imp Win Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		fr.Seek(0, io.SeekStart)
 	}
 	if header.Checksum != header.ComputedChecksum16() {
-		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Win Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		fmt.Fprintf(os.Stderr, "Cannot read the Imp Win Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		fr.Seek(0, io.SeekStart)
 	}
 
