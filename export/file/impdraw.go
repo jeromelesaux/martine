@@ -103,8 +103,8 @@ func ExportSplitRaster(filename string, p color.Palette, rasters *constants.Spli
 }
 
 func SaveGo(filePath string, data []byte, p color.Palette, screenMode uint8, cont *x.MartineContext) error {
-	data1 := data[0 : len(data)/2]
-	data2 := data[(len(data)/2)+1:]
+	data1 := data[0:0x4000]
+	data2 := data[0x4000:]
 	go1Filename := cont.AmsdosFullPath(filePath, ".GO1")
 	go2Filename := cont.AmsdosFullPath(filePath, ".GO2")
 	if !cont.NoAmsdosHeader {
