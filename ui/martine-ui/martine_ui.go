@@ -101,6 +101,7 @@ func (m *MartineUI) NewContext(me *menu.ImageMenu, checkOriginalImage bool) *exp
 	context.DitheringMultiplier = me.DitheringMultiplier
 	context.Brightness = me.Brightness
 	context.Saturation = me.Saturation
+
 	if me.Brightness > 0 && me.Saturation == 0 {
 		context.Saturation = me.Brightness
 	}
@@ -165,6 +166,7 @@ func (m *MartineUI) NewContext(me *menu.ImageMenu, checkOriginalImage bool) *exp
 	context.ZigZag = m.imageExport.ExportZigzag
 	context.Compression = m.imageExport.ExportCompression
 	context.Dsk = m.imageExport.ExportDsk
+	context.ExportAsGoFile = m.imageExport.ExportAsGoFiles
 	context.OneLine = me.OneLine
 	context.OneRow = me.OneRow
 	return context

@@ -102,6 +102,7 @@ type MartineContext struct {
 	FilloutGif                  bool
 	Saturation                  float64
 	Brightness                  float64
+	ExportAsGoFile              bool
 }
 
 func MaskIsAllowed(mode uint8, value uint8) bool {

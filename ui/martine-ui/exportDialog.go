@@ -21,6 +21,9 @@ func (m *MartineUI) exportDialog(ie *menu.ImageExport, w fyne.Window) {
 			widget.NewCheck("import all file in Dsk", func(b bool) {
 				ie.ExportDsk = b
 			}),
+			widget.NewCheck("export as Go1 and Go2 files", func(b bool) {
+				ie.ExportAsGoFiles = b
+			}),
 			widget.NewCheck("export text file", func(b bool) {
 				ie.ExportText = b
 			}),

@@ -640,9 +640,16 @@ func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Siz
 func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *export.MartineContext) error {
 	if ex.Overscan {
 		if ex.EgxFormat == 0 {
-			if err := file.Overscan(filePath, bw, p, screenMode, ex); err != nil {
-				fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-				return err
+			if ex.ExportAsGoFile {
+				if err := file.SaveGo(filePath, bw, p, screenMode, ex); err != nil {
+					fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+					return err
+				}
+			} else {
+				if err := file.Overscan(filePath, bw, p, screenMode, ex); err != nil {
+					fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+					return err
+				}
 			}
 		} else {
 			if err := file.EgxOverscan(filePath, bw, p, ex.EgxMode1, ex.EgxMode2, ex); err != nil {
