@@ -122,5 +122,9 @@ func SaveGo(filePath string, data []byte, p color.Palette, screenMode uint8, con
 			return err
 		}
 	}
+
+	cont.AddFile(go1Filename)
+	cont.AddFile(go2Filename)
+
 	return nil
 }
