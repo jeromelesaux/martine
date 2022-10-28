@@ -8,7 +8,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/common"
@@ -8541,7 +8540,7 @@ func SaveKit(filePath string, p color.Palette, noAmsdosHeader bool) error {
 }
 
 func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cont *x.MartineContext) error {
-	osFilepath := filepath.Join(cont.OutputPath, cont.GetAmsdosFilename(filePath, ".KIT"))
+	osFilepath := cont.AmsdosFullPath(filePath, ".KIT")
 	fmt.Fprintf(os.Stdout, "Saving Kit file (%s)\n", osFilepath)
 	data := [16]uint16{}
 	paletteSize := len(p)
