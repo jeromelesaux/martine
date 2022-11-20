@@ -36,12 +36,12 @@ import (
 */
 
 /*
- initialisation du raster à faire qu'un fois
- ld bc,#7F00
- ld hl,#8E8D
- ld d,#8c
- out (c), c
- out (c), d // out du mode 0
+initialisation du raster à faire qu'un fois
+ld bc,#7F00
+ld hl,#8E8D
+ld d,#8c
+out (c), c
+out (c), d // out du mode 0
 */
 var splitRasterSetMode = []byte{0x01, 0x00, 0x7F, 0x21, 0x8D, 0x8E, 0x16, 0x8C, 0xED, 0x49, 0xED, 0x69}
 
@@ -56,9 +56,9 @@ ld a,#54: out (c), a
 var splitRasterSetColor = []byte{0x3E, 0x54, 0xED, 0x79}
 
 /*
- ld a,(bc) // restitution du mode
- out (c),a // resitution de la couleur depuis la palette en #7F00
- out (c),h // restitution du mode
+ld a,(bc) // restitution du mode
+out (c),a // resitution de la couleur depuis la palette en #7F00
+out (c),h // restitution du mode
 */
 var splitRasterRestore = []byte{0x0A, 0xED, 0x79, 0xED, 0x61}
 
@@ -103,8 +103,10 @@ func ExportSplitRaster(filename string, p color.Palette, rasters *constants.Spli
 }
 
 func SaveGo(filePath string, data []byte, p color.Palette, screenMode uint8, cont *x.MartineContext) error {
-	data1 := data[0:0x4000]
-	data2 := data[0x4000:]
+	data1 := make([]byte, 0x4000)
+	data2 := make([]byte, 0x4000)
+	copy(data1, data[0x20:0x4020])
+	copy(data2, data[0x4040:])
 	go1Filename := cont.AmsdosFullPath(filePath, ".GO1")
 	go2Filename := cont.AmsdosFullPath(filePath, ".GO2")
 	if !cont.NoAmsdosHeader {
