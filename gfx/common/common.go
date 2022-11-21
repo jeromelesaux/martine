@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx/errors"
@@ -641,7 +642,33 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *e
 	if ex.Overscan {
 		if ex.EgxFormat == 0 {
 			if ex.ExportAsGoFile {
-				if err := file.SaveGo(filePath, bw, p, screenMode, ex); err != nil {
+				orig, err := OverscanRawToImg(bw, screenMode, p)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error while converting into image file %s error :%v", filePath, err)
+					return err
+				}
+
+				imgUp, imgDown, err := convert.SplitImage(orig)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error while splitting image from  file %s error :%v", filePath, err)
+					return err
+				}
+				width := imgUp.Bounds().Max.X
+				height := imgUp.Bounds().Max.Y
+				dataUp, _, _, err := ToSprite(imgUp, p, constants.Size{Width: width, Height: height}, screenMode, ex)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error while converting to sprite file %s error :%v", filePath, err)
+					return err
+				}
+				width = imgDown.Bounds().Max.X
+				height = imgDown.Bounds().Max.Y
+				dataDown, _, _, err := ToSprite(imgDown, p, constants.Size{Width: width, Height: height}, screenMode, ex)
+
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+					return err
+				}
+				if err = file.SaveGo(filePath, dataUp, dataDown, p, screenMode, ex); err != nil {
 					fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 					return err
 				}

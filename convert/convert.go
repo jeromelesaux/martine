@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"image/draw"
 	"math"
 	"os"
 	"sort"
 
 	"github.com/disintegration/imaging"
+	"github.com/oliamb/cutter"
 
 	"github.com/jeromelesaux/martine/constants"
 )
@@ -366,4 +368,31 @@ func ToCPCPalette(p color.Palette, cpcPalette color.Palette) color.Palette {
 		out = append(out, c)
 	}
 	return out
+}
+
+func SplitImage(i image.Image) (*image.NRGBA, *image.NRGBA, error) {
+	height := i.Bounds().Max.Y / 2
+	width := i.Bounds().Max.X
+	image1, err := cutter.Crop(i, cutter.Config{
+		Width:  width,
+		Height: height,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+	image2, err := cutter.Crop(i, cutter.Config{
+		Width:  width,
+		Height: height,
+		Anchor: image.Point{X: 0, Y: height},
+	})
+
+	b := image1.Bounds()
+	raw1 := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+	draw.Draw(raw1, raw1.Bounds(), image1, b.Min, draw.Src)
+
+	b = image2.Bounds()
+	raw2 := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+	draw.Draw(raw2, raw2.Bounds(), image2, b.Min, draw.Src)
+
+	return raw1, raw2, err
 }

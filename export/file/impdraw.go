@@ -8,7 +8,6 @@ import (
 
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
-	x "github.com/jeromelesaux/martine/export"
 )
 
 /*
@@ -102,11 +101,11 @@ func ExportSplitRaster(filename string, p color.Palette, rasters *constants.Spli
 	return nil
 }
 
-func SaveGo(filePath string, data []byte, p color.Palette, screenMode uint8, cont *x.MartineContext) error {
+func SaveGo(filePath string, dataUp, dataDown []byte, p color.Palette, screenMode uint8, cont *export.MartineContext) error {
 	data1 := make([]byte, 0x4000)
 	data2 := make([]byte, 0x4000)
-	copy(data1, data[0x20:0x4020])
-	copy(data2, data[0x4040:])
+	copy(data1, dataUp)
+	copy(data2, dataDown)
 	go1Filename := cont.AmsdosFullPath(filePath, ".GO1")
 	go2Filename := cont.AmsdosFullPath(filePath, ".GO2")
 	if !cont.NoAmsdosHeader {
