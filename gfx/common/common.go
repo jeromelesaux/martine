@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx/errors"
@@ -642,7 +641,7 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *e
 	if ex.Overscan {
 		if ex.EgxFormat == 0 {
 			if ex.ExportAsGoFile {
-				orig, err := OverscanRawToImg(bw, screenMode, p)
+				/*orig, err := OverscanRawToImg(bw, screenMode, p)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Error while converting into image file %s error :%v", filePath, err)
 					return err
@@ -653,22 +652,13 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *e
 					fmt.Fprintf(os.Stderr, "Error while splitting image from  file %s error :%v", filePath, err)
 					return err
 				}
-				width := imgUp.Bounds().Max.X
-				height := imgUp.Bounds().Max.Y
-				dataUp, _, _, err := ToSprite(imgUp, p, constants.Size{Width: width, Height: height}, screenMode, ex)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error while converting to sprite file %s error :%v", filePath, err)
-					return err
-				}
-				width = imgDown.Bounds().Max.X
-				height = imgDown.Bounds().Max.Y
-				dataDown, _, _, err := ToSprite(imgDown, p, constants.Size{Width: width, Height: height}, screenMode, ex)
-
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
-					return err
-				}
-				if err = file.SaveGo(filePath, dataUp, dataDown, p, screenMode, ex); err != nil {
+				config := export.NewMartineContext("", "")
+				config.Size = constants.Size{Width: imgUp.Bounds().Max.X, Height: imgUp.Bounds().Max.Y}
+				config.Overscan = true
+				dataUp := ToMode0(imgUp, p, config)
+				dataDown := ToMode0(imgDown, p, config)
+				*/
+				if err := file.SaveGo(filePath, bw, p, screenMode, ex); err != nil {
 					fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 					return err
 				}

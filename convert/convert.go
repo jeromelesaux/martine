@@ -394,5 +394,12 @@ func SplitImage(i image.Image) (*image.NRGBA, *image.NRGBA, error) {
 	raw2 := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
 	draw.Draw(raw2, raw2.Bounds(), image2, b.Min, draw.Src)
 
+	/*f, _ := os.Create("imageup.png")
+	png.Encode(f, image1)
+	f.Close()
+
+	f2, _ := os.Create("imagedown.png")
+	png.Encode(f2, image2)
+	f2.Close()*/
 	return raw1, raw2, err
 }
