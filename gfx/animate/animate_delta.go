@@ -28,13 +28,13 @@ var (
 	DeltaExportV2 DeltaExportFormat = 2
 )
 
-func DeltaPackingMemory(images []image.Image, ex *config.MartineConfig, initialAddress uint16, mode uint8) ([]*transformation.DeltaCollection, [][]byte, color.Palette, error) {
+func DeltaPackingMemory(images []image.Image, cfg *config.MartineConfig, initialAddress uint16, mode uint8) ([]*transformation.DeltaCollection, [][]byte, color.Palette, error) {
 	var isSprite bool = true
 	var maxImages = 22
 	var pad int = 1
 	var err error
 	var palette color.Palette
-	if !ex.CustomDimension && !ex.SpriteHard {
+	if !cfg.CustomDimension && !cfg.SpriteHard {
 		isSprite = false
 	}
 	if len(images) <= 1 {
@@ -52,13 +52,13 @@ func DeltaPackingMemory(images []image.Image, ex *config.MartineConfig, initialA
 	// now transform images as win or scr
 	fmt.Printf("Let's go transform images files in win or scr\n")
 
-	_, _, palette, _, err = gfx.ApplyOneImage(images[0], ex, int(mode), palette, mode)
+	_, _, palette, _, err = gfx.ApplyOneImage(images[0], cfg, int(mode), palette, mode)
 	if err != nil {
 		return nil, nil, palette, err
 	}
 	for i := 0; i < len(images); i += pad {
 		in := images[i]
-		raw, _, _, _, err = gfx.ApplyOneImage(in, ex, int(mode), palette, mode)
+		raw, _, _, _, err = gfx.ApplyOneImage(in, cfg, int(mode), palette, mode)
 		if err != nil {
 			return nil, nil, palette, err
 		}
@@ -66,14 +66,14 @@ func DeltaPackingMemory(images []image.Image, ex *config.MartineConfig, initialA
 		fmt.Printf("Image [%d] proceed\n", i)
 	}
 
-	lineOctetsWidth := ex.LineWidth
+	lineOctetsWidth := cfg.LineWidth
 	x0, y0, err := transformation.CpcCoordinates(initialAddress, 0xC000, lineOctetsWidth)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error while computing cpc coordinates :%v\n", err)
 	}
 
 	fmt.Printf("Let's go deltapacking raw images\n")
-	realSize := &constants.Size{Width: ex.Size.Width, Height: ex.Size.Height}
+	realSize := &constants.Size{Width: cfg.Size.Width, Height: cfg.Size.Height}
 	if isSprite {
 		realSize.Width = realSize.ModeWidth(mode)
 	}
@@ -99,10 +99,10 @@ func DeltaPackingMemory(images []image.Image, ex *config.MartineConfig, initialA
 	return deltaData, rawImages, palette, nil
 }
 
-func DeltaPacking(gitFilepath string, ex *config.MartineConfig, initialAddress uint16, mode uint8, exportVersion DeltaExportFormat) error {
+func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress uint16, mode uint8, exportVersion DeltaExportFormat) error {
 	var isSprite = true
 	var maxImages = 22
-	if !ex.CustomDimension && !ex.SpriteHard {
+	if !cfg.CustomDimension && !cfg.SpriteHard {
 		isSprite = false
 	}
 	fr, err := os.Open(gitFilepath)
@@ -131,15 +131,15 @@ func DeltaPacking(gitFilepath string, ex *config.MartineConfig, initialAddress u
 	// now transform images as win or scr
 	fmt.Printf("Let's go transform images files in win or scr\n")
 
-	if ex.FilloutGif {
-		imgs := filloutGif(*gifImages, ex)
-		_, _, palette, _, err = gfx.ApplyOneImage(imgs[0], ex, int(mode), palette, mode)
+	if cfg.FilloutGif {
+		imgs := filloutGif(*gifImages, cfg)
+		_, _, palette, _, err = gfx.ApplyOneImage(imgs[0], cfg, int(mode), palette, mode)
 		if err != nil {
 			return err
 		}
 		for i := 0; i < len(imgs); i += pad {
 			in := imgs[i]
-			raw, _, _, _, err = gfx.ApplyOneImage(in, ex, int(mode), palette, mode)
+			raw, _, _, _, err = gfx.ApplyOneImage(in, cfg, int(mode), palette, mode)
 			if err != nil {
 				return err
 			}
@@ -147,30 +147,30 @@ func DeltaPacking(gitFilepath string, ex *config.MartineConfig, initialAddress u
 			fmt.Printf("Image [%d] proceed\n", i)
 		}
 	} else {
-		_, _, palette, _, err = gfx.ApplyOneImage(images[0], ex, int(mode), palette, mode)
+		_, _, palette, _, err = gfx.ApplyOneImage(images[0], cfg, int(mode), palette, mode)
 		if err != nil {
 			return err
 		}
 		for i := 0; i < len(images); i += pad {
 			in := images[i]
-			raw, _, _, _, err = gfx.ApplyOneImage(in, ex, int(mode), palette, mode)
+			raw, _, _, _, err = gfx.ApplyOneImage(in, cfg, int(mode), palette, mode)
 			if err != nil {
 				return err
 			}
-			png.Png(ex.OutputPath+fmt.Sprintf("/%.2d.png", i), in)
+			png.Png(cfg.OutputPath+fmt.Sprintf("/%.2d.png", i), in)
 
 			rawImages = append(rawImages, raw)
 			fmt.Printf("Image [%d] proceed\n", i)
 		}
 	}
-	lineOctetsWidth := ex.LineWidth
+	lineOctetsWidth := cfg.LineWidth
 	x0, y0, err := transformation.CpcCoordinates(initialAddress, 0xC000, lineOctetsWidth)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error while computing cpc coordinates :%v\n", err)
 	}
 
 	fmt.Printf("Let's go deltapacking raw images\n")
-	realSize := &constants.Size{Width: ex.Size.Width, Height: ex.Size.Height}
+	realSize := &constants.Size{Width: cfg.Size.Width, Height: cfg.Size.Height}
 	realSize.Width = realSize.ModeWidth(mode)
 	var lastImage []byte
 	for i := 0; i < len(rawImages)-1; i++ {
@@ -191,8 +191,8 @@ func DeltaPacking(gitFilepath string, ex *config.MartineConfig, initialAddress u
 	dc := transformation.Delta(d1, d2, isSprite, *realSize, mode, uint16(x0), uint16(y0), lineOctetsWidth)
 	deltaData = append(deltaData, dc)
 	fmt.Printf("%d bytes differ from the both images\n", len(dc.Items))
-	filename := string(ex.OsFilename(".asm"))
-	return exportDeltaAnimate(rawImages[0], deltaData, palette, isSprite, ex, initialAddress, mode, ex.OutputPath+string(filepath.Separator)+filename, exportVersion)
+	filename := string(cfg.OsFilename(".asm"))
+	return exportDeltaAnimate(rawImages[0], deltaData, palette, isSprite, cfg, initialAddress, mode, cfg.OutputPath+string(filepath.Separator)+filename, exportVersion)
 }
 
 func ConvertToImage(g gif.GIF) []*image.NRGBA {
@@ -215,7 +215,7 @@ func ConvertToImage(g gif.GIF) []*image.NRGBA {
 	return c
 }
 
-func filloutGif(g gif.GIF, ex *config.MartineConfig) []image.Image {
+func filloutGif(g gif.GIF, cfg *config.MartineConfig) []image.Image {
 	c := make([]image.Image, 0)
 	width := g.Image[0].Bounds().Max.X
 	height := g.Image[0].Bounds().Max.Y
@@ -231,20 +231,20 @@ func filloutGif(g gif.GIF, ex *config.MartineConfig) []image.Image {
 	return c
 }
 
-func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaCollection, palette color.Palette, isSprite bool, ex *config.MartineConfig, initialAddress uint16, mode uint8, exportVersion DeltaExportFormat) (string, error) {
+func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaCollection, palette color.Palette, isSprite bool, cfg *config.MartineConfig, initialAddress uint16, mode uint8, exportVersion DeltaExportFormat) (string, error) {
 	var sourceCode string
 	var dataCode string
 	var deltaIndex []string
 	var code string
 	var nbDelta = len(delta)
 	if !isSprite {
-		if ex.Compression != -1 {
+		if cfg.Compression != -1 {
 
 			sourceCode = deltaScreenCompressCodeDelta
 			if exportVersion == DeltaExportV2 {
 				sourceCode = deltaScreenCompressCodeDeltaV2
 			}
-			if ex.CpcPlus {
+			if cfg.CpcPlus {
 				sourceCode = deltaScreenCompressCodeDeltaPlus
 			}
 		} else {
@@ -252,7 +252,7 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 			if exportVersion == DeltaExportV2 {
 				sourceCode = deltaScreenCodeDeltaV2
 			}
-			if ex.CpcPlus {
+			if cfg.CpcPlus {
 				sourceCode = deltaScreenCodeDeltaPlus
 			}
 		}
@@ -261,7 +261,7 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	}
 	// copy of the sprite
 	dataCode += "\nsprite:\n"
-	if ex.Compression != -1 {
+	if cfg.Compression != -1 {
 		if isSprite {
 			sourceCode = depackRoutine
 		}
@@ -290,7 +290,7 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 		}
 		name := fmt.Sprintf("delta%.2d", i)
 		dataCode += name + ":\n"
-		if ex.Compression != -1 {
+		if cfg.Compression != -1 {
 			fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
 			if dc.OccurencePerFrame != 0 {
 				d := zx0.Encode(data)
@@ -326,15 +326,15 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	header = strings.Replace(header, "$NBDELTA$", nbDeltaLabel, 1)
 
 	// replace char large for the screen
-	charLarge := fmt.Sprintf("#%.4x", 0xC000+ex.LineWidth)
+	charLarge := fmt.Sprintf("#%.4x", 0xC000+cfg.LineWidth)
 	header = strings.Replace(header, "$LIGNELARGE$", charLarge, 1)
 
 	// replace heigth
-	height := fmt.Sprintf("%d", ex.Size.Height)
+	height := fmt.Sprintf("%d", cfg.Size.Height)
 	header = strings.Replace(header, "$HAUT$", height, 1)
 
 	// replace width
-	var width string = fmt.Sprintf("%d", ex.Size.ModeWidth(mode))
+	var width string = fmt.Sprintf("%d", cfg.Size.ModeWidth(mode))
 	header = strings.Replace(header, "$LARGE$", width, 1)
 
 	var modeSet string
@@ -352,7 +352,7 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 
 	code += header
 	code += dataCode
-	if ex.Compression != -1 {
+	if cfg.Compression != -1 {
 		code += "\nbuffer:\n"
 	}
 	code += "\nend\n"
@@ -366,7 +366,7 @@ func exportDeltaAnimate(
 	delta []*transformation.DeltaCollection,
 	palette color.Palette,
 	isSprite bool,
-	ex *config.MartineConfig,
+	cfg *config.MartineConfig,
 	initialAddress uint16,
 	mode uint8,
 	filename string,
@@ -381,7 +381,7 @@ func exportDeltaAnimate(
 		sourceCode = deltaScreenCodeDeltaV2
 	}
 	if !isSprite {
-		if ex.Compression != -1 {
+		if cfg.Compression != -1 {
 			sourceCode = deltaScreenCompressCodeDelta
 			if exportVersion == DeltaExportV2 {
 				sourceCode = deltaScreenCompressCodeDeltaV2
@@ -395,7 +395,7 @@ func exportDeltaAnimate(
 	}
 	// copy of the sprite
 	dataCode += "sprite:\n"
-	if ex.Compression != -1 {
+	if cfg.Compression != -1 {
 		if isSprite {
 			sourceCode = depackRoutine
 		}
@@ -424,7 +424,7 @@ func exportDeltaAnimate(
 		}
 		name := fmt.Sprintf("delta%.2d", i)
 		dataCode += name + ":\n"
-		if ex.Compression != -1 {
+		if cfg.Compression != -1 {
 			fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
 			if dc.OccurencePerFrame != 0 {
 				d := zx0.Encode(data)
@@ -462,15 +462,15 @@ func exportDeltaAnimate(
 	header = strings.Replace(header, "$NBDELTA$", nbDeltaLabel, 1)
 
 	// replace char large for the screen
-	charLarge := fmt.Sprintf("#%.4x", 0xC000+ex.LineWidth)
+	charLarge := fmt.Sprintf("#%.4x", 0xC000+cfg.LineWidth)
 	header = strings.Replace(header, "$LIGNELARGE$", charLarge, 1)
 
 	// replace heigth
-	height := fmt.Sprintf("%d", ex.Size.Height)
+	height := fmt.Sprintf("%d", cfg.Size.Height)
 	header = strings.Replace(header, "$HAUT$", height, 1)
 
 	// replace width
-	var width string = fmt.Sprintf("%d", ex.Size.ModeWidth(mode))
+	var width string = fmt.Sprintf("%d", cfg.Size.ModeWidth(mode))
 	header = strings.Replace(header, "$LARGE$", width, 1)
 
 	var modeSet string
@@ -490,7 +490,7 @@ func exportDeltaAnimate(
 	code += dataCode
 	code += "\nend\n"
 	code += "\nsave'disc.bin',#200, end - start,DSK,'delta.dsk'"
-	if ex.Compression != -1 {
+	if cfg.Compression != -1 {
 		code += "\nbuffer dw 0\n"
 	}
 

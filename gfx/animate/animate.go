@@ -22,17 +22,8 @@ import (
 )
 
 func Animation(filepaths []string, screenMode uint8, export *config.MartineConfig) error {
-	var sizeScreen constants.Size
-	switch screenMode {
-	case 0:
-		sizeScreen = constants.OverscanMode0
-	case 1:
-		sizeScreen = constants.OverscanMode1
-	case 2:
-		sizeScreen = constants.OverscanMode2
-	default:
-		sizeScreen = constants.OverscanMode0
-	}
+	sizeScreen := constants.NewSizeMode(screenMode, true)
+
 	export.Overscan = true
 	board, palette, err := concatSprites(filepaths, sizeScreen, export.Size, screenMode, export)
 	if err != nil {

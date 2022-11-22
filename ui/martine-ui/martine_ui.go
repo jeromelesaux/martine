@@ -109,25 +109,7 @@ func (m *MartineUI) NewContext(me *menu.ImageMenu, checkOriginalImage bool) *con
 		context.Brightness = me.Saturation
 	}
 	context.Reducer = me.Reducer
-	var size constants.Size
-	switch me.Mode {
-	case 0:
-		size = constants.Mode0
-		if me.IsFullScreen {
-			size = constants.OverscanMode0
-		}
-	case 1:
-		size = constants.Mode1
-		if me.IsFullScreen {
-			size = constants.OverscanMode1
-		}
-	case 2:
-		size = constants.Mode2
-		if me.IsFullScreen {
-			size = constants.OverscanMode2
-		}
-	}
-	context.Size = size
+	context.Size = constants.NewSizeMode(uint8(me.Mode), me.IsFullScreen)
 	if me.IsSprite {
 		width, err := strconv.Atoi(me.Width.Text)
 		if err != nil {

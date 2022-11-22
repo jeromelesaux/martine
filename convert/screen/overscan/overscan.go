@@ -8,23 +8,13 @@ import (
 	"github.com/jeromelesaux/martine/convert/pixel"
 	"github.com/jeromelesaux/martine/export/impdraw/overscan"
 	"github.com/jeromelesaux/martine/export/png"
-	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
 // overscanRawToImg will convert fullscreen amstrad screen slice of bytes in image.NRGBA
 // using the  screen mode  and the palette as arguments
 func OverscanRawToImg(d []byte, mode uint8, p color.Palette) (*image.NRGBA, error) {
-	var m constants.Size
-	switch mode {
-	case 0:
-		m = constants.OverscanMode0
-	case 1:
-		m = constants.OverscanMode1
-	case 2:
-		m = constants.OverscanMode2
-	default:
-		return nil, errors.ErrorUndefinedMode
-	}
+	m := constants.NewSizeMode(mode, true)
+
 	out := image.NewNRGBA(image.Rectangle{
 		Min: image.Point{X: 0, Y: 0},
 		Max: image.Point{X: int(m.Width), Y: int(m.Height)}})
@@ -106,17 +96,7 @@ func OverscanRawToImg(d []byte, mode uint8, p color.Palette) (*image.NRGBA, erro
 // overscanToImg will convert fullscreen amstrad screen filepath 'srcPath' in image.NRGBA
 // using the  screen mode  and the palette as arguments
 func OverscanToImg(scrPath string, mode uint8, p color.Palette) (*image.NRGBA, error) {
-	var m constants.Size
-	switch mode {
-	case 0:
-		m = constants.OverscanMode0
-	case 1:
-		m = constants.OverscanMode1
-	case 2:
-		m = constants.OverscanMode2
-	default:
-		return nil, errors.ErrorUndefinedMode
-	}
+	m := constants.NewSizeMode(mode, true)
 	out := image.NewNRGBA(image.Rectangle{
 		Min: image.Point{X: 0, Y: 0},
 		Max: image.Point{X: int(m.Width), Y: int(m.Height)}})

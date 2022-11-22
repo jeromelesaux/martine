@@ -1,4 +1,4 @@
-package transformation
+package transformation_test
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/gfx/transformation"
 )
 
 func TestBoardSprite(t *testing.T) {
@@ -19,7 +20,7 @@ func TestBoardSprite(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Cannot decode png file error :%v\n", err)
 	}
-	a := AnalyzeTilesBoard(im, constants.Size{Width: 16, Height: 16})
+	a := transformation.AnalyzeTilesBoard(im, constants.Size{Width: 16, Height: 16})
 	t.Log(a.String())
 	fmt.Println(a.String())
 	a.SaveSchema("alexkidd_board.png")

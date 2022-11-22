@@ -17,28 +17,13 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	cfg := config.NewMartineConfig(*picturePath, *output)
 
 	if !*reverse {
-		switch *mode {
-		case 0:
-			size = constants.Mode0
-			if *overscan {
-				size = constants.OverscanMode0
-			}
-		case 1:
-			size = constants.Mode1
-			if *overscan {
-				size = constants.OverscanMode1
-			}
-		case 2:
-			size = constants.Mode2
-			if *overscan {
-				size = constants.OverscanMode2
-			}
-		default:
-			if *height == -1 && *width == -1 && !*deltaMode {
-				fmt.Fprintf(os.Stderr, "mode %d not defined and no custom width or height\n", *mode)
-				usage()
-			}
+		size := constants.NewSizeMode(uint8(*mode), *overscan)
+		emptySize := constants.Size{}
+		if size == emptySize && *height == -1 && *width == -1 && !*deltaMode {
+			fmt.Fprintf(os.Stderr, "mode %d not defined and no custom width or height\n", *mode)
+			usage()
 		}
+
 		if *height != -1 {
 			cfg.CustomDimension = true
 			cfg.Win = true

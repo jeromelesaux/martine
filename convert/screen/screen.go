@@ -14,7 +14,6 @@ import (
 	"github.com/jeromelesaux/martine/convert/pixel"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
-	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
 func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte {
@@ -266,17 +265,8 @@ func ToMode2AndExport(in *image.NRGBA, p color.Palette, size constants.Size, fil
 // scrRawToImg will convert the classical OCP screen slice of bytes  into image.NRGBA structure
 // using the mode and the palette as arguments
 func ScrRawToImg(d []byte, mode uint8, p color.Palette) (*image.NRGBA, error) {
-	var m constants.Size
-	switch mode {
-	case 0:
-		m = constants.Mode0
-	case 1:
-		m = constants.Mode1
-	case 2:
-		m = constants.Mode2
-	default:
-		return nil, errors.ErrorUndefinedMode
-	}
+	m := constants.NewSizeMode(mode, false)
+
 	out := image.NewNRGBA(image.Rectangle{
 		Min: image.Point{X: 0, Y: 0},
 		Max: image.Point{X: int(m.Width), Y: int(m.Height)}})
@@ -349,17 +339,8 @@ func ScrRawToImg(d []byte, mode uint8, p color.Palette) (*image.NRGBA, error) {
 // SrcToImg load the amstrad classical 17ko  screen image to image.NRBGA
 // using the mode and palette as arguments
 func ScrToImg(scrPath string, mode uint8, p color.Palette) (*image.NRGBA, error) {
-	var m constants.Size
-	switch mode {
-	case 0:
-		m = constants.Mode0
-	case 1:
-		m = constants.Mode1
-	case 2:
-		m = constants.Mode2
-	default:
-		return nil, errors.ErrorUndefinedMode
-	}
+	m := constants.NewSizeMode(mode, false)
+
 	out := image.NewNRGBA(image.Rectangle{
 		Min: image.Point{X: 0, Y: 0},
 		Max: image.Point{X: int(m.Width), Y: int(m.Height)}})

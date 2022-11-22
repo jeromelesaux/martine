@@ -27,6 +27,42 @@ type Size struct {
 	GatearrayValue  uint8
 }
 
+func NewSize(mode uint8) Size {
+	s := Size{}
+	switch mode {
+	case 0:
+		s = Mode0
+	case 1:
+		s = Mode1
+	case 2:
+		s = Mode2
+	}
+	return s
+}
+
+func NewSizeMode(mode uint8, overscan bool) Size {
+	s := Size{}
+	switch mode {
+	case 0:
+		s = Mode0
+	case 1:
+		s = Mode1
+	case 2:
+		s = Mode2
+	}
+	if overscan {
+		switch mode {
+		case 0:
+			s = OverscanMode0
+		case 1:
+			s = OverscanMode1
+		case 2:
+			s = OverscanMode2
+		}
+	}
+	return s
+}
+
 func (s *Size) ModeWidth(mode uint8) int {
 	switch mode {
 	case 0:
