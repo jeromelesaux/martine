@@ -20,6 +20,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/spritehard"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/sprite"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
@@ -280,7 +281,7 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 			}
 			filePath := reader.URI()
 			if m.sprite.IsHardSprite {
-				spritesHard, err := file.OpenSpr(filePath.Path())
+				spritesHard, err := spritehard.OpenSpr(filePath.Path())
 				if err != nil {
 					dialog.ShowError(err, m.window)
 					return

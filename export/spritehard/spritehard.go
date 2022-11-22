@@ -1,4 +1,4 @@
-package file
+package spritehard
 
 import (
 	"encoding/binary"
