@@ -11,6 +11,7 @@ import (
 
 	"github.com/jeromelesaux/m4client/cpc"
 	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/amsdos"
 )
 
 type SpriteHard struct {
@@ -89,11 +90,11 @@ func Spr(filePath string, spr SprImpdraw, cont *x.MartineContext) error {
 		ext = ".SPR.zxo"
 	}
 	if !cont.NoAmsdosHeader {
-		if err := SaveAmsdosFile(osFilename, ext, content, 2, 0, 0x0, 0x4000); err != nil {
+		if err := amsdos.SaveAmsdosFile(osFilename, ext, content, 2, 0, 0x0, 0x4000); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(osFilename, content); err != nil {
+		if err := amsdos.SaveOSFile(osFilename, content); err != nil {
 			return err
 		}
 	}

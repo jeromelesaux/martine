@@ -13,6 +13,7 @@ import (
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
 	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/amsdos"
 )
 
 var ErrorBadFileFormat = errors.New("bad file format")
@@ -8260,11 +8261,11 @@ func Ink(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 	osFilepath := cont.AmsdosFullPath(filePath, ".INK")
 
 	if !cont.NoAmsdosHeader {
-		if err := SaveAmsdosFile(osFilepath, ".INK", data, 2, 0, 0x8809, 0x8809); err != nil {
+		if err := amsdos.SaveAmsdosFile(osFilepath, ".INK", data, 2, 0, 0x8809, 0x8809); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(osFilepath, data); err != nil {
+		if err := amsdos.SaveOSFile(osFilepath, data); err != nil {
 			return err
 		}
 	}
@@ -8454,11 +8455,11 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 	osFilepath := cont.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", osFilepath)
 	if !cont.NoAmsdosHeader {
-		if err := SaveAmsdosFile(osFilepath, ".SCR", o, 0, 0, 0x170, 0); err != nil {
+		if err := amsdos.SaveAmsdosFile(osFilepath, ".SCR", o, 0, 0, 0x170, 0); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(filePath, o); err != nil {
+		if err := amsdos.SaveOSFile(filePath, o); err != nil {
 			return err
 		}
 	}
@@ -8527,11 +8528,11 @@ func SaveKit(filePath string, p color.Palette, noAmsdosHeader bool) error {
 		return err
 	}
 	if !noAmsdosHeader {
-		if err = SaveAmsdosFile(filePath, ".KIT", v, 2, 0, 0x8809, 0x8809); err != nil {
+		if err = amsdos.SaveAmsdosFile(filePath, ".KIT", v, 2, 0, 0x8809, 0x8809); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(filePath, v); err != nil {
+		if err := amsdos.SaveOSFile(filePath, v); err != nil {
 			return err
 		}
 	}
@@ -8557,11 +8558,11 @@ func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 		return err
 	}
 	if !cont.NoAmsdosHeader {
-		if err := SaveAmsdosFile(osFilepath, ".KIT", res, 2, 0, 0x8809, 0x8809); err != nil {
+		if err := amsdos.SaveAmsdosFile(osFilepath, ".KIT", res, 2, 0, 0x8809, 0x8809); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(osFilepath, res); err != nil {
+		if err := amsdos.SaveOSFile(osFilepath, res); err != nil {
 			return err
 		}
 	}
@@ -8741,11 +8742,11 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cont *
 	data, _ = Compress(data, cont.Compression)
 
 	if !cont.NoAmsdosHeader {
-		if err := SaveAmsdosFile(osFilepath, ".SCR", data, 2, 0, 0xc000, exec); err != nil {
+		if err := amsdos.SaveAmsdosFile(osFilepath, ".SCR", data, 2, 0, 0xc000, exec); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(osFilepath, data); err != nil {
+		if err := amsdos.SaveOSFile(osFilepath, data); err != nil {
 			return err
 		}
 	}
@@ -8857,11 +8858,11 @@ func SavePal(filePath string, p color.Palette, screenMode uint8, noAmsdosHeader 
 	}
 
 	if !noAmsdosHeader {
-		if err := SaveAmsdosFile(filePath, ".PAL", res, 2, 0, 0x8809, 0x8809); err != nil {
+		if err := amsdos.SaveAmsdosFile(filePath, ".PAL", res, 2, 0, 0x8809, 0x8809); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(filePath, res); err != nil {
+		if err := amsdos.SaveOSFile(filePath, res); err != nil {
 			return err
 		}
 	}
@@ -8895,11 +8896,11 @@ func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 		return err
 	}
 	if !cont.NoAmsdosHeader {
-		if err := SaveAmsdosFile(osFilepath, ".PAL", res, 2, 0, 0x8809, 0x8809); err != nil {
+		if err := amsdos.SaveAmsdosFile(osFilepath, ".PAL", res, 2, 0, 0x8809, 0x8809); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(osFilepath, res); err != nil {
+		if err := amsdos.SaveOSFile(osFilepath, res); err != nil {
 			return err
 		}
 	}
@@ -9010,11 +9011,11 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, dont
 
 	fmt.Fprintf(os.Stdout, "%s, data size :%d\n", win.ToString(), len(data))
 	if !cont.NoAmsdosHeader {
-		if err := SaveAmsdosFile(osFilename, ".WIN", content, 2, 0, 0x4000, 0x4000); err != nil {
+		if err := amsdos.SaveAmsdosFile(osFilename, ".WIN", content, 2, 0, 0x4000, 0x4000); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(osFilename, content); err != nil {
+		if err := amsdos.SaveOSFile(osFilename, content); err != nil {
 			return err
 		}
 	}
@@ -9104,11 +9105,11 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 		copy(o[0x7da0:], egxOverscanTemplate[0x7da0:]) // copy egx routine
 	}
 	if !cont.NoAmsdosHeader {
-		if err := SaveAmsdosFile(osFilepath, ".SCR", o, 0, 0, 0x170, 0x170); err != nil {
+		if err := amsdos.SaveAmsdosFile(osFilepath, ".SCR", o, 0, 0, 0x170, 0x170); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(osFilepath, o); err != nil {
+		if err := amsdos.SaveOSFile(osFilepath, o); err != nil {
 			return err
 		}
 	}

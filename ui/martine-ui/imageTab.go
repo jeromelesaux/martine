@@ -18,6 +18,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/net"
@@ -49,7 +50,7 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 			palCode)
 		filename := filepath.Base(me.OriginalImagePath.Path())
 		fileExport := m.imageExport.ExportFolderPath + string(filepath.Separator) + filename + ".asm"
-		if err = file.SaveStringOSFile(fileExport, content); err != nil {
+		if err = amsdos.SaveStringOSFile(fileExport, content); err != nil {
 			pi.Hide()
 			dialog.ShowError(err, m.window)
 			return

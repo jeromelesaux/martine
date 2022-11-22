@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"sort"
 
-	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/amsdos"
 )
 
 type DeltaCollectionV2 struct {
@@ -57,7 +57,7 @@ func (dc *DeltaCollectionV2) Save(filename string) error {
 	if err != nil {
 		return err
 	}
-	return file.SaveOSFile(filename, b)
+	return amsdos.SaveOSFile(filename, b)
 }
 
 func (dc *DeltaCollectionV2) Marshall() ([]byte, error) {

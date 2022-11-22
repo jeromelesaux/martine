@@ -19,6 +19,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx/animate"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
@@ -70,7 +71,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						dialog.ShowError(err, m.window)
 						return
 					}
-					err = file.SaveOSFile(m.animateExport.ExportFolderPath+string(filepath.Separator)+"code.asm", []byte(code))
+					err = amsdos.SaveOSFile(m.animateExport.ExportFolderPath+string(filepath.Separator)+"code.asm", []byte(code))
 					if err != nil {
 						dialog.ShowError(err, m.window)
 						return

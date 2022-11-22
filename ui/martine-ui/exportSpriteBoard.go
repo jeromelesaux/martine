@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx/animate"
@@ -134,7 +135,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			code += routine
 		}
 
-		if err := file.SaveStringOSFile(s.ExportFolderPath+string(filepath.Separator)+"compiled_sprites.asm", code); err != nil {
+		if err := amsdos.SaveStringOSFile(s.ExportFolderPath+string(filepath.Separator)+"compiled_sprites.asm", code); err != nil {
 			pi.Hide()
 			dialog.NewError(err, m.window).Show()
 			return
@@ -166,7 +167,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		var err error
 		//TODO add amsdos header
 		if s.ExportWithAmsdosHeader {
-			err = file.SaveAmsdosFile(filename, ".WIN", buf, 2, 0, 0x4000, 0x4000)
+			err = amsdos.SaveAmsdosFile(filename, ".WIN", buf, 2, 0, 0x4000, 0x4000)
 			if err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
@@ -174,7 +175,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 				return
 			}
 		} else {
-			err = file.SaveOSFile(filename, buf)
+			err = amsdos.SaveOSFile(filename, buf)
 			if err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()

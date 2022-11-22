@@ -12,6 +12,7 @@ import (
 
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/errors"
@@ -492,7 +493,7 @@ func exportDeltaAnimate(
 		code += "\nbuffer dw 0\n"
 	}
 
-	return file.SaveStringOSFile(filename, code)
+	return amsdos.SaveStringOSFile(filename, code)
 }
 
 var deltaScreenCodeDeltaV2 = `

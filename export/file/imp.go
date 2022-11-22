@@ -12,6 +12,7 @@ import (
 
 	"github.com/jeromelesaux/m4client/cpc"
 	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/amsdos"
 )
 
 type ImpFooter struct {
@@ -118,11 +119,11 @@ func Imp(sprites []byte, nbFrames, width, height, mode uint, filename string, ex
 	impPath := filepath.Join(export.OutputPath, export.GetAmsdosFilename(filename, ".IMP"))
 
 	if !export.NoAmsdosHeader {
-		if err := SaveAmsdosFile(impPath, ".IMP", output, 0, 0, 0x4000, 0x0); err != nil {
+		if err := amsdos.SaveAmsdosFile(impPath, ".IMP", output, 0, 0, 0x4000, 0x0); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(impPath, output); err != nil {
+		if err := amsdos.SaveOSFile(impPath, output); err != nil {
 			return err
 		}
 	}
@@ -140,11 +141,11 @@ func TileMap(data []byte, filename string, export *x.MartineContext) error {
 	impPath := filepath.Join(export.OutputPath, export.GetAmsdosFilename(filename, ".TIL"))
 
 	if !export.NoAmsdosHeader {
-		if err := SaveAmsdosFile(impPath, ".TIL", output, 0, 0, 0x4000, 0); err != nil {
+		if err := amsdos.SaveAmsdosFile(impPath, ".TIL", output, 0, 0, 0x4000, 0); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(impPath, output); err != nil {
+		if err := amsdos.SaveOSFile(impPath, output); err != nil {
 			return err
 		}
 	}

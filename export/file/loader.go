@@ -11,6 +11,7 @@ import (
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/constants"
 	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/amsdos"
 )
 
 // CPC plus loader nb colors *2 offset 0x9d
@@ -1415,14 +1416,14 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cont *x.Ma
 	// modifier checksum amsdos header
 	// the header already in the static file
 	cont.AddFile(osFilepath)
-	if err := SaveOSFile(osFilepath, loader); err != nil {
+	if err := amsdos.SaveOSFile(osFilepath, loader); err != nil {
 		return err
 	}
 
 	// export fichier basic loader
 	loader = basicCPCPlusLoaderBasic
 	filename := cont.AmsdosFullPath(filePath, ".SCR")
-	filename = AmsdosFilename(filename, ".SCR")
+	filename = amsdos.AmsdosFilename(filename, ".SCR")
 	var scrFile [12]byte
 	for i := 0; i < 12; i++ {
 		scrFile[i] = ' '
@@ -1445,11 +1446,11 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cont *x.Ma
 	osFilepath = cont.AmsdosFullPath(filePath, ".BAS")
 
 	if !cont.NoAmsdosHeader {
-		if err := SaveAmsdosFile(osFilepath, ".BAS", loader, 0, 0, 0x170, 0); err != nil {
+		if err := amsdos.SaveAmsdosFile(osFilepath, ".BAS", loader, 0, 0, 0x170, 0); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(osFilepath, loader); err != nil {
+		if err := amsdos.SaveOSFile(osFilepath, loader); err != nil {
 			return err
 		}
 	}
@@ -1485,12 +1486,12 @@ func BasicLoader(filePath string, p color.Palette, cont *x.MartineContext) error
 	osFilepath := cont.AmsdosFullPath(filePath, ".BAS")
 
 	if !cont.NoAmsdosHeader {
-		if err := SaveAmsdosFile(osFilepath, ".BAS", loader, 0, 0, 0x170, 0); err != nil {
+		if err := amsdos.SaveAmsdosFile(osFilepath, ".BAS", loader, 0, 0, 0x170, 0); err != nil {
 			return err
 		}
 
 	} else {
-		if err := SaveOSFile(osFilepath, loader); err != nil {
+		if err := amsdos.SaveOSFile(osFilepath, loader); err != nil {
 			return err
 		}
 	}
@@ -1548,11 +1549,11 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 	flashBinPath := filepath.Join(cont.OutputPath, "FLASH.BIN")
 
 	if !cont.NoAmsdosHeader {
-		if err := SaveAmsdosFile(flashBinPath, ".BIN", flashLoader, 2, 0, 0x3000, 0x3000); err != nil {
+		if err := amsdos.SaveAmsdosFile(flashBinPath, ".BIN", flashLoader, 2, 0, 0x3000, 0x3000); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(flashBinPath, flashLoader); err != nil {
+		if err := amsdos.SaveOSFile(flashBinPath, flashLoader); err != nil {
 			return err
 		}
 	}
@@ -1567,11 +1568,11 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 	basicPath := filepath.Join(cont.OutputPath, "-SWITCH.BAS")
 
 	if !cont.NoAmsdosHeader {
-		if err := SaveAmsdosFile(basicPath, ".BAS", basicLoader, 0, 0, 0x170, 0); err != nil {
+		if err := amsdos.SaveAmsdosFile(basicPath, ".BAS", basicLoader, 0, 0, 0x170, 0); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(basicPath, basicLoader); err != nil {
+		if err := amsdos.SaveOSFile(basicPath, basicLoader); err != nil {
 			return err
 		}
 	}
@@ -1611,11 +1612,11 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cont *x.Mar
 	osFilepath := cont.AmsdosFullPath(filePath, ".BAS")
 
 	if !cont.NoAmsdosHeader {
-		if err := SaveAmsdosFile(osFilepath, ".BAS", loader, 0, 0, 0x170, 0); err != nil {
+		if err := amsdos.SaveAmsdosFile(osFilepath, ".BAS", loader, 0, 0, 0x170, 0); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(osFilepath, loader); err != nil {
+		if err := amsdos.SaveOSFile(osFilepath, loader); err != nil {
 			return err
 		}
 	}
@@ -1692,11 +1693,11 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cont *x.Mar
 	egxBinPath := filepath.Join(cont.OutputPath, "EGX.BIN")
 
 	if !cont.NoAmsdosHeader {
-		if err := SaveAmsdosFile(egxBinPath, ".BIN", egxLoader, 2, 0, egxHeaderStartAddress, egxHeaderStartAddress); err != nil {
+		if err := amsdos.SaveAmsdosFile(egxBinPath, ".BIN", egxLoader, 2, 0, egxHeaderStartAddress, egxHeaderStartAddress); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(egxBinPath, egxLoader); err != nil {
+		if err := amsdos.SaveOSFile(egxBinPath, egxLoader); err != nil {
 			return err
 		}
 	}

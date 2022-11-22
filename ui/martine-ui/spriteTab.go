@@ -28,7 +28,7 @@ import (
 func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 
 	if s.SpriteColumns == 0 || s.SpriteRows == 0 {
-		dialog.NewError(errors.New("number of sprites per row or column are not set."), m.window).Show()
+		dialog.NewError(errors.New("number of sprites per row or column are not set"), m.window).Show()
 		return
 	}
 	pi := dialog.NewProgressInfinite("Computing....", "Please wait.", m.window)

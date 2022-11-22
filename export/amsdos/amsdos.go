@@ -1,4 +1,4 @@
-package file
+package amsdos
 
 import (
 	"encoding/binary"

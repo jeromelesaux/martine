@@ -8,6 +8,7 @@ import (
 
 	"github.com/jeromelesaux/martine/constants"
 	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/amsdos"
 )
 
 // ByteToken is the token by default
@@ -41,11 +42,11 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, co
 	}
 	if !cont.NoAmsdosHeader {
 
-		if err := SaveAmsdosFile(osFilepath, ".TXT", []byte(out), 0, 0, 0, 0); err != nil {
+		if err := amsdos.SaveAmsdosFile(osFilepath, ".TXT", []byte(out), 0, 0, 0, 0); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(osFilepath, []byte(out)); err != nil {
+		if err := amsdos.SaveOSFile(osFilepath, []byte(out)); err != nil {
 			return err
 		}
 	}
@@ -156,12 +157,12 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 	}
 
 	if !cont.NoAmsdosHeader {
-		if err := SaveAmsdosFile(osFilepath, ".TXT", []byte(out), 0, 0, 0, 0); err != nil {
+		if err := amsdos.SaveAmsdosFile(osFilepath, ".TXT", []byte(out), 0, 0, 0, 0); err != nil {
 			return err
 		}
 		//binary.Write(fw, binary.LittleEndian, header)
 	} else {
-		if err := SaveOSFile(osFilepath, []byte(out)); err != nil {
+		if err := amsdos.SaveOSFile(osFilepath, []byte(out)); err != nil {
 			return err
 		}
 	}

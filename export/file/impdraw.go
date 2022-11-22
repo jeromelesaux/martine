@@ -8,6 +8,7 @@ import (
 
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/amsdos"
 )
 
 /*
@@ -88,11 +89,11 @@ func ExportSplitRaster(filename string, p color.Palette, rasters *constants.Spli
 	basicPath := filepath.Join(cont.OutputPath, cont.GetAmsdosFilename(filename, ".SPL"))
 
 	if !cont.NoAmsdosHeader {
-		if err := SaveAmsdosFile(basicPath, ".SPL", output, 0, 0, 0x170, 0); err != nil {
+		if err := amsdos.SaveAmsdosFile(basicPath, ".SPL", output, 0, 0, 0x170, 0); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(basicPath, output); err != nil {
+		if err := amsdos.SaveOSFile(basicPath, output); err != nil {
 			return err
 		}
 	}
@@ -109,17 +110,17 @@ func SaveGo(filePath string, data []byte, p color.Palette, screenMode uint8, con
 	go1Filename := cont.AmsdosFullPath(filePath, ".GO1")
 	go2Filename := cont.AmsdosFullPath(filePath, ".GO2")
 	if !cont.NoAmsdosHeader {
-		if err := SaveAmsdosFile(go1Filename, ".GO1", data1, 0, 0, 0x20, 0); err != nil {
+		if err := amsdos.SaveAmsdosFile(go1Filename, ".GO1", data1, 0, 0, 0x20, 0); err != nil {
 			return err
 		}
-		if err := SaveAmsdosFile(go2Filename, ".GO2", data2, 0, 0, 0x4000, 0); err != nil {
+		if err := amsdos.SaveAmsdosFile(go2Filename, ".GO2", data2, 0, 0, 0x4000, 0); err != nil {
 			return err
 		}
 	} else {
-		if err := SaveOSFile(go1Filename, data1); err != nil {
+		if err := amsdos.SaveOSFile(go1Filename, data1); err != nil {
 			return err
 		}
-		if err := SaveOSFile(go2Filename, data2); err != nil {
+		if err := amsdos.SaveOSFile(go2Filename, data2); err != nil {
 			return err
 		}
 	}

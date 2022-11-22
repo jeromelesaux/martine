@@ -11,6 +11,7 @@ import (
 
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/errors"
@@ -396,7 +397,7 @@ func (a *AnalyzeBoard) SaveFlatFile(folderpath string, palette color.Palette, mo
 	}
 	spriteFolder := filepath.Join(folderpath, "sprites")
 	os.Mkdir(spriteFolder, os.ModePerm)
-	return file.SaveOSFile(filepath.Join(spriteFolder, "tiles.bin"), flatFile)
+	return amsdos.SaveOSFile(filepath.Join(spriteFolder, "tiles.bin"), flatFile)
 }
 
 func (a *AnalyzeBoard) SaveSprites(folderpath string, palette color.Palette, mode uint8, cont *export.MartineContext) error {

@@ -12,6 +12,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/transformation"
@@ -125,5 +126,5 @@ func exportDeltaMotif(images [][]byte, motifs [][]byte, p color.Palette, ex *exp
 	deltaCode += file.FormatAssemblyBasicPalette(p, "\n")
 
 	//	fmt.Printf("%s", deltaCode)
-	return file.SaveStringOSFile(filename, deltaCode)
+	return amsdos.SaveStringOSFile(filename, deltaCode)
 }

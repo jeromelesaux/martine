@@ -15,6 +15,7 @@ import (
 
 	cm "github.com/jeromelesaux/martine/common"
 	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx/common"
 )
@@ -398,7 +399,7 @@ func (dc *DeltaCollection) Save(filename string) error {
 	if err != nil {
 		return err
 	}
-	return file.SaveOSFile(filename, b)
+	return amsdos.SaveOSFile(filename, b)
 }
 
 func DeltaAddress(x, y, lineOctetWidth int) int {
