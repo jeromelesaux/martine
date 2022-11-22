@@ -10,7 +10,6 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/ascii"
-	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/impdraw/overscan"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
@@ -662,7 +661,7 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *e
 				dataUp := ToMode0(imgUp, p, config)
 				dataDown := ToMode0(imgDown, p, config)
 				*/
-				if err := file.SaveGo(filePath, bw, p, screenMode, ex); err != nil {
+				if err := overscan.SaveGo(filePath, bw, p, screenMode, ex); err != nil {
 					fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 					return err
 				}
