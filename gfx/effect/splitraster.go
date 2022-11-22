@@ -10,7 +10,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/impdraw/splitraster"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/errors"
@@ -39,7 +39,7 @@ func DoSpliteRaster(in image.Image, screenMode uint8, filename string, cont *exp
 	if err := common.Export(filename, bw, p, screenMode, cont); err != nil {
 		return err
 	}
-	return file.ExportSplitRaster(filename, p, rasters, cont)
+	return splitraster.ExportSplitRaster(filename, p, rasters, cont)
 }
 
 func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cont *export.MartineContext) (color.Palette, []byte, *constants.SplitRasterScreen, error) {
