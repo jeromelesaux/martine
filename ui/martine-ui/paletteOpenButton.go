@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 )
@@ -41,7 +42,7 @@ func NewOpenPaletteButton(m PaletteInterface, win fyne.Window) *widget.Button {
 				m.SetPalette(p)
 				m.SetPaletteImage(*canvas.NewImageFromImage(png.PalToImage(p)))
 			case ".kit":
-				p, _, err := ocpartstudio.OpenKit(palettePath)
+				p, _, err := impPalette.OpenKit(palettePath)
 				if err != nil {
 					dialog.ShowError(err, win)
 					return

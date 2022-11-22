@@ -625,7 +625,7 @@ func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Siz
 			return err
 		}
 	} else {
-		if err := ocpartstudio.Kit(filename, p, mode, dontImportDsk, cont); err != nil {
+		if err := impPalette.Kit(filename, p, mode, dontImportDsk, cont); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 			return err
 		}
@@ -709,7 +709,7 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *e
 			return err
 		}
 	} else {
-		if err := ocpartstudio.Kit(filePath, p, screenMode, false, ex); err != nil {
+		if err := impPalette.Kit(filePath, p, screenMode, false, ex); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}

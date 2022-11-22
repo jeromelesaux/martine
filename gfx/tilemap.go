@@ -13,8 +13,8 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
+	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
-	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/errors"
 	"github.com/jeromelesaux/martine/gfx/transformation"
@@ -123,7 +123,7 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 	data := make([]byte, 0)
 
 	finalFile := strings.ReplaceAll(filename, "?", "")
-	if err := ocpartstudio.Kit(finalFile, palette, mode, false, cont); err != nil {
+	if err := impPalette.Kit(finalFile, palette, mode, false, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", finalFile, err)
 		return err
 	}
@@ -412,7 +412,7 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 	data := make([]byte, 0)
 
 	finalFile := strings.ReplaceAll(filename, "?", "")
-	if err := ocpartstudio.Kit(finalFile, palette, mode, false, cont); err != nil {
+	if err := impPalette.Kit(finalFile, palette, mode, false, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", finalFile, err)
 		return err
 	}
@@ -587,7 +587,7 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 	}
 
 	finalFile := strings.ReplaceAll(filename, "?", "")
-	if err = ocpartstudio.Kit(finalFile, palette, mode, false, cont); err != nil {
+	if err = impPalette.Kit(finalFile, palette, mode, false, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", finalFile, err)
 		return err
 	}
@@ -685,7 +685,7 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 	data := make([]byte, 0)
 
 	finalFile := strings.ReplaceAll(filename, "?", "")
-	if err = ocpartstudio.Kit(finalFile, palette, mode, false, cont); err != nil {
+	if err = impPalette.Kit(finalFile, palette, mode, false, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", finalFile, err)
 		return err
 	}

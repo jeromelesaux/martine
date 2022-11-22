@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/diskimage"
+	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/m4"
 
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
@@ -122,7 +123,7 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	defer func() {
 		os.Remove("temporary_palette.kit")
 	}()
-	if err := ocpartstudio.SaveKit("temporary_palette.kit", me.ResultImage.Palette, false); err != nil {
+	if err := impPalette.SaveKit("temporary_palette.kit", me.ResultImage.Palette, false); err != nil {
 		pi.Hide()
 		dialog.ShowError(err, m.window)
 	}

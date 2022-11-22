@@ -15,7 +15,6 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/diskimage"
-	"github.com/jeromelesaux/martine/export/file"
 	ovs "github.com/jeromelesaux/martine/export/impdraw/overscan"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
@@ -221,13 +220,13 @@ func main() {
 
 	if *info {
 		if *palettePath != "" {
-			file.PalInformation(*palettePath)
+			ocpartstudio.PalInformation(*palettePath)
 		}
 		if *winPath != "" {
-			file.WinInformation(*winPath)
+			ocpartstudio.WinInformation(*winPath)
 		}
 		if *kitPath != "" {
-			file.KitInformation(*kitPath)
+			impPalette.KitInformation(*kitPath)
 		}
 		if *inkPath != "" {
 			impPalette.InkInformation(*inkPath)
@@ -438,7 +437,7 @@ func main() {
 			}
 		} else {
 			if *kitPath != "" && *plusMode {
-				p, _, err = ocpartstudio.OpenKit(*kitPath)
+				p, _, err = impPalette.OpenKit(*kitPath)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Cannot open kit file (%s) error %v\n", *kitPath, err)
 					os.Exit(-1)
@@ -553,7 +552,7 @@ func main() {
 							var p color.Palette
 							var err error
 							if cont.CpcPlus {
-								p, _, err = ocpartstudio.OpenKit(*kitPath)
+								p, _, err = impPalette.OpenKit(*kitPath)
 								if *kitPath != "" {
 									if err != nil {
 										fmt.Fprintf(os.Stderr, "Error while reading kit file (%s) :%v\n", *kitPath, err)

@@ -16,6 +16,7 @@ import (
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/compression"
 	"github.com/jeromelesaux/martine/export/diskimage"
+	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/spritehard"
@@ -111,7 +112,7 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 	pi := dialog.NewProgressInfinite("Saving....", "Please wait.", m.window)
 	pi.Show()
-	if err := ocpartstudio.SaveKit(s.ExportFolderPath+string(filepath.Separator)+"SPRITES.KIT", s.Palette, s.ExportWithAmsdosHeader); err != nil {
+	if err := impPalette.SaveKit(s.ExportFolderPath+string(filepath.Separator)+"SPRITES.KIT", s.Palette, s.ExportWithAmsdosHeader); err != nil {
 		pi.Hide()
 		dialog.ShowError(err, m.window)
 		return

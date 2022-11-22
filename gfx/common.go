@@ -133,7 +133,7 @@ func ApplyOneImageAndExport(in image.Image,
 	}
 	if cont.KitPath != "" {
 		fmt.Fprintf(os.Stdout, "Input plus palette to apply : (%s)\n", cont.KitPath)
-		palette, _, err = ocpartstudio.OpenKit(cont.KitPath)
+		palette, _, err = impPalette.OpenKit(cont.KitPath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", cont.KitPath)
 		} else {

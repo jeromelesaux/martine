@@ -73,7 +73,7 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 	}
 	if export.KitPath != "" {
 		fmt.Fprintf(os.Stdout, "Input plus palette to apply : (%s)\n", export.KitPath)
-		palette, _, err := ocpartstudio.OpenKit(export.KitPath)
+		palette, _, err := impPalette.OpenKit(export.KitPath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", export.KitPath)
 		} else {

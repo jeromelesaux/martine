@@ -18,6 +18,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/export"
+	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
@@ -237,7 +238,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 										os.Remove(uc.URI().Path())
 										context := export.NewMartineContext(filepath.Base(paletteExportPath), paletteExportPath)
 										context.NoAmsdosHeader = false
-										if err := ocpartstudio.SaveKit(paletteExportPath+".kit", tm.Palette, false); err != nil {
+										if err := impPalette.SaveKit(paletteExportPath+".kit", tm.Palette, false); err != nil {
 											dialog.ShowError(err, m.window)
 										}
 										if err := ocpartstudio.SavePal(paletteExportPath+".pal", tm.Palette, uint8(tm.Mode), false); err != nil {
