@@ -19,6 +19,7 @@ import (
 	ovs "github.com/jeromelesaux/martine/export/impdraw/overscan"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
 	"github.com/jeromelesaux/martine/export/net"
+	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/snapshot"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/animate"
@@ -394,7 +395,7 @@ func main() {
 				screenMode)
 
 			spritePath := cont.AmsdosFullPath(v, ".WIN")
-			data, err := file.RawWin(spritePath)
+			data, err := ocpartstudio.RawWin(spritePath)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error while extracting raw content, err:%s\n", err)
 			}
@@ -428,14 +429,14 @@ func main() {
 		var p color.Palette
 		var err error
 		if *palettePath != "" && !*plusMode {
-			p, _, err = file.OpenPal(*palettePath)
+			p, _, err = ocpartstudio.OpenPal(*palettePath)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot open palette file (%s) error %v\n", *palettePath, err)
 				os.Exit(-1)
 			}
 		} else {
 			if *kitPath != "" && *plusMode {
-				p, _, err = file.OpenKit(*kitPath)
+				p, _, err = ocpartstudio.OpenKit(*kitPath)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Cannot open kit file (%s) error %v\n", *kitPath, err)
 					os.Exit(-1)
@@ -550,7 +551,7 @@ func main() {
 							var p color.Palette
 							var err error
 							if cont.CpcPlus {
-								p, _, err = file.OpenKit(*kitPath)
+								p, _, err = ocpartstudio.OpenKit(*kitPath)
 								if *kitPath != "" {
 									if err != nil {
 										fmt.Fprintf(os.Stderr, "Error while reading kit file (%s) :%v\n", *kitPath, err)
@@ -559,7 +560,7 @@ func main() {
 								}
 							} else {
 								if *palettePath != "" {
-									p, _, err = file.OpenPal(*palettePath)
+									p, _, err = ocpartstudio.OpenPal(*palettePath)
 									if err != nil {
 										fmt.Fprintf(os.Stderr, "Error while reading palette file (%s) :%v\n", *palettePath, err)
 										os.Exit(-1)

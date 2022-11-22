@@ -12,8 +12,8 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/diskimage"
-	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/net"
+	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/snapshot"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
@@ -121,14 +121,14 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	defer func() {
 		os.Remove("temporary_palette.kit")
 	}()
-	if err := file.SaveKit("temporary_palette.kit", me.ResultImage.Palette, false); err != nil {
+	if err := ocpartstudio.SaveKit("temporary_palette.kit", me.ResultImage.Palette, false); err != nil {
 		pi.Hide()
 		dialog.ShowError(err, m.window)
 	}
 	context.KitPath = "temporary_palette.kit"
 
 	if !context.Overscan {
-		if err := file.EgxLoader(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Palette, uint8(me.LeftImage.Mode), uint8(me.RightImage.Mode), context); err != nil {
+		if err := ocpartstudio.EgxLoader(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Palette, uint8(me.LeftImage.Mode), uint8(me.RightImage.Mode), context); err != nil {
 			pi.Hide()
 			dialog.ShowError(err, m.window)
 			return

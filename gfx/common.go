@@ -11,7 +11,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/filter"
@@ -114,7 +114,7 @@ func ApplyOneImageAndExport(in image.Image,
 
 	if cont.PalettePath != "" {
 		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", cont.PalettePath)
-		palette, _, err = file.OpenPal(cont.PalettePath)
+		palette, _, err = ocpartstudio.OpenPal(cont.PalettePath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", cont.PalettePath)
 		} else {
@@ -123,7 +123,7 @@ func ApplyOneImageAndExport(in image.Image,
 	}
 	if cont.InkPath != "" {
 		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", cont.InkPath)
-		palette, _, err = file.OpenInk(cont.InkPath)
+		palette, _, err = ocpartstudio.OpenInk(cont.InkPath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", cont.InkPath)
 		} else {
@@ -132,7 +132,7 @@ func ApplyOneImageAndExport(in image.Image,
 	}
 	if cont.KitPath != "" {
 		fmt.Fprintf(os.Stdout, "Input plus palette to apply : (%s)\n", cont.KitPath)
-		palette, _, err = file.OpenKit(cont.KitPath)
+		palette, _, err = ocpartstudio.OpenKit(cont.KitPath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", cont.KitPath)
 		} else {

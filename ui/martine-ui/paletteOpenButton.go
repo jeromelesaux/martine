@@ -11,7 +11,7 @@ import (
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 )
 
@@ -33,7 +33,7 @@ func NewOpenPaletteButton(m PaletteInterface, win fyne.Window) *widget.Button {
 			palettePath := reader.URI().Path()
 			switch strings.ToLower(filepath.Ext(palettePath)) {
 			case ".pal":
-				p, _, err := file.OpenPal(palettePath)
+				p, _, err := ocpartstudio.OpenPal(palettePath)
 				if err != nil {
 					dialog.ShowError(err, win)
 					return
@@ -41,7 +41,7 @@ func NewOpenPaletteButton(m PaletteInterface, win fyne.Window) *widget.Button {
 				m.SetPalette(p)
 				m.SetPaletteImage(*canvas.NewImageFromImage(png.PalToImage(p)))
 			case ".kit":
-				p, _, err := file.OpenKit(palettePath)
+				p, _, err := ocpartstudio.OpenKit(palettePath)
 				if err != nil {
 					dialog.ShowError(err, win)
 					return

@@ -12,6 +12,7 @@ import (
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/impdraw/overscan"
+	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
@@ -109,13 +110,13 @@ func RawSpriteToImg(data []byte, height, width, mode uint8, p color.Palette) *im
 // using the mode and palette as arguments
 func SpriteToImg(winPath string, mode uint8, p color.Palette) (*image.NRGBA, constants.Size, error) {
 	var s constants.Size
-	footer, err := file.OpenWin(winPath)
+	footer, err := ocpartstudio.OpenWin(winPath)
 	if err != nil {
 		return nil, s, err
 	}
 	var out *image.NRGBA
 
-	d, err := file.RawWin(winPath)
+	d, err := ocpartstudio.RawWin(winPath)
 	if err != nil {
 		return nil, s, err
 	}
@@ -322,7 +323,7 @@ func ScrToImg(scrPath string, mode uint8, p color.Palette) (*image.NRGBA, error)
 		Min: image.Point{X: 0, Y: 0},
 		Max: image.Point{X: int(m.Width), Y: int(m.Height)}})
 
-	d, err := file.RawScr(scrPath)
+	d, err := ocpartstudio.RawScr(scrPath)
 	if err != nil {
 		return nil, err
 	}
@@ -600,12 +601,12 @@ func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) e
 }
 
 func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, cont *export.MartineContext) error {
-	if err := file.Win(filename, data, mode, lineSize, size.Height, dontImportDsk, cont); err != nil {
+	if err := ocpartstudio.Win(filename, data, mode, lineSize, size.Height, dontImportDsk, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 		return err
 	}
 	if !cont.CpcPlus {
-		if err := file.Pal(filename, p, mode, dontImportDsk, cont); err != nil {
+		if err := ocpartstudio.Pal(filename, p, mode, dontImportDsk, cont); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 			return err
 		}
@@ -614,7 +615,7 @@ func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Siz
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
-		if err := file.Ink(filename, p, 2, dontImportDsk, cont); err != nil {
+		if err := ocpartstudio.Ink(filename, p, 2, dontImportDsk, cont); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 			return err
 		}
@@ -624,7 +625,7 @@ func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Siz
 			return err
 		}
 	} else {
-		if err := file.Kit(filename, p, mode, dontImportDsk, cont); err != nil {
+		if err := ocpartstudio.Kit(filename, p, mode, dontImportDsk, cont); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 			return err
 		}
@@ -679,17 +680,17 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *e
 		}
 
 	} else {
-		if err := file.Scr(filePath, bw, p, screenMode, ex); err != nil {
+		if err := ocpartstudio.Scr(filePath, bw, p, screenMode, ex); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
-		if err := file.Loader(filePath, p, screenMode, ex); err != nil {
+		if err := ocpartstudio.Loader(filePath, p, screenMode, ex); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving the loader %s with error %v\n", filePath, err)
 			return err
 		}
 	}
 	if !ex.CpcPlus {
-		if err := file.Pal(filePath, p, screenMode, false, ex); err != nil {
+		if err := ocpartstudio.Pal(filePath, p, screenMode, false, ex); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
@@ -698,7 +699,7 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *e
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath2, err)
 			return err
 		}
-		if err := file.Ink(filePath, p, screenMode, false, ex); err != nil {
+		if err := ocpartstudio.Ink(filePath, p, screenMode, false, ex); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
@@ -708,7 +709,7 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *e
 			return err
 		}
 	} else {
-		if err := file.Kit(filePath, p, screenMode, false, ex); err != nil {
+		if err := ocpartstudio.Kit(filePath, p, screenMode, false, ex); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}

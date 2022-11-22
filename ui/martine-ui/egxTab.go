@@ -17,7 +17,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/common"
@@ -415,10 +415,10 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 								os.Remove(uc.URI().Path())
 								context := export.NewMartineContext(filepath.Base(paletteExportPath), paletteExportPath)
 								context.NoAmsdosHeader = false
-								if err := file.SaveKit(paletteExportPath+".kit", me.Palette, false); err != nil {
+								if err := ocpartstudio.SaveKit(paletteExportPath+".kit", me.Palette, false); err != nil {
 									dialog.ShowError(err, m.window)
 								}
-								if err := file.SavePal(paletteExportPath+".pal", me.Palette, uint8(me.Mode), false); err != nil {
+								if err := ocpartstudio.SavePal(paletteExportPath+".pal", me.Palette, uint8(me.Mode), false); err != nil {
 									dialog.ShowError(err, m.window)
 								}
 							}, m.window)

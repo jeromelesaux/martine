@@ -10,7 +10,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/gfx"
 )
 
@@ -30,11 +30,11 @@ func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, cont *ex
 	}
 	filename1 := filepath.Base(filepath1)
 	filename2 := filepath.Base(filepath2)
-	p1, _, err := file.OpenPal(palpath1)
+	p1, _, err := ocpartstudio.OpenPal(palpath1)
 	if err != nil {
 		return err
 	}
-	p2, _, err := file.OpenPal(palpath2)
+	p2, _, err := ocpartstudio.OpenPal(palpath2)
 	if err != nil {
 		return err
 	}
@@ -42,7 +42,7 @@ func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, cont *ex
 	cont.AddFile(filepath2)
 	cont.AddFile(palpath1)
 	cont.AddFile(palpath2)
-	return file.FlashLoader(filename1, filename2, p1, p2, uint8(m1), uint8(m2), cont)
+	return ocpartstudio.FlashLoader(filename1, filename2, p1, p2, uint8(m1), uint8(m2), cont)
 }
 
 func AutoFlash(in image.Image,
@@ -98,7 +98,7 @@ func AutoFlash(in image.Image,
 	if err != nil {
 		return err
 	}
-	p1, _, err := file.OpenPal(flashPalettePath1)
+	p1, _, err := ocpartstudio.OpenPal(flashPalettePath1)
 	if err != nil {
 		return err
 	}
@@ -141,9 +141,9 @@ func AutoFlash(in image.Image,
 	if err != nil {
 		return err
 	}
-	p2, _, err := file.OpenPal(flashPalettePath2)
+	p2, _, err := ocpartstudio.OpenPal(flashPalettePath2)
 	if err != nil {
 		return err
 	}
-	return file.FlashLoader(filenameLeft, filenameRigth, p1, p2, uint8(mode), uint8(flashMode), cont)
+	return ocpartstudio.FlashLoader(filenameLeft, filenameRigth, p1, p2, uint8(mode), uint8(flashMode), cont)
 }

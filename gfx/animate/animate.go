@@ -14,7 +14,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	p "github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/common"
@@ -54,7 +54,7 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 	var palette, newPalette color.Palette
 	if export.PalettePath != "" {
 		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", export.PalettePath)
-		palette, _, err := file.OpenPal(export.PalettePath)
+		palette, _, err := ocpartstudio.OpenPal(export.PalettePath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", export.PalettePath)
 		} else {
@@ -63,7 +63,7 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 	}
 	if export.InkPath != "" {
 		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", export.InkPath)
-		palette, _, err := file.OpenInk(export.InkPath)
+		palette, _, err := ocpartstudio.OpenInk(export.InkPath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", export.InkPath)
 		} else {
@@ -72,7 +72,7 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 	}
 	if export.KitPath != "" {
 		fmt.Fprintf(os.Stdout, "Input plus palette to apply : (%s)\n", export.KitPath)
-		palette, _, err := file.OpenKit(export.KitPath)
+		palette, _, err := ocpartstudio.OpenKit(export.KitPath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", export.KitPath)
 		} else {

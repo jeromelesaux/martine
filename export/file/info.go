@@ -3,11 +3,13 @@ package file
 import (
 	"fmt"
 	"os"
+
+	"github.com/jeromelesaux/martine/export/ocpartstudio"
 )
 
 func PalInformation(filePath string) {
 	fmt.Fprintf(os.Stdout, "Input palette to open : (%s)\n", filePath)
-	_, palette, err := OpenPal(filePath)
+	_, palette, err := ocpartstudio.OpenPal(filePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", filePath)
 	} else {
@@ -17,7 +19,7 @@ func PalInformation(filePath string) {
 
 func WinInformation(filePath string) {
 	fmt.Fprintf(os.Stdout, "Input window to open : (%s)\n", filePath)
-	win, err := OpenWin(filePath)
+	win, err := ocpartstudio.OpenWin(filePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Window in file (%s) can not be read skipped\n", filePath)
 	} else {
@@ -27,7 +29,7 @@ func WinInformation(filePath string) {
 
 func KitInformation(filePath string) {
 	fmt.Fprintf(os.Stdout, "Input kit palette to open : (%s)\n", filePath)
-	_, palette, err := OpenKit(filePath)
+	_, palette, err := ocpartstudio.OpenKit(filePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", filePath)
 	} else {
@@ -37,7 +39,7 @@ func KitInformation(filePath string) {
 
 func InkInformation(filePath string) {
 	fmt.Fprintf(os.Stdout, "Input kit palette to open : (%s)\n", filePath)
-	_, palette, err := OpenInk(filePath)
+	_, palette, err := ocpartstudio.OpenInk(filePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", filePath)
 	} else {

@@ -10,7 +10,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/common"
@@ -56,7 +56,7 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cont *export.
 			return err
 		}
 		if !cont.Overscan {
-			if err = file.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), cont); err != nil {
+			if err = ocpartstudio.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), cont); err != nil {
 				return err
 			}
 		}
@@ -104,7 +104,7 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cont *export.
 				return err
 			}
 			if !cont.Overscan {
-				if err = file.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), cont); err != nil {
+				if err = ocpartstudio.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), cont); err != nil {
 					return err
 				}
 			}
@@ -132,7 +132,7 @@ func AutoEgx1(in image.Image,
 
 	if cont.PalettePath != "" {
 		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", cont.PalettePath)
-		palette, _, err = file.OpenPal(cont.PalettePath)
+		palette, _, err = ocpartstudio.OpenPal(cont.PalettePath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", cont.PalettePath)
 		} else {
@@ -174,7 +174,7 @@ func AutoEgx2(in image.Image,
 
 	if cont.PalettePath != "" {
 		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", cont.PalettePath)
-		palette, _, err = file.OpenPal(cont.PalettePath)
+		palette, _, err = ocpartstudio.OpenPal(cont.PalettePath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", cont.PalettePath)
 		} else {

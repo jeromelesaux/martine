@@ -1,4 +1,4 @@
-package file
+package ocpartstudio_test
 
 import (
 	"testing"

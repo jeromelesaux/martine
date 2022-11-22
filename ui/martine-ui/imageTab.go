@@ -21,8 +21,8 @@ import (
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/diskimage"
-	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/net"
+	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/export/snapshot"
 	"github.com/jeromelesaux/martine/gfx"
@@ -62,7 +62,7 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 		defer func() {
 			os.Remove("temporary_palette.kit")
 		}()
-		if err := file.SaveKit("temporary_palette.kit", me.Palette, false); err != nil {
+		if err := ocpartstudio.SaveKit("temporary_palette.kit", me.Palette, false); err != nil {
 			pi.Hide()
 			dialog.ShowError(err, m.window)
 		}
@@ -406,10 +406,10 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 								os.Remove(uc.URI().Path())
 								context := export.NewMartineContext(filepath.Base(paletteExportPath), paletteExportPath)
 								context.NoAmsdosHeader = false
-								if err := file.SaveKit(paletteExportPath+".kit", me.Palette, false); err != nil {
+								if err := ocpartstudio.SaveKit(paletteExportPath+".kit", me.Palette, false); err != nil {
 									dialog.ShowError(err, m.window)
 								}
-								if err := file.SavePal(paletteExportPath+".pal", me.Palette, uint8(me.Mode), false); err != nil {
+								if err := ocpartstudio.SavePal(paletteExportPath+".pal", me.Palette, uint8(me.Mode), false); err != nil {
 									dialog.ShowError(err, m.window)
 								}
 							}, m.window)

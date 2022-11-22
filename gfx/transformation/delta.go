@@ -17,8 +17,8 @@ import (
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/ascii"
-	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/impdraw/overscan"
+	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/gfx/common"
 )
 
@@ -517,19 +517,19 @@ func ProceedDelta(filespath []string, initialAddress uint16, cont *x.MartineCont
 	for i := 0; i < len(filespath)-1; i++ {
 		switch strings.ToUpper(filepath.Ext(filespath[i])) {
 		case ".WIN":
-			d1, err = file.RawWin(filespath[i])
+			d1, err = ocpartstudio.RawWin(filespath[i])
 			if err != nil {
 				return err
 			}
 			isSprite = true
-			footer, err := file.OpenWin(filespath[i])
+			footer, err := ocpartstudio.OpenWin(filespath[i])
 			if err != nil {
 				return err
 			}
 			size.Width = int(footer.Width)
 			size.Height = int(footer.Height)
 		case ".SCR":
-			_, err = file.RawScr(filespath[i])
+			_, err = ocpartstudio.RawScr(filespath[i])
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "File (%s) is not a simple screen.\n", filespath[i])
 			}
@@ -543,19 +543,19 @@ func ProceedDelta(filespath []string, initialAddress uint16, cont *x.MartineCont
 
 		switch strings.ToUpper(filepath.Ext(filespath[i+1])) {
 		case ".WIN":
-			d2, err = file.RawWin(filespath[i+1])
+			d2, err = ocpartstudio.RawWin(filespath[i+1])
 			if err != nil {
 				return err
 			}
 			isSprite = true
-			footer, err := file.OpenWin(filespath[i+1])
+			footer, err := ocpartstudio.OpenWin(filespath[i+1])
 			if err != nil {
 				return err
 			}
 			size.Width = int(footer.Width)
 			size.Height = int(footer.Height)
 		case ".SCR":
-			_, err = file.RawScr(filespath[i+1])
+			_, err = ocpartstudio.RawScr(filespath[i+1])
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "File (%s) is not a simple screen.\n", filespath[i+1])
 			}
@@ -585,18 +585,18 @@ func ProceedDelta(filespath []string, initialAddress uint16, cont *x.MartineCont
 
 	switch strings.ToUpper(filepath.Ext(filespath[len(filespath)-1])) {
 	case ".WIN":
-		d1, err = file.RawWin(filespath[len(filespath)-1])
+		d1, err = ocpartstudio.RawWin(filespath[len(filespath)-1])
 		if err != nil {
 			return err
 		}
-		footer, err := file.OpenWin(filespath[len(filespath)-1])
+		footer, err := ocpartstudio.OpenWin(filespath[len(filespath)-1])
 		if err != nil {
 			return err
 		}
 		size.Width = int(footer.Width)
 		size.Height = int(footer.Height)
 	case ".SCR":
-		_, err = file.RawScr(filespath[len(filespath)-1])
+		_, err = ocpartstudio.RawScr(filespath[len(filespath)-1])
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "File (%s) is not a simple screen.\n", filespath[len(filespath)-1])
 		}
@@ -610,18 +610,18 @@ func ProceedDelta(filespath []string, initialAddress uint16, cont *x.MartineCont
 
 	switch strings.ToUpper(filepath.Ext(filespath[0])) {
 	case ".WIN":
-		d2, err = file.RawWin(filespath[0])
+		d2, err = ocpartstudio.RawWin(filespath[0])
 		if err != nil {
 			return err
 		}
-		footer, err := file.OpenWin(filespath[0])
+		footer, err := ocpartstudio.OpenWin(filespath[0])
 		if err != nil {
 			return err
 		}
 		size.Width = int(footer.Width)
 		size.Height = int(footer.Height)
 	case ".SCR":
-		_, err = file.RawScr(filespath[0])
+		_, err = ocpartstudio.RawScr(filespath[0])
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "File (%s) is not a simple screen.\n", filespath[0])
 		}
