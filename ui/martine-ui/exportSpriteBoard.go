@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
+	"github.com/jeromelesaux/martine/export/compression"
 	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx/animate"
@@ -163,7 +164,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			}
 		}
 		filename := s.ExportFolderPath + string(filepath.Separator) + "SPRITES.BIN"
-		buf, _ = file.Compress(buf, s.ExportCompression)
+		buf, _ = compression.Compress(buf, s.ExportCompression)
 		var err error
 		//TODO add amsdos header
 		if s.ExportWithAmsdosHeader {

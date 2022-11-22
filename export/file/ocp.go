@@ -14,6 +14,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
+	"github.com/jeromelesaux/martine/export/compression"
 )
 
 var ErrorBadFileFormat = errors.New("bad file format")
@@ -8450,7 +8451,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 		}
 	}
 
-	o, _ = Compress(o, cont.Compression)
+	o, _ = compression.Compress(o, cont.Compression)
 
 	osFilepath := cont.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", osFilepath)
@@ -8739,7 +8740,7 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cont *
 		}
 		copy(data[0x07d0:], codeScrStandard[:])
 	}
-	data, _ = Compress(data, cont.Compression)
+	data, _ = compression.Compress(data, cont.Compression)
 
 	if !cont.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".SCR", data, 2, 0, 0xc000, exec); err != nil {
@@ -8991,7 +8992,7 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, dont
 	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", osFilepath, screenMode, width, height)
 	win := OcpWinFooter{Unused: 3, Height: byte(height), Unused2: 0, Width: uint16(width * 8)}
 
-	data, _ = Compress(data, cont.Compression)
+	data, _ = compression.Compress(data, cont.Compression)
 
 	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	fmt.Fprintf(os.Stderr, "Data length %d\n", binary.Size(data))

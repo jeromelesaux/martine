@@ -12,6 +12,7 @@ import (
 	"github.com/jeromelesaux/m4client/cpc"
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
+	"github.com/jeromelesaux/martine/export/compression"
 )
 
 type SpriteHard struct {
@@ -84,7 +85,7 @@ func Spr(filePath string, spr SprImpdraw, cont *x.MartineContext) error {
 	for _, v := range spr.Data {
 		content = append(content, v.Data[:]...)
 	}
-	content, _ = Compress(content, cont.Compression)
+	content, _ = compression.Compress(content, cont.Compression)
 	ext := ".SPR"
 	if cont.Compression != -1 {
 		ext = ".SPR.zxo"

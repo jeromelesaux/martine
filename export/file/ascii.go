@@ -9,6 +9,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
+	"github.com/jeromelesaux/martine/export/compression"
 )
 
 // ByteToken is the token by default
@@ -22,7 +23,7 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, co
 
 	var out string
 
-	data, _ = Compress(data, cont.Compression)
+	data, _ = compression.Compress(data, cont.Compression)
 
 	cpcFilename := string(cont.AmsdosFilename()) + ".TXT"
 	osFilepath := cont.AmsdosFullPath(filePath, ".TXT")

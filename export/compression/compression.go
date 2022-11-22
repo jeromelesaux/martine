@@ -1,4 +1,4 @@
-package file
+package compression
 
 import (
 	"fmt"
