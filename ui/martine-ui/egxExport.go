@@ -12,7 +12,8 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/diskimage"
-	"github.com/jeromelesaux/martine/export/net"
+	"github.com/jeromelesaux/martine/export/m4"
+
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/snapshot"
 	"github.com/jeromelesaux/martine/gfx/common"
@@ -163,7 +164,7 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 		}
 	}
 	if m.egxExport.ExportToM2 {
-		if err := net.ImportInM4(context); err != nil {
+		if err := m4.ImportInM4(context); err != nil {
 			dialog.NewError(err, m.window).Show()
 			fmt.Fprintf(os.Stderr, "Cannot send to M4 error :%v\n", err)
 		}

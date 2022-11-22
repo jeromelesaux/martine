@@ -18,7 +18,8 @@ import (
 	"github.com/jeromelesaux/martine/export/file"
 	ovs "github.com/jeromelesaux/martine/export/impdraw/overscan"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
-	"github.com/jeromelesaux/martine/export/net"
+	"github.com/jeromelesaux/martine/export/m4"
+
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/snapshot"
 	"github.com/jeromelesaux/martine/gfx"
@@ -639,7 +640,7 @@ func main() {
 		}
 	}
 	if cont.M4 {
-		if err := net.ImportInM4(cont); err != nil {
+		if err := m4.ImportInM4(cont); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot send to M4 error :%v\n", err)
 		}
 	}

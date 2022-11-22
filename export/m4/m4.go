@@ -1,4 +1,4 @@
-package net
+package m4
 
 import (
 	"errors"

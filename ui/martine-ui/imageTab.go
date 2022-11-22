@@ -21,7 +21,8 @@ import (
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/diskimage"
-	"github.com/jeromelesaux/martine/export/net"
+	"github.com/jeromelesaux/martine/export/m4"
+
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/export/snapshot"
@@ -103,7 +104,7 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 		}
 	}
 	if m.imageExport.ExportToM2 {
-		if err := net.ImportInM4(context); err != nil {
+		if err := m4.ImportInM4(context); err != nil {
 			dialog.NewError(err, m.window).Show()
 			fmt.Fprintf(os.Stderr, "Cannot send to M4 error :%v\n", err)
 		}
