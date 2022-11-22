@@ -16,6 +16,7 @@ import (
 	cm "github.com/jeromelesaux/martine/common"
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
+	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx/common"
 )
@@ -476,12 +477,12 @@ func ExportDelta(filename string, dc *DeltaCollection, mode uint8, cont *x.Marti
 
 	var emptyPalette []color.Color
 	outFilepath := filepath.Join(cont.OutputPath, filename+".txt")
-	if err = file.Ascii(outFilepath, data, emptyPalette, false, cont); err != nil {
+	if err = ascii.Ascii(outFilepath, data, emptyPalette, false, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while exporting data as ascii mode file (%s) error :%v\n", outFilepath, err)
 		return err
 	}
 	outFilepath = filepath.Join(cont.OutputPath, filename+"c.txt")
-	if err = file.AsciiByColumn(outFilepath, data, emptyPalette, false, mode, cont); err != nil {
+	if err = ascii.AsciiByColumn(outFilepath, data, emptyPalette, false, mode, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while exporting data as ascii by column mode file (%s) error :%v\n", outFilepath, err)
 		return err
 	}

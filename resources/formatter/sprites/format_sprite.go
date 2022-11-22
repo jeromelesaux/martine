@@ -10,7 +10,7 @@ import (
 
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/ascii"
 )
 
 type stringSlice []string
@@ -66,7 +66,7 @@ func main() {
 				filename := strings.Replace(filepath.Base(sprite), filepath.Ext(sprite), "", -1)
 				out += fmt.Sprintf("%s\n", filename)
 				for i := 0; i < len(d.Screen); i += 8 {
-					out += fmt.Sprintf("%s ", file.ByteToken)
+					out += fmt.Sprintf("%s ", ascii.ByteToken)
 					if i < len(d.Screen) {
 						out += toDamsByte(d.Screen[i])
 					}

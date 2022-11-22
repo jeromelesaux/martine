@@ -1,4 +1,4 @@
-package file
+package ascii_test
 
 import (
 	"os"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/jeromelesaux/martine/constants"
 	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/ascii"
 )
 
 func TestAsciiByColumn(t *testing.T) {
@@ -19,7 +20,7 @@ func TestAsciiByColumn(t *testing.T) {
 	e := x.NewMartineContext("input.bin", "./")
 	e.Size.Height = 5
 	e.Size.Width = 5
-	err := AsciiByColumn("test.bin", data, constants.CpcOldPalette, true, 1, e)
+	err := ascii.AsciiByColumn("test.bin", data, constants.CpcOldPalette, true, 1, e)
 	if err != nil {
 		t.Fatalf("expected no error and gets :%v", err)
 	}

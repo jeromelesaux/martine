@@ -13,7 +13,7 @@ import (
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
-	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 	zx0 "github.com/jeromelesaux/zx0/encode"
@@ -114,16 +114,16 @@ func exportDeltaMotif(images [][]byte, motifs [][]byte, p color.Palette, ex *exp
 	for i := 0; i < len(images); i++ {
 		deltaCode += fmt.Sprintf("delta%.2d\n", i)
 		encoded := zx0.Encode(images[i])
-		deltaCode += file.FormatAssemblyDatabyte(encoded, "\n")
+		deltaCode += ascii.FormatAssemblyDatabyte(encoded, "\n")
 	}
 
 	for i := 0; i < len(motifs); i++ {
 		deltaCode += fmt.Sprintf("motif%.2d\n", i)
-		deltaCode += file.FormatAssemblyDatabyte(motifs[i], "\n")
+		deltaCode += ascii.FormatAssemblyDatabyte(motifs[i], "\n")
 	}
 
-	deltaCode += "palette:\n" + file.ByteToken + " "
-	deltaCode += file.FormatAssemblyBasicPalette(p, "\n")
+	deltaCode += "palette:\n" + ascii.ByteToken + " "
+	deltaCode += ascii.FormatAssemblyBasicPalette(p, "\n")
 
 	//	fmt.Printf("%s", deltaCode)
 	return amsdos.SaveStringOSFile(filename, deltaCode)

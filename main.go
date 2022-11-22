@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
@@ -257,7 +258,7 @@ func main() {
 	screenMode = uint8(*mode)
 
 	if *byteStatement != "" {
-		file.ByteToken = *byteStatement
+		ascii.ByteToken = *byteStatement
 	}
 
 	if *deltaPacking || *deltaPacking2 {

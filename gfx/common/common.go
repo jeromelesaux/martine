@@ -9,6 +9,7 @@ import (
 
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/errors"
@@ -632,10 +633,10 @@ func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Siz
 			return err
 		}
 	}
-	if err := file.Ascii(filename, data, p, dontImportDsk, cont); err != nil {
+	if err := ascii.Ascii(filename, data, p, dontImportDsk, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving ascii file for (%s) error :%v\n", filename, err)
 	}
-	return file.AsciiByColumn(filename, data, p, dontImportDsk, mode, cont)
+	return ascii.AsciiByColumn(filename, data, p, dontImportDsk, mode, cont)
 }
 
 func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *export.MartineContext) error {
@@ -716,7 +717,7 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *e
 			return err
 		}
 	}
-	return file.Ascii(filePath, bw, p, false, ex)
+	return ascii.Ascii(filePath, bw, p, false, ex)
 }
 
 // PalettePosition returns the position of the color c in the palette

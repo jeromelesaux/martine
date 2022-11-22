@@ -9,7 +9,7 @@ import (
 
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/ascii"
 )
 
 var (
@@ -40,7 +40,7 @@ func main() {
 	}
 	out := "sprite\n"
 	for i := 0; i < len(s.Screen); i += 8 {
-		out += fmt.Sprintf("%s ", file.ByteToken)
+		out += fmt.Sprintf("%s ", ascii.ByteToken)
 		if i < len(s.Screen) {
 			out += toDamsByte(s.Screen[i])
 		}
@@ -88,7 +88,7 @@ func main() {
 		if len(d.Screen) != 1 {
 			out += fmt.Sprintf("delta%.2d\n", index)
 			for i := 0; i < len(d.Screen); i += 8 {
-				out += fmt.Sprintf("%s ", file.ByteToken)
+				out += fmt.Sprintf("%s ", ascii.ByteToken)
 				if i < len(d.Screen) {
 					out += toDamsByte(d.Screen[i])
 				}

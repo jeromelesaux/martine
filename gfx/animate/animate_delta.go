@@ -13,7 +13,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
-	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/errors"
@@ -267,9 +267,9 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 		}
 		fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
 		data := zx0.Encode(imageReference)
-		dataCode += file.FormatAssemblyDatabyte(data, "\n")
+		dataCode += ascii.FormatAssemblyDatabyte(data, "\n")
 	} else {
-		dataCode += file.FormatAssemblyDatabyte(imageReference, "\n")
+		dataCode += ascii.FormatAssemblyDatabyte(imageReference, "\n")
 	}
 	// copy of all delta
 	for i := 0; i < len(delta); i++ {
@@ -294,22 +294,22 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 			fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
 			if dc.OccurencePerFrame != 0 {
 				d := zx0.Encode(data)
-				dataCode += file.FormatAssemblyDatabyte(d, "\n")
+				dataCode += ascii.FormatAssemblyDatabyte(d, "\n")
 			} else {
 				nbDelta--
 			}
 		} else {
-			dataCode += file.FormatAssemblyDatabyte(data, "\n")
+			dataCode += ascii.FormatAssemblyDatabyte(data, "\n")
 		}
 		deltaIndex = append(deltaIndex, name)
 	}
 	dataCode += "table_delta:\n"
-	file.ByteToken = "dw"
-	dataCode += file.FormatAssemblyString(deltaIndex, "\n")
+	ascii.ByteToken = "dw"
+	dataCode += ascii.FormatAssemblyString(deltaIndex, "\n")
 
-	file.ByteToken = "db"
-	dataCode += "palette:\n" + file.ByteToken + " "
-	dataCode += file.FormatAssemblyBasicPalette(palette, "\n")
+	ascii.ByteToken = "db"
+	dataCode += "palette:\n" + ascii.ByteToken + " "
+	dataCode += ascii.FormatAssemblyBasicPalette(palette, "\n")
 
 	header := sourceCode
 	// replace the initial address
@@ -401,9 +401,9 @@ func exportDeltaAnimate(
 		}
 		fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
 		data := zx0.Encode(imageReference)
-		dataCode += file.FormatAssemblyDatabyte(data, "\n")
+		dataCode += ascii.FormatAssemblyDatabyte(data, "\n")
 	} else {
-		dataCode += file.FormatAssemblyDatabyte(imageReference, "\n")
+		dataCode += ascii.FormatAssemblyDatabyte(imageReference, "\n")
 	}
 	// copy of all delta
 	for i := 0; i < len(delta); i++ {
@@ -428,23 +428,23 @@ func exportDeltaAnimate(
 			fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
 			if dc.OccurencePerFrame != 0 {
 				d := zx0.Encode(data)
-				dataCode += file.FormatAssemblyDatabyte(d, "\n")
-				dataCode += file.FormatAssemblyDatabyte(d, "\n")
+				dataCode += ascii.FormatAssemblyDatabyte(d, "\n")
+				dataCode += ascii.FormatAssemblyDatabyte(d, "\n")
 			} else {
 				nbDelta--
 			}
 		} else {
-			dataCode += file.FormatAssemblyDatabyte(data, "\n")
+			dataCode += ascii.FormatAssemblyDatabyte(data, "\n")
 		}
 		deltaIndex = append(deltaIndex, name)
 	}
 	dataCode += "table_delta:\n"
-	file.ByteToken = "dw"
-	dataCode += file.FormatAssemblyString(deltaIndex, "\n")
+	ascii.ByteToken = "dw"
+	dataCode += ascii.FormatAssemblyString(deltaIndex, "\n")
 
-	file.ByteToken = "db"
-	dataCode += "palette:\n" + file.ByteToken + " "
-	dataCode += file.FormatAssemblyBasicPalette(palette, "\n")
+	ascii.ByteToken = "db"
+	dataCode += "palette:\n" + ascii.ByteToken + " "
+	dataCode += ascii.FormatAssemblyBasicPalette(palette, "\n")
 
 	var header string = sourceCode
 	if isSprite {
