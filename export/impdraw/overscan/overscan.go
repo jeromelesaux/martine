@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"image/color"
 	"io"
-	"io/ioutil"
+
 	"os"
 
 	"github.com/jeromelesaux/m4client/cpc"
@@ -33,7 +33,7 @@ func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 		fr.Seek(0, io.SeekStart)
 	}
 	palette := color.Palette{}
-	b, err := ioutil.ReadAll(fr)
+	b, err := io.ReadAll(fr)
 	if err != nil {
 		return palette, 0xff, err
 	}
@@ -178,7 +178,7 @@ func RawOverscan(filePath string) ([]byte, error) {
 		fmt.Fprintf(os.Stderr, "Cannot read the Overscan Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		fr.Seek(0, io.SeekStart)
 	}
-	bf, err := ioutil.ReadAll(fr)
+	bf, err := io.ReadAll(fr)
 	if err != nil {
 		return nil, err
 	}

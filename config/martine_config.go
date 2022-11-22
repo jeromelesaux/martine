@@ -14,7 +14,7 @@ import (
 	"github.com/jeromelesaux/martine/export"
 )
 
-//var amsdosFilenameOnce sync.Once
+// var amsdosFilenameOnce sync.Once
 var (
 	Egx1Mode = 1
 	Egx2Mode = 2

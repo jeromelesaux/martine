@@ -7,11 +7,11 @@ import (
 	"github.com/jeromelesaux/martine/export/amsdos"
 )
 
-func SaveGo(filePath string, data []byte, p color.Palette, screenMode uint8, cfg *config.MartineConfig) error {
+func SaveGo(filePath string, dataUp, dataDown []byte, p color.Palette, screenMode uint8, cfg *config.MartineConfig) error {
 	data1 := make([]byte, 0x4000)
 	data2 := make([]byte, 0x4000)
-	copy(data1, data[0x0:0x4040])
-	copy(data2, data[0x4040:0x8000])
+	copy(data1, dataUp)
+	copy(data2, dataDown)
 	go1Filename := cfg.AmsdosFullPath(filePath, ".GO1")
 	go2Filename := cfg.AmsdosFullPath(filePath, ".GO2")
 	if !cfg.NoAmsdosHeader {

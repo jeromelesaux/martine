@@ -8,6 +8,7 @@ import (
 
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/convert/export"
 	"github.com/jeromelesaux/martine/convert/pixel"
 	"github.com/jeromelesaux/martine/convert/screen"
 	"github.com/jeromelesaux/martine/gfx/errors"
@@ -20,17 +21,17 @@ func Transform(in *image.NRGBA,
 	cfg *config.MartineConfig) error {
 	switch size {
 	case constants.Mode0:
-		return screen.ToMode0AndExport(in, p, size, filepath, cfg)
+		return export.ToMode0AndExport(in, p, size, filepath, cfg)
 	case constants.Mode1:
-		return screen.ToMode1AndExport(in, p, size, filepath, cfg)
+		return export.ToMode1AndExport(in, p, size, filepath, cfg)
 	case constants.Mode2:
-		return screen.ToMode2AndExport(in, p, size, filepath, cfg)
+		return export.ToMode2AndExport(in, p, size, filepath, cfg)
 	case constants.OverscanMode0:
-		return screen.ToMode0AndExport(in, p, size, filepath, cfg)
+		return export.ToMode0AndExport(in, p, size, filepath, cfg)
 	case constants.OverscanMode1:
-		return screen.ToMode1AndExport(in, p, size, filepath, cfg)
+		return export.ToMode1AndExport(in, p, size, filepath, cfg)
 	case constants.OverscanMode2:
-		return screen.ToMode2AndExport(in, p, size, filepath, cfg)
+		return export.ToMode2AndExport(in, p, size, filepath, cfg)
 	default:
 		return errors.ErrorNotYetImplemented
 	}

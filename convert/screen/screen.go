@@ -9,23 +9,23 @@ import (
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert/address"
-	"github.com/jeromelesaux/martine/convert/export"
+
 	"github.com/jeromelesaux/martine/convert/palette"
 	"github.com/jeromelesaux/martine/convert/pixel"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 )
 
-func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte {
+func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte {
 	var bw []byte
 
 	lineToAdd := 1
 
-	if ex.OneRow {
+	if cfg.OneRow {
 		lineToAdd = 2
 	}
 
-	if ex.Overscan {
+	if cfg.Overscan {
 		bw = make([]byte, 0x8000)
 	} else {
 		bw = make([]byte, 0x4000)
@@ -43,7 +43,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
-			pp1 = ex.SwapInk(pp1)
+			pp1 = cfg.SwapInk(pp1)
 			firmwareColorUsed[pp1]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := in.At(x+1, y)
@@ -52,7 +52,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
-			pp2 = ex.SwapInk(pp2)
+			pp2 = cfg.SwapInk(pp2)
 			firmwareColorUsed[pp2]++
 			c3 := in.At(x+2, y)
 			pp3, err := palette.PalettePosition(c3, p)
@@ -60,7 +60,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
-			pp3 = ex.SwapInk(pp3)
+			pp3 = cfg.SwapInk(pp3)
 			firmwareColorUsed[pp3]++
 			c4 := in.At(x+3, y)
 			pp4, err := palette.PalettePosition(c4, p)
@@ -68,7 +68,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
-			pp4 = ex.SwapInk(pp4)
+			pp4 = cfg.SwapInk(pp4)
 			firmwareColorUsed[pp4]++
 			c5 := in.At(x+4, y)
 			pp5, err := palette.PalettePosition(c5, p)
@@ -76,7 +76,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
 				pp5 = 0
 			}
-			pp5 = ex.SwapInk(pp5)
+			pp5 = cfg.SwapInk(pp5)
 			firmwareColorUsed[pp5]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c6 := in.At(x+5, y)
@@ -85,7 +85,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
 				pp6 = 0
 			}
-			pp6 = ex.SwapInk(pp6)
+			pp6 = cfg.SwapInk(pp6)
 			firmwareColorUsed[pp6]++
 			c7 := in.At(x+6, y)
 			pp7, err := palette.PalettePosition(c7, p)
@@ -93,7 +93,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
 				pp7 = 0
 			}
-			pp7 = ex.SwapInk(pp7)
+			pp7 = cfg.SwapInk(pp7)
 			firmwareColorUsed[pp7]++
 			c8 := in.At(x+7, y)
 			pp8, err := palette.PalettePosition(c8, p)
@@ -101,9 +101,9 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, x+7, y)
 				pp8 = 0
 			}
-			pp8 = ex.SwapInk(pp8)
+			pp8 = cfg.SwapInk(pp8)
 			firmwareColorUsed[pp8]++
-			if ex.OneLine {
+			if cfg.OneLine {
 				pp2 = 0
 				pp4 = 0
 				pp6 = 0
@@ -114,7 +114,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			addr := address.CpcScreenAddress(0, x, y, 2, ex.Overscan)
+			addr := address.CpcScreenAddress(0, x, y, 2, cfg.Overscan)
 			bw[addr] = pixel
 		}
 
@@ -124,15 +124,15 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 	return bw
 }
 
-func ToMode1(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte {
+func ToMode1(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte {
 	var bw []byte
 
 	lineToAdd := 1
 
-	if ex.OneRow {
+	if cfg.OneRow {
 		lineToAdd = 2
 	}
-	if ex.Overscan {
+	if cfg.Overscan {
 		bw = make([]byte, 0x8000)
 	} else {
 		bw = make([]byte, 0x4000)
@@ -151,7 +151,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
-			pp1 = ex.SwapInk(pp1)
+			pp1 = cfg.SwapInk(pp1)
 			firmwareColorUsed[pp1]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := in.At(x+1, y)
@@ -160,7 +160,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
-			pp2 = ex.SwapInk(pp2)
+			pp2 = cfg.SwapInk(pp2)
 			firmwareColorUsed[pp2]++
 			c3 := in.At(x+2, y)
 			pp3, err := palette.PalettePosition(c3, p)
@@ -168,7 +168,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
-			pp3 = ex.SwapInk(pp3)
+			pp3 = cfg.SwapInk(pp3)
 			firmwareColorUsed[pp3]++
 			c4 := in.At(x+3, y)
 			pp4, err := palette.PalettePosition(c4, p)
@@ -176,9 +176,9 @@ func ToMode1(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
-			pp4 = ex.SwapInk(pp4)
+			pp4 = cfg.SwapInk(pp4)
 			firmwareColorUsed[pp4]++
-			if ex.OneLine {
+			if cfg.OneLine {
 				pp4 = 0
 				pp2 = 0
 			}
@@ -187,21 +187,21 @@ func ToMode1(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			addr := address.CpcScreenAddress(0, x, y, 1, ex.Overscan)
+			addr := address.CpcScreenAddress(0, x, y, 1, cfg.Overscan)
 			bw[addr] = pixel
 		}
 	}
 	return bw
 }
 
-func ToMode0(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte {
+func ToMode0(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte {
 	var bw []byte
 
 	lineToAdd := 1
-	if ex.OneRow {
+	if cfg.OneRow {
 		lineToAdd = 2
 	}
-	if ex.Overscan {
+	if cfg.Overscan {
 		bw = make([]byte, 0x8000)
 	} else {
 		bw = make([]byte, 0x4000)
@@ -219,7 +219,7 @@ func ToMode0(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
-			pp1 = ex.SwapInk(pp1)
+			pp1 = cfg.SwapInk(pp1)
 			firmwareColorUsed[pp1]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := in.At(x+1, y)
@@ -228,9 +228,9 @@ func ToMode0(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
-			pp2 = ex.SwapInk(pp2)
+			pp2 = cfg.SwapInk(pp2)
 			firmwareColorUsed[pp2]++
-			if ex.OneLine {
+			if cfg.OneLine {
 				pp2 = 0
 			}
 			pixel := pixel.PixelMode0(pp1, pp2)
@@ -238,28 +238,13 @@ func ToMode0(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			addr := address.CpcScreenAddress(0, x, y, 0, ex.Overscan)
+			addr := address.CpcScreenAddress(0, x, y, 0, cfg.Overscan)
 			bw[addr] = pixel
 		}
 	}
 
 	//	fmt.Println(firmwareColorUsed)
 	return bw
-}
-
-func ToMode0AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, cfg *config.MartineConfig) error {
-	bw := ToMode0(in, p, cfg)
-	return export.Export(filePath, bw, p, 0, cfg)
-}
-
-func ToMode1AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, cfg *config.MartineConfig) error {
-	bw := ToMode1(in, p, cfg)
-	return export.Export(filePath, bw, p, 1, cfg)
-}
-
-func ToMode2AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, cfg *config.MartineConfig) error {
-	bw := ToMode2(in, p, cfg)
-	return export.Export(filePath, bw, p, 2, cfg)
 }
 
 // scrRawToImg will convert the classical OCP screen slice of bytes  into image.NRGBA structure
