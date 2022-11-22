@@ -120,7 +120,7 @@ func (dc *DeltaCollection) Add(b byte, address uint16) {
 	dc.Items = append(dc.Items, item)
 }
 
-func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, cont *x.MartineContext) (*DeltaCollection, error) {
+func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, cont *x.MartineConfig) (*DeltaCollection, error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
 		return data, errors.ErrorSizeMismatch
@@ -167,7 +167,7 @@ func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.
 	return data, nil
 }
 
-func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, cont *x.MartineContext) (*DeltaCollection, error) {
+func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, cont *x.MartineConfig) (*DeltaCollection, error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
 		return data, errors.ErrorSizeMismatch
@@ -240,7 +240,7 @@ func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.
 	return data, nil
 }
 
-func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, cont *x.MartineContext) (*DeltaCollection, error) {
+func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, cont *x.MartineConfig) (*DeltaCollection, error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
 		return data, errors.ErrorSizeMismatch
@@ -466,7 +466,7 @@ func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8, x0
 	return data
 }
 
-func ExportDelta(filename string, dc *DeltaCollection, mode uint8, cont *x.MartineContext) error {
+func ExportDelta(filename string, dc *DeltaCollection, mode uint8, cont *x.MartineConfig) error {
 	if err := dc.Save(filename + ".bin"); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file (%s) error %v \n", filename+".bin", err)
 		return err
@@ -491,7 +491,7 @@ func ExportDelta(filename string, dc *DeltaCollection, mode uint8, cont *x.Marti
 	return nil
 }
 
-func ProceedDelta(filespath []string, initialAddress uint16, cont *x.MartineContext, mode uint8) error {
+func ProceedDelta(filespath []string, initialAddress uint16, cont *x.MartineConfig, mode uint8) error {
 
 	if len(filespath) == 1 {
 		var err error

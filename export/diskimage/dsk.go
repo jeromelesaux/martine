@@ -9,7 +9,7 @@ import (
 	x "github.com/jeromelesaux/martine/export"
 )
 
-func ImportInDsk(filePath string, cont *x.MartineContext) error {
+func ImportInDsk(filePath string, cont *x.MartineConfig) error {
 	var suffix string
 	if cont.EgxFormat == x.Egx1Mode {
 		suffix += "-egx1"

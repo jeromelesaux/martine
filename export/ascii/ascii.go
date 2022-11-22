@@ -15,7 +15,7 @@ import (
 // ByteToken is the token by default
 var ByteToken = "db" // "BYTE"
 
-func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cont *x.MartineContext) error {
+func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cont *x.MartineConfig) error {
 	eol := "\n"
 	if runtime.GOOS == "windows" {
 		eol = "\r\n"
@@ -85,7 +85,7 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, co
 	return nil
 }
 
-func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk bool, mode uint8, cont *x.MartineContext) error {
+func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk bool, mode uint8, cont *x.MartineConfig) error {
 	eol := "\n"
 	if runtime.GOOS == "windows" {
 		eol = "\r\n"

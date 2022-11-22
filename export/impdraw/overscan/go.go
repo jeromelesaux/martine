@@ -7,7 +7,7 @@ import (
 	"github.com/jeromelesaux/martine/export/amsdos"
 )
 
-func SaveGo(filePath string, data []byte, p color.Palette, screenMode uint8, cont *export.MartineContext) error {
+func SaveGo(filePath string, data []byte, p color.Palette, screenMode uint8, cont *export.MartineConfig) error {
 	data1 := make([]byte, 0x4000)
 	data2 := make([]byte, 0x4000)
 	copy(data1, data[0x0:0x4040])

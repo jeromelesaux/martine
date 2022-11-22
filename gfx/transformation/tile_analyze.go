@@ -385,7 +385,7 @@ func (a *AnalyzeBoard) SaveBoardTile(folderpath string, bt []BoardTile) error {
 	return nil
 }
 
-func (a *AnalyzeBoard) SaveFlatFile(folderpath string, palette color.Palette, mode uint8, cont *export.MartineContext) error {
+func (a *AnalyzeBoard) SaveFlatFile(folderpath string, palette color.Palette, mode uint8, cont *export.MartineConfig) error {
 	flatFile := make([]byte, 0)
 	for _, sprt := range a.GetUniqTiles() {
 		for x := 0; x < sprt.Size.Width; x++ {
@@ -400,7 +400,7 @@ func (a *AnalyzeBoard) SaveFlatFile(folderpath string, palette color.Palette, mo
 	return amsdos.SaveOSFile(filepath.Join(spriteFolder, "tiles.bin"), flatFile)
 }
 
-func (a *AnalyzeBoard) SaveSprites(folderpath string, palette color.Palette, mode uint8, cont *export.MartineContext) error {
+func (a *AnalyzeBoard) SaveSprites(folderpath string, palette color.Palette, mode uint8, cont *export.MartineConfig) error {
 	spriteFolder := filepath.Join(folderpath, "sprites")
 	os.Mkdir(spriteFolder, os.ModePerm)
 	for index, v := range a.GetUniqTiles() {

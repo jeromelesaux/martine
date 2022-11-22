@@ -25,7 +25,7 @@ func (i *InkPalette) ToString() string {
 	return out
 }
 
-func Ink(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cont *export.MartineContext) error {
+func Ink(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cont *export.MartineConfig) error {
 	fmt.Fprintf(os.Stdout, "Saving INK file (%s)\n", filePath)
 	data := make([]uint8, 16)
 	fmt.Fprintf(os.Stdout, "Palette size %d\n", len(p))

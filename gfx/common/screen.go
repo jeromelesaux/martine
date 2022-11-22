@@ -10,7 +10,7 @@ import (
 	"github.com/jeromelesaux/martine/export"
 )
 
-func ToMode2(in *image.NRGBA, p color.Palette, ex *export.MartineContext) []byte {
+func ToMode2(in *image.NRGBA, p color.Palette, ex *export.MartineConfig) []byte {
 	var bw []byte
 
 	lineToAdd := 1
@@ -118,7 +118,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *export.MartineContext) []byte
 	return bw
 }
 
-func ToMode1(in *image.NRGBA, p color.Palette, ex *export.MartineContext) []byte {
+func ToMode1(in *image.NRGBA, p color.Palette, ex *export.MartineConfig) []byte {
 	var bw []byte
 
 	lineToAdd := 1
@@ -188,7 +188,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, ex *export.MartineContext) []byte
 	return bw
 }
 
-func ToMode0(in *image.NRGBA, p color.Palette, ex *export.MartineContext) []byte {
+func ToMode0(in *image.NRGBA, p color.Palette, ex *export.MartineConfig) []byte {
 	var bw []byte
 
 	lineToAdd := 1
@@ -241,17 +241,17 @@ func ToMode0(in *image.NRGBA, p color.Palette, ex *export.MartineContext) []byte
 	return bw
 }
 
-func ToMode0AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, cont *export.MartineContext) error {
+func ToMode0AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, cont *export.MartineConfig) error {
 	bw := ToMode0(in, p, cont)
 	return Export(filePath, bw, p, 0, cont)
 }
 
-func ToMode1AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, cont *export.MartineContext) error {
+func ToMode1AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, cont *export.MartineConfig) error {
 	bw := ToMode1(in, p, cont)
 	return Export(filePath, bw, p, 1, cont)
 }
 
-func ToMode2AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, cont *export.MartineContext) error {
+func ToMode2AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, cont *export.MartineConfig) error {
 	bw := ToMode2(in, p, cont)
 	return Export(filePath, bw, p, 2, cont)
 }

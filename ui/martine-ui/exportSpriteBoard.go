@@ -150,7 +150,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		for idxX, v := range s.SpritesData {
 			for idxY, v0 := range v {
 				filename := s.ExportFolderPath + string(filepath.Separator) + fmt.Sprintf("L%.2dC%.2d.WIN", idxX, idxY)
-				cont := export.NewMartineContext("", s.ExportFolderPath)
+				cont := export.NewMartineConfig("", s.ExportFolderPath)
 				cont.Compression = s.ExportCompression
 				cont.NoAmsdosHeader = !s.ExportWithAmsdosHeader
 				if err := window.Win(filename, v0, uint8(s.Mode), s.SpriteWidth, s.SpriteHeight, s.ExportDsk, cont); err != nil {
@@ -188,7 +188,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			}
 		}
 		if s.ExportDsk {
-			cont := export.NewMartineContext("", s.ExportFolderPath)
+			cont := export.NewMartineConfig("", s.ExportFolderPath)
 			if err := diskimage.ImportInDsk(filename, cont); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
@@ -205,7 +205,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			}
 		}
 		filename := s.ExportFolderPath + string(filepath.Separator) + "sprites.imp"
-		cont := export.NewMartineContext("", s.ExportFolderPath)
+		cont := export.NewMartineConfig("", s.ExportFolderPath)
 		cont.Compression = s.ExportCompression
 		cont.NoAmsdosHeader = !s.ExportWithAmsdosHeader
 		if err := tile.Imp(buf, uint(s.SpriteRows*s.SpriteColumns), uint(s.SpriteWidth), uint(s.SpriteHeight), uint(s.Mode), filename, cont); err != nil {
@@ -233,7 +233,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			}
 		}
 		filename := s.ExportFolderPath + string(filepath.Separator) + "sprites.spr"
-		cont := export.NewMartineContext("", s.ExportFolderPath)
+		cont := export.NewMartineConfig("", s.ExportFolderPath)
 		cont.Compression = s.ExportCompression
 		cont.NoAmsdosHeader = !s.ExportWithAmsdosHeader
 		if err := spritehard.Spr(filename, data, cont); err != nil {

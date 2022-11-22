@@ -113,7 +113,7 @@ func SaveKit(filePath string, p color.Palette, noAmsdosHeader bool) error {
 	return nil
 }
 
-func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cont *export.MartineContext) error {
+func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cont *export.MartineConfig) error {
 	osFilepath := cont.AmsdosFullPath(filePath, ".KIT")
 	fmt.Fprintf(os.Stdout, "Saving Kit file (%s)\n", osFilepath)
 	data := [16]uint16{}

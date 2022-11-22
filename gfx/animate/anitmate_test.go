@@ -17,7 +17,7 @@ import (
 )
 
 func TestAnimate(t *testing.T) {
-	e := export.NewMartineContext("/Users/jeromelesaux/Downloads/bomberman.gif", "animation")
+	e := export.NewMartineConfig("/Users/jeromelesaux/Downloads/bomberman.gif", "animation")
 	e.Size = constants.Size{Width: 40, Height: 50, ColorsAvailable: 8}
 	var screenMode uint8 = 0
 	fs := []string{"/Users/jeromelesaux/Downloads/bomberman.gif"}
@@ -26,7 +26,7 @@ func TestAnimate(t *testing.T) {
 }
 
 func TestDeltaMotif(t *testing.T) {
-	err := DeltaMotif("/Users/jeromelesaux/Downloads/triangles.gif", &export.MartineContext{InputPath: "triangles.gif", OutputPath: "."}, 20, 0xc000, 1)
+	err := DeltaMotif("/Users/jeromelesaux/Downloads/triangles.gif", &export.MartineConfig{InputPath: "triangles.gif", OutputPath: "."}, 20, 0xc000, 1)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}

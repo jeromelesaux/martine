@@ -17,7 +17,7 @@ import (
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
-func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cont *export.MartineContext) error {
+func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cont *export.MartineConfig) error {
 	p = constants.SortColorsByDistance(p)
 	if m1 == 0 && m2 == 1 || m2 == 0 && m1 == 1 {
 		var f0, f1 string
@@ -117,7 +117,7 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cont *export.
 }
 
 func AutoEgx1(in image.Image,
-	cont *export.MartineContext,
+	cont *export.MartineConfig,
 	filename, picturePath string) error {
 	var err error
 
@@ -159,7 +159,7 @@ func AutoEgx1(in image.Image,
 }
 
 func AutoEgx2(in image.Image,
-	cont *export.MartineContext,
+	cont *export.MartineConfig,
 	filename, picturePath string) error {
 	var err error
 
@@ -201,12 +201,12 @@ func AutoEgx2(in image.Image,
 	return ToEgx2(downgraded, downgraded, p, 1, picturePath, cont)
 }
 
-func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8, picturePath string, cont *export.MartineContext) error {
+func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8, picturePath string, cont *export.MartineConfig) error {
 	bw, p := ToEgx1Raw(inMode0, inMode1, p, firstLineMode, cont)
 	return common.Export(picturePath, bw, p, 1, cont)
 }
 
-func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8, cont *export.MartineContext) ([]byte, color.Palette) {
+func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8, cont *export.MartineConfig) ([]byte, color.Palette) {
 	var bw []byte
 	if cont.Overscan {
 		bw = make([]byte, 0x8000)
@@ -285,12 +285,12 @@ func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uin
 	return bw, p
 }
 
-func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8, picturePath string, cont *export.MartineContext) error {
+func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8, picturePath string, cont *export.MartineConfig) error {
 	bw, p := ToEgx2Raw(inMode1, inMode2, p, firstLineMode, cont)
 	return common.Export(picturePath, bw, p, 2, cont)
 }
 
-func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8, cont *export.MartineContext) ([]byte, color.Palette) {
+func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8, cont *export.MartineConfig) ([]byte, color.Palette) {
 	var bw []byte
 	if cont.Overscan {
 		bw = make([]byte, 0x8000)
@@ -412,7 +412,7 @@ func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uin
 	return bw, p
 }
 
-func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cont *export.MartineContext) ([]byte, color.Palette, int, error) {
+func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cont *export.MartineConfig) ([]byte, color.Palette, int, error) {
 	p = constants.SortColorsByDistance(p)
 	if mode1 == 0 && mode2 == 1 || mode2 == 0 && mode1 == 1 {
 		var f0, f1 []byte

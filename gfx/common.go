@@ -103,7 +103,7 @@ func DoTransformation(in *image.NRGBA,
 }
 
 func ApplyOneImageAndExport(in image.Image,
-	cont *export.MartineContext,
+	cont *export.MartineConfig,
 	filename, picturePath string,
 	mode int,
 	screenMode uint8) error {
@@ -245,7 +245,7 @@ func ApplyOneImageAndExport(in image.Image,
 }
 
 func ApplyOneImage(in image.Image,
-	cont *export.MartineContext,
+	cont *export.MartineConfig,
 	mode int,
 	palette color.Palette,
 	screenMode uint8) ([]byte, *image.NRGBA, color.Palette, int, error) {

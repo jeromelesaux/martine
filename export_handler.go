@@ -12,9 +12,9 @@ import (
 	"github.com/jeromelesaux/martine/export"
 )
 
-func ExportHandler() (*export.MartineContext, constants.Size) {
+func ExportHandler() (*export.MartineConfig, constants.Size) {
 	var size constants.Size
-	exp := export.NewMartineContext(*picturePath, *output)
+	exp := export.NewMartineConfig(*picturePath, *output)
 
 	if !*reverse {
 		switch *mode {

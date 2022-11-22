@@ -1378,14 +1378,14 @@ var (
 	egxPlusMode2Offset         = 0x121e
 )
 
-func Loader(filePath string, p color.Palette, mode uint8, cont *x.MartineContext) error {
+func Loader(filePath string, p color.Palette, mode uint8, cont *x.MartineConfig) error {
 	if cont.CpcPlus {
 		return BasicLoaderCPCPlus(filePath, p, mode, cont)
 	}
 	return BasicLoader(filePath, p, cont)
 }
 
-func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cont *x.MartineContext) error {
+func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cont *x.MartineConfig) error {
 	// export de la palette assemblée
 	loader := paletteCPCPlusLoader
 
@@ -1460,7 +1460,7 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cont *x.Ma
 	return nil
 }
 
-func BasicLoader(filePath string, p color.Palette, cont *x.MartineContext) error {
+func BasicLoader(filePath string, p color.Palette, cont *x.MartineConfig) error {
 	var out string
 	for i := 0; i < len(p); i++ {
 		v, err := constants.FirmwareNumber(p[i])
@@ -1500,7 +1500,7 @@ func BasicLoader(filePath string, p color.Palette, cont *x.MartineContext) error
 	return nil
 }
 
-func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, m1, m2 uint8, cont *x.MartineContext) error {
+func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, m1, m2 uint8, cont *x.MartineConfig) error {
 	// modification du binaire flash
 	pal1 := make([]byte, 16)
 	pal2 := make([]byte, 16)
@@ -1580,7 +1580,7 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 	return nil
 }
 
-func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cont *x.MartineContext) error {
+func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cont *x.MartineConfig) error {
 	var out string
 	for i := 0; i < len(p); i++ {
 		v, err := constants.FirmwareNumber(p[i])

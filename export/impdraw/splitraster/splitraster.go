@@ -62,7 +62,7 @@ out (c),h // restitution du mode
 */
 var splitRasterRestore = []byte{0x0A, 0xED, 0x79, 0xED, 0x61}
 
-func ExportSplitRaster(filename string, p color.Palette, rasters *constants.SplitRasterScreen, cont *export.MartineContext) error {
+func ExportSplitRaster(filename string, p color.Palette, rasters *constants.SplitRasterScreen, cont *export.MartineConfig) error {
 
 	output := make([]byte, 0)
 	// set the init split raster routine assembled opcode

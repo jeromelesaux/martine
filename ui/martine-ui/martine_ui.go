@@ -86,15 +86,15 @@ func (m *MartineUI) NewTabs() *container.AppTabs {
 	)
 }
 
-func (m *MartineUI) NewContext(me *menu.ImageMenu, checkOriginalImage bool) *export.MartineContext {
+func (m *MartineUI) NewContext(me *menu.ImageMenu, checkOriginalImage bool) *export.MartineConfig {
 	if checkOriginalImage && me.OriginalImagePath == nil {
 		return nil
 	}
-	var context *export.MartineContext
+	var context *export.MartineConfig
 	if checkOriginalImage {
-		context = export.NewMartineContext(me.OriginalImagePath.Path(), "")
+		context = export.NewMartineConfig(me.OriginalImagePath.Path(), "")
 	} else {
-		context = export.NewMartineContext("", "")
+		context = export.NewMartineConfig("", "")
 	}
 	context.CpcPlus = me.IsCpcPlus
 	context.Overscan = me.IsFullScreen

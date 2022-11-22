@@ -89,7 +89,7 @@ func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 	return palette, mode, nil
 }
 
-func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, cont *export.MartineContext) error {
+func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, cont *export.MartineConfig) error {
 	o := make([]byte, 0x7e90-0x80)
 
 	// remove first line to keep #38 address free
@@ -191,7 +191,7 @@ func RawOverscan(filePath string) ([]byte, error) {
 	return data, nil
 }
 
-func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uint8, cont *export.MartineContext) error {
+func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uint8, cont *export.MartineConfig) error {
 	o := make([]byte, 0x8000-0x80)
 	osFilepath := cont.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", osFilepath)

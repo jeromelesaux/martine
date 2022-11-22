@@ -601,7 +601,7 @@ func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) e
 	return png.Png(output, out)
 }
 
-func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, cont *export.MartineContext) error {
+func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, cont *export.MartineConfig) error {
 	if err := window.Win(filename, data, mode, lineSize, size.Height, dontImportDsk, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 		return err
@@ -642,7 +642,7 @@ func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Siz
 	return ascii.AsciiByColumn(filename, data, p, dontImportDsk, mode, cont)
 }
 
-func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *export.MartineContext) error {
+func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *export.MartineConfig) error {
 	if ex.Overscan {
 		if ex.EgxFormat == 0 {
 			if ex.ExportAsGoFile {

@@ -29,7 +29,7 @@ var (
 	impTileFlag = true
 )
 
-func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in image.Image, cont *export.MartineContext, criteria common.AnalyseTilemapOption) error {
+func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in image.Image, cont *export.MartineConfig, criteria common.AnalyseTilemapOption) error {
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
 	m := convert.Resize(in, mapSize, cont.ResizingAlgo)
 	var palette color.Palette
@@ -218,7 +218,7 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 	return err
 }
 
-func ExportTilemapClassical(m image.Image, filename string, board *transformation.AnalyzeBoard, size constants.Size, cont *export.MartineContext) error {
+func ExportTilemapClassical(m image.Image, filename string, board *transformation.AnalyzeBoard, size constants.Size, cont *export.MartineConfig) error {
 	finalFile := strings.ReplaceAll(filename, "?", "")
 	if err := board.SaveSchema(filepath.Join(cont.OutputPath, "tilesmap_schema.png")); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot save tilemap schema error :%v\n", err)
@@ -287,7 +287,7 @@ func ExportTilemapClassical(m image.Image, filename string, board *transformatio
 	return nil
 }
 
-func TilemapClassical(mode uint8, isCpcPlus bool, filename, picturePath string, in image.Image, size constants.Size, cont *export.MartineContext) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette) {
+func TilemapClassical(mode uint8, isCpcPlus bool, filename, picturePath string, in image.Image, size constants.Size, cont *export.MartineConfig) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette) {
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
 	m := convert.Resize(in, mapSize, cont.ResizingAlgo)
 	var palette color.Palette
@@ -329,7 +329,7 @@ func sizeOctet(size constants.Size, mode uint8) int {
 	return 0
 }
 
-func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in image.Image, cont *export.MartineContext) error {
+func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in image.Image, cont *export.MartineConfig) error {
 	/*
 		8x8 : 40x25
 		16x8 : 20x25
@@ -498,7 +498,7 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 	return err
 }
 
-func TilemapRaw(mode uint8, isCpcPlus bool, size constants.Size, in image.Image, cont *export.MartineContext) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette, error) {
+func TilemapRaw(mode uint8, isCpcPlus bool, size constants.Size, in image.Image, cont *export.MartineConfig) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette, error) {
 	/*
 		8x8 : 40x25
 		16x8 : 20x25
@@ -570,7 +570,7 @@ func TilemapRaw(mode uint8, isCpcPlus bool, size constants.Size, in image.Image,
 	return analyze, tilesImagesTilemap, palette, nil
 }
 
-func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palette color.Palette, mode uint8, in image.Image, flatExport bool, cont *export.MartineContext) (err error) {
+func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palette color.Palette, mode uint8, in image.Image, flatExport bool, cont *export.MartineConfig) (err error) {
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
 	tilesSize := sizeOctet(analyze.TileSize, mode) * len(analyze.BoardTiles)
 	nbTilePixelLarge := 20
@@ -631,7 +631,7 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 	return
 }
 
-func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string, palette color.Palette, mode uint8, size constants.Size, in image.Image, cont *export.MartineContext) (err error) {
+func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string, palette color.Palette, mode uint8, size constants.Size, in image.Image, cont *export.MartineConfig) (err error) {
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
 	nbTilePixelLarge := 20
 	nbTilePixelHigh := 25

@@ -40,7 +40,7 @@ func TestOpenGif(t *testing.T) {
 }
 
 func TestInternalDelta(t *testing.T) {
-	ex := &export.MartineContext{
+	ex := &export.MartineConfig{
 		Size:            constants.Size{Width: 100, Height: 100, ColorsAvailable: 4},
 		CustomDimension: true,
 		LineWidth:       0x50,

@@ -414,7 +414,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 								paletteExportPath := uc.URI().Path()
 								uc.Close()
 								os.Remove(uc.URI().Path())
-								context := export.NewMartineContext(filepath.Base(paletteExportPath), paletteExportPath)
+								context := export.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
 								context.NoAmsdosHeader = false
 								if err := impPalette.SaveKit(paletteExportPath+".kit", me.Palette, false); err != nil {
 									dialog.ShowError(err, m.window)

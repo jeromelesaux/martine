@@ -40,7 +40,7 @@ func SplitBoardToSprite(
 		y += spriteHeight
 		x = 0
 	}
-	cont := export.NewMartineContext("", "")
+	cont := export.NewMartineConfig("", "")
 	cont.CustomDimension = true
 	rawSprites := make([][]*image.NRGBA, len(sprites))
 	results = make([][][]byte, len(sprites))

@@ -91,7 +91,7 @@ func OpenWin(filePath string) (*OcpWinFooter, error) {
 	return ocpWinFooter, nil
 }
 
-func Win(filePath string, data []byte, screenMode uint8, width, height int, dontImportDsk bool, cont *export.MartineContext) error {
+func Win(filePath string, data []byte, screenMode uint8, width, height int, dontImportDsk bool, cont *export.MartineConfig) error {
 	osFilepath := cont.AmsdosFullPath(filePath, ".WIN")
 	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", osFilepath, screenMode, width, height)
 	win := OcpWinFooter{Unused: 3, Height: byte(height), Unused2: 0, Width: uint16(width * 8)}

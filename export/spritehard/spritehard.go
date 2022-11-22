@@ -78,7 +78,7 @@ func OpenSpr(filePath string) (*SprImpdraw, error) {
 	return &spr, nil
 }
 
-func Spr(filePath string, spr SprImpdraw, cont *x.MartineContext) error {
+func Spr(filePath string, spr SprImpdraw, cont *x.MartineConfig) error {
 	osFilename := cont.AmsdosFullPath(filePath, ".SPR")
 	fmt.Fprintf(os.Stdout, "Saving SPR file (%s)\n", osFilename)
 	content := make([]byte, 0)

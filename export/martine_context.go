@@ -21,7 +21,7 @@ var (
 
 var ErrorNotAllowed = errors.New("error not allowed")
 
-type MartineContext struct {
+type MartineConfig struct {
 	InputPath                   string
 	OutputPath                  string
 	PalettePath                 string
@@ -130,8 +130,8 @@ func ModeMaskSprite(mode uint8) ([]uint8, error) {
 	}
 }
 
-func NewMartineContext(input, output string) *MartineContext {
-	return &MartineContext{
+func NewMartineConfig(input, output string) *MartineConfig {
+	return &MartineConfig{
 		Scr:            true,
 		Pal:            true,
 		Ink:            true,
@@ -146,11 +146,11 @@ func NewMartineContext(input, output string) *MartineContext {
 		LineWidth:      0x50}
 }
 
-func (e *MartineContext) AddFile(file string) {
+func (e *MartineConfig) AddFile(file string) {
 	e.DskFiles = append(e.DskFiles, file)
 }
 
-func (e *MartineContext) ImportInkSwap(s string) error {
+func (e *MartineConfig) ImportInkSwap(s string) error {
 	if s == "" {
 		return nil
 	}
@@ -177,7 +177,7 @@ func (e *MartineContext) ImportInkSwap(s string) error {
 	return nil
 }
 
-func (e *MartineContext) SwapInk(inkIndex int) int {
+func (e *MartineConfig) SwapInk(inkIndex int) int {
 	if v, ok := e.InkSwapper[inkIndex]; ok {
 		return v
 	}
@@ -191,7 +191,7 @@ func RemoveUnsupportedChar(s string) string {
 	return s
 }
 
-func (e *MartineContext) AmsdosFilename() []byte {
+func (e *MartineConfig) AmsdosFilename() []byte {
 	for i := 0; i < 8; i++ {
 		e.amsdosFilename[i] = ' '
 	}
@@ -206,15 +206,15 @@ func (e *MartineContext) AmsdosFilename() []byte {
 	return e.amsdosFilename
 }
 
-func (e *MartineContext) Filename() string {
+func (e *MartineConfig) Filename() string {
 	return string(e.AmsdosFilename())
 }
 
-func (e *MartineContext) Fullpath(ext string) string {
+func (e *MartineConfig) Fullpath(ext string) string {
 	return filepath.Join(e.OutputPath, e.OsFilename(ext))
 }
 
-func (e *MartineContext) TransformToAmsdosFile(filePath string) string {
+func (e *MartineConfig) TransformToAmsdosFile(filePath string) string {
 	amsdosFile := make([]byte, 8)
 	file := strings.ToUpper(filepath.Base(e.InputPath))
 	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
@@ -239,7 +239,7 @@ func AmsdosFilename(inputPath, ext string) string {
 	return string(osFile) + ext
 }
 
-func (e *MartineContext) OsFilename(ext string) string {
+func (e *MartineConfig) OsFilename(ext string) string {
 	file := strings.ToUpper(filepath.Base(e.InputPath))
 	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
 	filenameSize := len(filename)
@@ -251,7 +251,7 @@ func (e *MartineContext) OsFilename(ext string) string {
 	return string(osFile) + ext
 }
 
-func (e *MartineContext) GetAmsdosFilename(filePath string, ext string) string {
+func (e *MartineConfig) GetAmsdosFilename(filePath string, ext string) string {
 	file := strings.ToUpper(filepath.Base(filePath))
 	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
 	filenameSize := 7
@@ -263,7 +263,7 @@ func (e *MartineContext) GetAmsdosFilename(filePath string, ext string) string {
 	return osFile + ext
 }
 
-func (e *MartineContext) AmsdosFullPath(filePath string, newExtension string) string {
+func (e *MartineConfig) AmsdosFullPath(filePath string, newExtension string) string {
 	filename := filepath.Base(filePath)
 	file := RemoveUnsupportedChar(strings.TrimSuffix(filename, filepath.Ext(filename)))
 	length := 6
@@ -275,14 +275,14 @@ func (e *MartineContext) AmsdosFullPath(filePath string, newExtension string) st
 	return filepath.Join(e.OutputPath, strings.ToUpper(newFilename))
 }
 
-func (e *MartineContext) OsFullPath(filePath string, newExtension string) string {
+func (e *MartineConfig) OsFullPath(filePath string, newExtension string) string {
 	filename := filepath.Base(filePath)
 	file := RemoveUnsupportedChar(strings.TrimSuffix(filename, filepath.Ext(filename)))
 	newFilename := file + newExtension
 	return filepath.Join(e.OutputPath, newFilename)
 }
 
-func (e *MartineContext) SetLineWith(i string) error {
+func (e *MartineConfig) SetLineWith(i string) error {
 	v, err := common.ParseHexadecimal8(i)
 	if err != nil {
 		return err

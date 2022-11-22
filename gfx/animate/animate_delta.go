@@ -28,7 +28,7 @@ var (
 	DeltaExportV2 DeltaExportFormat = 2
 )
 
-func DeltaPackingMemory(images []image.Image, ex *export.MartineContext, initialAddress uint16, mode uint8) ([]*transformation.DeltaCollection, [][]byte, color.Palette, error) {
+func DeltaPackingMemory(images []image.Image, ex *export.MartineConfig, initialAddress uint16, mode uint8) ([]*transformation.DeltaCollection, [][]byte, color.Palette, error) {
 	var isSprite bool = true
 	var maxImages = 22
 	var pad int = 1
@@ -99,7 +99,7 @@ func DeltaPackingMemory(images []image.Image, ex *export.MartineContext, initial
 	return deltaData, rawImages, palette, nil
 }
 
-func DeltaPacking(gitFilepath string, ex *export.MartineContext, initialAddress uint16, mode uint8, exportVersion DeltaExportFormat) error {
+func DeltaPacking(gitFilepath string, ex *export.MartineConfig, initialAddress uint16, mode uint8, exportVersion DeltaExportFormat) error {
 	var isSprite = true
 	var maxImages = 22
 	if !ex.CustomDimension && !ex.SpriteHard {
@@ -215,7 +215,7 @@ func ConvertToImage(g gif.GIF) []*image.NRGBA {
 	return c
 }
 
-func filloutGif(g gif.GIF, ex *export.MartineContext) []image.Image {
+func filloutGif(g gif.GIF, ex *export.MartineConfig) []image.Image {
 	c := make([]image.Image, 0)
 	width := g.Image[0].Bounds().Max.X
 	height := g.Image[0].Bounds().Max.Y
@@ -231,7 +231,7 @@ func filloutGif(g gif.GIF, ex *export.MartineContext) []image.Image {
 	return c
 }
 
-func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaCollection, palette color.Palette, isSprite bool, ex *export.MartineContext, initialAddress uint16, mode uint8, exportVersion DeltaExportFormat) (string, error) {
+func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaCollection, palette color.Palette, isSprite bool, ex *export.MartineConfig, initialAddress uint16, mode uint8, exportVersion DeltaExportFormat) (string, error) {
 	var sourceCode string
 	var dataCode string
 	var deltaIndex []string
@@ -366,7 +366,7 @@ func exportDeltaAnimate(
 	delta []*transformation.DeltaCollection,
 	palette color.Palette,
 	isSprite bool,
-	ex *export.MartineContext,
+	ex *export.MartineConfig,
 	initialAddress uint16,
 	mode uint8,
 	filename string,

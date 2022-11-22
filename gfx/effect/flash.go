@@ -14,7 +14,7 @@ import (
 	"github.com/jeromelesaux/martine/gfx"
 )
 
-func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, cont *export.MartineContext) error {
+func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, cont *export.MartineConfig) error {
 	if filepath2 == "" && filepath1 != "" {
 		filename := filepath.Base(filepath1)
 		f, err := os.Open(filepath1)
@@ -46,7 +46,7 @@ func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, cont *ex
 }
 
 func AutoFlash(in image.Image,
-	cont *export.MartineContext,
+	cont *export.MartineConfig,
 	filename, picturePath string,
 	mode int,
 	screenMode uint8) error {

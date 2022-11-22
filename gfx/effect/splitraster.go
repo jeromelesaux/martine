@@ -16,7 +16,7 @@ import (
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
-func DoSpliteRaster(in image.Image, screenMode uint8, filename string, cont *export.MartineContext) error {
+func DoSpliteRaster(in image.Image, screenMode uint8, filename string, cont *export.MartineConfig) error {
 
 	var p color.Palette
 	var bw []byte
@@ -42,7 +42,7 @@ func DoSpliteRaster(in image.Image, screenMode uint8, filename string, cont *exp
 	return splitraster.ExportSplitRaster(filename, p, rasters, cont)
 }
 
-func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cont *export.MartineContext) (color.Palette, []byte, *constants.SplitRasterScreen, error) {
+func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cont *export.MartineConfig) (color.Palette, []byte, *constants.SplitRasterScreen, error) {
 
 	var bw []byte
 	srs := constants.NewSplitRasterScreen()
@@ -184,7 +184,7 @@ func isSplitRaster(in *image.NRGBA, pos, y, length int) bool {
 	return occ >= (length - 1)
 }
 
-func setPixelMode0(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cont *export.MartineContext) ([]byte, map[int]int) {
+func setPixelMode0(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cont *export.MartineConfig) ([]byte, map[int]int) {
 	c1 := in.At(x, y)
 	out.Set(x, y, c1)
 	pp1, err := common.PalettePosition(c1, p)
@@ -214,7 +214,7 @@ func setPixelMode0(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	return bw, firmwareColorUsed
 }
 
-func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cont *export.MartineContext) ([]byte, map[int]int) {
+func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cont *export.MartineConfig) ([]byte, map[int]int) {
 	c1 := in.At(x, y)
 	out.Set(x, y, c1)
 	pp1, err := common.PalettePosition(c1, p)
@@ -259,7 +259,7 @@ func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	return bw, firmwareColorUsed
 }
 
-func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cont *export.MartineContext) ([]byte, map[int]int) {
+func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cont *export.MartineConfig) ([]byte, map[int]int) {
 	c1 := in.At(x, y)
 	out.Set(x, y, c1)
 	pp1, err := common.PalettePosition(c1, p)

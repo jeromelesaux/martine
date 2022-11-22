@@ -12,7 +12,7 @@ import (
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
-func Transform(in *image.NRGBA, p color.Palette, size constants.Size, filepath string, cont *x.MartineContext) error {
+func Transform(in *image.NRGBA, p color.Palette, size constants.Size, filepath string, cont *x.MartineConfig) error {
 	switch size {
 	case constants.Mode0:
 		return common.ToMode0AndExport(in, p, size, filepath, cont)
@@ -31,7 +31,7 @@ func Transform(in *image.NRGBA, p color.Palette, size constants.Size, filepath s
 	}
 }
 
-func InternalTransform(in *image.NRGBA, p color.Palette, size constants.Size, cont *x.MartineContext) []byte {
+func InternalTransform(in *image.NRGBA, p color.Palette, size constants.Size, cont *x.MartineConfig) []byte {
 	switch size {
 	case constants.Mode0:
 		return common.ToMode0(in, p, cont)

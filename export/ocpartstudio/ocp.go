@@ -176,7 +176,7 @@ func RawScr(filePath string) ([]byte, error) {
 	return rawSrc, nil
 }
 
-func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cont *x.MartineContext) error {
+func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cont *x.MartineConfig) error {
 	osFilepath := cont.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving SCR file (%s)\n", osFilepath)
 	var exec uint16
@@ -354,7 +354,7 @@ func SavePal(filePath string, p color.Palette, screenMode uint8, noAmsdosHeader 
 	return nil
 }
 
-func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cont *x.MartineContext) error {
+func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cont *x.MartineConfig) error {
 	fmt.Fprintf(os.Stdout, "Saving PAL file (%s)\n", filePath)
 	data := OcpPalette{ScreenMode: screenMode, ColorAnimation: 0, ColorAnimationDelay: 0}
 	for i := 0; i < 16; i++ {
