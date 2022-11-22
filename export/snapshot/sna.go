@@ -1,11 +1,12 @@
-package file
+package snapshot
 
 import (
 	"encoding/binary"
 	"fmt"
+	"os"
+
 	"github.com/jeromelesaux/dsk"
 	m "github.com/jeromelesaux/m4client/cpc"
-	"os"
 )
 
 func ImportInSna(filePath, snaPath string, screenMode uint8) error {

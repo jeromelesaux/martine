@@ -13,6 +13,7 @@ import (
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/net"
+	"github.com/jeromelesaux/martine/export/snapshot"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
@@ -154,7 +155,7 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 				}
 			}
 			context.SnaPath = filepath.Join(me.ResultImage.Path, "test.sna")
-			if err := file.ImportInSna(gfxFile, context.SnaPath, 0); err != nil {
+			if err := snapshot.ImportInSna(gfxFile, context.SnaPath, 0); err != nil {
 				dialog.NewError(err, m.window).Show()
 				return
 			}

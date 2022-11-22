@@ -15,6 +15,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/net"
+	"github.com/jeromelesaux/martine/export/snapshot"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/animate"
 	cgfx "github.com/jeromelesaux/martine/gfx/common"
@@ -545,8 +546,8 @@ func main() {
 							var p color.Palette
 							var err error
 							if cont.CpcPlus {
+								p, _, err = file.OpenKit(*kitPath)
 								if *kitPath != "" {
-									p, _, err = file.OpenKit(*kitPath)
 									if err != nil {
 										fmt.Fprintf(os.Stderr, "Error while reading kit file (%s) :%v\n", *kitPath, err)
 										os.Exit(-1)
@@ -623,7 +624,7 @@ func main() {
 				}
 			}
 			cont.SnaPath = filepath.Join(*output, "test.sna")
-			if err := file.ImportInSna(gfxFile, cont.SnaPath, screenMode); err != nil {
+			if err := snapshot.ImportInSna(gfxFile, cont.SnaPath, screenMode); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot create or write into sna file error :%v\n", err)
 			}
 			fmt.Fprintf(os.Stdout, "Sna saved in file %s\n", cont.SnaPath)
