@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/net"
 	"github.com/jeromelesaux/martine/export/snapshot"
@@ -610,7 +611,7 @@ func main() {
 	}
 	// export into bundle DSK or SNA
 	if cont.Dsk {
-		if err := file.ImportInDsk(*picturePath, cont); err != nil {
+		if err := diskimage.ImportInDsk(*picturePath, cont); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot create or write into dsk file error :%v\n", err)
 		}
 	}

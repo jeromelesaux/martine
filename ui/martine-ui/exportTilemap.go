@@ -10,7 +10,7 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
@@ -124,7 +124,7 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 			return
 		}
 		if context.Dsk {
-			if err := file.ImportInDsk(t.OriginalImagePath.Path(), context); err != nil {
+			if err := diskimage.ImportInDsk(t.OriginalImagePath.Path(), context); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 				return
@@ -138,7 +138,7 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 				dialog.NewError(err, m.window).Show()
 			}
 			if context.Dsk {
-				if err := file.ImportInDsk(t.OriginalImagePath.Path(), context); err != nil {
+				if err := diskimage.ImportInDsk(t.OriginalImagePath.Path(), context); err != nil {
 					pi.Hide()
 					dialog.NewError(err, m.window).Show()
 					return
@@ -152,7 +152,7 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 				dialog.NewError(err, m.window).Show()
 			}
 			if context.Dsk {
-				if err := file.ImportInDsk(t.OriginalImagePath.Path(), context); err != nil {
+				if err := diskimage.ImportInDsk(t.OriginalImagePath.Path(), context); err != nil {
 					pi.Hide()
 					dialog.NewError(err, m.window).Show()
 					return

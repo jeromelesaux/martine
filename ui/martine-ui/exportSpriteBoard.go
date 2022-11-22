@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/gfx/animate"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
@@ -183,7 +184,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		}
 		if s.ExportDsk {
 			cont := export.NewMartineContext("", s.ExportFolderPath)
-			if err := file.ImportInDsk(filename, cont); err != nil {
+			if err := diskimage.ImportInDsk(filename, cont); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 				fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", filename, err)
@@ -209,7 +210,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			return
 		}
 		if s.ExportDsk {
-			if err := file.ImportInDsk(filename, cont); err != nil {
+			if err := diskimage.ImportInDsk(filename, cont); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 				fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", filename, err)
@@ -237,7 +238,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			return
 		}
 		if s.ExportDsk {
-			if err := file.ImportInDsk(filename, cont); err != nil {
+			if err := diskimage.ImportInDsk(filename, cont); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 				fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", filename, err)

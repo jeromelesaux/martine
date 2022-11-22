@@ -18,6 +18,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/net"
 	"github.com/jeromelesaux/martine/export/snapshot"
@@ -76,7 +77,7 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 			return
 		}
 		if context.Dsk {
-			if err := file.ImportInDsk(me.OriginalImagePath.Path(), context); err != nil {
+			if err := diskimage.ImportInDsk(me.OriginalImagePath.Path(), context); err != nil {
 				dialog.NewError(err, m.window).Show()
 				return
 			}

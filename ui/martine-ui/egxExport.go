@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/net"
 	"github.com/jeromelesaux/martine/export/snapshot"
@@ -140,7 +141,7 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 		}
 	}
 	if m.egxExport.ExportDsk {
-		if err := file.ImportInDsk(me.ResultImage.Path, context); err != nil {
+		if err := diskimage.ImportInDsk(me.ResultImage.Path, context); err != nil {
 			dialog.NewError(err, m.window).Show()
 			return
 		}
