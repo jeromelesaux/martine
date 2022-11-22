@@ -15,6 +15,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/impdraw/tile"
 	"github.com/jeromelesaux/martine/export/net"
 	"github.com/jeromelesaux/martine/export/snapshot"
 	"github.com/jeromelesaux/martine/gfx"
@@ -398,7 +399,7 @@ func main() {
 			sprites = append(sprites, data...)
 		}
 		finalFile := strings.ReplaceAll(filename, "?", "")
-		if err = file.Imp(sprites, uint(len(spritesPaths)), uint(cont.Size.Width), uint(cont.Size.Height), uint(screenMode), finalFile, cont); err != nil {
+		if err = tile.Imp(sprites, uint(len(spritesPaths)), uint(cont.Size.Width), uint(cont.Size.Height), uint(screenMode), finalFile, cont); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", *picturePath, err)
 		}
 		os.Exit(0)

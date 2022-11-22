@@ -14,6 +14,7 @@ import (
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/impdraw/tile"
 	"github.com/jeromelesaux/martine/gfx/errors"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
@@ -154,7 +155,7 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 	}
 	// save the file sprites
 	finalFile = strings.ReplaceAll(filename, "?", "")
-	if err := file.Imp(data, uint(nbFrames), uint(choosenBoard.TileSize.Width), uint(choosenBoard.TileSize.Height), uint(mode), finalFile, cont); err != nil {
+	if err := tile.Imp(data, uint(nbFrames), uint(choosenBoard.TileSize.Width), uint(choosenBoard.TileSize.Height), uint(mode), finalFile, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", picturePath, err)
 	}
 
@@ -210,7 +211,7 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 		}
 	}
 
-	if err := file.TileMap(tileMaps, finalFile, cont); err != nil {
+	if err := tile.TileMap(tileMaps, finalFile, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot export to Imp-TileMap the image %s error %v", picturePath, err)
 	}
 	return err
@@ -278,7 +279,7 @@ func ExportTilemapClassical(m image.Image, filename string, board *transformatio
 		}
 	}
 
-	if err := file.TileMap(tileMaps, finalFile, cont); err != nil {
+	if err := tile.TileMap(tileMaps, finalFile, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot export to Imp-TileMap the image %s error %v", cont.OutputPath, err)
 		return err
 	}
@@ -442,7 +443,7 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 	}
 	// save the file sprites
 	finalFile = strings.ReplaceAll(filename, "?", "")
-	if err := file.Imp(data, uint(nbFrames), uint(analyze.TileSize.Width), uint(analyze.TileSize.Height), uint(mode), finalFile, cont); err != nil {
+	if err := tile.Imp(data, uint(nbFrames), uint(analyze.TileSize.Width), uint(analyze.TileSize.Height), uint(mode), finalFile, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", picturePath, err)
 	}
 
@@ -490,7 +491,7 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 		}
 	}
 
-	if err := file.TileMap(tileMaps, finalFile, cont); err != nil {
+	if err := tile.TileMap(tileMaps, finalFile, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot export to Imp-TileMap the image %s error %v", picturePath, err)
 	}
 	return err
@@ -715,7 +716,7 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 	}
 	// save the file sprites
 	finalFile = strings.ReplaceAll(filename, "?", "")
-	if err = file.Imp(data, uint(nbFrames), uint(analyze.TileSize.Width), uint(analyze.TileSize.Height), uint(mode), finalFile, cont); err != nil {
+	if err = tile.Imp(data, uint(nbFrames), uint(analyze.TileSize.Width), uint(analyze.TileSize.Height), uint(mode), finalFile, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", cont.OutputPath, err)
 	}
 	m := convert.Resize(in, mapSize, cont.ResizingAlgo)
@@ -763,7 +764,7 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 		}
 	}
 
-	if err = file.TileMap(tileMaps, finalFile, cont); err != nil {
+	if err = tile.TileMap(tileMaps, finalFile, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot export to Imp-TileMap the image %s error %v", cont.OutputPath, err)
 	}
 	return err

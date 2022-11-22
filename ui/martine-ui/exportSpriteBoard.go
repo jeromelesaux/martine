@@ -17,6 +17,7 @@ import (
 	"github.com/jeromelesaux/martine/export/compression"
 	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/impdraw/tile"
 	"github.com/jeromelesaux/martine/export/spritehard"
 	"github.com/jeromelesaux/martine/gfx/animate"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
@@ -206,7 +207,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		cont := export.NewMartineContext("", s.ExportFolderPath)
 		cont.Compression = s.ExportCompression
 		cont.NoAmsdosHeader = !s.ExportWithAmsdosHeader
-		if err := file.Imp(buf, uint(s.SpriteRows*s.SpriteColumns), uint(s.SpriteWidth), uint(s.SpriteHeight), uint(s.Mode), filename, cont); err != nil {
+		if err := tile.Imp(buf, uint(s.SpriteRows*s.SpriteColumns), uint(s.SpriteWidth), uint(s.SpriteHeight), uint(s.Mode), filename, cont); err != nil {
 			pi.Hide()
 			dialog.NewError(err, m.window).Show()
 			fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", filename, err)

@@ -1,4 +1,4 @@
-package file
+package tile
 
 import (
 	"bytes"

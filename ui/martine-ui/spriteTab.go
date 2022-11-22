@@ -20,6 +20,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/impdraw/tile"
 	"github.com/jeromelesaux/martine/export/spritehard"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/sprite"
@@ -328,7 +329,7 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 			} else {
 				// load and display .imp file content
 				mode := m.sprite.Mode
-				footer, err := file.OpenImp(filePath.Path(), mode)
+				footer, err := tile.OpenImp(filePath.Path(), mode)
 				if err != nil {
 					dialog.ShowError(err, m.window)
 					return
@@ -337,7 +338,7 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 				m.sprite.SpriteWidth = int(footer.Width)
 				m.sprite.SpriteHeight = int(footer.Height)
 				m.sprite.SpriteColumns = 8
-				data, err := file.RawImp(filePath.Path())
+				data, err := tile.RawImp(filePath.Path())
 				if err != nil {
 					dialog.ShowError(err, m.window)
 					return
