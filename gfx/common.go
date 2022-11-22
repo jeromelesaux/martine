@@ -11,6 +11,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
+	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/common"
@@ -123,7 +124,7 @@ func ApplyOneImageAndExport(in image.Image,
 	}
 	if cont.InkPath != "" {
 		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", cont.InkPath)
-		palette, _, err = ocpartstudio.OpenInk(cont.InkPath)
+		palette, _, err = impPalette.OpenInk(cont.InkPath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", cont.InkPath)
 		} else {

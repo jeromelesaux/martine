@@ -11,6 +11,7 @@ import (
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/impdraw/overscan"
+	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/errors"
@@ -614,7 +615,7 @@ func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Siz
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
-		if err := ocpartstudio.Ink(filename, p, 2, dontImportDsk, cont); err != nil {
+		if err := impPalette.Ink(filename, p, 2, dontImportDsk, cont); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 			return err
 		}
@@ -698,7 +699,7 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *e
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath2, err)
 			return err
 		}
-		if err := ocpartstudio.Ink(filePath, p, screenMode, false, ex); err != nil {
+		if err := impPalette.Ink(filePath, p, screenMode, false, ex); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}

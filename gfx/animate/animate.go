@@ -14,6 +14,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
+	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	p "github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
@@ -63,7 +64,7 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 	}
 	if export.InkPath != "" {
 		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", export.InkPath)
-		palette, _, err := ocpartstudio.OpenInk(export.InkPath)
+		palette, _, err := impPalette.OpenInk(export.InkPath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", export.InkPath)
 		} else {

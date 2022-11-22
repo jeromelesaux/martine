@@ -36,13 +36,3 @@ func KitInformation(filePath string) {
 		fmt.Fprintf(os.Stdout, "Palette from file %s\n\n%s", filePath, palette.ToString())
 	}
 }
-
-func InkInformation(filePath string) {
-	fmt.Fprintf(os.Stdout, "Input kit palette to open : (%s)\n", filePath)
-	_, palette, err := ocpartstudio.OpenInk(filePath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", filePath)
-	} else {
-		fmt.Fprintf(os.Stdout, "Palette from file %s\n\n%s", filePath, palette.ToString())
-	}
-}

@@ -17,6 +17,7 @@ import (
 	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/export/file"
 	ovs "github.com/jeromelesaux/martine/export/impdraw/overscan"
+	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
 	"github.com/jeromelesaux/martine/export/m4"
 
@@ -229,7 +230,7 @@ func main() {
 			file.KitInformation(*kitPath)
 		}
 		if *inkPath != "" {
-			file.InkInformation(*inkPath)
+			impPalette.InkInformation(*inkPath)
 		}
 		os.Exit(0)
 	}
