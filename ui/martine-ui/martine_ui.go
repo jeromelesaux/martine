@@ -16,8 +16,8 @@ import (
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/common"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
@@ -86,15 +86,15 @@ func (m *MartineUI) NewTabs() *container.AppTabs {
 	)
 }
 
-func (m *MartineUI) NewContext(me *menu.ImageMenu, checkOriginalImage bool) *export.MartineConfig {
+func (m *MartineUI) NewContext(me *menu.ImageMenu, checkOriginalImage bool) *config.MartineConfig {
 	if checkOriginalImage && me.OriginalImagePath == nil {
 		return nil
 	}
-	var context *export.MartineConfig
+	var context *config.MartineConfig
 	if checkOriginalImage {
-		context = export.NewMartineConfig(me.OriginalImagePath.Path(), "")
+		context = config.NewMartineConfig(me.OriginalImagePath.Path(), "")
 	} else {
-		context = export.NewMartineConfig("", "")
+		context = config.NewMartineConfig("", "")
 	}
 	context.CpcPlus = me.IsCpcPlus
 	context.Overscan = me.IsFullScreen

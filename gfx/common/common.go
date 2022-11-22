@@ -7,8 +7,8 @@ import (
 	"math"
 	"os"
 
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/impdraw/overscan"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
@@ -601,48 +601,48 @@ func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) e
 	return png.Png(output, out)
 }
 
-func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, cont *export.MartineConfig) error {
-	if err := window.Win(filename, data, mode, lineSize, size.Height, dontImportDsk, cont); err != nil {
+func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, cfg *config.MartineConfig) error {
+	if err := window.Win(filename, data, mode, lineSize, size.Height, dontImportDsk, cfg); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 		return err
 	}
-	if !cont.CpcPlus {
-		if err := ocpartstudio.Pal(filename, p, mode, dontImportDsk, cont); err != nil {
+	if !cfg.CpcPlus {
+		if err := ocpartstudio.Pal(filename, p, mode, dontImportDsk, cfg); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 			return err
 		}
-		filePath := cont.OsFullPath(filename, "_palettepal.png")
+		filePath := cfg.OsFullPath(filename, "_palettepal.png")
 		if err := png.PalToPng(filePath, p); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
-		if err := impPalette.Ink(filename, p, 2, dontImportDsk, cont); err != nil {
+		if err := impPalette.Ink(filename, p, 2, dontImportDsk, cfg); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 			return err
 		}
-		filePath = cont.OsFullPath(filename, "_paletteink.png")
+		filePath = cfg.OsFullPath(filename, "_paletteink.png")
 		if err := png.PalToPng(filePath, p); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	} else {
-		if err := impPalette.Kit(filename, p, mode, dontImportDsk, cont); err != nil {
+		if err := impPalette.Kit(filename, p, mode, dontImportDsk, cfg); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 			return err
 		}
-		filePath := cont.OsFullPath(filename, "_palettekit.png")
+		filePath := cfg.OsFullPath(filename, "_palettekit.png")
 		if err := png.PalToPng(filePath, p); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	}
-	if err := ascii.Ascii(filename, data, p, dontImportDsk, cont); err != nil {
+	if err := ascii.Ascii(filename, data, p, dontImportDsk, cfg); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving ascii file for (%s) error :%v\n", filename, err)
 	}
-	return ascii.AsciiByColumn(filename, data, p, dontImportDsk, mode, cont)
+	return ascii.AsciiByColumn(filename, data, p, dontImportDsk, mode, cfg)
 }
 
-func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *export.MartineConfig) error {
+func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *config.MartineConfig) error {
 	if ex.Overscan {
 		if ex.EgxFormat == 0 {
 			if ex.ExportAsGoFile {

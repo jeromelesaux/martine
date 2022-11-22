@@ -18,7 +18,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/fyne-io/custom_widget"
-	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
@@ -421,7 +421,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 								paletteExportPath := uc.URI().Path()
 								uc.Close()
 								os.Remove(uc.URI().Path())
-								context := export.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
+								context := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
 								context.NoAmsdosHeader = false
 								if err := impPalette.SaveKit(paletteExportPath+".kit", a.Palette, false); err != nil {
 									dialog.ShowError(err, m.window)

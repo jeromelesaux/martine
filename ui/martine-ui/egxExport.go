@@ -10,7 +10,7 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/export/diskimage"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/m4"
@@ -112,9 +112,9 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 		context.NoAmsdosHeader = true
 	}
 	if me.ResultImage.EgxType == 1 {
-		context.EgxFormat = export.Egx1Mode
+		context.EgxFormat = config.Egx1Mode
 	} else {
-		context.EgxFormat = export.Egx2Mode
+		context.EgxFormat = config.Egx2Mode
 	}
 	context.EgxMode1 = uint8(me.LeftImage.Mode)
 	context.EgxMode2 = uint8(me.RightImage.Mode)

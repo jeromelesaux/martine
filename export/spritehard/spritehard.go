@@ -10,7 +10,7 @@ import (
 	"os"
 
 	"github.com/jeromelesaux/m4client/cpc"
-	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/compression"
 )
@@ -78,19 +78,19 @@ func OpenSpr(filePath string) (*SprImpdraw, error) {
 	return &spr, nil
 }
 
-func Spr(filePath string, spr SprImpdraw, cont *x.MartineConfig) error {
-	osFilename := cont.AmsdosFullPath(filePath, ".SPR")
+func Spr(filePath string, spr SprImpdraw, cfg *config.MartineConfig) error {
+	osFilename := cfg.AmsdosFullPath(filePath, ".SPR")
 	fmt.Fprintf(os.Stdout, "Saving SPR file (%s)\n", osFilename)
 	content := make([]byte, 0)
 	for _, v := range spr.Data {
 		content = append(content, v.Data[:]...)
 	}
-	content, _ = compression.Compress(content, cont.Compression)
+	content, _ = compression.Compress(content, cfg.Compression)
 	ext := ".SPR"
-	if cont.Compression != -1 {
+	if cfg.Compression != -1 {
 		ext = ".SPR.zxo"
 	}
-	if !cont.NoAmsdosHeader {
+	if !cfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilename, ext, content, 2, 0, 0x0, 0x4000); err != nil {
 			return err
 		}

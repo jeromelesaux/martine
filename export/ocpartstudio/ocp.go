@@ -10,8 +10,8 @@ import (
 
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/common"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/compression"
 )
@@ -176,11 +176,11 @@ func RawScr(filePath string) ([]byte, error) {
 	return rawSrc, nil
 }
 
-func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cont *x.MartineConfig) error {
-	osFilepath := cont.AmsdosFullPath(filePath, ".SCR")
+func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cfg *config.MartineConfig) error {
+	osFilepath := cfg.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving SCR file (%s)\n", osFilepath)
 	var exec uint16
-	if cont.CpcPlus {
+	if cfg.CpcPlus {
 		exec = 0x821
 		switch screenMode {
 		case 0:
@@ -223,9 +223,9 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cont *
 		}
 		copy(data[0x07d0:], codeScrStandard[:])
 	}
-	data, _ = compression.Compress(data, cont.Compression)
+	data, _ = compression.Compress(data, cfg.Compression)
 
-	if !cont.NoAmsdosHeader {
+	if !cfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".SCR", data, 2, 0, 0xc000, exec); err != nil {
 			return err
 		}
@@ -235,7 +235,7 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cont *
 		}
 	}
 
-	cont.AddFile(osFilepath)
+	cfg.AddFile(osFilepath)
 	return nil
 }
 
@@ -354,7 +354,7 @@ func SavePal(filePath string, p color.Palette, screenMode uint8, noAmsdosHeader 
 	return nil
 }
 
-func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cont *x.MartineConfig) error {
+func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cfg *config.MartineConfig) error {
 	fmt.Fprintf(os.Stdout, "Saving PAL file (%s)\n", filePath)
 	data := OcpPalette{ScreenMode: screenMode, ColorAnimation: 0, ColorAnimationDelay: 0}
 	for i := 0; i < 16; i++ {
@@ -373,13 +373,13 @@ func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
-	osFilepath := cont.AmsdosFullPath(filePath, ".PAL")
+	osFilepath := cfg.AmsdosFullPath(filePath, ".PAL")
 
 	res, err := common.StructToBytes(data)
 	if err != nil {
 		return err
 	}
-	if !cont.NoAmsdosHeader {
+	if !cfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".PAL", res, 2, 0, 0x8809, 0x8809); err != nil {
 			return err
 		}
@@ -389,7 +389,7 @@ func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 		}
 	}
 	if !dontImportDsk {
-		cont.AddFile(osFilepath)
+		cfg.AddFile(osFilepath)
 	}
 	return nil
 }

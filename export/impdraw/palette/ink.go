@@ -8,8 +8,8 @@ import (
 	"os"
 
 	"github.com/jeromelesaux/m4client/cpc"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
 )
 
@@ -25,7 +25,7 @@ func (i *InkPalette) ToString() string {
 	return out
 }
 
-func Ink(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cont *export.MartineConfig) error {
+func Ink(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cfg *config.MartineConfig) error {
 	fmt.Fprintf(os.Stdout, "Saving INK file (%s)\n", filePath)
 	data := make([]uint8, 16)
 	fmt.Fprintf(os.Stdout, "Palette size %d\n", len(p))
@@ -41,9 +41,9 @@ func Ink(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 	}
 
 	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
-	osFilepath := cont.AmsdosFullPath(filePath, ".INK")
+	osFilepath := cfg.AmsdosFullPath(filePath, ".INK")
 
-	if !cont.NoAmsdosHeader {
+	if !cfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".INK", data, 2, 0, 0x8809, 0x8809); err != nil {
 			return err
 		}
@@ -54,7 +54,7 @@ func Ink(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 	}
 
 	if !dontImportDsk {
-		cont.AddFile(osFilepath)
+		cfg.AddFile(osFilepath)
 	}
 	return nil
 }

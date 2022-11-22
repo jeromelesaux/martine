@@ -3,18 +3,18 @@ package overscan
 import (
 	"image/color"
 
-	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/export/amsdos"
 )
 
-func SaveGo(filePath string, data []byte, p color.Palette, screenMode uint8, cont *export.MartineConfig) error {
+func SaveGo(filePath string, data []byte, p color.Palette, screenMode uint8, cfg *config.MartineConfig) error {
 	data1 := make([]byte, 0x4000)
 	data2 := make([]byte, 0x4000)
 	copy(data1, data[0x0:0x4040])
 	copy(data2, data[0x4040:0x8000])
-	go1Filename := cont.AmsdosFullPath(filePath, ".GO1")
-	go2Filename := cont.AmsdosFullPath(filePath, ".GO2")
-	if !cont.NoAmsdosHeader {
+	go1Filename := cfg.AmsdosFullPath(filePath, ".GO1")
+	go2Filename := cfg.AmsdosFullPath(filePath, ".GO2")
+	if !cfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(go1Filename, ".GO1", data1, 0, 0, 0x20, 0); err != nil {
 			return err
 		}
@@ -30,8 +30,8 @@ func SaveGo(filePath string, data []byte, p color.Palette, screenMode uint8, con
 		}
 	}
 
-	cont.AddFile(go1Filename)
-	cont.AddFile(go2Filename)
+	cfg.AddFile(go1Filename)
+	cfg.AddFile(go2Filename)
 
 	return nil
 }

@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 
 	"github.com/jeromelesaux/m4client/cpc"
-	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/export/amsdos"
 )
 
@@ -92,7 +92,7 @@ func RawImp(filePath string) ([]byte, error) {
 	return raw, nil
 }
 
-func Imp(sprites []byte, nbFrames, width, height, mode uint, filename string, export *x.MartineConfig) error {
+func Imp(sprites []byte, nbFrames, width, height, mode uint, filename string, export *config.MartineConfig) error {
 	w := width
 	switch mode {
 	case 0:
@@ -133,7 +133,7 @@ func Imp(sprites []byte, nbFrames, width, height, mode uint, filename string, ex
 	return nil
 }
 
-func TileMap(data []byte, filename string, export *x.MartineConfig) error {
+func TileMap(data []byte, filename string, export *config.MartineConfig) error {
 
 	output := make([]byte, 0x4000)
 	copy(output[0:], data[:])

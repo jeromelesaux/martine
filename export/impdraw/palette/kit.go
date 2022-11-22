@@ -9,8 +9,8 @@ import (
 
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/common"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
 )
 
@@ -113,8 +113,8 @@ func SaveKit(filePath string, p color.Palette, noAmsdosHeader bool) error {
 	return nil
 }
 
-func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cont *export.MartineConfig) error {
-	osFilepath := cont.AmsdosFullPath(filePath, ".KIT")
+func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cfg *config.MartineConfig) error {
+	osFilepath := cfg.AmsdosFullPath(filePath, ".KIT")
 	fmt.Fprintf(os.Stdout, "Saving Kit file (%s)\n", osFilepath)
 	data := [16]uint16{}
 	paletteSize := len(p)
@@ -130,7 +130,7 @@ func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 	if err != nil {
 		return err
 	}
-	if !cont.NoAmsdosHeader {
+	if !cfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".KIT", res, 2, 0, 0x8809, 0x8809); err != nil {
 			return err
 		}
@@ -141,7 +141,7 @@ func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 	}
 
 	if !dontImportDsk {
-		cont.AddFile(osFilepath)
+		cfg.AddFile(osFilepath)
 	}
 	return nil
 }

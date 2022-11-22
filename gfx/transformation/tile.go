@@ -9,14 +9,14 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/convert"
-	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/oliamb/cutter"
 )
 
-func TileMode(ex *x.MartineConfig, mode uint8, iterationX, iterationY int) error {
+func TileMode(ex *config.MartineConfig, mode uint8, iterationX, iterationY int) error {
 	fr, err := os.Open(ex.InputPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot open (%s),error :%v\n", ex.InputPath, err)

@@ -15,8 +15,8 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/convert"
-	"github.com/jeromelesaux/martine/export"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
@@ -414,7 +414,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 								paletteExportPath := uc.URI().Path()
 								uc.Close()
 								os.Remove(uc.URI().Path())
-								context := export.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
+								context := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
 								context.NoAmsdosHeader = false
 								if err := impPalette.SaveKit(paletteExportPath+".kit", me.Palette, false); err != nil {
 									dialog.ShowError(err, m.window)

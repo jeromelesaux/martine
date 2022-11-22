@@ -7,27 +7,27 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
-	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/impdraw/splitraster"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
-func DoSpliteRaster(in image.Image, screenMode uint8, filename string, cont *export.MartineConfig) error {
+func DoSpliteRaster(in image.Image, screenMode uint8, filename string, cfg *config.MartineConfig) error {
 
 	var p color.Palette
 	var bw []byte
 	var rasters *constants.SplitRasterScreen
 	var err error
-	if !cont.Overscan {
+	if !cfg.Overscan {
 		return errors.ErrorNotYetImplemented
 	}
-	switch cont.CpcPlus {
+	switch cfg.CpcPlus {
 	case false:
-		p, bw, rasters, err = ToSplitRasterCPCOld(in, screenMode, filename, cont)
+		p, bw, rasters, err = ToSplitRasterCPCOld(in, screenMode, filename, cfg)
 		if err != nil {
 			return err
 		}
@@ -36,26 +36,26 @@ func DoSpliteRaster(in image.Image, screenMode uint8, filename string, cont *exp
 		return errors.ErrorNotYetImplemented
 	}
 	// export des données
-	if err := common.Export(filename, bw, p, screenMode, cont); err != nil {
+	if err := common.Export(filename, bw, p, screenMode, cfg); err != nil {
 		return err
 	}
-	return splitraster.ExportSplitRaster(filename, p, rasters, cont)
+	return splitraster.ExportSplitRaster(filename, p, rasters, cfg)
 }
 
-func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cont *export.MartineConfig) (color.Palette, []byte, *constants.SplitRasterScreen, error) {
+func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg *config.MartineConfig) (color.Palette, []byte, *constants.SplitRasterScreen, error) {
 
 	var bw []byte
 	srs := constants.NewSplitRasterScreen()
-	out := convert.Resize(in, cont.Size, cont.ResizingAlgo)
+	out := convert.Resize(in, cfg.Size, cfg.ResizingAlgo)
 	fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
-	if err := png.Png(filepath.Join(cont.OutputPath, filename+"_resized.png"), out); err != nil {
+	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_resized.png"), out); err != nil {
 		return nil, bw, srs, err
 	}
-	p, newIm, err := convert.DowngradingPalette(out, cont.Size, cont.CpcPlus)
+	p, newIm, err := convert.DowngradingPalette(out, cfg.Size, cfg.CpcPlus)
 	if err != nil {
 		return p, bw, srs, err
 	}
-	if err := png.Png(filepath.Join(cont.OutputPath, filename+"_downgraded.png"), newIm); err != nil {
+	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_downgraded.png"), newIm); err != nil {
 		return nil, bw, srs, err
 	}
 
@@ -66,7 +66,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cont
 	fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), newIm.Bounds().Max.X, newIm.Bounds().Max.Y)
 	fmt.Println(in.Bounds())
 
-	if cont.Overscan {
+	if cfg.Overscan {
 		bw = make([]byte, 0x8000)
 	} else {
 		bw = make([]byte, 0x4000)
@@ -74,8 +74,8 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cont
 	firmwareColorUsed := make(map[int]int)
 	backgroundColor := p[0]
 	notSplitRaster := true
-	for y := 0; y < cont.Size.Height; y++ {
-		for x := 0; x < cont.Size.Width; {
+	for y := 0; y < cfg.Size.Height; y++ {
+		for x := 0; x < cfg.Size.Width; {
 			if x%16 == 0 {
 				if !srs.IsFull() {
 					notSplitRaster = false
@@ -88,7 +88,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cont
 					case 0:
 						for i := 0; i < 16; {
 							pixel := common.PixelMode0(pp, pp)
-							addr := common.CpcScreenAddress(0, x+i, y, 0, cont.Overscan)
+							addr := common.CpcScreenAddress(0, x+i, y, 0, cfg.Overscan)
 							bw[addr] = pixel
 							i += 2
 							firmwareColorUsed[pp] += 2
@@ -96,7 +96,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cont
 					case 1:
 						for i := 0; i < 16; {
 							pixel := common.PixelMode1(pp, pp, pp, pp)
-							addr := common.CpcScreenAddress(0, x+i, y, 1, cont.Overscan)
+							addr := common.CpcScreenAddress(0, x+i, y, 1, cfg.Overscan)
 							bw[addr] = pixel
 							i += 4
 							firmwareColorUsed[pp] += 4
@@ -104,7 +104,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cont
 					case 2:
 						for i := 0; i < 16; {
 							pixel := common.PixelMode2(pp, pp, pp, pp, pp, pp, pp, pp)
-							addr := common.CpcScreenAddress(0, x+i, y, 2, cont.Overscan)
+							addr := common.CpcScreenAddress(0, x+i, y, 2, cfg.Overscan)
 							bw[addr] = pixel
 							i += 8
 							firmwareColorUsed[pp] += 8
@@ -126,19 +126,19 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cont
 				// traitement normal des pixels
 				switch screenMode {
 				case 0:
-					bw, firmwareColorUsed = setPixelMode0(newIm, srIm, p, x, y, bw, firmwareColorUsed, cont)
+					bw, firmwareColorUsed = setPixelMode0(newIm, srIm, p, x, y, bw, firmwareColorUsed, cfg)
 					x += 2
 				case 1:
-					bw, firmwareColorUsed = setPixelMode1(newIm, srIm, p, x, y, bw, firmwareColorUsed, cont)
+					bw, firmwareColorUsed = setPixelMode1(newIm, srIm, p, x, y, bw, firmwareColorUsed, cfg)
 					x += 4
 				case 2:
-					bw, firmwareColorUsed = setPixelMode2(newIm, srIm, p, x, y, bw, firmwareColorUsed, cont)
+					bw, firmwareColorUsed = setPixelMode2(newIm, srIm, p, x, y, bw, firmwareColorUsed, cfg)
 					x += 4
 				}
 			}
 		}
 	}
-	if err := png.Png(filepath.Join(cont.OutputPath, filename+"_splitraster.png"), srIm); err != nil {
+	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_splitraster.png"), srIm); err != nil {
 		return nil, bw, srs, err
 	}
 	fmt.Println(firmwareColorUsed)
@@ -184,7 +184,7 @@ func isSplitRaster(in *image.NRGBA, pos, y, length int) bool {
 	return occ >= (length - 1)
 }
 
-func setPixelMode0(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cont *export.MartineConfig) ([]byte, map[int]int) {
+func setPixelMode0(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cfg *config.MartineConfig) ([]byte, map[int]int) {
 	c1 := in.At(x, y)
 	out.Set(x, y, c1)
 	pp1, err := common.PalettePosition(c1, p)
@@ -209,12 +209,12 @@ func setPixelMode0(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND
-	addr := common.CpcScreenAddress(0, x, y, 0, cont.Overscan)
+	addr := common.CpcScreenAddress(0, x, y, 0, cfg.Overscan)
 	bw[addr] = pixel
 	return bw, firmwareColorUsed
 }
 
-func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cont *export.MartineConfig) ([]byte, map[int]int) {
+func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cfg *config.MartineConfig) ([]byte, map[int]int) {
 	c1 := in.At(x, y)
 	out.Set(x, y, c1)
 	pp1, err := common.PalettePosition(c1, p)
@@ -254,12 +254,12 @@ func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND
-	addr := common.CpcScreenAddress(0, x, y, 1, cont.Overscan)
+	addr := common.CpcScreenAddress(0, x, y, 1, cfg.Overscan)
 	bw[addr] = pixel
 	return bw, firmwareColorUsed
 }
 
-func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cont *export.MartineConfig) ([]byte, map[int]int) {
+func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cfg *config.MartineConfig) ([]byte, map[int]int) {
 	c1 := in.At(x, y)
 	out.Set(x, y, c1)
 	pp1, err := common.PalettePosition(c1, p)
@@ -332,7 +332,7 @@ func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND
-	addr := common.CpcScreenAddress(0, x, y, 2, cont.Overscan)
+	addr := common.CpcScreenAddress(0, x, y, 2, cfg.Overscan)
 	bw[addr] = pixel
 	return bw, firmwareColorUsed
 }

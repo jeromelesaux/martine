@@ -10,11 +10,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/gfx/errors"
 
 	cm "github.com/jeromelesaux/martine/common"
-	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/impdraw/overscan"
@@ -120,7 +120,7 @@ func (dc *DeltaCollection) Add(b byte, address uint16) {
 	dc.Items = append(dc.Items, item)
 }
 
-func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, cont *x.MartineConfig) (*DeltaCollection, error) {
+func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, cfg *config.MartineConfig) (*DeltaCollection, error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
 		return data, errors.ErrorSizeMismatch
@@ -159,7 +159,7 @@ func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.
 			}
 			pixel2 := common.PixelMode0(p2, p4)
 			if pixel1 != pixel2 {
-				addr := common.CpcScreenAddress(0xc000, i, j, 0, cont.Overscan)
+				addr := common.CpcScreenAddress(0xc000, i, j, 0, cfg.Overscan)
 				data.Add(pixel2, uint16(addr))
 			}
 		}
@@ -167,7 +167,7 @@ func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.
 	return data, nil
 }
 
-func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, cont *x.MartineConfig) (*DeltaCollection, error) {
+func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, cfg *config.MartineConfig) (*DeltaCollection, error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
 		return data, errors.ErrorSizeMismatch
@@ -232,7 +232,7 @@ func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.
 			}
 			pixel2 := common.PixelMode1(p2, p4, p6, p8)
 			if pixel1 != pixel2 {
-				addr := common.CpcScreenAddress(0xc000, i, j, 1, cont.Overscan)
+				addr := common.CpcScreenAddress(0xc000, i, j, 1, cfg.Overscan)
 				data.Add(pixel2, uint16(addr))
 			}
 		}
@@ -240,7 +240,7 @@ func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.
 	return data, nil
 }
 
-func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, cont *x.MartineConfig) (*DeltaCollection, error) {
+func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, cfg *config.MartineConfig) (*DeltaCollection, error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
 		return data, errors.ErrorSizeMismatch
@@ -357,7 +357,7 @@ func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.
 			}
 			pixel2 := common.PixelMode2(p2, p4, p6, p8, p10, p12, p14, p16)
 			if pixel1 != pixel2 {
-				addr := common.CpcScreenAddress(0xc000, i, j, 2, cont.Overscan)
+				addr := common.CpcScreenAddress(0xc000, i, j, 2, cfg.Overscan)
 				data.Add(pixel2, uint16(addr))
 			}
 		}
@@ -466,7 +466,7 @@ func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8, x0
 	return data
 }
 
-func ExportDelta(filename string, dc *DeltaCollection, mode uint8, cont *x.MartineConfig) error {
+func ExportDelta(filename string, dc *DeltaCollection, mode uint8, cfg *config.MartineConfig) error {
 	if err := dc.Save(filename + ".bin"); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file (%s) error %v \n", filename+".bin", err)
 		return err
@@ -478,20 +478,20 @@ func ExportDelta(filename string, dc *DeltaCollection, mode uint8, cont *x.Marti
 	}
 
 	var emptyPalette []color.Color
-	outFilepath := filepath.Join(cont.OutputPath, filename+".txt")
-	if err = ascii.Ascii(outFilepath, data, emptyPalette, false, cont); err != nil {
+	outFilepath := filepath.Join(cfg.OutputPath, filename+".txt")
+	if err = ascii.Ascii(outFilepath, data, emptyPalette, false, cfg); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while exporting data as ascii mode file (%s) error :%v\n", outFilepath, err)
 		return err
 	}
-	outFilepath = filepath.Join(cont.OutputPath, filename+"c.txt")
-	if err = ascii.AsciiByColumn(outFilepath, data, emptyPalette, false, mode, cont); err != nil {
+	outFilepath = filepath.Join(cfg.OutputPath, filename+"c.txt")
+	if err = ascii.AsciiByColumn(outFilepath, data, emptyPalette, false, mode, cfg); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while exporting data as ascii by column mode file (%s) error :%v\n", outFilepath, err)
 		return err
 	}
 	return nil
 }
 
-func ProceedDelta(filespath []string, initialAddress uint16, cont *x.MartineConfig, mode uint8) error {
+func ProceedDelta(filespath []string, initialAddress uint16, cfg *config.MartineConfig, mode uint8) error {
 
 	if len(filespath) == 1 {
 		var err error
@@ -508,7 +508,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, cont *x.MartineConf
 	var isSprite = false
 	var size constants.Size
 	//var x0, y0 uint16
-	lineOctetsWidth := cont.LineWidth
+	lineOctetsWidth := cfg.LineWidth
 	x0, y0, err := CpcCoordinates(initialAddress, 0xC000, lineOctetsWidth)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error while computing cpc coordinates :%v\n", err)
@@ -577,8 +577,8 @@ func ProceedDelta(filespath []string, initialAddress uint16, cont *x.MartineConf
 		fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
 		fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
 		if dc.OccurencePerFrame != 0 {
-			out := filepath.Join(cont.OutputPath, fmt.Sprintf("%.2dto%.2d", i, (i+1)))
-			if err := ExportDelta(out, dc, mode, cont); err != nil {
+			out := filepath.Join(cfg.OutputPath, fmt.Sprintf("%.2dto%.2d", i, (i+1)))
+			if err := ExportDelta(out, dc, mode, cfg); err != nil {
 				return err
 			}
 		}
@@ -650,8 +650,8 @@ func ProceedDelta(filespath []string, initialAddress uint16, cont *x.MartineConf
 	fmt.Fprintf(os.Stdout, "%d screen addresses are involved\n", dc.NbAdresses())
 	fmt.Fprintf(os.Stdout, "Report:\n%s\n", dc.ToString())
 	if dc.OccurencePerFrame != 0 {
-		out := filepath.Join(cont.OutputPath, fmt.Sprintf("%.2dto00", len(filespath)-1))
-		if err := ExportDelta(out, dc, mode, cont); err != nil {
+		out := filepath.Join(cfg.OutputPath, fmt.Sprintf("%.2dto00", len(filespath)-1))
+		if err := ExportDelta(out, dc, mode, cfg); err != nil {
 			return err
 		}
 	}

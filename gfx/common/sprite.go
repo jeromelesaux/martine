@@ -7,12 +7,12 @@ import (
 	"math"
 	"os"
 
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
-func ToSpriteAndExport(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, ex *export.MartineConfig) error {
+func ToSpriteAndExport(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, ex *config.MartineConfig) error {
 
 	data, firmwareColorUsed, lineSize, err := ToSprite(in, p, size, mode, ex)
 	if err != nil {
@@ -22,7 +22,7 @@ func ToSpriteAndExport(in *image.NRGBA, p color.Palette, size constants.Size, mo
 	return ExportSprite(data, lineSize, p, size, mode, filename, dontImportDsk, ex)
 }
 
-func ToSpriteHardAndExport(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, ex *export.MartineConfig) error {
+func ToSpriteHardAndExport(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, ex *config.MartineConfig) error {
 
 	data, firmwareColorUsed := ToSpriteHard(in, p, size, mode, ex)
 	fmt.Println(firmwareColorUsed)
@@ -33,7 +33,7 @@ func ToSprite(in *image.NRGBA,
 	p color.Palette,
 	size constants.Size,
 	mode uint8,
-	ex *export.MartineConfig) (data []byte, firmwareColorUsed map[int]int, lineSize int, err error) {
+	ex *config.MartineConfig) (data []byte, firmwareColorUsed map[int]int, lineSize int, err error) {
 
 	firmwareColorUsed = make(map[int]int)
 	size.Height = in.Bounds().Max.Y
@@ -319,7 +319,7 @@ func ToSprite(in *image.NRGBA,
 	return data, firmwareColorUsed, lineSize, nil
 }
 
-func ToSpriteHard(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, ex *export.MartineConfig) (data []byte, firmwareColorUsed map[int]int) {
+func ToSpriteHard(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, ex *config.MartineConfig) (data []byte, firmwareColorUsed map[int]int) {
 	size.Height = in.Bounds().Max.Y
 	size.Width = in.Bounds().Max.X
 	firmwareColorUsed = make(map[int]int)

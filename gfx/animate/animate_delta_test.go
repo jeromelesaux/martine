@@ -8,8 +8,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
@@ -40,7 +40,7 @@ func TestOpenGif(t *testing.T) {
 }
 
 func TestInternalDelta(t *testing.T) {
-	ex := &export.MartineConfig{
+	ex := &config.MartineConfig{
 		Size:            constants.Size{Width: 100, Height: 100, ColorsAvailable: 4},
 		CustomDimension: true,
 		LineWidth:       0x50,

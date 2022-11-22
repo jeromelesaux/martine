@@ -1,4 +1,4 @@
-package export
+package config
 
 import (
 	"errors"
@@ -11,6 +11,7 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/export"
 )
 
 //var amsdosFilenameOnce sync.Once
@@ -57,7 +58,7 @@ type MartineConfig struct {
 	CustomDimension             bool
 	amsdosFilename              []byte
 	DskFiles                    []string
-	Tiles                       *JsonSlice
+	Tiles                       *export.JsonSlice
 	DeltaMode                   bool
 	ExtendedDsk                 bool
 	ResizingAlgo                imaging.ResampleFilter
@@ -141,7 +142,7 @@ func NewMartineConfig(input, output string) *MartineConfig {
 		DskFiles:       make([]string, 0),
 		Rotation3DX0:   -1,
 		Rotation3DY0:   -1,
-		Tiles:          NewJsonSlice(),
+		Tiles:          export.NewJsonSlice(),
 		InkSwapper:     make(map[int]int),
 		LineWidth:      0x50}
 }

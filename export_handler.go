@@ -8,13 +8,13 @@ import (
 
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/common"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/export"
 )
 
-func ExportHandler() (*export.MartineConfig, constants.Size) {
+func ExportHandler() (*config.MartineConfig, constants.Size) {
 	var size constants.Size
-	exp := export.NewMartineConfig(*picturePath, *output)
+	cfg := config.NewMartineConfig(*picturePath, *output)
 
 	if !*reverse {
 		switch *mode {
@@ -40,8 +40,8 @@ func ExportHandler() (*export.MartineConfig, constants.Size) {
 			}
 		}
 		if *height != -1 {
-			exp.CustomDimension = true
-			exp.Win = true
+			cfg.CustomDimension = true
+			cfg.Win = true
 			size.Height = *height
 			if *width != -1 {
 				size.Width = *width
@@ -50,8 +50,8 @@ func ExportHandler() (*export.MartineConfig, constants.Size) {
 			}
 		}
 		if *width != -1 {
-			exp.Win = true
-			exp.CustomDimension = true
+			cfg.Win = true
+			cfg.CustomDimension = true
 			size.Width = *width
 			if *height != -1 {
 				size.Height = *height
@@ -106,50 +106,50 @@ func ExportHandler() (*export.MartineConfig, constants.Size) {
 		resizeAlgo = imaging.NearestNeighbor
 	}
 
-	exp.FilloutGif = *filloutGif
-	exp.ExtendedDsk = *extendedDsk
-	exp.TileMode = *tileMode
-	exp.RollMode = *rollMode
-	exp.RollIteration = *iterations
-	exp.NoAmsdosHeader = *noAmsdosHeader
-	exp.CpcPlus = *plusMode
-	exp.TileIterationX = *tileIterationX
-	exp.TileIterationY = *tileIterationY
-	exp.Compression = *compress
-	exp.RotationMode = *rotateMode
-	exp.Rotation3DMode = *rotate3dMode
-	exp.Rotation3DType = *rotate3dType
-	exp.Rotation3DX0 = *rotate3dX0
-	exp.Rotation3DY0 = *rotate3dY0
-	exp.M4Host = *m4Host
-	exp.M4RemotePath = *m4RemotePath
-	exp.M4Autoexec = *m4Autoexec
-	exp.ResizingAlgo = resizeAlgo
-	exp.DitheringMultiplier = *ditheringMultiplier
-	exp.DitheringWithQuantification = *withQuantization
-	exp.PalettePath = *palettePath
-	exp.InkPath = *inkPath
-	exp.KitPath = *kitPath
-	exp.RotationRlaBit = *rla
-	exp.RotationSraBit = *sra
-	exp.RotationSlaBit = *sla
-	exp.RotationRraBit = *rra
-	exp.RotationKeephighBit = *keephigh
-	exp.RotationKeeplowBit = *keeplow
-	exp.RotationLosthighBit = *losthigh
-	exp.RotationLostlowBit = *lostlow
-	exp.RotationIterations = *iterations
-	exp.Flash = *flash
-	exp.Sna = *sna
-	exp.SpriteHard = *spriteHard
-	exp.SplitRaster = *splitRasters
-	exp.ZigZag = *zigzag
-	exp.Animate = *doAnimation
-	exp.Reducer = *reducer
-	exp.Json = *jsonOutput
-	exp.Ascii = *txtOutput
-	exp.OneLine = *oneLine
-	exp.OneRow = *oneRow
+	cfg.FilloutGif = *filloutGif
+	cfg.ExtendedDsk = *extendedDsk
+	cfg.TileMode = *tileMode
+	cfg.RollMode = *rollMode
+	cfg.RollIteration = *iterations
+	cfg.NoAmsdosHeader = *noAmsdosHeader
+	cfg.CpcPlus = *plusMode
+	cfg.TileIterationX = *tileIterationX
+	cfg.TileIterationY = *tileIterationY
+	cfg.Compression = *compress
+	cfg.RotationMode = *rotateMode
+	cfg.Rotation3DMode = *rotate3dMode
+	cfg.Rotation3DType = *rotate3dType
+	cfg.Rotation3DX0 = *rotate3dX0
+	cfg.Rotation3DY0 = *rotate3dY0
+	cfg.M4Host = *m4Host
+	cfg.M4RemotePath = *m4RemotePath
+	cfg.M4Autoexec = *m4Autoexec
+	cfg.ResizingAlgo = resizeAlgo
+	cfg.DitheringMultiplier = *ditheringMultiplier
+	cfg.DitheringWithQuantification = *withQuantization
+	cfg.PalettePath = *palettePath
+	cfg.InkPath = *inkPath
+	cfg.KitPath = *kitPath
+	cfg.RotationRlaBit = *rla
+	cfg.RotationSraBit = *sra
+	cfg.RotationSlaBit = *sla
+	cfg.RotationRraBit = *rra
+	cfg.RotationKeephighBit = *keephigh
+	cfg.RotationKeeplowBit = *keeplow
+	cfg.RotationLosthighBit = *losthigh
+	cfg.RotationLostlowBit = *lostlow
+	cfg.RotationIterations = *iterations
+	cfg.Flash = *flash
+	cfg.Sna = *sna
+	cfg.SpriteHard = *spriteHard
+	cfg.SplitRaster = *splitRasters
+	cfg.ZigZag = *zigzag
+	cfg.Animate = *doAnimation
+	cfg.Reducer = *reducer
+	cfg.Json = *jsonOutput
+	cfg.Ascii = *txtOutput
+	cfg.OneLine = *oneLine
+	cfg.OneRow = *oneRow
 
 	if *scanlineSequence != "" {
 		sequence := strings.Split(*scanlineSequence, ",")
@@ -159,21 +159,21 @@ func ExportHandler() (*export.MartineConfig, constants.Size) {
 				fmt.Fprintf(os.Stderr, "Bad scanline sequence (%s) error:%v\n", *scanlineSequence, err)
 				os.Exit(-1)
 			}
-			exp.ScanlineSequence = append(exp.ScanlineSequence, line)
+			cfg.ScanlineSequence = append(cfg.ScanlineSequence, line)
 		}
-		modulo := size.Height % len(exp.ScanlineSequence)
+		modulo := size.Height % len(cfg.ScanlineSequence)
 		if modulo != 0 {
-			fmt.Fprintf(os.Stderr, "height modulo scanlinesequence is not equal to 0 %d lines and the output image lines is %d\n", len(exp.ScanlineSequence), size.Height)
+			fmt.Fprintf(os.Stderr, "height modulo scanlinesequence is not equal to 0 %d lines and the output image lines is %d\n", len(cfg.ScanlineSequence), size.Height)
 			os.Exit(-1)
 		}
 	}
 
-	if err := exp.ImportInkSwap(*inkSwap); err != nil {
+	if err := cfg.ImportInkSwap(*inkSwap); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot parse inkswap option with error [%s]\n", err)
 		os.Exit(-1)
 	}
 	if *lineWidth != "" {
-		if err := exp.SetLineWith(*lineWidth); err != nil {
+		if err := cfg.SetLineWith(*lineWidth); err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot parse linewidth option with error [%s]\n", err)
 			os.Exit(-1)
 		}
@@ -183,64 +183,64 @@ func ExportHandler() (*export.MartineConfig, constants.Size) {
 
 		v, err := common.ParseHexadecimal8(*maskSprite)
 		if err == nil {
-			exp.MaskSprite = uint8(v)
+			cfg.MaskSprite = uint8(v)
 		}
-		if exp.MaskSprite != 0 {
+		if cfg.MaskSprite != 0 {
 			if *maskOrOperation {
-				exp.MaskOrOperation = true
+				cfg.MaskOrOperation = true
 			}
 			if *maskAdOperation {
-				exp.MaskAndOperation = true
+				cfg.MaskAndOperation = true
 			}
-			if exp.MaskAndOperation && exp.MaskOrOperation {
+			if cfg.MaskAndOperation && cfg.MaskOrOperation {
 				fmt.Fprintf(os.Stderr, "Or and And operations are setted, will only apply And operation.\n")
-				exp.MaskOrOperation = false
+				cfg.MaskOrOperation = false
 			}
-			if !exp.MaskAndOperation && !exp.MaskOrOperation {
+			if !cfg.MaskAndOperation && !cfg.MaskOrOperation {
 				fmt.Fprintf(os.Stderr, "Or and And operations are not setted, will only apply And operation.\n")
-				exp.MaskAndOperation = true
+				cfg.MaskAndOperation = true
 			}
 			fmt.Fprintf(os.Stdout, "Applying sprite mask value [#%X] [%.8b] AND = %t, OR =%t\n",
-				exp.MaskSprite,
-				exp.MaskSprite,
-				exp.MaskAndOperation,
-				exp.MaskOrOperation)
+				cfg.MaskSprite,
+				cfg.MaskSprite,
+				cfg.MaskAndOperation,
+				cfg.MaskOrOperation)
 		}
 	}
 
-	if exp.CpcPlus {
-		exp.Kit = true
-		exp.Pal = false
+	if cfg.CpcPlus {
+		cfg.Kit = true
+		cfg.Pal = false
 	}
-	exp.Overscan = *overscan
-	if exp.Overscan {
-		exp.Scr = false
-		exp.Kit = true
+	cfg.Overscan = *overscan
+	if cfg.Overscan {
+		cfg.Scr = false
+		cfg.Kit = true
 	}
-	if exp.M4Host != "" {
-		exp.M4 = true
+	if cfg.M4Host != "" {
+		cfg.M4 = true
 	}
 
 	if *egx1 {
-		exp.EgxFormat = export.Egx1Mode
+		cfg.EgxFormat = config.Egx1Mode
 	}
 	if *egx2 {
-		exp.EgxFormat = export.Egx2Mode
+		cfg.EgxFormat = config.Egx2Mode
 	}
 	if *mode != -1 {
-		exp.EgxMode1 = uint8(*mode)
+		cfg.EgxMode1 = uint8(*mode)
 	}
 	if *mode2 != -1 {
-		exp.EgxMode2 = uint8(*mode2)
+		cfg.EgxMode2 = uint8(*mode2)
 	}
 
 	if *saturationPal > 0 || *brightnessPal > 0 {
-		exp.CpcPlus = true
-		exp.Saturation = *saturationPal
-		exp.Brightness = *brightnessPal
+		cfg.CpcPlus = true
+		cfg.Saturation = *saturationPal
+		cfg.Brightness = *brightnessPal
 	}
 
-	exp.DeltaMode = *deltaMode
-	exp.Dsk = *dsk
-	return exp, size
+	cfg.DeltaMode = *deltaMode
+	cfg.Dsk = *dsk
+	return cfg, size
 }

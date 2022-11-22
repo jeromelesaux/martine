@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/jeromelesaux/m4client/cpc"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
 )
 
@@ -1378,14 +1378,14 @@ var (
 	egxPlusMode2Offset         = 0x121e
 )
 
-func Loader(filePath string, p color.Palette, mode uint8, cont *x.MartineConfig) error {
-	if cont.CpcPlus {
-		return BasicLoaderCPCPlus(filePath, p, mode, cont)
+func Loader(filePath string, p color.Palette, mode uint8, cfg *config.MartineConfig) error {
+	if cfg.CpcPlus {
+		return BasicLoaderCPCPlus(filePath, p, mode, cfg)
 	}
-	return BasicLoader(filePath, p, cont)
+	return BasicLoader(filePath, p, cfg)
 }
 
-func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cont *x.MartineConfig) error {
+func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cfg *config.MartineConfig) error {
 	// export de la palette assemblée
 	loader := paletteCPCPlusLoader
 
@@ -1412,17 +1412,17 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cont *x.Ma
 	}
 	copy(loader[0:128], data)
 
-	osFilepath := cont.AmsdosFullPath("PALPLUS", ".BIN")
+	osFilepath := cfg.AmsdosFullPath("PALPLUS", ".BIN")
 	// modifier checksum amsdos header
 	// the header already in the static file
-	cont.AddFile(osFilepath)
+	cfg.AddFile(osFilepath)
 	if err := amsdos.SaveOSFile(osFilepath, loader); err != nil {
 		return err
 	}
 
 	// export fichier basic loader
 	loader = basicCPCPlusLoaderBasic
-	filename := cont.AmsdosFullPath(filePath, ".SCR")
+	filename := cfg.AmsdosFullPath(filePath, ".SCR")
 	filename = amsdos.AmsdosFilename(filename, ".SCR")
 	var scrFile [12]byte
 	for i := 0; i < 12; i++ {
@@ -1443,9 +1443,9 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cont *x.Ma
 
 	fmt.Println(loader)
 
-	osFilepath = cont.AmsdosFullPath(filePath, ".BAS")
+	osFilepath = cfg.AmsdosFullPath(filePath, ".BAS")
 
-	if !cont.NoAmsdosHeader {
+	if !cfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".BAS", loader, 0, 0, 0x170, 0); err != nil {
 			return err
 		}
@@ -1455,12 +1455,12 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cont *x.Ma
 		}
 	}
 
-	cont.AddFile(osFilepath)
+	cfg.AddFile(osFilepath)
 
 	return nil
 }
 
-func BasicLoader(filePath string, p color.Palette, cont *x.MartineConfig) error {
+func BasicLoader(filePath string, p color.Palette, cfg *config.MartineConfig) error {
 	var out string
 	for i := 0; i < len(p); i++ {
 		v, err := constants.FirmwareNumber(p[i])
@@ -1477,15 +1477,15 @@ func BasicLoader(filePath string, p color.Palette, cont *x.MartineConfig) error 
 
 	var loader []byte = basicLoaderBasic
 	copy(loader[startPaletteValues:], out[0:])
-	basicFile := cont.AmsdosFullPath(filePath, "")
+	basicFile := cfg.AmsdosFullPath(filePath, "")
 	filename := filepath.Base(basicFile) // exportType.GetAmsdosFilename(filePath, "")
 	copy(loader[startPaletteName:], filename[:])
 	copy(loader[startScreenName:], filename[:])
 	fmt.Println(loader)
 
-	osFilepath := cont.AmsdosFullPath(filePath, ".BAS")
+	osFilepath := cfg.AmsdosFullPath(filePath, ".BAS")
 
-	if !cont.NoAmsdosHeader {
+	if !cfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".BAS", loader, 0, 0, 0x170, 0); err != nil {
 			return err
 		}
@@ -1496,11 +1496,11 @@ func BasicLoader(filePath string, p color.Palette, cont *x.MartineConfig) error 
 		}
 	}
 
-	cont.AddFile(osFilepath)
+	cfg.AddFile(osFilepath)
 	return nil
 }
 
-func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, m1, m2 uint8, cont *x.MartineConfig) error {
+func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, m1, m2 uint8, cfg *config.MartineConfig) error {
 	// modification du binaire flash
 	pal1 := make([]byte, 16)
 	pal2 := make([]byte, 16)
@@ -1546,9 +1546,9 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 		flashLoader[flashMode2Offset] = 0x8e
 	}
 
-	flashBinPath := filepath.Join(cont.OutputPath, "FLASH.BIN")
+	flashBinPath := filepath.Join(cfg.OutputPath, "FLASH.BIN")
 
-	if !cont.NoAmsdosHeader {
+	if !cfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(flashBinPath, ".BIN", flashLoader, 2, 0, 0x3000, 0x3000); err != nil {
 			return err
 		}
@@ -1558,16 +1558,16 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 		}
 	}
 
-	cont.AddFile(flashBinPath)
+	cfg.AddFile(flashBinPath)
 
 	// modification du flash loader en basic
 	var basicLoader []byte = flashBasicLoader
-	copy(basicLoader[flashScreen1Offset:], cont.GetAmsdosFilename(screenFilename2, ""))
-	copy(basicLoader[flashScreen2Offset:], cont.GetAmsdosFilename(screenFilename1, ""))
+	copy(basicLoader[flashScreen1Offset:], cfg.GetAmsdosFilename(screenFilename2, ""))
+	copy(basicLoader[flashScreen2Offset:], cfg.GetAmsdosFilename(screenFilename1, ""))
 
-	basicPath := filepath.Join(cont.OutputPath, "-SWITCH.BAS")
+	basicPath := filepath.Join(cfg.OutputPath, "-SWITCH.BAS")
 
-	if !cont.NoAmsdosHeader {
+	if !cfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(basicPath, ".BAS", basicLoader, 0, 0, 0x170, 0); err != nil {
 			return err
 		}
@@ -1576,11 +1576,11 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 			return err
 		}
 	}
-	cont.AddFile(basicPath)
+	cfg.AddFile(basicPath)
 	return nil
 }
 
-func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cont *x.MartineConfig) error {
+func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cfg *config.MartineConfig) error {
 	var out string
 	for i := 0; i < len(p); i++ {
 		v, err := constants.FirmwareNumber(p[i])
@@ -1595,9 +1595,9 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cont *x.Mar
 
 	}
 
-	filename := cont.GetAmsdosFilename(filePath, "")
+	filename := cfg.GetAmsdosFilename(filePath, "")
 	var loader []byte
-	if cont.CpcPlus {
+	if cfg.CpcPlus {
 		loader = egxPlusBasicLoader
 		copy(loader[startPlusScreenName:], filename[:])
 
@@ -1609,9 +1609,9 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cont *x.Mar
 	}
 
 	fmt.Println(loader)
-	osFilepath := cont.AmsdosFullPath(filePath, ".BAS")
+	osFilepath := cfg.AmsdosFullPath(filePath, ".BAS")
 
-	if !cont.NoAmsdosHeader {
+	if !cfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".BAS", loader, 0, 0, 0x170, 0); err != nil {
 			return err
 		}
@@ -1621,11 +1621,11 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cont *x.Mar
 		}
 	}
 
-	cont.AddFile(osFilepath)
+	cfg.AddFile(osFilepath)
 	var egxLoader []byte
 
 	var egxHeaderStartAddress uint16
-	if !cont.CpcPlus {
+	if !cfg.CpcPlus {
 		egxLoader = egxBinary
 		pal := make([]byte, 16)
 		index := 15
@@ -1690,9 +1690,9 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cont *x.Mar
 		egxHeaderStartAddress = 0x8000
 	}
 
-	egxBinPath := filepath.Join(cont.OutputPath, "EGX.BIN")
+	egxBinPath := filepath.Join(cfg.OutputPath, "EGX.BIN")
 
-	if !cont.NoAmsdosHeader {
+	if !cfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(egxBinPath, ".BIN", egxLoader, 2, 0, egxHeaderStartAddress, egxHeaderStartAddress); err != nil {
 			return err
 		}
@@ -1702,7 +1702,7 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cont *x.Mar
 		}
 	}
 
-	cont.AddFile(egxBinPath)
+	cfg.AddFile(egxBinPath)
 
 	return nil
 }

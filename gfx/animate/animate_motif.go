@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 
 	"github.com/disintegration/imaging"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
-	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/gfx/common"
@@ -19,7 +19,7 @@ import (
 	zx0 "github.com/jeromelesaux/zx0/encode"
 )
 
-func DeltaMotif(gitFilepath string, ex *export.MartineConfig, threshold int, initialAddress uint16, mode uint8) error {
+func DeltaMotif(gitFilepath string, ex *config.MartineConfig, threshold int, initialAddress uint16, mode uint8) error {
 
 	fr, err := os.Open(gitFilepath)
 	if err != nil {
@@ -109,7 +109,7 @@ func DeltaMotif(gitFilepath string, ex *export.MartineConfig, threshold int, ini
 	return exportDeltaMotif(deltas, motifs, customPalette, ex, ex.OutputPath+string(filepath.Separator)+filename)
 }
 
-func exportDeltaMotif(images [][]byte, motifs [][]byte, p color.Palette, ex *export.MartineConfig, filename string) error {
+func exportDeltaMotif(images [][]byte, motifs [][]byte, p color.Palette, ex *config.MartineConfig, filename string) error {
 	var deltaCode string
 	for i := 0; i < len(images); i++ {
 		deltaCode += fmt.Sprintf("delta%.2d\n", i)

@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
 )
 
@@ -62,7 +62,7 @@ out (c),h // restitution du mode
 */
 var splitRasterRestore = []byte{0x0A, 0xED, 0x79, 0xED, 0x61}
 
-func ExportSplitRaster(filename string, p color.Palette, rasters *constants.SplitRasterScreen, cont *export.MartineConfig) error {
+func ExportSplitRaster(filename string, p color.Palette, rasters *constants.SplitRasterScreen, cfg *config.MartineConfig) error {
 
 	output := make([]byte, 0)
 	// set the init split raster routine assembled opcode
@@ -86,9 +86,9 @@ func ExportSplitRaster(filename string, p color.Palette, rasters *constants.Spli
 	}
 	output = append(output, splitRasterRestore...)
 
-	basicPath := filepath.Join(cont.OutputPath, cont.GetAmsdosFilename(filename, ".SPL"))
+	basicPath := filepath.Join(cfg.OutputPath, cfg.GetAmsdosFilename(filename, ".SPL"))
 
-	if !cont.NoAmsdosHeader {
+	if !cfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(basicPath, ".SPL", output, 0, 0, 0x170, 0); err != nil {
 			return err
 		}
@@ -98,6 +98,6 @@ func ExportSplitRaster(filename string, p color.Palette, rasters *constants.Spli
 		}
 	}
 
-	cont.AddFile(basicPath)
+	cfg.AddFile(basicPath)
 	return nil
 }

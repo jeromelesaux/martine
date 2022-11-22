@@ -6,47 +6,47 @@ import (
 	"path/filepath"
 
 	"github.com/jeromelesaux/dsk"
-	x "github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/config"
 )
 
-func ImportInDsk(filePath string, cont *x.MartineConfig) error {
+func ImportInDsk(filePath string, cfg *config.MartineConfig) error {
 	var suffix string
-	if cont.EgxFormat == x.Egx1Mode {
+	if cfg.EgxFormat == config.Egx1Mode {
 		suffix += "-egx1"
 	}
-	if cont.EgxFormat == x.Egx2Mode {
+	if cfg.EgxFormat == config.Egx2Mode {
 		suffix += "-egx2"
 	}
-	if cont.CpcPlus {
+	if cfg.CpcPlus {
 		suffix += "-cpcplus"
 	}
-	if cont.Overscan {
+	if cfg.Overscan {
 		suffix += "-overscan"
 	}
-	if cont.Flash {
+	if cfg.Flash {
 		suffix += "-flash"
 	}
-	if cont.CustomDimension || cont.SpriteHard {
+	if cfg.CustomDimension || cfg.SpriteHard {
 		suffix += "-sprite"
 	}
-	if cont.DitheringAlgo != 0 {
+	if cfg.DitheringAlgo != 0 {
 		suffix += "-dithering"
 	}
-	if cont.SplitRaster {
+	if cfg.SplitRaster {
 		suffix += "-splitrasters"
 	}
 
-	dskFullpath := cont.AmsdosFullPath(filePath, suffix+".dsk")
+	dskFullpath := cfg.AmsdosFullPath(filePath, suffix+".dsk")
 
 	var floppy *dsk.DSK
-	if cont.ExtendedDsk {
+	if cfg.ExtendedDsk {
 		floppy = dsk.FormatDsk(10, 80, 1, 1, dsk.DataFormat)
 	} else {
 		floppy = dsk.FormatDsk(9, 40, 1, 0, dsk.DataFormat)
 	}
 
 	dsk.WriteDsk(dskFullpath, floppy)
-	for _, v := range cont.DskFiles {
+	for _, v := range cfg.DskFiles {
 		if filepath.Ext(v) == ".TXT" {
 			if err := floppy.PutFile(v, dsk.MODE_ASCII, 0, 0, 0, false, false); err != nil {
 				fmt.Fprintf(os.Stderr, "Error while insert (%s) in dsk (%s) error :%v\n", v, dskFullpath, err)

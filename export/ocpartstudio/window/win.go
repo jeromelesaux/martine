@@ -9,7 +9,7 @@ import (
 
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/common"
-	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/compression"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
@@ -91,17 +91,17 @@ func OpenWin(filePath string) (*OcpWinFooter, error) {
 	return ocpWinFooter, nil
 }
 
-func Win(filePath string, data []byte, screenMode uint8, width, height int, dontImportDsk bool, cont *export.MartineConfig) error {
-	osFilepath := cont.AmsdosFullPath(filePath, ".WIN")
+func Win(filePath string, data []byte, screenMode uint8, width, height int, dontImportDsk bool, cfg *config.MartineConfig) error {
+	osFilepath := cfg.AmsdosFullPath(filePath, ".WIN")
 	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", osFilepath, screenMode, width, height)
 	win := OcpWinFooter{Unused: 3, Height: byte(height), Unused2: 0, Width: uint16(width * 8)}
 
-	data, _ = compression.Compress(data, cont.Compression)
+	data, _ = compression.Compress(data, cfg.Compression)
 
 	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	fmt.Fprintf(os.Stderr, "Data length %d\n", binary.Size(data))
 	fmt.Fprintf(os.Stderr, "Footer length %d\n", binary.Size(win))
-	osFilename := cont.Fullpath(".WIN")
+	osFilename := cfg.Fullpath(".WIN")
 
 	body, err := common.StructToBytes(data)
 	if err != nil {
@@ -115,7 +115,7 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, dont
 	content = append(content, footer...)
 
 	fmt.Fprintf(os.Stdout, "%s, data size :%d\n", win.ToString(), len(data))
-	if !cont.NoAmsdosHeader {
+	if !cfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilename, ".WIN", content, 2, 0, 0x4000, 0x4000); err != nil {
 			return err
 		}
@@ -126,7 +126,7 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, dont
 	}
 
 	if !dontImportDsk {
-		cont.AddFile(osFilepath)
+		cfg.AddFile(osFilepath)
 	}
 	return nil
 }

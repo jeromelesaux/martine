@@ -4,8 +4,8 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/gfx"
 )
 
@@ -40,18 +40,18 @@ func SplitBoardToSprite(
 		y += spriteHeight
 		x = 0
 	}
-	cont := export.NewMartineConfig("", "")
-	cont.CustomDimension = true
+	cfg := config.NewMartineConfig("", "")
+	cfg.CustomDimension = true
 	rawSprites := make([][]*image.NRGBA, len(sprites))
 	results = make([][][]byte, len(sprites))
 
-	cont.Size = size
-	cont.SpriteHard = isSpriteHard
+	cfg.Size = size
+	cfg.SpriteHard = isSpriteHard
 	for i := 0; i < len(sprites); i++ {
 		results[i] = make([][]byte, len(sprites[i]))
 		for j := 0; j < len(sprites[i]); j++ {
 			v := sprites[i][j]
-			r, sp, _, _, err := gfx.ApplyOneImage(v, cont, int(mode), p, mode)
+			r, sp, _, _, err := gfx.ApplyOneImage(v, cfg, int(mode), p, mode)
 			if err != nil {
 				return results, sprites, err
 			}

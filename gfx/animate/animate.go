@@ -11,9 +11,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
-	"github.com/jeromelesaux/martine/export"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	p "github.com/jeromelesaux/martine/export/png"
@@ -21,7 +21,7 @@ import (
 	"github.com/jeromelesaux/martine/gfx/common"
 )
 
-func Animation(filepaths []string, screenMode uint8, export *export.MartineConfig) error {
+func Animation(filepaths []string, screenMode uint8, export *config.MartineConfig) error {
 	var sizeScreen constants.Size
 	switch screenMode {
 	case 0:
@@ -46,7 +46,7 @@ func Animation(filepaths []string, screenMode uint8, export *export.MartineConfi
 	return nil
 }
 
-func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, screenMode uint8, export *export.MartineConfig) (*image.NRGBA, color.Palette, error) {
+func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, screenMode uint8, export *config.MartineConfig) (*image.NRGBA, color.Palette, error) {
 	nbImgWidth := int(sizeScreen.Width / spriteSize.Width)
 	//nbImgHeight := int(sizeScreen.Height / size.Height)
 	largeMarge := (sizeScreen.Width - (spriteSize.Width * nbImgWidth)) / nbImgWidth

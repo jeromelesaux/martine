@@ -7,14 +7,14 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
-	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/gfx"
 )
 
-func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, cont *export.MartineConfig) error {
+func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, cfg *config.MartineConfig) error {
 	if filepath2 == "" && filepath1 != "" {
 		filename := filepath.Base(filepath1)
 		f, err := os.Open(filepath1)
@@ -26,7 +26,7 @@ func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, cont *ex
 		if err != nil {
 			return err
 		}
-		return AutoFlash(in, cont, filename, filepath1, m1, uint8(m1))
+		return AutoFlash(in, cfg, filename, filepath1, m1, uint8(m1))
 	}
 	filename1 := filepath.Base(filepath1)
 	filename2 := filepath.Base(filepath2)
@@ -38,26 +38,26 @@ func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, cont *ex
 	if err != nil {
 		return err
 	}
-	cont.AddFile(filepath1)
-	cont.AddFile(filepath2)
-	cont.AddFile(palpath1)
-	cont.AddFile(palpath2)
-	return ocpartstudio.FlashLoader(filename1, filename2, p1, p2, uint8(m1), uint8(m2), cont)
+	cfg.AddFile(filepath1)
+	cfg.AddFile(filepath2)
+	cfg.AddFile(palpath1)
+	cfg.AddFile(palpath2)
+	return ocpartstudio.FlashLoader(filename1, filename2, p1, p2, uint8(m1), uint8(m2), cfg)
 }
 
 func AutoFlash(in image.Image,
-	cont *export.MartineConfig,
+	cfg *config.MartineConfig,
 	filename, picturePath string,
 	mode int,
 	screenMode uint8) error {
 
 	var err error
 	size := constants.Size{
-		Width:  cont.Size.Width * 2,
-		Height: cont.Size.Height * 2}
-	im := convert.Resize(in, size, cont.ResizingAlgo)
-	leftIm := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{cont.Size.Width, cont.Size.Height}})
-	rigthIm := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{cont.Size.Width, cont.Size.Height}})
+		Width:  cfg.Size.Width * 2,
+		Height: cfg.Size.Height * 2}
+	im := convert.Resize(in, size, cfg.ResizingAlgo)
+	leftIm := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{cfg.Size.Width, cfg.Size.Height}})
+	rigthIm := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{cfg.Size.Width, cfg.Size.Height}})
 	indexExtFilename := strings.LastIndex(filename, ".")
 	indexExtPath := strings.LastIndex(picturePath, ".")
 
@@ -88,10 +88,10 @@ func AutoFlash(in image.Image,
 		namesize = 7
 	}
 	flashPaletteFilename1 := strings.ToUpper(name)[0:namesize] + "1.PAL"
-	flashPalettePath1 := filepath.Join(cont.OutputPath, flashPaletteFilename1)
+	flashPalettePath1 := filepath.Join(cfg.OutputPath, flashPaletteFilename1)
 
 	err = gfx.ApplyOneImageAndExport(leftIm,
-		cont,
+		cfg,
 		filenameLeft, filepathLeft,
 		mode,
 		screenMode)
@@ -121,20 +121,20 @@ func AutoFlash(in image.Image,
 
 	switch flashMode {
 	case 0:
-		cont.Size = constants.Mode0
+		cfg.Size = constants.Mode0
 	case 1:
-		cont.Size = constants.Mode1
+		cfg.Size = constants.Mode1
 	case 2:
-		cont.Size = constants.Mode2
+		cfg.Size = constants.Mode2
 	}
 
 	flashPaletteFilename2 := strings.ToUpper(name)[0:namesize] + "2.PAL"
-	flashPalettePath2 := filepath.Join(cont.OutputPath, flashPaletteFilename2)
+	flashPalettePath2 := filepath.Join(cfg.OutputPath, flashPaletteFilename2)
 
-	cont.PalettePath = flashPalettePath1
+	cfg.PalettePath = flashPalettePath1
 
 	err = gfx.ApplyOneImageAndExport(rigthIm,
-		cont,
+		cfg,
 		filenameRigth, filepathRigth,
 		flashMode,
 		uint8(flashMode))
@@ -145,5 +145,5 @@ func AutoFlash(in image.Image,
 	if err != nil {
 		return err
 	}
-	return ocpartstudio.FlashLoader(filenameLeft, filenameRigth, p1, p2, uint8(mode), uint8(flashMode), cont)
+	return ocpartstudio.FlashLoader(filenameLeft, filenameRigth, p1, p2, uint8(mode), uint8(flashMode), cfg)
 }

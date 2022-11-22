@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 
 	"github.com/disintegration/imaging"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
-	"github.com/jeromelesaux/martine/export"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
@@ -103,7 +103,7 @@ func DoTransformation(in *image.NRGBA,
 }
 
 func ApplyOneImageAndExport(in image.Image,
-	cont *export.MartineConfig,
+	cfg *config.MartineConfig,
 	filename, picturePath string,
 	mode int,
 	screenMode uint8) error {
@@ -113,43 +113,43 @@ func ApplyOneImageAndExport(in image.Image,
 	var downgraded *image.NRGBA
 	var err error
 
-	if cont.PalettePath != "" {
-		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", cont.PalettePath)
-		palette, _, err = ocpartstudio.OpenPal(cont.PalettePath)
+	if cfg.PalettePath != "" {
+		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", cfg.PalettePath)
+		palette, _, err = ocpartstudio.OpenPal(cfg.PalettePath)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", cont.PalettePath)
+			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", cfg.PalettePath)
 		} else {
 			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
 		}
 	}
-	if cont.InkPath != "" {
-		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", cont.InkPath)
-		palette, _, err = impPalette.OpenInk(cont.InkPath)
+	if cfg.InkPath != "" {
+		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", cfg.InkPath)
+		palette, _, err = impPalette.OpenInk(cfg.InkPath)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", cont.InkPath)
+			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", cfg.InkPath)
 		} else {
 			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
 		}
 	}
-	if cont.KitPath != "" {
-		fmt.Fprintf(os.Stdout, "Input plus palette to apply : (%s)\n", cont.KitPath)
-		palette, _, err = impPalette.OpenKit(cont.KitPath)
+	if cfg.KitPath != "" {
+		fmt.Fprintf(os.Stdout, "Input plus palette to apply : (%s)\n", cfg.KitPath)
+		palette, _, err = impPalette.OpenKit(cfg.KitPath)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", cont.KitPath)
+			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", cfg.KitPath)
 		} else {
 			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
 		}
 	}
 
-	out := convert.Resize(in, cont.Size, cont.ResizingAlgo)
+	out := convert.Resize(in, cfg.Size, cfg.ResizingAlgo)
 	fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
-	if err := png.Png(filepath.Join(cont.OutputPath, filename+"_resized.png"), out); err != nil {
+	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_resized.png"), out); err != nil {
 		os.Exit(-2)
 	}
 
-	if cont.Reducer > 0 {
-		out = convert.Reducer(out, cont.Reducer)
-		if err := png.Png(filepath.Join(cont.OutputPath, filename+"_resized.png"), out); err != nil {
+	if cfg.Reducer > 0 {
+		out = convert.Reducer(out, cfg.Reducer)
+		if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_resized.png"), out); err != nil {
 			os.Exit(-2)
 		}
 	}
@@ -157,7 +157,7 @@ func ApplyOneImageAndExport(in image.Image,
 	if len(palette) > 0 {
 		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
 	} else {
-		newPalette, downgraded, err = convert.DowngradingPalette(out, cont.Size, cont.CpcPlus)
+		newPalette, downgraded, err = convert.DowngradingPalette(out, cfg.Size, cfg.CpcPlus)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", picturePath)
 		}
@@ -174,9 +174,9 @@ func ApplyOneImageAndExport(in image.Image,
 	paletteToSort = fillColorPalette(paletteToSort)
 	newPalette = constants.SortColorsByDistance(paletteToSort)
 
-	out, _ = DoDithering(out, newPalette, cont.DitheringAlgo, cont.DitheringType, cont.DitheringWithQuantification, cont.DitheringMatrix, float32(cont.DitheringMultiplier), cont.CpcPlus, cont.Size)
-	if cont.Saturation > 0 || cont.Brightness > 0 {
-		palette = convert.EnhanceBrightness(newPalette, cont.Brightness, cont.Saturation)
+	out, _ = DoDithering(out, newPalette, cfg.DitheringAlgo, cfg.DitheringType, cfg.DitheringWithQuantification, cfg.DitheringMatrix, float32(cfg.DitheringMultiplier), cfg.CpcPlus, cfg.Size)
+	if cfg.Saturation > 0 || cfg.Brightness > 0 {
+		palette = convert.EnhanceBrightness(newPalette, cfg.Brightness, cfg.Saturation)
 		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
 		var paletteToSort color.Palette
 		switch mode {
@@ -200,52 +200,52 @@ func ApplyOneImageAndExport(in image.Image,
 	}
 
 	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
-	if err := png.Png(filepath.Join(cont.OutputPath, filename+"_down.png"), downgraded); err != nil {
+	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_down.png"), downgraded); err != nil {
 		os.Exit(-2)
 	}
 
 	images, err := DoTransformation(downgraded, newPalette,
-		screenMode, cont.RollMode, cont.RotationMode, cont.Rotation3DMode,
-		cont.RotationRlaBit, cont.RotationSlaBit, cont.RotationRraBit, cont.RotationSraBit,
-		cont.RotationKeephighBit, cont.RotationLosthighBit,
-		cont.RotationKeeplowBit, cont.RotationLostlowBit, cont.RotationIterations,
-		cont.RollIteration, cont.Rotation3DX0, cont.Rotation3DY0, cont.Rotation3DType, cont.ResizingAlgo, cont.Size)
+		screenMode, cfg.RollMode, cfg.RotationMode, cfg.Rotation3DMode,
+		cfg.RotationRlaBit, cfg.RotationSlaBit, cfg.RotationRraBit, cfg.RotationSraBit,
+		cfg.RotationKeephighBit, cfg.RotationLosthighBit,
+		cfg.RotationKeeplowBit, cfg.RotationLostlowBit, cfg.RotationIterations,
+		cfg.RollIteration, cfg.Rotation3DX0, cfg.Rotation3DY0, cfg.Rotation3DType, cfg.ResizingAlgo, cfg.Size)
 	if err != nil {
 		os.Exit(-2)
 	} else {
 
-		for indice := 0; indice < cont.RollIteration; indice++ {
+		for indice := 0; indice < cfg.RollIteration; indice++ {
 			img := images[indice]
-			newFilename := cont.OsFullPath(filename, fmt.Sprintf("%.2d", indice)+".png")
+			newFilename := cfg.OsFullPath(filename, fmt.Sprintf("%.2d", indice)+".png")
 			if err := png.Png(newFilename, img); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot create image (%s) error :%v\n", newFilename, err)
 			}
-			if err := common.ToSpriteAndExport(img, newPalette, constants.Size{Width: cont.Size.Width, Height: cont.Size.Height}, screenMode, newFilename, false, cont); err != nil {
+			if err := common.ToSpriteAndExport(img, newPalette, constants.Size{Width: cfg.Size.Width, Height: cfg.Size.Height}, screenMode, newFilename, false, cfg); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot create sprite image (%s) error %v\n", newFilename, err)
 			}
 		}
 	}
 
-	if !cont.CustomDimension && !cont.SpriteHard {
-		Transform(downgraded, newPalette, cont.Size, picturePath, cont)
+	if !cfg.CustomDimension && !cfg.SpriteHard {
+		Transform(downgraded, newPalette, cfg.Size, picturePath, cfg)
 	} else {
-		if cont.ZigZag {
+		if cfg.ZigZag {
 			// prepare zigzag transformation
 			downgraded = transformation.Zigzag(downgraded)
 		}
-		if !cont.SpriteHard {
+		if !cfg.SpriteHard {
 			//fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
-			common.ToSpriteAndExport(downgraded, newPalette, cont.Size, screenMode, filename, false, cont)
+			common.ToSpriteAndExport(downgraded, newPalette, cfg.Size, screenMode, filename, false, cfg)
 		} else {
 			//fmt.Fprintf(os.Stdout, "Transform image in sprite hard.\n")
-			common.ToSpriteHardAndExport(downgraded, newPalette, cont.Size, screenMode, filename, cont)
+			common.ToSpriteHardAndExport(downgraded, newPalette, cfg.Size, screenMode, filename, cfg)
 		}
 	}
 	return err
 }
 
 func ApplyOneImage(in image.Image,
-	cont *export.MartineConfig,
+	cfg *config.MartineConfig,
 	mode int,
 	palette color.Palette,
 	screenMode uint8) ([]byte, *image.NRGBA, color.Palette, int, error) {
@@ -254,16 +254,16 @@ func ApplyOneImage(in image.Image,
 	var downgraded *image.NRGBA
 	var err error
 
-	out := convert.Resize(in, cont.Size, cont.ResizingAlgo)
+	out := convert.Resize(in, cfg.Size, cfg.ResizingAlgo)
 
-	if cont.Reducer > -1 {
-		out = convert.Reducer(out, cont.Reducer)
+	if cfg.Reducer > -1 {
+		out = convert.Reducer(out, cfg.Reducer)
 	}
 
 	if len(palette) > 0 {
 		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
 	} else {
-		newPalette, downgraded, err = convert.DowngradingPalette(out, cont.Size, cont.CpcPlus)
+		newPalette, downgraded, err = convert.DowngradingPalette(out, cfg.Size, cfg.CpcPlus)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image")
 		}
@@ -288,10 +288,10 @@ func ApplyOneImage(in image.Image,
 	}
 	paletteToSort = fillColorPalette(paletteToSort)
 	newPalette = constants.SortColorsByDistance(paletteToSort)
-	out, _ = DoDithering(out, newPalette, cont.DitheringAlgo, cont.DitheringType, cont.DitheringWithQuantification, cont.DitheringMatrix, float32(cont.DitheringMultiplier), cont.CpcPlus, cont.Size)
+	out, _ = DoDithering(out, newPalette, cfg.DitheringAlgo, cfg.DitheringType, cfg.DitheringWithQuantification, cfg.DitheringMatrix, float32(cfg.DitheringMultiplier), cfg.CpcPlus, cfg.Size)
 
-	if cont.Saturation > 0 || cont.Brightness > 0 {
-		palette = convert.EnhanceBrightness(newPalette, cont.Brightness, cont.Saturation)
+	if cfg.Saturation > 0 || cfg.Brightness > 0 {
+		palette = convert.EnhanceBrightness(newPalette, cfg.Brightness, cfg.Saturation)
 		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
 		var paletteToSort color.Palette
 		switch mode {
@@ -307,31 +307,31 @@ func ApplyOneImage(in image.Image,
 	}
 	var data []byte
 	var lineSize int
-	if !cont.CustomDimension && !cont.SpriteHard {
-		data = InternalTransform(downgraded, newPalette, cont.Size, cont)
-		lineSize = cont.Size.Width
+	if !cfg.CustomDimension && !cfg.SpriteHard {
+		data = InternalTransform(downgraded, newPalette, cfg.Size, cfg)
+		lineSize = cfg.Size.Width
 	} else {
-		if cont.ZigZag {
+		if cfg.ZigZag {
 			// prepare zigzag transformation
 			downgraded = transformation.Zigzag(downgraded)
 		}
-		if !cont.SpriteHard {
+		if !cfg.SpriteHard {
 			//fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
-			data, _, lineSize, err = common.ToSprite(downgraded, newPalette, cont.Size, screenMode, cont)
+			data, _, lineSize, err = common.ToSprite(downgraded, newPalette, cfg.Size, screenMode, cfg)
 		} else {
 			//	fmt.Fprintf(os.Stdout, "Transform image in sprite hard.\n")
-			data, _ = common.ToSpriteHard(downgraded, newPalette, cont.Size, screenMode, cont)
+			data, _ = common.ToSpriteHard(downgraded, newPalette, cfg.Size, screenMode, cfg)
 			lineSize = 16
 		}
 	}
-	if cont.OneRow {
+	if cfg.OneRow {
 		for y := 0; y < downgraded.Bounds().Max.Y; y += 2 {
 			for x := 0; x < downgraded.Bounds().Max.X; x++ {
 				downgraded.Set(x, y, newPalette[0])
 			}
 		}
 	}
-	if cont.OneLine {
+	if cfg.OneLine {
 		for y := 0; y < downgraded.Bounds().Max.Y; y++ {
 			for x := 0; x < downgraded.Bounds().Max.X; x += 2 {
 				downgraded.Set(x, y, newPalette[0])

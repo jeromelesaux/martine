@@ -8,12 +8,12 @@ import (
 	"strings"
 
 	"github.com/jeromelesaux/m4client/cpc"
-	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/config"
 )
 
 func AmsdosFilename(inputPath, ext string) string {
 	file := strings.ToUpper(filepath.Base(inputPath))
-	filename := export.RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
+	filename := config.RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
 	filenameSize := len(filename)
 	if filenameSize > 8 {
 		filenameSize = 8

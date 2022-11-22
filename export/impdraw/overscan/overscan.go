@@ -10,8 +10,8 @@ import (
 
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/common/errors"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/compression"
 )
@@ -89,18 +89,18 @@ func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 	return palette, mode, nil
 }
 
-func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, cont *export.MartineConfig) error {
+func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, cfg *config.MartineConfig) error {
 	o := make([]byte, 0x7e90-0x80)
 
 	// remove first line to keep #38 address free
 	var width int
 	switch screenMode {
 	case 0:
-		width = cont.Size.Width / 2
+		width = cfg.Size.Width / 2
 	case 1:
-		width = cont.Size.Width / 4
+		width = cfg.Size.Width / 4
 	case 2:
-		width = cont.Size.Width / 8
+		width = cfg.Size.Width / 8
 	}
 	for i := 0; i < width; i++ {
 		data[i] = 0
@@ -110,7 +110,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 	copy(o, OverscanBoot[:])
 	copy(o[0x200-0x170:], data[:])
 	//o[(0x1ac-0x170)] = 0 // cpc old
-	switch cont.CpcPlus {
+	switch cfg.CpcPlus {
 	case true:
 		o[(0x1ac - 0x170)] = 1
 	case false:
@@ -125,7 +125,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 		o[0x184-0x170] = 0x10
 	}
 	// affectation de la palette CPC old
-	if cont.CpcPlus {
+	if cfg.CpcPlus {
 		offset := 0
 		for i := 0; i < len(p); i++ {
 			cp := constants.NewCpcPlusColor(p[i])
@@ -145,11 +145,11 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 		}
 	}
 
-	o, _ = compression.Compress(o, cont.Compression)
+	o, _ = compression.Compress(o, cfg.Compression)
 
-	osFilepath := cont.AmsdosFullPath(filePath, ".SCR")
+	osFilepath := cfg.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", osFilepath)
-	if !cont.NoAmsdosHeader {
+	if !cfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".SCR", o, 0, 0, 0x170, 0); err != nil {
 			return err
 		}
@@ -159,7 +159,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 		}
 	}
 
-	cont.AddFile(osFilepath)
+	cfg.AddFile(osFilepath)
 	return nil
 }
 
@@ -191,15 +191,15 @@ func RawOverscan(filePath string) ([]byte, error) {
 	return data, nil
 }
 
-func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uint8, cont *export.MartineConfig) error {
+func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uint8, cfg *config.MartineConfig) error {
 	o := make([]byte, 0x8000-0x80)
-	osFilepath := cont.AmsdosFullPath(filePath, ".SCR")
+	osFilepath := cfg.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", osFilepath)
 
 	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 
 	var overscanTemplate []byte
-	if cont.CpcPlus {
+	if cfg.CpcPlus {
 		overscanTemplate = egxPlusOverscanTemplate
 	} else {
 		overscanTemplate = egxOverscanTemplate
@@ -207,7 +207,7 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 	copy(o[:], overscanTemplate[:])
 	copy(o[0x200-0x170:], data[:]) //  - 0x170  to have the file offset
 	//o[(0x1ac-0x170)] = 0 // cpc old
-	switch cont.CpcPlus {
+	switch cfg.CpcPlus {
 	case true:
 		o[(0x1ac - 0x170)] = 1
 	case false:
@@ -244,7 +244,7 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 	o[0x8f] = byte(extraFlag)
 
 	// affectation de la palette CPC old
-	if cont.CpcPlus {
+	if cfg.CpcPlus {
 		offset := 0
 		for i := 0; i < len(p); i++ {
 			cp := constants.NewCpcPlusColor(p[i])
@@ -263,13 +263,13 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 			}
 		}
 	}
-	if cont.CpcPlus {
+	if cfg.CpcPlus {
 		copy(o[0x6b2:0x6c8], egxPlusOverscanTemplate[0x6b2:0x6c8])
 		copy(o[0x7da0:], egxPlusOverscanTemplate[0x7da0:]) // copy egx routine
 	} else {
 		copy(o[0x7da0:], egxOverscanTemplate[0x7da0:]) // copy egx routine
 	}
-	if !cont.NoAmsdosHeader {
+	if !cfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".SCR", o, 0, 0, 0x170, 0x170); err != nil {
 			return err
 		}
@@ -279,6 +279,6 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 		}
 	}
 
-	cont.AddFile(osFilepath)
+	cfg.AddFile(osFilepath)
 	return nil
 }

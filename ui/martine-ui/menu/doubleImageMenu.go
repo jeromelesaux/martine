@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 
 	"fyne.io/fyne/v2/canvas"
-	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/config"
 )
 
 type DoubleImageMenu struct {
@@ -37,8 +37,8 @@ func (m *MergedImageMenu) CmdLine() string {
 }
 
 func (d *DoubleImageMenu) CmdLine() string {
-	palFilename := export.AmsdosFilename(d.LeftImage.OriginalImagePath.Path(), ".PAL")
-	scrFilename := export.AmsdosFilename(d.LeftImage.OriginalImagePath.Path(), ".SCR")
+	palFilename := config.AmsdosFilename(d.LeftImage.OriginalImagePath.Path(), ".PAL")
+	scrFilename := config.AmsdosFilename(d.LeftImage.OriginalImagePath.Path(), ".SCR")
 
 	cmd := "\n" + d.LeftImage.CmdLine() + " -out mode0"
 	cmd += "\n" + d.RightImage.CmdLine() + " -pal " + palFilename + " -out mode1"
