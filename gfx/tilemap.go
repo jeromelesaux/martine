@@ -15,6 +15,7 @@ import (
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
+	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/errors"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
@@ -41,8 +42,8 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 	palette = convert.ToCPCPalette(palette, refPalette)
 	palette = constants.SortColorsByDistance(palette)
 	_, m = convert.DowngradingWithPalette(m, palette)
-	file.PalToPng(cont.OutputPath+"/palette.png", palette)
-	file.Png(cont.OutputPath+"/map.png", m)
+	png.PalToPng(cont.OutputPath+"/palette.png", palette)
+	png.Png(cont.OutputPath+"/map.png", m)
 	size := constants.Size{Width: 2, Height: 8}
 	var sizeIteration int
 	switch mode {
@@ -142,7 +143,7 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 			if nbFrames < 255 {
 				data = append(data, d...)
 				scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%stiles%stile-%.2d.png", string(filepath.Separator), string(filepath.Separator), i))
-				if err := file.Png(scenePath, tile); err != nil {
+				if err := png.Png(scenePath, tile); err != nil {
 					fmt.Fprintf(os.Stderr, "Cannot create scene tile-%.2d error %v\n", i, err)
 					return err
 				}
@@ -187,7 +188,7 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 			// store the map in the slice
 			scenes = append(scenes, m1)
 			scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%sscenes%sscene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
-			if err := file.Png(scenePath, m1); err != nil {
+			if err := png.Png(scenePath, m1); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot create sscene-%.2d.png error %v\n", index, err)
 				return err
 			}
@@ -254,7 +255,7 @@ func ExportTilemapClassical(m image.Image, filename string, board *transformatio
 			// store the map in the slice
 			scenes = append(scenes, m1)
 			scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%sscenes%sscene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
-			if err := file.Png(scenePath, m1); err != nil {
+			if err := png.Png(scenePath, m1); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot encode in png scene scene-%.2d error %v\n", index, err)
 				return err
 			}
@@ -387,8 +388,8 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 	palette = convert.ToCPCPalette(palette, refPalette)
 	palette = constants.SortColorsByDistance(palette)
 	_, m = convert.DowngradingWithPalette(m, palette)
-	file.PalToPng(cont.OutputPath+"/palette.png", palette)
-	file.Png(cont.OutputPath+"/map.png", m)
+	png.PalToPng(cont.OutputPath+"/palette.png", palette)
+	png.Png(cont.OutputPath+"/map.png", m)
 
 	analyze := transformation.AnalyzeTilesBoard(m, cont.Size)
 	tilesSize := sizeOctet(analyze.TileSize, mode) * len(analyze.BoardTiles)
@@ -430,7 +431,7 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 			}
 			data = append(data, d...)
 			scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%stiles%stile-%.2d.png", string(filepath.Separator), string(filepath.Separator), i))
-			if err := file.Png(scenePath, tile); err != nil {
+			if err := png.Png(scenePath, tile); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot encode in png scene tile-%.2d error %v\n", i, err)
 				return err
 			}
@@ -467,7 +468,7 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 			// store the map in the slice
 			scenes = append(scenes, m1)
 			scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%sscenes%sscene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
-			if err := file.Png(scenePath, m1); err != nil {
+			if err := png.Png(scenePath, m1); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot encode in png scene scene-%.2d error %v\n", index, err)
 				return err
 			}
@@ -620,7 +621,7 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 			// store the map in the slice
 			//	scenes = append(scenes, m1)
 			scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%sscenes%sscene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
-			if err := file.Png(scenePath, m1); err != nil {
+			if err := png.Png(scenePath, m1); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot encode in png scene scene-%.2d error %v\n", index, err)
 				return err
 			}
@@ -703,7 +704,7 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 			}
 			data = append(data, d...)
 			scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%stiles%stile-%.2d.png", string(filepath.Separator), string(filepath.Separator), i))
-			if err := file.Png(scenePath, tile); err != nil {
+			if err := png.Png(scenePath, tile); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot encode in png scene tile-%.2d error %v\n", i, err)
 				return err
 			}
@@ -740,7 +741,7 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 			// store the map in the slice
 			scenes = append(scenes, m1)
 			scenePath := filepath.Join(cont.OutputPath, fmt.Sprintf("%sscenes%sscene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
-			if err := file.Png(scenePath, m1); err != nil {
+			if err := png.Png(scenePath, m1); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot encode in png scene scene-%.2d error %v\n", index, err)
 				return err
 			}

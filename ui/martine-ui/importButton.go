@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/png"
 	cgfx "github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
@@ -51,7 +52,7 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 				me.Palette = p
 				me.Mode = int(mode)
 				modeSelection.SetSelectedIndex(me.Mode)
-				me.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(p))
+				me.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(p))
 				me.OriginalImage = *canvas.NewImageFromImage(img)
 				me.OriginalImage.FillMode = canvas.ImageFillContain
 			} else if me.IsSprite {

@@ -22,6 +22,7 @@ import (
 	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/net"
+	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/export/snapshot"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
@@ -114,7 +115,7 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 func (m *MartineUI) monochromeColor(c color.Color) {
 
 	m.main.Palette = convert.ColorMonochromePalette(c, m.main.Palette)
-	m.main.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(m.main.Palette))
+	m.main.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(m.main.Palette))
 
 	refreshUI.OnTapped()
 }
@@ -163,7 +164,7 @@ func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 	}
 	me.CpcImage = *canvas.NewImageFromImage(me.Downgraded)
 	me.CpcImage.FillMode = canvas.ImageFillStretch
-	me.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(me.Palette))
+	me.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(me.Palette))
 	refreshUI.OnTapped()
 }
 
@@ -416,7 +417,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 						widget.NewButton("Gray", func() {
 							if me.IsCpcPlus {
 								me.Palette = convert.MonochromePalette(me.Palette)
-								me.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(me.Palette))
+								me.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(me.Palette))
 								forcePalette.SetChecked(true)
 								refreshUI.OnTapped()
 							}

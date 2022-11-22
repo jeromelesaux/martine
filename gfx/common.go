@@ -12,6 +12,7 @@ import (
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/filter"
 	"github.com/jeromelesaux/martine/gfx/transformation"
@@ -141,13 +142,13 @@ func ApplyOneImageAndExport(in image.Image,
 
 	out := convert.Resize(in, cont.Size, cont.ResizingAlgo)
 	fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
-	if err := file.Png(filepath.Join(cont.OutputPath, filename+"_resized.png"), out); err != nil {
+	if err := png.Png(filepath.Join(cont.OutputPath, filename+"_resized.png"), out); err != nil {
 		os.Exit(-2)
 	}
 
 	if cont.Reducer > 0 {
 		out = convert.Reducer(out, cont.Reducer)
-		if err := file.Png(filepath.Join(cont.OutputPath, filename+"_resized.png"), out); err != nil {
+		if err := png.Png(filepath.Join(cont.OutputPath, filename+"_resized.png"), out); err != nil {
 			os.Exit(-2)
 		}
 	}
@@ -198,7 +199,7 @@ func ApplyOneImageAndExport(in image.Image,
 	}
 
 	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
-	if err := file.Png(filepath.Join(cont.OutputPath, filename+"_down.png"), downgraded); err != nil {
+	if err := png.Png(filepath.Join(cont.OutputPath, filename+"_down.png"), downgraded); err != nil {
 		os.Exit(-2)
 	}
 
@@ -215,7 +216,7 @@ func ApplyOneImageAndExport(in image.Image,
 		for indice := 0; indice < cont.RollIteration; indice++ {
 			img := images[indice]
 			newFilename := cont.OsFullPath(filename, fmt.Sprintf("%.2d", indice)+".png")
-			if err := file.Png(newFilename, img); err != nil {
+			if err := png.Png(newFilename, img); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot create image (%s) error :%v\n", newFilename, err)
 			}
 			if err := common.ToSpriteAndExport(img, newPalette, constants.Size{Width: cont.Size.Width, Height: cont.Size.Height}, screenMode, newFilename, false, cont); err != nil {

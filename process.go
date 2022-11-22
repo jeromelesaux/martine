@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
 )
 
@@ -188,5 +188,5 @@ func (p *Process) GenerateRawFile() error {
 		return err
 	}
 	*picturePath = p.PicturePath
-	return file.Png(p.PicturePath, in)
+	return png.Png(p.PicturePath, in)
 }

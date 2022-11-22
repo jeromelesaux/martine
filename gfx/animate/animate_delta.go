@@ -14,6 +14,7 @@ import (
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/errors"
 	"github.com/jeromelesaux/martine/gfx/transformation"
@@ -156,7 +157,7 @@ func DeltaPacking(gitFilepath string, ex *export.MartineContext, initialAddress 
 			if err != nil {
 				return err
 			}
-			file.Png(ex.OutputPath+fmt.Sprintf("/%.2d.png", i), in)
+			png.Png(ex.OutputPath+fmt.Sprintf("/%.2d.png", i), in)
 
 			rawImages = append(rawImages, raw)
 			fmt.Printf("Image [%d] proceed\n", i)

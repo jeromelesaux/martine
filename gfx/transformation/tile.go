@@ -11,7 +11,7 @@ import (
 
 	"github.com/jeromelesaux/martine/convert"
 	x "github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/oliamb/cutter"
 )
@@ -59,7 +59,7 @@ func TileMode(ex *x.MartineContext, mode uint8, iterationX, iterationY int) erro
 			resized := convert.Resize(cropped, ex.Size, ex.ResizingAlgo)
 			ext := "_resized_" + strconv.Itoa(index) + ".png"
 			filePath := filepath.Join(ex.OutputPath, ex.OsFilename(ext))
-			if err := file.Png(filePath, resized); err != nil {
+			if err := png.Png(filePath, resized); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot resized image, error %v\n", err)
 			}
 			p, downgraded, err := convert.DowngradingPalette(resized, ex.Size, ex.CpcPlus)
@@ -73,7 +73,7 @@ func TileMode(ex *x.MartineContext, mode uint8, iterationX, iterationY int) erro
 
 			ext = "_downgraded_" + strconv.Itoa(index) + ".png"
 			filePath = filepath.Join(ex.OutputPath, ex.OsFilename(ext))
-			if err := file.Png(filePath, downgraded); err != nil {
+			if err := png.Png(filePath, downgraded); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot downgrade image, error %v\n", err)
 			}
 			ext = strconv.Itoa(index) + ".png"

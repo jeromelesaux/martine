@@ -15,6 +15,7 @@ import (
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
+	p "github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/common"
 )
@@ -109,7 +110,7 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 				filename := fmt.Sprintf("%.2d", index)
 				out := convert.Resize(in, export.Size, export.ResizingAlgo)
 				fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
-				if err := file.Png(filepath.Join(export.OutputPath, filename+"_resized.png"), out); err != nil {
+				if err := p.Png(filepath.Join(export.OutputPath, filename+"_resized.png"), out); err != nil {
 					os.Exit(-2)
 				}
 
@@ -125,7 +126,7 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 				newPalette = constants.SortColorsByDistance(newPalette)
 
 				fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
-				if err := file.Png(filepath.Join(export.OutputPath, filename+"_down.png"), downgraded); err != nil {
+				if err := p.Png(filepath.Join(export.OutputPath, filename+"_down.png"), downgraded); err != nil {
 					os.Exit(-2)
 				}
 
@@ -160,7 +161,7 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 				filename := fmt.Sprintf("%.2d", index0)
 				out := convert.Resize(in, export.Size, export.ResizingAlgo)
 				fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
-				if err := file.Png(filepath.Join(export.OutputPath, filename+"_resized.png"), out); err != nil {
+				if err := p.Png(filepath.Join(export.OutputPath, filename+"_resized.png"), out); err != nil {
 					os.Exit(-2)
 				}
 
@@ -176,7 +177,7 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 				newPalette = constants.SortColorsByDistance(newPalette)
 
 				fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
-				if err := file.Png(filepath.Join(export.OutputPath, filename+"_down.png"), downgraded); err != nil {
+				if err := p.Png(filepath.Join(export.OutputPath, filename+"_down.png"), downgraded); err != nil {
 					os.Exit(-2)
 				}
 
@@ -200,7 +201,7 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 		}
 
 	}
-	if err := file.Png(filepath.Join(export.OutputPath, "board.png"), board); err != nil {
+	if err := p.Png(filepath.Join(export.OutputPath, "board.png"), board); err != nil {
 		os.Exit(-2)
 	}
 	return board, newPalette, nil

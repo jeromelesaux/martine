@@ -12,7 +12,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
-	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/errors"
 	"github.com/pbnjay/pixfont"
@@ -360,7 +360,7 @@ func (a *AnalyzeBoard) Image(filePath string, bt []BoardTile, size constants.Siz
 			}
 		}
 	}
-	return file.Png(filePath, im)
+	return png.Png(filePath, im)
 }
 
 func (a *AnalyzeBoard) SaveBoardTile(folderpath string, bt []BoardTile) error {
@@ -377,7 +377,7 @@ func (a *AnalyzeBoard) SaveBoardTile(folderpath string, bt []BoardTile) error {
 				im.Set(x, y, sprt.Colors[x][y])
 			}
 		}
-		err := file.Png(folderpath+string(filepath.Separator)+fmt.Sprintf("%.4d.png", index), im)
+		err := png.Png(folderpath+string(filepath.Separator)+fmt.Sprintf("%.4d.png", index), im)
 		if err != nil {
 			return err
 		}
@@ -416,7 +416,7 @@ func (a *AnalyzeBoard) SaveSprites(folderpath string, palette color.Palette, mod
 				im.Set(x, y, sprt.Colors[x][y])
 			}
 		}
-		err := file.Png(filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", index)), im)
+		err := png.Png(filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", index)), im)
 		if err != nil {
 			return err
 		}
@@ -485,7 +485,7 @@ func (a *AnalyzeBoard) SaveSchema(filePath string) error {
 		x0 = 10
 		y0 += spaceHeigth / 2
 	}
-	return file.Png(filePath, im)
+	return png.Png(filePath, im)
 }
 
 func (a *AnalyzeBoard) SaveTilemap(filePath string) error {

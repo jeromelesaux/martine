@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/png"
 )
 
 type PaletteInterface interface {
@@ -38,7 +39,7 @@ func NewOpenPaletteButton(m PaletteInterface, win fyne.Window) *widget.Button {
 					return
 				}
 				m.SetPalette(p)
-				m.SetPaletteImage(*canvas.NewImageFromImage(file.PalToImage(p)))
+				m.SetPaletteImage(*canvas.NewImageFromImage(png.PalToImage(p)))
 			case ".kit":
 				p, _, err := file.OpenKit(palettePath)
 				if err != nil {
@@ -46,7 +47,7 @@ func NewOpenPaletteButton(m PaletteInterface, win fyne.Window) *widget.Button {
 					return
 				}
 				m.SetPalette(p)
-				m.SetPaletteImage(*canvas.NewImageFromImage(file.PalToImage(p)))
+				m.SetPaletteImage(*canvas.NewImageFromImage(png.PalToImage(p)))
 			}
 			refreshUI.OnTapped()
 		}, win)

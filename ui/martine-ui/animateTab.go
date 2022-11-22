@@ -21,6 +21,7 @@ import (
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/animate"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 	w2 "github.com/jeromelesaux/martine/ui/martine-ui/widget"
@@ -100,7 +101,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 }
 
 func (m *MartineUI) refreshAnimatePalette() {
-	m.animate.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(m.animate.Palette))
+	m.animate.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(m.animate.Palette))
 	refreshUI.OnTapped()
 }
 
@@ -152,7 +153,7 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 	a.DeltaCollection = deltaCollection
 	a.Palette = palette
 	a.RawImages = rawImages
-	a.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(a.Palette))
+	a.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(a.Palette))
 	refreshUI.OnTapped()
 }
 

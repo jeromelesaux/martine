@@ -18,7 +18,7 @@ import (
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
@@ -63,7 +63,7 @@ func NewMartineUI() *MartineUI {
 func (m *MartineUI) SetPalette(p color.Palette) {
 
 	m.main.Palette = p
-	m.main.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(p))
+	m.main.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(p))
 	refreshUI.OnTapped()
 }
 

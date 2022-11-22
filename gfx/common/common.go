@@ -10,6 +10,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
@@ -215,7 +216,7 @@ func SpriteToPng(winPath string, output string, mode uint8, p color.Palette) err
 	if err != nil {
 		return err
 	}
-	return file.Png(output+".png", out)
+	return png.Png(output+".png", out)
 }
 
 // scrRawToImg will convert the classical OCP screen slice of bytes  into image.NRGBA structure
@@ -394,7 +395,7 @@ func ScrToPng(scrPath string, output string, mode uint8, p color.Palette) error 
 	if err != nil {
 		return err
 	}
-	return file.Png(output, out)
+	return png.Png(output, out)
 }
 
 // overscanRawToImg will convert fullscreen amstrad screen slice of bytes in image.NRGBA
@@ -593,7 +594,7 @@ func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) e
 	if err != nil {
 		return err
 	}
-	return file.Png(output, out)
+	return png.Png(output, out)
 }
 
 func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, cont *export.MartineContext) error {
@@ -607,7 +608,7 @@ func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Siz
 			return err
 		}
 		filePath := cont.OsFullPath(filename, "_palettepal.png")
-		if err := file.PalToPng(filePath, p); err != nil {
+		if err := png.PalToPng(filePath, p); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
@@ -616,7 +617,7 @@ func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Siz
 			return err
 		}
 		filePath = cont.OsFullPath(filename, "_paletteink.png")
-		if err := file.PalToPng(filePath, p); err != nil {
+		if err := png.PalToPng(filePath, p); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
@@ -626,7 +627,7 @@ func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Siz
 			return err
 		}
 		filePath := cont.OsFullPath(filename, "_palettekit.png")
-		if err := file.PalToPng(filePath, p); err != nil {
+		if err := png.PalToPng(filePath, p); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 			return err
 		}
@@ -691,7 +692,7 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *e
 			return err
 		}
 		filePath2 := ex.OsFullPath(filePath, "_palettepal.png")
-		if err := file.PalToPng(filePath2, p); err != nil {
+		if err := png.PalToPng(filePath2, p); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath2, err)
 			return err
 		}
@@ -700,7 +701,7 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *e
 			return err
 		}
 		filePath2 = ex.OsFullPath(filePath, "_paletteink.png")
-		if err := file.PalToPng(filePath2, p); err != nil {
+		if err := png.PalToPng(filePath2, p); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath2, err)
 			return err
 		}
@@ -710,7 +711,7 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *e
 			return err
 		}
 		filePath2 := ex.OsFullPath(filePath, "_palettekit.png")
-		if err := file.PalToPng(filePath2, p); err != nil {
+		if err := png.PalToPng(filePath2, p); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath2, err)
 			return err
 		}

@@ -17,6 +17,7 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/png"
 	cgfx "github.com/jeromelesaux/martine/gfx/common"
 )
 
@@ -160,7 +161,7 @@ func (me *ImageMenu) NewImportButton(dialogSize fyne.Size, modeSelection *widget
 				me.Palette = p
 				me.Mode = int(mode)
 				modeSelection.SetSelectedIndex(me.Mode)
-				me.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(p))
+				me.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(p))
 				me.OriginalImage = *canvas.NewImageFromImage(img)
 				me.OriginalImage.FillMode = canvas.ImageFillContain
 			} else if me.IsSprite {

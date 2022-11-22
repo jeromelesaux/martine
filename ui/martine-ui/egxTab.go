@@ -18,6 +18,7 @@ import (
 	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/effect"
@@ -75,7 +76,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	secondIm.Data = out
 	secondIm.CpcImage = *canvas.NewImageFromImage(downgraded)
 	secondIm.Palette = palette
-	secondIm.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(secondIm.Palette))
+	secondIm.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(secondIm.Palette))
 	out, downgraded, _, _, err = gfx.ApplyOneImage(im.CpcImage.Image, context, im.Mode, palette, uint8(im.Mode))
 	if err != nil {
 		dialog.ShowError(err, m.window)
@@ -84,7 +85,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	im.Data = out
 	im.CpcImage = *canvas.NewImageFromImage(downgraded)
 	im.Palette = palette
-	im.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(im.Palette))
+	im.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(im.Palette))
 
 	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
 	pi.Show()
@@ -112,7 +113,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 		}
 	}
 	di.ResultImage.CpcResultImage = *canvas.NewImageFromImage(img)
-	di.ResultImage.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(di.ResultImage.Palette))
+	di.ResultImage.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(di.ResultImage.Palette))
 	refreshUI.OnTapped()
 }
 
@@ -155,7 +156,7 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) fyne.CanvasObject {
 					di.ResultImage.RightPalette = di.RightImage.Palette
 					di.ResultImage.LeftPaletteImage = di.LeftImage.PaletteImage
 					di.ResultImage.RightPaletteImage = di.RightImage.PaletteImage
-					di.ResultImage.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(di.ResultImage.Palette))
+					di.ResultImage.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(di.ResultImage.Palette))
 					s := m.window.Content().Size()
 					s.Height += 10.
 					s.Width += 10.
@@ -426,7 +427,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 						widget.NewButton("Gray", func() {
 							if me.IsCpcPlus {
 								me.Palette = convert.MonochromePalette(me.Palette)
-								me.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(me.Palette))
+								me.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(me.Palette))
 								forcePalette.SetChecked(true)
 								refreshUI.OnTapped()
 							}

@@ -19,8 +19,8 @@ import (
 	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
-	"github.com/jeromelesaux/martine/export/file"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
+	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/export/spritehard"
 	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/sprite"
@@ -76,7 +76,7 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 		}
 	}
 	s.OriginalImages.Update(icache, icache.ImagesPerRow, icache.ImagesPerColumn)
-	s.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(s.Palette))
+	s.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(s.Palette))
 	pi.Hide()
 	refreshUI.OnTapped()
 }

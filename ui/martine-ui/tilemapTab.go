@@ -19,6 +19,7 @@ import (
 	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
@@ -70,7 +71,7 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 		}
 	}
 	me.TileImages.Update(tilesCanvas, len(tiles)-1, len(tiles[0])-1)
-	me.PaletteImage = *canvas.NewImageFromImage(file.PalToImage(me.Palette))
+	me.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(me.Palette))
 	canvas.Refresh(&me.TileImages.Table)
 	refreshUI.OnTapped()
 }

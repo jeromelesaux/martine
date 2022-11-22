@@ -10,7 +10,7 @@ import (
 
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
 
@@ -32,7 +32,7 @@ func TestOpenGif(t *testing.T) {
 		rect := image.Rect(0, 0, v.Bounds().Max.X, v.Bounds().Max.Y)
 		img := image.NewNRGBA(rect)
 		draw.Draw(img, rect, v, rect.Min, draw.Over)
-		if err := file.Png(fmt.Sprintf("tests/%d.png", i), img); err != nil {
+		if err := png.Png(fmt.Sprintf("tests/%d.png", i), img); err != nil {
 			t.Fatal(err)
 		}
 	}
