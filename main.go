@@ -19,6 +19,7 @@ import (
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
 	"github.com/jeromelesaux/martine/export/m4"
+	"github.com/jeromelesaux/martine/export/ocpartstudio/window"
 
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/snapshot"
@@ -223,7 +224,7 @@ func main() {
 			ocpartstudio.PalInformation(*palettePath)
 		}
 		if *winPath != "" {
-			ocpartstudio.WinInformation(*winPath)
+			window.WinInformation(*winPath)
 		}
 		if *kitPath != "" {
 			impPalette.KitInformation(*kitPath)
@@ -396,7 +397,7 @@ func main() {
 				screenMode)
 
 			spritePath := cont.AmsdosFullPath(v, ".WIN")
-			data, err := ocpartstudio.RawWin(spritePath)
+			data, err := window.RawWin(spritePath)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error while extracting raw content, err:%s\n", err)
 			}

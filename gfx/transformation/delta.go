@@ -19,6 +19,7 @@ import (
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/impdraw/overscan"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
+	"github.com/jeromelesaux/martine/export/ocpartstudio/window"
 	"github.com/jeromelesaux/martine/gfx/common"
 )
 
@@ -517,12 +518,12 @@ func ProceedDelta(filespath []string, initialAddress uint16, cont *x.MartineCont
 	for i := 0; i < len(filespath)-1; i++ {
 		switch strings.ToUpper(filepath.Ext(filespath[i])) {
 		case ".WIN":
-			d1, err = ocpartstudio.RawWin(filespath[i])
+			d1, err = window.RawWin(filespath[i])
 			if err != nil {
 				return err
 			}
 			isSprite = true
-			footer, err := ocpartstudio.OpenWin(filespath[i])
+			footer, err := window.OpenWin(filespath[i])
 			if err != nil {
 				return err
 			}
@@ -543,12 +544,12 @@ func ProceedDelta(filespath []string, initialAddress uint16, cont *x.MartineCont
 
 		switch strings.ToUpper(filepath.Ext(filespath[i+1])) {
 		case ".WIN":
-			d2, err = ocpartstudio.RawWin(filespath[i+1])
+			d2, err = window.RawWin(filespath[i+1])
 			if err != nil {
 				return err
 			}
 			isSprite = true
-			footer, err := ocpartstudio.OpenWin(filespath[i+1])
+			footer, err := window.OpenWin(filespath[i+1])
 			if err != nil {
 				return err
 			}
@@ -585,11 +586,11 @@ func ProceedDelta(filespath []string, initialAddress uint16, cont *x.MartineCont
 
 	switch strings.ToUpper(filepath.Ext(filespath[len(filespath)-1])) {
 	case ".WIN":
-		d1, err = ocpartstudio.RawWin(filespath[len(filespath)-1])
+		d1, err = window.RawWin(filespath[len(filespath)-1])
 		if err != nil {
 			return err
 		}
-		footer, err := ocpartstudio.OpenWin(filespath[len(filespath)-1])
+		footer, err := window.OpenWin(filespath[len(filespath)-1])
 		if err != nil {
 			return err
 		}
@@ -610,11 +611,11 @@ func ProceedDelta(filespath []string, initialAddress uint16, cont *x.MartineCont
 
 	switch strings.ToUpper(filepath.Ext(filespath[0])) {
 	case ".WIN":
-		d2, err = ocpartstudio.RawWin(filespath[0])
+		d2, err = window.RawWin(filespath[0])
 		if err != nil {
 			return err
 		}
-		footer, err := ocpartstudio.OpenWin(filespath[0])
+		footer, err := window.OpenWin(filespath[0])
 		if err != nil {
 			return err
 		}

@@ -13,6 +13,7 @@ import (
 	"github.com/jeromelesaux/martine/export/impdraw/overscan"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
+	"github.com/jeromelesaux/martine/export/ocpartstudio/window"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
@@ -110,13 +111,13 @@ func RawSpriteToImg(data []byte, height, width, mode uint8, p color.Palette) *im
 // using the mode and palette as arguments
 func SpriteToImg(winPath string, mode uint8, p color.Palette) (*image.NRGBA, constants.Size, error) {
 	var s constants.Size
-	footer, err := ocpartstudio.OpenWin(winPath)
+	footer, err := window.OpenWin(winPath)
 	if err != nil {
 		return nil, s, err
 	}
 	var out *image.NRGBA
 
-	d, err := ocpartstudio.RawWin(winPath)
+	d, err := window.RawWin(winPath)
 	if err != nil {
 		return nil, s, err
 	}
@@ -601,7 +602,7 @@ func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) e
 }
 
 func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, cont *export.MartineContext) error {
-	if err := ocpartstudio.Win(filename, data, mode, lineSize, size.Height, dontImportDsk, cont); err != nil {
+	if err := window.Win(filename, data, mode, lineSize, size.Height, dontImportDsk, cont); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
 		return err
 	}

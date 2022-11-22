@@ -18,7 +18,7 @@ import (
 	"github.com/jeromelesaux/martine/export/diskimage"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
-	"github.com/jeromelesaux/martine/export/ocpartstudio"
+	"github.com/jeromelesaux/martine/export/ocpartstudio/window"
 	"github.com/jeromelesaux/martine/export/spritehard"
 	"github.com/jeromelesaux/martine/gfx/animate"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
@@ -153,7 +153,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 				cont := export.NewMartineContext("", s.ExportFolderPath)
 				cont.Compression = s.ExportCompression
 				cont.NoAmsdosHeader = !s.ExportWithAmsdosHeader
-				if err := ocpartstudio.Win(filename, v0, uint8(s.Mode), s.SpriteWidth, s.SpriteHeight, s.ExportDsk, cont); err != nil {
+				if err := window.Win(filename, v0, uint8(s.Mode), s.SpriteWidth, s.SpriteHeight, s.ExportDsk, cont); err != nil {
 					fmt.Fprintf(os.Stderr, "error while exporting sprites error %s\n", err.Error())
 				}
 			}
