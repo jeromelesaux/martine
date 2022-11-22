@@ -9,9 +9,9 @@ import (
 
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/convert/address"
 	"github.com/jeromelesaux/martine/convert/export"
+	ci "github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/convert/palette"
 	"github.com/jeromelesaux/martine/convert/pixel"
 	"github.com/jeromelesaux/martine/export/impdraw/splitraster"
@@ -49,12 +49,12 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 
 	var bw []byte
 	srs := constants.NewSplitRasterScreen()
-	out := convert.Resize(in, cfg.Size, cfg.ResizingAlgo)
+	out := ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
 	fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
 	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_resized.png"), out); err != nil {
 		return nil, bw, srs, err
 	}
-	p, newIm, err := convert.DowngradingPalette(out, cfg.Size, cfg.CpcPlus)
+	p, newIm, err := ci.DowngradingPalette(out, cfg.Size, cfg.CpcPlus)
 	if err != nil {
 		return p, bw, srs, err
 	}

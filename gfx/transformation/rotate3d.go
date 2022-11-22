@@ -8,7 +8,8 @@ import (
 
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
+	ci "github.com/jeromelesaux/martine/convert/image"
+
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
@@ -37,7 +38,7 @@ func Rotate3d(in *image.NRGBA,
 		background := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: size.Width, Y: size.Height}})
 		draw.Draw(background, background.Bounds(), &image.Uniform{p[0]}, image.Point{0, 0}, draw.Src)
 		rin := rotateImage(in, background, i, rotation3DX0, rotation3DY0, rotation3DType)
-		_, rin = convert.DowngradingWithPalette(rin, p)
+		_, rin = ci.DowngradingWithPalette(rin, p)
 		images = append(images, rin)
 		/*newFilename := cont.OsFullPath(filePath, fmt.Sprintf("%.2d", indice)+".png")
 		if err := file.Png(newFilename, rin); err != nil {

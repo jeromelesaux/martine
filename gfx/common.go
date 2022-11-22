@@ -10,7 +10,7 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
+	ci "github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/convert/sprite"
 	"github.com/jeromelesaux/martine/convert/spritehard"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
@@ -39,7 +39,7 @@ func DoDithering(in *image.NRGBA,
 			}
 		case constants.OrderedDither:
 			if isCpcPlus {
-				p = convert.ExtractPalette(in, isCpcPlus, 27)
+				p = ci.ExtractPalette(in, isCpcPlus, 27)
 				in = filter.BayerDiphering(in, ditheringMatrix, p)
 			} else {
 				in = filter.BayerDiphering(in, ditheringMatrix, constants.CpcOldPalette)
@@ -142,23 +142,23 @@ func ApplyOneImageAndExport(in image.Image,
 		}
 	}
 
-	out := convert.Resize(in, cfg.Size, cfg.ResizingAlgo)
+	out := ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
 	fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
 	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_resized.png"), out); err != nil {
 		os.Exit(-2)
 	}
 
 	if cfg.Reducer > 0 {
-		out = convert.Reducer(out, cfg.Reducer)
+		out = ci.Reducer(out, cfg.Reducer)
 		if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_resized.png"), out); err != nil {
 			os.Exit(-2)
 		}
 	}
 
 	if len(palette) > 0 {
-		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
+		newPalette, downgraded = ci.DowngradingWithPalette(out, palette)
 	} else {
-		newPalette, downgraded, err = convert.DowngradingPalette(out, cfg.Size, cfg.CpcPlus)
+		newPalette, downgraded, err = ci.DowngradingPalette(out, cfg.Size, cfg.CpcPlus)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", picturePath)
 		}
@@ -177,8 +177,8 @@ func ApplyOneImageAndExport(in image.Image,
 
 	out, _ = DoDithering(out, newPalette, cfg.DitheringAlgo, cfg.DitheringType, cfg.DitheringWithQuantification, cfg.DitheringMatrix, float32(cfg.DitheringMultiplier), cfg.CpcPlus, cfg.Size)
 	if cfg.Saturation > 0 || cfg.Brightness > 0 {
-		palette = convert.EnhanceBrightness(newPalette, cfg.Brightness, cfg.Saturation)
-		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
+		palette = ci.EnhanceBrightness(newPalette, cfg.Brightness, cfg.Saturation)
+		newPalette, downgraded = ci.DowngradingWithPalette(out, palette)
 		var paletteToSort color.Palette
 		switch mode {
 		case 1:
@@ -255,16 +255,16 @@ func ApplyOneImage(in image.Image,
 	var downgraded *image.NRGBA
 	var err error
 
-	out := convert.Resize(in, cfg.Size, cfg.ResizingAlgo)
+	out := ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
 
 	if cfg.Reducer > -1 {
-		out = convert.Reducer(out, cfg.Reducer)
+		out = ci.Reducer(out, cfg.Reducer)
 	}
 
 	if len(palette) > 0 {
-		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
+		newPalette, downgraded = ci.DowngradingWithPalette(out, palette)
 	} else {
-		newPalette, downgraded, err = convert.DowngradingPalette(out, cfg.Size, cfg.CpcPlus)
+		newPalette, downgraded, err = ci.DowngradingPalette(out, cfg.Size, cfg.CpcPlus)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image")
 		}
@@ -292,8 +292,8 @@ func ApplyOneImage(in image.Image,
 	out, _ = DoDithering(out, newPalette, cfg.DitheringAlgo, cfg.DitheringType, cfg.DitheringWithQuantification, cfg.DitheringMatrix, float32(cfg.DitheringMultiplier), cfg.CpcPlus, cfg.Size)
 
 	if cfg.Saturation > 0 || cfg.Brightness > 0 {
-		palette = convert.EnhanceBrightness(newPalette, cfg.Brightness, cfg.Saturation)
-		newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
+		palette = ci.EnhanceBrightness(newPalette, cfg.Brightness, cfg.Saturation)
+		newPalette, downgraded = ci.DowngradingWithPalette(out, palette)
 		var paletteToSort color.Palette
 		switch mode {
 		case 1:

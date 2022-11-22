@@ -11,7 +11,7 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
+	ci "github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/convert/sprite"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/ascii"
@@ -37,18 +37,18 @@ func DeltaMotif(gitFilepath string, ex *config.MartineConfig, threshold int, ini
 	screens := make([]*image.NRGBA, 0)
 	// resize all images
 	for _, v := range images {
-		out := convert.Resize(v, size, imaging.NearestNeighbor)
+		out := ci.Resize(v, size, imaging.NearestNeighbor)
 		screens = append(screens, out)
 	}
 
 	// downgrading palette
-	customPalette, _, err := convert.DowngradingPalette(screens[0], size, ex.CpcPlus)
+	customPalette, _, err := ci.DowngradingPalette(screens[0], size, ex.CpcPlus)
 	if err != nil {
 		return err
 	}
 	// converting all screens
 	for index, v := range screens {
-		_, out := convert.DowngradingWithPalette(v, customPalette)
+		_, out := ci.DowngradingWithPalette(v, customPalette)
 		screens[index] = out
 	}
 

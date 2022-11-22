@@ -9,7 +9,7 @@ import (
 
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
+	ci "github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/gfx"
 )
@@ -55,7 +55,7 @@ func AutoFlash(in image.Image,
 	size := constants.Size{
 		Width:  cfg.Size.Width * 2,
 		Height: cfg.Size.Height * 2}
-	im := convert.Resize(in, size, cfg.ResizingAlgo)
+	im := ci.Resize(in, size, cfg.ResizingAlgo)
 	leftIm := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{cfg.Size.Width, cfg.Size.Height}})
 	rigthIm := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{cfg.Size.Width, cfg.Size.Height}})
 	indexExtFilename := strings.LastIndex(filename, ".")

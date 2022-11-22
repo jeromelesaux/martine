@@ -18,7 +18,8 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
+
+	ci "github.com/jeromelesaux/martine/convert/image"
 	spr "github.com/jeromelesaux/martine/convert/sprite"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
 	"github.com/jeromelesaux/martine/export/png"
@@ -51,7 +52,7 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 	}
 	img := image.NewNRGBA(image.Rect(0, 0, b.Bounds().Max.X, b.Bounds().Max.Y))
 	draw.Draw(img, img.Bounds(), b, b.Bounds().Min, draw.Src)
-	pal, _, err := convert.DowngradingPalette(img, constants.Size{ColorsAvailable: colorsAvailable, Width: img.Bounds().Max.X, Height: img.Bounds().Max.Y}, s.IsCpcPlus)
+	pal, _, err := ci.DowngradingPalette(img, constants.Size{ColorsAvailable: colorsAvailable, Width: img.Bounds().Max.X, Height: img.Bounds().Max.Y}, s.IsCpcPlus)
 	if err != nil {
 		pi.Hide()
 		dialog.NewError(err, m.window).Show()

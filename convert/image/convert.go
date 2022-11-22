@@ -1,4 +1,4 @@
-package convert
+package image
 
 import (
 	"errors"

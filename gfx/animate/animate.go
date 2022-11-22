@@ -13,7 +13,7 @@ import (
 
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
+	ci "github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/convert/sprite"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
@@ -109,16 +109,16 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 				}
 				var downgraded *image.NRGBA
 				filename := fmt.Sprintf("%.2d", index)
-				out := convert.Resize(in, export.Size, export.ResizingAlgo)
+				out := ci.Resize(in, export.Size, export.ResizingAlgo)
 				fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
 				if err := p.Png(filepath.Join(export.OutputPath, filename+"_resized.png"), out); err != nil {
 					os.Exit(-2)
 				}
 
 				if len(palette) > 0 {
-					newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
+					newPalette, downgraded = ci.DowngradingWithPalette(out, palette)
 				} else {
-					newPalette, downgraded, err = convert.DowngradingPalette(out, export.Size, export.CpcPlus)
+					newPalette, downgraded, err = ci.DowngradingPalette(out, export.Size, export.CpcPlus)
 					if err != nil {
 						fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", v)
 					}
@@ -160,16 +160,16 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 				}
 				var downgraded *image.NRGBA
 				filename := fmt.Sprintf("%.2d", index0)
-				out := convert.Resize(in, export.Size, export.ResizingAlgo)
+				out := ci.Resize(in, export.Size, export.ResizingAlgo)
 				fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
 				if err := p.Png(filepath.Join(export.OutputPath, filename+"_resized.png"), out); err != nil {
 					os.Exit(-2)
 				}
 
 				if len(palette) > 0 {
-					newPalette, downgraded = convert.DowngradingWithPalette(out, palette)
+					newPalette, downgraded = ci.DowngradingWithPalette(out, palette)
 				} else {
-					newPalette, downgraded, err = convert.DowngradingPalette(out, export.Size, export.CpcPlus)
+					newPalette, downgraded, err = ci.DowngradingPalette(out, export.Size, export.CpcPlus)
 					if err != nil {
 						fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", v)
 					}

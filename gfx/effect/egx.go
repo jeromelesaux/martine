@@ -9,9 +9,9 @@ import (
 
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
 	"github.com/jeromelesaux/martine/convert/address"
 	"github.com/jeromelesaux/martine/convert/export"
+	ci "github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/convert/palette"
 	"github.com/jeromelesaux/martine/convert/pixel"
 	"github.com/jeromelesaux/martine/convert/screen"
@@ -130,7 +130,7 @@ func AutoEgx1(in image.Image,
 		Width:  cfg.Size.Width,
 		Height: cfg.Size.Height}
 
-	im := convert.Resize(in, size, cfg.ResizingAlgo)
+	im := ci.Resize(in, size, cfg.ResizingAlgo)
 	var palette color.Palette // palette de l'image
 	var p color.Palette       // palette cpc de l'image
 	var downgraded *image.NRGBA
@@ -145,9 +145,9 @@ func AutoEgx1(in image.Image,
 		}
 	}
 	if len(palette) > 0 {
-		p, downgraded = convert.DowngradingWithPalette(im, palette)
+		p, downgraded = ci.DowngradingWithPalette(im, palette)
 	} else {
-		p, downgraded, err = convert.DowngradingPalette(im, cfg.Size, cfg.CpcPlus)
+		p, downgraded, err = ci.DowngradingPalette(im, cfg.Size, cfg.CpcPlus)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", picturePath)
 		}
@@ -172,7 +172,7 @@ func AutoEgx2(in image.Image,
 		Width:  cfg.Size.Width,
 		Height: cfg.Size.Height}
 
-	im := convert.Resize(in, size, cfg.ResizingAlgo)
+	im := ci.Resize(in, size, cfg.ResizingAlgo)
 	var palette color.Palette // palette de l'image
 	var p color.Palette       // palette cpc de l'image
 	var downgraded *image.NRGBA
@@ -188,9 +188,9 @@ func AutoEgx2(in image.Image,
 	}
 
 	if len(palette) > 0 {
-		p, downgraded = convert.DowngradingWithPalette(im, palette)
+		p, downgraded = ci.DowngradingWithPalette(im, palette)
 	} else {
-		p, downgraded, err = convert.DowngradingPalette(im, cfg.Size, cfg.CpcPlus)
+		p, downgraded, err = ci.DowngradingPalette(im, cfg.Size, cfg.CpcPlus)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", picturePath)
 		}

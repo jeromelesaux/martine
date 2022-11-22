@@ -16,7 +16,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/config"
-	"github.com/jeromelesaux/martine/convert"
+
+	ci "github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/convert/screen"
 	"github.com/jeromelesaux/martine/convert/screen/overscan"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
@@ -428,7 +429,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 						}),
 						widget.NewButton("Gray", func() {
 							if me.IsCpcPlus {
-								me.Palette = convert.MonochromePalette(me.Palette)
+								me.Palette = ci.MonochromePalette(me.Palette)
 								me.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(me.Palette))
 								forcePalette.SetChecked(true)
 								refreshUI.OnTapped()

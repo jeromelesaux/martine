@@ -10,7 +10,8 @@ import (
 	"strconv"
 
 	"github.com/jeromelesaux/martine/config"
-	"github.com/jeromelesaux/martine/convert"
+
+	ci "github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/convert/sprite"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/oliamb/cutter"
@@ -56,13 +57,13 @@ func TileMode(ex *config.MartineConfig, mode uint8, iterationX, iterationY int) 
 				return err
 			}
 
-			resized := convert.Resize(cropped, ex.Size, ex.ResizingAlgo)
+			resized := ci.Resize(cropped, ex.Size, ex.ResizingAlgo)
 			ext := "_resized_" + strconv.Itoa(index) + ".png"
 			filePath := filepath.Join(ex.OutputPath, ex.OsFilename(ext))
 			if err := png.Png(filePath, resized); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot resized image, error %v\n", err)
 			}
-			p, downgraded, err := convert.DowngradingPalette(resized, ex.Size, ex.CpcPlus)
+			p, downgraded, err := ci.DowngradingPalette(resized, ex.Size, ex.CpcPlus)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot downgrad the palette, error :%v\n", err)
 			}

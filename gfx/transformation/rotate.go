@@ -7,7 +7,7 @@ import (
 
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
+	ci "github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
@@ -46,7 +46,7 @@ func Rotate(in *image.NRGBA,
 				rin,
 			)
 		}
-		_, rin = convert.DowngradingWithPalette(rin, p)
+		_, rin = ci.DowngradingWithPalette(rin, p)
 		images = append(images, rin)
 		/*	newFilename := cont.OsFullPath(filePath, fmt.Sprintf("%.2d", indice)+".png")
 			if err := file.Png(newFilename, rin); err != nil {

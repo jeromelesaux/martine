@@ -12,7 +12,8 @@ import (
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/convert"
+
+	ci "github.com/jeromelesaux/martine/convert/image"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
 	"github.com/jeromelesaux/martine/export/png"
@@ -31,17 +32,17 @@ var (
 
 func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in image.Image, cfg *config.MartineConfig, criteria common.AnalyseTilemapOption) error {
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
-	m := convert.Resize(in, mapSize, cfg.ResizingAlgo)
+	m := ci.Resize(in, mapSize, cfg.ResizingAlgo)
 	var palette color.Palette
 	var err error
-	palette = convert.ExtractPalette(m, isCpcPlus, cfg.Size.ColorsAvailable)
+	palette = ci.ExtractPalette(m, isCpcPlus, cfg.Size.ColorsAvailable)
 	refPalette := constants.CpcOldPalette
 	if cfg.CpcPlus {
 		refPalette = constants.CpcPlusPalette
 	}
-	palette = convert.ToCPCPalette(palette, refPalette)
+	palette = ci.ToCPCPalette(palette, refPalette)
 	palette = constants.SortColorsByDistance(palette)
-	_, m = convert.DowngradingWithPalette(m, palette)
+	_, m = ci.DowngradingWithPalette(m, palette)
 	png.PalToPng(cfg.OutputPath+"/palette.png", palette)
 	png.Png(cfg.OutputPath+"/map.png", m)
 	size := constants.Size{Width: 2, Height: 8}
@@ -289,16 +290,16 @@ func ExportTilemapClassical(m image.Image, filename string, board *transformatio
 
 func TilemapClassical(mode uint8, isCpcPlus bool, filename, picturePath string, in image.Image, size constants.Size, cfg *config.MartineConfig) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette) {
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
-	m := convert.Resize(in, mapSize, cfg.ResizingAlgo)
+	m := ci.Resize(in, mapSize, cfg.ResizingAlgo)
 	var palette color.Palette
-	palette = convert.ExtractPalette(m, isCpcPlus, cfg.Size.ColorsAvailable)
+	palette = ci.ExtractPalette(m, isCpcPlus, cfg.Size.ColorsAvailable)
 	refPalette := constants.CpcOldPalette
 	if cfg.CpcPlus {
 		refPalette = constants.CpcPlusPalette
 	}
-	palette = convert.ToCPCPalette(palette, refPalette)
+	palette = ci.ToCPCPalette(palette, refPalette)
 	palette = constants.SortColorsByDistance(palette)
-	_, m = convert.DowngradingWithPalette(m, palette)
+	_, m = ci.DowngradingWithPalette(m, palette)
 	tilemap := transformation.AnalyzeTilesBoard(m, size)
 	var tilesImagesTilemap [][]image.Image
 	for y := 0; y < m.Bounds().Max.Y; y += tilemap.TileSize.Height {
@@ -374,10 +375,10 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 		return errors.ErrorCustomDimensionMustBeSet
 	}
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
-	m := convert.Resize(in, mapSize, cfg.ResizingAlgo)
+	m := ci.Resize(in, mapSize, cfg.ResizingAlgo)
 	var palette color.Palette
 	var err error
-	palette, m, err = convert.DowngradingPalette(m, mapSize, true)
+	palette, m, err = ci.DowngradingPalette(m, mapSize, true)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", cfg.InputPath)
 	}
@@ -385,9 +386,9 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 	if cfg.CpcPlus {
 		refPalette = constants.CpcPlusPalette
 	}
-	palette = convert.ToCPCPalette(palette, refPalette)
+	palette = ci.ToCPCPalette(palette, refPalette)
 	palette = constants.SortColorsByDistance(palette)
-	_, m = convert.DowngradingWithPalette(m, palette)
+	_, m = ci.DowngradingWithPalette(m, palette)
 	png.PalToPng(cfg.OutputPath+"/palette.png", palette)
 	png.Png(cfg.OutputPath+"/map.png", m)
 
@@ -532,19 +533,19 @@ func TilemapRaw(mode uint8, isCpcPlus bool, size constants.Size, in image.Image,
 		return nil, tilesImagesTilemap, palette, errors.ErrorCustomDimensionMustBeSet
 	}
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: cfg.Size.ColorsAvailable}
-	m := convert.Resize(in, mapSize, cfg.ResizingAlgo)
+	m := ci.Resize(in, mapSize, cfg.ResizingAlgo)
 	if isCpcPlus {
-		palette, _, _ = convert.DowngradingPalette(m, mapSize, isCpcPlus)
+		palette, _, _ = ci.DowngradingPalette(m, mapSize, isCpcPlus)
 	} else {
-		palette = convert.ExtractPalette(m, isCpcPlus, cfg.Size.ColorsAvailable)
+		palette = ci.ExtractPalette(m, isCpcPlus, cfg.Size.ColorsAvailable)
 	}
 	refPalette := constants.CpcOldPalette
 	if cfg.CpcPlus {
 		refPalette = constants.CpcPlusPalette
 	}
-	palette = convert.ToCPCPalette(palette, refPalette)
+	palette = ci.ToCPCPalette(palette, refPalette)
 	palette = constants.SortColorsByDistance(palette)
-	_, m = convert.DowngradingWithPalette(m, palette)
+	_, m = ci.DowngradingWithPalette(m, palette)
 
 	analyze := transformation.AnalyzeTilesBoard(m, cfg.Size)
 
@@ -604,7 +605,7 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 	//scenes := make([]*image.NRGBA, 0)
 	os.Mkdir(cfg.OutputPath+string(filepath.Separator)+"scenes", os.ModePerm)
 	index := 0
-	m := convert.Resize(in, mapSize, cfg.ResizingAlgo)
+	m := ci.Resize(in, mapSize, cfg.ResizingAlgo)
 	for y := 0; y < m.Bounds().Max.Y; y += (nbTilePixelHigh * analyze.TileSize.Height) {
 		for x := 0; x < m.Bounds().Max.X; x += (nbTilePixelLarge * analyze.TileSize.Width) {
 			m1 := image.NewNRGBA(image.Rect(0, 0, nbTilePixelLarge*analyze.TileSize.Width, nbTilePixelHigh*analyze.TileSize.Height))
@@ -720,7 +721,7 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 	if err = tile.Imp(data, uint(nbFrames), uint(analyze.TileSize.Width), uint(analyze.TileSize.Height), uint(mode), finalFile, cfg); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", cfg.OutputPath, err)
 	}
-	m := convert.Resize(in, mapSize, cfg.ResizingAlgo)
+	m := ci.Resize(in, mapSize, cfg.ResizingAlgo)
 	// save the tilemap
 	scenes := make([]*image.NRGBA, 0)
 	os.Mkdir(cfg.OutputPath+string(filepath.Separator)+"scenes", os.ModePerm)
