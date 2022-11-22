@@ -1,4 +1,4 @@
-package common
+package screen
 
 import (
 	"fmt"
@@ -8,6 +8,13 @@ import (
 
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/convert/address"
+	"github.com/jeromelesaux/martine/convert/export"
+	"github.com/jeromelesaux/martine/convert/palette"
+	"github.com/jeromelesaux/martine/convert/pixel"
+	"github.com/jeromelesaux/martine/export/ocpartstudio"
+	"github.com/jeromelesaux/martine/export/png"
+	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
 func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte {
@@ -32,7 +39,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 8 {
 
 			c1 := in.At(x, y)
-			pp1, err := PalettePosition(c1, p)
+			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
@@ -41,7 +48,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 			firmwareColorUsed[pp1]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := in.At(x+1, y)
-			pp2, err := PalettePosition(c2, p)
+			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
@@ -49,7 +56,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 			pp2 = ex.SwapInk(pp2)
 			firmwareColorUsed[pp2]++
 			c3 := in.At(x+2, y)
-			pp3, err := PalettePosition(c3, p)
+			pp3, err := palette.PalettePosition(c3, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
@@ -57,7 +64,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 			pp3 = ex.SwapInk(pp3)
 			firmwareColorUsed[pp3]++
 			c4 := in.At(x+3, y)
-			pp4, err := PalettePosition(c4, p)
+			pp4, err := palette.PalettePosition(c4, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
@@ -65,7 +72,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 			pp4 = ex.SwapInk(pp4)
 			firmwareColorUsed[pp4]++
 			c5 := in.At(x+4, y)
-			pp5, err := PalettePosition(c5, p)
+			pp5, err := palette.PalettePosition(c5, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
 				pp5 = 0
@@ -74,7 +81,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 			firmwareColorUsed[pp5]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c6 := in.At(x+5, y)
-			pp6, err := PalettePosition(c6, p)
+			pp6, err := palette.PalettePosition(c6, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
 				pp6 = 0
@@ -82,7 +89,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 			pp6 = ex.SwapInk(pp6)
 			firmwareColorUsed[pp6]++
 			c7 := in.At(x+6, y)
-			pp7, err := PalettePosition(c7, p)
+			pp7, err := palette.PalettePosition(c7, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
 				pp7 = 0
@@ -90,7 +97,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 			pp7 = ex.SwapInk(pp7)
 			firmwareColorUsed[pp7]++
 			c8 := in.At(x+7, y)
-			pp8, err := PalettePosition(c8, p)
+			pp8, err := palette.PalettePosition(c8, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, x+7, y)
 				pp8 = 0
@@ -103,12 +110,12 @@ func ToMode2(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 				pp6 = 0
 				pp8 = 0
 			}
-			pixel := PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
+			pixel := pixel.PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
 			//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			addr := CpcScreenAddress(0, x, y, 2, ex.Overscan)
+			addr := address.CpcScreenAddress(0, x, y, 2, ex.Overscan)
 			bw[addr] = pixel
 		}
 
@@ -140,7 +147,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 4 {
 
 			c1 := in.At(x, y)
-			pp1, err := PalettePosition(c1, p)
+			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
@@ -149,7 +156,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 			firmwareColorUsed[pp1]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := in.At(x+1, y)
-			pp2, err := PalettePosition(c2, p)
+			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
@@ -157,7 +164,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 			pp2 = ex.SwapInk(pp2)
 			firmwareColorUsed[pp2]++
 			c3 := in.At(x+2, y)
-			pp3, err := PalettePosition(c3, p)
+			pp3, err := palette.PalettePosition(c3, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
@@ -165,7 +172,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 			pp3 = ex.SwapInk(pp3)
 			firmwareColorUsed[pp3]++
 			c4 := in.At(x+3, y)
-			pp4, err := PalettePosition(c4, p)
+			pp4, err := palette.PalettePosition(c4, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
@@ -176,12 +183,12 @@ func ToMode1(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 				pp4 = 0
 				pp2 = 0
 			}
-			pixel := PixelMode1(pp1, pp2, pp3, pp4)
+			pixel := pixel.PixelMode1(pp1, pp2, pp3, pp4)
 			//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			addr := CpcScreenAddress(0, x, y, 1, ex.Overscan)
+			addr := address.CpcScreenAddress(0, x, y, 1, ex.Overscan)
 			bw[addr] = pixel
 		}
 	}
@@ -208,7 +215,7 @@ func ToMode0(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
 
 			c1 := in.At(x, y)
-			pp1, err := PalettePosition(c1, p)
+			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
@@ -217,7 +224,7 @@ func ToMode0(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 			firmwareColorUsed[pp1]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := in.At(x+1, y)
-			pp2, err := PalettePosition(c2, p)
+			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
@@ -227,12 +234,12 @@ func ToMode0(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 			if ex.OneLine {
 				pp2 = 0
 			}
-			pixel := PixelMode0(pp1, pp2)
+			pixel := pixel.PixelMode0(pp1, pp2)
 			//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			addr := CpcScreenAddress(0, x, y, 0, ex.Overscan)
+			addr := address.CpcScreenAddress(0, x, y, 0, ex.Overscan)
 			bw[addr] = pixel
 		}
 	}
@@ -243,15 +250,194 @@ func ToMode0(in *image.NRGBA, p color.Palette, ex *config.MartineConfig) []byte 
 
 func ToMode0AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, cfg *config.MartineConfig) error {
 	bw := ToMode0(in, p, cfg)
-	return Export(filePath, bw, p, 0, cfg)
+	return export.Export(filePath, bw, p, 0, cfg)
 }
 
 func ToMode1AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, cfg *config.MartineConfig) error {
 	bw := ToMode1(in, p, cfg)
-	return Export(filePath, bw, p, 1, cfg)
+	return export.Export(filePath, bw, p, 1, cfg)
 }
 
 func ToMode2AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, cfg *config.MartineConfig) error {
 	bw := ToMode2(in, p, cfg)
-	return Export(filePath, bw, p, 2, cfg)
+	return export.Export(filePath, bw, p, 2, cfg)
+}
+
+// scrRawToImg will convert the classical OCP screen slice of bytes  into image.NRGBA structure
+// using the mode and the palette as arguments
+func ScrRawToImg(d []byte, mode uint8, p color.Palette) (*image.NRGBA, error) {
+	var m constants.Size
+	switch mode {
+	case 0:
+		m = constants.Mode0
+	case 1:
+		m = constants.Mode1
+	case 2:
+		m = constants.Mode2
+	default:
+		return nil, errors.ErrorUndefinedMode
+	}
+	out := image.NewNRGBA(image.Rectangle{
+		Min: image.Point{X: 0, Y: 0},
+		Max: image.Point{X: int(m.Width), Y: int(m.Height)}})
+
+	cpcRow := 0
+	switch mode {
+	case 0:
+		for y := 0; y < m.Height; y++ {
+			cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
+			for x := 0; x < m.Width; x += 2 {
+				val := d[cpcLine+cpcRow]
+				pp1, pp2 := pixel.RawPixelMode0(val)
+				c1 := p[pp1]
+				c2 := p[pp2]
+
+				out.Set(x, y, c1)
+				out.Set(x+1, y, c2)
+				cpcRow++
+			}
+			cpcRow = 0
+		}
+	case 1:
+		for y := 0; y < m.Height; y++ {
+			cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
+			for x := 0; x < m.Width; x += 4 {
+				val := d[cpcLine+cpcRow]
+				pp1, pp2, pp3, pp4 := pixel.RawPixelMode1(val)
+				c1 := p[pp1]
+				c2 := p[pp2]
+				c3 := p[pp3]
+				c4 := p[pp4]
+				out.Set(x, y, c1)
+				out.Set(x+1, y, c2)
+				out.Set(x+2, y, c3)
+				out.Set(x+3, y, c4)
+				cpcRow++
+			}
+			cpcRow = 0
+		}
+	case 2:
+		for y := 0; y < m.Height; y++ {
+			cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
+			for x := 0; x < m.Width; x += 8 {
+				val := d[cpcLine+cpcRow]
+				pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 := pixel.RawPixelMode2(val)
+				c1 := p[pp1]
+				c2 := p[pp2]
+				c3 := p[pp3]
+				c4 := p[pp4]
+				c5 := p[pp5]
+				c6 := p[pp6]
+				c7 := p[pp7]
+				c8 := p[pp8]
+				out.Set(x, y, c1)
+				out.Set(x+1, y, c2)
+				out.Set(x+2, y, c3)
+				out.Set(x+3, y, c4)
+				out.Set(x+4, y, c5)
+				out.Set(x+5, y, c6)
+				out.Set(x+6, y, c7)
+				out.Set(x+7, y, c8)
+				cpcRow++
+			}
+			cpcRow = 0
+		}
+	}
+	return out, nil
+}
+
+// SrcToImg load the amstrad classical 17ko  screen image to image.NRBGA
+// using the mode and palette as arguments
+func ScrToImg(scrPath string, mode uint8, p color.Palette) (*image.NRGBA, error) {
+	var m constants.Size
+	switch mode {
+	case 0:
+		m = constants.Mode0
+	case 1:
+		m = constants.Mode1
+	case 2:
+		m = constants.Mode2
+	default:
+		return nil, errors.ErrorUndefinedMode
+	}
+	out := image.NewNRGBA(image.Rectangle{
+		Min: image.Point{X: 0, Y: 0},
+		Max: image.Point{X: int(m.Width), Y: int(m.Height)}})
+
+	d, err := ocpartstudio.RawScr(scrPath)
+	if err != nil {
+		return nil, err
+	}
+	cpcRow := 0
+	switch mode {
+	case 0:
+		for y := 0; y < m.Height; y++ {
+			cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
+			for x := 0; x < m.Width; x += 2 {
+				val := d[cpcLine+cpcRow]
+				pp1, pp2 := pixel.RawPixelMode0(val)
+				c1 := p[pp1]
+				c2 := p[pp2]
+
+				out.Set(x, y, c1)
+				out.Set(x+1, y, c2)
+				cpcRow++
+			}
+			cpcRow = 0
+		}
+	case 1:
+		for y := 0; y < m.Height; y++ {
+			cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
+			for x := 0; x < m.Width; x += 4 {
+				val := d[cpcLine+cpcRow]
+				pp1, pp2, pp3, pp4 := pixel.RawPixelMode1(val)
+				c1 := p[pp1]
+				c2 := p[pp2]
+				c3 := p[pp3]
+				c4 := p[pp4]
+				out.Set(x, y, c1)
+				out.Set(x+1, y, c2)
+				out.Set(x+2, y, c3)
+				out.Set(x+3, y, c4)
+				cpcRow++
+			}
+			cpcRow = 0
+		}
+	case 2:
+		for y := 0; y < m.Height; y++ {
+			cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
+			for x := 0; x < m.Width; x += 8 {
+				val := d[cpcLine+cpcRow]
+				pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 := pixel.RawPixelMode2(val)
+				c1 := p[pp1]
+				c2 := p[pp2]
+				c3 := p[pp3]
+				c4 := p[pp4]
+				c5 := p[pp5]
+				c6 := p[pp6]
+				c7 := p[pp7]
+				c8 := p[pp8]
+				out.Set(x, y, c1)
+				out.Set(x+1, y, c2)
+				out.Set(x+2, y, c3)
+				out.Set(x+3, y, c4)
+				out.Set(x+4, y, c5)
+				out.Set(x+5, y, c6)
+				out.Set(x+6, y, c7)
+				out.Set(x+7, y, c8)
+				cpcRow++
+			}
+			cpcRow = 0
+		}
+	}
+	return out, nil
+}
+
+func ScrToPng(scrPath string, output string, mode uint8, p color.Palette) error {
+
+	out, err := ScrToImg(scrPath, mode, p)
+	if err != nil {
+		return err
+	}
+	return png.Png(output, out)
 }

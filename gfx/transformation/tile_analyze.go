@@ -11,9 +11,9 @@ import (
 
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/convert/sprite"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/png"
-	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/errors"
 	"github.com/pbnjay/pixfont"
 )
@@ -422,7 +422,7 @@ func (a *AnalyzeBoard) SaveSprites(folderpath string, palette color.Palette, mod
 		}
 
 		filename := filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", index))
-		err = common.ToSpriteAndExport(im, palette, v.Size, mode, filename, true, cfg)
+		err = sprite.ToSpriteAndExport(im, palette, v.Size, mode, filename, true, cfg)
 		if err != nil {
 			return err
 		}

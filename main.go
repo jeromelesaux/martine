@@ -13,6 +13,9 @@ import (
 	"fyne.io/fyne/v2/app"
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/convert/screen"
+	covs "github.com/jeromelesaux/martine/convert/screen/overscan"
+	"github.com/jeromelesaux/martine/convert/sprite"
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/diskimage"
 	ovs "github.com/jeromelesaux/martine/export/impdraw/overscan"
@@ -25,7 +28,6 @@ import (
 	"github.com/jeromelesaux/martine/export/snapshot"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/animate"
-	cgfx "github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/effect"
 	"github.com/jeromelesaux/martine/gfx/errors"
 	"github.com/jeromelesaux/martine/gfx/filter"
@@ -418,7 +420,7 @@ func main() {
 				os.Exit(-1)
 			}
 
-			if err := cgfx.OverscanToPng(*picturePath, outpath, mode, p); err != nil {
+			if err := covs.OverscanToPng(*picturePath, outpath, mode, p); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
 				os.Exit(-1)
 			}
@@ -450,12 +452,12 @@ func main() {
 		}
 		switch strings.ToUpper(filepath.Ext(filename)) {
 		case ".WIN":
-			if err := cgfx.SpriteToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
+			if err := sprite.SpriteToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
 				os.Exit(-1)
 			}
 		case ".SCR":
-			if err := cgfx.ScrToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
+			if err := screen.ScrToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
 				os.Exit(-1)
 			}

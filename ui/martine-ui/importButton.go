@@ -11,9 +11,11 @@ import (
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jeromelesaux/martine/convert/screen"
+	ovs "github.com/jeromelesaux/martine/convert/screen/overscan"
+	"github.com/jeromelesaux/martine/convert/sprite"
 	"github.com/jeromelesaux/martine/export/impdraw/overscan"
 	"github.com/jeromelesaux/martine/export/png"
-	cgfx "github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
@@ -40,7 +42,7 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 					dialog.ShowError(fmt.Errorf("no palette found in selected file, try to normal option and open the associated palette"), m.window)
 					return
 				}
-				img, err := cgfx.OverscanToImg(me.OriginalImagePath.Path(), mode, p)
+				img, err := ovs.OverscanToImg(me.OriginalImagePath.Path(), mode, p)
 				if err != nil {
 					dialog.ShowError(err, m.window)
 					return
@@ -61,7 +63,7 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 					dialog.ShowError(errors.New("palette is empty, please import palette first"), m.window)
 					return
 				}
-				img, size, err := cgfx.SpriteToImg(me.OriginalImagePath.Path(), uint8(me.Mode), me.Palette)
+				img, size, err := sprite.SpriteToImg(me.OriginalImagePath.Path(), uint8(me.Mode), me.Palette)
 				if err != nil {
 					dialog.ShowError(err, m.window)
 					return
@@ -76,7 +78,7 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 					dialog.ShowError(errors.New("palette is empty,  please import palette first, or select fullscreen option to open a fullscreen option"), m.window)
 					return
 				}
-				img, err := cgfx.ScrToImg(me.OriginalImagePath.Path(), uint8(me.Mode), me.Palette)
+				img, err := screen.ScrToImg(me.OriginalImagePath.Path(), uint8(me.Mode), me.Palette)
 				if err != nil {
 					dialog.ShowError(err, m.window)
 					return

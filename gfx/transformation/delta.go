@@ -12,6 +12,9 @@ import (
 
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/convert/address"
+	"github.com/jeromelesaux/martine/convert/palette"
+	"github.com/jeromelesaux/martine/convert/pixel"
 	"github.com/jeromelesaux/martine/gfx/errors"
 
 	cm "github.com/jeromelesaux/martine/common"
@@ -20,7 +23,6 @@ import (
 	"github.com/jeromelesaux/martine/export/impdraw/overscan"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/ocpartstudio/window"
-	"github.com/jeromelesaux/martine/gfx/common"
 )
 
 type DeltaItem struct {
@@ -135,31 +137,31 @@ func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.
 			i++
 			c3 := current.At(i, j)
 			c4 := next.At(i, j)
-			p1, err := common.PalettePosition(c1, currentPalette)
+			p1, err := palette.PalettePosition(c1, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, i, j)
 				p1 = 0
 			}
-			p3, err := common.PalettePosition(c3, currentPalette)
+			p3, err := palette.PalettePosition(c3, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, i, j)
 				p3 = 0
 			}
-			pixel1 := common.PixelMode0(p1, p3)
+			pixel1 := pixel.PixelMode0(p1, p3)
 
-			p2, err := common.PalettePosition(c2, nextPalette)
+			p2, err := palette.PalettePosition(c2, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p2 = 0
 			}
-			p4, err := common.PalettePosition(c4, nextPalette)
+			p4, err := palette.PalettePosition(c4, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p4 = 0
 			}
-			pixel2 := common.PixelMode0(p2, p4)
+			pixel2 := pixel.PixelMode0(p2, p4)
 			if pixel1 != pixel2 {
-				addr := common.CpcScreenAddress(0xc000, i, j, 0, cfg.Overscan)
+				addr := address.CpcScreenAddress(0xc000, i, j, 0, cfg.Overscan)
 				data.Add(pixel2, uint16(addr))
 			}
 		}
@@ -188,51 +190,51 @@ func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.
 			i++
 			c7 := current.At(i, j)
 			c8 := next.At(i, j)
-			p1, err := common.PalettePosition(c1, currentPalette)
+			p1, err := palette.PalettePosition(c1, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, i, j)
 				p1 = 0
 			}
-			p3, err := common.PalettePosition(c3, currentPalette)
+			p3, err := palette.PalettePosition(c3, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, i, j)
 				p3 = 0
 			}
-			p5, err := common.PalettePosition(c5, currentPalette)
+			p5, err := palette.PalettePosition(c5, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, i, j)
 				p5 = 0
 			}
-			p7, err := common.PalettePosition(c7, currentPalette)
+			p7, err := palette.PalettePosition(c7, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, i, j)
 				p7 = 0
 			}
-			pixel1 := common.PixelMode1(p1, p3, p5, p7)
+			pixel1 := pixel.PixelMode1(p1, p3, p5, p7)
 
-			p2, err := common.PalettePosition(c2, nextPalette)
+			p2, err := palette.PalettePosition(c2, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p2 = 0
 			}
-			p4, err := common.PalettePosition(c4, nextPalette)
+			p4, err := palette.PalettePosition(c4, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p4 = 0
 			}
-			p6, err := common.PalettePosition(c6, nextPalette)
+			p6, err := palette.PalettePosition(c6, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, i, j)
 				p6 = 0
 			}
-			p8, err := common.PalettePosition(c8, nextPalette)
+			p8, err := palette.PalettePosition(c8, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, i, j)
 				p8 = 0
 			}
-			pixel2 := common.PixelMode1(p2, p4, p6, p8)
+			pixel2 := pixel.PixelMode1(p2, p4, p6, p8)
 			if pixel1 != pixel2 {
-				addr := common.CpcScreenAddress(0xc000, i, j, 1, cfg.Overscan)
+				addr := address.CpcScreenAddress(0xc000, i, j, 1, cfg.Overscan)
 				data.Add(pixel2, uint16(addr))
 			}
 		}
@@ -273,91 +275,91 @@ func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.
 			i++
 			c15 := current.At(i, j)
 			c16 := next.At(i, j)
-			p1, err := common.PalettePosition(c1, currentPalette)
+			p1, err := palette.PalettePosition(c1, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, i, j)
 				p1 = 0
 			}
-			p3, err := common.PalettePosition(c3, currentPalette)
+			p3, err := palette.PalettePosition(c3, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, i, j)
 				p3 = 0
 			}
-			p5, err := common.PalettePosition(c5, currentPalette)
+			p5, err := palette.PalettePosition(c5, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, i, j)
 				p5 = 0
 			}
-			p7, err := common.PalettePosition(c7, currentPalette)
+			p7, err := palette.PalettePosition(c7, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, i, j)
 				p7 = 0
 			}
-			p9, err := common.PalettePosition(c9, currentPalette)
+			p9, err := palette.PalettePosition(c9, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c9, i, j)
 				p9 = 0
 			}
-			p11, err := common.PalettePosition(c11, currentPalette)
+			p11, err := palette.PalettePosition(c11, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c11, i, j)
 				p11 = 0
 			}
-			p13, err := common.PalettePosition(c13, currentPalette)
+			p13, err := palette.PalettePosition(c13, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c13, i, j)
 				p13 = 0
 			}
-			p15, err := common.PalettePosition(c15, currentPalette)
+			p15, err := palette.PalettePosition(c15, currentPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c15, i, j)
 				p15 = 0
 			}
-			pixel1 := common.PixelMode2(p1, p3, p5, p7, p9, p11, p13, p15)
+			pixel1 := pixel.PixelMode2(p1, p3, p5, p7, p9, p11, p13, p15)
 
-			p2, err := common.PalettePosition(c2, nextPalette)
+			p2, err := palette.PalettePosition(c2, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p2 = 0
 			}
-			p4, err := common.PalettePosition(c4, nextPalette)
+			p4, err := palette.PalettePosition(c4, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p4 = 0
 			}
-			p6, err := common.PalettePosition(c6, nextPalette)
+			p6, err := palette.PalettePosition(c6, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, i, j)
 				p6 = 0
 			}
-			p8, err := common.PalettePosition(c8, nextPalette)
+			p8, err := palette.PalettePosition(c8, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, i, j)
 				p8 = 0
 			}
-			p10, err := common.PalettePosition(c10, nextPalette)
+			p10, err := palette.PalettePosition(c10, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c10, i, j)
 				p10 = 0
 			}
-			p12, err := common.PalettePosition(c12, nextPalette)
+			p12, err := palette.PalettePosition(c12, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c12, i, j)
 				p12 = 0
 			}
-			p14, err := common.PalettePosition(c14, nextPalette)
+			p14, err := palette.PalettePosition(c14, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c14, i, j)
 				p14 = 0
 			}
-			p16, err := common.PalettePosition(c16, nextPalette)
+			p16, err := palette.PalettePosition(c16, nextPalette)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c16, i, j)
 				p16 = 0
 			}
-			pixel2 := common.PixelMode2(p2, p4, p6, p8, p10, p12, p14, p16)
+			pixel2 := pixel.PixelMode2(p2, p4, p6, p8, p10, p12, p14, p16)
 			if pixel1 != pixel2 {
-				addr := common.CpcScreenAddress(0xc000, i, j, 2, cfg.Overscan)
+				addr := address.CpcScreenAddress(0xc000, i, j, 2, cfg.Overscan)
 				data.Add(pixel2, uint16(addr))
 			}
 		}

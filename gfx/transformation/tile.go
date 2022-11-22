@@ -11,8 +11,8 @@ import (
 
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/convert"
+	"github.com/jeromelesaux/martine/convert/sprite"
 	"github.com/jeromelesaux/martine/export/png"
-	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/oliamb/cutter"
 )
 
@@ -79,7 +79,7 @@ func TileMode(ex *config.MartineConfig, mode uint8, iterationX, iterationY int) 
 			ext = strconv.Itoa(index) + ".png"
 			ex.Size.Width = resized.Bounds().Max.X
 			ex.Size.Height = resized.Bounds().Max.Y
-			if err := common.ToSpriteAndExport(downgraded, p, ex.Size, mode, ex.OsFilename(ext), false, ex); err != nil {
+			if err := sprite.ToSpriteAndExport(downgraded, p, ex.Size, mode, ex.OsFilename(ext), false, ex); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot create sprite from image, error :%v\n", err)
 			}
 			index++

@@ -17,11 +17,12 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/convert"
+	"github.com/jeromelesaux/martine/convert/screen"
+	"github.com/jeromelesaux/martine/convert/screen/overscan"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
-	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/effect"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 	w2 "github.com/jeromelesaux/martine/ui/martine-ui/widget"
@@ -101,13 +102,13 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	di.ResultImage.EgxType = egxType
 	var img image.Image
 	if context.Overscan {
-		img, err = common.OverscanRawToImg(di.ResultImage.Data, 0, di.ResultImage.Palette)
+		img, err = overscan.OverscanRawToImg(di.ResultImage.Data, 0, di.ResultImage.Palette)
 		if err != nil {
 			dialog.ShowError(err, m.window)
 			return
 		}
 	} else {
-		img, err = common.ScrRawToImg(di.ResultImage.Data, 0, di.ResultImage.Palette)
+		img, err = screen.ScrRawToImg(di.ResultImage.Data, 0, di.ResultImage.Palette)
 		if err != nil {
 			dialog.ShowError(err, m.window)
 			return

@@ -11,13 +11,13 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/config"
+	"github.com/jeromelesaux/martine/convert/export"
 	"github.com/jeromelesaux/martine/export/diskimage"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/m4"
 
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/snapshot"
-	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
@@ -136,7 +136,7 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 			return
 		}
 	} else {
-		if err := common.Export(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Data, me.ResultImage.Palette, uint8(me.ResultImage.EgxType), context); err != nil {
+		if err := export.Export(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Data, me.ResultImage.Palette, uint8(me.ResultImage.EgxType), context); err != nil {
 			pi.Hide()
 			dialog.ShowError(err, m.window)
 			return

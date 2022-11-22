@@ -16,9 +16,11 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/convert/screen"
+	ovs "github.com/jeromelesaux/martine/convert/screen/overscan"
+	"github.com/jeromelesaux/martine/convert/sprite"
 	"github.com/jeromelesaux/martine/export/impdraw/overscan"
 	"github.com/jeromelesaux/martine/export/png"
-	cgfx "github.com/jeromelesaux/martine/gfx/common"
 )
 
 type ImageMenu struct {
@@ -149,7 +151,7 @@ func (me *ImageMenu) NewImportButton(dialogSize fyne.Size, modeSelection *widget
 					dialog.ShowError(fmt.Errorf("no palette found in selected file, try to normal option and open the associated palette"), win)
 					return
 				}
-				img, err := cgfx.OverscanToImg(me.OriginalImagePath.Path(), mode, p)
+				img, err := ovs.OverscanToImg(me.OriginalImagePath.Path(), mode, p)
 				if err != nil {
 					dialog.ShowError(err, win)
 					return
@@ -170,7 +172,7 @@ func (me *ImageMenu) NewImportButton(dialogSize fyne.Size, modeSelection *widget
 					dialog.ShowError(errors.New("palette is empty, please import palette first"), win)
 					return
 				}
-				img, size, err := cgfx.SpriteToImg(me.OriginalImagePath.Path(), uint8(me.Mode), me.Palette)
+				img, size, err := sprite.SpriteToImg(me.OriginalImagePath.Path(), uint8(me.Mode), me.Palette)
 				if err != nil {
 					dialog.ShowError(err, win)
 					return
@@ -185,7 +187,7 @@ func (me *ImageMenu) NewImportButton(dialogSize fyne.Size, modeSelection *widget
 					dialog.ShowError(errors.New("palette is empty,  please import palette first, or select fullscreen option to open a fullscreen option"), win)
 					return
 				}
-				img, err := cgfx.ScrToImg(me.OriginalImagePath.Path(), uint8(me.Mode), me.Palette)
+				img, err := screen.ScrToImg(me.OriginalImagePath.Path(), uint8(me.Mode), me.Palette)
 				if err != nil {
 					dialog.ShowError(err, win)
 					return

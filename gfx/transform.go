@@ -8,24 +8,25 @@ import (
 
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/gfx/common"
+	"github.com/jeromelesaux/martine/convert/pixel"
+	"github.com/jeromelesaux/martine/convert/screen"
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
 func Transform(in *image.NRGBA, p color.Palette, size constants.Size, filepath string, cfg *config.MartineConfig) error {
 	switch size {
 	case constants.Mode0:
-		return common.ToMode0AndExport(in, p, size, filepath, cfg)
+		return screen.ToMode0AndExport(in, p, size, filepath, cfg)
 	case constants.Mode1:
-		return common.ToMode1AndExport(in, p, size, filepath, cfg)
+		return screen.ToMode1AndExport(in, p, size, filepath, cfg)
 	case constants.Mode2:
-		return common.ToMode2AndExport(in, p, size, filepath, cfg)
+		return screen.ToMode2AndExport(in, p, size, filepath, cfg)
 	case constants.OverscanMode0:
-		return common.ToMode0AndExport(in, p, size, filepath, cfg)
+		return screen.ToMode0AndExport(in, p, size, filepath, cfg)
 	case constants.OverscanMode1:
-		return common.ToMode1AndExport(in, p, size, filepath, cfg)
+		return screen.ToMode1AndExport(in, p, size, filepath, cfg)
 	case constants.OverscanMode2:
-		return common.ToMode2AndExport(in, p, size, filepath, cfg)
+		return screen.ToMode2AndExport(in, p, size, filepath, cfg)
 	default:
 		return errors.ErrorNotYetImplemented
 	}
@@ -34,17 +35,17 @@ func Transform(in *image.NRGBA, p color.Palette, size constants.Size, filepath s
 func InternalTransform(in *image.NRGBA, p color.Palette, size constants.Size, cfg *config.MartineConfig) []byte {
 	switch size {
 	case constants.Mode0:
-		return common.ToMode0(in, p, cfg)
+		return screen.ToMode0(in, p, cfg)
 	case constants.Mode1:
-		return common.ToMode1(in, p, cfg)
+		return screen.ToMode1(in, p, cfg)
 	case constants.Mode2:
-		return common.ToMode2(in, p, cfg)
+		return screen.ToMode2(in, p, cfg)
 	case constants.OverscanMode0:
-		return common.ToMode0(in, p, cfg)
+		return screen.ToMode0(in, p, cfg)
 	case constants.OverscanMode1:
-		return common.ToMode1(in, p, cfg)
+		return screen.ToMode1(in, p, cfg)
 	case constants.OverscanMode2:
-		return common.ToMode2(in, p, cfg)
+		return screen.ToMode2(in, p, cfg)
 	default:
 		return []byte{}
 	}
@@ -76,7 +77,7 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 
 		switch mode {
 		case 0:
-			p1, p2 := common.RawPixelMode0(byte(val))
+			p1, p2 := pixel.RawPixelMode0(byte(val))
 			c1 := palette[p1]
 			newColor := revertColor(uint8(c1), index, isPlus)
 			in.Set(x, y, newColor)
@@ -94,7 +95,7 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 				y++
 			}
 		case 1:
-			p1, p2, p3, p4 := common.RawPixelMode1(byte(val))
+			p1, p2, p3, p4 := pixel.RawPixelMode1(byte(val))
 			c1 := palette[p1]
 			newColor := revertColor(uint8(c1), index, isPlus)
 			in.Set(x, y, newColor)
@@ -128,7 +129,7 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 				y++
 			}
 		case 2:
-			p1, p2, p3, p4, p5, p6, p7, p8 := common.RawPixelMode2(byte(val))
+			p1, p2, p3, p4, p5, p6, p7, p8 := pixel.RawPixelMode2(byte(val))
 			c1 := palette[p1]
 			newColor := revertColor(uint8(c1), index, isPlus)
 			in.Set(x, y, newColor)

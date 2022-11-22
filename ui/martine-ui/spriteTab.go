@@ -19,10 +19,10 @@ import (
 	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
+	spr "github.com/jeromelesaux/martine/convert/sprite"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/export/spritehard"
-	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/sprite"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
@@ -357,7 +357,7 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 				var row, col int
 				for i := 0; i < len(data); i += spriteLength {
 					m.sprite.SpritesData[row][col] = append(m.sprite.SpritesData[row][col], data[i:(i+spriteLength)]...)
-					m.sprite.SpritesCollection[row][col] = common.RawSpriteToImg(data[i:(i+spriteLength)], footer.Height, footer.Width, uint8(m.sprite.Mode), m.sprite.Palette)
+					m.sprite.SpritesCollection[row][col] = spr.RawSpriteToImg(data[i:(i+spriteLength)], footer.Height, footer.Width, uint8(m.sprite.Mode), m.sprite.Palette)
 					col++
 					if col%m.sprite.SpriteColumns == 0 {
 						col = 0

@@ -11,10 +11,11 @@ import (
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
+	"github.com/jeromelesaux/martine/convert/sprite"
+	"github.com/jeromelesaux/martine/convert/spritehard"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
-	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/filter"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
@@ -220,7 +221,7 @@ func ApplyOneImageAndExport(in image.Image,
 			if err := png.Png(newFilename, img); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot create image (%s) error :%v\n", newFilename, err)
 			}
-			if err := common.ToSpriteAndExport(img, newPalette, constants.Size{Width: cfg.Size.Width, Height: cfg.Size.Height}, screenMode, newFilename, false, cfg); err != nil {
+			if err := sprite.ToSpriteAndExport(img, newPalette, constants.Size{Width: cfg.Size.Width, Height: cfg.Size.Height}, screenMode, newFilename, false, cfg); err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot create sprite image (%s) error %v\n", newFilename, err)
 			}
 		}
@@ -235,10 +236,10 @@ func ApplyOneImageAndExport(in image.Image,
 		}
 		if !cfg.SpriteHard {
 			//fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
-			common.ToSpriteAndExport(downgraded, newPalette, cfg.Size, screenMode, filename, false, cfg)
+			sprite.ToSpriteAndExport(downgraded, newPalette, cfg.Size, screenMode, filename, false, cfg)
 		} else {
 			//fmt.Fprintf(os.Stdout, "Transform image in sprite hard.\n")
-			common.ToSpriteHardAndExport(downgraded, newPalette, cfg.Size, screenMode, filename, cfg)
+			spritehard.ToSpriteHardAndExport(downgraded, newPalette, cfg.Size, screenMode, filename, cfg)
 		}
 	}
 	return err
@@ -317,10 +318,10 @@ func ApplyOneImage(in image.Image,
 		}
 		if !cfg.SpriteHard {
 			//fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
-			data, _, lineSize, err = common.ToSprite(downgraded, newPalette, cfg.Size, screenMode, cfg)
+			data, _, lineSize, err = sprite.ToSprite(downgraded, newPalette, cfg.Size, screenMode, cfg)
 		} else {
 			//	fmt.Fprintf(os.Stdout, "Transform image in sprite hard.\n")
-			data, _ = common.ToSpriteHard(downgraded, newPalette, cfg.Size, screenMode, cfg)
+			data, _ = spritehard.ToSpriteHard(downgraded, newPalette, cfg.Size, screenMode, cfg)
 			lineSize = 16
 		}
 	}

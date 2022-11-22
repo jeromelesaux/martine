@@ -12,9 +12,9 @@ import (
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
+	"github.com/jeromelesaux/martine/convert/sprite"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/ascii"
-	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 	zx0 "github.com/jeromelesaux/zx0/encode"
 )
@@ -72,7 +72,7 @@ func DeltaMotif(gitFilepath string, ex *config.MartineConfig, threshold int, ini
 	/* conversion des sprites en mode cpc */
 	for i := 0; i < len(refTiles); i++ {
 		sprt := (&refTiles[i]).Image()
-		data, _, _, _ := common.ToSprite(sprt, customPalette, refTiles[i].Size, 1, ex)
+		data, _, _, _ := sprite.ToSprite(sprt, customPalette, refTiles[i].Size, 1, ex)
 		motifs = append(motifs, data)
 	}
 

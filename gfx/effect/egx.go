@@ -10,10 +10,15 @@ import (
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert"
+	"github.com/jeromelesaux/martine/convert/address"
+	"github.com/jeromelesaux/martine/convert/export"
+	"github.com/jeromelesaux/martine/convert/palette"
+	"github.com/jeromelesaux/martine/convert/pixel"
+	"github.com/jeromelesaux/martine/convert/screen"
+	"github.com/jeromelesaux/martine/convert/screen/overscan"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
-	"github.com/jeromelesaux/martine/gfx/common"
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
 
@@ -34,20 +39,20 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cfg *config.M
 		}
 		var in0, in1 *image.NRGBA
 		if cfg.Overscan {
-			in0, err = common.OverscanToImg(f0, mode0, p)
+			in0, err = overscan.OverscanToImg(f0, mode0, p)
 			if err != nil {
 				return err
 			}
-			in1, err = common.OverscanToImg(f1, mode1, p)
+			in1, err = overscan.OverscanToImg(f1, mode1, p)
 			if err != nil {
 				return err
 			}
 		} else {
-			in0, err = common.ScrToImg(f0, 0, p)
+			in0, err = screen.ScrToImg(f0, 0, p)
 			if err != nil {
 				return err
 			}
-			in1, err = common.ScrToImg(f1, 1, p)
+			in1, err = screen.ScrToImg(f1, 1, p)
 			if err != nil {
 				return err
 			}
@@ -82,20 +87,20 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cfg *config.M
 			}
 			var in2, in1 *image.NRGBA
 			if cfg.Overscan {
-				in1, err = common.OverscanToImg(f1, mode1, p)
+				in1, err = overscan.OverscanToImg(f1, mode1, p)
 				if err != nil {
 					return err
 				}
-				in2, err = common.OverscanToImg(f2, mode2, p)
+				in2, err = overscan.OverscanToImg(f2, mode2, p)
 				if err != nil {
 					return err
 				}
 			} else {
-				in1, err = common.ScrToImg(f1, mode1, p)
+				in1, err = screen.ScrToImg(f1, mode1, p)
 				if err != nil {
 					return err
 				}
-				in2, err = common.ScrToImg(f2, mode2, p)
+				in2, err = screen.ScrToImg(f2, mode2, p)
 				if err != nil {
 					return err
 				}
@@ -203,7 +208,7 @@ func AutoEgx2(in image.Image,
 
 func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8, picturePath string, cfg *config.MartineConfig) error {
 	bw, p := ToEgx1Raw(inMode0, inMode1, p, firstLineMode, cfg)
-	return common.Export(picturePath, bw, p, 1, cfg)
+	return export.Export(picturePath, bw, p, 1, cfg)
 }
 
 func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8, cfg *config.MartineConfig) ([]byte, color.Palette) {
@@ -224,7 +229,7 @@ func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uin
 	for y := inMode0.Bounds().Min.Y + mode0Line; y < inMode0.Bounds().Max.Y; y += 2 {
 		for x := inMode0.Bounds().Min.X; x < inMode0.Bounds().Max.X; x += 2 {
 			c1 := inMode0.At(x, y)
-			pp1, err := common.PalettePosition(c1, p)
+			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
@@ -232,21 +237,21 @@ func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uin
 			firmwareColorUsed[pp1]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := inMode0.At(x+1, y)
-			pp2, err := common.PalettePosition(c2, p)
+			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			firmwareColorUsed[pp2]++
-			pixel := common.PixelMode0(pp1, pp2)
-			addr := common.CpcScreenAddress(0, x, y, 0, cfg.Overscan)
+			pixel := pixel.PixelMode0(pp1, pp2)
+			addr := address.CpcScreenAddress(0, x, y, 0, cfg.Overscan)
 			bw[addr] = pixel
 		}
 	}
 	for y := inMode1.Bounds().Min.Y + mode1Line; y < inMode1.Bounds().Max.Y; y += 2 {
 		for x := inMode1.Bounds().Min.X; x < inMode1.Bounds().Max.X; x += 4 {
 			c1 := inMode1.At(x, y)
-			pp1, err := common.PalettePosition(c1, p)
+			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
@@ -254,31 +259,31 @@ func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uin
 			firmwareColorUsed[pp1]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := inMode1.At(x+1, y)
-			pp2, err := common.PalettePosition(c2, p)
+			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			firmwareColorUsed[pp2]++
 			c3 := inMode1.At(x+2, y)
-			pp3, err := common.PalettePosition(c3, p)
+			pp3, err := palette.PalettePosition(c3, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
 			firmwareColorUsed[pp3]++
 			c4 := inMode1.At(x+3, y)
-			pp4, err := common.PalettePosition(c4, p)
+			pp4, err := palette.PalettePosition(c4, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
 			firmwareColorUsed[pp4]++
 
-			pixel := common.PixelMode1(pp1, pp2, pp3, pp4)
-			addr := common.CpcScreenAddress(0, x, y, 1, cfg.Overscan)
+			pixel := pixel.PixelMode1(pp1, pp2, pp3, pp4)
+			addr := address.CpcScreenAddress(0, x, y, 1, cfg.Overscan)
 			bw[addr] = pixel
-			addr = common.CpcScreenAddress(0, x+1, y, 1, cfg.Overscan)
+			addr = address.CpcScreenAddress(0, x+1, y, 1, cfg.Overscan)
 			bw[addr] = pixel
 		}
 	}
@@ -287,7 +292,7 @@ func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uin
 
 func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8, picturePath string, cfg *config.MartineConfig) error {
 	bw, p := ToEgx2Raw(inMode1, inMode2, p, firstLineMode, cfg)
-	return common.Export(picturePath, bw, p, 2, cfg)
+	return export.Export(picturePath, bw, p, 2, cfg)
 }
 
 func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8, cfg *config.MartineConfig) ([]byte, color.Palette) {
@@ -308,7 +313,7 @@ func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uin
 	for y := inMode1.Bounds().Min.Y + mode1Line; y < inMode1.Bounds().Max.Y; y += 2 {
 		for x := inMode1.Bounds().Min.X; x < inMode1.Bounds().Max.X; x += 4 {
 			c1 := inMode1.At(x, y)
-			pp1, err := common.PalettePosition(c1, p)
+			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
@@ -316,36 +321,36 @@ func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uin
 			firmwareColorUsed[pp1]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := inMode1.At(x+1, y)
-			pp2, err := common.PalettePosition(c2, p)
+			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			firmwareColorUsed[pp2]++
 			c3 := inMode1.At(x+2, y)
-			pp3, err := common.PalettePosition(c3, p)
+			pp3, err := palette.PalettePosition(c3, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
 			firmwareColorUsed[pp3]++
 			c4 := inMode1.At(x+3, y)
-			pp4, err := common.PalettePosition(c4, p)
+			pp4, err := palette.PalettePosition(c4, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
 			firmwareColorUsed[pp4]++
 
-			pixel := common.PixelMode1(pp1, pp2, pp3, pp4)
-			addr := common.CpcScreenAddress(0, x, y, 1, cfg.Overscan)
+			pixel := pixel.PixelMode1(pp1, pp2, pp3, pp4)
+			addr := address.CpcScreenAddress(0, x, y, 1, cfg.Overscan)
 			bw[addr] = pixel
 		}
 	}
 	for y := inMode2.Bounds().Min.Y + mode2Line; y < inMode2.Bounds().Max.Y; y += 2 {
 		for x := inMode2.Bounds().Min.X; x < inMode2.Bounds().Max.X; x += 8 {
 			c1 := inMode2.At(x, y)
-			pp1, err := common.PalettePosition(c1, p)
+			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
@@ -353,28 +358,28 @@ func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uin
 			firmwareColorUsed[pp1]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := inMode2.At(x+1, y)
-			pp2, err := common.PalettePosition(c2, p)
+			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			firmwareColorUsed[pp2]++
 			c3 := inMode2.At(x+2, y)
-			pp3, err := common.PalettePosition(c3, p)
+			pp3, err := palette.PalettePosition(c3, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
 			firmwareColorUsed[pp3]++
 			c4 := inMode2.At(x+3, y)
-			pp4, err := common.PalettePosition(c4, p)
+			pp4, err := palette.PalettePosition(c4, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
 			firmwareColorUsed[pp4]++
 			c5 := inMode2.At(x+4, y)
-			pp5, err := common.PalettePosition(c5, p)
+			pp5, err := palette.PalettePosition(c5, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
 				pp5 = 0
@@ -382,30 +387,30 @@ func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uin
 			firmwareColorUsed[pp5]++
 			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c6 := inMode2.At(x+5, y)
-			pp6, err := common.PalettePosition(c5, p)
+			pp6, err := palette.PalettePosition(c5, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
 				pp6 = 0
 			}
 			firmwareColorUsed[pp6]++
 			c7 := inMode2.At(x+6, y)
-			pp7, err := common.PalettePosition(c7, p)
+			pp7, err := palette.PalettePosition(c7, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
 				pp7 = 0
 			}
 			firmwareColorUsed[pp7]++
 			c8 := inMode2.At(x+7, y)
-			pp8, err := common.PalettePosition(c8, p)
+			pp8, err := palette.PalettePosition(c8, p)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, x+3, y)
 				pp8 = 0
 			}
 			firmwareColorUsed[pp8]++
-			pixel := common.PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
-			addr := common.CpcScreenAddress(0, x, y, 2, cfg.Overscan)
+			pixel := pixel.PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
+			addr := address.CpcScreenAddress(0, x, y, 2, cfg.Overscan)
 			bw[addr] = pixel
-			addr = common.CpcScreenAddress(0, x+1, y, 2, cfg.Overscan)
+			addr = address.CpcScreenAddress(0, x+1, y, 2, cfg.Overscan)
 			bw[addr] = pixel
 		}
 	}
@@ -429,20 +434,20 @@ func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cfg *config.Ma
 		}
 		var in0, in1 *image.NRGBA
 		if cfg.Overscan {
-			in0, err = common.OverscanRawToImg(f0, mode0, p)
+			in0, err = overscan.OverscanRawToImg(f0, mode0, p)
 			if err != nil {
 				return nil, p, 0, err
 			}
-			in1, err = common.OverscanRawToImg(f1, mode1, p)
+			in1, err = overscan.OverscanRawToImg(f1, mode1, p)
 			if err != nil {
 				return nil, p, 0, err
 			}
 		} else {
-			in0, err = common.ScrRawToImg(f0, 0, p)
+			in0, err = screen.ScrRawToImg(f0, 0, p)
 			if err != nil {
 				return nil, p, 0, err
 			}
-			in1, err = common.ScrRawToImg(f1, 1, p)
+			in1, err = screen.ScrRawToImg(f1, 1, p)
 			if err != nil {
 				return nil, p, 0, err
 			}
@@ -470,20 +475,20 @@ func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cfg *config.Ma
 			}
 			var in2, in1 *image.NRGBA
 			if cfg.Overscan {
-				in1, err = common.OverscanRawToImg(f1, mode1, p)
+				in1, err = overscan.OverscanRawToImg(f1, mode1, p)
 				if err != nil {
 					return nil, p, 0, err
 				}
-				in2, err = common.OverscanRawToImg(f2, mode2, p)
+				in2, err = overscan.OverscanRawToImg(f2, mode2, p)
 				if err != nil {
 					return nil, p, 0, err
 				}
 			} else {
-				in1, err = common.ScrRawToImg(f1, mode1, p)
+				in1, err = screen.ScrRawToImg(f1, mode1, p)
 				if err != nil {
 					return nil, p, 0, err
 				}
-				in2, err = common.ScrRawToImg(f2, mode2, p)
+				in2, err = screen.ScrRawToImg(f2, mode2, p)
 				if err != nil {
 					return nil, p, 0, err
 				}
