@@ -18,6 +18,7 @@ import (
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/impdraw/overscan"
 	"github.com/jeromelesaux/martine/gfx/common"
 )
 
@@ -532,7 +533,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, cont *x.MartineCont
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "File (%s) is not a simple screen.\n", filespath[i])
 			}
-			d1, err = file.RawOverscan(filespath[i])
+			d1, err = overscan.RawOverscan(filespath[i])
 			if err != nil {
 				return err
 			}
@@ -558,7 +559,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, cont *x.MartineCont
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "File (%s) is not a simple screen.\n", filespath[i+1])
 			}
-			d2, err = file.RawOverscan(filespath[i+1])
+			d2, err = overscan.RawOverscan(filespath[i+1])
 			if err != nil {
 				return err
 			}
@@ -599,7 +600,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, cont *x.MartineCont
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "File (%s) is not a simple screen.\n", filespath[len(filespath)-1])
 		}
-		d1, err = file.RawOverscan(filespath[len(filespath)-1])
+		d1, err = overscan.RawOverscan(filespath[len(filespath)-1])
 		if err != nil {
 			return err
 		}
@@ -624,7 +625,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, cont *x.MartineCont
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "File (%s) is not a simple screen.\n", filespath[0])
 		}
-		d2, err = file.RawOverscan(filespath[0])
+		d2, err = overscan.RawOverscan(filespath[0])
 		if err != nil {
 			return err
 		}

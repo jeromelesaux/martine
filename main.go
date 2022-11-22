@@ -16,6 +16,7 @@ import (
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/export/file"
+	ovs "github.com/jeromelesaux/martine/export/impdraw/overscan"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
 	"github.com/jeromelesaux/martine/export/net"
 	"github.com/jeromelesaux/martine/export/snapshot"
@@ -408,7 +409,7 @@ func main() {
 
 		outpath := filepath.Join(*output, strings.Replace(strings.ToLower(filename), ".scr", ".png", 1))
 		if cont.Overscan {
-			p, mode, err := file.OverscanPalette(*picturePath)
+			p, mode, err := ovs.OverscanPalette(*picturePath)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot get the palette from file (%s) error %v\n", *picturePath, err)
 				os.Exit(-1)

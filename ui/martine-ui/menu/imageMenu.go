@@ -16,7 +16,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/impdraw/overscan"
 	"github.com/jeromelesaux/martine/export/png"
 	cgfx "github.com/jeromelesaux/martine/gfx/common"
 )
@@ -140,7 +140,7 @@ func (me *ImageMenu) NewImportButton(dialogSize fyne.Size, modeSelection *widget
 			if me.IsFullScreen {
 
 				// open palette widget to get palette
-				p, mode, err := file.OverscanPalette(me.OriginalImagePath.Path())
+				p, mode, err := overscan.OverscanPalette(me.OriginalImagePath.Path())
 				if err != nil {
 					dialog.ShowError(err, win)
 					return

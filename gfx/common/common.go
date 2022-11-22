@@ -11,6 +11,7 @@ import (
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/file"
+	"github.com/jeromelesaux/martine/export/impdraw/overscan"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/errors"
 )
@@ -509,7 +510,7 @@ func OverscanToImg(scrPath string, mode uint8, p color.Palette) (*image.NRGBA, e
 		Min: image.Point{X: 0, Y: 0},
 		Max: image.Point{X: int(m.Width), Y: int(m.Height)}})
 
-	d, err := file.RawOverscan(scrPath) // RawOverscan data commence en 0x30
+	d, err := overscan.RawOverscan(scrPath) // RawOverscan data commence en 0x30
 	if err != nil {
 		return nil, err
 	}
@@ -665,13 +666,13 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, ex *e
 					return err
 				}
 			} else {
-				if err := file.Overscan(filePath, bw, p, screenMode, ex); err != nil {
+				if err := overscan.Overscan(filePath, bw, p, screenMode, ex); err != nil {
 					fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 					return err
 				}
 			}
 		} else {
-			if err := file.EgxOverscan(filePath, bw, p, ex.EgxMode1, ex.EgxMode2, ex); err != nil {
+			if err := overscan.EgxOverscan(filePath, bw, p, ex.EgxMode1, ex.EgxMode2, ex); err != nil {
 				fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 				return err
 			}
