@@ -15,10 +15,10 @@ func SaveGo(filePath string, dataUp, dataDown []byte, p color.Palette, screenMod
 	go1Filename := cfg.AmsdosFullPath(filePath, ".GO1")
 	go2Filename := cfg.AmsdosFullPath(filePath, ".GO2")
 	if !cfg.NoAmsdosHeader {
-		if err := amsdos.SaveAmsdosFile(go1Filename, ".GO1", data1, 0, 0, 0x20, 0); err != nil {
+		if err := amsdos.SaveAmsdosFile(go1Filename, ".GO1", data1, 2, 0, 0x20, 0); err != nil {
 			return err
 		}
-		if err := amsdos.SaveAmsdosFile(go2Filename, ".GO2", data2, 0, 0, 0x4000, 0); err != nil {
+		if err := amsdos.SaveAmsdosFile(go2Filename, ".GO2", data1, 2, 0, 0x4000, 0); err != nil {
 			return err
 		}
 	} else {
