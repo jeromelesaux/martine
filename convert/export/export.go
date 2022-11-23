@@ -8,8 +8,8 @@ import (
 
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
-	ci "github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/convert/screen"
+
 	ovs "github.com/jeromelesaux/martine/convert/screen/overscan"
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/impdraw/overscan"
@@ -37,24 +37,12 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, cfg *
 	if cfg.Overscan {
 		if cfg.EgxFormat == 0 {
 			if cfg.ExportAsGoFile {
-				orig, err := ovs.OverscanRawToImg(bw, screenMode, p)
+				dataUp, dataDown, err := ovs.ToGo(bw, screenMode, p)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error while converting into image file %s error :%v", filePath, err)
+					fmt.Fprintf(os.Stderr, "Error while converting into .goN files file %s error :%v", filePath, err)
 					return err
 				}
-
-				imgUp, imgDown, err := ci.SplitImage(orig)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error while splitting image from  file %s error :%v", filePath, err)
-					return err
-				}
-				config := config.NewMartineConfig("", "")
-				config.Size = constants.Size{Width: imgUp.Bounds().Max.X, Height: imgUp.Bounds().Max.Y}
-				config.Overscan = true
-				dataUp := screen.ToMode0(imgUp, p, config)
-				dataDown := screen.ToMode0(imgDown, p, config)
-
-				if err := overscan.SaveGo(filePath, dataUp[0:0x4000], dataDown[0:0x4000], p, screenMode, cfg); err != nil {
+				if err := overscan.SaveGo(filePath, dataUp, dataDown, p, screenMode, cfg); err != nil {
 					fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 					return err
 				}

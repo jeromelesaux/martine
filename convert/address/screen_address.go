@@ -33,3 +33,23 @@ func CpcScreenAddress(intialeAddresse int, x, y int, mode uint8, isOverscan bool
 func CpcScreenAddressOffset(line int) int {
 	return int(math.Floor(float64(line)/8)*80) + (line%8)*2048
 }
+
+func CpcOverscanSplitScreenAddress(intialeAddresse int, x, y int, mode uint8, isOverscan bool) int {
+	var addr int
+	var adjustMode int
+	switch mode {
+	case 0:
+		adjustMode = 2
+	case 1:
+		adjustMode = 4
+	case 2:
+		adjustMode = 8
+	}
+
+	addr = (0x800 * (y % 8)) + (0x60 * (y / 8)) + ((x + 1) / adjustMode)
+
+	if intialeAddresse == 0 {
+		return addr
+	}
+	return intialeAddresse + addr
+}
