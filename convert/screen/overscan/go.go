@@ -14,7 +14,7 @@ import (
 	"github.com/jeromelesaux/martine/convert/pixel"
 )
 
-func ToGo(data []byte, screenMode uint8, p color.Palette) ([]byte, []byte, error) {
+func ToGo(data []byte, screenMode uint8, p color.Palette, isCpcPlus bool) ([]byte, []byte, error) {
 	orig, err := OverscanRawToImg(data, screenMode, p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while converting into image  error :%v", err)
@@ -29,6 +29,7 @@ func ToGo(data []byte, screenMode uint8, p color.Palette) ([]byte, []byte, error
 	config := config.NewMartineConfig("", "")
 	config.Size = constants.Size{Width: imgUp.Bounds().Max.X, Height: imgUp.Bounds().Max.Y}
 	config.Overscan = true
+	config.CpcPlus = isCpcPlus
 	var dataUp, dataDown []byte
 	switch screenMode {
 	case 0:

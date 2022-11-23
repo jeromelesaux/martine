@@ -37,7 +37,7 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, cfg *
 	if cfg.Overscan {
 		if cfg.EgxFormat == 0 {
 			if cfg.ExportAsGoFile {
-				dataUp, dataDown, err := ovs.ToGo(bw, screenMode, p)
+				dataUp, dataDown, err := ovs.ToGo(bw, screenMode, p, cfg.CpcPlus)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Error while converting into .goN files file %s error :%v", filePath, err)
 					return err
