@@ -26,14 +26,14 @@ func TestAnimate(t *testing.T) {
 }
 
 func TestDeltaMotif(t *testing.T) {
-	err := DeltaMotif("/Users/jeromelesaux/Downloads/triangles.gif", &config.MartineConfig{InputPath: "triangles.gif", OutputPath: "."}, 20, 0xc000, 1)
+	err := DeltaMotif("../../samples/coke.gif", &config.MartineConfig{InputPath: "triangles.gif", OutputPath: "."}, 20, 0xc000, 1)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
 }
 
 func TestCompressZx0(t *testing.T) {
-	f, err := os.Open("/Users/jeromelesaux/Downloads/cat.scr")
+	f, err := os.Open("../../samples/coke.gif")
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
@@ -43,7 +43,7 @@ func TestCompressZx0(t *testing.T) {
 		t.Fatalf("%v", err)
 	}
 	compressed := encode.Encode(b)
-	err = amsdos.SaveOSFile("/Users/jeromelesaux/Downloads/test.zx0", compressed)
+	err = amsdos.SaveOSFile("../../samples/test.zx0", compressed)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
@@ -54,7 +54,7 @@ func TestDisplayCode(t *testing.T) {
 }
 
 func TestMergeGifImages(t *testing.T) {
-	fr, err := os.Open("/Users/jeromelesaux/Downloads/Files_Gif/sablier-8.gif")
+	fr, err := os.Open("../../samples/coke.gif")
 	if err != nil {
 		t.Fatal(err)
 	}

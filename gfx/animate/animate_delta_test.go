@@ -16,7 +16,7 @@ import (
 
 func TestOpenGif(t *testing.T) {
 	os.Mkdir("tests", os.ModePerm)
-	fr, err := os.Open("../../images/triangles.gif")
+	fr, err := os.Open("../../samples/coke.gif")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,7 +49,7 @@ func TestInternalDelta(t *testing.T) {
 		OneRow:          false,
 		FilloutGif:      false,
 	}
-	err := DeltaPacking("/Users/jeromelesaux/Downloads/cigarette-femme.gif", ex, 0xc010, 1, DeltaExportV1)
+	err := DeltaPacking("../../samples/coke.gif", ex, 0xc010, 1, DeltaExportV1)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -15,9 +15,9 @@ import (
 func ExportHandler() (*config.MartineConfig, constants.Size) {
 	var size constants.Size
 	cfg := config.NewMartineConfig(*picturePath, *output)
-
+	size = constants.NewSizeMode(uint8(*mode), *overscan)
 	if !*reverse {
-		size := constants.NewSizeMode(uint8(*mode), *overscan)
+
 		emptySize := constants.Size{}
 		if size == emptySize && *height == -1 && *width == -1 && !*deltaMode {
 			fmt.Fprintf(os.Stderr, "mode %d not defined and no custom width or height\n", *mode)

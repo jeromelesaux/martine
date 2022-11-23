@@ -15,7 +15,7 @@ import (
 )
 
 func TestMotifs(t *testing.T) {
-	fr, err := os.Open("../images/ww.jpg")
+	fr, err := os.Open("../../samples/Batman-Neal-Adams.jpg")
 	if err != nil {
 		t.Fatalf("%v", err)
 	}

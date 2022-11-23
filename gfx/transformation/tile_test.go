@@ -11,7 +11,7 @@ import (
 )
 
 func TestBoardSprite(t *testing.T) {
-	f, err := os.Open("../images/ak.png")
+	f, err := os.Open("../../samples/mario-level1.png")
 	if err != nil {
 		t.Fatalf("Cannot open file error %v\n", err)
 	}
