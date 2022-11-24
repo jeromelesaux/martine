@@ -91,7 +91,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 					case 0:
 						for i := 0; i < 16; {
 							pixel := pixel.PixelMode0(pp, pp)
-							addr := address.CpcScreenAddress(0, x+i, y, 0, cfg.Overscan)
+							addr := address.CpcScreenAddress(0, x+i, y, 0, cfg.Overscan, cfg.ExportAsGoFile)
 							bw[addr] = pixel
 							i += 2
 							firmwareColorUsed[pp] += 2
@@ -99,7 +99,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 					case 1:
 						for i := 0; i < 16; {
 							pixel := pixel.PixelMode1(pp, pp, pp, pp)
-							addr := address.CpcScreenAddress(0, x+i, y, 1, cfg.Overscan)
+							addr := address.CpcScreenAddress(0, x+i, y, 1, cfg.Overscan, cfg.ExportAsGoFile)
 							bw[addr] = pixel
 							i += 4
 							firmwareColorUsed[pp] += 4
@@ -107,7 +107,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 					case 2:
 						for i := 0; i < 16; {
 							pixel := pixel.PixelMode2(pp, pp, pp, pp, pp, pp, pp, pp)
-							addr := address.CpcScreenAddress(0, x+i, y, 2, cfg.Overscan)
+							addr := address.CpcScreenAddress(0, x+i, y, 2, cfg.Overscan, cfg.ExportAsGoFile)
 							bw[addr] = pixel
 							i += 8
 							firmwareColorUsed[pp] += 8
@@ -212,7 +212,7 @@ func setPixelMode0(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND
-	addr := address.CpcScreenAddress(0, x, y, 0, cfg.Overscan)
+	addr := address.CpcScreenAddress(0, x, y, 0, cfg.Overscan, cfg.ExportAsGoFile)
 	bw[addr] = pixel
 	return bw, firmwareColorUsed
 }
@@ -257,7 +257,7 @@ func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND
-	addr := address.CpcScreenAddress(0, x, y, 1, cfg.Overscan)
+	addr := address.CpcScreenAddress(0, x, y, 1, cfg.Overscan, cfg.ExportAsGoFile)
 	bw[addr] = pixel
 	return bw, firmwareColorUsed
 }
@@ -335,7 +335,7 @@ func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND
-	addr := address.CpcScreenAddress(0, x, y, 2, cfg.Overscan)
+	addr := address.CpcScreenAddress(0, x, y, 2, cfg.Overscan, cfg.ExportAsGoFile)
 	bw[addr] = pixel
 	return bw, firmwareColorUsed
 }

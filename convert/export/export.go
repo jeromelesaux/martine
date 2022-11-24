@@ -9,8 +9,8 @@ import (
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert/screen"
+	co "github.com/jeromelesaux/martine/convert/screen/overscan"
 
-	ovs "github.com/jeromelesaux/martine/convert/screen/overscan"
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/impdraw/overscan"
 	"github.com/jeromelesaux/martine/export/impdraw/palette"
@@ -37,12 +37,12 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, cfg *
 	if cfg.Overscan {
 		if cfg.EgxFormat == 0 {
 			if cfg.ExportAsGoFile {
-				dataUp, dataDown, err := ovs.ToGo(bw, screenMode, p, cfg.CpcPlus)
+				data, err := co.ToGo(bw, screenMode, p, cfg)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error while converting into .goN files file %s error :%v", filePath, err)
+					fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 					return err
 				}
-				if err := overscan.SaveGo(filePath, dataUp, dataDown, p, screenMode, cfg); err != nil {
+				if err := overscan.SaveGo(filePath, data, p, screenMode, cfg); err != nil {
 					fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
 					return err
 				}
