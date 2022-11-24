@@ -17,7 +17,7 @@ func CpcScreenAddress(intialeAddresse int, x, y int, mode uint8, isOverscan, dou
 	}
 	if isOverscan {
 		addr = (0x800 * (y % 8)) + (0x60 * (y / 8)) + ((x + 1) / adjustMode)
-		if doubleScreen && y >= 168 {
+		if doubleScreen && y > 167 {
 			addr += 0x3800
 		} else {
 			if !doubleScreen && y > 127 {
