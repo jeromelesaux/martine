@@ -67,11 +67,11 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 		palette = di.RightImage.Palette
 		secondIm = &di.LeftImage
 	}
-	context := m.NewContext(im, false)
-	if context == nil {
+	cfg := m.NewConfig(im, false)
+	if cfg == nil {
 		return
 	}
-	out, downgraded, _, _, err := gfx.ApplyOneImage(secondIm.CpcImage.Image, context, secondIm.Mode, palette, uint8(secondIm.Mode))
+	out, downgraded, _, _, err := gfx.ApplyOneImage(secondIm.CpcImage.Image, cfg, secondIm.Mode, palette, uint8(secondIm.Mode))
 	if err != nil {
 		dialog.ShowError(err, m.window)
 		return
@@ -80,7 +80,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	secondIm.CpcImage = *canvas.NewImageFromImage(downgraded)
 	secondIm.Palette = palette
 	secondIm.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(secondIm.Palette))
-	out, downgraded, _, _, err = gfx.ApplyOneImage(im.CpcImage.Image, context, im.Mode, palette, uint8(im.Mode))
+	out, downgraded, _, _, err = gfx.ApplyOneImage(im.CpcImage.Image, cfg, im.Mode, palette, uint8(im.Mode))
 	if err != nil {
 		dialog.ShowError(err, m.window)
 		return
@@ -92,7 +92,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 
 	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
 	pi.Show()
-	res, _, egxType, err := effect.EgxRaw(di.LeftImage.Data, di.RightImage.Data, palette, di.LeftImage.Mode, di.RightImage.Mode, context)
+	res, _, egxType, err := effect.EgxRaw(di.LeftImage.Data, di.RightImage.Data, palette, di.LeftImage.Mode, di.RightImage.Mode, cfg)
 	pi.Hide()
 	if err != nil {
 		dialog.ShowError(err, m.window)
@@ -102,7 +102,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	di.ResultImage.Palette = palette
 	di.ResultImage.EgxType = egxType
 	var img image.Image
-	if context.Overscan {
+	if cfg.Overscan {
 		img, err = overscan.OverscanRawToImg(di.ResultImage.Data, 0, di.ResultImage.Palette)
 		if err != nil {
 			dialog.ShowError(err, m.window)
@@ -416,8 +416,8 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 								paletteExportPath := uc.URI().Path()
 								uc.Close()
 								os.Remove(uc.URI().Path())
-								context := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
-								context.NoAmsdosHeader = false
+								cfg := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
+								cfg.NoAmsdosHeader = false
 								if err := impPalette.SaveKit(paletteExportPath+".kit", me.Palette, false); err != nil {
 									dialog.ShowError(err, m.window)
 								}

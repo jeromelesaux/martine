@@ -4,7 +4,7 @@ import "math"
 
 // CpcScreenAddress returns the screen address according the screen mode, the initialAddress (always #C000)
 // x the column number and y the line number on the screen
-func CpcScreenAddress(intialeAddresse int, x, y int, mode uint8, isOverscan, isGoFile bool) int {
+func CpcScreenAddress(intialeAddresse int, x, y int, mode uint8, isOverscan, doubleScreen bool) int {
 	var addr int
 	var adjustMode int
 	switch mode {
@@ -17,10 +17,10 @@ func CpcScreenAddress(intialeAddresse int, x, y int, mode uint8, isOverscan, isG
 	}
 	if isOverscan {
 		addr = (0x800 * (y % 8)) + (0x60 * (y / 8)) + ((x + 1) / adjustMode)
-		if isGoFile && y > 168 {
+		if doubleScreen && y >= 168 {
 			addr += 0x3800
 		} else {
-			if !isGoFile && y > 127 {
+			if !doubleScreen && y > 127 {
 				addr += 0x3800
 			}
 		}

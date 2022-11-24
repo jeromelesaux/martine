@@ -15,7 +15,7 @@ func ToGo(data []byte, screenMode uint8, p color.Palette, cfg *config.MartineCon
 		fmt.Fprintf(os.Stderr, "Error while converting into image  error :%v", err)
 		return nil, err
 	}
-
+	cfg.DoubleScreenAddress = true
 	switch screenMode {
 	case 0:
 		data = screen.ToMode0(orig, p, cfg)
@@ -24,6 +24,6 @@ func ToGo(data []byte, screenMode uint8, p color.Palette, cfg *config.MartineCon
 	case 2:
 		data = screen.ToMode2(orig, p, cfg)
 	}
-
+	cfg.DoubleScreenAddress = false
 	return data, nil
 }

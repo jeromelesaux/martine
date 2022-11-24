@@ -37,12 +37,12 @@ func (m *MartineUI) IsClassicalTilemap(width, height int) bool {
 }
 
 func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
-	context := m.NewContext(&me.ImageMenu, true)
-	if context == nil {
+	cfg := m.NewConfig(&me.ImageMenu, true)
+	if cfg == nil {
 		return
 	}
 
-	context.CustomDimension = true
+	cfg.CustomDimension = true
 
 	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
 	pi.Show()
@@ -50,12 +50,12 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 	var palette color.Palette
 	var tiles [][]image.Image
 	var err error
-	if m.IsClassicalTilemap(context.Size.Width, context.Size.Height) {
+	if m.IsClassicalTilemap(cfg.Size.Width, cfg.Size.Height) {
 		filename := filepath.Base(me.OriginalImagePath.Path())
-		analyze, tiles, palette = gfx.TilemapClassical(uint8(me.Mode), me.IsCpcPlus, filename, me.OriginalImagePath.Path(), me.OriginalImage.Image, context.Size, context)
+		analyze, tiles, palette = gfx.TilemapClassical(uint8(me.Mode), me.IsCpcPlus, filename, me.OriginalImagePath.Path(), me.OriginalImage.Image, cfg.Size, cfg)
 		pi.Hide()
 	} else {
-		analyze, tiles, palette, err = gfx.TilemapRaw(uint8(me.Mode), me.IsCpcPlus, context.Size, me.OriginalImage.Image, context)
+		analyze, tiles, palette, err = gfx.TilemapRaw(uint8(me.Mode), me.IsCpcPlus, cfg.Size, me.OriginalImage.Image, cfg)
 		pi.Hide()
 		if err != nil {
 			dialog.NewError(err, m.window).Show()
@@ -236,8 +236,8 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 										paletteExportPath := uc.URI().Path()
 										uc.Close()
 										os.Remove(uc.URI().Path())
-										context := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
-										context.NoAmsdosHeader = false
+										cfg := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
+										cfg.NoAmsdosHeader = false
 										if err := impPalette.SaveKit(paletteExportPath+".kit", tm.Palette, false); err != nil {
 											dialog.ShowError(err, m.window)
 										}

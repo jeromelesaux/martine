@@ -114,17 +114,17 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 	pi := dialog.NewProgressInfinite("Saving....", "Please wait.", m.window)
 	pi.Show()
-	context := m.NewContext(&t.ImageMenu, true)
-	context.OutputPath = t.ExportFolderPath
-	if m.IsClassicalTilemap(context.Size.Width, context.Size.Height) && !m.tilemap.IsSprite {
+	cfg := m.NewConfig(&t.ImageMenu, true)
+	cfg.OutputPath = t.ExportFolderPath
+	if m.IsClassicalTilemap(cfg.Size.Width, cfg.Size.Height) && !m.tilemap.IsSprite {
 		filename := filepath.Base(t.OriginalImagePath.Path())
-		if err := gfx.ExportTilemapClassical(t.OriginalImage.Image, filename, t.Result, context.Size, context); err != nil {
+		if err := gfx.ExportTilemapClassical(t.OriginalImage.Image, filename, t.Result, cfg.Size, cfg); err != nil {
 			pi.Hide()
 			dialog.NewError(err, m.window).Show()
 			return
 		}
-		if context.Dsk {
-			if err := diskimage.ImportInDsk(t.OriginalImagePath.Path(), context); err != nil {
+		if cfg.Dsk {
+			if err := diskimage.ImportInDsk(t.OriginalImagePath.Path(), cfg); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 				return
@@ -133,12 +133,12 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 		pi.Hide()
 	} else {
 		if t.ExportImpdraw {
-			if err := gfx.ExportImpdrawTilemap(t.Result, "tilemap", t.Palette, uint8(t.Mode), context.Size, t.OriginalImage.Image, context); err != nil {
+			if err := gfx.ExportImpdrawTilemap(t.Result, "tilemap", t.Palette, uint8(t.Mode), cfg.Size, t.OriginalImage.Image, cfg); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 			}
-			if context.Dsk {
-				if err := diskimage.ImportInDsk(t.OriginalImagePath.Path(), context); err != nil {
+			if cfg.Dsk {
+				if err := diskimage.ImportInDsk(t.OriginalImagePath.Path(), cfg); err != nil {
 					pi.Hide()
 					dialog.NewError(err, m.window).Show()
 					return
@@ -147,12 +147,12 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 			pi.Hide()
 		} else {
 
-			if err := gfx.ExportTilemap(t.Result, "tilemap", t.Palette, uint8(t.Mode), t.OriginalImage.Image, t.ExportFlat, context); err != nil {
+			if err := gfx.ExportTilemap(t.Result, "tilemap", t.Palette, uint8(t.Mode), t.OriginalImage.Image, t.ExportFlat, cfg); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 			}
-			if context.Dsk {
-				if err := diskimage.ImportInDsk(t.OriginalImagePath.Path(), context); err != nil {
+			if cfg.Dsk {
+				if err := diskimage.ImportInDsk(t.OriginalImagePath.Path(), cfg); err != nil {
 					pi.Hide()
 					dialog.NewError(err, m.window).Show()
 					return

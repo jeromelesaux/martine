@@ -244,7 +244,7 @@ func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uin
 			}
 			firmwareColorUsed[pp2]++
 			pixel := pixel.PixelMode0(pp1, pp2)
-			addr := address.CpcScreenAddress(0, x, y, 0, cfg.Overscan, cfg.ExportAsGoFile)
+			addr := address.CpcScreenAddress(0, x, y, 0, cfg.Overscan, cfg.DoubleScreenAddress)
 			bw[addr] = pixel
 		}
 	}
@@ -281,9 +281,9 @@ func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uin
 			firmwareColorUsed[pp4]++
 
 			pixel := pixel.PixelMode1(pp1, pp2, pp3, pp4)
-			addr := address.CpcScreenAddress(0, x, y, 1, cfg.Overscan, cfg.ExportAsGoFile)
+			addr := address.CpcScreenAddress(0, x, y, 1, cfg.Overscan, cfg.DoubleScreenAddress)
 			bw[addr] = pixel
-			addr = address.CpcScreenAddress(0, x+1, y, 1, cfg.Overscan, cfg.ExportAsGoFile)
+			addr = address.CpcScreenAddress(0, x+1, y, 1, cfg.Overscan, cfg.DoubleScreenAddress)
 			bw[addr] = pixel
 		}
 	}
@@ -343,7 +343,7 @@ func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uin
 			firmwareColorUsed[pp4]++
 
 			pixel := pixel.PixelMode1(pp1, pp2, pp3, pp4)
-			addr := address.CpcScreenAddress(0, x, y, 1, cfg.Overscan, cfg.ExportAsGoFile)
+			addr := address.CpcScreenAddress(0, x, y, 1, cfg.Overscan, cfg.DoubleScreenAddress)
 			bw[addr] = pixel
 		}
 	}
@@ -408,9 +408,9 @@ func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uin
 			}
 			firmwareColorUsed[pp8]++
 			pixel := pixel.PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
-			addr := address.CpcScreenAddress(0, x, y, 2, cfg.Overscan, cfg.ExportAsGoFile)
+			addr := address.CpcScreenAddress(0, x, y, 2, cfg.Overscan, cfg.DoubleScreenAddress)
 			bw[addr] = pixel
-			addr = address.CpcScreenAddress(0, x+1, y, 2, cfg.Overscan, cfg.ExportAsGoFile)
+			addr = address.CpcScreenAddress(0, x+1, y, 2, cfg.Overscan, cfg.DoubleScreenAddress)
 			bw[addr] = pixel
 		}
 	}

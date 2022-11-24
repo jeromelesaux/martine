@@ -41,11 +41,11 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						// cancel button
 						return
 					}
-					context := m.NewContext(&a.ImageMenu, false)
-					if context == nil {
+					cfg := m.NewConfig(&a.ImageMenu, false)
+					if cfg == nil {
 						return
 					}
-					context.Compression = m.animateExport.ExportCompression
+					cfg.Compression = m.animateExport.ExportCompression
 					if a.ExportVersion == 0 {
 						a.ExportVersion = animate.DeltaExportV1
 					}
@@ -63,7 +63,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						a.DeltaCollection,
 						a.Palette,
 						a.IsSprite,
-						context,
+						cfg,
 						uint16(address),
 						uint8(a.Mode),
 						a.ExportVersion,
@@ -122,11 +122,11 @@ func CheckWidthSize(width, mode int) bool {
 }
 
 func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
-	context := m.NewContext(&a.ImageMenu, false)
-	if context == nil {
+	cfg := m.NewConfig(&a.ImageMenu, false)
+	if cfg == nil {
 		return
 	}
-	context.Compression = m.animateExport.ExportCompression
+	cfg.Compression = m.animateExport.ExportCompression
 	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
 	pi.Show()
 	address, err := strconv.ParseUint(a.InitialAddress.Text, 16, 64)
@@ -136,7 +136,7 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 		return
 	}
 	// controle de de la taille de la largeur en fonction du mode
-	width := context.Size.Width
+	width := cfg.Size.Width
 	mode := a.Mode
 	// get all images from widget imagetable
 	if !CheckWidthSize(width, mode) {
@@ -145,7 +145,7 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 		return
 	}
 	imgs := a.AnimateImages.Images()[0]
-	deltaCollection, rawImages, palette, err := animate.DeltaPackingMemory(imgs, context, uint16(address), uint8(a.Mode))
+	deltaCollection, rawImages, palette, err := animate.DeltaPackingMemory(imgs, cfg, uint16(address), uint8(a.Mode))
 	pi.Hide()
 	if err != nil {
 		dialog.NewError(err, m.window).Show()
@@ -421,8 +421,8 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 								paletteExportPath := uc.URI().Path()
 								uc.Close()
 								os.Remove(uc.URI().Path())
-								context := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
-								context.NoAmsdosHeader = false
+								cfg := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
+								cfg.NoAmsdosHeader = false
 								if err := impPalette.SaveKit(paletteExportPath+".kit", a.Palette, false); err != nil {
 									dialog.ShowError(err, m.window)
 								}

@@ -35,12 +35,16 @@ import (
 func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 	pi := dialog.NewProgressInfinite("Saving....", "Please wait.", m.window)
 	pi.Show()
-	context := m.NewContext(me, true)
-	if context == nil {
+	cfg := m.NewConfig(me, true)
+	if cfg == nil {
 		return
 	}
 	if m.imageExport.ExportText {
-		out, _, palette, _, err := gfx.ApplyOneImage(me.OriginalImage.Image, context, me.Mode, me.Palette, uint8(me.Mode))
+		if cfg.Overscan {
+			cfg.ExportAsGoFile = true
+		}
+
+		out, _, palette, _, err := gfx.ApplyOneImage(me.OriginalImage.Image, cfg, me.Mode, me.Palette, uint8(me.Mode))
 		if err != nil {
 			pi.Hide()
 			dialog.ShowError(err, m.window)
@@ -68,11 +72,11 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 			pi.Hide()
 			dialog.ShowError(err, m.window)
 		}
-		context.KitPath = "temporary_palette.kit"
+		cfg.KitPath = "temporary_palette.kit"
 		filename := filepath.Base(me.OriginalImagePath.Path())
 		if err := gfx.ApplyOneImageAndExport(
 			me.OriginalImage.Image,
-			context,
+			cfg,
 			filename,
 			m.imageExport.ExportFolderPath+string(filepath.Separator)+filename,
 			me.Mode,
@@ -81,23 +85,23 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 			dialog.NewError(err, m.window).Show()
 			return
 		}
-		if context.Dsk {
-			if err := diskimage.ImportInDsk(me.OriginalImagePath.Path(), context); err != nil {
+		if cfg.Dsk {
+			if err := diskimage.ImportInDsk(me.OriginalImagePath.Path(), cfg); err != nil {
 				dialog.NewError(err, m.window).Show()
 				return
 			}
 		}
-		if context.Sna {
-			if context.Overscan {
+		if cfg.Sna {
+			if cfg.Overscan {
 				var gfxFile string
-				for _, v := range context.DskFiles {
+				for _, v := range cfg.DskFiles {
 					if filepath.Ext(v) == ".SCR" {
 						gfxFile = v
 						break
 					}
 				}
-				context.SnaPath = filepath.Join(m.imageExport.ExportFolderPath, "test.sna")
-				if err := snapshot.ImportInSna(gfxFile, context.SnaPath, uint8(me.Mode)); err != nil {
+				cfg.SnaPath = filepath.Join(m.imageExport.ExportFolderPath, "test.sna")
+				if err := snapshot.ImportInSna(gfxFile, cfg.SnaPath, uint8(me.Mode)); err != nil {
 					dialog.NewError(err, m.window).Show()
 					return
 				}
@@ -105,7 +109,7 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 		}
 	}
 	if m.imageExport.ExportToM2 {
-		if err := m4.ImportInM4(context); err != nil {
+		if err := m4.ImportInM4(cfg); err != nil {
 			dialog.NewError(err, m.window).Show()
 			fmt.Fprintf(os.Stderr, "Cannot send to M4 error :%v\n", err)
 		}
@@ -125,8 +129,8 @@ func (m *MartineUI) monochromeColor(c color.Color) {
 
 func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 	me.CpcImage = canvas.Image{}
-	context := m.NewContext(me, true)
-	if context == nil {
+	cfg := m.NewConfig(me, true)
+	if cfg == nil {
 		return
 	}
 
@@ -150,7 +154,7 @@ func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 	}
 	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
 	pi.Show()
-	out, downgraded, palette, _, err := gfx.ApplyOneImage(me.OriginalImage.Image, context, me.Mode, inPalette, uint8(me.Mode))
+	out, downgraded, palette, _, err := gfx.ApplyOneImage(me.OriginalImage.Image, cfg, me.Mode, inPalette, uint8(me.Mode))
 	pi.Hide()
 	if err != nil {
 		dialog.NewError(err, m.window).Show()
@@ -162,7 +166,7 @@ func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 		me.Palette = palette
 	}
 	if me.IsSprite || me.IsHardSprite {
-		newSize := constants.Size{Width: context.Size.Width * 50, Height: context.Size.Height * 50}
+		newSize := constants.Size{Width: cfg.Size.Width * 50, Height: cfg.Size.Height * 50}
 		me.Downgraded = image.Resize(me.Downgraded, newSize, me.ResizeAlgo)
 	}
 	me.CpcImage = *canvas.NewImageFromImage(me.Downgraded)
@@ -406,8 +410,8 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 								paletteExportPath := uc.URI().Path()
 								uc.Close()
 								os.Remove(uc.URI().Path())
-								context := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
-								context.NoAmsdosHeader = false
+								cfg := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
+								cfg.NoAmsdosHeader = false
 								if err := impPalette.SaveKit(paletteExportPath+".kit", me.Palette, false); err != nil {
 									dialog.ShowError(err, m.window)
 								}

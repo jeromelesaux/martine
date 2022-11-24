@@ -104,6 +104,7 @@ type MartineConfig struct {
 	Saturation                  float64
 	Brightness                  float64
 	ExportAsGoFile              bool
+	DoubleScreenAddress         bool
 }
 
 func MaskIsAllowed(mode uint8, value uint8) bool {

@@ -86,30 +86,30 @@ func (m *MartineUI) NewTabs() *container.AppTabs {
 	)
 }
 
-func (m *MartineUI) NewContext(me *menu.ImageMenu, checkOriginalImage bool) *config.MartineConfig {
+func (m *MartineUI) NewConfig(me *menu.ImageMenu, checkOriginalImage bool) *config.MartineConfig {
 	if checkOriginalImage && me.OriginalImagePath == nil {
 		return nil
 	}
-	var context *config.MartineConfig
+	var cfg *config.MartineConfig
 	if checkOriginalImage {
-		context = config.NewMartineConfig(me.OriginalImagePath.Path(), "")
+		cfg = config.NewMartineConfig(me.OriginalImagePath.Path(), "")
 	} else {
-		context = config.NewMartineConfig("", "")
+		cfg = config.NewMartineConfig("", "")
 	}
-	context.CpcPlus = me.IsCpcPlus
-	context.Overscan = me.IsFullScreen
-	context.DitheringMultiplier = me.DitheringMultiplier
-	context.Brightness = me.Brightness
-	context.Saturation = me.Saturation
+	cfg.CpcPlus = me.IsCpcPlus
+	cfg.Overscan = me.IsFullScreen
+	cfg.DitheringMultiplier = me.DitheringMultiplier
+	cfg.Brightness = me.Brightness
+	cfg.Saturation = me.Saturation
 
 	if me.Brightness > 0 && me.Saturation == 0 {
-		context.Saturation = me.Brightness
+		cfg.Saturation = me.Brightness
 	}
 	if me.Brightness == 0 && me.Saturation > 0 {
-		context.Brightness = me.Saturation
+		cfg.Brightness = me.Saturation
 	}
-	context.Reducer = me.Reducer
-	context.Size = constants.NewSizeMode(uint8(me.Mode), me.IsFullScreen)
+	cfg.Reducer = me.Reducer
+	cfg.Size = constants.NewSizeMode(uint8(me.Mode), me.IsFullScreen)
 	if me.IsSprite {
 		width, err := strconv.Atoi(me.Width.Text)
 		if err != nil {
@@ -121,37 +121,37 @@ func (m *MartineUI) NewContext(me *menu.ImageMenu, checkOriginalImage bool) *con
 			dialog.NewError(err, m.window).Show()
 			return nil
 		}
-		context.Size.Height = height
-		context.Size.Width = width
-		context.CustomDimension = true
+		cfg.Size.Height = height
+		cfg.Size.Width = width
+		cfg.CustomDimension = true
 	}
 	if me.IsHardSprite {
-		context.Size.Height = 16
-		context.Size.Width = 16
+		cfg.Size.Height = 16
+		cfg.Size.Width = 16
 	}
 
 	if me.ApplyDithering {
-		context.DitheringAlgo = 0
-		context.DitheringMatrix = me.DitheringMatrix
-		context.DitheringType = me.DitheringType
+		cfg.DitheringAlgo = 0
+		cfg.DitheringMatrix = me.DitheringMatrix
+		cfg.DitheringType = me.DitheringType
 	} else {
-		context.DitheringAlgo = -1
+		cfg.DitheringAlgo = -1
 	}
-	context.DitheringWithQuantification = me.WithQuantification
-	context.OutputPath = m.imageExport.ExportFolderPath
+	cfg.DitheringWithQuantification = me.WithQuantification
+	cfg.OutputPath = m.imageExport.ExportFolderPath
 	if checkOriginalImage {
-		context.InputPath = me.OriginalImagePath.Path()
+		cfg.InputPath = me.OriginalImagePath.Path()
 	}
-	context.Json = m.imageExport.ExportJson
-	context.Ascii = m.imageExport.ExportText
-	context.NoAmsdosHeader = !m.imageExport.ExportWithAmsdosHeader
-	context.ZigZag = m.imageExport.ExportZigzag
-	context.Compression = m.imageExport.ExportCompression
-	context.Dsk = m.imageExport.ExportDsk
-	context.ExportAsGoFile = m.imageExport.ExportAsGoFiles
-	context.OneLine = me.OneLine
-	context.OneRow = me.OneRow
-	return context
+	cfg.Json = m.imageExport.ExportJson
+	cfg.Ascii = m.imageExport.ExportText
+	cfg.NoAmsdosHeader = !m.imageExport.ExportWithAmsdosHeader
+	cfg.ZigZag = m.imageExport.ExportZigzag
+	cfg.Compression = m.imageExport.ExportCompression
+	cfg.Dsk = m.imageExport.ExportDsk
+	cfg.ExportAsGoFile = m.imageExport.ExportAsGoFiles
+	cfg.OneLine = me.OneLine
+	cfg.OneRow = me.OneRow
+	return cfg
 }
 
 func openImage(path string) (image.Image, error) {

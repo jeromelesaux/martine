@@ -99,25 +99,25 @@ func (m *MartineUI) exportEgxDialog(ie *menu.ImageExport, w fyne.Window) {
 func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	pi := dialog.NewProgressInfinite("Saving....", "Please wait.", m.window)
 	pi.Show()
-	context := m.NewContext(&me.LeftImage, true)
-	if context == nil {
+	cfg := m.NewConfig(&me.LeftImage, true)
+	if cfg == nil {
 		pi.Hide()
 		return
 	}
-	context.OutputPath = me.ResultImage.Path
-	context.Dsk = m.egxExport.ExportDsk
+	cfg.OutputPath = me.ResultImage.Path
+	cfg.Dsk = m.egxExport.ExportDsk
 	if m.egxExport.ExportWithAmsdosHeader {
-		context.NoAmsdosHeader = false
+		cfg.NoAmsdosHeader = false
 	} else {
-		context.NoAmsdosHeader = true
+		cfg.NoAmsdosHeader = true
 	}
 	if me.ResultImage.EgxType == 1 {
-		context.EgxFormat = config.Egx1Mode
+		cfg.EgxFormat = config.Egx1Mode
 	} else {
-		context.EgxFormat = config.Egx2Mode
+		cfg.EgxFormat = config.Egx2Mode
 	}
-	context.EgxMode1 = uint8(me.LeftImage.Mode)
-	context.EgxMode2 = uint8(me.RightImage.Mode)
+	cfg.EgxMode1 = uint8(me.LeftImage.Mode)
+	cfg.EgxMode2 = uint8(me.RightImage.Mode)
 
 	// palette export
 	defer func() {
@@ -127,45 +127,45 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 		pi.Hide()
 		dialog.ShowError(err, m.window)
 	}
-	context.KitPath = "temporary_palette.kit"
+	cfg.KitPath = "temporary_palette.kit"
 
-	if !context.Overscan {
-		if err := ocpartstudio.EgxLoader(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Palette, uint8(me.LeftImage.Mode), uint8(me.RightImage.Mode), context); err != nil {
+	if !cfg.Overscan {
+		if err := ocpartstudio.EgxLoader(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Palette, uint8(me.LeftImage.Mode), uint8(me.RightImage.Mode), cfg); err != nil {
 			pi.Hide()
 			dialog.ShowError(err, m.window)
 			return
 		}
 	} else {
-		if err := export.Export(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Data, me.ResultImage.Palette, uint8(me.ResultImage.EgxType), context); err != nil {
+		if err := export.Export(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Data, me.ResultImage.Palette, uint8(me.ResultImage.EgxType), cfg); err != nil {
 			pi.Hide()
 			dialog.ShowError(err, m.window)
 			return
 		}
 	}
 	if m.egxExport.ExportDsk {
-		if err := diskimage.ImportInDsk(me.ResultImage.Path, context); err != nil {
+		if err := diskimage.ImportInDsk(me.ResultImage.Path, cfg); err != nil {
 			dialog.NewError(err, m.window).Show()
 			return
 		}
 	}
-	if context.Sna {
-		if context.Overscan {
+	if cfg.Sna {
+		if cfg.Overscan {
 			var gfxFile string
-			for _, v := range context.DskFiles {
+			for _, v := range cfg.DskFiles {
 				if filepath.Ext(v) == ".SCR" {
 					gfxFile = v
 					break
 				}
 			}
-			context.SnaPath = filepath.Join(me.ResultImage.Path, "test.sna")
-			if err := snapshot.ImportInSna(gfxFile, context.SnaPath, 0); err != nil {
+			cfg.SnaPath = filepath.Join(me.ResultImage.Path, "test.sna")
+			if err := snapshot.ImportInSna(gfxFile, cfg.SnaPath, 0); err != nil {
 				dialog.NewError(err, m.window).Show()
 				return
 			}
 		}
 	}
 	if m.egxExport.ExportToM2 {
-		if err := m4.ImportInM4(context); err != nil {
+		if err := m4.ImportInM4(cfg); err != nil {
 			dialog.NewError(err, m.window).Show()
 			fmt.Fprintf(os.Stderr, "Cannot send to M4 error :%v\n", err)
 		}
