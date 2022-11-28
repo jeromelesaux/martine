@@ -3,11 +3,11 @@ RM=rm
 MV=mv
 
 
-SOURCEDIR=.
+SOURCEDIR=./cli
 SOURCES := $(shell find $(SOURCEDIR) -name '*.go')
 
-VERSION:=$(shell grep -m1 "appVersion" *.go | sed 's/[", ]//g' | cut -d= -f2)
-suffix=$(shell grep -m1 "version" *.go | sed 's/[", ]//g' | cut -d= -f2 | sed 's/[0-9.]//g')
+VERSION:=$(shell grep -m1 "appVersion" $(SOURCEDIR)/*.go | sed 's/[", ]//g' | cut -d= -f2)
+suffix=$(shell grep -m1 "version" $(SOURCEDIR)/*.go | sed 's/[", ]//g' | cut -d= -f2 | sed 's/[0-9.]//g')
 snapshot=$(shell date +%FT%T)
 UNAME := $(shell uname)
 BINARY=binaries
@@ -54,9 +54,9 @@ compile:
 	@echo "Compilation for ${ARCH} ${OS} bits"
 	mkdir ${BINARY}/martine-${OS}-${ARCH}
 	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/martine${EXT} $(SOURCEDIR)/main.go $(SOURCEDIR)/process.go $(SOURCEDIR)/export_handler.go
-	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/prepare_delta${EXT} $(SOURCEDIR)/resources/formatter/delta/prepare_delta.go
-	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/format_sprite${EXT} $(SOURCEDIR)/resources/formatter/sprites/format_sprite.go
-	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/format_data${EXT} $(SOURCEDIR)/resources/formatter/data/format_data.go
+	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/prepare_delta${EXT} ./resources/formatter/delta/prepare_delta.go
+	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/format_sprite${EXT} ./resources/formatter/sprites/format_sprite.go
+	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/format_data${EXT} ./resources/formatter/data/format_data.go
 	zip ${BINARY}/martine-$(appversion)-${OS}-${ARCH}.zip ${BINARY}/martine-${OS}-${ARCH}/* ./resources/*
 
 build-linux:
