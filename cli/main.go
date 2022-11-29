@@ -126,6 +126,7 @@ var (
 	saturationPal       = flag.Float64("contrast", 0., "apply contrast on the color of the palette on amstrad plus screen. (max value 100 and only on CPC PLUS).")
 	brightnessPal       = flag.Float64("brightness", 0., "apply brightness on the color of the palette on amstrad plus screen. (max value 100 and only on CPC PLUS).")
 	analyzeTilemap      = flag.String("analyzetilemap", "", "analyse the image to get the most accurate tilemap according to the  criteria :\n\tsize : lower export size\n\tnumber : lower number of tiles")
+	exportGoFiles       = flag.Bool("go", false, "Export results as .go1 and .go2 files.")
 
 	version = flag.Bool("version", false, "print martine's version")
 )

@@ -135,6 +135,7 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	cfg.Ascii = *txtOutput
 	cfg.OneLine = *oneLine
 	cfg.OneRow = *oneRow
+	cfg.ExportAsGoFile = *exportGoFiles
 
 	if *scanlineSequence != "" {
 		sequence := strings.Split(*scanlineSequence, ",")
