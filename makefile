@@ -41,63 +41,75 @@ package:
 	rm -fr ${BINARY}
 	mkdir ${BINARY}
 ifeq ($(UNAME),Linux)
-	(make package-linux)
+	(make package-linux ARCH=amd64 OS=linux)
 else 
 ifeq ($(UNAME), Darwin)
-	(make package-darwin)
+	(make package-darwin ARCH=amd64 OS=darwin)
 else 
-	(make package-windows)
+	(make package-windows ARCH=amd64 OS=windows EXT=.exe)
 endif 
 endif
 	
-compile:
+init:
 	@echo "Compilation for ${ARCH} ${OS} bits"
 	mkdir ${BINARY}/martine-${OS}-${ARCH}
+
+compile:
+	(make init)
 	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/martine${EXT} $(SOURCEDIR)/main.go $(SOURCEDIR)/process.go $(SOURCEDIR)/export_handler.go
 	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/prepare_delta${EXT} ./resources/formatter/delta/prepare_delta.go
 	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/format_sprite${EXT} ./resources/formatter/sprites/format_sprite.go
 	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/format_data${EXT} ./resources/formatter/data/format_data.go
+	(make archive)
+
+archive:
 	zip ${BINARY}/martine-$(appversion)-${OS}-${ARCH}.zip ${BINARY}/martine-${OS}-${ARCH}/* ./resources/*
 
 build-linux:
 	@echo "Compilation for linux"
-	mkdir ${BINARY}/martine-${OS}-${ARCH}
+	(make init ARCH=amd64 OS=linux)
 	(make compile ARCH=amd64 OS=linux)
 
 build-windows:
 	@echo "Compilation for windows"
-	mkdir ${BINARY}/martine-${OS}-${ARCH}
+	(make init ARCH=amd64 OS=windows EXT=.exe)
 	(make compile ARCH=amd64 OS=windows EXT=.exe)
 
 build-darwin:
 	@echo "Compilation for macos"
-	mkdir ${BINARY}/martine-${OS}-${ARCH}
+	(make init ARCH=arm64 OS=darwin)
 	(make compile ARCH=amd64 OS=darwin)
 
 build-raspbian:
 	@echo "Compilation for raspberry pi Raspbian 64 bits"
-	mkdir ${BINARY}/martine-${OS}-${ARCH}
+	(make init ARCH=arm64 OS=linux)
 	(make compile ARCH=arm64 OS=linux)
 
 build-raspbian-i386:
 	@echo "Compilation for raspberry pi Raspbian 32 bits"
-	mkdir ${BINARY}/martine-${OS}-${ARCH}
+	(make init ARCH=arm OS=linux GOARM=5)
 	(make compile ARCH=arm OS=linux GOARM=5)
 
 build-windows-i386:
 	@echo "Compilation for windows 32bits"
-	mkdir ${BINARY}/martine-${OS}-${ARCH}
+	(make init ARCH=386 OS=windows  EXT=.exe)
 	(make compile ARCH=386 OS=windows  EXT=.exe)
 
 package-darwin:
+	(make init)
 	@echo "Compilation and packaging for darwin"
 	fyne package -os darwin -icon martine-logo.png -sourceDir ${SOURCEDIR}
+	mv martine.app ${BINARY}/martine-${OS}-${ARCH}/
 
 package-windows:
-	@echo "Compilation and packaging for darwin"
+	(make init)
+	@echo "Compilation and packaging for windows"
 	fyne package -os windows -icon martine-logo.png -sourceDir ${SOURCEDIR}
+	mv martine.app ${BINARY}/martine-${OS}-${ARCH}/
 
 package-linux:
-	@echo "Compilation and packaging for darwin"
+	(make init)
+	@echo "Compilation and packaging for linux"
 	fyne package -os linux -icon martine-logo.png -sourceDir ${SOURCEDIR}
+	mv martine.app ${BINARY}/martine-${OS}-${ARCH}/
 		
