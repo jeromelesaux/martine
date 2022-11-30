@@ -91,13 +91,13 @@ build-windows-i386:
 
 package-darwin:
 	@echo "Compilation and packaging for darwin"
-	fyne package -os darwin -icon martine-logo.png -sourceDir ./
+	fyne package -os darwin -icon martine-logo.png -sourceDir ${SOURCEDIR}
 
 package-windows:
 	@echo "Compilation and packaging for darwin"
-	fyne package -os windows -icon martine-logo.png -sourceDir ./
+	fyne package -os windows -icon martine-logo.png -sourceDir ${SOURCEDIR}
 
 package-linux:
 	@echo "Compilation and packaging for darwin"
-	fyne package -os linux -icon martine-logo.png -sourceDir ./
+	fyne package -os linux -icon martine-logo.png -sourceDir ${SOURCEDIR}
 		
