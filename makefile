@@ -55,12 +55,10 @@ init:
 	mkdir ${BINARY}/martine-${OS}-${ARCH}
 
 compile:
-	(make init)
 	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/martine${EXT} $(SOURCEDIR)/main.go $(SOURCEDIR)/process.go $(SOURCEDIR)/export_handler.go
 	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/prepare_delta${EXT} ./resources/formatter/delta/prepare_delta.go
 	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/format_sprite${EXT} ./resources/formatter/sprites/format_sprite.go
 	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/format_data${EXT} ./resources/formatter/data/format_data.go
-	(make archive)
 
 archive:
 	zip ${BINARY}/martine-$(appversion)-${OS}-${ARCH}.zip ${BINARY}/martine-${OS}-${ARCH}/* ./resources/*
@@ -69,31 +67,37 @@ build-linux:
 	@echo "Compilation for linux"
 	(make init ARCH=amd64 OS=linux)
 	(make compile ARCH=amd64 OS=linux)
+	(make archive ARCH=amd64 OS=linux)
 
 build-windows:
 	@echo "Compilation for windows"
 	(make init ARCH=amd64 OS=windows EXT=.exe)
 	(make compile ARCH=amd64 OS=windows EXT=.exe)
+	(make archive ARCH=amd64 OS=windows EXT=.exe)
 
 build-darwin:
 	@echo "Compilation for macos"
 	(make init ARCH=arm64 OS=darwin)
 	(make compile ARCH=amd64 OS=darwin)
+	(make archive ARCH=amd64 OS=darwin)
 
 build-raspbian:
 	@echo "Compilation for raspberry pi Raspbian 64 bits"
 	(make init ARCH=arm64 OS=linux)
 	(make compile ARCH=arm64 OS=linux)
+	(make archive  ARCH=arm64 OS=linux)
 
 build-raspbian-i386:
 	@echo "Compilation for raspberry pi Raspbian 32 bits"
 	(make init ARCH=arm OS=linux GOARM=5)
 	(make compile ARCH=arm OS=linux GOARM=5)
+	(make archive ARCH=arm OS=linux GOARM=5)
 
 build-windows-i386:
 	@echo "Compilation for windows 32bits"
 	(make init ARCH=386 OS=windows  EXT=.exe)
 	(make compile ARCH=386 OS=windows  EXT=.exe)
+	(make archive ARCH=386 OS=windows  EXT=.exe)
 
 package-darwin:
 	(make init)
