@@ -6,7 +6,7 @@ MV=mv
 SOURCEDIR=./cli
 SOURCES := $(shell find $(SOURCEDIR) -name '*.go')
 
-VERSION:=$(shell grep -m1 "appVersion" $(SOURCEDIR)/*.go | sed 's/[", ]//g' | cut -d= -f2)
+VERSION:=$(shell grep -m1 "AppVersion" $(SOURCEDIR)/*.go | sed 's/[", ]//g' | cut -d= -f2)
 suffix=$(shell grep -m1 "version" $(SOURCEDIR)/*.go | sed 's/[", ]//g' | cut -d= -f2 | sed 's/[0-9.]//g')
 snapshot=$(shell date +%FT%T)
 UNAME := $(shell uname)
