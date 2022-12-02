@@ -1,4 +1,4 @@
-package main
+package main_test
 
 import (
 	"os"
@@ -6,14 +6,12 @@ import (
 	"testing"
 )
 
-var (
-	//mask10000000 = 0xFF
-	//mask00000010 = 0x02
-	mask4 = 0x04
-)
+// mask10000000 = 0xFF
+// mask00000010 = 0x02
+var mask4 = 0x04
 
 func TestInit(t *testing.T) {
-	os.Mkdir("test", os.ModePerm)
+	os.Mkdir("../test", os.ModePerm)
 }
 
 func TestMainBit(t *testing.T) {
@@ -32,7 +30,7 @@ func TestMainBit(t *testing.T) {
 }
 
 func TestNormalScreenMode0(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/Batman-Neal-Adams.jpg", "-mode", "0", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/Batman-Neal-Adams.jpg", "-mode", "0", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -43,7 +41,7 @@ func TestNormalScreenMode0(t *testing.T) {
 }
 
 func TestNormalScreenMode1(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/Batman-Neal-Adams.jpg", "-mode", "1", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/Batman-Neal-Adams.jpg", "-mode", "1", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -54,7 +52,7 @@ func TestNormalScreenMode1(t *testing.T) {
 }
 
 func TestNormalScreenMode1Dsk(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/Batman-Neal-Adams.jpg", "-mode", "1", "-out", "test", "-dsk"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/Batman-Neal-Adams.jpg", "-mode", "1", "-out", "../test", "-dsk"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -63,8 +61,9 @@ func TestNormalScreenMode1Dsk(t *testing.T) {
 		t.Fatalf("Expected no error and gets :%v", err)
 	}
 }
+
 func TestNormalScreenMode2(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/Batman-Neal-Adams.jpg", "-mode", "2", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/Batman-Neal-Adams.jpg", "-mode", "2", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -75,7 +74,7 @@ func TestNormalScreenMode2(t *testing.T) {
 }
 
 func TestFullScreenMode0(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/Batman-Neal-Adams.jpg", "-mode", "0", "-fullscreen", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/Batman-Neal-Adams.jpg", "-mode", "0", "-fullscreen", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -86,7 +85,7 @@ func TestFullScreenMode0(t *testing.T) {
 }
 
 func TestFullScreenMode1(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/Batman-Neal-Adams.jpg", "-mode", "1", "-fullscreen", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/Batman-Neal-Adams.jpg", "-mode", "1", "-fullscreen", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -97,7 +96,7 @@ func TestFullScreenMode1(t *testing.T) {
 }
 
 func TestFullScreenMode2(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/Batman-Neal-Adams.jpg", "-mode", "2", "-fullscreen", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/Batman-Neal-Adams.jpg", "-mode", "2", "-fullscreen", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -106,8 +105,9 @@ func TestFullScreenMode2(t *testing.T) {
 		t.Fatalf("Expected no error and gets :%v", err)
 	}
 }
+
 func TestFullScreenPlusMode0(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/Batman-Neal-Adams.jpg", "-mode", "0", "-fullscreen", "-plus", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/Batman-Neal-Adams.jpg", "-mode", "0", "-fullscreen", "-plus", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -118,7 +118,7 @@ func TestFullScreenPlusMode0(t *testing.T) {
 }
 
 func TestFullScreenPlusMode1(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/Batman-Neal-Adams.jpg", "-mode", "1", "-fullscreen", "-plus", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/Batman-Neal-Adams.jpg", "-mode", "1", "-fullscreen", "-plus", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -129,7 +129,7 @@ func TestFullScreenPlusMode1(t *testing.T) {
 }
 
 func TestFullScreenPlusMode2(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/Batman-Neal-Adams.jpg", "-mode", "2", "-fullscreen", "-plus", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/Batman-Neal-Adams.jpg", "-mode", "2", "-fullscreen", "-plus", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -140,7 +140,7 @@ func TestFullScreenPlusMode2(t *testing.T) {
 }
 
 func TestSpriteMode0(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/rotate.png", "-mode", "0", "-width", "16", "-height", "16", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/rotate.png", "-mode", "0", "-width", "16", "-height", "16", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -151,7 +151,7 @@ func TestSpriteMode0(t *testing.T) {
 }
 
 func TestSpriteMode1(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/rotate.png", "-mode", "1", "-width", "16", "-height", "16", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/rotate.png", "-mode", "1", "-width", "16", "-height", "16", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -162,7 +162,7 @@ func TestSpriteMode1(t *testing.T) {
 }
 
 func TestSpriteMode2(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -173,7 +173,7 @@ func TestSpriteMode2(t *testing.T) {
 }
 
 func TestSpritePlusMode0(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/rotate.png", "-mode", "0", "-width", "16", "-height", "16", "-plus", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/rotate.png", "-mode", "0", "-width", "16", "-height", "16", "-plus", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -184,7 +184,7 @@ func TestSpritePlusMode0(t *testing.T) {
 }
 
 func TestSpritePlusMode1(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/rotate.png", "-mode", "1", "-width", "16", "-height", "16", "-plus", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/rotate.png", "-mode", "1", "-width", "16", "-height", "16", "-plus", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -195,7 +195,7 @@ func TestSpritePlusMode1(t *testing.T) {
 }
 
 func TestSpritePlusMode2(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-plus", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-plus", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -206,7 +206,7 @@ func TestSpritePlusMode2(t *testing.T) {
 }
 
 func TestRollRraMode0(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/rotate.png", "-mode", "0", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-rra", "1", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/rotate.png", "-mode", "0", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-rra", "1", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -217,7 +217,7 @@ func TestRollRraMode0(t *testing.T) {
 }
 
 func TestRollRraMode1(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/rotate.png", "-mode", "1", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-rra", "1", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/rotate.png", "-mode", "1", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-rra", "1", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -228,7 +228,7 @@ func TestRollRraMode1(t *testing.T) {
 }
 
 func TestRollRraMode2(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-rra", "1", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-rra", "1", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -239,7 +239,7 @@ func TestRollRraMode2(t *testing.T) {
 }
 
 func TestRollRLaMode0(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/rotate.png", "-mode", "0", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-rla", "1", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/rotate.png", "-mode", "0", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-rla", "1", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -250,7 +250,7 @@ func TestRollRLaMode0(t *testing.T) {
 }
 
 func TestRollRLaMode1(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/rotate.png", "-mode", "1", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-rla", "1", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/rotate.png", "-mode", "1", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-rla", "1", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -261,7 +261,7 @@ func TestRollRLaMode1(t *testing.T) {
 }
 
 func TestRollRLaMode2(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-rla", "1", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-rla", "1", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -272,7 +272,7 @@ func TestRollRLaMode2(t *testing.T) {
 }
 
 func TestRollKeephighMode0(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/rotate.png", "-mode", "0", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keephigh", "1", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/rotate.png", "-mode", "0", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keephigh", "1", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -283,7 +283,7 @@ func TestRollKeephighMode0(t *testing.T) {
 }
 
 func TestRollKeephighMode1(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/rotate.png", "-mode", "1", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keephigh", "1", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/rotate.png", "-mode", "1", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keephigh", "1", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -294,7 +294,7 @@ func TestRollKeephighMode1(t *testing.T) {
 }
 
 func TestRollKeephighMode2(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keephigh", "1", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keephigh", "1", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -305,7 +305,7 @@ func TestRollKeephighMode2(t *testing.T) {
 }
 
 func TestRollKeeplowMode0(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/rotate.png", "-mode", "0", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keeplow", "1", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/rotate.png", "-mode", "0", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keeplow", "1", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -316,7 +316,7 @@ func TestRollKeeplowMode0(t *testing.T) {
 }
 
 func TestRollKeeplowMode1(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/rotate.png", "-mode", "1", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keeplow", "1", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/rotate.png", "-mode", "1", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keeplow", "1", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -327,7 +327,7 @@ func TestRollKeeplowMode1(t *testing.T) {
 }
 
 func TestRollKeeplowMode2(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keeplow", "1", "-out", "test"}
+	args := []string{"run", "main.go", "process.go", "export_handler.go", "-in", "../samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keeplow", "1", "-out", "../test"}
 	cmd := exec.Command("go", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -338,5 +338,5 @@ func TestRollKeeplowMode2(t *testing.T) {
 }
 
 func TestEnded(t *testing.T) {
-	os.RemoveAll("test")
+	os.RemoveAll("../test")
 }
