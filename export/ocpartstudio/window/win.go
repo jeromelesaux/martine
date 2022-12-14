@@ -35,11 +35,17 @@ func RawWin(filePath string) ([]byte, error) {
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Win Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		_, err = fr.Seek(0, io.SeekStart)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if header.Checksum != header.ComputedChecksum16() {
 		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Win Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		_, err = fr.Seek(0, io.SeekStart)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	bf, err := ioutil.ReadAll(fr)
@@ -65,11 +71,17 @@ func OpenWin(filePath string) (*OcpWinFooter, error) {
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		_, err := fr.Seek(0, io.SeekStart)
+		if err != nil {
+			return &OcpWinFooter{}, err
+		}
 	}
 	if header.Checksum != header.ComputedChecksum16() {
 		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		_, err := fr.Seek(0, io.SeekStart)
+		if err != nil {
+			return &OcpWinFooter{}, err
+		}
 	}
 
 	ocpWinFooter := &OcpWinFooter{}
@@ -98,7 +110,7 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, dont
 
 	data, _ = compression.Compress(data, cfg.Compression)
 
-	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
+	// fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 	fmt.Fprintf(os.Stderr, "Data length %d\n", binary.Size(data))
 	fmt.Fprintf(os.Stderr, "Footer length %d\n", binary.Size(win))
 	osFilename := cfg.Fullpath(".WIN")

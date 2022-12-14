@@ -10,9 +10,7 @@ import (
 	"github.com/jeromelesaux/martine/config"
 )
 
-var (
-	ErrorNoHostDefined = errors.New("no host defined")
-)
+var ErrorNoHostDefined = errors.New("no host defined")
 
 func ImportInM4(cfg *config.MartineConfig) error {
 	if cfg.M4Host == "" {
@@ -24,7 +22,10 @@ func ImportInM4(cfg *config.MartineConfig) error {
 	}
 
 	client := m4.M4Client{IPClient: cfg.M4Host}
-	client.ResetCpc()
+	err := client.ResetCpc()
+	if err != nil {
+		return err
+	}
 	if !cfg.Sna {
 		fmt.Fprintf(os.Stdout, "Attempt to create remote directory (%s) to host (%s)\n", cfg.M4RemotePath, client.IPClient)
 		if err := client.MakeDirectory(cfg.M4RemotePath); err != nil {
@@ -70,8 +71,8 @@ func ImportInM4(cfg *config.MartineConfig) error {
 
 	if cfg.M4Autoexec {
 		if cfg.Sna {
-			client.Run(cfg.M4RemotePath + "test.sna")
-			return nil
+			err := client.Run(cfg.M4RemotePath + "test.sna")
+			return err
 		}
 		p, err := client.Ls(cfg.M4RemotePath)
 		if err != nil {
@@ -91,11 +92,17 @@ func ImportInM4(cfg *config.MartineConfig) error {
 		}
 		if cfg.Scr {
 			fmt.Fprintf(os.Stdout, "Execute basic file (%s)\n", "/"+cfg.M4RemotePath+"/"+basicFile)
-			client.Run("/" + cfg.M4RemotePath + "/" + basicFile)
+			err := client.Run("/" + cfg.M4RemotePath + "/" + basicFile)
+			if err != nil {
+				return err
+			}
 		} else {
 			if cfg.Overscan {
 				fmt.Fprintf(os.Stdout, "Execute overscan file (%s)\n", "/"+cfg.M4RemotePath+"/"+overscanFile)
-				client.Run("/" + cfg.M4RemotePath + "/" + overscanFile)
+				err := client.Run("/" + cfg.M4RemotePath + "/" + overscanFile)
+				if err != nil {
+					return err
+				}
 			} else {
 				fmt.Fprintf(os.Stdout, "Too many importants files, cannot choice.\n")
 			}

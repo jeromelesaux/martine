@@ -27,11 +27,17 @@ func TestMotifs(t *testing.T) {
 	var p color.Palette = constants.CpcOldPalette
 	out := image.Resize(in, constants.Size{Width: 320, Height: 200}, imaging.NearestNeighbor)
 	_, out = image.DowngradingWithPalette(out, p)
-	png.Png("../test/motifs/orig.png", out)
+	err = png.Png("../test/motifs/orig.png", out)
+	if err != nil {
+		t.Fatal(err)
+	}
 	a := transformation.AnalyzeTilesBoard(out, constants.Size{Width: 4, Height: 4})
 	threshold := 27
 	board := a.ReduceTilesNumber(float64(threshold))
 	fmt.Printf("number sprites inital [%d] [%d] with threshold :%d\n", len(a.BoardTiles), len(board), threshold)
-	//a.SaveBoardTile("../test/motifs/", board)
-	a.Image("../test/motifs/new.png", board, a.ImageSize)
+	// a.SaveBoardTile("../test/motifs/", board)
+	err = a.Image("../test/motifs/new.png", board, a.ImageSize)
+	if err != nil {
+		t.Fatal(err)
+	}
 }

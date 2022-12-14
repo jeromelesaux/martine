@@ -151,11 +151,17 @@ func RawScr(filePath string) ([]byte, error) {
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot read the RawScr Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		_, err := fr.Seek(0, io.SeekStart)
+		if err != nil {
+			return []byte{}, err
+		}
 	}
 	if header.Checksum != header.ComputedChecksum16() {
 		fmt.Fprintf(os.Stderr, "Cannot read the RawScr Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		_, err := fr.Seek(0, io.SeekStart)
+		if err != nil {
+			return []byte{}, err
+		}
 	}
 
 	bf, err := ioutil.ReadAll(fr)
@@ -193,7 +199,7 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cfg *c
 		offset := 1
 		for i := 0; i < len(p); i++ {
 			cp := constants.NewCpcPlusColor(p[i])
-			//fmt.Fprintf(os.Stderr, "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
+			// fmt.Fprintf(os.Stderr, "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
 			v := cp.Bytes()
 			data[0x17d0+offset] = v[0]
 			offset++
@@ -288,11 +294,17 @@ func OpenPal(filePath string) (color.Palette, *OcpPalette, error) {
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		_, err := fr.Seek(0, io.SeekStart)
+		if err != nil {
+			return color.Palette{}, &OcpPalette{}, err
+		}
 	}
 	if header.Checksum != header.ComputedChecksum16() {
 		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		_, err := fr.Seek(0, io.SeekStart)
+		if err != nil {
+			return color.Palette{}, &OcpPalette{}, err
+		}
 	}
 
 	ocpPalette := &OcpPalette{}

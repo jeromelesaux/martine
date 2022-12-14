@@ -23,6 +23,12 @@ func TestBoardSprite(t *testing.T) {
 	a := transformation.AnalyzeTilesBoard(im, constants.Size{Width: 16, Height: 16})
 	t.Log(a.String())
 	fmt.Println(a.String())
-	a.SaveSchema("alexkidd_board.png")
-	a.SaveTilemap("alexkidd.map")
+	err = a.SaveSchema("alexkidd_board.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = a.SaveTilemap("alexkidd.map")
+	if err != nil {
+		t.Fatal(err)
+	}
 }

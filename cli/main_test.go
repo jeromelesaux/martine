@@ -11,7 +11,10 @@ import (
 var mask4 = 0x04
 
 func TestInit(t *testing.T) {
-	os.Mkdir("../test", os.ModePerm)
+	err := os.Mkdir("../test", os.ModePerm)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestMainBit(t *testing.T) {

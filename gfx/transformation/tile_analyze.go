@@ -143,6 +143,7 @@ func (a *AnalyzeBoard) Sort() []BoardTile {
 	}
 	return sorted
 }
+
 func (a *AnalyzeBoard) String() string {
 	out := a.TileSize.ToString()
 	for _, v := range a.BoardTiles {
@@ -298,7 +299,7 @@ func AnalyzeTilesBoard(im image.Image, size constants.Size) *AnalyzeBoard {
 		for y := size.Height; y < im.Bounds().Max.Y; y += size.Height {
 			sprt, err := ExtractTile(im, size, x, y)
 			if err != nil {
-				//fmt.Fprintf(os.Stderr, "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
+				// fmt.Fprintf(os.Stderr, "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
 				break
 			}
 			index := board.Analyse(sprt, x, y)
@@ -396,13 +397,19 @@ func (a *AnalyzeBoard) SaveFlatFile(folderpath string, palette color.Palette, mo
 		}
 	}
 	spriteFolder := filepath.Join(folderpath, "sprites")
-	os.Mkdir(spriteFolder, os.ModePerm)
+	err := os.Mkdir(spriteFolder, os.ModePerm)
+	if err != nil {
+		return err
+	}
 	return amsdos.SaveOSFile(filepath.Join(spriteFolder, "tiles.bin"), flatFile)
 }
 
 func (a *AnalyzeBoard) SaveSprites(folderpath string, palette color.Palette, mode uint8, cfg *config.MartineConfig) error {
 	spriteFolder := filepath.Join(folderpath, "sprites")
-	os.Mkdir(spriteFolder, os.ModePerm)
+	err := os.Mkdir(spriteFolder, os.ModePerm)
+	if err != nil {
+		return err
+	}
 	for index, v := range a.GetUniqTiles() {
 		sprt := v
 		im := image.NewNRGBA(
@@ -496,9 +503,15 @@ func (a *AnalyzeBoard) SaveTilemap(filePath string) error {
 	defer f.Close()
 	for _, v := range a.TileMap {
 		for _, val := range v {
-			f.WriteString(fmt.Sprintf("%.2d", val) + ",")
+			_, err := f.WriteString(fmt.Sprintf("%.2d", val) + ",")
+			if err != nil {
+				return err
+			}
 		}
-		f.WriteString("\n")
+		_, err := f.WriteString("\n")
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -514,7 +527,6 @@ func computeTileDistance(t0, t1 *Tile) float64 {
 }
 
 func (a *AnalyzeBoard) ReduceTilesNumber(threshold float64) []BoardTile {
-
 	newBoard := make([]BoardTile, 0)
 	deleted := make([]int, 0)
 	for index, b := range a.BoardTiles {

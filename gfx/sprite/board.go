@@ -15,8 +15,8 @@ func SplitBoardToSprite(
 	row, col int,
 	mode uint8,
 	isSpriteHard bool,
-	size constants.Size) ([][][]byte, [][]*image.NRGBA, error) {
-
+	size constants.Size,
+) ([][][]byte, [][]*image.NRGBA, error) {
 	results := make([][][]byte, 0)
 	spriteWidth := im.Bounds().Max.X / col
 	spriteHeight := im.Bounds().Max.Y / row

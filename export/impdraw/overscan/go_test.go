@@ -24,8 +24,14 @@ func TestSaveGo(t *testing.T) {
 	cfg.Dsk = true
 	cfg.CpcPlus = true
 	cfg.Size = constants.NewSizeMode(0, true)
-	gfx.ApplyOneImageAndExport(img, cfg, cfg.InputPath, filepath.Dir(fileInput), 0, 0)
+	err := gfx.ApplyOneImageAndExport(img, cfg, cfg.InputPath, filepath.Dir(fileInput), 0, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
 	cfg.ExportAsGoFile = false
-	//gfx.ApplyOneImageAndExport(img, cfg, cfg.InputPath, filepath.Dir(fileInput), 0, 0)
-	diskimage.ImportInDsk(filepath.Dir(fileInput), cfg)
+	// gfx.ApplyOneImageAndExport(img, cfg, cfg.InputPath, filepath.Dir(fileInput), 0, 0)
+	err = diskimage.ImportInDsk(filepath.Dir(fileInput), cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
 }

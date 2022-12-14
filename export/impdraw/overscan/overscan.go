@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"image/color"
 	"io"
-
 	"os"
 
 	"github.com/jeromelesaux/m4client/cpc"
@@ -26,11 +25,19 @@ func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot read the Overscan Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		_, err := fr.Seek(0, io.SeekStart)
+		if err != nil {
+			return color.Palette{}, 0xff, err
+		}
+
 	}
 	if header.Checksum != header.ComputedChecksum16() {
 		fmt.Fprintf(os.Stderr, "Cannot read the Overscan Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		_, err := fr.Seek(0, io.SeekStart)
+		if err != nil {
+			return color.Palette{}, 0xff, err
+		}
+
 	}
 	palette := color.Palette{}
 	b, err := io.ReadAll(fr)
@@ -80,7 +87,6 @@ func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 				fmt.Fprintf(os.Stderr, "Error while retreiving color from hardware value %X error %v\n", v, err)
 				palette = append(palette, color.Black)
 			} else {
-
 				palette = append(palette, c)
 			}
 		}
@@ -109,7 +115,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 
 	copy(o, OverscanBoot[:])
 	copy(o[0x200-0x170:], data[:])
-	//o[(0x1ac-0x170)] = 0 // cpc old
+	// o[(0x1ac-0x170)] = 0 // cpc old
 	switch cfg.CpcPlus {
 	case true:
 		o[(0x1ac - 0x170)] = 1
@@ -129,7 +135,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 		offset := 0
 		for i := 0; i < len(p); i++ {
 			cp := constants.NewCpcPlusColor(p[i])
-			//fmt.Fprintf(os.Stderr, "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
+			// fmt.Fprintf(os.Stderr, "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
 			v := cp.Bytes()
 			copy(o[(0x801-0x170)+offset:], v[:])
 			offset += 2
@@ -172,11 +178,17 @@ func RawOverscan(filePath string) ([]byte, error) {
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot read the Overscan Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		_, err := fr.Seek(0, io.SeekStart)
+		if err != nil {
+			return []byte{}, err
+		}
 	}
 	if header.Checksum != header.ComputedChecksum16() {
 		fmt.Fprintf(os.Stderr, "Cannot read the Overscan Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		_, err := fr.Seek(0, io.SeekStart)
+		if err != nil {
+			return []byte{}, err
+		}
 	}
 	bf, err := io.ReadAll(fr)
 	if err != nil {
@@ -196,7 +208,7 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 	osFilepath := cfg.AmsdosFullPath(filePath, ".SCR")
 	fmt.Fprintf(os.Stdout, "Saving overscan file (%s)\n", osFilepath)
 
-	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
+	// fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 
 	var overscanTemplate []byte
 	if cfg.CpcPlus {
@@ -206,7 +218,7 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 	}
 	copy(o[:], overscanTemplate[:])
 	copy(o[0x200-0x170:], data[:]) //  - 0x170  to have the file offset
-	//o[(0x1ac-0x170)] = 0 // cpc old
+	// o[(0x1ac-0x170)] = 0 // cpc old
 	switch cfg.CpcPlus {
 	case true:
 		o[(0x1ac - 0x170)] = 1
@@ -248,7 +260,7 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 		offset := 0
 		for i := 0; i < len(p); i++ {
 			cp := constants.NewCpcPlusColor(p[i])
-			//fmt.Fprintf(os.Stderr, "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
+			// fmt.Fprintf(os.Stderr, "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
 			v := cp.Bytes()
 			copy(o[(0x801-0x170)+offset:], v[:])
 			offset += 2

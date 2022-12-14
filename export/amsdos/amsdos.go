@@ -25,10 +25,12 @@ func AmsdosFilename(inputPath, ext string) string {
 
 func SaveAmsdosFile(filename, extension string, data []byte, fileType, user byte, loadingAddress, executionAddress uint16) error {
 	filesize := len(data)
-	header := cpc.CpcHead{Type: fileType, User: user, Address: loadingAddress, Exec: executionAddress,
+	header := cpc.CpcHead{
+		Type: fileType, User: user, Address: loadingAddress, Exec: executionAddress,
 		Size:        uint16(filesize),
 		Size2:       uint16(filesize),
-		LogicalSize: uint16(filesize)}
+		LogicalSize: uint16(filesize),
+	}
 	cpcFilename := AmsdosFilename(filename, extension)
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
@@ -39,8 +41,14 @@ func SaveAmsdosFile(filename, extension string, data []byte, fileType, user byte
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", filename, err)
 		return err
 	}
-	binary.Write(fw, binary.LittleEndian, header)
-	binary.Write(fw, binary.LittleEndian, data)
+	err = binary.Write(fw, binary.LittleEndian, header)
+	if err != nil {
+		return err
+	}
+	err = binary.Write(fw, binary.LittleEndian, data)
+	if err != nil {
+		return err
+	}
 
 	return fw.Close()
 }
@@ -51,7 +59,10 @@ func SaveOSFile(filename string, data []byte) error {
 		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", filename, err)
 		return err
 	}
-	binary.Write(fw, binary.LittleEndian, data)
+	err = binary.Write(fw, binary.LittleEndian, data)
+	if err != nil {
+		return err
+	}
 
 	return fw.Close()
 }

@@ -124,7 +124,12 @@ func main() {
 			os.Exit(-1)
 		}
 		defer f.Close()
-		f.WriteString(out)
+		_, err = f.WriteString(out)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error while writing file (%s) error %v\n", *outfile, err)
+			os.Exit(-1)
+		}
+
 	} else {
 		fmt.Println(out)
 	}

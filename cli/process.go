@@ -177,7 +177,10 @@ func (p *Process) Apply() {
 	*egx1 = p.Egx1
 	*egx2 = p.Egx2
 	for i := 0; i < len(p.DeltaFile); i++ {
-		deltaFiles.Set(p.DeltaFile[i])
+		err := deltaFiles.Set(p.DeltaFile[i])
+		if err != nil {
+			continue
+		}
 	}
 }
 

@@ -150,7 +150,6 @@ func printVersion() {
 */
 
 func main() {
-
 	var filename, extension string
 	var screenMode uint8
 	var in image.Image
@@ -171,7 +170,11 @@ func main() {
 	if len(flag.Args()) > 0 {
 		firstArg := flag.Args()[0]
 		if firstArg[0] != '-' {
-			flag.Set("i", firstArg)
+			err := flag.Set("i", firstArg)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error :%v\n", err)
+				os.Exit(-1)
+			}
 			for i := 1; i < len(flag.Args()); i += 2 {
 				name := strings.Replace(flag.Arg(i), "-", "", 1)
 				var value string
@@ -185,7 +188,11 @@ func main() {
 				} else {
 					value = "true"
 				}
-				flag.Set(name, value)
+				err = flag.Set(name, value)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error :%v\n", err)
+					os.Exit(-1)
+				}
 			}
 			flag.Parse()
 		}
@@ -392,13 +399,16 @@ func main() {
 				fmt.Fprintf(os.Stderr, "Cannot decode the image %s error %v", *picturePath, err)
 				os.Exit(-2)
 			}
-			gfx.ApplyOneImageAndExport(in,
+			err = gfx.ApplyOneImageAndExport(in,
 				cfg,
 				filepath.Base(v),
 				v,
 				*mode,
 				screenMode)
-
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Cannot apply the image %s error %v", *picturePath, err)
+				os.Exit(-2)
+			}
 			spritePath := cfg.AmsdosFullPath(v, ".WIN")
 			data, err := window.RawWin(spritePath)
 			if err != nil {

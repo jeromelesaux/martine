@@ -30,7 +30,7 @@ var (
 
 func DeltaPackingMemory(images []image.Image, cfg *config.MartineConfig, initialAddress uint16, mode uint8) ([]*transformation.DeltaCollection, [][]byte, color.Palette, error) {
 	var isSprite bool = true
-	var maxImages = 22
+	maxImages := 22
 	var pad int = 1
 	var err error
 	var palette color.Palette
@@ -100,8 +100,8 @@ func DeltaPackingMemory(images []image.Image, cfg *config.MartineConfig, initial
 }
 
 func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress uint16, mode uint8, exportVersion DeltaExportFormat) error {
-	var isSprite = true
-	var maxImages = 22
+	isSprite := true
+	maxImages := 22
 	if !cfg.CustomDimension && !cfg.SpriteHard {
 		isSprite = false
 	}
@@ -157,8 +157,10 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 			if err != nil {
 				return err
 			}
-			png.Png(cfg.OutputPath+fmt.Sprintf("/%.2d.png", i), in)
-
+			err = png.Png(cfg.OutputPath+fmt.Sprintf("/%.2d.png", i), in)
+			if err != nil {
+				return err
+			}
 			rawImages = append(rawImages, raw)
 			fmt.Printf("Image [%d] proceed\n", i)
 		}
@@ -236,7 +238,7 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 	var dataCode string
 	var deltaIndex []string
 	var code string
-	var nbDelta = len(delta)
+	nbDelta := len(delta)
 	if !isSprite {
 		if cfg.Compression != -1 {
 
@@ -370,8 +372,8 @@ func exportDeltaAnimate(
 	initialAddress uint16,
 	mode uint8,
 	filename string,
-	exportVersion DeltaExportFormat) error {
-
+	exportVersion DeltaExportFormat,
+) error {
 	var sourceCode string = deltaCodeDelta
 	var dataCode string
 	var deltaIndex []string
@@ -1357,6 +1359,7 @@ nblb dw 0
 nbdeltas dw 0
 ;----------------------------
 `
+
 var deltaScreenCodeDelta = `
 ;--- dimensions du sprite ----
 large equ $LARGE$

@@ -45,7 +45,10 @@ func ImportInDsk(filePath string, cfg *config.MartineConfig) error {
 		floppy = dsk.FormatDsk(9, 40, 1, 0, dsk.DataFormat)
 	}
 
-	dsk.WriteDsk(dskFullpath, floppy)
+	err := dsk.WriteDsk(dskFullpath, floppy)
+	if err != nil {
+		return err
+	}
 	for _, v := range cfg.DskFiles {
 		if filepath.Ext(v) == ".TXT" {
 			if err := floppy.PutFile(v, dsk.MODE_ASCII, 0, 0, 0, false, false); err != nil {

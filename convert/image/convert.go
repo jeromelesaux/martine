@@ -20,7 +20,7 @@ import (
 var ErrorCannotDowngradePalette = errors.New("cannot Downgrade colors palette")
 
 func Resize(in image.Image, size constants.Size, algo imaging.ResampleFilter) *image.NRGBA {
-	//fmt.Fprintf(os.Stdout, "* Step 1 * Resizing image to width %d pixels heigh %d\n", size.Width, size.Height)
+	// fmt.Fprintf(os.Stdout, "* Step 1 * Resizing image to width %d pixels heigh %d\n", size.Width, size.Height)
 	return imaging.Resize(in, size.Width, size.Height, algo)
 }
 
@@ -203,7 +203,7 @@ func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (c
 		fmt.Fprintf(os.Stderr, "Downgraded palette size (%d) is greater than the available colors in this mode (%d)\n", len(p), size.ColorsAvailable)
 		fmt.Fprintf(os.Stderr, "Check color usage in image.\n")
 		colorUsage := computePaletteUsage(out, p)
-		//fmt.Println(colorUsage)
+		// fmt.Println(colorUsage)
 		// feed sort palette colors structure
 		paletteToReduce := constants.NewPaletteReducer()
 
@@ -220,7 +220,7 @@ func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (c
 }
 
 func computePaletteUsage(in *image.NRGBA, p color.Palette) map[color.Color]int {
-	usage := make(map[color.Color]int, 0)
+	usage := make(map[color.Color]int)
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
 			c := in.At(x, y)
@@ -231,7 +231,7 @@ func computePaletteUsage(in *image.NRGBA, p color.Palette) map[color.Color]int {
 }
 
 func downgradeWithPalette(in *image.NRGBA, p color.Palette) *image.NRGBA {
-	cache := make(map[color.Color]color.Color, 0)
+	cache := make(map[color.Color]color.Color)
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
 			c := in.At(x, y)
@@ -253,7 +253,7 @@ func ExtractPalette(in *image.NRGBA, isCpcPlus bool, nbColors int) color.Palette
 		Key   color.Color
 		Value int
 	}
-	cache := make(map[color.Color]int, 0)
+	cache := make(map[color.Color]int)
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
 			c := in.At(x, y)
@@ -291,7 +291,7 @@ func ExtractPalette(in *image.NRGBA, isCpcPlus bool, nbColors int) color.Palette
 
 func PaletteUsed(in *image.NRGBA, isCpcPlus bool) color.Palette {
 	fmt.Fprintf(os.Stdout, "Define the Palette use in image.\n")
-	cache := make(map[color.Color]color.Color, 0)
+	cache := make(map[color.Color]color.Color)
 	p := color.Palette{}
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
@@ -318,7 +318,7 @@ func PaletteUsed(in *image.NRGBA, isCpcPlus bool) color.Palette {
 
 func downgrade(in *image.NRGBA, isCpcPlus bool) (color.Palette, *image.NRGBA) {
 	fmt.Fprintf(os.Stdout, "Plus palette :%d\n", len(constants.CpcPlusPalette))
-	cache := make(map[color.Color]color.Color, 0)
+	cache := make(map[color.Color]color.Color)
 	p := color.Palette{}
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
@@ -381,11 +381,15 @@ func SplitImage(i image.Image) (*image.NRGBA, *image.NRGBA, error) {
 	if err != nil {
 		return nil, nil, err
 	}
+
 	image2, err := cutter.Crop(i, cutter.Config{
 		Width:  width,
 		Height: height,
 		Anchor: image.Point{X: 0, Y: height},
 	})
+	if err != nil {
+		return nil, nil, err
+	}
 
 	b := image1.Bounds()
 	raw1 := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
@@ -396,11 +400,22 @@ func SplitImage(i image.Image) (*image.NRGBA, *image.NRGBA, error) {
 	draw.Draw(raw2, raw2.Bounds(), image2, b.Min, draw.Src)
 
 	f, _ := os.Create("imageup.png")
-	png.Encode(f, image1)
+	err = png.Encode(f, image1)
+	if err != nil {
+		return raw1, raw2, err
+	}
+
 	f.Close()
 
-	f2, _ := os.Create("imagedown.png")
-	png.Encode(f2, image2)
+	f2, err := os.Create("imagedown.png")
+	if err != nil {
+		return raw1, raw2, err
+	}
+
+	err = png.Encode(f2, image2)
+	if err != nil {
+		return raw1, raw2, err
+	}
 	f2.Close()
 	return raw1, raw2, err
 }

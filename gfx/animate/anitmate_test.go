@@ -22,7 +22,10 @@ func TestAnimate(t *testing.T) {
 	var screenMode uint8 = 0
 	fs := []string{"/Users/jeromelesaux/Downloads/bomberman.gif"}
 
-	Animation(fs, screenMode, e)
+	err := Animation(fs, screenMode, e)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestDeltaMotif(t *testing.T) {
@@ -66,7 +69,10 @@ func TestMergeGifImages(t *testing.T) {
 	imgRect := image.Rectangle{Min: image.Point{X: 0, Y: 0}, Max: image.Point{X: gifs.Config.Width, Y: gifs.Config.Height}}
 	origImg := image.NewRGBA(imgRect)
 	draw.Draw(origImg, gifs.Image[0].Bounds(), gifs.Image[0], gifs.Image[0].Bounds().Min, 0)
-	savePng("origin.png", origImg)
+	err = savePng("origin.png", origImg)
+	if err != nil {
+		t.Fatal(err)
+	}
 	previousImg := origImg
 
 	for i := 1; i < len(gifs.Image); i++ {
@@ -75,7 +81,10 @@ func TestMergeGifImages(t *testing.T) {
 		currImg := gifs.Image[i]
 		draw.Draw(img, currImg.Bounds(), currImg, currImg.Bounds().Min, draw.Over)
 		filename := fmt.Sprintf("origin-%.2d.png", i)
-		savePng(filename, img)
+		err = savePng(filename, img)
+		if err != nil {
+			t.Fatal(err)
+		}
 		previousImg = img
 	}
 	t.Log(gifs)

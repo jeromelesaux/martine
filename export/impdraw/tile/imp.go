@@ -22,7 +22,6 @@ type ImpFooter struct {
 }
 
 func OpenImp(filePath string, mode int) (*ImpFooter, error) {
-
 	footer := &ImpFooter{}
 	fr, err := os.Open(filePath)
 	if err != nil {
@@ -32,14 +31,23 @@ func OpenImp(filePath string, mode int) (*ImpFooter, error) {
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot read the Imp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		_, err := fr.Seek(0, io.SeekStart)
+		if err != nil {
+			return footer, err
+		}
 	}
 	if header.Checksum != header.ComputedChecksum16() {
 		fmt.Fprintf(os.Stderr, "Cannot read the Imp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(-3, io.SeekEnd)
+		_, err := fr.Seek(-3, io.SeekEnd)
+		if err != nil {
+			return footer, err
+		}
 	} else {
 		fmt.Fprintf(os.Stdout, "LogicalSize=%d\n", header.LogicalSize)
 		_, err = fr.Seek(0x80+int64(header.LogicalSize)-3, io.SeekStart)
+		if err != nil {
+			return footer, err
+		}
 	}
 
 	if err != nil {
@@ -75,11 +83,17 @@ func RawImp(filePath string) ([]byte, error) {
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot read the Imp Win Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		_, err := fr.Seek(0, io.SeekStart)
+		if err != nil {
+			return []byte{}, err
+		}
 	}
 	if header.Checksum != header.ComputedChecksum16() {
 		fmt.Fprintf(os.Stderr, "Cannot read the Imp Win Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		_, err := fr.Seek(0, io.SeekStart)
+		if err != nil {
+			return []byte{}, err
+		}
 	}
 
 	bf, err := ioutil.ReadAll(fr)
@@ -134,7 +148,6 @@ func Imp(sprites []byte, nbFrames, width, height, mode uint, filename string, ex
 }
 
 func TileMap(data []byte, filename string, export *config.MartineConfig) error {
-
 	output := make([]byte, 0x4000)
 	copy(output[0:], data[:])
 

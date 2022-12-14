@@ -15,7 +15,10 @@ import (
 )
 
 func TestOpenGif(t *testing.T) {
-	os.Mkdir("tests", os.ModePerm)
+	err := os.Mkdir("tests", os.ModePerm)
+	if err != nil {
+		t.Fatal(err)
+	}
 	fr, err := os.Open("../../samples/coke.gif")
 	if err != nil {
 		t.Fatal(err)
@@ -53,7 +56,6 @@ func TestInternalDelta(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 }
 
 func TestHSPSimpleNodes(t *testing.T) {
@@ -73,7 +75,7 @@ func TestHSPSimpleNodes(t *testing.T) {
 	c.Add(254, 0x4100)
 	optim := NewZ80HspNode(0, 0, true, NoneRegister, nil)
 	for _, v := range c.ItemsSortByByte() {
-		var already = false
+		already := false
 		reg := optim.NextRegister()
 		for _, offset := range v.Offsets {
 			node := NewZ80HspNode(v.Byte, offset, already, reg, nil)

@@ -24,7 +24,7 @@ func (f *stringSlice) Set(value string) error {
 	return nil
 }
 
-//var deltaFiles stringSlice
+// var deltaFiles stringSlice
 var (
 	//	sprites = flag.String("sprites", "", "sprites json path")
 	outfile = flag.String("out", "", "output filepath to store data")
@@ -103,7 +103,11 @@ func main() {
 			os.Exit(-1)
 		}
 		defer f.Close()
-		f.WriteString(out)
+		_, err = f.WriteString(out)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error while writing in file (%s) error %v\n", *outfile, err)
+			os.Exit(-1)
+		}
 	} else {
 		fmt.Println(out)
 	}

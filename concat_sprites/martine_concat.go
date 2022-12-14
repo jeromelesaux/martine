@@ -47,7 +47,11 @@ func displaySprite(filePath string, out *os.File) {
 	base := filepath.Base(filePath)
 	ext := filepath.Ext(base)
 	spriteName := strings.Replace(base, ext, "", 1)
-	out.Write([]byte(fmt.Sprintf("%s\n", strings.ToLower(spriteName))))
+	_, err = out.Write([]byte(fmt.Sprintf("%s\n", strings.ToLower(spriteName))))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while writing : %v\n", err)
+		return
+	}
 	scanner := bufio.NewScanner(f)
 
 	scanner.Scan() // remove amsdos header
@@ -61,8 +65,11 @@ func displaySprite(filePath string, out *os.File) {
 		case '.':
 			continue
 		default:
-			out.Write([]byte(fmt.Sprintf("%s\n", in)))
-
+			_, err = out.Write([]byte(fmt.Sprintf("%s\n", in)))
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error while writing : %v\n", err)
+				return
+			}
 		}
 
 	}

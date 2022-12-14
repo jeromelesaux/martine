@@ -2,8 +2,9 @@ package lz4
 
 import (
 	"bytes"
-	"github.com/pierrec/lz4"
 	"io"
+
+	"github.com/pierrec/lz4"
 )
 
 func Encode(dst, src []byte) ([]byte, error) {
@@ -17,6 +18,5 @@ func Encode(dst, src []byte) ([]byte, error) {
 		return nil, err
 	}
 	err = zw.Close()
-	dst = zout.Bytes()
-	return dst, err
+	return zout.Bytes(), err
 }

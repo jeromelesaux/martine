@@ -182,7 +182,7 @@ func (me *ImageMenu) NewImportButton(dialogSize fyne.Size, modeSelection *widget
 				me.OriginalImage = *canvas.NewImageFromImage(img)
 				me.OriginalImage.FillMode = canvas.ImageFillContain
 			} else {
-				//loading classical screen
+				// loading classical screen
 				if len(me.Palette) == 0 {
 					dialog.ShowError(errors.New("palette is empty,  please import palette first, or select fullscreen option to open a fullscreen option"), win)
 					return

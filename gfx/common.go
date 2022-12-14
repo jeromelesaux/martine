@@ -28,7 +28,8 @@ func DoDithering(in *image.NRGBA,
 	ditheringMatrix [][]float32,
 	ditheringMultiplier float32,
 	isCpcPlus bool,
-	size constants.Size) (*image.NRGBA, color.Palette) {
+	size constants.Size,
+) (*image.NRGBA, color.Palette) {
 	if ditheringAlgo != -1 {
 		switch ditheringType {
 		case constants.ErrorDiffusionDither:
@@ -69,7 +70,8 @@ func DoTransformation(in *image.NRGBA,
 	rotation3DY0,
 	rotation3DType int,
 	resizingAlgo imaging.ResampleFilter,
-	size constants.Size) ([]*image.NRGBA, error) {
+	size constants.Size,
+) ([]*image.NRGBA, error) {
 	var err error
 
 	var images []*image.NRGBA
@@ -107,8 +109,8 @@ func ApplyOneImageAndExport(in image.Image,
 	cfg *config.MartineConfig,
 	filename, picturePath string,
 	mode int,
-	screenMode uint8) error {
-
+	screenMode uint8,
+) error {
 	var palette color.Palette
 	var newPalette color.Palette
 	var downgraded *image.NRGBA
@@ -214,7 +216,6 @@ func ApplyOneImageAndExport(in image.Image,
 	if err != nil {
 		os.Exit(-2)
 	} else {
-
 		for indice := 0; indice < cfg.RollIteration; indice++ {
 			img := images[indice]
 			newFilename := cfg.OsFullPath(filename, fmt.Sprintf("%.2d", indice)+".png")
@@ -228,18 +229,27 @@ func ApplyOneImageAndExport(in image.Image,
 	}
 
 	if !cfg.CustomDimension && !cfg.SpriteHard {
-		Transform(downgraded, newPalette, cfg.Size, picturePath, cfg)
+		err = Transform(downgraded, newPalette, cfg.Size, picturePath, cfg)
+		if err != nil {
+			return err
+		}
 	} else {
 		if cfg.ZigZag {
 			// prepare zigzag transformation
 			downgraded = transformation.Zigzag(downgraded)
 		}
 		if !cfg.SpriteHard {
-			//fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
-			sprite.ToSpriteAndExport(downgraded, newPalette, cfg.Size, screenMode, filename, false, cfg)
+			// fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
+			err = sprite.ToSpriteAndExport(downgraded, newPalette, cfg.Size, screenMode, filename, false, cfg)
+			if err != nil {
+				return err
+			}
 		} else {
-			//fmt.Fprintf(os.Stdout, "Transform image in sprite hard.\n")
-			spritehard.ToSpriteHardAndExport(downgraded, newPalette, cfg.Size, screenMode, filename, cfg)
+			// fmt.Fprintf(os.Stdout, "Transform image in sprite hard.\n")
+			err = spritehard.ToSpriteHardAndExport(downgraded, newPalette, cfg.Size, screenMode, filename, cfg)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return err
@@ -249,8 +259,8 @@ func ApplyOneImage(in image.Image,
 	cfg *config.MartineConfig,
 	mode int,
 	palette color.Palette,
-	screenMode uint8) ([]byte, *image.NRGBA, color.Palette, int, error) {
-
+	screenMode uint8,
+) ([]byte, *image.NRGBA, color.Palette, int, error) {
 	var newPalette color.Palette
 	var downgraded *image.NRGBA
 	var err error
@@ -317,7 +327,7 @@ func ApplyOneImage(in image.Image,
 			downgraded = transformation.Zigzag(downgraded)
 		}
 		if !cfg.SpriteHard {
-			//fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
+			// fmt.Fprintf(os.Stdout, "Transform image in sprite.\n")
 			data, _, lineSize, err = sprite.ToSprite(downgraded, newPalette, cfg.Size, screenMode, cfg)
 		} else {
 			//	fmt.Fprintf(os.Stdout, "Transform image in sprite hard.\n")

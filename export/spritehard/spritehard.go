@@ -57,11 +57,17 @@ func OpenSpr(filePath string) (*SprImpdraw, error) {
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot read the Sprite Hard Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		_, err := fr.Seek(0, io.SeekStart)
+		if err != nil {
+			return &spr, err
+		}
 	}
 	if header.Checksum != header.ComputedChecksum16() {
 		fmt.Fprintf(os.Stderr, "Cannot read the Sprite Hard Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		_, err := fr.Seek(0, io.SeekStart)
+		if err != nil {
+			return &spr, err
+		}
 	}
 	for {
 		spriteHard := SpriteHard{}

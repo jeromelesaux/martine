@@ -51,11 +51,17 @@ func OpenKit(filePath string) (color.Palette, *KitPalette, error) {
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot read the Kit Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		_, err = fr.Seek(0, io.SeekStart)
+		if err != nil {
+			return color.Palette{}, &KitPalette{}, err
+		}
 	}
 	if header.Checksum != header.ComputedChecksum16() {
 		fmt.Fprintf(os.Stderr, "Cannot read the Kit Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
-		fr.Seek(0, io.SeekStart)
+		_, err = fr.Seek(0, io.SeekStart)
+		if err != nil {
+			return color.Palette{}, &KitPalette{}, err
+		}
 	}
 
 	KitPalette := &KitPalette{}
@@ -82,7 +88,6 @@ func OpenKit(filePath string) (color.Palette, *KitPalette, error) {
 }
 
 func SaveKit(filePath string, p color.Palette, noAmsdosHeader bool) error {
-
 	fmt.Fprintf(os.Stdout, "Saving Kit file (%s)\n", filePath)
 	data := [16]uint16{}
 	paletteSize := len(p)
@@ -94,7 +99,7 @@ func SaveKit(filePath string, p color.Palette, noAmsdosHeader bool) error {
 		data[i] = cp.Value()
 	}
 
-	//fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
+	// fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
 
 	v, err := common.StructToBytes(data)
 	if err != nil {

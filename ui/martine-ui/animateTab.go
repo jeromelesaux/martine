@@ -224,7 +224,12 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 					return
 				}
 				fmt.Println(gifCfg.Height)
-				fr.Seek(0, io.SeekStart)
+				_, err = fr.Seek(0, io.SeekStart)
+				if err != nil {
+					pi.Hide()
+					dialog.ShowError(err, m.window)
+					return
+				}
 				gifImages, err := gif.DecodeAll(fr)
 				if err != nil {
 					pi.Hide()
