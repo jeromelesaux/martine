@@ -121,3 +121,9 @@ package-linux:
 	mv martine ${BINARY}/martine-${OS}-${ARCH}/
 	(make archive)
 		
+get-linter:
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
+
+lint:
+	@echo "Lint the whole project"
+	golangci-lint run --timeout 2m 

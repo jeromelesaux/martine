@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -96,7 +95,7 @@ func RawImp(filePath string) ([]byte, error) {
 		}
 	}
 
-	bf, err := ioutil.ReadAll(fr)
+	bf, err := io.ReadAll(fr)
 	if err != nil {
 		return nil, err
 	}
