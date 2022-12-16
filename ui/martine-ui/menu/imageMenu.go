@@ -24,17 +24,17 @@ import (
 )
 
 type ImageMenu struct {
-	OriginalImage       *canvas.Image
-	CpcImage            *canvas.Image
-	OriginalImagePath   fyne.URI
+	originalImage       *canvas.Image
+	cpcImage            *canvas.Image
+	originalImagePath   fyne.URI
 	IsCpcPlus           bool
 	IsFullScreen        bool
 	IsSprite            bool
 	IsHardSprite        bool
 	Mode                int
-	Width               *widget.Entry
-	Height              *widget.Entry
-	Palette             color.Palette
+	width               *widget.Entry
+	height              *widget.Entry
+	palette             color.Palette
 	Data                []byte
 	Downgraded          *image.NRGBA
 	DitheringMatrix     [][]float32
@@ -43,7 +43,7 @@ type ImageMenu struct {
 	ApplyDithering      bool
 	ResizeAlgo          imaging.ResampleFilter
 	ResizeAlgoNumber    int
-	PaletteImage        *canvas.Image
+	paletteImage        *canvas.Image
 	UsePalette          bool
 	DitheringMultiplier float64
 	WithQuantification  bool
@@ -57,22 +57,69 @@ type ImageMenu struct {
 
 func NewImageMenu() *ImageMenu {
 	return &ImageMenu{
-		OriginalImage: &canvas.Image{},
-		CpcImage:      &canvas.Image{},
-		PaletteImage:  &canvas.Image{},
-		Width:         &widget.Entry{},
-		Height:        &widget.Entry{},
+		originalImage: &canvas.Image{},
+		cpcImage:      &canvas.Image{},
+		paletteImage:  &canvas.Image{},
+		width:         widget.NewEntry(),
+		height:        widget.NewEntry(),
 		Downgraded:    &image.NRGBA{},
 	}
 }
 
 func (i *ImageMenu) SetPalette(p color.Palette) {
-	i.Palette = p
+	i.palette = p
+}
+
+func (i *ImageMenu) Palette() color.Palette {
+	return i.palette
 }
 
 func (i *ImageMenu) SetPaletteImage(img image.Image) {
-	i.PaletteImage.Image = img
-	i.PaletteImage.Refresh()
+	i.paletteImage.Image = img
+	i.paletteImage.Refresh()
+}
+
+func (i *ImageMenu) PaletteImage() *canvas.Image {
+	return i.paletteImage
+}
+
+func (i *ImageMenu) CpcImage() *canvas.Image {
+	return i.cpcImage
+}
+
+func (i *ImageMenu) SetCpcImage(img image.Image) {
+	i.cpcImage.Image = img
+	i.cpcImage.FillMode = canvas.ImageFillStretch
+	i.cpcImage.Refresh()
+}
+
+func (i *ImageMenu) OriginalImagePath() string {
+	if i.originalImagePath == nil {
+		return ""
+	}
+	return i.originalImagePath.Path()
+}
+
+func (i *ImageMenu) SetOriginalImagePath(path fyne.URI) {
+	i.originalImagePath = path
+}
+
+func (i *ImageMenu) Width() *widget.Entry {
+	return i.width
+}
+
+func (i *ImageMenu) Height() *widget.Entry {
+	return i.height
+}
+
+func (i *ImageMenu) GetWidth() (int, string, error) {
+	v, err := strconv.Atoi(i.width.Text)
+	return v, i.width.Text, err
+}
+
+func (i *ImageMenu) GetHeight() (int, string, error) {
+	v, err := strconv.Atoi(i.height.Text)
+	return v, i.height.Text, err
 }
 
 func (i *ImageMenu) CmdLine() string {
@@ -81,8 +128,8 @@ func (i *ImageMenu) CmdLine() string {
 		fmt.Fprintf(os.Stderr, "error while getting executable path :%v\n", err)
 		return exec
 	}
-	if i.OriginalImagePath != nil {
-		exec += " -in " + i.OriginalImagePath.Path()
+	if i.originalImagePath != nil {
+		exec += " -in " + i.originalImagePath.Path()
 	}
 	if i.IsCpcPlus {
 		exec += " -plus"
@@ -91,15 +138,15 @@ func (i *ImageMenu) CmdLine() string {
 		exec += " -fullscreen"
 	}
 	if i.IsSprite {
-		width, err := strconv.Atoi(i.Width.Text)
+		width, err := strconv.Atoi(i.width.Text)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot convert width value :%s error :%v\n", i.Width.Text, err)
+			fmt.Fprintf(os.Stderr, "cannot convert width value :%s error :%v\n", i.width.Text, err)
 		} else {
 			exec += " -width " + strconv.Itoa(width)
 		}
-		height, err := strconv.Atoi(i.Height.Text)
+		height, err := strconv.Atoi(i.height.Text)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot convert height value :%s error :%v\n", i.Height.Text, err)
+			fmt.Fprintf(os.Stderr, "cannot convert height value :%s error :%v\n", i.height.Text, err)
 		} else {
 			exec += " -height " + strconv.Itoa(height)
 		}
@@ -140,6 +187,16 @@ func (i *ImageMenu) CmdLine() string {
 	return exec
 }
 
+func (me *ImageMenu) SetOriginalImage(img image.Image) {
+	me.originalImage.Image = img
+	me.originalImage.FillMode = canvas.ImageFillContain
+	me.originalImage.Refresh()
+}
+
+func (me *ImageMenu) OriginalImage() *canvas.Image {
+	return me.originalImage
+}
+
 func (me *ImageMenu) NewImportButton(dialogSize fyne.Size, modeSelection *widget.Select, refreshUI *widget.Button, win fyne.Window) *widget.Button {
 	return widget.NewButtonWithIcon("Import", theme.FileImageIcon(), func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
@@ -150,11 +207,11 @@ func (me *ImageMenu) NewImportButton(dialogSize fyne.Size, modeSelection *widget
 			if reader == nil {
 				return
 			}
-			me.OriginalImagePath = reader.URI()
+			me.originalImagePath = reader.URI()
 			if me.IsFullScreen {
 
 				// open palette widget to get palette
-				p, mode, err := overscan.OverscanPalette(me.OriginalImagePath.Path())
+				p, mode, err := overscan.OverscanPalette(me.originalImagePath.Path())
 				if err != nil {
 					dialog.ShowError(err, win)
 					return
@@ -163,7 +220,7 @@ func (me *ImageMenu) NewImportButton(dialogSize fyne.Size, modeSelection *widget
 					dialog.ShowError(fmt.Errorf("no palette found in selected file, try to normal option and open the associated palette"), win)
 					return
 				}
-				img, err := ovs.OverscanToImg(me.OriginalImagePath.Path(), mode, p)
+				img, err := ovs.OverscanToImg(me.originalImagePath.Path(), mode, p)
 				if err != nil {
 					dialog.ShowError(err, win)
 					return
@@ -172,44 +229,38 @@ func (me *ImageMenu) NewImportButton(dialogSize fyne.Size, modeSelection *widget
 					dialog.ShowError(errors.New("palette is empty"), win)
 					return
 				}
-				me.Palette = p
+				me.palette = p
 				me.Mode = int(mode)
 				modeSelection.SetSelectedIndex(me.Mode)
-				me.PaletteImage.Image = png.PalToImage(p)
-				me.OriginalImage.Image = img
-				me.PaletteImage.Refresh()
-				me.OriginalImage.Refresh()
-				me.OriginalImage.FillMode = canvas.ImageFillContain
+
+				me.SetPaletteImage(png.PalToImage(p))
+				me.SetOriginalImage(img)
 			} else if me.IsSprite {
 				// loading sprite file
-				if len(me.Palette) == 0 {
+				if len(me.palette) == 0 {
 					dialog.ShowError(errors.New("palette is empty, please import palette first"), win)
 					return
 				}
-				img, size, err := sprite.SpriteToImg(me.OriginalImagePath.Path(), uint8(me.Mode), me.Palette)
+				img, size, err := sprite.SpriteToImg(me.originalImagePath.Path(), uint8(me.Mode), me.Palette())
 				if err != nil {
 					dialog.ShowError(err, win)
 					return
 				}
-				me.Width.SetText(strconv.Itoa(size.Width))
-				me.Height.SetText(strconv.Itoa(size.Height))
-				me.OriginalImage.Image = img
-				me.OriginalImage.FillMode = canvas.ImageFillContain
-				me.OriginalImage.Refresh()
+				me.width.SetText(strconv.Itoa(size.Width))
+				me.height.SetText(strconv.Itoa(size.Height))
+				me.SetOriginalImage(img)
 			} else {
 				// loading classical screen
-				if len(me.Palette) == 0 {
+				if len(me.Palette()) == 0 {
 					dialog.ShowError(errors.New("palette is empty,  please import palette first, or select fullscreen option to open a fullscreen option"), win)
 					return
 				}
-				img, err := screen.ScrToImg(me.OriginalImagePath.Path(), uint8(me.Mode), me.Palette)
+				img, err := screen.ScrToImg(me.originalImagePath.Path(), uint8(me.Mode), me.Palette())
 				if err != nil {
 					dialog.ShowError(err, win)
 					return
 				}
-				me.OriginalImage.Image = img
-				me.OriginalImage.FillMode = canvas.ImageFillContain
-				me.OriginalImage.Refresh()
+				me.SetOriginalImage(img)
 			}
 			refreshUI.OnTapped()
 		}, win)

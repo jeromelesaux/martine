@@ -51,8 +51,8 @@ func (i *TilemapMenu) CmdLine() string {
 		fmt.Fprintf(os.Stderr, "error while getting executable path :%v\n", err)
 		return exec
 	}
-	if i.OriginalImagePath != nil {
-		exec += " -in " + i.OriginalImagePath.Path()
+	if i.OriginalImagePath() != "" {
+		exec += " -in " + i.OriginalImagePath()
 	}
 	if i.IsCpcPlus {
 		exec += " -plus"
@@ -61,15 +61,15 @@ func (i *TilemapMenu) CmdLine() string {
 		exec += " -fullscreen"
 	}
 	if i.IsSprite {
-		width, err := strconv.Atoi(i.Width.Text)
+		width, widthText, err := i.GetWidth()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot convert width value :%s error :%v\n", i.Width.Text, err)
+			fmt.Fprintf(os.Stderr, "cannot convert width value :%s error :%v\n", widthText, err)
 		} else {
 			exec += " -width " + strconv.Itoa(width)
 		}
-		height, err := strconv.Atoi(i.Height.Text)
+		height, heightText, err := i.GetHeight()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot convert height value :%s error :%v\n", i.Height.Text, err)
+			fmt.Fprintf(os.Stderr, "cannot convert height value :%s error :%v\n", heightText, err)
 		} else {
 			exec += " -height " + strconv.Itoa(height)
 		}

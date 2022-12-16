@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
@@ -29,11 +28,11 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 			if reader == nil {
 				return
 			}
-			me.OriginalImagePath = reader.URI()
+			me.SetOriginalImagePath(reader.URI())
 			if me.IsFullScreen {
 
 				// open palette widget to get palette
-				p, mode, err := overscan.OverscanPalette(me.OriginalImagePath.Path())
+				p, mode, err := overscan.OverscanPalette(me.OriginalImagePath())
 				if err != nil {
 					dialog.ShowError(err, m.window)
 					return
@@ -42,7 +41,7 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 					dialog.ShowError(fmt.Errorf("no palette found in selected file, try to normal option and open the associated palette"), m.window)
 					return
 				}
-				img, err := ovs.OverscanToImg(me.OriginalImagePath.Path(), mode, p)
+				img, err := ovs.OverscanToImg(me.OriginalImagePath(), mode, p)
 				if err != nil {
 					dialog.ShowError(err, m.window)
 					return
@@ -51,44 +50,37 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 					dialog.ShowError(errors.New("palette is empty"), m.window)
 					return
 				}
-				me.Palette = p
+				me.SetPalette(p)
 				me.Mode = int(mode)
 				modeSelection.SetSelectedIndex(me.Mode)
-				me.PaletteImage.Image = png.PalToImage(p)
-				me.PaletteImage.Refresh()
-				me.OriginalImage.Image = img
-				me.OriginalImage.FillMode = canvas.ImageFillContain
-				me.OriginalImage.Refresh()
+				me.SetPaletteImage(png.PalToImage(p))
+				me.SetOriginalImage(img)
 			} else if me.IsSprite {
 				// loading sprite file
-				if len(me.Palette) == 0 {
+				if len(me.Palette()) == 0 {
 					dialog.ShowError(errors.New("palette is empty, please import palette first"), m.window)
 					return
 				}
-				img, size, err := sprite.SpriteToImg(me.OriginalImagePath.Path(), uint8(me.Mode), me.Palette)
+				img, size, err := sprite.SpriteToImg(me.OriginalImagePath(), uint8(me.Mode), me.Palette())
 				if err != nil {
 					dialog.ShowError(err, m.window)
 					return
 				}
-				me.Width.SetText(strconv.Itoa(size.Width))
-				me.Height.SetText(strconv.Itoa(size.Height))
-				me.OriginalImage.Image = img
-				me.OriginalImage.FillMode = canvas.ImageFillContain
-				me.OriginalImage.Refresh()
+				me.Width().SetText(strconv.Itoa(size.Width))
+				me.Height().SetText(strconv.Itoa(size.Height))
+				me.SetOriginalImage(img)
 			} else {
 				//loading classical screen
-				if len(me.Palette) == 0 {
+				if len(me.Palette()) == 0 {
 					dialog.ShowError(errors.New("palette is empty,  please import palette first, or select fullscreen option to open a fullscreen option"), m.window)
 					return
 				}
-				img, err := screen.ScrToImg(me.OriginalImagePath.Path(), uint8(me.Mode), me.Palette)
+				img, err := screen.ScrToImg(me.OriginalImagePath(), uint8(me.Mode), me.Palette())
 				if err != nil {
 					dialog.ShowError(err, m.window)
 					return
 				}
-				me.OriginalImage.Image = img
-				me.OriginalImage.FillMode = canvas.ImageFillContain
-				me.OriginalImage.Refresh()
+				me.SetOriginalImage(img)
 			}
 		}, m.window)
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".scr", ".win", ".bin"}))

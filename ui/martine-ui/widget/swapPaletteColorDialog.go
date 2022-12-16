@@ -71,7 +71,6 @@ func indexColor(index int) {
 
 func colorChanged(c color.Color) {
 	colorToChange = c
-
 	selectedColor = canvas.NewRectangle(colorToChange)
 	selectedColorContainer.Add(selectedColor)
 	selectedColorContainer.Refresh()

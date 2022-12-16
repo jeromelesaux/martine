@@ -45,7 +45,7 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 	case 2:
 		colorsAvailable = constants.Mode2.ColorsAvailable
 	}
-	b := s.OriginalBoard.Image
+	b := s.OriginalBoard().Image
 	if b == nil {
 		pi.Hide()
 		return
@@ -58,9 +58,9 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 		dialog.NewError(err, m.window).Show()
 		return
 	}
-	s.Palette = pal
+	s.SetPalette(pal)
 	size := constants.Size{Width: s.SpriteWidth, Height: s.SpriteHeight}
-	raw, sprites, err := sprite.SplitBoardToSprite(s.OriginalBoard.Image, s.Palette, s.SpriteColumns, s.SpriteRows, uint8(s.Mode), s.IsHardSprite, size)
+	raw, sprites, err := sprite.SplitBoardToSprite(s.OriginalBoard().Image, s.Palette(), s.SpriteColumns, s.SpriteRows, uint8(s.Mode), s.IsHardSprite, size)
 	if err != nil {
 		pi.Hide()
 		dialog.NewError(err, m.window).Show()
@@ -77,8 +77,7 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 		}
 	}
 	s.OriginalImages.Update(icache, icache.ImagesPerRow, icache.ImagesPerColumn)
-	s.PaletteImage.Image = png.PalToImage(s.Palette)
-	s.PaletteImage.Refresh()
+	s.SetPaletteImage(png.PalToImage(s.Palette()))
 	pi.Hide()
 }
 
@@ -99,12 +98,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 				dialog.ShowError(err, m.window)
 				return
 			}
-
-			s.OriginalBoard.Image = img
-			s.OriginalBoard.FillMode = canvas.ImageFillContain
-			s.OriginalBoard.Refresh()
-			//m.window.Canvas().Refresh(&s.OriginalBoard)
-			//m.window.Resize(m.window.Content().Size())
+			s.SetOriginalBoard(img)
 		}, m.window)
 		d.SetFilter(imagesFilesFilter)
 		d.Resize(dialogSize)
@@ -195,7 +189,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 		layout.NewGridLayoutWithColumns(2),
 		container.New(
 			layout.NewGridLayoutWithRows(2),
-			s.OriginalBoard,
+			s.OriginalBoard(),
 			s.OriginalImages,
 		),
 		container.New(
@@ -253,7 +247,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 				),
 				container.New(
 					layout.NewGridLayoutWithRows(2),
-					s.PaletteImage,
+					s.PaletteImage(),
 				),
 			),
 		),
@@ -297,7 +291,7 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 
 				for i := 0; i < len(spritesHard.Data); i++ {
 					m.sprite.SpritesData[row][col] = append(m.sprite.SpritesData[row][col], spritesHard.Data[i].Data[:]...)
-					m.sprite.SpritesCollection[row][col] = spritesHard.Data[i].Image(m.sprite.Palette)
+					m.sprite.SpritesCollection[row][col] = spritesHard.Data[i].Image(m.sprite.Palette())
 					col++
 					if col%m.sprite.SpriteColumns == 0 {
 						col = 0
@@ -347,7 +341,7 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 				var row, col int
 				for i := 0; i < len(data); i += spriteLength {
 					m.sprite.SpritesData[row][col] = append(m.sprite.SpritesData[row][col], data[i:(i+spriteLength)]...)
-					m.sprite.SpritesCollection[row][col] = spr.RawSpriteToImg(data[i:(i+spriteLength)], footer.Height, footer.Width, uint8(m.sprite.Mode), m.sprite.Palette)
+					m.sprite.SpritesCollection[row][col] = spr.RawSpriteToImg(data[i:(i+spriteLength)], footer.Height, footer.Width, uint8(m.sprite.Mode), m.sprite.Palette())
 					col++
 					if col%m.sprite.SpriteColumns == 0 {
 						col = 0

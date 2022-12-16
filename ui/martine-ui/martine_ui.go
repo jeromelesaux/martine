@@ -7,7 +7,6 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"os"
-	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -22,8 +21,7 @@ import (
 )
 
 var (
-	modeSelection *widget.Select
-	//paletteSelection  *widget.Select
+	modeSelection     *widget.Select
 	dialogSize        = fyne.NewSize(800, 800)
 	imagesFilesFilter = storage.NewExtensionFileFilter([]string{".jpg", ".gif", ".png", ".jpeg", ".JPG", ".JPEG", ".GIF", ".PNG"})
 )
@@ -59,9 +57,8 @@ func NewMartineUI() *MartineUI {
 }
 
 func (m *MartineUI) SetPalette(p color.Palette) {
-	m.main.Palette = p
-	m.main.PaletteImage.Image = png.PalToImage(p)
-	m.main.PaletteImage.Refresh()
+	m.main.SetPalette(p)
+	m.main.SetPaletteImage(png.PalToImage(p))
 }
 
 func (m *MartineUI) Load(app fyne.App) {
@@ -89,7 +86,7 @@ func (m *MartineUI) NewConfig(me *menu.ImageMenu, checkOriginalImage bool) *conf
 	}
 	var cfg *config.MartineConfig
 	if checkOriginalImage {
-		cfg = config.NewMartineConfig(me.OriginalImagePath.Path(), "")
+		cfg = config.NewMartineConfig(me.OriginalImagePath(), "")
 	} else {
 		cfg = config.NewMartineConfig("", "")
 	}
@@ -108,12 +105,12 @@ func (m *MartineUI) NewConfig(me *menu.ImageMenu, checkOriginalImage bool) *conf
 	cfg.Reducer = me.Reducer
 	cfg.Size = constants.NewSizeMode(uint8(me.Mode), me.IsFullScreen)
 	if me.IsSprite {
-		width, err := strconv.Atoi(me.Width.Text)
+		width, _, err := me.GetWidth()
 		if err != nil {
 			dialog.NewError(err, m.window).Show()
 			return nil
 		}
-		height, err := strconv.Atoi(me.Height.Text)
+		height, _, err := me.GetHeight()
 		if err != nil {
 			dialog.NewError(err, m.window).Show()
 			return nil
@@ -137,7 +134,7 @@ func (m *MartineUI) NewConfig(me *menu.ImageMenu, checkOriginalImage bool) *conf
 	cfg.DitheringWithQuantification = me.WithQuantification
 	cfg.OutputPath = m.imageExport.ExportFolderPath
 	if checkOriginalImage {
-		cfg.InputPath = me.OriginalImagePath.Path()
+		cfg.InputPath = me.OriginalImagePath()
 	}
 	cfg.Json = m.imageExport.ExportJson
 	cfg.Ascii = m.imageExport.ExportText

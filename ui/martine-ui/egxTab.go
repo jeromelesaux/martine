@@ -9,7 +9,6 @@ import (
 	"strconv"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
@@ -60,39 +59,36 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	var palette color.Palette
 	if di.LeftImage.Mode < di.RightImage.Mode {
 		im = di.LeftImage
-		palette = di.LeftImage.Palette
+		palette = di.LeftImage.Palette()
 		secondIm = di.RightImage
 	} else {
 		im = di.RightImage
-		palette = di.RightImage.Palette
+		palette = di.RightImage.Palette()
 		secondIm = di.LeftImage
 	}
 	cfg := m.NewConfig(im, false)
 	if cfg == nil {
 		return
 	}
-	out, downgraded, _, _, err := gfx.ApplyOneImage(secondIm.CpcImage.Image, cfg, secondIm.Mode, palette, uint8(secondIm.Mode))
+	out, downgraded, _, _, err := gfx.ApplyOneImage(secondIm.CpcImage().Image, cfg, secondIm.Mode, palette, uint8(secondIm.Mode))
 	if err != nil {
 		dialog.ShowError(err, m.window)
 		return
 	}
 	secondIm.Data = out
-	secondIm.CpcImage.Image = downgraded
-	secondIm.CpcImage.Refresh()
-	secondIm.Palette = palette
-	secondIm.PaletteImage.Image = png.PalToImage(secondIm.Palette)
-	secondIm.PaletteImage.Refresh()
-	out, downgraded, _, _, err = gfx.ApplyOneImage(im.CpcImage.Image, cfg, im.Mode, palette, uint8(im.Mode))
+	secondIm.SetCpcImage(downgraded)
+	secondIm.SetPalette(palette)
+
+	im.SetPaletteImage(png.PalToImage(secondIm.Palette()))
+	out, downgraded, _, _, err = gfx.ApplyOneImage(im.CpcImage().Image, cfg, im.Mode, palette, uint8(im.Mode))
 	if err != nil {
 		dialog.ShowError(err, m.window)
 		return
 	}
 	im.Data = out
-	im.CpcImage.Image = downgraded
-	im.CpcImage.Refresh()
-	im.Palette = palette
-	im.PaletteImage.Image = png.PalToImage(im.Palette)
-	im.PaletteImage.Refresh()
+	im.SetCpcImage(downgraded)
+	im.SetPalette(palette)
+	im.SetPaletteImage(png.PalToImage(im.Palette()))
 
 	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
 	pi.Show()
@@ -127,19 +123,19 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 
 func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) fyne.CanvasObject {
 	di.ResultImage = menu.NewMergedImageMenu()
-	di.ResultImage.CpcLeftImage = di.LeftImage.CpcImage
-	di.ResultImage.CpcRightImage = di.RightImage.CpcImage
-	di.ResultImage.LeftPalette = di.LeftImage.Palette
-	di.ResultImage.RightPalette = di.RightImage.Palette
-	di.ResultImage.LeftPaletteImage = di.LeftImage.PaletteImage
-	di.ResultImage.RightPaletteImage = di.RightImage.PaletteImage
+	di.ResultImage.CpcLeftImage = di.LeftImage.CpcImage()
+	di.ResultImage.CpcRightImage = di.RightImage.CpcImage()
+	di.ResultImage.LeftPalette = di.LeftImage.Palette()
+	di.ResultImage.RightPalette = di.RightImage.Palette()
+	di.ResultImage.LeftPaletteImage = di.LeftImage.PaletteImage()
+	di.ResultImage.RightPaletteImage = di.RightImage.PaletteImage()
 
 	return container.New(
 		layout.NewGridLayoutWithRows(3),
 		container.New(
 			layout.NewGridLayoutWithColumns(2),
-			di.LeftImage.CpcImage,
-			di.RightImage.CpcImage,
+			di.LeftImage.CpcImage(),
+			di.RightImage.CpcImage(),
 		),
 
 		container.New(
@@ -149,42 +145,30 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) fyne.CanvasObject {
 				layout.NewGridLayoutWithColumns(2),
 				container.New(
 					layout.NewGridLayoutWithColumns(1),
-					di.LeftImage.PaletteImage,
+					di.LeftImage.PaletteImage(),
 				),
 				container.New(
 					layout.NewGridLayoutWithColumns(1),
-					di.RightImage.PaletteImage,
+					di.RightImage.PaletteImage(),
 				),
 
 				widget.NewButtonWithIcon("Merge image", theme.MediaPlayIcon(), func() {
 					m.MergeImages(m.egx)
 				}),
 				widget.NewButtonWithIcon("Refresh UI", theme.ComputerIcon(), func() {
-					di.ResultImage.CpcLeftImage.Image = di.LeftImage.CpcImage.Image
-					di.ResultImage.CpcRightImage.Image = di.RightImage.CpcImage.Image
+					di.ResultImage.CpcLeftImage.Image = di.LeftImage.CpcImage().Image
+					di.ResultImage.CpcRightImage.Image = di.RightImage.CpcImage().Image
 					di.ResultImage.CpcLeftImage.Refresh()
 					di.ResultImage.CpcResultImage.Refresh()
-					di.ResultImage.LeftPalette = di.LeftImage.Palette
-					di.ResultImage.RightPalette = di.RightImage.Palette
-					di.ResultImage.LeftPaletteImage.Image = di.LeftImage.PaletteImage.Image
+					di.ResultImage.LeftPalette = di.LeftImage.Palette()
+					di.ResultImage.RightPalette = di.RightImage.Palette()
+					di.ResultImage.LeftPaletteImage.Image = di.LeftImage.PaletteImage().Image
 					di.ResultImage.LeftPaletteImage.Refresh()
-					di.ResultImage.RightPaletteImage.Image = di.RightImage.PaletteImage.Image
+					di.ResultImage.RightPaletteImage.Image = di.RightImage.PaletteImage().Image
 					di.ResultImage.LeftPaletteImage.Refresh()
 					di.ResultImage.PaletteImage.Image = png.PalToImage(di.ResultImage.Palette)
 					di.ResultImage.PaletteImage.Refresh()
 
-					// s := m.window.Content().Size()
-					// s.Height += 10.
-					// s.Width += 10.
-					// m.window.Resize(s)
-					// m.window.Canvas().Refresh(&di.ResultImage.CpcLeftImage)
-					// m.window.Canvas().Refresh(&di.ResultImage.CpcRightImage)
-					// m.window.Canvas().Refresh(&di.ResultImage.CpcResultImage)
-					// m.window.Canvas().Refresh(&di.ResultImage.LeftPaletteImage)
-					// m.window.Canvas().Refresh(&di.ResultImage.RightPaletteImage)
-					// m.window.Canvas().Refresh(&di.ResultImage.PaletteImage)
-					// m.window.Resize(m.window.Content().Size())
-					m.window.Content().Refresh()
 				}),
 				widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
 					// export the egx image
@@ -235,18 +219,13 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 				return
 			}
 
-			me.OriginalImagePath = reader.URI()
-			img, err := openImage(me.OriginalImagePath.Path())
+			me.SetOriginalImagePath(reader.URI())
+			img, err := openImage(me.OriginalImagePath())
 			if err != nil {
 				dialog.ShowError(err, m.window)
 				return
 			}
-
-			me.OriginalImage.Image = img
-			me.OriginalImage.FillMode = canvas.ImageFillContain
-			me.OriginalImage.Refresh()
-			// m.window.Canvas().Refresh(&me.OriginalImage)
-			// m.window.Resize(m.window.Content().Size())
+			me.SetOriginalImage(img)
 		}, m.window)
 		d.SetFilter(imagesFilesFilter)
 		d.Resize(dialogSize)
@@ -344,9 +323,9 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 		container.New(
 			layout.NewGridLayoutWithRows(2),
 			container.NewScroll(
-				me.OriginalImage),
+				me.OriginalImage()),
 			container.NewScroll(
-				me.CpcImage),
+				me.CpcImage()),
 		),
 		container.New(
 			layout.NewVBoxLayout(),
@@ -391,12 +370,12 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 				),
 				container.New(
 					layout.NewGridLayoutWithRows(2),
-					me.PaletteImage,
+					me.PaletteImage(),
 					container.New(
 						layout.NewHBoxLayout(),
 						forcePalette,
 						widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
-							w2.SwapColor(m.SetPalette, me.Palette, m.window, func() {
+							w2.SwapColor(m.SetPalette, me.Palette(), m.window, func() {
 								forcePalette.SetChecked(true)
 							})
 						}),
@@ -415,10 +394,10 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 								os.Remove(uc.URI().Path())
 								cfg := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
 								cfg.NoAmsdosHeader = false
-								if err := impPalette.SaveKit(paletteExportPath+".kit", me.Palette, false); err != nil {
+								if err := impPalette.SaveKit(paletteExportPath+".kit", me.Palette(), false); err != nil {
 									dialog.ShowError(err, m.window)
 								}
-								if err := ocpartstudio.SavePal(paletteExportPath+".pal", me.Palette, uint8(me.Mode), false); err != nil {
+								if err := ocpartstudio.SavePal(paletteExportPath+".pal", me.Palette(), uint8(me.Mode), false); err != nil {
 									dialog.ShowError(err, m.window)
 								}
 							}, m.window)
@@ -426,9 +405,8 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 						}),
 						widget.NewButton("Gray", func() {
 							if me.IsCpcPlus {
-								me.Palette = ci.MonochromePalette(me.Palette)
-								me.PaletteImage.Image = png.PalToImage(me.Palette)
-								me.PaletteImage.Refresh()
+								me.SetPalette(ci.MonochromePalette(me.Palette()))
+								me.SetPaletteImage(png.PalToImage(me.Palette()))
 								forcePalette.SetChecked(true)
 								forcePalette.Refresh()
 							}

@@ -61,7 +61,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 					code, err := animate.ExportDeltaAnimate(
 						a.RawImages[0],
 						a.DeltaCollection,
-						a.Palette,
+						a.Palette(),
 						a.IsSprite,
 						cfg,
 						uint16(address),
@@ -102,8 +102,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 }
 
 func (m *MartineUI) refreshAnimatePalette() {
-	m.animate.PaletteImage.Image = png.PalToImage(m.animate.Palette)
-	m.animate.PaletteImage.Refresh()
+	m.animate.SetPaletteImage(png.PalToImage(m.animate.Palette()))
 }
 
 func CheckWidthSize(width, mode int) bool {
@@ -152,10 +151,9 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 		return
 	}
 	a.DeltaCollection = deltaCollection
-	a.Palette = palette
+	a.SetPalette(palette)
 	a.RawImages = rawImages
-	a.PaletteImage.Image = png.PalToImage(a.Palette)
-	a.PaletteImage.Refresh()
+	a.SetPaletteImage(png.PalToImage(a.Palette()))
 }
 
 func (m *MartineUI) ImageIndexToRemove(row, col int) {
@@ -291,12 +289,10 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	modeLabel := widget.NewLabel("Mode:")
 
 	widthLabel := widget.NewLabel("Width")
-	a.Width = widget.NewEntry()
-	a.Width.Validator = validation.NewRegexp("\\d+", "Must contain a number")
+	a.Width().Validator = validation.NewRegexp("\\d+", "Must contain a number")
 
 	heightLabel := widget.NewLabel("Height")
-	a.Height = widget.NewEntry()
-	a.Height.Validator = validation.NewRegexp("\\d+", "Must contain a number")
+	a.Height().Validator = validation.NewRegexp("\\d+", "Must contain a number")
 
 	a.AnimateImages = custom_widget.NewEmptyImageTable(fyne.NewSize(menu.AnimateSize, menu.AnimateSize))
 	a.AnimateImages.IndexCallbackFunc = m.ImageIndexToRemove
@@ -371,12 +367,12 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 						container.New(
 							layout.NewHBoxLayout(),
 							widthLabel,
-							a.Width,
+							a.Width(),
 						),
 						container.New(
 							layout.NewHBoxLayout(),
 							heightLabel,
-							a.Height,
+							a.Height(),
 						),
 					),
 				),
@@ -390,12 +386,12 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 				),
 				container.New(
 					layout.NewGridLayoutWithColumns(2),
-					a.PaletteImage,
+					a.PaletteImage(),
 					container.New(
 						layout.NewHBoxLayout(),
 						forcePalette,
 						widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
-							w2.SwapColor(m.SetPalette, a.Palette, m.window, m.refreshAnimatePalette)
+							w2.SwapColor(m.SetPalette, a.Palette(), m.window, m.refreshAnimatePalette)
 						}),
 						widget.NewButtonWithIcon("export", theme.DocumentSaveIcon(), func() {
 							d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
@@ -412,10 +408,10 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 								os.Remove(uc.URI().Path())
 								cfg := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
 								cfg.NoAmsdosHeader = false
-								if err := impPalette.SaveKit(paletteExportPath+".kit", a.Palette, false); err != nil {
+								if err := impPalette.SaveKit(paletteExportPath+".kit", a.Palette(), false); err != nil {
 									dialog.ShowError(err, m.window)
 								}
-								if err := ocpartstudio.SavePal(paletteExportPath+".pal", a.Palette, uint8(a.Mode), false); err != nil {
+								if err := ocpartstudio.SavePal(paletteExportPath+".pal", a.Palette(), uint8(a.Mode), false); err != nil {
 									dialog.ShowError(err, m.window)
 								}
 							}, m.window)

@@ -51,11 +51,11 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 	var tiles [][]image.Image
 	var err error
 	if m.IsClassicalTilemap(cfg.Size.Width, cfg.Size.Height) {
-		filename := filepath.Base(me.OriginalImagePath.Path())
-		analyze, tiles, palette = gfx.TilemapClassical(uint8(me.Mode), me.IsCpcPlus, filename, me.OriginalImagePath.Path(), me.OriginalImage.Image, cfg.Size, cfg)
+		filename := filepath.Base(me.OriginalImagePath())
+		analyze, tiles, palette = gfx.TilemapClassical(uint8(me.Mode), me.IsCpcPlus, filename, me.OriginalImagePath(), me.OriginalImage().Image, cfg.Size, cfg)
 		pi.Hide()
 	} else {
-		analyze, tiles, palette, err = gfx.TilemapRaw(uint8(me.Mode), me.IsCpcPlus, cfg.Size, me.OriginalImage.Image, cfg)
+		analyze, tiles, palette, err = gfx.TilemapRaw(uint8(me.Mode), me.IsCpcPlus, cfg.Size, me.OriginalImage().Image, cfg)
 		pi.Hide()
 		if err != nil {
 			dialog.NewError(err, m.window).Show()
@@ -64,7 +64,7 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 	}
 
 	me.Result = analyze
-	me.Palette = palette
+	me.SetPalette(palette)
 	tilesCanvas := custom_widget.NewImageTableCache(len(tiles), len(tiles[0]), fyne.NewSize(50, 50))
 	for i, v := range tiles {
 		for i2, v2 := range v {
@@ -72,9 +72,7 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 		}
 	}
 	me.TileImages.Update(tilesCanvas, len(tiles)-1, len(tiles[0])-1)
-	me.PaletteImage.Image = png.PalToImage(me.Palette)
-	me.PaletteImage.Refresh()
-
+	me.SetPaletteImage(png.PalToImage(me.Palette()))
 }
 
 func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
@@ -97,15 +95,13 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 				return
 			}
 
-			tm.OriginalImagePath = reader.URI()
-			img, err := openImage(tm.OriginalImagePath.Path())
+			tm.SetOriginalImagePath(reader.URI())
+			img, err := openImage(tm.OriginalImagePath())
 			if err != nil {
 				dialog.ShowError(err, m.window)
 				return
 			}
-			tm.OriginalImage.Image = img
-			tm.OriginalImage.FillMode = canvas.ImageFillContain
-			tm.OriginalImage.Refresh()
+			tm.SetOriginalImage(img)
 			// m.window.Canvas().Refresh(&tm.OriginalImage)
 			// m.window.Resize(m.window.Content().Size())
 		}, m.window)
@@ -142,12 +138,11 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 	modeLabel := widget.NewLabel("Mode:")
 
 	widthLabel := widget.NewLabel("Width")
-	tm.Width = widget.NewEntry()
-	tm.Width.Validator = validation.NewRegexp("\\d+", "Must contain a number")
+
+	tm.Width().Validator = validation.NewRegexp("\\d+", "Must contain a number")
 
 	heightLabel := widget.NewLabel("Height")
-	tm.Height = widget.NewEntry()
-	tm.Height.Validator = validation.NewRegexp("\\d+", "Must contain a number")
+	tm.Height().Validator = validation.NewRegexp("\\d+", "Must contain a number")
 
 	tm.TileImages = custom_widget.NewEmptyImageTable(fyne.NewSize(menu.TileSize, menu.TileSize))
 
@@ -158,7 +153,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 			container.New(
 				layout.NewGridLayoutWithColumns(1),
 				container.NewScroll(
-					tm.OriginalImage),
+					tm.OriginalImage()),
 			),
 			container.New(
 				layout.NewVBoxLayout(),
@@ -185,12 +180,12 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 							container.New(
 								layout.NewHBoxLayout(),
 								widthLabel,
-								tm.Width,
+								tm.Width(),
 							),
 							container.New(
 								layout.NewHBoxLayout(),
 								heightLabel,
-								tm.Height,
+								tm.Height(),
 							),
 						),
 					),
@@ -199,12 +194,12 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 
 						container.New(
 							layout.NewGridLayoutWithColumns(2),
-							tm.PaletteImage,
+							tm.PaletteImage(),
 							container.New(
 								layout.NewHBoxLayout(),
 								forcePalette,
 								widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
-									w2.SwapColor(m.SetPalette, tm.Palette, m.window, nil)
+									w2.SwapColor(m.SetPalette, tm.Palette(), m.window, nil)
 								}),
 								widget.NewButtonWithIcon("export", theme.DocumentSaveIcon(), func() {
 									d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
@@ -221,10 +216,10 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 										os.Remove(uc.URI().Path())
 										cfg := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
 										cfg.NoAmsdosHeader = false
-										if err := impPalette.SaveKit(paletteExportPath+".kit", tm.Palette, false); err != nil {
+										if err := impPalette.SaveKit(paletteExportPath+".kit", tm.Palette(), false); err != nil {
 											dialog.ShowError(err, m.window)
 										}
-										if err := ocpartstudio.SavePal(paletteExportPath+".pal", tm.Palette, uint8(tm.Mode), false); err != nil {
+										if err := ocpartstudio.SavePal(paletteExportPath+".pal", tm.Palette(), uint8(tm.Mode), false); err != nil {
 											dialog.ShowError(err, m.window)
 										}
 									}, m.window)

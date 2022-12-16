@@ -56,8 +56,8 @@ func (m *MergedImageMenu) CmdLine() string {
 }
 
 func (d *DoubleImageMenu) CmdLine() string {
-	palFilename := config.AmsdosFilename(d.LeftImage.OriginalImagePath.Path(), ".PAL")
-	scrFilename := config.AmsdosFilename(d.LeftImage.OriginalImagePath.Path(), ".SCR")
+	palFilename := config.AmsdosFilename(d.LeftImage.OriginalImagePath(), ".PAL")
+	scrFilename := config.AmsdosFilename(d.LeftImage.OriginalImagePath(), ".SCR")
 
 	cmd := "\n" + d.LeftImage.CmdLine() + " -out mode0"
 	cmd += "\n" + d.RightImage.CmdLine() + " -pal " + palFilename + " -out mode1"
