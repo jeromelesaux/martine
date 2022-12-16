@@ -104,7 +104,6 @@ func (s *SpriteMenu) ImportSprite(win fyne.Window) *widget.Button {
 			if reader == nil {
 				return
 			}
-			//filename := reader.URI()
 
 		}, win)
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".scr", ".win", ".bin"}))

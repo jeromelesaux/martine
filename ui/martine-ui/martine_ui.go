@@ -81,7 +81,7 @@ func (m *MartineUI) NewTabs() *container.AppTabs {
 }
 
 func (m *MartineUI) NewConfig(me *menu.ImageMenu, checkOriginalImage bool) *config.MartineConfig {
-	if checkOriginalImage && me.OriginalImagePath == nil {
+	if checkOriginalImage && me.OriginalImagePath() == "" {
 		return nil
 	}
 	var cfg *config.MartineConfig

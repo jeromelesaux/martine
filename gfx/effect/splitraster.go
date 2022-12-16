@@ -77,7 +77,6 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 	}
 	firmwareColorUsed := make(map[int]int)
 	backgroundColor := p[0]
-	//	notSplitRaster = true
 	for y := 0; y < cfg.Size.Height; y++ {
 		for x := 0; x < cfg.Size.Width; {
 			if x%16 == 0 {
