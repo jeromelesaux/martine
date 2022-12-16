@@ -1,12 +1,12 @@
 package ui
 
 import (
+	"image"
 	"image/color"
 	"path/filepath"
 	"strings"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
@@ -18,7 +18,7 @@ import (
 
 type PaletteInterface interface {
 	SetPalette(color.Palette)
-	SetPaletteImage(canvas.Image)
+	SetPaletteImage(image.Image)
 }
 
 func NewOpenPaletteButton(m PaletteInterface, win fyne.Window) *widget.Button {
@@ -40,7 +40,7 @@ func NewOpenPaletteButton(m PaletteInterface, win fyne.Window) *widget.Button {
 					return
 				}
 				m.SetPalette(p)
-				m.SetPaletteImage(*canvas.NewImageFromImage(png.PalToImage(p)))
+				m.SetPaletteImage(png.PalToImage(p))
 			case ".kit":
 				p, _, err := impPalette.OpenKit(palettePath)
 				if err != nil {
@@ -48,9 +48,8 @@ func NewOpenPaletteButton(m PaletteInterface, win fyne.Window) *widget.Button {
 					return
 				}
 				m.SetPalette(p)
-				m.SetPaletteImage(*canvas.NewImageFromImage(png.PalToImage(p)))
+				m.SetPaletteImage(png.PalToImage(p))
 			}
-			refreshUI.OnTapped()
 		}, win)
 
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".pal", ".kit"}))

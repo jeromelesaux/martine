@@ -41,7 +41,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						// cancel button
 						return
 					}
-					cfg := m.NewConfig(&a.ImageMenu, false)
+					cfg := m.NewConfig(a.ImageMenu, false)
 					if cfg == nil {
 						return
 					}
@@ -102,8 +102,8 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 }
 
 func (m *MartineUI) refreshAnimatePalette() {
-	m.animate.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(m.animate.Palette))
-	refreshUI.OnTapped()
+	m.animate.PaletteImage.Image = png.PalToImage(m.animate.Palette)
+	m.animate.PaletteImage.Refresh()
 }
 
 func CheckWidthSize(width, mode int) bool {
@@ -122,7 +122,7 @@ func CheckWidthSize(width, mode int) bool {
 }
 
 func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
-	cfg := m.NewConfig(&a.ImageMenu, false)
+	cfg := m.NewConfig(a.ImageMenu, false)
 	if cfg == nil {
 		return
 	}
@@ -154,8 +154,8 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 	a.DeltaCollection = deltaCollection
 	a.Palette = palette
 	a.RawImages = rawImages
-	a.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(a.Palette))
-	refreshUI.OnTapped()
+	a.PaletteImage.Image = png.PalToImage(a.Palette)
+	a.PaletteImage.Refresh()
 }
 
 func (m *MartineUI) ImageIndexToRemove(row, col int) {
@@ -163,26 +163,14 @@ func (m *MartineUI) ImageIndexToRemove(row, col int) {
 }
 
 func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
-	importOpen := NewImportButton(m, &a.ImageMenu)
+	importOpen := NewImportButton(m, a.ImageMenu)
 
-	paletteOpen := NewOpenPaletteButton(&a.ImageMenu, m.window)
+	paletteOpen := NewOpenPaletteButton(a.ImageMenu, m.window)
 
 	forcePalette := widget.NewCheck("use palette", func(b bool) {
 		a.UsePalette = b
 	})
 
-	forceUIRefresh := widget.NewButtonWithIcon("Refresh UI", theme.ComputerIcon(), func() {
-		s := m.window.Content().Size()
-		s.Height += 10.
-		s.Width += 10.
-		m.window.Resize(s)
-		m.window.Canvas().Refresh(&a.OriginalImage)
-		m.window.Canvas().Refresh(&a.PaletteImage)
-		m.tilemap.TileImages.Refresh()
-		m.window.Resize(m.window.Content().Size())
-		m.window.Content().Refresh()
-	})
-	refreshUI = forceUIRefresh
 	openFileWidget := widget.NewButton("Add image", func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {
@@ -287,9 +275,6 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 
 	openFileWidget.Icon = theme.FileImageIcon()
 
-	a.OriginalImage = canvas.Image{}
-	a.PaletteImage = canvas.Image{}
-
 	isPlus := widget.NewCheck("CPC Plus", func(b bool) {
 		a.IsCpcPlus = b
 	})
@@ -357,7 +342,6 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 				applyButton,
 				exportButton,
 				importOpen,
-				forceUIRefresh,
 			),
 			container.New(
 				layout.NewGridLayoutWithColumns(2),
@@ -406,7 +390,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 				),
 				container.New(
 					layout.NewGridLayoutWithColumns(2),
-					&a.PaletteImage,
+					a.PaletteImage,
 					container.New(
 						layout.NewHBoxLayout(),
 						forcePalette,

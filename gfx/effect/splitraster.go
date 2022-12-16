@@ -48,6 +48,7 @@ func DoSpliteRaster(in image.Image, screenMode uint8, filename string, cfg *conf
 func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg *config.MartineConfig) (color.Palette, []byte, *constants.SplitRasterScreen, error) {
 
 	var bw []byte
+	var notSplitRaster bool
 	srs := constants.NewSplitRasterScreen()
 	out := ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
 	fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
@@ -76,7 +77,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 	}
 	firmwareColorUsed := make(map[int]int)
 	backgroundColor := p[0]
-	notSplitRaster := true
+	//	notSplitRaster = true
 	for y := 0; y < cfg.Size.Height; y++ {
 		for x := 0; x < cfg.Size.Width; {
 			if x%16 == 0 {

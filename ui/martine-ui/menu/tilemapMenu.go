@@ -13,7 +13,7 @@ import (
 var TileSize float32 = 20.
 
 type TilemapMenu struct {
-	ImageMenu
+	*ImageMenu
 	Result                 *transformation.AnalyzeBoard
 	TileImages             *custom_widget.ImageTable
 	ExportDsk              bool
@@ -39,6 +39,7 @@ func (tm *TilemapMenu) ResetExport() {
 
 func NewTilemapMenu() *TilemapMenu {
 	return &TilemapMenu{
+		ImageMenu:  NewImageMenu(),
 		Result:     &transformation.AnalyzeBoard{},
 		TileImages: custom_widget.NewEmptyImageTable(fyne.NewSize(TileSize, TileSize)),
 	}

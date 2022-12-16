@@ -11,25 +11,44 @@ import (
 )
 
 type DoubleImageMenu struct {
-	LeftImage   ImageMenu
-	RightImage  ImageMenu
-	ResultImage MergedImageMenu
+	LeftImage   *ImageMenu
+	RightImage  *ImageMenu
+	ResultImage *MergedImageMenu
+}
+
+func NewDoubleImageMenu() *DoubleImageMenu {
+	return &DoubleImageMenu{
+		LeftImage:   NewImageMenu(),
+		RightImage:  NewImageMenu(),
+		ResultImage: NewMergedImageMenu(),
+	}
 }
 
 type MergedImageMenu struct {
-	CpcLeftImage      canvas.Image
-	CpcRightImage     canvas.Image
-	CpcResultImage    canvas.Image
+	CpcLeftImage      *canvas.Image
+	CpcRightImage     *canvas.Image
+	CpcResultImage    *canvas.Image
 	LeftPalette       color.Palette
 	RightPalette      color.Palette
-	LeftPaletteImage  canvas.Image
-	RightPaletteImage canvas.Image
+	LeftPaletteImage  *canvas.Image
+	RightPaletteImage *canvas.Image
 	Data              []byte
 	Palette           color.Palette
-	PaletteImage      canvas.Image
+	PaletteImage      *canvas.Image
 	CmdLineGenerate   string
 	Path              string
 	EgxType           int
+}
+
+func NewMergedImageMenu() *MergedImageMenu {
+	return &MergedImageMenu{
+		CpcLeftImage:      &canvas.Image{},
+		CpcRightImage:     &canvas.Image{},
+		CpcResultImage:    &canvas.Image{},
+		LeftPaletteImage:  &canvas.Image{},
+		RightPaletteImage: &canvas.Image{},
+		PaletteImage:      &canvas.Image{},
+	}
 }
 
 func (m *MergedImageMenu) CmdLine() string {

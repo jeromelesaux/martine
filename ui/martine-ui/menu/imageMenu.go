@@ -24,8 +24,8 @@ import (
 )
 
 type ImageMenu struct {
-	OriginalImage       canvas.Image
-	CpcImage            canvas.Image
+	OriginalImage       *canvas.Image
+	CpcImage            *canvas.Image
 	OriginalImagePath   fyne.URI
 	IsCpcPlus           bool
 	IsFullScreen        bool
@@ -43,7 +43,7 @@ type ImageMenu struct {
 	ApplyDithering      bool
 	ResizeAlgo          imaging.ResampleFilter
 	ResizeAlgoNumber    int
-	PaletteImage        canvas.Image
+	PaletteImage        *canvas.Image
 	UsePalette          bool
 	DitheringMultiplier float64
 	WithQuantification  bool
@@ -55,12 +55,24 @@ type ImageMenu struct {
 	CmdLineGenerate     string
 }
 
+func NewImageMenu() *ImageMenu {
+	return &ImageMenu{
+		OriginalImage: &canvas.Image{},
+		CpcImage:      &canvas.Image{},
+		PaletteImage:  &canvas.Image{},
+		Width:         &widget.Entry{},
+		Height:        &widget.Entry{},
+		Downgraded:    &image.NRGBA{},
+	}
+}
+
 func (i *ImageMenu) SetPalette(p color.Palette) {
 	i.Palette = p
 }
 
-func (i *ImageMenu) SetPaletteImage(c canvas.Image) {
-	i.PaletteImage = c
+func (i *ImageMenu) SetPaletteImage(img image.Image) {
+	i.PaletteImage.Image = img
+	i.PaletteImage.Refresh()
 }
 
 func (i *ImageMenu) CmdLine() string {
@@ -163,8 +175,10 @@ func (me *ImageMenu) NewImportButton(dialogSize fyne.Size, modeSelection *widget
 				me.Palette = p
 				me.Mode = int(mode)
 				modeSelection.SetSelectedIndex(me.Mode)
-				me.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(p))
-				me.OriginalImage = *canvas.NewImageFromImage(img)
+				me.PaletteImage.Image = png.PalToImage(p)
+				me.OriginalImage.Image = img
+				me.PaletteImage.Refresh()
+				me.OriginalImage.Refresh()
 				me.OriginalImage.FillMode = canvas.ImageFillContain
 			} else if me.IsSprite {
 				// loading sprite file
@@ -179,8 +193,9 @@ func (me *ImageMenu) NewImportButton(dialogSize fyne.Size, modeSelection *widget
 				}
 				me.Width.SetText(strconv.Itoa(size.Width))
 				me.Height.SetText(strconv.Itoa(size.Height))
-				me.OriginalImage = *canvas.NewImageFromImage(img)
+				me.OriginalImage.Image = img
 				me.OriginalImage.FillMode = canvas.ImageFillContain
+				me.OriginalImage.Refresh()
 			} else {
 				// loading classical screen
 				if len(me.Palette) == 0 {
@@ -192,8 +207,9 @@ func (me *ImageMenu) NewImportButton(dialogSize fyne.Size, modeSelection *widget
 					dialog.ShowError(err, win)
 					return
 				}
-				me.OriginalImage = *canvas.NewImageFromImage(img)
+				me.OriginalImage.Image = img
 				me.OriginalImage.FillMode = canvas.ImageFillContain
+				me.OriginalImage.Refresh()
 			}
 			refreshUI.OnTapped()
 		}, win)

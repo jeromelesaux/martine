@@ -27,10 +27,10 @@ var (
 
 type SpriteMenu struct {
 	IsHardSprite    bool
-	OriginalBoard   canvas.Image
-	OriginalPalette canvas.Image
+	OriginalBoard   *canvas.Image
+	OriginalPalette *canvas.Image
 	Palette         color.Palette
-	PaletteImage    canvas.Image
+	PaletteImage    *canvas.Image
 
 	SpritesData            [][][]byte
 	CompileSprite          bool
@@ -56,15 +56,18 @@ func (s *SpriteMenu) SetPalette(p color.Palette) {
 	s.Palette = p
 }
 
-func (s *SpriteMenu) SetPaletteImage(c canvas.Image) {
-	s.PaletteImage = c
+func (s *SpriteMenu) SetPaletteImage(img image.Image) {
+	s.PaletteImage.Image = img
+	s.PaletteImage.Refresh()
 }
 func NewSpriteMenu() *SpriteMenu {
 	return &SpriteMenu{
-		OriginalBoard:     canvas.Image{},
+		OriginalBoard:     &canvas.Image{},
 		OriginalImages:    custom_widget.NewEmptyImageTable(fyne.NewSize(SpriteSize, SpriteSize)),
 		SpritesCollection: make([][]*image.NRGBA, 0),
 		SpritesData:       make([][][]byte, 0),
+		OriginalPalette:   &canvas.Image{},
+		PaletteImage:      &canvas.Image{},
 	}
 }
 

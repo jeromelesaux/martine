@@ -31,8 +31,8 @@ import (
 
 func (m *MartineUI) newEgxTab(di *menu.DoubleImageMenu) fyne.CanvasObject {
 	return container.NewAppTabs(
-		container.NewTabItem("Image 1", m.newEgxImageTransfertTab(&di.LeftImage)),
-		container.NewTabItem("Image 2", m.newEgxImageTransfertTab(&di.RightImage)),
+		container.NewTabItem("Image 1", m.newEgxImageTransfertTab(di.LeftImage)),
+		container.NewTabItem("Image 2", m.newEgxImageTransfertTab(di.RightImage)),
 		container.NewTabItem("Egx", m.newEgxTabItem(di)),
 	)
 }
@@ -59,13 +59,13 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	var secondIm *menu.ImageMenu
 	var palette color.Palette
 	if di.LeftImage.Mode < di.RightImage.Mode {
-		im = &di.LeftImage
+		im = di.LeftImage
 		palette = di.LeftImage.Palette
-		secondIm = &di.RightImage
+		secondIm = di.RightImage
 	} else {
-		im = &di.RightImage
+		im = di.RightImage
 		palette = di.RightImage.Palette
-		secondIm = &di.LeftImage
+		secondIm = di.LeftImage
 	}
 	cfg := m.NewConfig(im, false)
 	if cfg == nil {
@@ -77,18 +77,22 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 		return
 	}
 	secondIm.Data = out
-	secondIm.CpcImage = *canvas.NewImageFromImage(downgraded)
+	secondIm.CpcImage.Image = downgraded
+	secondIm.CpcImage.Refresh()
 	secondIm.Palette = palette
-	secondIm.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(secondIm.Palette))
+	secondIm.PaletteImage.Image = png.PalToImage(secondIm.Palette)
+	secondIm.PaletteImage.Refresh()
 	out, downgraded, _, _, err = gfx.ApplyOneImage(im.CpcImage.Image, cfg, im.Mode, palette, uint8(im.Mode))
 	if err != nil {
 		dialog.ShowError(err, m.window)
 		return
 	}
 	im.Data = out
-	im.CpcImage = *canvas.NewImageFromImage(downgraded)
+	im.CpcImage.Image = downgraded
+	im.CpcImage.Refresh()
 	im.Palette = palette
-	im.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(im.Palette))
+	im.PaletteImage.Image = png.PalToImage(im.Palette)
+	im.PaletteImage.Refresh()
 
 	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
 	pi.Show()
@@ -115,24 +119,27 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 			return
 		}
 	}
-	di.ResultImage.CpcResultImage = *canvas.NewImageFromImage(img)
-	di.ResultImage.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(di.ResultImage.Palette))
-	refreshUI.OnTapped()
+	di.ResultImage.CpcResultImage.Image = img
+	di.ResultImage.CpcResultImage.Refresh()
+	di.ResultImage.PaletteImage.Image = png.PalToImage(di.ResultImage.Palette)
+	di.ResultImage.PaletteImage.Refresh()
 }
 
 func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) fyne.CanvasObject {
+	di.ResultImage = menu.NewMergedImageMenu()
 	di.ResultImage.CpcLeftImage = di.LeftImage.CpcImage
 	di.ResultImage.CpcRightImage = di.RightImage.CpcImage
 	di.ResultImage.LeftPalette = di.LeftImage.Palette
 	di.ResultImage.RightPalette = di.RightImage.Palette
 	di.ResultImage.LeftPaletteImage = di.LeftImage.PaletteImage
 	di.ResultImage.RightPaletteImage = di.RightImage.PaletteImage
+
 	return container.New(
 		layout.NewGridLayoutWithRows(3),
 		container.New(
 			layout.NewGridLayoutWithColumns(2),
-			&di.LeftImage.CpcImage,
-			&di.RightImage.CpcImage,
+			di.LeftImage.CpcImage,
+			di.RightImage.CpcImage,
 		),
 
 		container.New(
@@ -142,35 +149,41 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) fyne.CanvasObject {
 				layout.NewGridLayoutWithColumns(2),
 				container.New(
 					layout.NewGridLayoutWithColumns(1),
-					&di.LeftImage.PaletteImage,
+					di.LeftImage.PaletteImage,
 				),
 				container.New(
 					layout.NewGridLayoutWithColumns(1),
-					&di.RightImage.PaletteImage,
+					di.RightImage.PaletteImage,
 				),
 
 				widget.NewButtonWithIcon("Merge image", theme.MediaPlayIcon(), func() {
 					m.MergeImages(m.egx)
 				}),
 				widget.NewButtonWithIcon("Refresh UI", theme.ComputerIcon(), func() {
-					di.ResultImage.CpcLeftImage = di.LeftImage.CpcImage
-					di.ResultImage.CpcRightImage = di.RightImage.CpcImage
+					di.ResultImage.CpcLeftImage.Image = di.LeftImage.CpcImage.Image
+					di.ResultImage.CpcRightImage.Image = di.RightImage.CpcImage.Image
+					di.ResultImage.CpcLeftImage.Refresh()
+					di.ResultImage.CpcResultImage.Refresh()
 					di.ResultImage.LeftPalette = di.LeftImage.Palette
 					di.ResultImage.RightPalette = di.RightImage.Palette
-					di.ResultImage.LeftPaletteImage = di.LeftImage.PaletteImage
-					di.ResultImage.RightPaletteImage = di.RightImage.PaletteImage
-					di.ResultImage.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(di.ResultImage.Palette))
-					s := m.window.Content().Size()
-					s.Height += 10.
-					s.Width += 10.
-					m.window.Resize(s)
-					m.window.Canvas().Refresh(&di.ResultImage.CpcLeftImage)
-					m.window.Canvas().Refresh(&di.ResultImage.CpcRightImage)
-					m.window.Canvas().Refresh(&di.ResultImage.CpcResultImage)
-					m.window.Canvas().Refresh(&di.ResultImage.LeftPaletteImage)
-					m.window.Canvas().Refresh(&di.ResultImage.RightPaletteImage)
-					m.window.Canvas().Refresh(&di.ResultImage.PaletteImage)
-					m.window.Resize(m.window.Content().Size())
+					di.ResultImage.LeftPaletteImage.Image = di.LeftImage.PaletteImage.Image
+					di.ResultImage.LeftPaletteImage.Refresh()
+					di.ResultImage.RightPaletteImage.Image = di.RightImage.PaletteImage.Image
+					di.ResultImage.LeftPaletteImage.Refresh()
+					di.ResultImage.PaletteImage.Image = png.PalToImage(di.ResultImage.Palette)
+					di.ResultImage.PaletteImage.Refresh()
+
+					// s := m.window.Content().Size()
+					// s.Height += 10.
+					// s.Width += 10.
+					// m.window.Resize(s)
+					// m.window.Canvas().Refresh(&di.ResultImage.CpcLeftImage)
+					// m.window.Canvas().Refresh(&di.ResultImage.CpcRightImage)
+					// m.window.Canvas().Refresh(&di.ResultImage.CpcResultImage)
+					// m.window.Canvas().Refresh(&di.ResultImage.LeftPaletteImage)
+					// m.window.Canvas().Refresh(&di.ResultImage.RightPaletteImage)
+					// m.window.Canvas().Refresh(&di.ResultImage.PaletteImage)
+					// m.window.Resize(m.window.Content().Size())
 					m.window.Content().Refresh()
 				}),
 				widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
@@ -194,10 +207,10 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) fyne.CanvasObject {
 		),
 		container.New(
 			layout.NewGridLayoutWithColumns(2),
-			&di.ResultImage.CpcResultImage,
+			di.ResultImage.CpcResultImage,
 			container.New(
 				layout.NewGridLayoutWithRows(3),
-				&di.ResultImage.PaletteImage,
+				di.ResultImage.PaletteImage,
 			),
 		),
 	)
@@ -212,18 +225,6 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 		me.UsePalette = b
 	})
 
-	forceUIRefresh := widget.NewButtonWithIcon("Refresh UI", theme.ComputerIcon(), func() {
-		s := m.window.Content().Size()
-		s.Height += 10.
-		s.Width += 10.
-		m.window.Resize(s)
-		m.window.Canvas().Refresh(&me.OriginalImage)
-		m.window.Canvas().Refresh(&me.PaletteImage)
-		m.window.Canvas().Refresh(&me.CpcImage)
-		m.window.Resize(m.window.Content().Size())
-		m.window.Content().Refresh()
-	})
-	refreshUI = forceUIRefresh
 	openFileWidget := widget.NewButton("Image", func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {
@@ -240,11 +241,12 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 				dialog.ShowError(err, m.window)
 				return
 			}
-			canvasImg := canvas.NewImageFromImage(img)
-			me.OriginalImage = *canvas.NewImageFromImage(canvasImg.Image)
+
+			me.OriginalImage.Image = img
 			me.OriginalImage.FillMode = canvas.ImageFillContain
-			m.window.Canvas().Refresh(&me.OriginalImage)
-			m.window.Resize(m.window.Content().Size())
+			me.OriginalImage.Refresh()
+			// m.window.Canvas().Refresh(&me.OriginalImage)
+			// m.window.Resize(m.window.Content().Size())
 		}, m.window)
 		d.SetFilter(imagesFilesFilter)
 		d.Resize(dialogSize)
@@ -261,10 +263,6 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 	})
 
 	openFileWidget.Icon = theme.FileImageIcon()
-
-	me.CpcImage = canvas.Image{}
-	me.OriginalImage = canvas.Image{}
-	me.PaletteImage = canvas.Image{}
 
 	winFormat := w2.NewScreenFormatRadio(me)
 
@@ -346,9 +344,9 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 		container.New(
 			layout.NewGridLayoutWithRows(2),
 			container.NewScroll(
-				&me.OriginalImage),
+				me.OriginalImage),
 			container.NewScroll(
-				&me.CpcImage),
+				me.CpcImage),
 		),
 		container.New(
 			layout.NewVBoxLayout(),
@@ -359,7 +357,6 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 				applyButton,
 				exportButton,
 				importOpen,
-				forceUIRefresh,
 			),
 			container.New(
 				layout.NewHBoxLayout(),
@@ -394,7 +391,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 				),
 				container.New(
 					layout.NewGridLayoutWithRows(2),
-					&me.PaletteImage,
+					me.PaletteImage,
 					container.New(
 						layout.NewHBoxLayout(),
 						forcePalette,
@@ -430,9 +427,10 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 						widget.NewButton("Gray", func() {
 							if me.IsCpcPlus {
 								me.Palette = ci.MonochromePalette(me.Palette)
-								me.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(me.Palette))
+								me.PaletteImage.Image = png.PalToImage(me.Palette)
+								me.PaletteImage.Refresh()
 								forcePalette.SetChecked(true)
-								refreshUI.OnTapped()
+								forcePalette.Refresh()
 							}
 						}),
 					),

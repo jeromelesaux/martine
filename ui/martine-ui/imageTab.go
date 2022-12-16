@@ -122,13 +122,11 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 func (m *MartineUI) monochromeColor(c color.Color) {
 
 	m.main.Palette = image.ColorMonochromePalette(c, m.main.Palette)
-	m.main.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(m.main.Palette))
-
-	refreshUI.OnTapped()
+	m.main.PaletteImage.Image = png.PalToImage(m.main.Palette)
+	m.main.PaletteImage.Refresh()
 }
 
 func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
-	me.CpcImage = canvas.Image{}
 	cfg := m.NewConfig(me, true)
 	if cfg == nil {
 		return
@@ -169,10 +167,11 @@ func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 		newSize := constants.Size{Width: cfg.Size.Width * 50, Height: cfg.Size.Height * 50}
 		me.Downgraded = image.Resize(me.Downgraded, newSize, me.ResizeAlgo)
 	}
-	me.CpcImage = *canvas.NewImageFromImage(me.Downgraded)
+	me.CpcImage.Image = me.Downgraded
 	me.CpcImage.FillMode = canvas.ImageFillStretch
-	me.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(me.Palette))
-	refreshUI.OnTapped()
+	me.CpcImage.Refresh()
+	me.PaletteImage.Image = png.PalToImage(me.Palette)
+	me.PaletteImage.Refresh()
 }
 
 func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
@@ -184,18 +183,6 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 		me.UsePalette = b
 	})
 
-	forceUIRefresh := widget.NewButtonWithIcon("Refresh UI", theme.ComputerIcon(), func() {
-		s := m.window.Content().Size()
-		s.Height += 10.
-		s.Width += 10.
-		m.window.Resize(s)
-		m.window.Canvas().Refresh(&me.OriginalImage)
-		m.window.Canvas().Refresh(&me.PaletteImage)
-		m.window.Canvas().Refresh(&me.CpcImage)
-		m.window.Resize(m.window.Content().Size())
-		m.window.Content().Refresh()
-	})
-	refreshUI = forceUIRefresh
 	openFileWidget := widget.NewButton("Image", func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {
@@ -212,11 +199,12 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 				dialog.ShowError(err, m.window)
 				return
 			}
-			canvasImg := canvas.NewImageFromImage(img)
-			me.OriginalImage = *canvas.NewImageFromImage(canvasImg.Image)
+
+			me.OriginalImage.Image = img
 			me.OriginalImage.FillMode = canvas.ImageFillContain
-			m.window.Canvas().Refresh(&me.OriginalImage)
-			m.window.Resize(m.window.Content().Size())
+			me.OriginalImage.Refresh()
+			// m.window.Canvas().Refresh(&me.OriginalImage)
+			// m.window.Resize(m.window.Content().Size())
 		}, m.window)
 		d.SetFilter(imagesFilesFilter)
 		d.Resize(dialogSize)
@@ -233,10 +221,6 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 	})
 
 	openFileWidget.Icon = theme.FileImageIcon()
-
-	me.CpcImage = canvas.Image{}
-	me.OriginalImage = canvas.Image{}
-	me.PaletteImage = canvas.Image{}
 
 	winFormat := w2.NewWinFormatRadio(me)
 
@@ -325,9 +309,9 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 		container.New(
 			layout.NewGridLayoutWithRows(2),
 			container.NewScroll(
-				&me.OriginalImage),
+				me.OriginalImage),
 			container.NewScroll(
-				&me.CpcImage),
+				me.CpcImage),
 		),
 		container.New(
 			layout.NewVBoxLayout(),
@@ -338,7 +322,6 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 				applyButton,
 				exportButton,
 				importOpen,
-				forceUIRefresh,
 			),
 			container.New(
 				layout.NewHBoxLayout(),
@@ -388,7 +371,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 				),
 				container.New(
 					layout.NewGridLayoutWithRows(2),
-					&me.PaletteImage,
+					me.PaletteImage,
 					container.New(
 						layout.NewHBoxLayout(),
 						forcePalette,
@@ -424,9 +407,10 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 						widget.NewButton("Gray", func() {
 							if me.IsCpcPlus {
 								me.Palette = image.MonochromePalette(me.Palette)
-								me.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(me.Palette))
+								me.PaletteImage.Image = png.PalToImage(me.Palette)
+								me.PaletteImage.Refresh()
 								forcePalette.SetChecked(true)
-								refreshUI.OnTapped()
+								forcePalette.Refresh()
 							}
 						}),
 

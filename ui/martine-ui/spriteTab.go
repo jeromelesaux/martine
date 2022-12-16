@@ -77,22 +77,12 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 		}
 	}
 	s.OriginalImages.Update(icache, icache.ImagesPerRow, icache.ImagesPerColumn)
-	s.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(s.Palette))
+	s.PaletteImage.Image = png.PalToImage(s.Palette)
+	s.PaletteImage.Refresh()
 	pi.Hide()
-	refreshUI.OnTapped()
 }
 
 func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
-
-	forceUIRefresh := widget.NewButtonWithIcon("Refresh UI", theme.ComputerIcon(), func() {
-		s := m.window.Content().Size()
-		s.Height += 10.
-		s.Width += 10.
-		m.window.Resize(s)
-		m.window.Resize(m.window.Content().Size())
-		m.window.Content().Refresh()
-	})
-	refreshUI = forceUIRefresh
 
 	openFileWidget := widget.NewButton("Image", func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
@@ -109,11 +99,12 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 				dialog.ShowError(err, m.window)
 				return
 			}
-			canvasImg := canvas.NewImageFromImage(img)
-			s.OriginalBoard = *canvas.NewImageFromImage(canvasImg.Image)
+
+			s.OriginalBoard.Image = img
 			s.OriginalBoard.FillMode = canvas.ImageFillContain
-			m.window.Canvas().Refresh(&s.OriginalBoard)
-			m.window.Resize(m.window.Content().Size())
+			s.OriginalBoard.Refresh()
+			//m.window.Canvas().Refresh(&s.OriginalBoard)
+			//m.window.Resize(m.window.Content().Size())
 		}, m.window)
 		d.SetFilter(imagesFilesFilter)
 		d.Resize(dialogSize)
@@ -199,13 +190,12 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 
 	paletteOpen := NewOpenPaletteButton(s, m.window)
 	importOpen := ImportSpriteBoard(m)
-	s.PaletteImage = canvas.Image{}
 
 	return container.New(
 		layout.NewGridLayoutWithColumns(2),
 		container.New(
 			layout.NewGridLayoutWithRows(2),
-			&s.OriginalBoard,
+			s.OriginalBoard,
 			s.OriginalImages,
 		),
 		container.New(
@@ -219,7 +209,6 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 					exportButton,
 					paletteOpen,
 					importOpen,
-					refreshUI,
 				),
 				container.New(
 					layout.NewHBoxLayout(),
@@ -264,7 +253,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 				),
 				container.New(
 					layout.NewGridLayoutWithRows(2),
-					&s.PaletteImage,
+					s.PaletteImage,
 				),
 			),
 		),
@@ -376,7 +365,6 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 				m.sprite.OriginalImages.Update(icache, icache.ImagesPerRow, icache.ImagesPerColumn)
 
 			}
-			refreshUI.OnTapped()
 
 		}, m.window)
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".spr", ".imp"}))

@@ -37,7 +37,7 @@ func (m *MartineUI) IsClassicalTilemap(width, height int) bool {
 }
 
 func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
-	cfg := m.NewConfig(&me.ImageMenu, true)
+	cfg := m.NewConfig(me.ImageMenu, true)
 	if cfg == nil {
 		return
 	}
@@ -72,33 +72,21 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 		}
 	}
 	me.TileImages.Update(tilesCanvas, len(tiles)-1, len(tiles[0])-1)
-	me.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(me.Palette))
-	canvas.Refresh(&me.TileImages.Table)
-	refreshUI.OnTapped()
+	me.PaletteImage.Image = png.PalToImage(me.Palette)
+	me.PaletteImage.Refresh()
+
 }
 
 func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 	tm.IsSprite = true
-	importOpen := NewImportButton(m, &tm.ImageMenu)
+	importOpen := NewImportButton(m, tm.ImageMenu)
 
-	paletteOpen := NewOpenPaletteButton(&tm.ImageMenu, m.window)
+	paletteOpen := NewOpenPaletteButton(tm.ImageMenu, m.window)
 
 	forcePalette := widget.NewCheck("use palette", func(b bool) {
 		tm.UsePalette = b
 	})
 
-	forceUIRefresh := widget.NewButtonWithIcon("Refresh UI", theme.ComputerIcon(), func() {
-		s := m.window.Content().Size()
-		s.Height += 10.
-		s.Width += 10.
-		m.window.Resize(s)
-		m.window.Canvas().Refresh(&tm.OriginalImage)
-		m.window.Canvas().Refresh(&tm.PaletteImage)
-		m.tilemap.TileImages.Refresh()
-		m.window.Resize(m.window.Content().Size())
-		m.window.Content().Refresh()
-	})
-	refreshUI = forceUIRefresh
 	openFileWidget := widget.NewButton("Image", func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {
@@ -115,12 +103,11 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 				dialog.ShowError(err, m.window)
 				return
 			}
-			canvasImg := canvas.NewImageFromImage(img)
-			tm.OriginalImage = *canvas.NewImageFromImage(canvasImg.Image)
+			tm.OriginalImage.Image = img
 			tm.OriginalImage.FillMode = canvas.ImageFillContain
 			tm.OriginalImage.Refresh()
-			m.window.Canvas().Refresh(&tm.OriginalImage)
-			m.window.Resize(m.window.Content().Size())
+			// m.window.Canvas().Refresh(&tm.OriginalImage)
+			// m.window.Resize(m.window.Content().Size())
 		}, m.window)
 		d.SetFilter(imagesFilesFilter)
 		d.Resize(dialogSize)
@@ -138,9 +125,6 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 	})
 
 	openFileWidget.Icon = theme.FileImageIcon()
-
-	tm.OriginalImage = canvas.Image{}
-	tm.PaletteImage = canvas.Image{}
 
 	isPlus := widget.NewCheck("CPC Plus", func(b bool) {
 		tm.IsCpcPlus = b
@@ -174,7 +158,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 			container.New(
 				layout.NewGridLayoutWithColumns(1),
 				container.NewScroll(
-					&tm.OriginalImage),
+					tm.OriginalImage),
 			),
 			container.New(
 				layout.NewVBoxLayout(),
@@ -187,7 +171,6 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 						applyButton,
 						exportButton,
 						importOpen,
-						forceUIRefresh,
 					),
 					container.New(
 						layout.NewHBoxLayout(),
@@ -216,7 +199,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 
 						container.New(
 							layout.NewGridLayoutWithColumns(2),
-							&tm.PaletteImage,
+							tm.PaletteImage,
 							container.New(
 								layout.NewHBoxLayout(),
 								forcePalette,

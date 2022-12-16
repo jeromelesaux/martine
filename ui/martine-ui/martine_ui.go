@@ -10,7 +10,6 @@ import (
 	"strconv"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/storage"
@@ -23,7 +22,6 @@ import (
 )
 
 var (
-	refreshUI     *widget.Button
 	modeSelection *widget.Select
 	//paletteSelection  *widget.Select
 	dialogSize        = fyne.NewSize(800, 800)
@@ -46,10 +44,10 @@ type MartineUI struct {
 
 func NewMartineUI() *MartineUI {
 	m := &MartineUI{
-		main:          &menu.ImageMenu{},
-		tilemap:       &menu.TilemapMenu{},
-		animate:       &menu.AnimateMenu{},
-		egx:           &menu.DoubleImageMenu{},
+		main:          menu.NewImageMenu(),
+		tilemap:       menu.NewTilemapMenu(),
+		animate:       menu.NewAnimateMenu(),
+		egx:           menu.NewDoubleImageMenu(),
 		sprite:        menu.NewSpriteMenu(),
 		imageExport:   &menu.ImageExport{},
 		tilemapExport: &menu.ImageExport{},
@@ -61,10 +59,9 @@ func NewMartineUI() *MartineUI {
 }
 
 func (m *MartineUI) SetPalette(p color.Palette) {
-
 	m.main.Palette = p
-	m.main.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(p))
-	refreshUI.OnTapped()
+	m.main.PaletteImage.Image = png.PalToImage(p)
+	m.main.PaletteImage.Refresh()
 }
 
 func (m *MartineUI) Load(app fyne.App) {

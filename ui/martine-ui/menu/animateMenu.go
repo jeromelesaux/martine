@@ -16,8 +16,8 @@ import (
 var AnimateSize float32 = 150.
 
 type AnimateMenu struct {
-	ImageMenu
-	Originalmages      []canvas.Image
+	*ImageMenu
+	Originalmages      []*canvas.Image
 	AnimateImages      *custom_widget.ImageTable
 	DeltaCollection    []*transformation.DeltaCollection
 	InitialAddress     *widget.Entry
@@ -31,7 +31,8 @@ type AnimateMenu struct {
 
 func NewAnimateMenu() *AnimateMenu {
 	return &AnimateMenu{
-		Originalmages:   make([]canvas.Image, 0),
+		ImageMenu:       NewImageMenu(),
+		Originalmages:   make([]*canvas.Image, 0),
 		AnimateImages:   custom_widget.NewEmptyImageTable(fyne.NewSize(AnimateSize, AnimateSize)),
 		DeltaCollection: make([]*transformation.DeltaCollection, 1),
 	}

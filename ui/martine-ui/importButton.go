@@ -54,9 +54,11 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 				me.Palette = p
 				me.Mode = int(mode)
 				modeSelection.SetSelectedIndex(me.Mode)
-				me.PaletteImage = *canvas.NewImageFromImage(png.PalToImage(p))
-				me.OriginalImage = *canvas.NewImageFromImage(img)
+				me.PaletteImage.Image = png.PalToImage(p)
+				me.PaletteImage.Refresh()
+				me.OriginalImage.Image = img
 				me.OriginalImage.FillMode = canvas.ImageFillContain
+				me.OriginalImage.Refresh()
 			} else if me.IsSprite {
 				// loading sprite file
 				if len(me.Palette) == 0 {
@@ -70,8 +72,9 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 				}
 				me.Width.SetText(strconv.Itoa(size.Width))
 				me.Height.SetText(strconv.Itoa(size.Height))
-				me.OriginalImage = *canvas.NewImageFromImage(img)
+				me.OriginalImage.Image = img
 				me.OriginalImage.FillMode = canvas.ImageFillContain
+				me.OriginalImage.Refresh()
 			} else {
 				//loading classical screen
 				if len(me.Palette) == 0 {
@@ -83,10 +86,10 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 					dialog.ShowError(err, m.window)
 					return
 				}
-				me.OriginalImage = *canvas.NewImageFromImage(img)
+				me.OriginalImage.Image = img
 				me.OriginalImage.FillMode = canvas.ImageFillContain
+				me.OriginalImage.Refresh()
 			}
-			refreshUI.OnTapped()
 		}, m.window)
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".scr", ".win", ".bin"}))
 		d.Resize(dialogSize)
