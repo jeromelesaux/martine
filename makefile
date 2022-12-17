@@ -101,23 +101,23 @@ build-windows-i386:
 	(make archive ARCH=386 OS=windows  EXT=.exe)
 
 package-darwin:
-	(make init)
+	(make init ARCH=arm64 OS=darwin)
 	@echo "Compilation and packaging for darwin"
-	fyne package -os darwin -icon martine-logo.png -sourceDir ${SOURCEDIR} -name martine
+	fyne package -os darwin -icon martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
 	mv martine.app ${BINARY}/martine-${OS}-${ARCH}/
 	(make archive)
 
 package-windows:
-	(make init)
+	(make init ARCH=386 OS=windows  EXT=.exe)
 	@echo "Compilation and packaging for windows"
-	fyne package -os windows -icon martine-logo.png -sourceDir ${SOURCEDIR} -name martine
+	fyne package -os windows -icon martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
 	mv martine.exe ${BINARY}/martine-${OS}-${ARCH}/
 	(make archive)
 
 package-linux:
 	(make init)
 	@echo "Compilation and packaging for linux"
-	fyne package -os linux -icon martine-logo.png -sourceDir ${SOURCEDIR} -name martine
+	fyne package -os linux -icon martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
 	mv martine ${BINARY}/martine-${OS}-${ARCH}/
 	(make archive)
 		
