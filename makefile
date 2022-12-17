@@ -101,10 +101,10 @@ build-windows-i386:
 	(make archive ARCH=386 OS=windows  EXT=.exe)
 
 package-darwin:
-	(make init ARCH=arm64 OS=darwin)
+	(make init ARCH=amd64 OS=darwin)
 	@echo "Compilation and packaging for darwin"
 	fyne package -os darwin -icon martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
-	mv martine.app ${BINARY}/martine-${OS}-${ARCH}/
+	cp -r martine.app ${BINARY}/martine-${OS}-${ARCH}/
 	(make archive)
 
 package-windows:
