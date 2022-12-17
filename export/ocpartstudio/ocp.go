@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"image/color"
 	"io"
-	"io/ioutil"
 	"os"
 
 	"github.com/jeromelesaux/m4client/cpc"
@@ -164,7 +163,7 @@ func RawScr(filePath string) ([]byte, error) {
 		}
 	}
 
-	bf, err := ioutil.ReadAll(fr)
+	bf, err := io.ReadAll(fr)
 	if err != nil {
 		return nil, err
 	}

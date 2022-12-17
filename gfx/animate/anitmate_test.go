@@ -6,7 +6,7 @@ import (
 	"image/draw"
 	"image/gif"
 	"image/png"
-	"io/ioutil"
+	"io"
 	"os"
 	"testing"
 
@@ -41,7 +41,7 @@ func TestCompressZx0(t *testing.T) {
 		t.Fatalf("%v", err)
 	}
 	defer f.Close()
-	b, err := ioutil.ReadAll(f)
+	b, err := io.ReadAll(f)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}

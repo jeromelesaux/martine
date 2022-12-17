@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -16,12 +15,12 @@ func WilcardedFiles(filespath []string) ([]string, error) {
 
 	for _, v := range filespath {
 		dir := filepath.Dir(v)
-		fis, err := ioutil.ReadDir(dir)
+		fis, err := os.ReadDir(dir)
 		if err != nil {
 			return fullfilespath, err
 		}
 		reg := filepath.Base(v)
-		//fmt.Fprintf(os.Stdout, "Regular to match (%s)\n", reg)
+		// fmt.Fprintf(os.Stdout, "Regular to match (%s)\n", reg)
 		for _, f := range fis {
 			if !f.IsDir() {
 				check := filepath.Join(dir, f.Name())
@@ -31,7 +30,7 @@ func WilcardedFiles(filespath []string) ([]string, error) {
 					fmt.Fprintf(os.Stderr, "Error while checking match with error %v\n", err)
 					return fullfilespath, err
 				}
-				//fmt.Fprintf(os.Stdout, "Returns %v\n", matchs)
+				// fmt.Fprintf(os.Stdout, "Returns %v\n", matchs)
 				if matchs {
 					//	fmt.Fprintf(os.Stdout, "Ok (%s) matches (%s)\n", reg, check)
 					if !ContainsFilepath(fullfilespath, check) {
