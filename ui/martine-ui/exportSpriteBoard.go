@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/compression"
@@ -25,7 +26,6 @@ import (
 )
 
 func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
-
 	formatSelect := widget.NewSelect(
 		[]string{
 			string(menu.SpriteImpCatcher),
@@ -110,7 +110,7 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 }
 
 func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
-	pi := dialog.NewProgressInfinite("Saving....", "Please wait.", m.window)
+	pi := custom_widget.NewProgressInfinite("Saving...., Please wait.", m.window)
 	pi.Show()
 	if err := impPalette.SaveKit(s.ExportFolderPath+string(filepath.Separator)+"SPRITES.KIT", s.Palette(), s.ExportWithAmsdosHeader); err != nil {
 		pi.Hide()
@@ -132,7 +132,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			} else {
 				pi.Hide()
 				dialog.NewError(errors.New("no yet implemented, try another option"), m.window).Show()
-				//routine = animate.ExportCompiledSprite(diff)
+				// routine = animate.ExportCompiledSprite(diff)
 				return
 			}
 			code += fmt.Sprintf("spr_%.2d:\n", idx)
@@ -169,7 +169,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		filename := s.ExportFolderPath + string(filepath.Separator) + "SPRITES.BIN"
 		buf, _ = compression.Compress(buf, s.ExportCompression)
 		var err error
-		//TODO add amsdos header
+		// TODO add amsdos header
 		if s.ExportWithAmsdosHeader {
 			err = amsdos.SaveAmsdosFile(filename, ".WIN", buf, 2, 0, 0x4000, 0x4000)
 			if err != nil {
@@ -253,5 +253,4 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		pi.Hide()
 	}
 	dialog.ShowInformation("Saved", "Your export ended in the folder : "+s.ExportFolderPath, m.window)
-
 }

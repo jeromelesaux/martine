@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert/image"
@@ -32,7 +33,7 @@ import (
 )
 
 func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
-	pi := dialog.NewProgressInfinite("Saving....", "Please wait.", m.window)
+	pi := custom_widget.NewProgressInfinite("Saving...., Please wait.", m.window)
 	pi.Show()
 	cfg := m.NewConfig(me, true)
 	if cfg == nil {
@@ -115,7 +116,6 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 	}
 	pi.Hide()
 	dialog.ShowInformation("Save", "Your files are save in folder \n"+m.imageExport.ExportFolderPath, m.window)
-
 }
 
 func (m *MartineUI) monochromeColor(c color.Color) {
@@ -147,7 +147,7 @@ func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 		}
 
 	}
-	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
+	pi := custom_widget.NewProgressInfinite("Computing, Please wait.", m.window)
 	pi.Show()
 	out, downgraded, palette, _, err := gfx.ApplyOneImage(me.OriginalImage().Image, cfg, me.Mode, inPalette, uint8(me.Mode))
 	pi.Hide()

@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/config"
 
 	ci "github.com/jeromelesaux/martine/convert/image"
@@ -90,7 +91,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	im.SetPalette(palette)
 	im.SetPaletteImage(png.PalToImage(im.Palette()))
 
-	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
+	pi := custom_widget.NewProgressInfinite("Computing, Please wait.", m.window)
 	pi.Show()
 	res, _, egxType, err := effect.EgxRaw(di.LeftImage.Data, di.RightImage.Data, palette, di.LeftImage.Mode, di.RightImage.Mode, cfg)
 	pi.Hide()
@@ -168,7 +169,6 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) fyne.CanvasObject {
 					di.ResultImage.LeftPaletteImage.Refresh()
 					di.ResultImage.PaletteImage.Image = png.PalToImage(di.ResultImage.Palette)
 					di.ResultImage.PaletteImage.Refresh()
-
 				}),
 				widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
 					// export the egx image

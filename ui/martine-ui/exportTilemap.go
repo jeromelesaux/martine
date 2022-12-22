@@ -9,13 +9,13 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
 func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
-
 	cont := container.NewVBox(
 		container.NewHBox(
 			widget.NewLabel("export type:"),
@@ -111,7 +111,7 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 }
 
 func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
-	pi := dialog.NewProgressInfinite("Saving....", "Please wait.", m.window)
+	pi := custom_widget.NewProgressInfinite("Saving...., Please wait.", m.window)
 	pi.Show()
 	cfg := m.NewConfig(t.ImageMenu, true)
 	cfg.OutputPath = t.ExportFolderPath

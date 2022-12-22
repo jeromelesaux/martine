@@ -56,7 +56,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 					}
 					m.animateExport.ExportFolderPath = lu.Path()
 					fmt.Println(m.animateExport.ExportFolderPath)
-					pi := dialog.NewProgressInfinite("Exporting", "Please wait.", m.window)
+					pi := custom_widget.NewProgressInfinite("Exporting, please wait.", m.window)
 					pi.Show()
 					code, err := animate.ExportDeltaAnimate(
 						a.RawImages[0],
@@ -126,7 +126,7 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 		return
 	}
 	cfg.Compression = m.animateExport.ExportCompression
-	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
+	pi := custom_widget.NewProgressInfinite("Computing, Please wait.", m.window)
 	pi.Show()
 	address, err := strconv.ParseUint(a.InitialAddress.Text, 16, 64)
 	if err != nil {
@@ -178,7 +178,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 			if reader == nil {
 				return
 			}
-			pi := dialog.NewProgressInfinite("Opening file", "Please wait.", m.window)
+			pi := custom_widget.NewProgressInfinite("Opening file, Please wait.", m.window)
 			pi.Show()
 			path := reader.URI()
 			if strings.ToUpper(filepath.Ext(path.Path())) != ".GIF" {

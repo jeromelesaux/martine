@@ -44,7 +44,7 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 
 	cfg.CustomDimension = true
 
-	pi := dialog.NewProgressInfinite("Computing", "Please wait.", m.window)
+	pi := custom_widget.NewProgressInfinite("Computing, Please wait.", m.window)
 	pi.Show()
 	var analyze *transformation.AnalyzeBoard
 	var palette color.Palette

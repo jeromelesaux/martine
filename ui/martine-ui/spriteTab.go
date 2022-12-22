@@ -29,12 +29,11 @@ import (
 )
 
 func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
-
 	if s.SpriteColumns == 0 || s.SpriteRows == 0 {
 		dialog.NewError(errors.New("number of sprites per row or column are not set"), m.window).Show()
 		return
 	}
-	pi := dialog.NewProgressInfinite("Computing....", "Please wait.", m.window)
+	pi := custom_widget.NewProgressInfinite("Computing...., Please wait.", m.window)
 	pi.Show()
 	var colorsAvailable int
 	switch s.Mode {
@@ -82,7 +81,6 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 }
 
 func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
-
 	openFileWidget := widget.NewButton("Image", func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {
@@ -309,7 +307,7 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 					}
 				}
 				m.sprite.OriginalImages.Update(icache, icache.ImagesPerRow, icache.ImagesPerColumn)
-				//len(spritesHard.Data)/m.sprite.SpriteNumberPerColumn
+				// len(spritesHard.Data)/m.sprite.SpriteNumberPerColumn
 			} else {
 				// load and display .imp file content
 				mode := m.sprite.Mode
@@ -359,11 +357,9 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 				m.sprite.OriginalImages.Update(icache, icache.ImagesPerRow, icache.ImagesPerColumn)
 
 			}
-
 		}, m.window)
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".spr", ".imp"}))
 		d.Resize(dialogSize)
 		d.Show()
-
 	})
 }
