@@ -236,7 +236,7 @@ func FormatAssemblyString(data []string, eol string) string {
 func SpritesHardText(data [][]byte) string {
 	var out string
 	for i, v := range data {
-		out += fmt.Sprintf("Sprite_%02d", i)
+		out += fmt.Sprintf("Sprite_%02d\n", i)
 		out += FormatAssemblyDatabyte(v, "\n")
 	}
 
