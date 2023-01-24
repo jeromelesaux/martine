@@ -233,6 +233,16 @@ func FormatAssemblyString(data []string, eol string) string {
 	return out
 }
 
+func SpritesHardText(data [][]byte) string {
+	var out string
+	for i, v := range data {
+		out += fmt.Sprintf("Sprite_%02d", i)
+		out += FormatAssemblyDatabyte(v, "\n")
+	}
+
+	return out
+}
+
 func FormatAssemblyDatabyte(data []byte, eol string) string {
 	var out string
 	for i := 0; i < len(data); i += 8 {

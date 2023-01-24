@@ -15,6 +15,7 @@ import (
 	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/export/amsdos"
+	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/compression"
 	"github.com/jeromelesaux/martine/export/diskimage"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
@@ -251,6 +252,16 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			}
 		}
 		pi.Hide()
+	}
+	if s.ExportText {
+		data := make([][]byte, 0)
+		for _, v := range s.SpritesData {
+			data = append(data, v...)
+		}
+		code := ascii.SpritesHardText(data)
+		filename := s.ExportFolderPath + string(filepath.Separator) + "SPRITES.ASM"
+		amsdos.SaveStringOSFile(filename, code)
+
 	}
 	dialog.ShowInformation("Saved", "Your export ended in the folder : "+s.ExportFolderPath, m.window)
 }

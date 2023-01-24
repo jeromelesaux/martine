@@ -37,7 +37,7 @@ func (m MartineTheme) Icon(name fyne.ThemeIconName) fyne.Resource {
 }
 
 func main() {
-	//os.Setenv("FYNE_SCALE", "3.0")
+	//os.Setenv("FYNE_SCALE", "1.0")
 	//os.Setenv("FYNE_THEME", "light")
 	/* main application */
 	mapp := app.NewWithID("Martine @IMPact")
