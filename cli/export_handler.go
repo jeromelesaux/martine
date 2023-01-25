@@ -10,6 +10,7 @@ import (
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/export/compression"
 )
 
 func ExportHandler() (*config.MartineConfig, constants.Size) {
@@ -100,7 +101,7 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	cfg.CpcPlus = *plusMode
 	cfg.TileIterationX = *tileIterationX
 	cfg.TileIterationY = *tileIterationY
-	cfg.Compression = *compress
+	cfg.Compression = compression.ToCompressMethod(*compress)
 	cfg.RotationMode = *rotateMode
 	cfg.Rotation3DMode = *rotate3dMode
 	cfg.Rotation3DType = *rotate3dType

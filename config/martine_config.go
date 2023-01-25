@@ -12,6 +12,7 @@ import (
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/export/compression"
 )
 
 // var amsdosFilenameOnce sync.Once
@@ -32,7 +33,7 @@ type MartineConfig struct {
 	M4Host                      string
 	M4Autoexec                  bool
 	Size                        constants.Size
-	Compression                 int
+	Compression                 compression.CompressionMethod
 	NoAmsdosHeader              bool
 	RotationMode                bool
 	Rotation3DMode              bool
@@ -145,7 +146,8 @@ func NewMartineConfig(input, output string) *MartineConfig {
 		Rotation3DY0:   -1,
 		Tiles:          export.NewJsonSlice(),
 		InkSwapper:     make(map[int]int),
-		LineWidth:      0x50}
+		LineWidth:      0x50,
+	}
 }
 
 func (e *MartineConfig) AddFile(file string) {
@@ -226,7 +228,6 @@ func (e *MartineConfig) TransformToAmsdosFile(filePath string) string {
 	}
 	copy(amsdosFile[:], file[0:filenameSize])
 	return string(amsdosFile)
-
 }
 
 func AmsdosFilename(inputPath, ext string) string {

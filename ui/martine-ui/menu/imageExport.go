@@ -1,12 +1,14 @@
 package menu
 
+import "github.com/jeromelesaux/martine/export/compression"
+
 type ImageExport struct {
 	ExportDsk              bool
 	ExportText             bool
 	ExportWithAmsdosHeader bool
 	ExportZigzag           bool
 	ExportJson             bool
-	ExportCompression      int
+	ExportCompression      compression.CompressionMethod
 	ExportFolderPath       string
 	M2IP                   string
 	ExportToM2             bool

@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/fyne-io/custom_widget"
+	"github.com/jeromelesaux/martine/export/compression"
 )
 
 var SpriteSize float32 = 80.
@@ -48,7 +49,7 @@ type SpriteMenu struct {
 	ExportWithAmsdosHeader bool
 	ExportZigzag           bool
 	ExportJson             bool
-	ExportCompression      int
+	ExportCompression      compression.CompressionMethod
 	ExportFolderPath       string
 }
 
@@ -104,10 +105,9 @@ func (s *SpriteMenu) ImportSprite(win fyne.Window) *widget.Button {
 			if reader == nil {
 				return
 			}
-
 		}, win)
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".scr", ".win", ".bin"}))
-		//d.Resize(dialogSize)
+		// d.Resize(dialogSize)
 		d.Show()
 	})
 }

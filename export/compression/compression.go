@@ -10,17 +10,47 @@ import (
 	zx0 "github.com/jeromelesaux/zx0/encode"
 )
 
-func Compress(data []byte, compression int) ([]byte, error) {
+type CompressionMethod int
+
+const (
+	NONE CompressionMethod = iota
+	RLE
+	RLE16
+	LZ4
+	RawLZ4
+	ZX0
+)
+
+func ToCompressMethod(val int) CompressionMethod {
+	switch val {
+	case -1:
+		return NONE
+	case 1:
+		return RLE
+	case 2:
+		return RLE16
+	case 3:
+		return LZ4
+	case 4:
+		return RawLZ4
+	case 5:
+		return ZX0
+	default:
+		return NONE
+	}
+}
+
+func Compress(data []byte, compression CompressionMethod) ([]byte, error) {
 	var err0 error
-	if compression != -1 {
+	if compression != NONE {
 		switch compression {
-		case 1:
+		case RLE:
 			fmt.Fprintf(os.Stdout, "Using RLE compression\n")
 			data = rle.Encode(data)
-		case 2:
+		case RLE16:
 			fmt.Fprintf(os.Stdout, "Using RLE 16 bits compression\n")
 			data = rle.Encode16(data)
-		case 3:
+		case LZ4:
 			fmt.Fprintf(os.Stdout, "Using LZ4 compression\n")
 			var dst []byte
 			dst, err := lz4.Encode(dst, data)
@@ -29,7 +59,7 @@ func Compress(data []byte, compression int) ([]byte, error) {
 				err0 = err
 			}
 			data = dst
-		case 4:
+		case RawLZ4:
 			fmt.Fprintf(os.Stdout, "Using LZ4-Raw compression\n")
 			var dst []byte
 			dst, err := rawlz4.Encode(dst, data)
@@ -38,7 +68,7 @@ func Compress(data []byte, compression int) ([]byte, error) {
 				err0 = err
 			}
 			data = dst[4:]
-		case 5:
+		case ZX0:
 			fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
 			data = zx0.Encode(data)
 		}

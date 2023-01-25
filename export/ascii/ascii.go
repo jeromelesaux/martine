@@ -232,7 +232,7 @@ func FormatAssemblyString(data []string, eol string) string {
 	return out
 }
 
-func SpritesHardText(data [][]byte, compressionType int) string {
+func SpritesHardText(data [][]byte, compressionType compression.CompressionMethod) string {
 	var out string
 	for i, v := range data {
 		out += fmt.Sprintf("Sprite_%02d\n", i)
