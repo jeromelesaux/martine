@@ -43,7 +43,6 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cg
 		out += eol
 	}
 	if !cgf.NoAmsdosHeader {
-
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".TXT", []byte(out), 0, 0, 0, 0); err != nil {
 			return err
 		}
@@ -162,7 +161,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".TXT", []byte(out), 0, 0, 0, 0); err != nil {
 			return err
 		}
-		//binary.Write(fw, binary.LittleEndian, header)
+		// binary.Write(fw, binary.LittleEndian, header)
 	} else {
 		if err := amsdos.SaveOSFile(osFilepath, []byte(out)); err != nil {
 			return err
@@ -233,11 +232,17 @@ func FormatAssemblyString(data []string, eol string) string {
 	return out
 }
 
-func SpritesHardText(data [][]byte) string {
+func SpritesHardText(data [][]byte, compressionType int) string {
 	var out string
 	for i, v := range data {
 		out += fmt.Sprintf("Sprite_%02d\n", i)
-		out += FormatAssemblyDatabyte(v, "\n")
+		compressed, err := compression.Compress([]byte(v), compressionType)
+		if err == nil {
+			out += FormatAssemblyDatabyte(compressed, "\n")
+		} else {
+			out += err.Error()
+		}
+
 	}
 
 	return out
