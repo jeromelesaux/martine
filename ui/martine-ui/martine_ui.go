@@ -23,6 +23,7 @@ import (
 var (
 	modeSelection     *widget.Select
 	dialogSize        = fyne.NewSize(800, 800)
+	savingDialogSize  = fyne.NewSize(800, 800)
 	imagesFilesFilter = storage.NewExtensionFileFilter([]string{".jpg", ".gif", ".png", ".jpeg", ".JPG", ".JPEG", ".GIF", ".PNG"})
 )
 

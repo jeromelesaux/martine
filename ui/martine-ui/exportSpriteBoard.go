@@ -101,6 +101,7 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 				m.ExportSpriteBoard(s)
 				// apply and export
 			}, m.window)
+			fo.Resize(savingDialogSize)
 			fo.Show()
 		}),
 	)

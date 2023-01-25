@@ -77,6 +77,7 @@ func (m *MartineUI) exportDialog(ie *menu.ImageExport, w fyne.Window) {
 
 				// apply and export
 			}, m.window)
+			fo.Resize(savingDialogSize)
 			fo.Show()
 		}),
 	)

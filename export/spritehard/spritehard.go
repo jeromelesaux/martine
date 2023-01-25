@@ -93,7 +93,7 @@ func Spr(filePath string, spr SprImpdraw, cfg *config.MartineConfig) error {
 	}
 	content, _ = compression.Compress(content, cfg.Compression)
 	ext := ".SPR"
-	if cfg.Compression != -1 {
+	if cfg.Compression != compression.NONE {
 		ext = ".SPR.zxo"
 	}
 	if !cfg.NoAmsdosHeader {

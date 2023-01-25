@@ -101,6 +101,7 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 				m.ExportTilemap(m.tilemap)
 				// apply and export
 			}, m.window)
+			fo.Resize(savingDialogSize)
 			fo.Show()
 		}),
 	)

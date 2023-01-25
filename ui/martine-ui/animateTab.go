@@ -80,6 +80,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 					}
 					dialog.ShowInformation("Save", "Your files are save in folder \n"+m.animateExport.ExportFolderPath, m.window)
 				}, m.window)
+				fo.Resize(savingDialogSize)
 				fo.Show()
 			}),
 			widget.NewLabel("Export version (V1 not optimized, V2 optimized)"),

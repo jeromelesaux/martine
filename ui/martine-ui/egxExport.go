@@ -13,6 +13,7 @@ import (
 	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/convert/export"
+	"github.com/jeromelesaux/martine/export/compression"
 	"github.com/jeromelesaux/martine/export/diskimage"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/m4"
@@ -57,17 +58,17 @@ func (m *MartineUI) exportEgxDialog(ie *menu.ImageExport, w fyne.Window) {
 			func(s string) {
 				switch s {
 				case "none":
-					ie.ExportCompression = 0
+					ie.ExportCompression = compression.NONE
 				case "rle":
-					ie.ExportCompression = 1
+					ie.ExportCompression = compression.RLE
 				case "rle 16bits":
-					ie.ExportCompression = 2
+					ie.ExportCompression = compression.RLE16
 				case "Lz4 Classic":
-					ie.ExportCompression = 3
+					ie.ExportCompression = compression.LZ4
 				case "Lz4 Raw":
-					ie.ExportCompression = 4
+					ie.ExportCompression = compression.RawLZ4
 				case "zx0 crunch":
-					ie.ExportCompression = 5
+					ie.ExportCompression = compression.ZX0
 				}
 			}),
 		m2host,
@@ -88,6 +89,7 @@ func (m *MartineUI) exportEgxDialog(ie *menu.ImageExport, w fyne.Window) {
 
 				// apply and export
 			}, m.window)
+			fo.Resize(savingDialogSize)
 			fo.Show()
 		}),
 	)
