@@ -104,8 +104,8 @@ package-darwin:
 	(make init ARCH=amd64 OS=darwin)
 	@echo "Compilation and packaging for darwin"
 	fyne package -os darwin -icon martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
-	cp -r martine.app ${BINARY}/martine-${OS}-${ARCH}/
-	(make archive)
+	ARCH=amd64 && OS=darwin && cp -r martine.app ${BINARY}/martine-${OS}-${ARCH}/
+	(make archive ARCH=amd64 OS=darwin)
 
 package-windows:
 	(make init ARCH=386 OS=windows  EXT=.exe)
