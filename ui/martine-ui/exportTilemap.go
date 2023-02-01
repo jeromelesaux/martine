@@ -96,11 +96,16 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 					// cancel button
 					return
 				}
+				SetDefaultDirectoryURI(lu)
 				m.tilemap.ExportFolderPath = lu.Path()
 				fmt.Println(m.tilemapExport.ExportFolderPath)
 				m.ExportTilemap(m.tilemap)
 				// apply and export
 			}, m.window)
+			d, err := DefaultDirectoryURI()
+			if err == nil {
+				fo.SetLocation(d)
+			}
 			fo.Resize(savingDialogSize)
 			fo.Show()
 		}),

@@ -94,7 +94,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 			if reader == nil {
 				return
 			}
-
+			SetDefaultDirectoryURI(reader.URI())
 			tm.SetOriginalImagePath(reader.URI())
 			img, err := openImage(tm.OriginalImagePath())
 			if err != nil {
@@ -105,6 +105,10 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 			// m.window.Canvas().Refresh(&tm.OriginalImage)
 			// m.window.Resize(m.window.Content().Size())
 		}, m.window)
+		path, err := DefaultDirectoryURI()
+		if err == nil {
+			d.SetLocation(path)
+		}
 		d.SetFilter(imagesFilesFilter)
 		d.Resize(dialogSize)
 		d.Show()

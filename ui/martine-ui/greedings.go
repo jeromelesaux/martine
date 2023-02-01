@@ -14,7 +14,7 @@ func (m *MartineUI) newGreedings() fyne.CanvasObject {
 		widget.NewLabel(`Some greedings.
 		Thanks a lot to all the Impact members.
 		Ast, CMP, Demoniak, Kris and Drill
-		Specials thanks for support to : 
+		Specials thanks for support to :
 		***        AST        ***
 		***      Tronic        ***
 		***        Siko          ***

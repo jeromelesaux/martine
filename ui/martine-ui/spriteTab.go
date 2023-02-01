@@ -90,7 +90,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 			if reader == nil {
 				return
 			}
-
+			SetDefaultDirectoryURI(reader.URI())
 			img, err := openImage(reader.URI().Path())
 			if err != nil {
 				dialog.ShowError(err, m.window)
@@ -98,6 +98,10 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 			}
 			s.SetOriginalBoard(img)
 		}, m.window)
+		path, err := DefaultDirectoryURI()
+		if err == nil {
+			d.SetLocation(path)
+		}
 		d.SetFilter(imagesFilesFilter)
 		d.Resize(dialogSize)
 		d.Show()
@@ -262,6 +266,7 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 			if reader == nil {
 				return
 			}
+			SetDefaultDirectoryURI(reader.URI())
 			filePath := reader.URI()
 			if m.sprite.IsHardSprite {
 				spritesHard, err := spritehard.OpenSpr(filePath.Path())
@@ -358,6 +363,10 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 
 			}
 		}, m.window)
+		path, err := DefaultDirectoryURI()
+		if err == nil {
+			d.SetLocation(path)
+		}
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".spr", ".imp"}))
 		d.Resize(dialogSize)
 		d.Show()

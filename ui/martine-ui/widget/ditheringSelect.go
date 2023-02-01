@@ -8,7 +8,8 @@ import (
 )
 
 func NewDitheringSelect(me *menu.ImageMenu) *widget.Select {
-	dithering := widget.NewSelect([]string{"FloydSteinberg",
+	dithering := widget.NewSelect([]string{
+		"FloydSteinberg",
 		"JarvisJudiceNinke",
 		"Stucki",
 		"Atkinson",

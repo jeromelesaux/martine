@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	_ "image/gif"
@@ -21,10 +22,11 @@ import (
 )
 
 var (
-	modeSelection     *widget.Select
-	dialogSize        = fyne.NewSize(800, 800)
-	savingDialogSize  = fyne.NewSize(800, 800)
-	imagesFilesFilter = storage.NewExtensionFileFilter([]string{".jpg", ".gif", ".png", ".jpeg", ".JPG", ".JPEG", ".GIF", ".PNG"})
+	modeSelection      *widget.Select
+	dialogSize         = fyne.NewSize(800, 800)
+	savingDialogSize   = fyne.NewSize(800, 800)
+	imagesFilesFilter  = storage.NewExtensionFileFilter([]string{".jpg", ".gif", ".png", ".jpeg", ".JPG", ".JPEG", ".GIF", ".PNG"})
+	savedDirectoryPath fyne.URI
 )
 
 type MartineUI struct {
@@ -157,4 +159,20 @@ func openImage(path string) (image.Image, error) {
 	defer f.Close()
 	i, _, err := image.Decode(f)
 	return i, err
+}
+
+func DefaultDirectoryURI() (fyne.ListableURI, error) {
+	if savedDirectoryPath == nil {
+		return nil, fmt.Errorf("empty saved directory path")
+	}
+	return storage.ListerForURI(savedDirectoryPath)
+}
+
+func SetDefaultDirectoryURI(path fyne.URI) {
+	p, err := storage.Parent(path)
+	if err == nil {
+		savedDirectoryPath = p
+		return
+	}
+	savedDirectoryPath = path
 }

@@ -186,7 +186,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 			if reader == nil {
 				return
 			}
-
+			SetDefaultDirectoryURI(reader.URI())
 			me.SetOriginalImagePath(reader.URI())
 			img, err := openImage(me.OriginalImagePath())
 			if err != nil {
@@ -197,6 +197,10 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 			// m.window.Canvas().Refresh(&me.OriginalImage)
 			// m.window.Resize(m.window.Content().Size())
 		}, m.window)
+		path, err := DefaultDirectoryURI()
+		if err == nil {
+			d.SetLocation(path)
+		}
 		d.SetFilter(imagesFilesFilter)
 		d.Resize(dialogSize)
 		d.Show()

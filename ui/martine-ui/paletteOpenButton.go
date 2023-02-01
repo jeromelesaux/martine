@@ -31,6 +31,7 @@ func NewOpenPaletteButton(m PaletteInterface, win fyne.Window) *widget.Button {
 			if reader == nil {
 				return
 			}
+			SetDefaultDirectoryURI(reader.URI())
 			palettePath := reader.URI().Path()
 			switch strings.ToLower(filepath.Ext(palettePath)) {
 			case ".pal":
@@ -51,7 +52,10 @@ func NewOpenPaletteButton(m PaletteInterface, win fyne.Window) *widget.Button {
 				m.SetPaletteImage(png.PalToImage(p))
 			}
 		}, win)
-
+		path, err := DefaultDirectoryURI()
+		if err == nil {
+			d.SetLocation(path)
+		}
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".pal", ".kit"}))
 		d.Resize(dialogSize)
 		d.Show()

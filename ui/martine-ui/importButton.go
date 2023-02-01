@@ -28,6 +28,7 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 			if reader == nil {
 				return
 			}
+			SetDefaultDirectoryURI(reader.URI())
 			me.SetOriginalImagePath(reader.URI())
 			if me.IsFullScreen {
 
@@ -70,7 +71,7 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 				me.Height().SetText(strconv.Itoa(size.Height))
 				me.SetOriginalImage(img)
 			} else {
-				//loading classical screen
+				// loading classical screen
 				if len(me.Palette()) == 0 {
 					dialog.ShowError(errors.New("palette is empty,  please import palette first, or select fullscreen option to open a fullscreen option"), m.window)
 					return
@@ -83,6 +84,10 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 				me.SetOriginalImage(img)
 			}
 		}, m.window)
+		path, err := DefaultDirectoryURI()
+		if err == nil {
+			d.SetLocation(path)
+		}
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".scr", ".win", ".bin"}))
 		d.Resize(dialogSize)
 		d.Show()

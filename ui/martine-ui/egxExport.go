@@ -82,6 +82,7 @@ func (m *MartineUI) exportEgxDialog(ie *menu.ImageExport, w fyne.Window) {
 					// cancel button
 					return
 				}
+				SetDefaultDirectoryURI(lu)
 				ie.ExportFolderPath = lu.Path()
 				m.egx.ResultImage.Path = lu.Path()
 				fmt.Println(ie.ExportFolderPath)
@@ -89,6 +90,10 @@ func (m *MartineUI) exportEgxDialog(ie *menu.ImageExport, w fyne.Window) {
 
 				// apply and export
 			}, m.window)
+			d, err := DefaultDirectoryURI()
+			if err == nil {
+				fo.SetLocation(d)
+			}
 			fo.Resize(savingDialogSize)
 			fo.Show()
 		}),
