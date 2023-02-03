@@ -23,6 +23,7 @@ import (
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/transformation"
+	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 	w2 "github.com/jeromelesaux/martine/ui/martine-ui/widget"
 )
@@ -94,7 +95,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 			if reader == nil {
 				return
 			}
-			SetDefaultDirectoryURI(reader.URI())
+			directory.SetDefaultDirectoryURI(reader.URI())
 			tm.SetOriginalImagePath(reader.URI())
 			img, err := openImage(tm.OriginalImagePath())
 			if err != nil {
@@ -105,7 +106,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 			// m.window.Canvas().Refresh(&tm.OriginalImage)
 			// m.window.Resize(m.window.Content().Size())
 		}, m.window)
-		path, err := DefaultDirectoryURI()
+		path, err := directory.DefaultDirectoryURI()
 		if err == nil {
 			d.SetLocation(path)
 		}
@@ -227,6 +228,10 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 											dialog.ShowError(err, m.window)
 										}
 									}, m.window)
+									dir, err := directory.DefaultDirectoryURI()
+									if err != nil {
+										d.SetLocation(dir)
+									}
 									d.Show()
 								}),
 							),

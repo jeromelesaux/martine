@@ -25,6 +25,7 @@ import (
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/effect"
+	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 	w2 "github.com/jeromelesaux/martine/ui/martine-ui/widget"
 )
@@ -218,7 +219,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 			if reader == nil {
 				return
 			}
-			SetDefaultDirectoryURI(reader.URI())
+			directory.SetDefaultDirectoryURI(reader.URI())
 			me.SetOriginalImagePath(reader.URI())
 			img, err := openImage(me.OriginalImagePath())
 			if err != nil {
@@ -227,6 +228,10 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 			}
 			me.SetOriginalImage(img)
 		}, m.window)
+		dir, err := directory.DefaultDirectoryURI()
+		if err != nil {
+			d.SetLocation(dir)
+		}
 		d.SetFilter(imagesFilesFilter)
 		d.Resize(dialogSize)
 		d.Show()
@@ -401,6 +406,10 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 									dialog.ShowError(err, m.window)
 								}
 							}, m.window)
+							dir, err := directory.DefaultDirectoryURI()
+							if err != nil {
+								d.SetLocation(dir)
+							}
 							d.Show()
 						}),
 						widget.NewButton("Gray", func() {

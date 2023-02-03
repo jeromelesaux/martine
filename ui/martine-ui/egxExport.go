@@ -20,6 +20,7 @@ import (
 
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/snapshot"
+	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
@@ -82,7 +83,7 @@ func (m *MartineUI) exportEgxDialog(ie *menu.ImageExport, w fyne.Window) {
 					// cancel button
 					return
 				}
-				SetDefaultDirectoryURI(lu)
+				directory.SetDefaultDirectoryURI(lu)
 				ie.ExportFolderPath = lu.Path()
 				m.egx.ResultImage.Path = lu.Path()
 				fmt.Println(ie.ExportFolderPath)
@@ -90,7 +91,7 @@ func (m *MartineUI) exportEgxDialog(ie *menu.ImageExport, w fyne.Window) {
 
 				// apply and export
 			}, m.window)
-			d, err := DefaultDirectoryURI()
+			d, err := directory.DefaultDirectoryURI()
 			if err == nil {
 				fo.SetLocation(d)
 			}

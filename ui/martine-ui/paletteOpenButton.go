@@ -14,6 +14,7 @@ import (
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
+	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 )
 
 type PaletteInterface interface {
@@ -31,7 +32,7 @@ func NewOpenPaletteButton(m PaletteInterface, win fyne.Window) *widget.Button {
 			if reader == nil {
 				return
 			}
-			SetDefaultDirectoryURI(reader.URI())
+			directory.SetDefaultDirectoryURI(reader.URI())
 			palettePath := reader.URI().Path()
 			switch strings.ToLower(filepath.Ext(palettePath)) {
 			case ".pal":
@@ -52,7 +53,7 @@ func NewOpenPaletteButton(m PaletteInterface, win fyne.Window) *widget.Button {
 				m.SetPaletteImage(png.PalToImage(p))
 			}
 		}, win)
-		path, err := DefaultDirectoryURI()
+		path, err := directory.DefaultDirectoryURI()
 		if err == nil {
 			d.SetLocation(path)
 		}

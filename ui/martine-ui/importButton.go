@@ -15,6 +15,7 @@ import (
 	"github.com/jeromelesaux/martine/convert/sprite"
 	"github.com/jeromelesaux/martine/export/impdraw/overscan"
 	"github.com/jeromelesaux/martine/export/png"
+	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
@@ -28,7 +29,7 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 			if reader == nil {
 				return
 			}
-			SetDefaultDirectoryURI(reader.URI())
+			directory.SetDefaultDirectoryURI(reader.URI())
 			me.SetOriginalImagePath(reader.URI())
 			if me.IsFullScreen {
 
@@ -84,7 +85,7 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 				me.SetOriginalImage(img)
 			}
 		}, m.window)
-		path, err := DefaultDirectoryURI()
+		path, err := directory.DefaultDirectoryURI()
 		if err == nil {
 			d.SetLocation(path)
 		}

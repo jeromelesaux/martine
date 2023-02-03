@@ -25,6 +25,7 @@ import (
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/export/spritehard"
 	"github.com/jeromelesaux/martine/gfx/sprite"
+	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
@@ -90,7 +91,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 			if reader == nil {
 				return
 			}
-			SetDefaultDirectoryURI(reader.URI())
+			directory.SetDefaultDirectoryURI(reader.URI())
 			img, err := openImage(reader.URI().Path())
 			if err != nil {
 				dialog.ShowError(err, m.window)
@@ -98,7 +99,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 			}
 			s.SetOriginalBoard(img)
 		}, m.window)
-		path, err := DefaultDirectoryURI()
+		path, err := directory.DefaultDirectoryURI()
 		if err == nil {
 			d.SetLocation(path)
 		}
@@ -266,7 +267,7 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 			if reader == nil {
 				return
 			}
-			SetDefaultDirectoryURI(reader.URI())
+			directory.SetDefaultDirectoryURI(reader.URI())
 			filePath := reader.URI()
 			if m.sprite.IsHardSprite {
 				spritesHard, err := spritehard.OpenSpr(filePath.Path())
@@ -363,7 +364,7 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 
 			}
 		}, m.window)
-		path, err := DefaultDirectoryURI()
+		path, err := directory.DefaultDirectoryURI()
 		if err == nil {
 			d.SetLocation(path)
 		}

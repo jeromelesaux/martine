@@ -21,6 +21,7 @@ import (
 	"github.com/jeromelesaux/martine/convert/sprite"
 	"github.com/jeromelesaux/martine/export/impdraw/overscan"
 	"github.com/jeromelesaux/martine/export/png"
+	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 )
 
 type ImageMenu struct {
@@ -264,6 +265,10 @@ func (me *ImageMenu) NewImportButton(dialogSize fyne.Size, modeSelection *widget
 			}
 			refreshUI.OnTapped()
 		}, win)
+		path, err := directory.DefaultDirectoryURI()
+		if err == nil {
+			d.SetLocation(path)
+		}
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".scr", ".win", ".bin"}))
 		d.Resize(dialogSize)
 		d.Show()

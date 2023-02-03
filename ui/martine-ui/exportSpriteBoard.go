@@ -23,6 +23,7 @@ import (
 	"github.com/jeromelesaux/martine/export/ocpartstudio/window"
 	"github.com/jeromelesaux/martine/export/spritehard"
 	"github.com/jeromelesaux/martine/gfx/animate"
+	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
@@ -97,12 +98,12 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 					// cancel button
 					return
 				}
-				SetDefaultDirectoryURI(lu)
+				directory.SetDefaultDirectoryURI(lu)
 				s.ExportFolderPath = lu.Path()
 				m.ExportSpriteBoard(s)
 				// apply and export
 			}, m.window)
-			d, err := DefaultDirectoryURI()
+			d, err := directory.DefaultDirectoryURI()
 			if err == nil {
 				fo.SetLocation(d)
 			}

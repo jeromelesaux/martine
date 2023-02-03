@@ -24,6 +24,7 @@ import (
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/animate"
+	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 	w2 "github.com/jeromelesaux/martine/ui/martine-ui/widget"
 )
@@ -41,7 +42,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						// cancel button
 						return
 					}
-					SetDefaultDirectoryURI(lu)
+					directory.SetDefaultDirectoryURI(lu)
 					cfg := m.NewConfig(a.ImageMenu, false)
 					if cfg == nil {
 						return
@@ -81,7 +82,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 					}
 					dialog.ShowInformation("Save", "Your files are save in folder \n"+m.animateExport.ExportFolderPath, m.window)
 				}, m.window)
-				d, err := DefaultDirectoryURI()
+				d, err := directory.DefaultDirectoryURI()
 				if err == nil {
 					fo.SetLocation(d)
 				}
@@ -184,11 +185,11 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 			if reader == nil {
 				return
 			}
-			SetDefaultDirectoryURI(reader.URI())
+			directory.SetDefaultDirectoryURI(reader.URI())
 			pi := custom_widget.NewProgressInfinite("Opening file, Please wait.", m.window)
 			pi.Show()
 			path := reader.URI()
-			SetDefaultDirectoryURI(reader.URI())
+			directory.SetDefaultDirectoryURI(reader.URI())
 			if strings.ToUpper(filepath.Ext(path.Path())) != ".GIF" {
 				img, err := openImage(path.Path())
 				if err != nil {
@@ -244,7 +245,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 			m.window.Resize(m.window.Content().Size())
 		}, m.window)
 
-		path, err := DefaultDirectoryURI()
+		path, err := directory.DefaultDirectoryURI()
 		if err == nil {
 			d.SetLocation(path)
 		}
@@ -428,6 +429,10 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 									dialog.ShowError(err, m.window)
 								}
 							}, m.window)
+							dir, err := directory.DefaultDirectoryURI()
+							if err != nil {
+								d.SetLocation(dir)
+							}
 							d.Show()
 						}),
 					),

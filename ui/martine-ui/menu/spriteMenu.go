@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/export/compression"
+	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 )
 
 var SpriteSize float32 = 80.
@@ -106,6 +107,10 @@ func (s *SpriteMenu) ImportSprite(win fyne.Window) *widget.Button {
 				return
 			}
 		}, win)
+		path, err := directory.DefaultDirectoryURI()
+		if err == nil {
+			d.SetLocation(path)
+		}
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".scr", ".win", ".bin"}))
 		// d.Resize(dialogSize)
 		d.Show()
