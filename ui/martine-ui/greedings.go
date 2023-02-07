@@ -11,32 +11,31 @@ import (
 func (m *MartineUI) newGreedings() fyne.CanvasObject {
 	return container.New(
 		layout.NewVBoxLayout(),
-		widget.NewLabel(`Some greedings.
-		Thanks a lot to all the Impact members.
-		Ast, CMP, Demoniak, Kris and Drill
-		Specials thanks for support to :
-		***        AST        ***
-		***      Tronic        ***
-		***        Siko          ***
-		*** Roudoudou ***
-		and thanks a lot to all users^^
-		for more informations about this tool, go to https://github.com/jeromelesaux/martine
-		for more informations about my tool go to https://github.com/jeromelesaux
-		to follow me on my old website https://http://koaks.amstrad.free.fr/amstrad/
-		to chat with us got to https://amstradplus.forumforever.com/index.php  or
-		https://discord.com/channels/453480213032992768/454619697485447169 on discord
-		`),
+		widget.NewRichTextFromMarkdown("# Some greedings.\n"+
+			"\n## Thanks a lot to all the Impact members.\n"+
+			"\n **Ast, CMP, Demoniak, Kris and Drill**\n"+
+			"\n Specials thanks for support to :\n"+
+			"\n - **AST**\n"+
+			"\n - **Tronic**\n"+
+			"\n - **Siko**\n"+
+			"\n - **Roudoudou**\n"+
+			"\n - and thanks a lot to all users^^\n"+
+			"\nfor more informations about this tool, go to [Martine's Github page](https://github.com/jeromelesaux/martine)\n"+
+			"\nfor more informations about my tool go to [github](https://github.com/jeromelesaux)\n"+
+			"\nto follow me on my old website [sidhome](https://koaks.amstrad.free.fr/amstrad/)\n"+
+			"\nto chat with us got to our [Impact forum](https://amstradplus.forumforever.com/index.php)  or\n"+
+			"\n[discord chat](https://discord.com/channels/453480213032992768/454619697485447169)\n"),
 		layout.NewSpacer(),
 		container.New(
 			layout.NewHBoxLayout(),
 			widget.NewLabel("Change color scheme"),
 			widget.NewSelect([]string{"Black", "White"}, func(s string) {
-				a := fyne.CurrentApp()
 				switch s {
 				case "Black":
-					a.Settings().SetTheme(theme.DarkTheme())
+					fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+
 				case "White":
-					a.Settings().SetTheme(theme.LightTheme())
+					fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
 				}
 			}),
 		),
