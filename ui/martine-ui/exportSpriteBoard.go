@@ -267,8 +267,12 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		}
 		code := ascii.SpritesHardText(data, s.ExportCompression)
 		filename := s.ExportFolderPath + string(filepath.Separator) + "SPRITES.ASM"
-		amsdos.SaveStringOSFile(filename, code)
-
+		err := amsdos.SaveStringOSFile(filename, code)
+		if err != nil {
+			pi.Hide()
+			dialog.NewError(err, m.window).Show()
+			return
+		}
 	}
 	dialog.ShowInformation("Saved", "Your export ended in the folder : "+s.ExportFolderPath, m.window)
 }
