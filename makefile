@@ -127,3 +127,6 @@ get-linter:
 lint:
 	@echo "Lint the whole project"
 	golangci-lint run --timeout 2m 
+
+test: 
+	go test ./... -cover

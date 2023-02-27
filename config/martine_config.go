@@ -263,7 +263,7 @@ func (e *MartineConfig) GetAmsdosFilename(filePath string, ext string) string {
 		filenameSize = len(filename) - 1
 	}
 	osFile := filename[0:filenameSize] + filename[end-1:end]
-	return osFile + ext
+	return osFile + strings.ToUpper(ext)
 }
 
 func (e *MartineConfig) AmsdosFullPath(filePath string, newExtension string) string {
