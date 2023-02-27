@@ -15,6 +15,7 @@ import (
 )
 
 func TestOpenGif(t *testing.T) {
+	os.RemoveAll(("tests"))
 	err := os.Mkdir("tests", os.ModePerm)
 	if err != nil {
 		t.Fatal(err)

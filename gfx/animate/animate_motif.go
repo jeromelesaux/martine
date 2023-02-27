@@ -57,16 +57,16 @@ func DeltaMotif(gitFilepath string, cfg *config.MartineConfig, threshold int, in
 	btc := make([][]transformation.BoardTile, 0)
 	btc = append(btc, refBoard)
 	refTiles := transformation.GetUniqTiles(refBoard)
-	err = a.Image("../../test/motifs/first.png", refBoard, a.ImageSize)
+	/*err = a.Image("../../test/motifs/first.png", refBoard, a.ImageSize)
 	if err != nil {
 		return err
-	}
+	}*/
 	// application des motifs sur toutes les images
 	for i := 1; i < len(screens); i++ {
 		ab := transformation.AnalyzeTilesBoardWithTiles(screens[i], constants.Size{Width: 4, Height: 4}, refTiles)
 		board := ab.BoardTiles
 		btc = append(btc, board)
-		err = ab.Image(fmt.Sprintf("../../test/motifs/%.2d.png", i), board, a.ImageSize)
+		err = ab.Image(fmt.Sprintf("%.2d.png", i), board, a.ImageSize)
 		if err != nil {
 			continue
 		}

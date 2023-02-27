@@ -8,6 +8,7 @@ import (
 	"image/png"
 	"io"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/jeromelesaux/martine/config"
@@ -17,21 +18,36 @@ import (
 )
 
 func TestAnimate(t *testing.T) {
-	e := config.NewMartineConfig("/Users/jeromelesaux/Downloads/bomberman.gif", "animation")
+	file := "../../samples/sonic_rotate.gif"
+	os.MkdirAll("animation-test", os.ModePerm)
+	e := config.NewMartineConfig(file, "animation-test")
 	e.Size = constants.Size{Width: 40, Height: 50, ColorsAvailable: 8}
 	var screenMode uint8 = 0
-	fs := []string{"/Users/jeromelesaux/Downloads/bomberman.gif"}
+	fs := []string{file}
 
 	err := Animation(fs, screenMode, e)
 	if err != nil {
 		t.Fatal(err)
 	}
+	os.RemoveAll("animation-test")
 }
 
 func TestDeltaMotif(t *testing.T) {
-	err := DeltaMotif("../../samples/coke.gif", &config.MartineConfig{InputPath: "triangles.gif", OutputPath: "."}, 20, 0xc000, 1)
+	err := DeltaMotif(
+		"../../samples/coke.gif",
+		&config.MartineConfig{InputPath: "triangles.gif", OutputPath: "."},
+		20,
+		0xc000,
+		1)
 	if err != nil {
 		t.Fatalf("%v", err)
+	}
+	files, err := filepath.Glob("*.png")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	for _, v := range files {
+		os.Remove(v)
 	}
 }
 
