@@ -19,6 +19,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/config"
+	"github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
@@ -231,7 +232,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 					dialog.ShowError(err, m.window)
 					return
 				}
-				imgs := animate.ConvertToImage(*gifImages)
+				imgs := image.GifToImages(*gifImages)
 				for index, img := range imgs {
 					if index == 0 {
 						a.AnimateImages.SubstitueImage(0, 0, canvas.NewImageFromImage(img))

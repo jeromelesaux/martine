@@ -255,6 +255,27 @@ func ApplyOneImageAndExport(in image.Image,
 	return err
 }
 
+func ApplyImages(
+	in []*image.NRGBA,
+	cfg *config.MartineConfig,
+	mode int,
+	palette color.Palette,
+	screenMode uint8,
+) ([][]byte, []*image.NRGBA, color.Palette, error) {
+	var gErr error
+	raw := make([][]byte, 0)
+	images := make([]*image.NRGBA, 0)
+	for _, img := range in {
+		v, r, _, _, err := ApplyOneImage(img, cfg, mode, palette, screenMode)
+		if err != nil {
+			gErr = err
+		}
+		raw = append(raw, v)
+		images = append(images, r)
+	}
+	return raw, images, palette, gErr
+}
+
 func ApplyOneImage(in image.Image,
 	cfg *config.MartineConfig,
 	mode int,

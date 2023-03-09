@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
+	"image/gif"
 	"os"
 	"strconv"
 
@@ -16,8 +17,11 @@ import (
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/fyne-io/custom_widget"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/gfx"
 
 	ci "github.com/jeromelesaux/martine/convert/image"
 	spr "github.com/jeromelesaux/martine/convert/sprite"
@@ -187,6 +191,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 
 	paletteOpen := NewOpenPaletteButton(s, m.window)
 	importOpen := ImportSpriteBoard(m)
+	gifOpen := applySpriteBoardFromGif(s, m)
 
 	return container.New(
 		layout.NewGridLayoutWithColumns(2),
@@ -206,6 +211,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 					exportButton,
 					paletteOpen,
 					importOpen,
+					gifOpen,
 				),
 				container.New(
 					layout.NewHBoxLayout(),
@@ -255,6 +261,86 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 			),
 		),
 	)
+}
+
+func applySpriteBoardFromGif(s *menu.SpriteMenu, m *MartineUI) fyne.Widget {
+	return widget.NewButtonWithIcon("From Gif", theme.FileImageIcon(), func() {
+		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+			if err != nil {
+				dialog.ShowError(err, m.window)
+				return
+			}
+			if reader == nil {
+				return
+			}
+			if (s.SpriteWidth == 0 || s.SpriteHeight == 0) && !s.IsHardSprite {
+				dialog.ShowError(errors.New("define dimension before"), m.window)
+				return
+			}
+			directory.SetDefaultDirectoryURI(reader.URI())
+			filePath := reader.URI()
+			fr, err := os.Open(filePath.Path())
+			if err != nil {
+				dialog.ShowError(err, m.window)
+				return
+			}
+			gifImage, err := gif.DecodeAll(fr)
+			if err != nil {
+				dialog.ShowError(err, m.window)
+				return
+			}
+			gifImages := ci.GifToImages(*gifImage)
+			resized := make([]*image.NRGBA, 0)
+			size := constants.Size{Width: s.SpriteWidth, Height: s.SpriteHeight}
+			for _, v := range gifImages {
+				r := ci.Resize(v, size, imaging.NearestNeighbor)
+				resized = append(resized, r)
+			}
+			cfg := config.NewMartineConfig("", "")
+			cfg.CustomDimension = true
+			cfg.Size = size
+			cfg.SpriteHard = s.IsHardSprite
+			var colorsAvailable int
+			switch s.Mode {
+			case 0:
+				colorsAvailable = constants.Mode0.ColorsAvailable
+			case 1:
+				colorsAvailable = constants.Mode1.ColorsAvailable
+			case 2:
+				colorsAvailable = constants.Mode2.ColorsAvailable
+			}
+			img := resized[0]
+			pal, _, err := ci.DowngradingPalette(img, constants.Size{ColorsAvailable: colorsAvailable, Width: img.Bounds().Max.X, Height: img.Bounds().Max.Y}, s.IsCpcPlus)
+			if err != nil {
+				dialog.ShowError(err, m.window)
+				return
+			}
+			s.SetPalette(pal)
+			raw, sprites, _, _ := gfx.ApplyImages(resized, cfg, s.Mode, pal, uint8(s.Mode))
+			s.SpritesCollection = make([][]*image.NRGBA, 1)
+			s.SpritesCollection[0] = sprites
+			s.SpritesData = make([][][]byte, 1)
+			s.SpritesData[0] = raw
+			s.SpriteColumns = 1
+			s.SpriteRows = len(resized)
+			icache := custom_widget.NewImageTableCache(s.SpriteColumns, s.SpriteRows, fyne.NewSize(50, 50))
+
+			for x := 0; x < s.SpriteColumns; x++ {
+				for y := 0; y < s.SpriteRows; y++ {
+					icache.Set(x, y, canvas.NewImageFromImage(s.SpritesCollection[x][y]))
+				}
+			}
+			s.OriginalImages.Update(icache, icache.ImagesPerRow, icache.ImagesPerColumn)
+			s.SetPaletteImage(png.PalToImage(s.Palette()))
+		}, m.window)
+		path, err := directory.DefaultDirectoryURI()
+		if err == nil {
+			d.SetLocation(path)
+		}
+		d.SetFilter(storage.NewExtensionFileFilter([]string{".gif"}))
+		d.Resize(dialogSize)
+		d.Show()
+	})
 }
 
 func ImportSpriteBoard(m *MartineUI) fyne.Widget {
