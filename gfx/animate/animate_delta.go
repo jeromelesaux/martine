@@ -460,7 +460,6 @@ func exportDeltaAnimate(
 	header = strings.Replace(header, "$NBCOLORS$", nbColors, 1)
 
 	// replace the number of delta
-	// replace the number of delta
 	nbDeltaLabel := fmt.Sprintf("%d", nbDelta)
 	header = strings.Replace(header, "$NBDELTA$", nbDeltaLabel, 1)
 

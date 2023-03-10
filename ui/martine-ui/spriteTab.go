@@ -38,6 +38,10 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 		dialog.NewError(errors.New("number of sprites per row or column are not set"), m.window).Show()
 		return
 	}
+	if (s.SpriteWidth == 0 || s.SpriteHeight == 0) && !s.IsHardSprite {
+		dialog.ShowError(errors.New("define dimension before"), m.window)
+		return
+	}
 	pi := custom_widget.NewProgressInfinite("Computing...., Please wait.", m.window)
 	pi.Show()
 	var colorsAvailable int
