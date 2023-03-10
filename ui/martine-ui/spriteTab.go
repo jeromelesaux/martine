@@ -100,6 +100,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 				return
 			}
 			directory.SetDefaultDirectoryURI(reader.URI())
+			s.FilePath =reader.URI().Path()
 			img, err := openImage(reader.URI().Path())
 			if err != nil {
 				dialog.ShowError(err, m.window)

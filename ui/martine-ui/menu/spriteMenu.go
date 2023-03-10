@@ -33,6 +33,7 @@ type SpriteMenu struct {
 	originalPalette *canvas.Image
 	palette         color.Palette
 	paletteImage    *canvas.Image
+	FilePath string
 
 	SpritesData            [][][]byte
 	CompileSprite          bool

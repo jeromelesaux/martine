@@ -265,7 +265,8 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		for _, v := range s.SpritesData {
 			data = append(data, v...)
 		}
-		code := ascii.SpritesHardText(data, s.ExportCompression)
+		header := fmt.Sprintf("' from file %s\n", s.FilePath)
+		code := header + ascii.SpritesHardText(data, s.ExportCompression)
 		filename := s.ExportFolderPath + string(filepath.Separator) + "SPRITES.ASM"
 		err := amsdos.SaveStringOSFile(filename, code)
 		if err != nil {
