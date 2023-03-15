@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"image/color"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/amsdos"
+	"github.com/jeromelesaux/martine/log"
 )
 
 // CPC plus loader nb colors *2 offset 0x9d
@@ -1441,7 +1441,7 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cfg *confi
 		loader[13] = 0x10
 	}
 
-	fmt.Println(loader)
+	log.GetLogger().Infoln(loader)
 
 	osFilepath = cfg.AmsdosFullPath(filePath, ".BAS")
 
@@ -1467,7 +1467,7 @@ func BasicLoader(filePath string, p color.Palette, cfg *config.MartineConfig) er
 		if err == nil {
 			out += fmt.Sprintf("%0.2d", v)
 		} else {
-			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 		if i+1 < len(p) {
 			out += ","
@@ -1481,7 +1481,7 @@ func BasicLoader(filePath string, p color.Palette, cfg *config.MartineConfig) er
 	filename := filepath.Base(basicFile) // exportType.GetAmsdosFilename(filePath, "")
 	copy(loader[startPaletteName:], filename[:])
 	copy(loader[startScreenName:], filename[:])
-	fmt.Println(loader)
+	log.GetLogger().Infoln(loader)
 
 	osFilepath := cfg.AmsdosFullPath(filePath, ".BAS")
 
@@ -1509,7 +1509,7 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 	for i := 0; i < len(p1); i++ {
 		v, err := constants.HardwareValues(p1[i])
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p1[i], err)
+			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p1[i], err)
 		}
 		pal1[index] = v[0]
 		index--
@@ -1518,7 +1518,7 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 	for i := 0; i < len(p2); i++ {
 		v, err := constants.HardwareValues(p2[i])
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p2[i], err)
+			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p2[i], err)
 		}
 		pal2[index] = v[0]
 		index--
@@ -1587,7 +1587,7 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cfg *config
 		if err == nil {
 			out += fmt.Sprintf("%0.2d", v)
 		} else {
-			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 		if i+1 < len(p) {
 			out += ","
@@ -1608,7 +1608,7 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cfg *config
 		copy(loader[startScreenName:], filename[:])
 	}
 
-	fmt.Println(loader)
+	log.GetLogger().Infoln(loader)
 	osFilepath := cfg.AmsdosFullPath(filePath, ".BAS")
 
 	if !cfg.NoAmsdosHeader {
@@ -1632,7 +1632,7 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cfg *config
 		for i := 0; i < len(p); i++ {
 			v, err := constants.HardwareValues(p[i])
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[i], err)
+				log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[i], err)
 			}
 			pal[index] = v[0]
 			index--
@@ -1669,7 +1669,7 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cfg *config
 			index++
 		}
 		copy(egxLoader[egxPlusBinaryPaletteOffset:], kit[:])
-		fmt.Println(kit)
+		log.GetLogger().Infoln(kit)
 		switch mode2 {
 		case 0:
 			egxLoader[egxPlusMode1Offset] = 0x8c

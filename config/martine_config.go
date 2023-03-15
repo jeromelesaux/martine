@@ -3,7 +3,6 @@ package config
 import (
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -13,6 +12,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/compression"
+	"github.com/jeromelesaux/martine/log"
 )
 
 // var amsdosFilenameOnce sync.Once
@@ -111,7 +111,7 @@ type MartineConfig struct {
 func MaskIsAllowed(mode uint8, value uint8) bool {
 	values, err := ModeMaskSprite(mode)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error with mode %d error :%v\n", mode, err)
+		log.GetLogger().Error("Error with mode %d error :%v\n", mode, err)
 		return false
 	}
 	for _, v := range values {

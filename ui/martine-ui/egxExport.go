@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -17,6 +16,7 @@ import (
 	"github.com/jeromelesaux/martine/export/diskimage"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/m4"
+	"github.com/jeromelesaux/martine/log"
 
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/snapshot"
@@ -86,7 +86,7 @@ func (m *MartineUI) exportEgxDialog(ie *menu.ImageExport, w fyne.Window) {
 				directory.SetDefaultDirectoryURI(lu)
 				ie.ExportFolderPath = lu.Path()
 				m.egx.ResultImage.Path = lu.Path()
-				fmt.Println(ie.ExportFolderPath)
+				log.GetLogger().Infoln(ie.ExportFolderPath)
 				m.ExportEgxImage(m.egx)
 
 				// apply and export
@@ -176,7 +176,7 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	if m.egxExport.ExportToM2 {
 		if err := m4.ImportInM4(cfg); err != nil {
 			dialog.NewError(err, m.window).Show()
-			fmt.Fprintf(os.Stderr, "Cannot send to M4 error :%v\n", err)
+			log.GetLogger().Error("Cannot send to M4 error :%v\n", err)
 		}
 	}
 	pi.Hide()

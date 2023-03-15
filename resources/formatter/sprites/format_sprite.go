@@ -11,6 +11,7 @@ import (
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/ascii"
+	"github.com/jeromelesaux/martine/log"
 )
 
 type stringSlice []string
@@ -32,12 +33,13 @@ var (
 )
 
 func main() {
+	log.Default()
 	var spritesFiles stringSlice
 	flag.Var(&spritesFiles, "in", "sprites json path")
 
 	flag.Parse()
 	if len(spritesFiles) == 0 {
-		fmt.Fprintf(os.Stdout, "sprites is mandarory\n")
+		log.GetLogger().Info("sprites is mandarory\n")
 		flag.PrintDefaults()
 		os.Exit(-1)
 	}
@@ -47,19 +49,19 @@ func main() {
 		fl := []string{sprite}
 		datafiles, err := common.WilcardedFiles(fl)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot parse wildcard files (%s) error :%v\n", sprite, err)
+			log.GetLogger().Error("Cannot parse wildcard files (%s) error :%v\n", sprite, err)
 			os.Exit(-1)
 		}
 		for _, v := range datafiles {
 			f, err := os.Open(v)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", v, err)
+				log.GetLogger().Error("Error while opening file (%s) error %v\n", v, err)
 				os.Exit(-1)
 			}
 			defer f.Close()
 			d := &export.Json{}
 			if err := json.NewDecoder(f).Decode(d); err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot decode json file (%s) error :%v\n", v, err)
+				log.GetLogger().Error("Cannot decode json file (%s) error :%v\n", v, err)
 				os.Exit(-1)
 			}
 			if len(d.Screen) != 1 {
@@ -99,17 +101,17 @@ func main() {
 	if *outfile != "" {
 		f, err := os.Create(*outfile)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while creating file (%s) error %v\n", *outfile, err)
+			log.GetLogger().Error("Error while creating file (%s) error %v\n", *outfile, err)
 			os.Exit(-1)
 		}
 		defer f.Close()
 		_, err = f.WriteString(out)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while writing in file (%s) error %v\n", *outfile, err)
+			log.GetLogger().Error("Error while writing in file (%s) error %v\n", *outfile, err)
 			os.Exit(-1)
 		}
 	} else {
-		fmt.Println(out)
+		log.GetLogger().Infoln(out)
 	}
 }
 

@@ -1,14 +1,13 @@
 package splitraster
 
 import (
-	"fmt"
 	"image/color"
-	"os"
 	"path/filepath"
 
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/amsdos"
+	"github.com/jeromelesaux/martine/log"
 )
 
 /*
@@ -67,19 +66,19 @@ func ExportSplitRaster(filename string, p color.Palette, rasters *constants.Spli
 	output := make([]byte, 0)
 	// set the init split raster routine assembled opcode
 	output = append(output, splitRasterSetMode...)
-	fmt.Fprintf(os.Stdout, "{%d} splits rasters found\n", len(rasters.Values))
+	log.GetLogger().Info("{%d} splits rasters found\n", len(rasters.Values))
 	for _, v := range rasters.Values {
 		// set the set mode assembled opcode
 		setPal := splitRasterSetMode
 		setPal[1] = byte(v.PaletteIndex[0])
-		//fmt.Fprintf(os.Stdout, "Set pen {%d}\n", v.PaletteIndex[0])
+		//log.GetLogger().Info( "Set pen {%d}\n", v.PaletteIndex[0])
 		output = append(output, setPal...)
 		// set the set color assembled opcode
 		for i, h := range v.HardwareColor {
 			if i%2 == 0 {
 				setColor := splitRasterSetColor
 				setColor[1] = byte(h)
-				//fmt.Fprintf(os.Stdout, "Set color {%d}\n", h)
+				//log.GetLogger().Info( "Set color {%d}\n", h)
 				output = append(output, setColor...)
 			}
 		}

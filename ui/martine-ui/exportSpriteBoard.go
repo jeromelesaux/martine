@@ -3,7 +3,6 @@ package ui
 import (
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"fyne.io/fyne/v2"
@@ -23,6 +22,7 @@ import (
 	"github.com/jeromelesaux/martine/export/ocpartstudio/window"
 	"github.com/jeromelesaux/martine/export/spritehard"
 	"github.com/jeromelesaux/martine/gfx/animate"
+	"github.com/jeromelesaux/martine/log"
 	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
@@ -48,7 +48,7 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 			case menu.SpriteHard:
 				s.ExportFormat = menu.SpriteHard
 			default:
-				fmt.Fprintf(os.Stderr, "error while getting sprite export format %s\n", v)
+				log.GetLogger().Error("error while getting sprite export format %s\n", v)
 			}
 		})
 	cont := container.New(
@@ -162,7 +162,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 				cfg.Compression = s.ExportCompression
 				cfg.NoAmsdosHeader = !s.ExportWithAmsdosHeader
 				if err := window.Win(filename, v0, uint8(s.Mode), s.SpriteWidth, s.SpriteHeight, s.ExportDsk, cfg); err != nil {
-					fmt.Fprintf(os.Stderr, "error while exporting sprites error %s\n", err.Error())
+					log.GetLogger().Error("error while exporting sprites error %s\n", err.Error())
 				}
 			}
 		}
@@ -183,7 +183,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			if err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
-				fmt.Fprintf(os.Stderr, "Error while saving flat sprites file error %s\n", err.Error())
+				log.GetLogger().Error("Error while saving flat sprites file error %s\n", err.Error())
 				return
 			}
 		} else {
@@ -191,7 +191,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			if err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
-				fmt.Fprintf(os.Stderr, "Error while saving flat sprites file error %s\n", err.Error())
+				log.GetLogger().Error("Error while saving flat sprites file error %s\n", err.Error())
 				return
 			}
 		}
@@ -200,7 +200,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			if err := diskimage.ImportInDsk(filename, cfg); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
-				fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", filename, err)
+				log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
 				return
 			}
 		}
@@ -219,14 +219,14 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		if err := tile.Imp(buf, uint(s.SpriteRows*s.SpriteColumns), uint(s.SpriteWidth), uint(s.SpriteHeight), uint(s.Mode), filename, cfg); err != nil {
 			pi.Hide()
 			dialog.NewError(err, m.window).Show()
-			fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", filename, err)
+			log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
 			return
 		}
 		if s.ExportDsk {
 			if err := diskimage.ImportInDsk(filename, cfg); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
-				fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", filename, err)
+				log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
 				return
 			}
 		}
@@ -247,14 +247,14 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		if err := spritehard.Spr(filename, data, cfg); err != nil {
 			pi.Hide()
 			dialog.NewError(err, m.window).Show()
-			fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", filename, err)
+			log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
 			return
 		}
 		if s.ExportDsk {
 			if err := diskimage.ImportInDsk(filename, cfg); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
-				fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", filename, err)
+				log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
 				return
 			}
 		}

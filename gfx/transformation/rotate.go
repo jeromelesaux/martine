@@ -50,10 +50,10 @@ func Rotate(in *image.NRGBA,
 		images = append(images, rin)
 		/*	newFilename := cont.OsFullPath(filePath, fmt.Sprintf("%.2d", indice)+".png")
 			if err := file.Png(newFilename, rin); err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot create image (%s) error :%v\n", newFilename, err)
+				log.GetLogger().Error( "Cannot create image (%s) error :%v\n", newFilename, err)
 			}
 			if err := common.ToSpriteAndExport(rin, p, maxSize, mode, newFilename, false, cont); err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot create sprite image (%s) error %v\n", newFilename, err)
+				log.GetLogger().Error( "Cannot create sprite image (%s) error %v\n", newFilename, err)
 			}*/
 		indice++
 	}

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/jeromelesaux/martine/common"
+	"github.com/jeromelesaux/martine/log"
 )
 
 var (
@@ -22,12 +23,12 @@ func main() {
 	spritesFiles := []string{*files}
 	filespath, err := common.WilcardedFiles(spritesFiles)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error while getting the files path. %v\n", err)
+		log.GetLogger().Error( "error while getting the files path. %v\n", err)
 		os.Exit(-1)
 	}
 	f, err := os.Create(*out)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error while opening file %s error : %v\n.", *out, err)
+		log.GetLogger().Error( "error while opening file %s error : %v\n.", *out, err)
 		os.Exit(-1)
 	}
 	defer f.Close()
@@ -40,7 +41,7 @@ func main() {
 func displaySprite(filePath string, out *os.File) {
 	f, err := os.Open(filePath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot open file (%s) error :%v\n", filePath, err)
+		log.GetLogger().Error( "Cannot open file (%s) error :%v\n", filePath, err)
 		return
 	}
 	defer f.Close()
@@ -49,7 +50,7 @@ func displaySprite(filePath string, out *os.File) {
 	spriteName := strings.Replace(base, ext, "", 1)
 	_, err = out.Write([]byte(fmt.Sprintf("%s\n", strings.ToLower(spriteName))))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while writing : %v\n", err)
+		log.GetLogger().Error( "Error while writing : %v\n", err)
 		return
 	}
 	scanner := bufio.NewScanner(f)
@@ -67,7 +68,7 @@ func displaySprite(filePath string, out *os.File) {
 		default:
 			_, err = out.Write([]byte(fmt.Sprintf("%s\n", in)))
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error while writing : %v\n", err)
+				log.GetLogger().Error( "Error while writing : %v\n", err)
 				return
 			}
 		}

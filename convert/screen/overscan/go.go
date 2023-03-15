@@ -1,18 +1,17 @@
 package overscan
 
 import (
-	"fmt"
 	"image/color"
-	"os"
 
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/convert/screen"
+	"github.com/jeromelesaux/martine/log"
 )
 
 func ToGo(data []byte, screenMode uint8, p color.Palette, cfg *config.MartineConfig) ([]byte, error) {
 	orig, err := OverscanRawToImg(data, screenMode, p)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while converting into image  error :%v", err)
+		log.GetLogger().Error("Error while converting into image  error :%v", err)
 		return nil, err
 	}
 	cfg.DoubleScreenAddress = true

@@ -25,6 +25,7 @@ import (
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/animate"
+	"github.com/jeromelesaux/martine/log"
 	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 	w2 "github.com/jeromelesaux/martine/ui/martine-ui/widget"
@@ -58,7 +59,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						return
 					}
 					m.animateExport.ExportFolderPath = lu.Path()
-					fmt.Println(m.animateExport.ExportFolderPath)
+					log.GetLogger().Infoln(m.animateExport.ExportFolderPath)
 					pi := custom_widget.NewProgressInfinite("Exporting, please wait.", m.window)
 					pi.Show()
 					code, err := animate.ExportDeltaAnimate(
@@ -219,7 +220,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 					dialog.ShowError(err, m.window)
 					return
 				}
-				fmt.Println(gifCfg.Height)
+				log.GetLogger().Infoln(gifCfg.Height)
 				_, err = fr.Seek(0, io.SeekStart)
 				if err != nil {
 					pi.Hide()
@@ -265,12 +266,12 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	})
 
 	applyButton := widget.NewButtonWithIcon("Compute", theme.VisibilityIcon(), func() {
-		fmt.Println("compute.")
+		log.GetLogger().Infoln("compute.")
 		m.AnimateApply(a)
 	})
 
 	removeButton := widget.NewButtonWithIcon("Remove", theme.DeleteIcon(), func() {
-		fmt.Printf("image index to remove %d\n", a.ImageToRemoveIndex)
+		log.GetLogger().Info("image index to remove %d\n", a.ImageToRemoveIndex)
 		images := a.AnimateImages.Images()
 		if len(images[0]) <= a.ImageToRemoveIndex {
 			return
@@ -295,7 +296,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	modes := widget.NewSelect([]string{"0", "1", "2"}, func(s string) {
 		mode, err := strconv.Atoi(s)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error %s cannot be cast in int\n", s)
+			log.GetLogger().Error("Error %s cannot be cast in int\n", s)
 		}
 		a.Mode = mode
 	})
@@ -449,7 +450,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 							"Ok",
 							e,
 							m.window)
-						fmt.Printf("%s\n", a.CmdLine())
+						log.GetLogger().Info("%s\n", a.CmdLine())
 						size := m.window.Content().Size()
 						size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
 						d.Resize(size)

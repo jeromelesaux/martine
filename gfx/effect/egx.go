@@ -1,7 +1,6 @@
 package effect
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"os"
@@ -20,6 +19,7 @@ import (
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/errors"
+	"github.com/jeromelesaux/martine/log"
 )
 
 func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cfg *config.MartineConfig) error {
@@ -136,12 +136,12 @@ func AutoEgx1(in image.Image,
 	var downgraded *image.NRGBA
 
 	if cfg.PalettePath != "" {
-		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", cfg.PalettePath)
+		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PalettePath)
 		palette, _, err = ocpartstudio.OpenPal(cfg.PalettePath)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", cfg.PalettePath)
+			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalettePath)
 		} else {
-			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
+			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
 		}
 	}
 	if len(palette) > 0 {
@@ -149,11 +149,11 @@ func AutoEgx1(in image.Image,
 	} else {
 		p, downgraded, err = ci.DowngradingPalette(im, cfg.Size, cfg.CpcPlus)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", picturePath)
+			log.GetLogger().Error("Cannot downgrade colors palette for this image %s\n", picturePath)
 		}
 	}
 	p = constants.SortColorsByDistance(p)
-	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
+	log.GetLogger().Info("Saving downgraded image into (%s)\n", filename+"_down.png")
 	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_down.png"), downgraded); err != nil {
 		os.Exit(-2)
 	}
@@ -178,12 +178,12 @@ func AutoEgx2(in image.Image,
 	var downgraded *image.NRGBA
 
 	if cfg.PalettePath != "" {
-		fmt.Fprintf(os.Stdout, "Input palette to apply : (%s)\n", cfg.PalettePath)
+		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PalettePath)
 		palette, _, err = ocpartstudio.OpenPal(cfg.PalettePath)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", cfg.PalettePath)
+			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalettePath)
 		} else {
-			fmt.Fprintf(os.Stdout, "Use palette with (%d) colors \n", len(palette))
+			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
 		}
 	}
 
@@ -192,11 +192,11 @@ func AutoEgx2(in image.Image,
 	} else {
 		p, downgraded, err = ci.DowngradingPalette(im, cfg.Size, cfg.CpcPlus)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot downgrade colors palette for this image %s\n", picturePath)
+			log.GetLogger().Error("Cannot downgrade colors palette for this image %s\n", picturePath)
 		}
 	}
 	p = constants.SortColorsByDistance(p)
-	fmt.Fprintf(os.Stdout, "Saving downgraded image into (%s)\n", filename+"_down.png")
+	log.GetLogger().Info("Saving downgraded image into (%s)\n", filename+"_down.png")
 	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_down.png"), downgraded); err != nil {
 		os.Exit(-2)
 	}
@@ -231,15 +231,15 @@ func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uin
 			c1 := inMode0.At(x, y)
 			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
 			firmwareColorUsed[pp1]++
-			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
+			//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := inMode0.At(x+1, y)
 			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			firmwareColorUsed[pp2]++
@@ -253,29 +253,29 @@ func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uin
 			c1 := inMode1.At(x, y)
 			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
 			firmwareColorUsed[pp1]++
-			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
+			//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := inMode1.At(x+1, y)
 			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			firmwareColorUsed[pp2]++
 			c3 := inMode1.At(x+2, y)
 			pp3, err := palette.PalettePosition(c3, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
 			firmwareColorUsed[pp3]++
 			c4 := inMode1.At(x+3, y)
 			pp4, err := palette.PalettePosition(c4, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
 			firmwareColorUsed[pp4]++
@@ -315,29 +315,29 @@ func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uin
 			c1 := inMode1.At(x, y)
 			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
 			firmwareColorUsed[pp1]++
-			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
+			//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := inMode1.At(x+1, y)
 			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			firmwareColorUsed[pp2]++
 			c3 := inMode1.At(x+2, y)
 			pp3, err := palette.PalettePosition(c3, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
 			firmwareColorUsed[pp3]++
 			c4 := inMode1.At(x+3, y)
 			pp4, err := palette.PalettePosition(c4, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
 			firmwareColorUsed[pp4]++
@@ -352,58 +352,58 @@ func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uin
 			c1 := inMode2.At(x, y)
 			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
 			firmwareColorUsed[pp1]++
-			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
+			//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := inMode2.At(x+1, y)
 			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			firmwareColorUsed[pp2]++
 			c3 := inMode2.At(x+2, y)
 			pp3, err := palette.PalettePosition(c3, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
 			firmwareColorUsed[pp3]++
 			c4 := inMode2.At(x+3, y)
 			pp4, err := palette.PalettePosition(c4, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
 			firmwareColorUsed[pp4]++
 			c5 := inMode2.At(x+4, y)
 			pp5, err := palette.PalettePosition(c5, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
 				pp5 = 0
 			}
 			firmwareColorUsed[pp5]++
-			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
+			//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c6 := inMode2.At(x+5, y)
 			pp6, err := palette.PalettePosition(c5, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
 				pp6 = 0
 			}
 			firmwareColorUsed[pp6]++
 			c7 := inMode2.At(x+6, y)
 			pp7, err := palette.PalettePosition(c7, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
 				pp7 = 0
 			}
 			firmwareColorUsed[pp7]++
 			c8 := inMode2.At(x+7, y)
 			pp8, err := palette.PalettePosition(c8, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, x+3, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c8, x+3, y)
 				pp8 = 0
 			}
 			firmwareColorUsed[pp8]++

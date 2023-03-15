@@ -1,21 +1,20 @@
 package spritehard
 
 import (
-	"fmt"
 	"image"
 	"image/color"
-	"os"
 
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	pal "github.com/jeromelesaux/martine/convert/palette"
 	"github.com/jeromelesaux/martine/convert/sprite"
+	"github.com/jeromelesaux/martine/log"
 )
 
 func ToSpriteHardAndExport(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, ex *config.MartineConfig) error {
 
 	data, firmwareColorUsed := ToSpriteHard(in, p, size, mode, ex)
-	fmt.Println(firmwareColorUsed)
+	log.GetLogger().Infoln(firmwareColorUsed)
 	return sprite.ExportSprite(data, 16, p, size, mode, filename, false, ex)
 }
 
@@ -30,7 +29,7 @@ func ToSpriteHard(in *image.NRGBA, p color.Palette, size constants.Size, mode ui
 			c := in.At(x, y)
 			pp, err := pal.PalettePosition(c, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c, x, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c, x, y)
 				pp = 0
 			}
 			firmwareColorUsed[pp]++

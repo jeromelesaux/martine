@@ -1,12 +1,11 @@
 package diskimage
 
 import (
-	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/jeromelesaux/dsk"
 	"github.com/jeromelesaux/martine/config"
+	"github.com/jeromelesaux/martine/log"
 )
 
 func ImportInDsk(filePath string, cfg *config.MartineConfig) error {
@@ -52,14 +51,14 @@ func ImportInDsk(filePath string, cfg *config.MartineConfig) error {
 	for _, v := range cfg.DskFiles {
 		if filepath.Ext(v) == ".TXT" {
 			if err := floppy.PutFile(v, dsk.MODE_ASCII, 0, 0, 0, false, false); err != nil {
-				fmt.Fprintf(os.Stderr, "Error while insert (%s) in dsk (%s) error :%v\n", v, dskFullpath, err)
+				log.GetLogger().Error("Error while insert (%s) in dsk (%s) error :%v\n", v, dskFullpath, err)
 			}
 		} else {
 			if err := floppy.PutFile(v, dsk.MODE_BINAIRE, 0, 0, 0, false, false); err != nil {
-				fmt.Fprintf(os.Stderr, "Error while insert (%s) in dsk (%s) error :%v\n", v, dskFullpath, err)
+				log.GetLogger().Error("Error while insert (%s) in dsk (%s) error :%v\n", v, dskFullpath, err)
 			}
 		}
 	}
-	fmt.Fprintf(os.Stdout, "Saving final dsk in path {%s}\n", dskFullpath)
+	log.GetLogger().Info("Saving final dsk in path {%s}\n", dskFullpath)
 	return dsk.WriteDsk(dskFullpath, floppy)
 }

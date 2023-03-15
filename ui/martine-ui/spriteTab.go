@@ -2,7 +2,6 @@ package ui
 
 import (
 	"errors"
-	"fmt"
 	"image"
 	"image/draw"
 	"image/gif"
@@ -22,6 +21,7 @@ import (
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/gfx"
+	"github.com/jeromelesaux/martine/log"
 
 	ci "github.com/jeromelesaux/martine/convert/image"
 	spr "github.com/jeromelesaux/martine/convert/sprite"
@@ -100,7 +100,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 				return
 			}
 			directory.SetDefaultDirectoryURI(reader.URI())
-			s.FilePath =reader.URI().Path()
+			s.FilePath = reader.URI().Path()
 			img, err := openImage(reader.URI().Path())
 			if err != nil {
 				dialog.ShowError(err, m.window)
@@ -122,7 +122,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 	})
 
 	applyButton := widget.NewButtonWithIcon("Apply", theme.VisibilityIcon(), func() {
-		fmt.Println("apply.")
+		log.GetLogger().Infoln("apply.")
 		m.ApplySprite(s)
 	})
 
@@ -131,7 +131,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 	modes := widget.NewSelect([]string{"0", "1", "2"}, func(v string) {
 		mode, err := strconv.Atoi(v)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error %s cannot be cast in int\n", v)
+			log.GetLogger().Error("Error %s cannot be cast in int\n", v)
 		}
 		s.Mode = mode
 	})
@@ -144,7 +144,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 	spriteNumberPerColumnEntry.OnChanged = func(v string) {
 		r, err := strconv.Atoi(v)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error %s cannot be cast in int\n", v)
+			log.GetLogger().Error("Error %s cannot be cast in int\n", v)
 			return
 		}
 		s.SpriteRows = r
@@ -153,7 +153,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 	spriteNumberPerRowEntry.OnChanged = func(v string) {
 		r, err := strconv.Atoi(v)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error %s cannot be cast in int\n", v)
+			log.GetLogger().Error("Error %s cannot be cast in int\n", v)
 			return
 		}
 		s.SpriteColumns = r
@@ -165,7 +165,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 	spriteWidthSizeEntry.OnChanged = func(v string) {
 		r, err := strconv.Atoi(v)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error %s cannot be cast in int\n", v)
+			log.GetLogger().Error("Error %s cannot be cast in int\n", v)
 			return
 		}
 		s.SpriteWidth = r
@@ -175,7 +175,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 	spriteHeightSizeEntry.OnChanged = func(v string) {
 		r, err := strconv.Atoi(v)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error %s cannot be cast in int\n", v)
+			log.GetLogger().Error("Error %s cannot be cast in int\n", v)
 			return
 		}
 		s.SpriteHeight = r

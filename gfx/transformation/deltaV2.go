@@ -108,7 +108,7 @@ func (dc *DeltaCollectionV2) Marshall() ([]byte, error) {
 				delta.Byte = item.Byte
 				delta.AddLowByte(currentLB)
 			}
-			//			fmt.Fprintf(os.Stdout, "Value[%d]:%.4x\n", j, value)
+			//			log.GetLogger().Info( "Value[%d]:%.4x\n", j, value)
 
 		}
 		deltas = append(deltas, delta)

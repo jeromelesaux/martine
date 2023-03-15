@@ -3,7 +3,6 @@ package spritehard
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"image"
 	"image/color"
 	"io"
@@ -13,6 +12,7 @@ import (
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/compression"
+	"github.com/jeromelesaux/martine/log"
 )
 
 type SpriteHard struct {
@@ -51,19 +51,19 @@ func OpenSpr(filePath string) (*SprImpdraw, error) {
 	spr := SprImpdraw{Data: make([]SpriteHard, 0)}
 	fr, err := os.Open(filePath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
+		log.GetLogger().Error("Error while opening file (%s) error %v\n", filePath, err)
 		return &spr, err
 	}
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot read the Sprite Hard Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		log.GetLogger().Error("Cannot read the Sprite Hard Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		_, err := fr.Seek(0, io.SeekStart)
 		if err != nil {
 			return &spr, err
 		}
 	}
 	if header.Checksum != header.ComputedChecksum16() {
-		fmt.Fprintf(os.Stderr, "Cannot read the Sprite Hard Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		log.GetLogger().Error("Cannot read the Sprite Hard Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		_, err := fr.Seek(0, io.SeekStart)
 		if err != nil {
 			return &spr, err
@@ -75,7 +75,7 @@ func OpenSpr(filePath string) (*SprImpdraw, error) {
 			if errors.Is(err, io.EOF) {
 				break
 			} else {
-				fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
+				log.GetLogger().Error("Error while opening file (%s) error %v\n", filePath, err)
 				return &spr, err
 			}
 		}
@@ -86,7 +86,7 @@ func OpenSpr(filePath string) (*SprImpdraw, error) {
 
 func Spr(filePath string, spr SprImpdraw, cfg *config.MartineConfig) error {
 	osFilename := cfg.AmsdosFullPath(filePath, ".SPR")
-	fmt.Fprintf(os.Stdout, "Saving SPR file (%s)\n", osFilename)
+	log.GetLogger().Info("Saving SPR file (%s)\n", osFilename)
 	content := make([]byte, 0)
 	for _, v := range spr.Data {
 		content = append(content, v.Data[:]...)

@@ -1,0 +1,101 @@
+package log
+
+import (
+	"fmt"
+	"io"
+	"log"
+	"os"
+	"time"
+)
+
+var logger *MLogger
+
+func GetLogger() *MLogger {
+	return logger
+}
+
+type MLogger struct {
+	errorLogger *log.Logger
+	infoLogger  *log.Logger
+	debugLogger *log.Logger
+}
+
+func NewMLogger(
+	debug io.Writer,
+	info io.Writer,
+	errors io.Writer,
+) *MLogger {
+	l := &MLogger{
+		debugLogger: log.New(debug, "Martine-DEBUG ", log.Ldate|log.Ltime),
+		infoLogger:  log.New(info, "Martine-INFO ", log.Ldate|log.Ltime),
+		errorLogger: log.New(errors, "Martine-ERROR ", log.Ldate|log.Ltime),
+	}
+	return l
+}
+
+func (m MLogger) Debug(format string, v ...any) {
+	s := fmt.Sprintf(format, v...)
+	m.debugLogger.Printf(s)
+}
+
+func (m MLogger) Debugln(v ...any) {
+	m.debugLogger.Println(v...)
+}
+
+func (m MLogger) Info(format string, v ...any) {
+	s := fmt.Sprintf(format, v...)
+	m.infoLogger.Printf(s)
+}
+
+func (m MLogger) Infoln(v ...any) {
+	m.infoLogger.Println(v...)
+}
+
+func (m MLogger) Error(format string, v ...any) {
+	s := fmt.Sprintf(format, v...)
+	m.errorLogger.Printf(s)
+}
+
+func (m MLogger) Errorln(v ...any) {
+	m.errorLogger.Println(v...)
+}
+
+func Default() *MLogger {
+	l := NewMLogger(os.Stdout, os.Stdout, os.Stderr)
+	logger = l
+	return l
+}
+
+func InitLoggerWithFiles() (*MLogger, error) {
+	now := time.Now()
+	infoFile := fmt.Sprintf("%s-info.log", now.Format(time.RFC3339))
+	infoWriter, err := os.Create(infoFile)
+	if err != nil {
+		return nil, err
+	}
+	debugFile := fmt.Sprintf("%s-debug.log", now.Format(time.RFC3339))
+	debugWriter, err := os.Create(debugFile)
+	if err != nil {
+		return nil, err
+	}
+	errFile := fmt.Sprintf("%s-error.log", now.Format(time.RFC3339))
+	errWriter, err := os.Create(errFile)
+	if err != nil {
+		return nil, err
+	}
+	l := NewMLogger(debugWriter, infoWriter, errWriter)
+	logger = l
+	return l, nil
+}
+
+func InitLoggerWithFile() (*MLogger, error) {
+	now := time.Now()
+	file := fmt.Sprintf("%s.log", now.Format(time.RFC3339))
+	writer, err := os.Create(file)
+	if err != nil {
+		return nil, err
+	}
+	l := NewMLogger(writer, writer, writer)
+	logger = l
+	return l, nil
+}

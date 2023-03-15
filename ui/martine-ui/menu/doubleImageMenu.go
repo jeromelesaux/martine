@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2/canvas"
 	"github.com/jeromelesaux/martine/config"
+	"github.com/jeromelesaux/martine/log"
 )
 
 type DoubleImageMenu struct {
@@ -63,7 +64,7 @@ func (d *DoubleImageMenu) CmdLine() string {
 	cmd += "\n" + d.RightImage.CmdLine() + " -pal " + palFilename + " -out mode1"
 	exec, err := os.Executable()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error while getting executable path :%v\n", err)
+		log.GetLogger().Error("error while getting executable path :%v\n", err)
 		return cmd
 	}
 

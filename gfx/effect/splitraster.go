@@ -1,10 +1,8 @@
 package effect
 
 import (
-	"fmt"
 	"image"
 	"image/color"
-	"os"
 	"path/filepath"
 
 	"github.com/jeromelesaux/martine/config"
@@ -17,6 +15,7 @@ import (
 	"github.com/jeromelesaux/martine/export/impdraw/splitraster"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/errors"
+	"github.com/jeromelesaux/martine/log"
 )
 
 func DoSpliteRaster(in image.Image, screenMode uint8, filename string, cfg *config.MartineConfig) error {
@@ -35,7 +34,7 @@ func DoSpliteRaster(in image.Image, screenMode uint8, filename string, cfg *conf
 			return err
 		}
 	default:
-		fmt.Fprintf(os.Stderr, "Not yet implemented.")
+		log.GetLogger().Error("Not yet implemented.")
 		return errors.ErrorNotYetImplemented
 	}
 	// export des données
@@ -51,7 +50,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 	var notSplitRaster bool
 	srs := constants.NewSplitRasterScreen()
 	out := ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
-	fmt.Fprintf(os.Stdout, "Saving resized image into (%s)\n", filename+"_resized.png")
+	log.GetLogger().Info("Saving resized image into (%s)\n", filename+"_resized.png")
 	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_resized.png"), out); err != nil {
 		return nil, bw, srs, err
 	}
@@ -67,8 +66,8 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 		Min: image.Point{X: out.Bounds().Min.X, Y: out.Bounds().Min.Y},
 		Max: image.Point{X: out.Bounds().Max.X, Y: out.Bounds().Max.Y}})
 
-	fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), newIm.Bounds().Max.X, newIm.Bounds().Max.Y)
-	fmt.Println(in.Bounds())
+	log.GetLogger().Info("Informations palette (%d) for image (%d,%d)\n", len(p), newIm.Bounds().Max.X, newIm.Bounds().Max.Y)
+	log.GetLogger().Infoln(in.Bounds())
 
 	if cfg.Overscan {
 		bw = make([]byte, 0x8000)
@@ -86,7 +85,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 						srs = SetCpcOldSplitRaster(out, srIm, constants.CpcOldPalette, srs, x, y, 16)
 					}
 					pp, _ := palette.PalettePosition(backgroundColor, p)
-					fmt.Fprintf(os.Stdout, "X{%d,%d},Y{%d} might be a splitraster\n", x, (x + 16), y)
+					log.GetLogger().Info("X{%d,%d},Y{%d} might be a splitraster\n", x, (x + 16), y)
 					switch screenMode {
 					case 0:
 						for i := 0; i < 16; {
@@ -144,7 +143,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_splitraster.png"), srIm); err != nil {
 		return nil, bw, srs, err
 	}
-	fmt.Println(firmwareColorUsed)
+	log.GetLogger().Infoln(firmwareColorUsed)
 	return p, bw, srs, nil
 }
 
@@ -160,7 +159,7 @@ func SetCpcOldSplitRaster(in *image.NRGBA, out *image.NRGBA, p color.Palette, s 
 		hds, err := constants.HardwareValues(c2)
 		if err != nil {
 			r, g, b, _ := c.RGBA()
-			fmt.Fprintf(os.Stderr, "not hardware value for color (%d,%d,%d)\n", r, g, b)
+			log.GetLogger().Error("not hardware value for color (%d,%d,%d)\n", r, g, b)
 			continue
 		}
 		if !s.Values[len(s.Values)-1].Add(0, int(hds[0])) {
@@ -192,23 +191,23 @@ func setPixelMode0(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	out.Set(x, y, c1)
 	pp1, err := palette.PalettePosition(c1, p)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+		log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 		pp1 = 0
 	}
 	firmwareColorUsed[pp1]++
-	//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
+	//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 	c2 := in.At(x+1, y)
 	out.Set(x+1, y, c2)
 	pp2, err := palette.PalettePosition(c2, p)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+		log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 		pp2 = 0
 	}
 
 	firmwareColorUsed[pp2]++
 
 	pixel := pixel.PixelMode0(pp1, pp2)
-	//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
+	//log.GetLogger().Info( "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND
@@ -222,16 +221,16 @@ func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	out.Set(x, y, c1)
 	pp1, err := palette.PalettePosition(c1, p)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+		log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 		pp1 = 0
 	}
 	firmwareColorUsed[pp1]++
-	//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
+	//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 	c2 := in.At(x+1, y)
 	out.Set(x+1, y, c2)
 	pp2, err := palette.PalettePosition(c2, p)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+		log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 		pp2 = 0
 	}
 	firmwareColorUsed[pp2]++
@@ -239,7 +238,7 @@ func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	out.Set(x+2, y, c3)
 	pp3, err := palette.PalettePosition(c3, p)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
+		log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 		pp3 = 0
 	}
 	firmwareColorUsed[pp3]++
@@ -247,13 +246,13 @@ func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	out.Set(x+3, y, c4)
 	pp4, err := palette.PalettePosition(c4, p)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
+		log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 		pp4 = 0
 	}
 	firmwareColorUsed[pp4]++
 
 	pixel := pixel.PixelMode1(pp1, pp2, pp3, pp4)
-	//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
+	//log.GetLogger().Info( "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND
@@ -267,16 +266,16 @@ func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	out.Set(x, y, c1)
 	pp1, err := palette.PalettePosition(c1, p)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+		log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 		pp1 = 0
 	}
 	firmwareColorUsed[pp1]++
-	//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
+	//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 	c2 := in.At(x+1, y)
 	out.Set(x+1, y, c2)
 	pp2, err := palette.PalettePosition(c2, p)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+		log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 		pp2 = 0
 	}
 	firmwareColorUsed[pp2]++
@@ -284,7 +283,7 @@ func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	out.Set(x+2, y, c3)
 	pp3, err := palette.PalettePosition(c3, p)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
+		log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 		pp3 = 0
 	}
 	firmwareColorUsed[pp3]++
@@ -292,7 +291,7 @@ func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	out.Set(x+3, y, c4)
 	pp4, err := palette.PalettePosition(c4, p)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
+		log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 		pp4 = 0
 	}
 	firmwareColorUsed[pp4]++
@@ -300,16 +299,16 @@ func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	out.Set(x+4, y, c5)
 	pp5, err := palette.PalettePosition(c5, p)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
+		log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
 		pp5 = 0
 	}
 	firmwareColorUsed[pp5]++
-	//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
+	//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 	c6 := in.At(x+5, y)
 	out.Set(x+5, y, c6)
 	pp6, err := palette.PalettePosition(c6, p)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
+		log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
 		pp6 = 0
 	}
 	firmwareColorUsed[pp6]++
@@ -317,7 +316,7 @@ func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	out.Set(x+6, y, c7)
 	pp7, err := palette.PalettePosition(c7, p)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
+		log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
 		pp3 = 0
 	}
 	firmwareColorUsed[pp7]++
@@ -325,13 +324,13 @@ func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	out.Set(x+7, y, c8)
 	pp8, err := palette.PalettePosition(c8, p)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, x+7, y)
+		log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c8, x+7, y)
 		pp8 = 0
 	}
 	firmwareColorUsed[pp8]++
 
 	pixel := pixel.PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
-	//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
+	//log.GetLogger().Info( "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND

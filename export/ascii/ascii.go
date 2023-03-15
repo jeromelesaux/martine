@@ -3,7 +3,6 @@ package ascii
 import (
 	"fmt"
 	"image/color"
-	"os"
 	"runtime"
 
 	"github.com/jeromelesaux/martine/config"
@@ -11,6 +10,7 @@ import (
 	x "github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/compression"
+	"github.com/jeromelesaux/martine/log"
 )
 
 // ByteToken is the token by default
@@ -28,7 +28,7 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cg
 
 	cpcFilename := string(cgf.AmsdosFilename()) + ".TXT"
 	osFilepath := cgf.AmsdosFullPath(filePath, ".TXT")
-	fmt.Fprintf(os.Stdout, "Writing ascii file (%s) data length (%d)\n", osFilepath, len(data))
+	log.GetLogger().Info("Writing ascii file (%s) data length (%d)\n", osFilepath, len(data))
 	sizeInfos := fmt.Sprintf("; width %d height %d %s", cgf.Size.Width, cgf.Size.Height, eol)
 	out += "; Screen " + cpcFilename + eol + ".screen:" + eol + sizeInfos
 	out += FormatAssemblyDatabyte(data, eol)
@@ -62,7 +62,7 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cg
 			if err == nil {
 				palette[i] = fmt.Sprintf("%.2d", v)
 			} else {
-				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+				log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 		hardwarepalette := make([]string, len(p))
@@ -75,7 +75,7 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cg
 			screen[i] = fmt.Sprintf("0x%.2x", data[i])
 		}
 		j := x.NewJson(cgf.Filename(), cgf.Size.Width, cgf.Size.Height, screen, palette, hardwarepalette)
-		fmt.Fprintf(os.Stdout, "Filepath:%s\n", filePath)
+		log.GetLogger().Info("Filepath:%s\n", filePath)
 		if cgf.TileMode {
 			cgf.Tiles.Sprites = append(cgf.Tiles.Sprites, j)
 			return nil
@@ -97,7 +97,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 
 	cpcFilename := string(cfg.AmsdosFilename()) + "C.TXT"
 	osFilepath := cfg.AmsdosFullPath(filePath, "C.TXT")
-	fmt.Fprintf(os.Stdout, "Writing ascii file (%s) values by columns data length (%d)\n", osFilepath, len(data))
+	log.GetLogger().Info("Writing ascii file (%s) values by columns data length (%d)\n", osFilepath, len(data))
 	sizeInfos := fmt.Sprintf("; width %d height %d %s", cfg.Size.Width, cfg.Size.Height, eol)
 	out += "; Screen by column " + cpcFilename + eol + ".screen:" + eol + sizeInfos
 	var adjustMode int
@@ -179,7 +179,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 			if err == nil {
 				palette[i] = fmt.Sprintf("%.2d", v)
 			} else {
-				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+				log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 		hardwarepalette := make([]string, len(p))
@@ -189,7 +189,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 		}
 
 		j := x.NewJson(cfg.Filename(), cfg.Size.Width, cfg.Size.Height, jsonData, palette, hardwarepalette)
-		fmt.Fprintf(os.Stdout, "Filepath:%s\n", filePath)
+		log.GetLogger().Info("Filepath:%s\n", filePath)
 		if cfg.TileMode {
 			cfg.Tiles.Sprites = append(cfg.Tiles.Sprites, j)
 			return nil
@@ -295,7 +295,7 @@ func FormatAssemblyCPCPalette(p color.Palette, eol string) string {
 				}
 			}
 		} else {
-			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
 	return out
@@ -315,7 +315,7 @@ func FormatAssemblyBasicPalette(p color.Palette, eol string) string {
 				}
 			}
 		} else {
-			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
 	return out

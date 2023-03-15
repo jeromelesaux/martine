@@ -2,13 +2,13 @@ package amsdos
 
 import (
 	"encoding/binary"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/config"
+	"github.com/jeromelesaux/martine/log"
 )
 
 func AmsdosFilename(inputPath, ext string) string {
@@ -34,11 +34,11 @@ func SaveAmsdosFile(filename, extension string, data []byte, fileType, user byte
 	cpcFilename := AmsdosFilename(filename, extension)
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = uint16(header.ComputedChecksum16())
-	fmt.Fprintf(os.Stderr, "filesize:%d,#%.2x\n", filesize, filesize)
-	fmt.Fprintf(os.Stderr, "Data length %d\n", binary.Size(data))
+	log.GetLogger().Error("filesize:%d,#%.2x\n", filesize, filesize)
+	log.GetLogger().Error("Data length %d\n", binary.Size(data))
 	fw, err := os.Create(filename)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", filename, err)
+		log.GetLogger().Error("Error while creating file (%s) error :%s\n", filename, err)
 		return err
 	}
 	err = binary.Write(fw, binary.LittleEndian, header)
@@ -56,7 +56,7 @@ func SaveAmsdosFile(filename, extension string, data []byte, fileType, user byte
 func SaveOSFile(filename string, data []byte) error {
 	fw, err := os.Create(filename)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", filename, err)
+		log.GetLogger().Error("Error while creating file (%s) error :%s\n", filename, err)
 		return err
 	}
 	err = binary.Write(fw, binary.LittleEndian, data)
@@ -70,7 +70,7 @@ func SaveOSFile(filename string, data []byte) error {
 func SaveStringOSFile(filename string, data string) error {
 	fw, err := os.Create(filename)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while creating file (%s) error :%s\n", filename, err)
+		log.GetLogger().Error("Error while creating file (%s) error :%s\n", filename, err)
 		return err
 	}
 	_, err = fw.WriteString(data)

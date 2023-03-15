@@ -23,6 +23,7 @@ import (
 	"github.com/jeromelesaux/martine/export/diskimage"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/m4"
+	"github.com/jeromelesaux/martine/log"
 
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
@@ -112,7 +113,7 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 	if m.imageExport.ExportToM2 {
 		if err := m4.ImportInM4(cfg); err != nil {
 			dialog.NewError(err, m.window).Show()
-			fmt.Fprintf(os.Stderr, "Cannot send to M4 error :%v\n", err)
+			log.GetLogger().Error("Cannot send to M4 error :%v\n", err)
 		}
 	}
 	pi.Hide()
@@ -212,7 +213,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 	})
 
 	applyButton := widget.NewButtonWithIcon("Apply", theme.VisibilityIcon(), func() {
-		fmt.Println("apply.")
+		log.GetLogger().Infoln("apply.")
 		m.ApplyOneImage(me)
 	})
 
@@ -266,7 +267,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 	modes := widget.NewSelect([]string{"0", "1", "2"}, func(s string) {
 		mode, err := strconv.Atoi(s)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error %s cannot be cast in int\n", s)
+			log.GetLogger().Error("Error %s cannot be cast in int\n", s)
 		}
 		me.Mode = mode
 	})
@@ -446,7 +447,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 							"Ok",
 							e,
 							m.window)
-						fmt.Printf("%s\n", me.CmdLine())
+						log.GetLogger().Info("%s\n", me.CmdLine())
 						size := m.window.Content().Size()
 						size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
 						d.Resize(size)

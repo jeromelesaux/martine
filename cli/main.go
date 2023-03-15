@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"image"
 	"image/color"
 	_ "image/jpeg"
@@ -23,6 +22,7 @@ import (
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
 	"github.com/jeromelesaux/martine/export/m4"
 	"github.com/jeromelesaux/martine/export/ocpartstudio/window"
+	"github.com/jeromelesaux/martine/log"
 
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/snapshot"
@@ -132,16 +132,16 @@ var (
 )
 
 func usage() {
-	fmt.Fprintf(os.Stdout, "martine convert (jpeg, png format) image to Amstrad cpc screen (even overscan)\n")
-	fmt.Fprintf(os.Stdout, "By Impact Sid (Version:%s)\n", common.AppVersion)
-	fmt.Fprintf(os.Stdout, "Special thanks to @Ast (for his support), @Siko and @Tronic for ideas\n")
-	fmt.Fprintf(os.Stdout, "usage :\n\n")
+	log.GetLogger().Info("martine convert (jpeg, png format) image to Amstrad cpc screen (even overscan)\n")
+	log.GetLogger().Info("By Impact Sid (Version:%s)\n", common.AppVersion)
+	log.GetLogger().Info("Special thanks to @Ast (for his support), @Siko and @Tronic for ideas\n")
+	log.GetLogger().Info("usage :\n\n")
 	flag.PrintDefaults()
 	os.Exit(-1)
 }
 
 func printVersion() {
-	fmt.Fprintf(os.Stdout, "%s\n", common.AppVersion)
+	log.GetLogger().Info("%s\n", common.AppVersion)
 	os.Exit(-1)
 }
 
@@ -153,6 +153,8 @@ func main() {
 	var filename, extension string
 	var screenMode uint8
 	var in image.Image
+
+	log.Default()
 
 	flag.Var(&deltaFiles, "df", "scr file path to add in delta mode comparison. (wildcard accepted such as ? or * file filename.) ")
 
@@ -172,7 +174,7 @@ func main() {
 		if firstArg[0] != '-' {
 			err := flag.Set("i", firstArg)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error :%v\n", err)
+				log.GetLogger().Error("Error :%v\n", err)
 				os.Exit(-1)
 			}
 			for i := 1; i < len(flag.Args()); i += 2 {
@@ -190,7 +192,7 @@ func main() {
 				}
 				err = flag.Set(name, value)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error :%v\n", err)
+					log.GetLogger().Error("Error :%v\n", err)
 					os.Exit(-1)
 				}
 			}
@@ -207,7 +209,7 @@ func main() {
 	if *initProcess != "" {
 		_, err := InitProcess(*initProcess)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while creating (%s) process file error :%v\n", *initProcess, err)
+			log.GetLogger().Error("Error while creating (%s) process file error :%v\n", *initProcess, err)
 			os.Exit(-1)
 		}
 		os.Exit(0)
@@ -216,14 +218,14 @@ func main() {
 	if *processFile != "" {
 		proc, err := LoadProcessFile(*processFile)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while loading (%s) process file error :%v\n", *initProcess, err)
+			log.GetLogger().Error("Error while loading (%s) process file error :%v\n", *initProcess, err)
 			os.Exit(-1)
 		}
 		proc.Apply()
 		if proc.PicturePath == "" && !proc.Delta {
 			err = proc.GenerateRawFile()
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error while loading (%s) process file error :%v\n", *initProcess, err)
+				log.GetLogger().Error("Error while loading (%s) process file error :%v\n", *initProcess, err)
 				os.Exit(-1)
 			}
 		}
@@ -247,7 +249,7 @@ func main() {
 
 	// picture path to convert
 	if *picturePath == "" && !*deltaMode {
-		fmt.Fprintf(os.Stderr, "No picture to compute (option -picturepath or -delta)\n")
+		log.GetLogger().Error("No picture to compute (option -picturepath or -delta)\n")
 		usage()
 	}
 	filename = filepath.Base(*picturePath)
@@ -256,7 +258,7 @@ func main() {
 	// output directory to store results
 	if *output != "" {
 		if err := common.CheckOutput(*output); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while getting directory informations :%v, Quiting\n", err)
+			log.GetLogger().Error("Error while getting directory informations :%v, Quiting\n", err)
 			os.Exit(-2)
 		}
 	} else {
@@ -264,7 +266,7 @@ func main() {
 	}
 
 	if *mode == -1 && !*deltaMode && !*reverse {
-		fmt.Fprintf(os.Stderr, "No output mode defined can not choose. Quiting\n")
+		log.GetLogger().Error("No output mode defined can not choose. Quiting\n")
 		usage()
 	}
 
@@ -279,7 +281,7 @@ func main() {
 		screenAddress, err := common.ParseHexadecimal16(*initialAddress)
 		cfg.Size = size
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while parsing (%s) use the starting address #C000, err : %v\n", *initialAddress, err)
+			log.GetLogger().Error("Error while parsing (%s) use the starting address #C000, err : %v\n", *initialAddress, err)
 			screenAddress = 0xC000
 		}
 		var exportVersion animate.DeltaExportFormat = animate.DeltaExportV1
@@ -288,24 +290,24 @@ func main() {
 			exportVersion = animate.DeltaExportV2
 		}
 		if err := animate.DeltaPacking(cfg.InputPath, cfg, screenAddress, screenMode, exportVersion); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while deltapacking error: %v\n", err)
+			log.GetLogger().Error("Error while deltapacking error: %v\n", err)
 		}
 		os.Exit(0)
 	}
 
 	if !*reverse {
-		fmt.Fprintf(os.Stdout, "Informations :\n%s", size.ToString())
+		log.GetLogger().Info("Informations :\n%s", size.ToString())
 	}
 	if !*impCatcher && !cfg.DeltaMode && !*reverse && !*doAnimation && strings.ToUpper(extension) != ".SCR" {
 		f, err := os.Open(*picturePath)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while opening file %s, error %v\n", *picturePath, err)
+			log.GetLogger().Error("Error while opening file %s, error %v\n", *picturePath, err)
 			os.Exit(-2)
 		}
 		defer f.Close()
 		in, _, err = image.Decode(f)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot decode the image %s error %v", *picturePath, err)
+			log.GetLogger().Error("Cannot decode the image %s error %v", *picturePath, err)
 			os.Exit(-2)
 		}
 	}
@@ -322,7 +324,7 @@ func main() {
 	cfg.Size = size
 
 	if !*deltaMode {
-		fmt.Fprintf(os.Stdout, "Filename :%s, extension:%s\n", filename, extension)
+		log.GetLogger().Info("Filename :%s, extension:%s\n", filename, extension)
 	}
 
 	if *ditheringAlgo != -1 {
@@ -330,73 +332,73 @@ func main() {
 		case 0:
 			cfg.DitheringMatrix = filter.FloydSteinberg
 			cfg.DitheringType = constants.ErrorDiffusionDither
-			fmt.Fprintf(os.Stdout, "Dither:FloydSteinberg, Type:ErrorDiffusionDither\n")
+			log.GetLogger().Info("Dither:FloydSteinberg, Type:ErrorDiffusionDither\n")
 		case 1:
 			cfg.DitheringMatrix = filter.JarvisJudiceNinke
 			cfg.DitheringType = constants.ErrorDiffusionDither
-			fmt.Fprintf(os.Stdout, "Dither:JarvisJudiceNinke, Type:ErrorDiffusionDither\n")
+			log.GetLogger().Info("Dither:JarvisJudiceNinke, Type:ErrorDiffusionDither\n")
 		case 2:
 			cfg.DitheringMatrix = filter.Stucki
 			cfg.DitheringType = constants.ErrorDiffusionDither
-			fmt.Fprintf(os.Stdout, "Dither:Stucki, Type:ErrorDiffusionDither\n")
+			log.GetLogger().Info("Dither:Stucki, Type:ErrorDiffusionDither\n")
 		case 3:
 			cfg.DitheringMatrix = filter.Atkinson
 			cfg.DitheringType = constants.ErrorDiffusionDither
-			fmt.Fprintf(os.Stdout, "Dither:Atkinson, Type:ErrorDiffusionDither\n")
+			log.GetLogger().Info("Dither:Atkinson, Type:ErrorDiffusionDither\n")
 		case 4:
 			cfg.DitheringMatrix = filter.Sierra
 			cfg.DitheringType = constants.ErrorDiffusionDither
-			fmt.Fprintf(os.Stdout, "Dither:Sierra, Type:ErrorDiffusionDither\n")
+			log.GetLogger().Info("Dither:Sierra, Type:ErrorDiffusionDither\n")
 		case 5:
 			cfg.DitheringMatrix = filter.SierraLite
 			cfg.DitheringType = constants.ErrorDiffusionDither
-			fmt.Fprintf(os.Stdout, "Dither:SierraLite, Type:ErrorDiffusionDither\n")
+			log.GetLogger().Info("Dither:SierraLite, Type:ErrorDiffusionDither\n")
 		case 6:
 			cfg.DitheringMatrix = filter.Sierra3
 			cfg.DitheringType = constants.ErrorDiffusionDither
-			fmt.Fprintf(os.Stdout, "Dither:Sierra3, Type:ErrorDiffusionDither\n")
+			log.GetLogger().Info("Dither:Sierra3, Type:ErrorDiffusionDither\n")
 		case 7:
 			cfg.DitheringMatrix = filter.Bayer2
 			cfg.DitheringType = constants.OrderedDither
-			fmt.Fprintf(os.Stdout, "Dither:Bayer2, Type:OrderedDither\n")
+			log.GetLogger().Info("Dither:Bayer2, Type:OrderedDither\n")
 		case 8:
 			cfg.DitheringMatrix = filter.Bayer3
 			cfg.DitheringType = constants.OrderedDither
-			fmt.Fprintf(os.Stdout, "Dither:Bayer3, Type:OrderedDither\n")
+			log.GetLogger().Info("Dither:Bayer3, Type:OrderedDither\n")
 		case 9:
 			cfg.DitheringMatrix = filter.Bayer4
 			cfg.DitheringType = constants.OrderedDither
-			fmt.Fprintf(os.Stdout, "Dither:Bayer4, Type:OrderedDither\n")
+			log.GetLogger().Info("Dither:Bayer4, Type:OrderedDither\n")
 		case 10:
 			cfg.DitheringMatrix = filter.Bayer8
 			cfg.DitheringType = constants.OrderedDither
-			fmt.Fprintf(os.Stdout, "Dither:Bayer8, Type:OrderedDither\n")
+			log.GetLogger().Info("Dither:Bayer8, Type:OrderedDither\n")
 		default:
-			fmt.Fprintf(os.Stderr, "Dithering matrix not available.")
+			log.GetLogger().Error("Dithering matrix not available.")
 			os.Exit(-1)
 		}
 	}
 	if *impCatcher {
 		if !cfg.CustomDimension {
-			fmt.Fprintf(os.Stderr, "You must set custom width and height.")
+			log.GetLogger().Error("You must set custom width and height.")
 			os.Exit(-1)
 		}
 		sprites := make([]byte, 0)
-		fmt.Fprintf(os.Stdout, "[%s]\n", *picturePath)
+		log.GetLogger().Info("[%s]\n", *picturePath)
 		spritesPaths, err := common.WilcardedFiles([]string{*picturePath})
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "error while getting wildcard files %s error : %v\n", *picturePath, err)
+			log.GetLogger().Error("error while getting wildcard files %s error : %v\n", *picturePath, err)
 		}
 		for _, v := range spritesPaths {
 			f, err := os.Open(v)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error while opening file %s, error %v\n", *picturePath, err)
+				log.GetLogger().Error("Error while opening file %s, error %v\n", *picturePath, err)
 				os.Exit(-2)
 			}
 			defer f.Close()
 			in, _, err = image.Decode(f)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot decode the image %s error %v", *picturePath, err)
+				log.GetLogger().Error("Cannot decode the image %s error %v", *picturePath, err)
 				os.Exit(-2)
 			}
 			err = gfx.ApplyOneImageAndExport(in,
@@ -406,19 +408,19 @@ func main() {
 				*mode,
 				screenMode)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot apply the image %s error %v", *picturePath, err)
+				log.GetLogger().Error("Cannot apply the image %s error %v", *picturePath, err)
 				os.Exit(-2)
 			}
 			spritePath := cfg.AmsdosFullPath(v, ".WIN")
 			data, err := window.RawWin(spritePath)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error while extracting raw content, err:%s\n", err)
+				log.GetLogger().Error("Error while extracting raw content, err:%s\n", err)
 			}
 			sprites = append(sprites, data...)
 		}
 		finalFile := strings.ReplaceAll(filename, "?", "")
 		if err = tile.Imp(sprites, uint(len(spritesPaths)), uint(cfg.Size.Width), uint(cfg.Size.Height), uint(screenMode), finalFile, cfg); err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot export to Imp-Catcher the image %s error %v", *picturePath, err)
+			log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", *picturePath, err)
 		}
 		os.Exit(0)
 	} else if *reverse {
@@ -427,18 +429,18 @@ func main() {
 		if cfg.Overscan {
 			p, mode, err := ovs.OverscanPalette(*picturePath)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot get the palette from file (%s) error %v\n", *picturePath, err)
+				log.GetLogger().Error("Cannot get the palette from file (%s) error %v\n", *picturePath, err)
 				os.Exit(-1)
 			}
 
 			if err := covs.OverscanToPng(*picturePath, outpath, mode, p); err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
+				log.GetLogger().Error("Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
 				os.Exit(-1)
 			}
 			os.Exit(1)
 		}
 		if *mode == -1 {
-			fmt.Fprintf(os.Stderr, "Mode is mandatory to convert to PNG")
+			log.GetLogger().Error("Mode is mandatory to convert to PNG")
 			os.Exit(-1)
 		}
 		var p color.Palette
@@ -446,30 +448,30 @@ func main() {
 		if *palettePath != "" && !*plusMode {
 			p, _, err = ocpartstudio.OpenPal(*palettePath)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot open palette file (%s) error %v\n", *palettePath, err)
+				log.GetLogger().Error("Cannot open palette file (%s) error %v\n", *palettePath, err)
 				os.Exit(-1)
 			}
 		} else {
 			if *kitPath != "" && *plusMode {
 				p, _, err = impPalette.OpenKit(*kitPath)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "Cannot open kit file (%s) error %v\n", *kitPath, err)
+					log.GetLogger().Error("Cannot open kit file (%s) error %v\n", *kitPath, err)
 					os.Exit(-1)
 				}
 			} else {
-				fmt.Fprintf(os.Stderr, "For screen or window image, pal or kit file palette is mandatory. (kit file must be associated with -p option)\n")
+				log.GetLogger().Error("For screen or window image, pal or kit file palette is mandatory. (kit file must be associated with -p option)\n")
 				os.Exit(-1)
 			}
 		}
 		switch strings.ToUpper(filepath.Ext(filename)) {
 		case ".WIN":
 			if err := sprite.SpriteToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
+				log.GetLogger().Error("Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
 				os.Exit(-1)
 			}
 		case ".SCR":
 			if err := screen.ScrToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
+				log.GetLogger().Error("Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
 				os.Exit(-1)
 			}
 		}
@@ -477,37 +479,37 @@ func main() {
 	}
 	if cfg.Animate {
 		if !cfg.CustomDimension {
-			fmt.Fprintf(os.Stderr, "You must set sprite dimensions with option -w and -h (mandatory)\n")
+			log.GetLogger().Error("You must set sprite dimensions with option -w and -h (mandatory)\n")
 			os.Exit(-1)
 		}
-		fmt.Fprintf(os.Stdout, "animation output.\n")
+		log.GetLogger().Info("animation output.\n")
 		files := []string{*picturePath}
 		files, err := common.WilcardedFiles(files)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot parse wildcard in argument (%s) error %v\n", *picturePath, err)
+			log.GetLogger().Error("Cannot parse wildcard in argument (%s) error %v\n", *picturePath, err)
 			os.Exit(-1)
 		}
 		if err := animate.Animation(files, screenMode, cfg); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while proceeding to animate export error : %v\n", err)
+			log.GetLogger().Error("Error while proceeding to animate export error : %v\n", err)
 			os.Exit(-1)
 		}
 	} else {
 		if cfg.DeltaMode {
-			fmt.Fprintf(os.Stdout, "delta files to proceed.\n")
+			log.GetLogger().Info("delta files to proceed.\n")
 			for i, v := range deltaFiles {
-				fmt.Fprintf(os.Stdout, "[%d]:%s\n", i, v)
+				log.GetLogger().Info("[%d]:%s\n", i, v)
 			}
 			screenAddress, err := common.ParseHexadecimal16(*initialAddress)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error while parsing (%s) use the starting address #C000, err : %v\n", *initialAddress, err)
+				log.GetLogger().Error("Error while parsing (%s) use the starting address #C000, err : %v\n", *initialAddress, err)
 				screenAddress = 0xC000
 			}
 			if *mode == -1 {
-				fmt.Fprintf(os.Stderr, "You must set the mode for this feature. (option -m)\n")
+				log.GetLogger().Error("You must set the mode for this feature. (option -m)\n")
 				os.Exit(-1)
 			}
 			if err := transformation.ProceedDelta(deltaFiles, screenAddress, cfg, uint8(*mode)); err != nil {
-				fmt.Fprintf(os.Stderr, "error while proceeding delta mode %v\n", err)
+				log.GetLogger().Error("error while proceeding delta mode %v\n", err)
 				os.Exit(-1)
 			}
 		} else {
@@ -516,16 +518,16 @@ func main() {
 				switch *analyzeTilemap {
 				case string(common.SizeTilemapOption):
 					criteria = common.SizeTilemapOption
-					fmt.Printf("go to analyse by size\n")
+					log.GetLogger().Info("go to analyse by size\n")
 				case string(common.NumberTilemapOption):
 					criteria = common.NumberTilemapOption
-					fmt.Printf("search for the lower number of tiles\n")
+					log.GetLogger().Info("search for the lower number of tiles\n")
 				default:
-					fmt.Fprintf(os.Stderr, "Error tilemap analyze option not found : choose between (%s,%s)\n", string(common.SizeTilemapOption), string(common.NumberTilemapOption))
+					log.GetLogger().Error("Error tilemap analyze option not found : choose between (%s,%s)\n", string(common.SizeTilemapOption), string(common.NumberTilemapOption))
 					os.Exit(-1)
 				}
 				if err := gfx.AnalyzeTilemap(screenMode, *plusMode, filename, *picturePath, in, cfg, criteria); err != nil {
-					fmt.Fprintf(os.Stderr, "Error whie do tilemap action with error :%v\n", err)
+					log.GetLogger().Error("Error whie do tilemap action with error :%v\n", err)
 					os.Exit(-1)
 				}
 			} else {
@@ -537,19 +539,19 @@ func main() {
 					*/
 
 					if err := gfx.Tilemap(screenMode, filename, *picturePath, size, in, cfg); err != nil {
-						fmt.Fprintf(os.Stderr, "Error whie do tilemap action with error :%v\n", err)
+						log.GetLogger().Error("Error whie do tilemap action with error :%v\n", err)
 						os.Exit(-1)
 					}
 				} else {
 					if cfg.TileMode {
 						if cfg.TileIterationX == -1 || cfg.TileIterationY == -1 {
-							fmt.Fprintf(os.Stderr, "missing arguments iterx and itery to use with tile mode.\n")
+							log.GetLogger().Error("missing arguments iterx and itery to use with tile mode.\n")
 							usage()
 							os.Exit(-1)
 						}
 						err := transformation.TileMode(cfg, uint8(*mode), cfg.TileIterationX, cfg.TileIterationY)
 						if err != nil {
-							fmt.Fprintf(os.Stderr, "Tile mode on error : error :%v\n", err)
+							log.GetLogger().Error("Tile mode on error : error :%v\n", err)
 							os.Exit(-1)
 						}
 					} else {
@@ -559,7 +561,7 @@ func main() {
 								*mode,
 								*mode2,
 								cfg); err != nil {
-								fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
+								log.GetLogger().Error("Error while applying on one image :%v\n", err)
 								os.Exit(-1)
 							}
 						} else {
@@ -569,7 +571,7 @@ func main() {
 								p, _, err = impPalette.OpenKit(*kitPath)
 								if *kitPath != "" {
 									if err != nil {
-										fmt.Fprintf(os.Stderr, "Error while reading kit file (%s) :%v\n", *kitPath, err)
+										log.GetLogger().Error("Error while reading kit file (%s) :%v\n", *kitPath, err)
 										os.Exit(-1)
 									}
 								}
@@ -577,7 +579,7 @@ func main() {
 								if *palettePath != "" {
 									p, _, err = ocpartstudio.OpenPal(*palettePath)
 									if err != nil {
-										fmt.Fprintf(os.Stderr, "Error while reading palette file (%s) :%v\n", *palettePath, err)
+										log.GetLogger().Error("Error while reading palette file (%s) :%v\n", *palettePath, err)
 										os.Exit(-1)
 									}
 								}
@@ -585,7 +587,7 @@ func main() {
 
 							if cfg.EgxFormat > 0 {
 								if len(p) == 0 {
-									fmt.Fprintf(os.Stderr, "Now colors found in palette, give up treatment.\n")
+									log.GetLogger().Error("Now colors found in palette, give up treatment.\n")
 									os.Exit(-1)
 								}
 								if err := effect.Egx(*picturePath, *picturePath2,
@@ -593,18 +595,18 @@ func main() {
 									*mode,
 									*mode2,
 									cfg); err != nil {
-									fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
+									log.GetLogger().Error("Error while applying on one image :%v\n", err)
 									os.Exit(-1)
 								}
 							} else {
 								if cfg.SplitRaster {
 									if cfg.Overscan {
 										if err := effect.DoSpliteRaster(in, screenMode, filename, cfg); err != nil {
-											fmt.Fprintf(os.Stderr, "Error while applying splitraster on one image :%v\n", err)
+											log.GetLogger().Error("Error while applying splitraster on one image :%v\n", err)
 											os.Exit(-1)
 										}
 									} else {
-										fmt.Fprintf(os.Stderr, "Only overscan mode implemented for this feature, %v", errors.ErrorNotYetImplemented)
+										log.GetLogger().Error("Only overscan mode implemented for this feature, %v", errors.ErrorNotYetImplemented)
 									}
 								} else {
 									if strings.ToUpper(extension) != ".SCR" {
@@ -613,11 +615,11 @@ func main() {
 											filename, *picturePath,
 											*mode,
 											screenMode); err != nil {
-											fmt.Fprintf(os.Stderr, "Error while applying on one image :%v\n", err)
+											log.GetLogger().Error("Error while applying on one image :%v\n", err)
 											os.Exit(-1)
 										}
 									} else {
-										fmt.Fprintf(os.Stderr, "Error while applying on one image : SCR format not used for this treatment\n")
+										log.GetLogger().Error("Error while applying on one image : SCR format not used for this treatment\n")
 										os.Exit(-1)
 									}
 								}
@@ -631,7 +633,7 @@ func main() {
 	// export into bundle DSK or SNA
 	if cfg.Dsk {
 		if err := diskimage.ImportInDsk(*picturePath, cfg); err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot create or write into dsk file error :%v\n", err)
+			log.GetLogger().Error("Cannot create or write into dsk file error :%v\n", err)
 		}
 	}
 	if cfg.Sna {
@@ -645,17 +647,17 @@ func main() {
 			}
 			cfg.SnaPath = filepath.Join(*output, "test.sna")
 			if err := snapshot.ImportInSna(gfxFile, cfg.SnaPath, screenMode); err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot create or write into sna file error :%v\n", err)
+				log.GetLogger().Error("Cannot create or write into sna file error :%v\n", err)
 			}
-			fmt.Fprintf(os.Stdout, "Sna saved in file %s\n", cfg.SnaPath)
+			log.GetLogger().Info("Sna saved in file %s\n", cfg.SnaPath)
 		} else {
-			fmt.Fprintf(os.Stderr, "Feature not implemented for this file.")
+			log.GetLogger().Error("Feature not implemented for this file.")
 			os.Exit(-1)
 		}
 	}
 	if cfg.M4 {
 		if err := m4.ImportInM4(cfg); err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot send to M4 error :%v\n", err)
+			log.GetLogger().Error("Cannot send to M4 error :%v\n", err)
 		}
 	}
 	os.Exit(0)

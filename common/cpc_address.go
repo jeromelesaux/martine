@@ -2,10 +2,10 @@ package common
 
 import (
 	"errors"
-	"fmt"
-	"os"
 	"strconv"
 	"strings"
+
+	"github.com/jeromelesaux/martine/log"
 )
 
 var (
@@ -19,7 +19,7 @@ func ParseHexadecimal16(address string) (uint16, error) {
 		value := strings.Replace(address, "#", "", -1)
 		v, err := strconv.ParseUint(value, 16, 16)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot get the hexadecimal value fom %s, error : %v\n", address, err)
+			log.GetLogger().Error("cannot get the hexadecimal value fom %s, error : %v\n", address, err)
 			return 0, ErrorCannotBeParsed
 		} else {
 			return uint16(v), nil
@@ -28,7 +28,7 @@ func ParseHexadecimal16(address string) (uint16, error) {
 		value := strings.Replace(address, "0x", "", -1)
 		v, err := strconv.ParseUint(value, 16, 16)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot get the hexadecimal value fom %s, error : %v\n", address, err)
+			log.GetLogger().Error("cannot get the hexadecimal value fom %s, error : %v\n", address, err)
 			return 0, ErrorCannotBeParsed
 		} else {
 			return uint16(v), nil
@@ -36,7 +36,7 @@ func ParseHexadecimal16(address string) (uint16, error) {
 	default:
 		v, err := strconv.ParseUint(address, 10, 16)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot get the hexadecimal value fom %s, error : %v\n", address, err)
+			log.GetLogger().Error("cannot get the hexadecimal value fom %s, error : %v\n", address, err)
 			return 0, ErrorCannotBeParsed
 		} else {
 			return uint16(v), nil
@@ -51,7 +51,7 @@ func ParseHexadecimal8(address string) (uint8, error) {
 		value := strings.Replace(address, "#", "", -1)
 		v, err := strconv.ParseUint(value, 16, 8)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot get the hexadecimal value fom %s, error : %v\n", address, err)
+			log.GetLogger().Error("cannot get the hexadecimal value fom %s, error : %v\n", address, err)
 			return 0, ErrorCannotBeParsed
 		} else {
 			return uint8(v), nil
@@ -60,7 +60,7 @@ func ParseHexadecimal8(address string) (uint8, error) {
 		value := strings.Replace(address, "0x", "", -1)
 		v, err := strconv.ParseUint(value, 16, 8)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot get the hexadecimal value fom %s, error : %v\n", address, err)
+			log.GetLogger().Error("cannot get the hexadecimal value fom %s, error : %v\n", address, err)
 			return 0, ErrorCannotBeParsed
 		} else {
 			return uint8(v), nil
@@ -68,7 +68,7 @@ func ParseHexadecimal8(address string) (uint8, error) {
 	default:
 		v, err := strconv.ParseUint(address, 10, 8)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot get the hexadecimal value fom %s, error : %v\n", address, err)
+			log.GetLogger().Error("cannot get the hexadecimal value fom %s, error : %v\n", address, err)
 			return 0, ErrorCannotBeParsed
 		} else {
 			return uint8(v), nil

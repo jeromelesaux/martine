@@ -1,10 +1,8 @@
 package gfx
 
 import (
-	"fmt"
 	"image"
 	"image/color"
-	"os"
 
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
@@ -12,6 +10,7 @@ import (
 	"github.com/jeromelesaux/martine/convert/pixel"
 	"github.com/jeromelesaux/martine/convert/screen"
 	"github.com/jeromelesaux/martine/gfx/errors"
+	"github.com/jeromelesaux/martine/log"
 )
 
 func Transform(in *image.NRGBA,
@@ -67,7 +66,7 @@ func revertColor(rawColor uint8, index int, isPlus bool) color.Color {
 	if !isPlus {
 		newColor, err = constants.ColorFromHardware(rawColor)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "No color found in data at index %d\n", index)
+			log.GetLogger().Error("No color found in data at index %d\n", index)
 			return constants.White.Color
 		}
 	} else {

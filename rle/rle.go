@@ -3,8 +3,8 @@ package rle
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
-	"os"
+
+	"github.com/jeromelesaux/martine/log"
 )
 
 func Encode(in []byte) []byte {
@@ -85,7 +85,7 @@ func Encode16(in []byte) []byte {
 
 			buf := new(bytes.Buffer)
 			if err := binary.Write(buf, binary.LittleEndian, nb); err != nil {
-				fmt.Fprintf(os.Stderr, "Error while copying in byte buffer error :%v\n", err)
+				log.GetLogger().Error("Error while copying in byte buffer error :%v\n", err)
 			}
 			out = append(out, buf.Bytes()...)
 			out = append(out, c)
@@ -95,7 +95,7 @@ func Encode16(in []byte) []byte {
 			if i+1 == binary.Size(in) {
 				buf := new(bytes.Buffer)
 				if err := binary.Write(buf, binary.LittleEndian, nb); err != nil {
-					fmt.Fprintf(os.Stderr, "Error while copying in byte buffer error :%v\n", err)
+					log.GetLogger().Error("Error while copying in byte buffer error :%v\n", err)
 				}
 				out = append(out, buf.Bytes()...)
 				out = append(out, c)
@@ -108,7 +108,7 @@ func Encode16(in []byte) []byte {
 	if nb > 1 {
 		buf := new(bytes.Buffer)
 		if err := binary.Write(buf, binary.LittleEndian, nb); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while copying in byte buffer error :%v\n", err)
+			log.GetLogger().Error("Error while copying in byte buffer error :%v\n", err)
 		}
 		out = append(out, buf.Bytes()...)
 		out = append(out, c)

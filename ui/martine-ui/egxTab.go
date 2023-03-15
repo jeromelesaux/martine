@@ -16,6 +16,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/config"
+	"github.com/jeromelesaux/martine/log"
 
 	ci "github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/convert/screen"
@@ -182,7 +183,7 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) fyne.CanvasObject {
 						"Ok",
 						e,
 						m.window)
-					fmt.Printf("%s\n", di.CmdLine())
+					log.GetLogger().Info("%s\n", di.CmdLine())
 					size := m.window.Content().Size()
 					size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
 					d.Resize(size)
@@ -242,7 +243,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 	})
 
 	applyButton := widget.NewButtonWithIcon("Apply", theme.VisibilityIcon(), func() {
-		fmt.Println("apply.")
+		log.GetLogger().Infoln("apply.")
 		m.ApplyOneImage(me)
 	})
 
@@ -290,7 +291,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 	modes := widget.NewSelect([]string{"0", "1", "2"}, func(s string) {
 		mode, err := strconv.Atoi(s)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error %s cannot be cast in int\n", s)
+			log.GetLogger().Error("Error %s cannot be cast in int\n", s)
 		}
 		me.Mode = mode
 	})
@@ -453,7 +454,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 							"Ok",
 							e,
 							m.window)
-						fmt.Printf("%s\n", me.CmdLine())
+						log.GetLogger().Info("%s\n", me.CmdLine())
 						size := m.window.Content().Size()
 						size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
 						d.Resize(size)

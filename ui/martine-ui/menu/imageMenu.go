@@ -21,6 +21,7 @@ import (
 	"github.com/jeromelesaux/martine/convert/sprite"
 	"github.com/jeromelesaux/martine/export/impdraw/overscan"
 	"github.com/jeromelesaux/martine/export/png"
+	"github.com/jeromelesaux/martine/log"
 	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 )
 
@@ -126,7 +127,7 @@ func (i *ImageMenu) GetHeight() (int, string, error) {
 func (i *ImageMenu) CmdLine() string {
 	exec, err := os.Executable()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error while getting executable path :%v\n", err)
+		log.GetLogger().Error("error while getting executable path :%v\n", err)
 		return exec
 	}
 	if i.originalImagePath != nil {
@@ -141,13 +142,13 @@ func (i *ImageMenu) CmdLine() string {
 	if i.IsSprite {
 		width, err := strconv.Atoi(i.width.Text)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot convert width value :%s error :%v\n", i.width.Text, err)
+			log.GetLogger().Error("cannot convert width value :%s error :%v\n", i.width.Text, err)
 		} else {
 			exec += " -width " + strconv.Itoa(width)
 		}
 		height, err := strconv.Atoi(i.height.Text)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot convert height value :%s error :%v\n", i.height.Text, err)
+			log.GetLogger().Error("cannot convert height value :%s error :%v\n", i.height.Text, err)
 		} else {
 			exec += " -height " + strconv.Itoa(height)
 		}

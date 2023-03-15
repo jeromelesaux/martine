@@ -15,6 +15,7 @@ import (
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/errors"
+	"github.com/jeromelesaux/martine/log"
 	"github.com/pbnjay/pixfont"
 )
 
@@ -105,7 +106,7 @@ func (a *AnalyzeBoard) TileIndex(tile *Tile, tiles []BoardTile) int {
 }
 
 func (a *AnalyzeBoard) Palette() color.Palette {
-	fmt.Fprintf(os.Stdout, "Getting global tiles palette...\n")
+	log.GetLogger().Info("Getting global tiles palette...\n")
 	var p color.Palette
 	for _, v := range a.BoardTiles {
 		for i := 0; i < v.Tile.Size.Width; i++ {
@@ -128,7 +129,7 @@ func (a *AnalyzeBoard) Palette() color.Palette {
 }
 
 func (a *AnalyzeBoard) Sort() []BoardTile {
-	fmt.Fprintf(os.Stdout, "Sorting tiles...\n")
+	log.GetLogger().Info("Sorting tiles...\n")
 	sorted := make([]BoardTile, len(a.BoardTiles))
 	for _, v0 := range a.BoardTiles {
 		var index int
@@ -261,7 +262,7 @@ func AnalyzeTilesBoardWithTiles(im image.Image, size constants.Size, tiles []Til
 		for y := size.Height; y < im.Bounds().Max.Y; y += size.Height {
 			sprt, err := ExtractTile(im, size, x, y)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
+				log.GetLogger().Error("Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
 				break
 			}
 			v := getCloserTile(*sprt, tiles)
@@ -288,7 +289,7 @@ func AnalyzeTilesBoard(im image.Image, size constants.Size) *AnalyzeBoard {
 	}
 	sprt0, _ := ExtractTile(im, size, 0, 0)
 	/*	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, 0, 0, err)
+		log.GetLogger().Error( "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, 0, 0, err)
 	}*/
 	board.NewTile(sprt0, 0, 0)
 	board.TileMap[0][0] = 0
@@ -299,7 +300,7 @@ func AnalyzeTilesBoard(im image.Image, size constants.Size) *AnalyzeBoard {
 		for y := size.Height; y < im.Bounds().Max.Y; y += size.Height {
 			sprt, err := ExtractTile(im, size, x, y)
 			if err != nil {
-				// fmt.Fprintf(os.Stderr, "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
+				// log.GetLogger().Error( "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
 				break
 			}
 			index := board.Analyse(sprt, x, y)
@@ -551,7 +552,7 @@ func (a *AnalyzeBoard) ReduceTilesNumber(threshold float64) []BoardTile {
 					tp := a.BoardTiles[i].TilePositions
 					newBoard[len(newBoard)-1].AddTile(tp)
 					deleted = append(deleted, i)
-					//	fmt.Printf("Tile[%d] and tile[%d] are similar distance :%f\n", index, i, d)
+					//	log.GetLogger().Info("Tile[%d] and tile[%d] are similar distance :%f\n", index, i, d)
 				}
 			}
 		}

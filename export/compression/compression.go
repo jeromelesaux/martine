@@ -1,10 +1,8 @@
 package compression
 
 import (
-	"fmt"
-	"os"
-
 	rawlz4 "github.com/bkaradzic/go-lz4"
+	"github.com/jeromelesaux/martine/log"
 	"github.com/jeromelesaux/martine/lz4"
 	"github.com/jeromelesaux/martine/rle"
 	zx0 "github.com/jeromelesaux/zx0/encode"
@@ -45,31 +43,31 @@ func Compress(data []byte, compression CompressionMethod) ([]byte, error) {
 	if compression != NONE {
 		switch compression {
 		case RLE:
-			fmt.Fprintf(os.Stdout, "Using RLE compression\n")
+			log.GetLogger().Info("Using RLE compression\n")
 			data = rle.Encode(data)
 		case RLE16:
-			fmt.Fprintf(os.Stdout, "Using RLE 16 bits compression\n")
+			log.GetLogger().Info("Using RLE 16 bits compression\n")
 			data = rle.Encode16(data)
 		case LZ4:
-			fmt.Fprintf(os.Stdout, "Using LZ4 compression\n")
+			log.GetLogger().Info("Using LZ4 compression\n")
 			var dst []byte
 			dst, err := lz4.Encode(dst, data)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
+				log.GetLogger().Error("Error while encoding into LZ4 : %v\n", err)
 				err0 = err
 			}
 			data = dst
 		case RawLZ4:
-			fmt.Fprintf(os.Stdout, "Using LZ4-Raw compression\n")
+			log.GetLogger().Info("Using LZ4-Raw compression\n")
 			var dst []byte
 			dst, err := rawlz4.Encode(dst, data)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error while encoding into LZ4 : %v\n", err)
+				log.GetLogger().Error("Error while encoding into LZ4 : %v\n", err)
 				err0 = err
 			}
 			data = dst[4:]
 		case ZX0:
-			fmt.Fprintf(os.Stdout, "Using Zx0 cruncher")
+			log.GetLogger().Info("Using Zx0 cruncher")
 			data = zx0.Encode(data)
 		}
 	}

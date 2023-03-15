@@ -1,11 +1,9 @@
 package sprite
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"math"
-	"os"
 
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
@@ -17,6 +15,7 @@ import (
 	"github.com/jeromelesaux/martine/export/ocpartstudio/window"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/errors"
+	"github.com/jeromelesaux/martine/log"
 )
 
 func RawSpriteToImg(data []byte, height, width, mode uint8, p color.Palette) *image.NRGBA {
@@ -226,52 +225,52 @@ func SpriteToPng(winPath string, output string, mode uint8, p color.Palette) err
 
 func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, cfg *config.MartineConfig) error {
 	if err := window.Win(filename, data, mode, lineSize, size.Height, dontImportDsk, cfg); err != nil {
-		fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+		log.GetLogger().Error("Error while saving file %s error :%v", filename, err)
 		return err
 	}
 	if !cfg.CpcPlus {
 		if err := ocpartstudio.Pal(filename, p, mode, dontImportDsk, cfg); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+			log.GetLogger().Error("Error while saving file %s error :%v", filename, err)
 			return err
 		}
 		filePath := cfg.OsFullPath(filename, "_palettepal.png")
 		if err := png.PalToPng(filePath, p); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 		if err := palette.Ink(filename, p, 2, dontImportDsk, cfg); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+			log.GetLogger().Error("Error while saving file %s error :%v", filename, err)
 			return err
 		}
 		filePath = cfg.OsFullPath(filename, "_paletteink.png")
 		if err := png.PalToPng(filePath, p); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	} else {
 		if err := palette.Kit(filename, p, mode, dontImportDsk, cfg); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filename, err)
+			log.GetLogger().Error("Error while saving file %s error :%v", filename, err)
 			return err
 		}
 		filePath := cfg.OsFullPath(filename, "_palettekit.png")
 		if err := png.PalToPng(filePath, p); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while saving file %s error :%v", filePath, err)
+			log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
 			return err
 		}
 	}
 	if err := ascii.Ascii(filename, data, p, dontImportDsk, cfg); err != nil {
-		fmt.Fprintf(os.Stderr, "Error while saving ascii file for (%s) error :%v\n", filename, err)
+		log.GetLogger().Error("Error while saving ascii file for (%s) error :%v\n", filename, err)
 	}
 	return ascii.AsciiByColumn(filename, data, p, dontImportDsk, mode, cfg)
 }
 
 func ToSpriteAndExport(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, dontImportDsk bool, ex *config.MartineConfig) error {
 
-	data, firmwareColorUsed, lineSize, err := ToSprite(in, p, size, mode, ex)
+	data, _, lineSize, err := ToSprite(in, p, size, mode, ex)
 	if err != nil {
 		return err
 	}
-	fmt.Println(firmwareColorUsed)
+
 	return ExportSprite(data, lineSize, p, size, mode, filename, dontImportDsk, ex)
 }
 
@@ -299,16 +298,16 @@ func ToSprite(in *image.NRGBA,
 				c1 := in.At(x, y)
 				pp1, err := pal.PalettePosition(c1, p)
 				if err != nil {
-					//fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+					//log.GetLogger().Error( "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 					pp1 = 0
 				}
 				pp1 = ex.SwapInk(pp1)
 				firmwareColorUsed[pp1]++
-				//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
+				//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 				c2 := in.At(x+1, y)
 				pp2, err := pal.PalettePosition(c2, p)
 				if err != nil {
-					//fmt.Fprintf(os.Stdout, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+					//log.GetLogger().Info( "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 					pp2 = 0
 				}
 				pp2 = ex.SwapInk(pp2)
@@ -365,16 +364,16 @@ func ToSprite(in *image.NRGBA,
 					c1 := in.At(x, y)
 					pp1, err := pal.PalettePosition(c1, p)
 					if err != nil {
-						//	fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+						//	log.GetLogger().Error( "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 						pp1 = 0
 					}
 					pp1 = ex.SwapInk(pp1)
 					firmwareColorUsed[pp1]++
-					//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
+					//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 					c2 := in.At(x+1, y)
 					pp2, err := pal.PalettePosition(c2, p)
 					if err != nil {
-						//fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+						//log.GetLogger().Error( "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 						pp2 = 0
 					}
 					pp2 = ex.SwapInk(pp2)
@@ -382,7 +381,7 @@ func ToSprite(in *image.NRGBA,
 					c3 := in.At(x+2, y)
 					pp3, err := pal.PalettePosition(c3, p)
 					if err != nil {
-						//	fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
+						//	log.GetLogger().Error( "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 						pp3 = 0
 					}
 					pp3 = ex.SwapInk(pp3)
@@ -390,7 +389,7 @@ func ToSprite(in *image.NRGBA,
 					c4 := in.At(x+3, y)
 					pp4, err := pal.PalettePosition(c4, p)
 					if err != nil {
-						//	fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
+						//	log.GetLogger().Error( "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 						pp4 = 0
 					}
 					pp4 = ex.SwapInk(pp4)
@@ -400,7 +399,7 @@ func ToSprite(in *image.NRGBA,
 						pp4 = 0
 					}
 					pixel := pixel.PixelMode1(pp1, pp2, pp3, pp4)
-					//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
+					//log.GetLogger().Info( "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 					// MACRO PIXM0 COL2,COL1
 					// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 					//	MEND
@@ -453,16 +452,16 @@ func ToSprite(in *image.NRGBA,
 						c1 := in.At(x, y)
 						pp1, err := pal.PalettePosition(c1, p)
 						if err != nil {
-							//		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+							//		log.GetLogger().Error( "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 							pp1 = 0
 						}
 						pp1 = ex.SwapInk(pp1)
 						firmwareColorUsed[pp1]++
-						//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
+						//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 						c2 := in.At(x+1, y)
 						pp2, err := pal.PalettePosition(c2, p)
 						if err != nil {
-							//fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+							//log.GetLogger().Error( "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 							pp2 = 0
 						}
 						pp2 = ex.SwapInk(pp2)
@@ -470,7 +469,7 @@ func ToSprite(in *image.NRGBA,
 						c3 := in.At(x+2, y)
 						pp3, err := pal.PalettePosition(c3, p)
 						if err != nil {
-							//		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
+							//		log.GetLogger().Error( "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 							pp3 = 0
 						}
 						pp3 = ex.SwapInk(pp3)
@@ -478,7 +477,7 @@ func ToSprite(in *image.NRGBA,
 						c4 := in.At(x+3, y)
 						pp4, err := pal.PalettePosition(c4, p)
 						if err != nil {
-							//		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
+							//		log.GetLogger().Error( "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 							pp4 = 0
 						}
 						pp4 = ex.SwapInk(pp4)
@@ -486,16 +485,16 @@ func ToSprite(in *image.NRGBA,
 						c5 := in.At(x+4, y)
 						pp5, err := pal.PalettePosition(c5, p)
 						if err != nil {
-							//	fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
+							//	log.GetLogger().Error( "%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
 							pp5 = 0
 						}
 						pp5 = ex.SwapInk(pp5)
 						firmwareColorUsed[pp5]++
-						//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
+						//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 						c6 := in.At(x+5, y)
 						pp6, err := pal.PalettePosition(c6, p)
 						if err != nil {
-							//	fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
+							//	log.GetLogger().Error( "%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
 							pp6 = 0
 						}
 						pp6 = ex.SwapInk(pp6)
@@ -503,7 +502,7 @@ func ToSprite(in *image.NRGBA,
 						c7 := in.At(x+6, y)
 						pp7, err := pal.PalettePosition(c7, p)
 						if err != nil {
-							//fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
+							//log.GetLogger().Error( "%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
 							pp7 = 0
 						}
 						pp7 = ex.SwapInk(pp7)
@@ -511,7 +510,7 @@ func ToSprite(in *image.NRGBA,
 						c8 := in.At(x+7, y)
 						pp8, err := pal.PalettePosition(c8, p)
 						if err != nil {
-							//		fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, x+7, y)
+							//		log.GetLogger().Error( "%v pixel position(%d,%d) not found in palette\n", c8, x+7, y)
 							pp8 = 0
 						}
 						pp8 = ex.SwapInk(pp8)
@@ -523,7 +522,7 @@ func ToSprite(in *image.NRGBA,
 							pp8 = 0
 						}
 						pixel := pixel.PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
-						//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
+						//log.GetLogger().Info( "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 						// MACRO PIXM0 COL2,COL1
 						// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 						//	MEND

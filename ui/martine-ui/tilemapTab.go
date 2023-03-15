@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"os"
@@ -23,6 +22,7 @@ import (
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/transformation"
+	"github.com/jeromelesaux/martine/log"
 	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 	w2 "github.com/jeromelesaux/martine/ui/martine-ui/widget"
@@ -121,7 +121,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 	})
 
 	applyButton := widget.NewButtonWithIcon("Compute", theme.VisibilityIcon(), func() {
-		fmt.Println("compute.")
+		log.GetLogger().Infoln("compute.")
 		m.TilemapApply(tm)
 	})
 
@@ -134,7 +134,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 	modes := widget.NewSelect([]string{"0", "1", "2"}, func(s string) {
 		mode, err := strconv.Atoi(s)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error %s cannot be cast in int\n", s)
+			log.GetLogger().Error("Error %s cannot be cast in int\n", s)
 		}
 		tm.Mode = mode
 	})
@@ -247,7 +247,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 									"Ok",
 									e,
 									m.window)
-								fmt.Printf("%s\n", tm.CmdLine())
+								log.GetLogger().Info("%s\n", tm.CmdLine())
 								size := m.window.Content().Size()
 								size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
 								d.Resize(size)

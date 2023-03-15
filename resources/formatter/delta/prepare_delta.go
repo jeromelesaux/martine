@@ -10,6 +10,7 @@ import (
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/ascii"
+	"github.com/jeromelesaux/martine/log"
 )
 
 var (
@@ -20,22 +21,23 @@ var (
 )
 
 func main() {
+	log.Default()
 	flag.Parse()
 	if *sprite == "" || *deltafiles == "" {
-		fmt.Fprintf(os.Stdout, "sprite and delta options are mandarories\n")
+		log.GetLogger().Info("sprite and delta options are mandarories\n")
 		flag.PrintDefaults()
 		os.Exit(-1)
 	}
 
 	f, err := os.Open(*sprite)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", *sprite, err)
+		log.GetLogger().Error("Error while opening file (%s) error %v\n", *sprite, err)
 		os.Exit(-1)
 	}
 	defer f.Close()
 	s := &export.Json{}
 	if err := json.NewDecoder(f).Decode(s); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot decode json file (%s) error :%v\n", *sprite, err)
+		log.GetLogger().Error("Cannot decode json file (%s) error :%v\n", *sprite, err)
 		os.Exit(-1)
 	}
 	out := "sprite\n"
@@ -70,19 +72,19 @@ func main() {
 	fl := []string{*deltafiles}
 	datafiles, err := common.WilcardedFiles(fl)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot parse wildcard files (%s) error :%v\n", *deltafiles, err)
+		log.GetLogger().Error("Cannot parse wildcard files (%s) error :%v\n", *deltafiles, err)
 		os.Exit(-1)
 	}
 	for index, v := range datafiles {
 		f, err := os.Open(v)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", v, err)
+			log.GetLogger().Error("Error while opening file (%s) error %v\n", v, err)
 			os.Exit(-1)
 		}
 		defer f.Close()
 		d := &export.Json{}
 		if err := json.NewDecoder(f).Decode(d); err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot decode json file (%s) error :%v\n", v, err)
+			log.GetLogger().Error("Cannot decode json file (%s) error :%v\n", v, err)
 			os.Exit(-1)
 		}
 		if len(d.Screen) != 1 {
@@ -120,18 +122,18 @@ func main() {
 	if *outfile != "" {
 		f, err := os.Create(*outfile)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while creating file (%s) error %v\n", *outfile, err)
+			log.GetLogger().Error("Error while creating file (%s) error %v\n", *outfile, err)
 			os.Exit(-1)
 		}
 		defer f.Close()
 		_, err = f.WriteString(out)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while writing file (%s) error %v\n", *outfile, err)
+			log.GetLogger().Error("Error while writing file (%s) error %v\n", *outfile, err)
 			os.Exit(-1)
 		}
 
 	} else {
-		fmt.Println(out)
+		log.GetLogger().Infoln(out)
 	}
 }
 

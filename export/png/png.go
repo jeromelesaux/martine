@@ -1,28 +1,29 @@
 package png
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
 	"image/png"
 	"os"
+
+	"github.com/jeromelesaux/martine/log"
 )
 
 func Png(filePath string, im *image.NRGBA) error {
 	fwd, err := os.Create(filePath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot create new image (%s) error %v\n", filePath, err)
+		log.GetLogger().Error("Cannot create new image (%s) error %v\n", filePath, err)
 		return err
 	}
 
 	if err := png.Encode(fwd, im); err != nil {
 		fwd.Close()
-		fmt.Fprintf(os.Stderr, "Cannot create new image (%s) as png error %v\n", filePath, err)
+		log.GetLogger().Error("Cannot create new image (%s) as png error %v\n", filePath, err)
 		return err
 	}
 	fwd.Close()
-	fmt.Fprintf(os.Stdout, "Create output file (%s)\n", filePath)
+	log.GetLogger().Info("Create output file (%s)\n", filePath)
 	return nil
 }
 

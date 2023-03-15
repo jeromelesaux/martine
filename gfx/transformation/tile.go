@@ -1,7 +1,6 @@
 package transformation
 
 import (
-	"fmt"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
@@ -10,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/jeromelesaux/martine/config"
+	"github.com/jeromelesaux/martine/log"
 
 	ci "github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/convert/sprite"
@@ -20,14 +20,14 @@ import (
 func TileMode(ex *config.MartineConfig, mode uint8, iterationX, iterationY int) error {
 	fr, err := os.Open(ex.InputPath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot open (%s),error :%v\n", ex.InputPath, err)
+		log.GetLogger().Error("Cannot open (%s),error :%v\n", ex.InputPath, err)
 		return err
 	}
 	defer fr.Close()
 
 	in, _, err := image.Decode(fr)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot decode image (%s) error :%v\n", ex.InputPath, err)
+		log.GetLogger().Error("Cannot decode image (%s) error :%v\n", ex.InputPath, err)
 		return err
 	}
 
@@ -38,7 +38,7 @@ func TileMode(ex *config.MartineConfig, mode uint8, iterationX, iterationY int) 
 	factorY := height/iterationY + 1
 
 	if factorX != factorY {
-		fmt.Fprintf(os.Stdout, "factor x (%d) differs from factor y (%d)\n", factorX, factorY)
+		log.GetLogger().Info("factor x (%d) differs from factor y (%d)\n", factorX, factorY)
 	}
 	if factorY == 0 {
 		factorY = height
@@ -53,7 +53,7 @@ func TileMode(ex *config.MartineConfig, mode uint8, iterationX, iterationY int) 
 				Mode:   cutter.TopLeft,
 			})
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot crop image for (%d,%d), error :%v\n", i, y, err)
+				log.GetLogger().Error("Cannot crop image for (%d,%d), error :%v\n", i, y, err)
 				return err
 			}
 
@@ -61,11 +61,11 @@ func TileMode(ex *config.MartineConfig, mode uint8, iterationX, iterationY int) 
 			ext := "_resized_" + strconv.Itoa(index) + ".png"
 			filePath := filepath.Join(ex.OutputPath, ex.OsFilename(ext))
 			if err := png.Png(filePath, resized); err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot resized image, error %v\n", err)
+				log.GetLogger().Error("Cannot resized image, error %v\n", err)
 			}
 			p, downgraded, err := ci.DowngradingPalette(resized, ex.Size, ex.CpcPlus)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot downgrad the palette, error :%v\n", err)
+				log.GetLogger().Error("Cannot downgrad the palette, error :%v\n", err)
 			}
 
 			if ex.ZigZag {
@@ -75,13 +75,13 @@ func TileMode(ex *config.MartineConfig, mode uint8, iterationX, iterationY int) 
 			ext = "_downgraded_" + strconv.Itoa(index) + ".png"
 			filePath = filepath.Join(ex.OutputPath, ex.OsFilename(ext))
 			if err := png.Png(filePath, downgraded); err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot downgrade image, error %v\n", err)
+				log.GetLogger().Error("Cannot downgrade image, error %v\n", err)
 			}
 			ext = strconv.Itoa(index) + ".png"
 			ex.Size.Width = resized.Bounds().Max.X
 			ex.Size.Height = resized.Bounds().Max.Y
 			if err := sprite.ToSpriteAndExport(downgraded, p, ex.Size, mode, ex.OsFilename(ext), false, ex); err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot create sprite from image, error :%v\n", err)
+				log.GetLogger().Error("Cannot create sprite from image, error :%v\n", err)
 			}
 			index++
 		}

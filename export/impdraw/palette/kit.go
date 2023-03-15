@@ -12,6 +12,7 @@ import (
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/amsdos"
+	"github.com/jeromelesaux/martine/log"
 )
 
 type KitPalette struct {
@@ -42,22 +43,22 @@ func (i *KitPalette) ToString() string {
 }
 
 func OpenKit(filePath string) (color.Palette, *KitPalette, error) {
-	fmt.Fprintf(os.Stdout, "Opening (%s) file\n", filePath)
+	log.GetLogger().Info("Opening (%s) file\n", filePath)
 	fr, err := os.Open(filePath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
+		log.GetLogger().Error("Error while opening file (%s) error %v\n", filePath, err)
 		return color.Palette{}, &KitPalette{}, err
 	}
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot read the Kit Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		log.GetLogger().Error("Cannot read the Kit Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		_, err = fr.Seek(0, io.SeekStart)
 		if err != nil {
 			return color.Palette{}, &KitPalette{}, err
 		}
 	}
 	if header.Checksum != header.ComputedChecksum16() {
-		fmt.Fprintf(os.Stderr, "Cannot read the Kit Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		log.GetLogger().Error("Cannot read the Kit Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		_, err = fr.Seek(0, io.SeekStart)
 		if err != nil {
 			return color.Palette{}, &KitPalette{}, err
@@ -70,7 +71,7 @@ func OpenKit(filePath string) (color.Palette, *KitPalette, error) {
 		var b uint16
 		if err := binary.Read(fr, binary.LittleEndian, &b); err != nil {
 			if err != io.EOF {
-				fmt.Fprintf(os.Stderr, "Error while reading Ocp Palette from file (%s) error %v\n", filePath, err)
+				log.GetLogger().Error("Error while reading Ocp Palette from file (%s) error %v\n", filePath, err)
 				return color.Palette{}, KitPalette, err
 			}
 			break
@@ -88,7 +89,7 @@ func OpenKit(filePath string) (color.Palette, *KitPalette, error) {
 }
 
 func SaveKit(filePath string, p color.Palette, noAmsdosHeader bool) error {
-	fmt.Fprintf(os.Stdout, "Saving Kit file (%s)\n", filePath)
+	log.GetLogger().Info("Saving Kit file (%s)\n", filePath)
 	data := [16]uint16{}
 	paletteSize := len(p)
 	if len(p) > 16 {
@@ -99,7 +100,7 @@ func SaveKit(filePath string, p color.Palette, noAmsdosHeader bool) error {
 		data[i] = cp.Value()
 	}
 
-	// fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
+	// log.GetLogger().Error( "Header length %d\n", binary.Size(header))
 
 	v, err := common.StructToBytes(data)
 	if err != nil {
@@ -120,7 +121,7 @@ func SaveKit(filePath string, p color.Palette, noAmsdosHeader bool) error {
 
 func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cfg *config.MartineConfig) error {
 	osFilepath := cfg.AmsdosFullPath(filePath, ".KIT")
-	fmt.Fprintf(os.Stdout, "Saving Kit file (%s)\n", osFilepath)
+	log.GetLogger().Info("Saving Kit file (%s)\n", osFilepath)
 	data := [16]uint16{}
 	paletteSize := len(p)
 	if len(p) > 16 {
@@ -152,11 +153,11 @@ func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 }
 
 func KitInformation(filePath string) {
-	fmt.Fprintf(os.Stdout, "Input kit palette to open : (%s)\n", filePath)
+	log.GetLogger().Info("Input kit palette to open : (%s)\n", filePath)
 	_, palette, err := OpenKit(filePath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", filePath)
+		log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", filePath)
 	} else {
-		fmt.Fprintf(os.Stdout, "Palette from file %s\n\n%s", filePath, palette.ToString())
+		log.GetLogger().Info("Palette from file %s\n\n%s", filePath, palette.ToString())
 	}
 }

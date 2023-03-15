@@ -2,7 +2,6 @@ package image
 
 import (
 	"errors"
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -15,12 +14,13 @@ import (
 	"github.com/oliamb/cutter"
 
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/log"
 )
 
 var ErrorCannotDowngradePalette = errors.New("cannot Downgrade colors palette")
 
 func Resize(in image.Image, size constants.Size, algo imaging.ResampleFilter) *image.NRGBA {
-	// fmt.Fprintf(os.Stdout, "* Step 1 * Resizing image to width %d pixels heigh %d\n", size.Width, size.Height)
+	// log.GetLogger().Info( "* Step 1 * Resizing image to width %d pixels heigh %d\n", size.Width, size.Height)
 	return imaging.Resize(in, size.Width, size.Height, algo)
 }
 
@@ -36,7 +36,7 @@ func Reducer(in *image.NRGBA, reducer int) *image.NRGBA {
 		mask = 32
 	}
 
-	fmt.Fprintf(os.Stdout, "Applying reducer mask :(%.8b)\n", mask)
+	log.GetLogger().Info("Applying reducer mask :(%.8b)\n", mask)
 	for x := 0; x < in.Bounds().Max.X; x++ {
 		for y := 0; y < in.Bounds().Max.Y; y++ {
 			c := in.At(x, y)
@@ -191,19 +191,18 @@ func ColorMonochromePalette(co color.Color, p color.Palette) color.Palette {
 }
 
 func DowngradingWithPalette(in *image.NRGBA, p color.Palette) (color.Palette, *image.NRGBA) {
-	//	fmt.Fprintf(os.Stdout, "Downgrading image with input palette %d\n", len(p))
+	//	log.GetLogger().Info( "Downgrading image with input palette %d\n", len(p))
 	return p, downgradeWithPalette(in, p)
 }
 
 func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (color.Palette, *image.NRGBA, error) {
-	//	fmt.Fprintf(os.Stdout, "* Step 2 * Downgrading palette image\n")
+	//	log.GetLogger().Info( "* Step 2 * Downgrading palette image\n")
 	p, out := downgrade(in, isCpcPlus)
-	//	fmt.Fprintf(os.Stdout, "Downgraded palette contains (%d) colors\n", len(p))
+	//	log.GetLogger().Info( "Downgraded palette contains (%d) colors\n", len(p))
 	if len(p) > size.ColorsAvailable {
-		fmt.Fprintf(os.Stderr, "Downgraded palette size (%d) is greater than the available colors in this mode (%d)\n", len(p), size.ColorsAvailable)
-		fmt.Fprintf(os.Stderr, "Check color usage in image.\n")
+		log.GetLogger().Error("Downgraded palette size (%d) is greater than the available colors in this mode (%d)\n", len(p), size.ColorsAvailable)
+		log.GetLogger().Error("Check color usage in image.\n")
 		colorUsage := computePaletteUsage(out, p)
-		// fmt.Println(colorUsage)
 		// feed sort palette colors structure
 		paletteToReduce := constants.NewPaletteReducer()
 
@@ -212,7 +211,7 @@ func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (c
 		}
 		// launch analyse
 		newPalette := paletteToReduce.Reduce(size.ColorsAvailable)
-		fmt.Fprintf(os.Stdout, "Phasis downgrade colors palette palette (%d)\n", len(newPalette))
+		log.GetLogger().Info("Phasis downgrade colors palette palette (%d)\n", len(newPalette))
 		return newPalette, downgradeWithPalette(out, newPalette), nil
 
 	}
@@ -290,7 +289,7 @@ func ExtractPalette(in *image.NRGBA, isCpcPlus bool, nbColors int) color.Palette
 }
 
 func PaletteUsed(in *image.NRGBA, isCpcPlus bool) color.Palette {
-	fmt.Fprintf(os.Stdout, "Define the Palette use in image.\n")
+	log.GetLogger().Info("Define the Palette use in image.\n")
 	cache := make(map[color.Color]color.Color)
 	p := color.Palette{}
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
@@ -317,7 +316,7 @@ func PaletteUsed(in *image.NRGBA, isCpcPlus bool) color.Palette {
 }
 
 func downgrade(in *image.NRGBA, isCpcPlus bool) (color.Palette, *image.NRGBA) {
-	fmt.Fprintf(os.Stdout, "Plus palette :%d\n", len(constants.CpcPlusPalette))
+	log.GetLogger().Info("Plus palette :%d\n", len(constants.CpcPlusPalette))
 	cache := make(map[color.Color]color.Color)
 	p := color.Palette{}
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
@@ -354,7 +353,7 @@ func paletteContains(p color.Palette, c color.Color) bool {
 
 func ConvertPalette(p color.Palette, p0 color.Palette) color.Palette {
 	var nP []color.Color
-	fmt.Fprintf(os.Stdout, "Converting palette length %d\n", len(p))
+	log.GetLogger().Info("Converting palette length %d\n", len(p))
 	for _, v := range p {
 		n := p0.Convert(v)
 		nP = append(nP, n)

@@ -13,6 +13,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/compression"
+	"github.com/jeromelesaux/martine/log"
 )
 
 var codeScrStandard = []byte{ // Routine à mettre en #C7D0
@@ -144,19 +145,19 @@ func min(a, b int) int {
 func RawScr(filePath string) ([]byte, error) {
 	fr, err := os.Open(filePath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
+		log.GetLogger().Error("Error while opening file (%s) error %v\n", filePath, err)
 		return []byte{}, err
 	}
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot read the RawScr Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		log.GetLogger().Error("Cannot read the RawScr Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		_, err := fr.Seek(0, io.SeekStart)
 		if err != nil {
 			return []byte{}, err
 		}
 	}
 	if header.Checksum != header.ComputedChecksum16() {
-		fmt.Fprintf(os.Stderr, "Cannot read the RawScr Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		log.GetLogger().Error("Cannot read the RawScr Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		_, err := fr.Seek(0, io.SeekStart)
 		if err != nil {
 			return []byte{}, err
@@ -183,7 +184,7 @@ func RawScr(filePath string) ([]byte, error) {
 
 func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cfg *config.MartineConfig) error {
 	osFilepath := cfg.AmsdosFullPath(filePath, ".SCR")
-	fmt.Fprintf(os.Stdout, "Saving SCR file (%s)\n", osFilepath)
+	log.GetLogger().Info( "Saving SCR file (%s)\n", osFilepath)
 	var exec uint16
 	if cfg.CpcPlus {
 		exec = 0x821
@@ -198,7 +199,7 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cfg *c
 		offset := 1
 		for i := 0; i < len(p); i++ {
 			cp := constants.NewCpcPlusColor(p[i])
-			// fmt.Fprintf(os.Stderr, "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
+			// log.GetLogger().Error( "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
 			v := cp.Bytes()
 			data[0x17d0+offset] = v[0]
 			offset++
@@ -223,7 +224,7 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cfg *c
 			if err == nil {
 				data[(0x17D0)+i] = v[0]
 			} else {
-				fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+				log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 		copy(data[0x07d0:], codeScrStandard[:])
@@ -273,7 +274,7 @@ func (o *OcpPalette) ToString() string {
 	for _, v := range o.PaletteColors {
 		hcolor, err := constants.ColorFromHardware(v[0])
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "error color :%v\n", err)
+			log.GetLogger().Error("error color :%v\n", err)
 			out += "00, "
 		} else {
 			fcolor, _ := constants.FirmwareNumber(hcolor)
@@ -287,19 +288,19 @@ func (o *OcpPalette) ToString() string {
 func OpenPal(filePath string) (color.Palette, *OcpPalette, error) {
 	fr, err := os.Open(filePath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
+		log.GetLogger().Error("Error while opening file (%s) error %v\n", filePath, err)
 		return color.Palette{}, &OcpPalette{}, err
 	}
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		log.GetLogger().Error("Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		_, err := fr.Seek(0, io.SeekStart)
 		if err != nil {
 			return color.Palette{}, &OcpPalette{}, err
 		}
 	}
 	if header.Checksum != header.ComputedChecksum16() {
-		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		log.GetLogger().Error("Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		_, err := fr.Seek(0, io.SeekStart)
 		if err != nil {
 			return color.Palette{}, &OcpPalette{}, err
@@ -308,7 +309,7 @@ func OpenPal(filePath string) (color.Palette, *OcpPalette, error) {
 
 	ocpPalette := &OcpPalette{}
 	if err := binary.Read(fr, binary.LittleEndian, ocpPalette); err != nil {
-		fmt.Fprintf(os.Stderr, "Error while reading Ocp Palette from file (%s) error %v\n", filePath, err)
+		log.GetLogger().Error("Error while reading Ocp Palette from file (%s) error %v\n", filePath, err)
 		return color.Palette{}, ocpPalette, err
 	}
 
@@ -316,7 +317,7 @@ func OpenPal(filePath string) (color.Palette, *OcpPalette, error) {
 	for _, v := range ocpPalette.PaletteColors {
 		c, err := constants.ColorFromHardware(v[0])
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Hardware color value %.2x is not recognized error :%v\n", v[0], err)
+			log.GetLogger().Error("Hardware color value %.2x is not recognized error :%v\n", v[0], err)
 			p = append(p, color.White)
 
 		} else {
@@ -328,14 +329,14 @@ func OpenPal(filePath string) (color.Palette, *OcpPalette, error) {
 }
 
 func SavePal(filePath string, p color.Palette, screenMode uint8, noAmsdosHeader bool) error {
-	fmt.Fprintf(os.Stdout, "Saving PAL file (%s)\n", filePath)
+	log.GetLogger().Info( "Saving PAL file (%s)\n", filePath)
 	data := OcpPalette{ScreenMode: screenMode, ColorAnimation: 0, ColorAnimationDelay: 0}
 	for i := 0; i < 16; i++ {
 		for j := 0; j < 12; j++ {
 			data.PaletteColors[i][j] = 54
 		}
 	}
-	fmt.Fprintf(os.Stdout, "Palette size %d\n", len(p))
+	log.GetLogger().Info( "Palette size %d\n", len(p))
 	for i := 0; i < len(p); i++ {
 		v, err := constants.HardwareValues(p[i])
 		if err == nil {
@@ -343,7 +344,7 @@ func SavePal(filePath string, p color.Palette, screenMode uint8, noAmsdosHeader 
 				data.PaletteColors[i][j] = v[0]
 			}
 		} else {
-			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
 
@@ -366,14 +367,14 @@ func SavePal(filePath string, p color.Palette, screenMode uint8, noAmsdosHeader 
 }
 
 func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cfg *config.MartineConfig) error {
-	fmt.Fprintf(os.Stdout, "Saving PAL file (%s)\n", filePath)
+	log.GetLogger().Info( "Saving PAL file (%s)\n", filePath)
 	data := OcpPalette{ScreenMode: screenMode, ColorAnimation: 0, ColorAnimationDelay: 0}
 	for i := 0; i < 16; i++ {
 		for j := 0; j < 12; j++ {
 			data.PaletteColors[i][j] = 54
 		}
 	}
-	fmt.Fprintf(os.Stdout, "Palette size %d\n", len(p))
+	log.GetLogger().Info( "Palette size %d\n", len(p))
 	for i := 0; i < len(p); i++ {
 		v, err := constants.HardwareValues(p[i])
 		if err == nil {
@@ -381,7 +382,7 @@ func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 				data.PaletteColors[i][j] = v[0]
 			}
 		} else {
-			fmt.Fprintf(os.Stderr, "Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
 	osFilepath := cfg.AmsdosFullPath(filePath, ".PAL")
@@ -406,11 +407,11 @@ func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 }
 
 func PalInformation(filePath string) {
-	fmt.Fprintf(os.Stdout, "Input palette to open : (%s)\n", filePath)
+	log.GetLogger().Info( "Input palette to open : (%s)\n", filePath)
 	_, palette, err := OpenPal(filePath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Palette in file (%s) can not be read skipped\n", filePath)
+		log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", filePath)
 	} else {
-		fmt.Fprintf(os.Stdout, "Palette from file %s\n\n%s", filePath, palette.ToString())
+		log.GetLogger().Info( "Palette from file %s\n\n%s", filePath, palette.ToString())
 	}
 }

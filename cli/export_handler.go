@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -11,6 +10,7 @@ import (
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/compression"
+	"github.com/jeromelesaux/martine/log"
 )
 
 func ExportHandler() (*config.MartineConfig, constants.Size) {
@@ -21,7 +21,7 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 
 		emptySize := constants.Size{}
 		if size == emptySize && *height == -1 && *width == -1 && !*deltaMode {
-			fmt.Fprintf(os.Stderr, "mode %d not defined and no custom width or height\n", *mode)
+			log.GetLogger().Error("mode %d not defined and no custom width or height\n", *mode)
 			usage()
 		}
 
@@ -47,11 +47,11 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 		}
 
 		if size.Width > constants.WidthMax {
-			fmt.Fprintf(os.Stderr, "Max width allowed is (%d) your choice (%d), Quiting...\n", size.Width, constants.WidthMax)
+			log.GetLogger().Error("Max width allowed is (%d) your choice (%d), Quiting...\n", size.Width, constants.WidthMax)
 			os.Exit(-1)
 		}
 		if size.Height > constants.HeightMax {
-			fmt.Fprintf(os.Stderr, "Max height allowed is (%d) your choice (%d), Quiting...\n", size.Height, constants.HeightMax)
+			log.GetLogger().Error("Max height allowed is (%d) your choice (%d), Quiting...\n", size.Height, constants.HeightMax)
 			os.Exit(-1)
 		}
 	}
@@ -143,25 +143,25 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 		for _, v := range sequence {
 			line, err := strconv.Atoi(v)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Bad scanline sequence (%s) error:%v\n", *scanlineSequence, err)
+				log.GetLogger().Error("Bad scanline sequence (%s) error:%v\n", *scanlineSequence, err)
 				os.Exit(-1)
 			}
 			cfg.ScanlineSequence = append(cfg.ScanlineSequence, line)
 		}
 		modulo := size.Height % len(cfg.ScanlineSequence)
 		if modulo != 0 {
-			fmt.Fprintf(os.Stderr, "height modulo scanlinesequence is not equal to 0 %d lines and the output image lines is %d\n", len(cfg.ScanlineSequence), size.Height)
+			log.GetLogger().Error("height modulo scanlinesequence is not equal to 0 %d lines and the output image lines is %d\n", len(cfg.ScanlineSequence), size.Height)
 			os.Exit(-1)
 		}
 	}
 
 	if err := cfg.ImportInkSwap(*inkSwap); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot parse inkswap option with error [%s]\n", err)
+		log.GetLogger().Error("Cannot parse inkswap option with error [%s]\n", err)
 		os.Exit(-1)
 	}
 	if *lineWidth != "" {
 		if err := cfg.SetLineWith(*lineWidth); err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot parse linewidth option with error [%s]\n", err)
+			log.GetLogger().Error("Cannot parse linewidth option with error [%s]\n", err)
 			os.Exit(-1)
 		}
 	}
@@ -180,14 +180,14 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 				cfg.MaskAndOperation = true
 			}
 			if cfg.MaskAndOperation && cfg.MaskOrOperation {
-				fmt.Fprintf(os.Stderr, "Or and And operations are setted, will only apply And operation.\n")
+				log.GetLogger().Error("Or and And operations are setted, will only apply And operation.\n")
 				cfg.MaskOrOperation = false
 			}
 			if !cfg.MaskAndOperation && !cfg.MaskOrOperation {
-				fmt.Fprintf(os.Stderr, "Or and And operations are not setted, will only apply And operation.\n")
+				log.GetLogger().Error("Or and And operations are not setted, will only apply And operation.\n")
 				cfg.MaskAndOperation = true
 			}
-			fmt.Fprintf(os.Stdout, "Applying sprite mask value [#%X] [%.8b] AND = %t, OR =%t\n",
+			log.GetLogger().Info("Applying sprite mask value [#%X] [%.8b] AND = %t, OR =%t\n",
 				cfg.MaskSprite,
 				cfg.MaskSprite,
 				cfg.MaskAndOperation,

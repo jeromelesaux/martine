@@ -2,20 +2,22 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"os"
+
+	"github.com/jeromelesaux/martine/log"
 )
 
 func main() {
+	log.Default()
 	scanner := bufio.NewScanner(os.Stdin)
 	count := 0
 	for scanner.Scan() {
 		if count%8 == 0 {
-			fmt.Printf("\ndb ")
+			log.GetLogger().Info("\ndb ")
 		}
-		fmt.Printf("%s", scanner.Text())
+		log.GetLogger().Info("%s", scanner.Text())
 		if (count+1)%8 != 0 {
-			fmt.Printf(", ")
+			log.GetLogger().Info(", ")
 		}
 		count++
 	}

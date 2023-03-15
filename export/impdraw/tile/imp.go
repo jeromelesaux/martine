@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -12,6 +11,7 @@ import (
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/export/amsdos"
+	"github.com/jeromelesaux/martine/log"
 )
 
 type ImpFooter struct {
@@ -24,25 +24,25 @@ func OpenImp(filePath string, mode int) (*ImpFooter, error) {
 	footer := &ImpFooter{}
 	fr, err := os.Open(filePath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
+		log.GetLogger().Error("Error while opening file (%s) error %v\n", filePath, err)
 		return footer, err
 	}
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot read the Imp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		log.GetLogger().Error("Cannot read the Imp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		_, err := fr.Seek(0, io.SeekStart)
 		if err != nil {
 			return footer, err
 		}
 	}
 	if header.Checksum != header.ComputedChecksum16() {
-		fmt.Fprintf(os.Stderr, "Cannot read the Imp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		log.GetLogger().Error("Cannot read the Imp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		_, err := fr.Seek(-3, io.SeekEnd)
 		if err != nil {
 			return footer, err
 		}
 	} else {
-		fmt.Fprintf(os.Stdout, "LogicalSize=%d\n", header.LogicalSize)
+		log.GetLogger().Info("LogicalSize=%d\n", header.LogicalSize)
 		_, err = fr.Seek(0x80+int64(header.LogicalSize)-3, io.SeekStart)
 		if err != nil {
 			return footer, err
@@ -50,12 +50,12 @@ func OpenImp(filePath string, mode int) (*ImpFooter, error) {
 	}
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while seek in the file (%s) with error %v\n", filePath, err)
+		log.GetLogger().Error("Error while seek in the file (%s) with error %v\n", filePath, err)
 		return footer, err
 	}
 
 	if err := binary.Read(fr, binary.LittleEndian, footer); err != nil {
-		fmt.Fprintf(os.Stderr, "Error while reading Imp Win from file (%s) error %v\n", filePath, err)
+		log.GetLogger().Error("Error while reading Imp Win from file (%s) error %v\n", filePath, err)
 		return footer, err
 	}
 	switch mode {
@@ -76,19 +76,19 @@ func OpenImp(filePath string, mode int) (*ImpFooter, error) {
 func RawImp(filePath string) ([]byte, error) {
 	fr, err := os.Open(filePath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
+		log.GetLogger().Error("Error while opening file (%s) error %v\n", filePath, err)
 		return []byte{}, err
 	}
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot read the Imp Win Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		log.GetLogger().Error("Cannot read the Imp Win Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		_, err := fr.Seek(0, io.SeekStart)
 		if err != nil {
 			return []byte{}, err
 		}
 	}
 	if header.Checksum != header.ComputedChecksum16() {
-		fmt.Fprintf(os.Stderr, "Cannot read the Imp Win Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		log.GetLogger().Error("Cannot read the Imp Win Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		_, err := fr.Seek(0, io.SeekStart)
 		if err != nil {
 			return []byte{}, err
@@ -125,7 +125,7 @@ func Imp(sprites []byte, nbFrames, width, height, mode uint, filename string, ex
 
 	buf := new(bytes.Buffer)
 	if err := binary.Write(buf, binary.LittleEndian, impHeader); err != nil {
-		fmt.Fprintf(os.Stderr, "Error while feeding imp header. error :%v\n", err)
+		log.GetLogger().Error("Error while feeding imp header. error :%v\n", err)
 	}
 	output = append(output, buf.Bytes()...)
 
@@ -141,7 +141,7 @@ func Imp(sprites []byte, nbFrames, width, height, mode uint, filename string, ex
 		}
 	}
 
-	fmt.Fprintf(os.Stdout, "Imp-Catcher file exported in [%s]\n", impPath)
+	log.GetLogger().Info("Imp-Catcher file exported in [%s]\n", impPath)
 	export.AddFile(impPath)
 	return nil
 }
@@ -162,7 +162,7 @@ func TileMap(data []byte, filename string, export *config.MartineConfig) error {
 		}
 	}
 
-	fmt.Fprintf(os.Stdout, "Imp-TileMap file exported in [%s]\n", impPath)
+	log.GetLogger().Info("Imp-TileMap file exported in [%s]\n", impPath)
 	export.AddFile(impPath)
 	return nil
 }

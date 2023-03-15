@@ -1,13 +1,12 @@
 package ui
 
 import (
-	"fmt"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jeromelesaux/martine/log"
 	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
@@ -74,7 +73,7 @@ func (m *MartineUI) exportDialog(ie *menu.ImageExport, w fyne.Window) {
 				}
 				directory.SetDefaultDirectoryURI(lu)
 				ie.ExportFolderPath = lu.Path()
-				fmt.Println(ie.ExportFolderPath)
+				log.GetLogger().Infoln(ie.ExportFolderPath)
 				m.ExportOneImage(m.main)
 
 				// apply and export

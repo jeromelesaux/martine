@@ -1,14 +1,13 @@
 package filter
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
-	"os"
 
 	"github.com/esimov/colorquant"
 	dither "github.com/esimov/dithergo"
+	"github.com/jeromelesaux/martine/log"
 	"github.com/jeromelesaux/martine/proc"
 )
 
@@ -84,7 +83,7 @@ func BayerDiphering(input *image.NRGBA, filter [][]float32, palette color.Palett
 	width := image2.Bounds().Max.X
 	filterRowLenght := len(filter[0]) - 1
 	filterLenght := len(filter[0]) * len(filter[0])
-	fmt.Fprintf(os.Stdout, "Palette length used in Bayer dithering %d\n", len(palette))
+	log.GetLogger().Info("Palette length used in Bayer dithering %d\n", len(palette))
 	pal := InitPalWithPalette(palette)
 
 	proc.Parallel(0, height, func(yc <-chan int) {
@@ -97,7 +96,7 @@ func BayerDiphering(input *image.NRGBA, filter [][]float32, palette color.Palett
 					color := rgbToQColor(plan.Colors[((y&1)*2 + (x & 1))])
 					image2.Set(x, y, color)
 				} else {
-					//fmt.Fprintf(os.Stderr,"(%d,%d):(%d)(%d)\n",x,y,(x & filterRowLenght),((y & filterRowLenght) << 3))
+					//log.GetLogger().Error("(%d,%d):(%d)(%d)\n",x,y,(x & filterRowLenght),((y & filterRowLenght) << 3))
 					mapValue := filter[(x & filterRowLenght)][(y&filterRowLenght)] / float32(filterLenght)
 					planIndex := 0
 					if mapValue < plan.Ratio {
@@ -107,11 +106,11 @@ func BayerDiphering(input *image.NRGBA, filter [][]float32, palette color.Palett
 					image2.Set(x, y, color)
 				}
 			}
-			//fmt.Fprintf(os.Stdout,"Analyse done for column %d\n",y)
-			fmt.Fprintf(os.Stdout, ".")
+			//log.GetLogger().Info("Analyse done for column %d\n",y)
+			log.GetLogger().Info(".")
 		}
 	})
-	fmt.Fprintf(os.Stdout, "\n")
+	log.GetLogger().Info("\n")
 	return image2
 }
 

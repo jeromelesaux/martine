@@ -1,14 +1,13 @@
 package screen
 
 import (
-	"fmt"
 	"image"
 	"image/color"
-	"os"
 
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert/address"
+	"github.com/jeromelesaux/martine/log"
 
 	"github.com/jeromelesaux/martine/convert/palette"
 	"github.com/jeromelesaux/martine/convert/pixel"
@@ -31,8 +30,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 		bw = make([]byte, 0x4000)
 	}
 	firmwareColorUsed := make(map[int]int)
-	//fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
-	//fmt.Println(in.Bounds())
+	//log.GetLogger().Info( "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
 
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 8 {
@@ -40,16 +38,16 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c1 := in.At(x, y)
 			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
 			pp1 = cfg.SwapInk(pp1)
 			firmwareColorUsed[pp1]++
-			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
+			//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := in.At(x+1, y)
 			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			pp2 = cfg.SwapInk(pp2)
@@ -57,7 +55,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c3 := in.At(x+2, y)
 			pp3, err := palette.PalettePosition(c3, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
 			pp3 = cfg.SwapInk(pp3)
@@ -65,7 +63,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c4 := in.At(x+3, y)
 			pp4, err := palette.PalettePosition(c4, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
 			pp4 = cfg.SwapInk(pp4)
@@ -73,16 +71,16 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c5 := in.At(x+4, y)
 			pp5, err := palette.PalettePosition(c5, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
 				pp5 = 0
 			}
 			pp5 = cfg.SwapInk(pp5)
 			firmwareColorUsed[pp5]++
-			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
+			//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c6 := in.At(x+5, y)
 			pp6, err := palette.PalettePosition(c6, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
 				pp6 = 0
 			}
 			pp6 = cfg.SwapInk(pp6)
@@ -90,7 +88,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c7 := in.At(x+6, y)
 			pp7, err := palette.PalettePosition(c7, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
 				pp7 = 0
 			}
 			pp7 = cfg.SwapInk(pp7)
@@ -98,7 +96,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c8 := in.At(x+7, y)
 			pp8, err := palette.PalettePosition(c8, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c8, x+7, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c8, x+7, y)
 				pp8 = 0
 			}
 			pp8 = cfg.SwapInk(pp8)
@@ -110,7 +108,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 				pp8 = 0
 			}
 			pixel := pixel.PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
-			//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
+			//log.GetLogger().Info( "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
@@ -120,7 +118,6 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 
 	}
 
-	//fmt.Println(firmwareColorUsed)
 	return bw
 }
 
@@ -139,8 +136,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 	}
 
 	firmwareColorUsed := make(map[int]int)
-	//fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
-	//fmt.Println(in.Bounds())
+	//log.GetLogger().Info( "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
 
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 4 {
@@ -148,16 +144,16 @@ func ToMode1(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c1 := in.At(x, y)
 			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
 			pp1 = cfg.SwapInk(pp1)
 			firmwareColorUsed[pp1]++
-			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
+			//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := in.At(x+1, y)
 			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			pp2 = cfg.SwapInk(pp2)
@@ -165,7 +161,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c3 := in.At(x+2, y)
 			pp3, err := palette.PalettePosition(c3, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
 			pp3 = cfg.SwapInk(pp3)
@@ -173,7 +169,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c4 := in.At(x+3, y)
 			pp4, err := palette.PalettePosition(c4, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
 			pp4 = cfg.SwapInk(pp4)
@@ -183,7 +179,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 				pp2 = 0
 			}
 			pixel := pixel.PixelMode1(pp1, pp2, pp3, pp4)
-			//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
+			//log.GetLogger().Info( "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
@@ -207,8 +203,7 @@ func ToMode0(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 		bw = make([]byte, 0x4000)
 	}
 	firmwareColorUsed := make(map[int]int)
-	//fmt.Fprintf(os.Stdout, "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
-	//fmt.Println(in.Bounds())
+	//log.GetLogger().Info( "Informations palette (%d) for image (%d,%d)\n", len(p), in.Bounds().Max.X, in.Bounds().Max.Y)
 
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y += lineToAdd {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
@@ -216,16 +211,16 @@ func ToMode0(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c1 := in.At(x, y)
 			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
 			pp1 = cfg.SwapInk(pp1)
 			firmwareColorUsed[pp1]++
-			//fmt.Fprintf(os.Stdout, "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
+			//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c2 := in.At(x+1, y)
 			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			pp2 = cfg.SwapInk(pp2)
@@ -234,7 +229,7 @@ func ToMode0(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 				pp2 = 0
 			}
 			pixel := pixel.PixelMode0(pp1, pp2)
-			//fmt.Fprintf(os.Stdout, "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
+			//log.GetLogger().Info( "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
@@ -243,7 +238,6 @@ func ToMode0(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 		}
 	}
 
-	//	fmt.Println(firmwareColorUsed)
 	return bw
 }
 

@@ -3,11 +3,12 @@ package common
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
+
+	"github.com/jeromelesaux/martine/log"
 )
 
 func WilcardedFiles(filespath []string) ([]string, error) {
@@ -20,19 +21,19 @@ func WilcardedFiles(filespath []string) ([]string, error) {
 			return fullfilespath, err
 		}
 		reg := filepath.Base(v)
-		// fmt.Fprintf(os.Stdout, "Regular to match (%s)\n", reg)
+		// log.GetLogger().Info( "Regular to match (%s)\n", reg)
 		for _, f := range fis {
 			if !f.IsDir() {
 				check := filepath.Join(dir, f.Name())
-				//	fmt.Fprintf(os.Stdout, "Checking regex for (%s) matches (%s)\n", f.Name(), reg)
+				//	log.GetLogger().Info( "Checking regex for (%s) matches (%s)\n", f.Name(), reg)
 				matchs, err := filepath.Match(reg, f.Name())
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error while checking match with error %v\n", err)
+					log.GetLogger().Error("Error while checking match with error %v\n", err)
 					return fullfilespath, err
 				}
-				// fmt.Fprintf(os.Stdout, "Returns %v\n", matchs)
+				// log.GetLogger().Info( "Returns %v\n", matchs)
 				if matchs {
-					//	fmt.Fprintf(os.Stdout, "Ok (%s) matches (%s)\n", reg, check)
+					//	log.GetLogger().Info( "Ok (%s) matches (%s)\n", reg, check)
 					if !ContainsFilepath(fullfilespath, check) {
 						fullfilespath = append(fullfilespath, check)
 					}

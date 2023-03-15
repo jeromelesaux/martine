@@ -12,6 +12,7 @@ import (
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/compression"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
+	"github.com/jeromelesaux/martine/log"
 )
 
 type OcpWinFooter struct {
@@ -28,19 +29,19 @@ func (o *OcpWinFooter) ToString() string {
 func RawWin(filePath string) ([]byte, error) {
 	fr, err := os.Open(filePath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
+		log.GetLogger().Error("Error while opening file (%s) error %v\n", filePath, err)
 		return []byte{}, err
 	}
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Win Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		log.GetLogger().Error("Cannot read the Ocp Win Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		_, err = fr.Seek(0, io.SeekStart)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if header.Checksum != header.ComputedChecksum16() {
-		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Win Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		log.GetLogger().Error("Cannot read the Ocp Win Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		_, err = fr.Seek(0, io.SeekStart)
 		if err != nil {
 			return nil, err
@@ -64,19 +65,19 @@ func RawWin(filePath string) ([]byte, error) {
 func OpenWin(filePath string) (*OcpWinFooter, error) {
 	fr, err := os.Open(filePath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while opening file (%s) error %v\n", filePath, err)
+		log.GetLogger().Error("Error while opening file (%s) error %v\n", filePath, err)
 		return &OcpWinFooter{}, err
 	}
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		log.GetLogger().Error("Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		_, err := fr.Seek(0, io.SeekStart)
 		if err != nil {
 			return &OcpWinFooter{}, err
 		}
 	}
 	if header.Checksum != header.ComputedChecksum16() {
-		fmt.Fprintf(os.Stderr, "Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
+		log.GetLogger().Error("Cannot read the Ocp Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
 		_, err := fr.Seek(0, io.SeekStart)
 		if err != nil {
 			return &OcpWinFooter{}, err
@@ -86,16 +87,16 @@ func OpenWin(filePath string) (*OcpWinFooter, error) {
 	ocpWinFooter := &OcpWinFooter{}
 	//_, err = fr.Seek(-5, io.SeekEnd)
 
-	fmt.Fprintf(os.Stdout, "LogicalSize=%d\n", header.LogicalSize)
+	log.GetLogger().Info("LogicalSize=%d\n", header.LogicalSize)
 	_, err = fr.Seek(0x80+int64(header.LogicalSize)-5, io.SeekStart)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while seek in the file (%s) with error %v\n", filePath, err)
+		log.GetLogger().Error("Error while seek in the file (%s) with error %v\n", filePath, err)
 		return &OcpWinFooter{}, err
 	}
 
 	if err := binary.Read(fr, binary.LittleEndian, ocpWinFooter); err != nil {
-		fmt.Fprintf(os.Stderr, "Error while reading Ocp Win from file (%s) error %v\n", filePath, err)
+		log.GetLogger().Error("Error while reading Ocp Win from file (%s) error %v\n", filePath, err)
 		return ocpWinFooter, err
 	}
 	ocpWinFooter.Width = uint16(uint(ocpWinFooter.Width / 8))
@@ -104,14 +105,14 @@ func OpenWin(filePath string) (*OcpWinFooter, error) {
 
 func Win(filePath string, data []byte, screenMode uint8, width, height int, dontImportDsk bool, cfg *config.MartineConfig) error {
 	osFilepath := cfg.AmsdosFullPath(filePath, ".WIN")
-	fmt.Fprintf(os.Stdout, "Saving WIN file (%s), screen mode %d, (%d,%d)\n", osFilepath, screenMode, width, height)
+	log.GetLogger().Info("Saving WIN file (%s), screen mode %d, (%d,%d)\n", osFilepath, screenMode, width, height)
 	win := OcpWinFooter{Unused: 3, Height: byte(height), Unused2: 0, Width: uint16(width * 8)}
 
 	data, _ = compression.Compress(data, cfg.Compression)
 
-	// fmt.Fprintf(os.Stderr, "Header length %d\n", binary.Size(header))
-	fmt.Fprintf(os.Stderr, "Data length %d\n", binary.Size(data))
-	fmt.Fprintf(os.Stderr, "Footer length %d\n", binary.Size(win))
+	// log.GetLogger().Error( "Header length %d\n", binary.Size(header))
+	log.GetLogger().Error("Data length %d\n", binary.Size(data))
+	log.GetLogger().Error("Footer length %d\n", binary.Size(win))
 	osFilename := cfg.Fullpath(".WIN")
 
 	body, err := common.StructToBytes(data)
@@ -125,7 +126,7 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, dont
 	content := body
 	content = append(content, footer...)
 
-	fmt.Fprintf(os.Stdout, "%s, data size :%d\n", win.ToString(), len(data))
+	log.GetLogger().Info("%s, data size :%d\n", win.ToString(), len(data))
 	if !cfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilename, ".WIN", content, 2, 0, 0x4000, 0x4000); err != nil {
 			return err
@@ -143,11 +144,11 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, dont
 }
 
 func WinInformation(filePath string) {
-	fmt.Fprintf(os.Stdout, "Input window to open : (%s)\n", filePath)
+	log.GetLogger().Info("Input window to open : (%s)\n", filePath)
 	win, err := OpenWin(filePath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Window in file (%s) can not be read skipped\n", filePath)
+		log.GetLogger().Error("Window in file (%s) can not be read skipped\n", filePath)
 	} else {
-		fmt.Fprintf(os.Stdout, "Window from file %s\n\n%s", filePath, win.ToString())
+		log.GetLogger().Info("Window from file %s\n\n%s", filePath, win.ToString())
 	}
 }

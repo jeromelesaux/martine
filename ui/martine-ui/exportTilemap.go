@@ -12,6 +12,7 @@ import (
 	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/gfx"
+	"github.com/jeromelesaux/martine/log"
 	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
@@ -99,7 +100,7 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 				}
 				directory.SetDefaultDirectoryURI(lu)
 				m.tilemap.ExportFolderPath = lu.Path()
-				fmt.Println(m.tilemapExport.ExportFolderPath)
+				log.GetLogger().Infoln(m.tilemapExport.ExportFolderPath)
 				m.ExportTilemap(m.tilemap)
 				// apply and export
 			}, m.window)

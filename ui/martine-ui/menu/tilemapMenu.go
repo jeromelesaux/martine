@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/gfx/transformation"
+	"github.com/jeromelesaux/martine/log"
 )
 
 var TileSize float32 = 20.
@@ -48,7 +49,7 @@ func NewTilemapMenu() *TilemapMenu {
 func (i *TilemapMenu) CmdLine() string {
 	exec, err := os.Executable()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error while getting executable path :%v\n", err)
+		log.GetLogger().Error( "error while getting executable path :%v\n", err)
 		return exec
 	}
 	if i.OriginalImagePath() != "" {
@@ -63,13 +64,13 @@ func (i *TilemapMenu) CmdLine() string {
 	if i.IsSprite {
 		width, widthText, err := i.GetWidth()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot convert width value :%s error :%v\n", widthText, err)
+			log.GetLogger().Error( "cannot convert width value :%s error :%v\n", widthText, err)
 		} else {
 			exec += " -width " + strconv.Itoa(width)
 		}
 		height, heightText, err := i.GetHeight()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot convert height value :%s error :%v\n", heightText, err)
+			log.GetLogger().Error( "cannot convert height value :%s error :%v\n", heightText, err)
 		} else {
 			exec += " -height " + strconv.Itoa(height)
 		}

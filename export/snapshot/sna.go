@@ -2,11 +2,11 @@ package snapshot
 
 import (
 	"encoding/binary"
-	"fmt"
 	"os"
 
 	"github.com/jeromelesaux/dsk"
 	m "github.com/jeromelesaux/m4client/cpc"
+	"github.com/jeromelesaux/martine/log"
 )
 
 func ImportInSna(filePath, snaPath string, screenMode uint8) error {
@@ -21,7 +21,7 @@ func ImportInSna(filePath, snaPath string, screenMode uint8) error {
 	if err := binary.Read(f, binary.LittleEndian, header); err != nil {
 		return err
 	}
-	fmt.Fprintf(os.Stdout, "Import file %s at address:#%4x size:%4x\n", filePath, header.Address, header.Size)
+	log.GetLogger().Info("Import file %s at address:#%4x size:%4x\n", filePath, header.Address, header.Size)
 	buff := make([]byte, 0xFFFF)
 	_, err = f.Read(buff)
 	if err != nil {

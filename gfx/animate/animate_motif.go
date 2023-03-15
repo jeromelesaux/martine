@@ -125,6 +125,6 @@ func exportDeltaMotif(images [][]byte, motifs [][]byte, p color.Palette, cfg *co
 	deltaCode += "palette:\n" + ascii.ByteToken + " "
 	deltaCode += ascii.FormatAssemblyBasicPalette(p, "\n")
 
-	//	fmt.Printf("%s", deltaCode)
+	//	log.GetLogger().Info("%s", deltaCode)
 	return amsdos.SaveStringOSFile(filename, deltaCode)
 }
