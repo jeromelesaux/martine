@@ -33,7 +33,7 @@ var (
 )
 
 func main() {
-	log.Default()
+	log.Default("")
 	var spritesFiles stringSlice
 	flag.Var(&spritesFiles, "in", "sprites json path")
 

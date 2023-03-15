@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -21,14 +22,15 @@ type MLogger struct {
 }
 
 func NewMLogger(
+	prefix string,
 	debug io.Writer,
 	info io.Writer,
 	errors io.Writer,
 ) *MLogger {
 	l := &MLogger{
-		debugLogger: log.New(debug, "Martine-DEBUG ", log.Ldate|log.Ltime),
-		infoLogger:  log.New(info, "Martine-INFO ", log.Ldate|log.Ltime),
-		errorLogger: log.New(errors, "Martine-ERROR ", log.Ldate|log.Ltime),
+		debugLogger: log.New(debug, prefix+" [DEBUG] ", log.Ldate|log.Ltime),
+		infoLogger:  log.New(info, prefix+" [INFO] ", log.Ldate|log.Ltime),
+		errorLogger: log.New(errors, prefix+" [ERROR] ", log.Ldate|log.Ltime),
 	}
 	return l
 }
@@ -60,42 +62,50 @@ func (m MLogger) Errorln(v ...any) {
 	m.errorLogger.Println(v...)
 }
 
-func Default() *MLogger {
-	l := NewMLogger(os.Stdout, os.Stdout, os.Stderr)
+func Default(prefix string) *MLogger {
+	l := NewMLogger(prefix, os.Stdout, os.Stdout, os.Stderr)
 	logger = l
 	return l
 }
 
-func InitLoggerWithFiles() (*MLogger, error) {
+func InitLoggerWithFiles(prefix string) (*MLogger, error) {
 	now := time.Now()
-	infoFile := fmt.Sprintf("%s-info.log", now.Format(time.RFC3339))
+	dir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+	infoFile := fmt.Sprintf(dir+string(filepath.Separator)+"%s-info.log", now.Format(time.RFC3339))
 	infoWriter, err := os.Create(infoFile)
 	if err != nil {
 		return nil, err
 	}
-	debugFile := fmt.Sprintf("%s-debug.log", now.Format(time.RFC3339))
+	debugFile := fmt.Sprintf(dir+string(filepath.Separator)+"%s-debug.log", now.Format(time.RFC3339))
 	debugWriter, err := os.Create(debugFile)
 	if err != nil {
 		return nil, err
 	}
-	errFile := fmt.Sprintf("%s-error.log", now.Format(time.RFC3339))
+	errFile := fmt.Sprintf(dir+string(filepath.Separator)+"%s-error.log", now.Format(time.RFC3339))
 	errWriter, err := os.Create(errFile)
 	if err != nil {
 		return nil, err
 	}
-	l := NewMLogger(debugWriter, infoWriter, errWriter)
+	l := NewMLogger(prefix, debugWriter, infoWriter, errWriter)
 	logger = l
 	return l, nil
 }
 
-func InitLoggerWithFile() (*MLogger, error) {
+func InitLoggerWithFile(prefix string) (*MLogger, error) {
 	now := time.Now()
-	file := fmt.Sprintf("%s.log", now.Format(time.RFC3339))
+	dir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+	file := fmt.Sprintf(dir+string(filepath.Separator)+"%s.log", now.Format(time.RFC3339))
 	writer, err := os.Create(file)
 	if err != nil {
 		return nil, err
 	}
-	l := NewMLogger(writer, writer, writer)
+	l := NewMLogger(prefix, writer, writer, writer)
 	logger = l
 	return l, nil
 }

@@ -21,7 +21,7 @@ var (
 )
 
 func main() {
-	log.Default()
+	log.Default("")
 	flag.Parse()
 	if *sprite == "" || *deltafiles == "" {
 		log.GetLogger().Info("sprite and delta options are mandarories\n")

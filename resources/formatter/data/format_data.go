@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	log.Default()
+	log.Default("")
 	scanner := bufio.NewScanner(os.Stdin)
 	count := 0
 	for scanner.Scan() {

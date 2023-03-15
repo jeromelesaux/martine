@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"image"
 	"image/color"
 	_ "image/jpeg"
@@ -128,7 +129,8 @@ var (
 	analyzeTilemap      = flag.String("analyzetilemap", "", "analyse the image to get the most accurate tilemap according to the  criteria :\n\tsize : lower export size\n\tnumber : lower number of tiles")
 	exportGoFiles       = flag.Bool("go", false, "Export results as .go1 and .go2 files.")
 
-	version = flag.Bool("version", false, "print martine's version")
+	version   = flag.Bool("version", false, "print martine's version")
+	appPrefix = fmt.Sprintf("Martine (%v)", common.AppVersion)
 )
 
 func usage() {
@@ -154,7 +156,7 @@ func main() {
 	var screenMode uint8
 	var in image.Image
 
-	log.Default()
+	log.Default(appPrefix)
 
 	flag.Var(&deltaFiles, "df", "scr file path to add in delta mode comparison. (wildcard accepted such as ? or * file filename.) ")
 
