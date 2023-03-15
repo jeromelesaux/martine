@@ -74,17 +74,17 @@ func InitLoggerWithFiles(prefix string) (*MLogger, error) {
 	if err != nil {
 		return nil, err
 	}
-	infoFile := fmt.Sprintf(dir+string(filepath.Separator)+"%s-info.log", now.Format(time.RFC3339))
+	infoFile := fmt.Sprintf(dir+string(filepath.Separator)+"%s %s-info.log", now.Format(time.DateTime))
 	infoWriter, err := os.Create(infoFile)
 	if err != nil {
 		return nil, err
 	}
-	debugFile := fmt.Sprintf(dir+string(filepath.Separator)+"%s-debug.log", now.Format(time.RFC3339))
+	debugFile := fmt.Sprintf(dir+string(filepath.Separator)+"%s %s-debug.log", now.Format(time.DateTime))
 	debugWriter, err := os.Create(debugFile)
 	if err != nil {
 		return nil, err
 	}
-	errFile := fmt.Sprintf(dir+string(filepath.Separator)+"%s-error.log", now.Format(time.RFC3339))
+	errFile := fmt.Sprintf(dir+string(filepath.Separator)+"%s %s-error.log", now.Format(time.DateTime))
 	errWriter, err := os.Create(errFile)
 	if err != nil {
 		return nil, err
@@ -100,7 +100,7 @@ func InitLoggerWithFile(prefix string) (*MLogger, error) {
 	if err != nil {
 		return nil, err
 	}
-	file := fmt.Sprintf(dir+string(filepath.Separator)+"%s.log", now.Format(time.RFC3339))
+	file := fmt.Sprintf(dir+string(filepath.Separator)+"%s %s.log", prefix, now.Format(time.DateTime))
 	writer, err := os.Create(file)
 	if err != nil {
 		return nil, err

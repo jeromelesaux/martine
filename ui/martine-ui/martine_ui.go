@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	_ "image/gif"
@@ -17,6 +18,7 @@ import (
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/png"
+	"github.com/jeromelesaux/martine/log"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
@@ -25,6 +27,7 @@ var (
 	dialogSize        = fyne.NewSize(800, 800)
 	savingDialogSize  = fyne.NewSize(800, 800)
 	imagesFilesFilter = storage.NewExtensionFileFilter([]string{".jpg", ".gif", ".png", ".jpeg", ".JPG", ".JPEG", ".GIF", ".PNG"})
+	appPrefix         = fmt.Sprintf("Martine (%v)", common.AppVersion)
 )
 
 type MartineUI struct {
@@ -63,6 +66,10 @@ func (m *MartineUI) SetPalette(p color.Palette) {
 }
 
 func (m *MartineUI) Load(app fyne.App) {
+	_, err := log.InitLoggerWithFile(appPrefix)
+	if err != nil {
+		panic(err)
+	}
 	m.window = app.NewWindow("Martine @IMPact v" + common.AppVersion)
 	m.window.SetContent(m.NewTabs())
 	m.window.Resize(fyne.NewSize(1400, 1000))
