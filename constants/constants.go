@@ -82,8 +82,13 @@ type CpcColor struct {
 	Color          color.RGBA
 }
 
-func (c *CpcColor) ToString() string {
-	return strconv.Itoa(c.HardwareNumber) + " firmware color :" + strconv.Itoa(c.FirmwareNumber) + " firmware value :" + strconv.Itoa(int(c.HardwareValues[uint8(0)]))
+func (c CpcColor) ToString() string {
+	var hardwareValues string
+	if len(c.HardwareValues) > 0 {
+		hardwareValues = strconv.Itoa(int(c.HardwareValues[uint8(0)]))
+	}
+
+	return strconv.Itoa(c.HardwareNumber) + " firmware color :" + strconv.Itoa(c.FirmwareNumber) + " firmware value :" + hardwareValues
 }
 
 const (
