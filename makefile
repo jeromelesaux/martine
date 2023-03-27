@@ -120,13 +120,22 @@ package-linux:
 	fyne package -os linux -icon martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
 	mv martine ${BINARY}/martine-${OS}-${ARCH}/
 	(make archive)
-		
+
+deps: get-linter get-vulncheck
+	@echo "Getting tools..."
+
 get-linter:
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
 
+get-vulncheck:
+	go install golang.org/x/vuln/cmd/govulncheck@latest
+
 lint:
 	@echo "Lint the whole project"
-	golangci-lint run --timeout 2m 
+	golangci-lint run --timeout 2m ./...
+
+vulncheck:
+	govulncheck ./...
 
 test: 
 	go test ./... -cover
