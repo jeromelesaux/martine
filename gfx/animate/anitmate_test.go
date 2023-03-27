@@ -19,13 +19,16 @@ import (
 
 func TestAnimate(t *testing.T) {
 	file := "../../samples/sonic_rotate.gif"
-	os.MkdirAll("animation-test", os.ModePerm)
+	err := os.MkdirAll("animation-test", os.ModePerm)
+	if err != nil {
+		t.Fatal(err)
+	}
 	e := config.NewMartineConfig(file, "animation-test")
 	e.Size = constants.Size{Width: 40, Height: 50, ColorsAvailable: 8}
 	var screenMode uint8 = 0
 	fs := []string{file}
 
-	err := Animation(fs, screenMode, e)
+	err = Animation(fs, screenMode, e)
 	if err != nil {
 		t.Fatal(err)
 	}

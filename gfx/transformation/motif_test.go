@@ -15,7 +15,10 @@ import (
 )
 
 func TestMotifs(t *testing.T) {
-	os.MkdirAll("../test/motifs", 0700)
+	err := os.MkdirAll("../test/motifs", 0700)
+	if err != nil {
+		t.Fatal(err)
+	}
 	fr, err := os.Open("../../samples/Batman-Neal-Adams.jpg")
 	if err != nil {
 		t.Fatalf("%v", err)

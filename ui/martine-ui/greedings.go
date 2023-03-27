@@ -32,10 +32,10 @@ func (m *MartineUI) newGreedings() fyne.CanvasObject {
 			widget.NewSelect([]string{"Black", "White"}, func(s string) {
 				switch s {
 				case "Black":
-					fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+					fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme()) // nolint:staticcheck
 
 				case "White":
-					fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
+					fyne.CurrentApp().Settings().SetTheme(theme.LightTheme()) // nolint:staticcheck
 				}
 			}),
 		),
