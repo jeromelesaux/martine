@@ -125,14 +125,14 @@ deps: get-linter get-vulncheck
 	@echo "Getting tools..."
 
 get-linter:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 get-vulncheck:
 	go install golang.org/x/vuln/cmd/govulncheck@latest
 
 lint:
 	@echo "Lint the whole project"
-	golangci-lint run --timeout 2m ./...
+	golangci-lint run --timeout 5m ./...
 
 vulncheck:
 	govulncheck ./...
