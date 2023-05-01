@@ -3,6 +3,8 @@ package menu
 import (
 	"image"
 	"image/color"
+	"os"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -11,21 +13,13 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/fyne-io/custom_widget"
+	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/compression"
+	"github.com/jeromelesaux/martine/log"
 	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 )
 
 var SpriteSize float32 = 80.
-
-type SpriteExportFormat string
-
-var (
-	SpriteFlatExport  SpriteExportFormat = "Flat"
-	SpriteFilesExport SpriteExportFormat = "Files"
-	SpriteImpCatcher  SpriteExportFormat = "Impcatcher"
-	SpriteCompiled    SpriteExportFormat = "Compiled"
-	SpriteHard        SpriteExportFormat = "Sprite Hard"
-)
 
 type SpriteMenu struct {
 	IsHardSprite    bool
@@ -33,7 +27,7 @@ type SpriteMenu struct {
 	originalPalette *canvas.Image
 	palette         color.Palette
 	paletteImage    *canvas.Image
-	FilePath string
+	FilePath        string
 
 	SpritesData            [][][]byte
 	CompileSprite          bool
@@ -45,7 +39,7 @@ type SpriteMenu struct {
 	Mode                   int
 	SpriteWidth            int
 	SpriteHeight           int
-	ExportFormat           SpriteExportFormat
+	ExportFormat           export.ExportFormat
 	ExportDsk              bool
 	ExportText             bool
 	ExportWithAmsdosHeader bool
@@ -53,6 +47,8 @@ type SpriteMenu struct {
 	ExportJson             bool
 	ExportCompression      compression.CompressionMethod
 	ExportFolderPath       string
+
+	CmdLineGenerate string
 }
 
 func (s *SpriteMenu) SetPalette(p color.Palette) {
@@ -116,4 +112,56 @@ func (s *SpriteMenu) ImportSprite(win fyne.Window) *widget.Button {
 		// d.Resize(dialogSize)
 		d.Show()
 	})
+}
+
+func (s *SpriteMenu) CmdLine() string {
+	exec, err := os.Executable()
+	if err != nil {
+		log.GetLogger().Error("error while getting executable path :%v\n", err)
+		return exec
+	}
+
+	exec += " -in " + s.FilePath
+	exec += " -split"
+	exec += " -mode " + strconv.Itoa(s.Mode)
+	exec += " -spritesrow " + strconv.Itoa(s.SpriteRows)
+	exec += " -spritescolumn " + strconv.Itoa(s.SpriteColumns)
+	if s.IsHardSprite {
+		exec += " -height 16 -width 16"
+	} else {
+		exec += " -height " + strconv.Itoa(s.SpriteHeight)
+		exec += " -width " + strconv.Itoa(s.SpriteWidth)
+	}
+
+	if s.IsCpcPlus {
+		exec += " -plus"
+	}
+
+	if s.ExportCompression != 0 {
+		exec += " -z " + strconv.Itoa((int(s.ExportCompression)))
+	}
+
+	if s.ExportDsk {
+		exec += " -dsk"
+	}
+
+	if s.ExportWithAmsdosHeader {
+		exec += " -noheader"
+	}
+
+	switch s.ExportFormat {
+	case export.SpriteCompiled:
+		exec += " -compiled"
+	case export.OcpWinExport:
+		exec += " -ocpwin"
+	case export.SpriteImpCatcher:
+		exec += " -imp"
+	case export.SpriteFlatExport:
+		exec += " -flat"
+	case export.SpriteHard:
+		exec += " -spritehard"
+	}
+
+	s.CmdLineGenerate = exec
+	return exec
 }

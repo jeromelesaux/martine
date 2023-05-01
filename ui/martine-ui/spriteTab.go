@@ -206,7 +206,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 			s.OriginalImages,
 		),
 		container.New(
-			layout.NewGridLayoutWithRows(2),
+			layout.NewGridLayoutWithRows(3),
 			container.New(
 				layout.NewVBoxLayout(),
 				container.New(
@@ -262,6 +262,24 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 				container.New(
 					layout.NewGridLayoutWithRows(2),
 					s.PaletteImage(),
+				),
+			),
+			container.New(
+				layout.NewVBoxLayout(),
+				widget.NewButton("show cmd", func() {
+					e := widget.NewMultiLineEntry()
+					e.SetText(s.CmdLine())
+
+					d := dialog.NewCustom("Command line generated",
+						"Ok",
+						e,
+						m.window)
+					log.GetLogger().Info("%s\n", s.CmdLine())
+					size := m.window.Content().Size()
+					size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
+					d.Resize(size)
+					d.Show()
+				},
 				),
 			),
 		),

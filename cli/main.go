@@ -1,10 +1,11 @@
-package main
+                                                    package main
 
 import (
 	"flag"
 	"fmt"
 	"image"
 	"image/color"
+	"image/draw"
 	_ "image/jpeg"
 	"os"
 	"path/filepath"
@@ -13,16 +14,21 @@ import (
 	"fyne.io/fyne/v2/app"
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/constants"
+	ci "github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/convert/screen"
 	covs "github.com/jeromelesaux/martine/convert/screen/overscan"
 	"github.com/jeromelesaux/martine/convert/sprite"
+	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/ascii"
+	"github.com/jeromelesaux/martine/export/compression"
 	"github.com/jeromelesaux/martine/export/diskimage"
 	ovs "github.com/jeromelesaux/martine/export/impdraw/overscan"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
 	"github.com/jeromelesaux/martine/export/m4"
 	"github.com/jeromelesaux/martine/export/ocpartstudio/window"
+	"github.com/jeromelesaux/martine/export/spritehard"
+	gfxsprite "github.com/jeromelesaux/martine/gfx/sprite"
 	"github.com/jeromelesaux/martine/log"
 
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
@@ -128,9 +134,14 @@ var (
 	brightnessPal       = flag.Float64("brightness", 0., "apply brightness on the color of the palette on amstrad plus screen. (max value 100 and only on CPC PLUS).")
 	analyzeTilemap      = flag.String("analyzetilemap", "", "analyse the image to get the most accurate tilemap according to the  criteria :\n\tsize : lower export size\n\tnumber : lower number of tiles")
 	exportGoFiles       = flag.Bool("go", false, "Export results as .go1 and .go2 files.")
-
-	version   = flag.Bool("version", false, "print martine's version")
-	appPrefix = fmt.Sprintf("Martine (%v)", common.AppVersion)
+	splitSpriteBoard    = flag.Bool("split", false, "Split sprite board to sprites.")
+	spritesPerRow       = flag.Int("spritesrow", 0, "Number of sprites in the board per row")
+	spritesPerColumn    = flag.Int("spritescolumn", 0, "Number of sprites in the board per column")
+	spriteFlat          = flag.Bool("flat", false, "Export sprite as flat file.")
+	spriteCompiled      = flag.Bool("compiled", false, "Export sprite as compiled sprites.")
+	spriteOcpWin        = flag.Bool("ocpwin", false, "Export sprite as OCP win file.")
+	version             = flag.Bool("version", false, "print martine's version")
+	appPrefix           = fmt.Sprintf("Martine (%v)", common.AppVersion)
 )
 
 func usage() {
@@ -380,220 +391,338 @@ func main() {
 			os.Exit(-1)
 		}
 	}
-	if *impCatcher {
-		if !cfg.CustomDimension {
-			log.GetLogger().Error("You must set custom width and height.")
-			os.Exit(-1)
-		}
-		sprites := make([]byte, 0)
-		log.GetLogger().Info("[%s]\n", *picturePath)
-		spritesPaths, err := common.WilcardedFiles([]string{*picturePath})
+	if *splitSpriteBoard {
+		// split sprites board
+		f, err := os.Open(*picturePath)
 		if err != nil {
-			log.GetLogger().Error("error while getting wildcard files %s error : %v\n", *picturePath, err)
+			log.GetLogger().Error("Error while opening file %s, error %v\n", *picturePath, err)
+			os.Exit(-2)
 		}
-		for _, v := range spritesPaths {
-			f, err := os.Open(v)
-			if err != nil {
-				log.GetLogger().Error("Error while opening file %s, error %v\n", *picturePath, err)
-				os.Exit(-2)
-			}
-			defer f.Close()
-			in, _, err = image.Decode(f)
-			if err != nil {
-				log.GetLogger().Error("Cannot decode the image %s error %v", *picturePath, err)
-				os.Exit(-2)
-			}
-			err = gfx.ApplyOneImageAndExport(in,
-				cfg,
-				filepath.Base(v),
-				v,
-				*mode,
-				screenMode)
-			if err != nil {
-				log.GetLogger().Error("Cannot apply the image %s error %v", *picturePath, err)
-				os.Exit(-2)
-			}
-			spritePath := cfg.AmsdosFullPath(v, ".WIN")
-			data, err := window.RawWin(spritePath)
-			if err != nil {
-				log.GetLogger().Error("Error while extracting raw content, err:%s\n", err)
-			}
-			sprites = append(sprites, data...)
+		defer f.Close()
+		in, _, err = image.Decode(f)
+		if err != nil {
+			log.GetLogger().Error("Cannot decode the image %s error %v", *picturePath, err)
+			os.Exit(-2)
 		}
-		finalFile := strings.ReplaceAll(filename, "?", "")
-		if err = tile.Imp(sprites, uint(len(spritesPaths)), uint(cfg.Size.Width), uint(cfg.Size.Height), uint(screenMode), finalFile, cfg); err != nil {
-			log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", *picturePath, err)
+		img := image.NewNRGBA(image.Rect(0, 0, in.Bounds().Max.X, in.Bounds().Max.Y))
+		draw.Draw(img, img.Bounds(), in, in.Bounds().Min, draw.Src)
+		pal, _, err := ci.DowngradingPalette(img, constants.Size{ColorsAvailable: size.ColorsAvailable, Width: img.Bounds().Max.X, Height: img.Bounds().Max.Y}, cfg.CpcPlus)
+		if err != nil {
+			log.GetLogger().Error("Cannot downgrade palette %s error %v", *picturePath, err)
+			os.Exit(-2)
+		}
+		size := constants.Size{Width: size.Width, Height: size.Height}
+		raw, _, err := gfxsprite.SplitBoardToSprite(img, pal, *spritesPerColumn, *spritesPerRow, uint8(*mode), *spriteHard, size)
+		if err != nil {
+			log.GetLogger().Error("Cannot split the sprite board %s error %v", *picturePath, err)
+			os.Exit(-2)
+		}
+		if err := impPalette.SaveKit(cfg.OutputPath+string(filepath.Separator)+"SPRITES.KIT", pal, !cfg.NoAmsdosHeader); err != nil {
+			log.GetLogger().Error("Cannot export palette %s error %v", *picturePath, err)
+			os.Exit(-2)
+		}
+		// now handle the export
+		if *spriteCompiled {
+			spr := make([][]byte, 0)
+			for _, v := range raw {
+				spr = append(spr, v...)
+			}
+			diffs := animate.AnalyzeSpriteBoard(spr)
+			var code string
+			for idx, diff := range diffs {
+				var routine string
+				if cfg.SpriteHard {
+					routine = animate.ExportCompiledSpriteHard(diff)
+				} else {
+					log.GetLogger().Error("not yet implemented")
+					os.Exit(-2)
+				}
+				code += fmt.Sprintf("spr_%.2d:\n", idx)
+				code += routine
+			}
+
+			if err := amsdos.SaveStringOSFile(cfg.OutputPath+string(filepath.Separator)+"compiled_sprites.asm", code); err != nil {
+				log.GetLogger().Error("error while saving sprite file error %v", err)
+				os.Exit(-2)
+			}
+		}
+
+		if *spriteOcpWin {
+			for idxX, v := range raw {
+				for idxY, v0 := range v {
+					filename := cfg.OutputPath + string(filepath.Separator) + fmt.Sprintf("L%.2dC%.2d.WIN", idxX, idxY)
+					if err := window.Win(filename, v0, uint8(*mode), cfg.Size.Width, cfg.Size.Height, cfg.Dsk, cfg); err != nil {
+						log.GetLogger().Error("error while exporting sprites error %s\n", err.Error())
+					}
+				}
+			}
+		}
+		if *spriteFlat {
+			buf := make([]byte, 0)
+			for _, v := range raw {
+				for _, v0 := range v {
+					buf = append(buf, v0...)
+				}
+			}
+			filename := cfg.OutputPath + string(filepath.Separator) + "SPRITES.BIN"
+			buf, _ = compression.Compress(buf, cfg.Compression)
+			var err error
+			// TODO add amsdos header
+			if !cfg.NoAmsdosHeader {
+				err = amsdos.SaveAmsdosFile(filename, ".WIN", buf, 2, 0, 0x4000, 0x4000)
+				if err != nil {
+					log.GetLogger().Error("Error while saving flat sprites file error %s\n", err.Error())
+					os.Exit(-2)
+				}
+			} else {
+				err = amsdos.SaveOSFile(filename, buf)
+				if err != nil {
+					log.GetLogger().Error("Error while saving flat sprites file error %s\n", err.Error())
+					os.Exit(-2)
+				}
+			}
+			if cfg.Dsk {
+				if err := diskimage.ImportInDsk(filename, cfg); err != nil {
+					log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
+					os.Exit(-2)
+				}
+			}
+		}
+		if *impCatcher {
+			buf := make([]byte, 0)
+			for _, v := range raw {
+				for _, v0 := range v {
+					buf = append(buf, v0...)
+				}
+			}
+			filename := cfg.OutputPath + string(filepath.Separator) + "sprites.imp"
+			if err := tile.Imp(buf, uint(*spritesPerRow*(*spritesPerColumn)), uint(cfg.Size.Width), uint(cfg.Size.Height), uint(*mode), filename, cfg); err != nil {
+				log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
+				os.Exit(-2)
+			}
+			if cfg.Dsk {
+				if err := diskimage.ImportInDsk(filename, cfg); err != nil {
+					log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
+					os.Exit(-2)
+				}
+			}
+		}
+		if *spriteHard {
+			data := spritehard.SprImpdraw{}
+			for _, v := range raw {
+				sh := spritehard.SpriteHard{}
+				for _, v0 := range v {
+					copy(sh.Data[:], v0[:256])
+					data.Data = append(data.Data, sh)
+				}
+			}
+			filename := cfg.OutputPath + string(filepath.Separator) + "sprites.spr"
+			if err := spritehard.Spr(filename, data, cfg); err != nil {
+				log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
+				os.Exit(-2)
+			}
+			if cfg.Dsk {
+				if err := diskimage.ImportInDsk(filename, cfg); err != nil {
+					log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
+					os.Exit(-2)
+				}
+			}
+		}
+
+		data := make([][]byte, 0)
+		for _, v := range raw {
+			data = append(data, v...)
+		}
+		header := fmt.Sprintf("' from file %s\n", cfg.InputPath)
+		code := header + ascii.SpritesHardText(data, cfg.Compression)
+		filename := cfg.OutputPath + string(filepath.Separator) + "SPRITES.ASM"
+		err = amsdos.SaveStringOSFile(filename, code)
+		if err != nil {
+			log.GetLogger().Error("cannot save text data file error %v", err)
+			os.Exit(-2)
 		}
 		os.Exit(0)
-	} else if *reverse {
-
-		outpath := filepath.Join(*output, strings.Replace(strings.ToLower(filename), ".scr", ".png", 1))
-		if cfg.Overscan {
-			p, mode, err := ovs.OverscanPalette(*picturePath)
-			if err != nil {
-				log.GetLogger().Error("Cannot get the palette from file (%s) error %v\n", *picturePath, err)
+	} else {
+		if *impCatcher {
+			if !cfg.CustomDimension {
+				log.GetLogger().Error("You must set custom width and height.")
 				os.Exit(-1)
 			}
+			sprites := make([]byte, 0)
+			log.GetLogger().Info("[%s]\n", *picturePath)
+			spritesPaths, err := common.WilcardedFiles([]string{*picturePath})
+			if err != nil {
+				log.GetLogger().Error("error while getting wildcard files %s error : %v\n", *picturePath, err)
+			}
+			for _, v := range spritesPaths {
+				f, err := os.Open(v)
+				if err != nil {
+					log.GetLogger().Error("Error while opening file %s, error %v\n", *picturePath, err)
+					os.Exit(-2)
+				}
+				defer f.Close()
+				in, _, err = image.Decode(f)
+				if err != nil {
+					log.GetLogger().Error("Cannot decode the image %s error %v", *picturePath, err)
+					os.Exit(-2)
+				}
+				err = gfx.ApplyOneImageAndExport(in,
+					cfg,
+					filepath.Base(v),
+					v,
+					*mode,
+					screenMode)
+				if err != nil {
+					log.GetLogger().Error("Cannot apply the image %s error %v", *picturePath, err)
+					os.Exit(-2)
+				}
+				spritePath := cfg.AmsdosFullPath(v, ".WIN")
+				data, err := window.RawWin(spritePath)
+				if err != nil {
+					log.GetLogger().Error("Error while extracting raw content, err:%s\n", err)
+				}
+				sprites = append(sprites, data...)
+			}
+			finalFile := strings.ReplaceAll(filename, "?", "")
+			if err = tile.Imp(sprites, uint(len(spritesPaths)), uint(cfg.Size.Width), uint(cfg.Size.Height), uint(screenMode), finalFile, cfg); err != nil {
+				log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", *picturePath, err)
+			}
+			os.Exit(0)
+		} else if *reverse {
 
-			if err := covs.OverscanToPng(*picturePath, outpath, mode, p); err != nil {
-				log.GetLogger().Error("Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
+			outpath := filepath.Join(*output, strings.Replace(strings.ToLower(filename), ".scr", ".png", 1))
+			if cfg.Overscan {
+				p, mode, err := ovs.OverscanPalette(*picturePath)
+				if err != nil {
+					log.GetLogger().Error("Cannot get the palette from file (%s) error %v\n", *picturePath, err)
+					os.Exit(-1)
+				}
+
+				if err := covs.OverscanToPng(*picturePath, outpath, mode, p); err != nil {
+					log.GetLogger().Error("Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
+					os.Exit(-1)
+				}
+				os.Exit(1)
+			}
+			if *mode == -1 {
+				log.GetLogger().Error("Mode is mandatory to convert to PNG")
 				os.Exit(-1)
+			}
+			var p color.Palette
+			var err error
+			if *palettePath != "" && !*plusMode {
+				p, _, err = ocpartstudio.OpenPal(*palettePath)
+				if err != nil {
+					log.GetLogger().Error("Cannot open palette file (%s) error %v\n", *palettePath, err)
+					os.Exit(-1)
+				}
+			} else {
+				if *kitPath != "" && *plusMode {
+					p, _, err = impPalette.OpenKit(*kitPath)
+					if err != nil {
+						log.GetLogger().Error("Cannot open kit file (%s) error %v\n", *kitPath, err)
+						os.Exit(-1)
+					}
+				} else {
+					log.GetLogger().Error("For screen or window image, pal or kit file palette is mandatory. (kit file must be associated with -p option)\n")
+					os.Exit(-1)
+				}
+			}
+			switch strings.ToUpper(filepath.Ext(filename)) {
+			case ".WIN":
+				if err := sprite.SpriteToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
+					log.GetLogger().Error("Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
+					os.Exit(-1)
+				}
+			case ".SCR":
+				if err := screen.ScrToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
+					log.GetLogger().Error("Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
+					os.Exit(-1)
+				}
 			}
 			os.Exit(1)
 		}
-		if *mode == -1 {
-			log.GetLogger().Error("Mode is mandatory to convert to PNG")
-			os.Exit(-1)
-		}
-		var p color.Palette
-		var err error
-		if *palettePath != "" && !*plusMode {
-			p, _, err = ocpartstudio.OpenPal(*palettePath)
+		if cfg.Animate {
+			if !cfg.CustomDimension {
+				log.GetLogger().Error("You must set sprite dimensions with option -w and -h (mandatory)\n")
+				os.Exit(-1)
+			}
+			log.GetLogger().Info("animation output.\n")
+			files := []string{*picturePath}
+			files, err := common.WilcardedFiles(files)
 			if err != nil {
-				log.GetLogger().Error("Cannot open palette file (%s) error %v\n", *palettePath, err)
+				log.GetLogger().Error("Cannot parse wildcard in argument (%s) error %v\n", *picturePath, err)
+				os.Exit(-1)
+			}
+			if err := animate.Animation(files, screenMode, cfg); err != nil {
+				log.GetLogger().Error("Error while proceeding to animate export error : %v\n", err)
 				os.Exit(-1)
 			}
 		} else {
-			if *kitPath != "" && *plusMode {
-				p, _, err = impPalette.OpenKit(*kitPath)
+			if cfg.DeltaMode {
+				log.GetLogger().Info("delta files to proceed.\n")
+				for i, v := range deltaFiles {
+					log.GetLogger().Info("[%d]:%s\n", i, v)
+				}
+				screenAddress, err := common.ParseHexadecimal16(*initialAddress)
 				if err != nil {
-					log.GetLogger().Error("Cannot open kit file (%s) error %v\n", *kitPath, err)
+					log.GetLogger().Error("Error while parsing (%s) use the starting address #C000, err : %v\n", *initialAddress, err)
+					screenAddress = 0xC000
+				}
+				if *mode == -1 {
+					log.GetLogger().Error("You must set the mode for this feature. (option -m)\n")
+					os.Exit(-1)
+				}
+				if err := transformation.ProceedDelta(deltaFiles, screenAddress, cfg, uint8(*mode)); err != nil {
+					log.GetLogger().Error("error while proceeding delta mode %v\n", err)
 					os.Exit(-1)
 				}
 			} else {
-				log.GetLogger().Error("For screen or window image, pal or kit file palette is mandatory. (kit file must be associated with -p option)\n")
-				os.Exit(-1)
-			}
-		}
-		switch strings.ToUpper(filepath.Ext(filename)) {
-		case ".WIN":
-			if err := sprite.SpriteToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
-				log.GetLogger().Error("Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
-				os.Exit(-1)
-			}
-		case ".SCR":
-			if err := screen.ScrToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
-				log.GetLogger().Error("Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
-				os.Exit(-1)
-			}
-		}
-		os.Exit(1)
-	}
-	if cfg.Animate {
-		if !cfg.CustomDimension {
-			log.GetLogger().Error("You must set sprite dimensions with option -w and -h (mandatory)\n")
-			os.Exit(-1)
-		}
-		log.GetLogger().Info("animation output.\n")
-		files := []string{*picturePath}
-		files, err := common.WilcardedFiles(files)
-		if err != nil {
-			log.GetLogger().Error("Cannot parse wildcard in argument (%s) error %v\n", *picturePath, err)
-			os.Exit(-1)
-		}
-		if err := animate.Animation(files, screenMode, cfg); err != nil {
-			log.GetLogger().Error("Error while proceeding to animate export error : %v\n", err)
-			os.Exit(-1)
-		}
-	} else {
-		if cfg.DeltaMode {
-			log.GetLogger().Info("delta files to proceed.\n")
-			for i, v := range deltaFiles {
-				log.GetLogger().Info("[%d]:%s\n", i, v)
-			}
-			screenAddress, err := common.ParseHexadecimal16(*initialAddress)
-			if err != nil {
-				log.GetLogger().Error("Error while parsing (%s) use the starting address #C000, err : %v\n", *initialAddress, err)
-				screenAddress = 0xC000
-			}
-			if *mode == -1 {
-				log.GetLogger().Error("You must set the mode for this feature. (option -m)\n")
-				os.Exit(-1)
-			}
-			if err := transformation.ProceedDelta(deltaFiles, screenAddress, cfg, uint8(*mode)); err != nil {
-				log.GetLogger().Error("error while proceeding delta mode %v\n", err)
-				os.Exit(-1)
-			}
-		} else {
-			if *analyzeTilemap != "" {
-				var criteria common.AnalyseTilemapOption
-				switch *analyzeTilemap {
-				case string(common.SizeTilemapOption):
-					criteria = common.SizeTilemapOption
-					log.GetLogger().Info("go to analyse by size\n")
-				case string(common.NumberTilemapOption):
-					criteria = common.NumberTilemapOption
-					log.GetLogger().Info("search for the lower number of tiles\n")
-				default:
-					log.GetLogger().Error("Error tilemap analyze option not found : choose between (%s,%s)\n", string(common.SizeTilemapOption), string(common.NumberTilemapOption))
-					os.Exit(-1)
-				}
-				if err := gfx.AnalyzeTilemap(screenMode, *plusMode, filename, *picturePath, in, cfg, criteria); err != nil {
-					log.GetLogger().Error("Error whie do tilemap action with error :%v\n", err)
-					os.Exit(-1)
-				}
-			} else {
-				if *tileMap {
-					/*
-						8x8 : 40x25
-						16x8 : 20x25
-						16x16 : 20x24
-					*/
-
-					if err := gfx.Tilemap(screenMode, filename, *picturePath, size, in, cfg); err != nil {
+				if *analyzeTilemap != "" {
+					var criteria common.AnalyseTilemapOption
+					switch *analyzeTilemap {
+					case string(common.SizeTilemapOption):
+						criteria = common.SizeTilemapOption
+						log.GetLogger().Info("go to analyse by size\n")
+					case string(common.NumberTilemapOption):
+						criteria = common.NumberTilemapOption
+						log.GetLogger().Info("search for the lower number of tiles\n")
+					default:
+						log.GetLogger().Error("Error tilemap analyze option not found : choose between (%s,%s)\n", string(common.SizeTilemapOption), string(common.NumberTilemapOption))
+						os.Exit(-1)
+					}
+					if err := gfx.AnalyzeTilemap(screenMode, *plusMode, filename, *picturePath, in, cfg, criteria); err != nil {
 						log.GetLogger().Error("Error whie do tilemap action with error :%v\n", err)
 						os.Exit(-1)
 					}
 				} else {
-					if cfg.TileMode {
-						if cfg.TileIterationX == -1 || cfg.TileIterationY == -1 {
-							log.GetLogger().Error("missing arguments iterx and itery to use with tile mode.\n")
-							usage()
-							os.Exit(-1)
-						}
-						err := transformation.TileMode(cfg, uint8(*mode), cfg.TileIterationX, cfg.TileIterationY)
-						if err != nil {
-							log.GetLogger().Error("Tile mode on error : error :%v\n", err)
+					if *tileMap {
+						/*
+							8x8 : 40x25
+							16x8 : 20x25
+							16x16 : 20x24
+						*/
+
+						if err := gfx.Tilemap(screenMode, filename, *picturePath, size, in, cfg); err != nil {
+							log.GetLogger().Error("Error whie do tilemap action with error :%v\n", err)
 							os.Exit(-1)
 						}
 					} else {
-						if *flash {
-							if err := effect.Flash(*picturePath, *picturePath2,
-								*palettePath, *palettePath2,
-								*mode,
-								*mode2,
-								cfg); err != nil {
-								log.GetLogger().Error("Error while applying on one image :%v\n", err)
+						if cfg.TileMode {
+							if cfg.TileIterationX == -1 || cfg.TileIterationY == -1 {
+								log.GetLogger().Error("missing arguments iterx and itery to use with tile mode.\n")
+								usage()
+								os.Exit(-1)
+							}
+							err := transformation.TileMode(cfg, uint8(*mode), cfg.TileIterationX, cfg.TileIterationY)
+							if err != nil {
+								log.GetLogger().Error("Tile mode on error : error :%v\n", err)
 								os.Exit(-1)
 							}
 						} else {
-							var p color.Palette
-							var err error
-							if cfg.CpcPlus {
-								p, _, err = impPalette.OpenKit(*kitPath)
-								if *kitPath != "" {
-									if err != nil {
-										log.GetLogger().Error("Error while reading kit file (%s) :%v\n", *kitPath, err)
-										os.Exit(-1)
-									}
-								}
-							} else {
-								if *palettePath != "" {
-									p, _, err = ocpartstudio.OpenPal(*palettePath)
-									if err != nil {
-										log.GetLogger().Error("Error while reading palette file (%s) :%v\n", *palettePath, err)
-										os.Exit(-1)
-									}
-								}
-							}
-
-							if cfg.EgxFormat > 0 {
-								if len(p) == 0 {
-									log.GetLogger().Error("Now colors found in palette, give up treatment.\n")
-									os.Exit(-1)
-								}
-								if err := effect.Egx(*picturePath, *picturePath2,
-									p,
+							if *flash {
+								if err := effect.Flash(*picturePath, *picturePath2,
+									*palettePath, *palettePath2,
 									*mode,
 									*mode2,
 									cfg); err != nil {
@@ -601,28 +730,64 @@ func main() {
 									os.Exit(-1)
 								}
 							} else {
-								if cfg.SplitRaster {
-									if cfg.Overscan {
-										if err := effect.DoSpliteRaster(in, screenMode, filename, cfg); err != nil {
-											log.GetLogger().Error("Error while applying splitraster on one image :%v\n", err)
+								var p color.Palette
+								var err error
+								if cfg.CpcPlus {
+									p, _, err = impPalette.OpenKit(*kitPath)
+									if *kitPath != "" {
+										if err != nil {
+											log.GetLogger().Error("Error while reading kit file (%s) :%v\n", *kitPath, err)
 											os.Exit(-1)
 										}
-									} else {
-										log.GetLogger().Error("Only overscan mode implemented for this feature, %v", errors.ErrorNotYetImplemented)
 									}
 								} else {
-									if strings.ToUpper(extension) != ".SCR" {
-										if err := gfx.ApplyOneImageAndExport(in,
-											cfg,
-											filename, *picturePath,
-											*mode,
-											screenMode); err != nil {
-											log.GetLogger().Error("Error while applying on one image :%v\n", err)
+									if *palettePath != "" {
+										p, _, err = ocpartstudio.OpenPal(*palettePath)
+										if err != nil {
+											log.GetLogger().Error("Error while reading palette file (%s) :%v\n", *palettePath, err)
 											os.Exit(-1)
 										}
-									} else {
-										log.GetLogger().Error("Error while applying on one image : SCR format not used for this treatment\n")
+									}
+								}
+
+								if cfg.EgxFormat > 0 {
+									if len(p) == 0 {
+										log.GetLogger().Error("Now colors found in palette, give up treatment.\n")
 										os.Exit(-1)
+									}
+									if err := effect.Egx(*picturePath, *picturePath2,
+										p,
+										*mode,
+										*mode2,
+										cfg); err != nil {
+										log.GetLogger().Error("Error while applying on one image :%v\n", err)
+										os.Exit(-1)
+									}
+								} else {
+									if cfg.SplitRaster {
+										if cfg.Overscan {
+											if err := effect.DoSpliteRaster(in, screenMode, filename, cfg); err != nil {
+												log.GetLogger().Error("Error while applying splitraster on one image :%v\n", err)
+												os.Exit(-1)
+											}
+										} else {
+											log.GetLogger().Error("Only overscan mode implemented for this feature, %v", errors.ErrorNotYetImplemented)
+										}
+									} else {
+
+										if strings.ToUpper(extension) != ".SCR" {
+											if err := gfx.ApplyOneImageAndExport(in,
+												cfg,
+												filename, *picturePath,
+												*mode,
+												screenMode); err != nil {
+												log.GetLogger().Error("Error while applying on one image :%v\n", err)
+												os.Exit(-1)
+											}
+										} else {
+											log.GetLogger().Error("Error while applying on one image : SCR format not used for this treatment\n")
+											os.Exit(-1)
+										}
 									}
 								}
 							}

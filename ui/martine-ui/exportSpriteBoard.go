@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/fyne-io/custom_widget"
 	"github.com/jeromelesaux/martine/config"
+	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/compression"
@@ -30,23 +31,23 @@ import (
 func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 	formatSelect := widget.NewSelect(
 		[]string{
-			string(menu.SpriteImpCatcher),
-			string(menu.SpriteFlatExport),
-			string(menu.SpriteFilesExport),
-			string(menu.SpriteCompiled),
-			string(menu.SpriteHard),
+			string(export.SpriteImpCatcher),
+			string(export.SpriteFlatExport),
+			string(export.OcpWinExport),
+			string(export.SpriteCompiled),
+			string(export.SpriteHard),
 		}, func(v string) {
-			switch menu.SpriteExportFormat(v) {
-			case menu.SpriteFlatExport:
-				s.ExportFormat = menu.SpriteFlatExport
-			case menu.SpriteFilesExport:
-				s.ExportFormat = menu.SpriteFilesExport
-			case menu.SpriteImpCatcher:
-				s.ExportFormat = menu.SpriteImpCatcher
-			case menu.SpriteCompiled:
-				s.ExportFormat = menu.SpriteCompiled
-			case menu.SpriteHard:
-				s.ExportFormat = menu.SpriteHard
+			switch export.ExportFormat(v) {
+			case export.SpriteFlatExport:
+				s.ExportFormat = export.SpriteFlatExport
+			case export.OcpWinExport:
+				s.ExportFormat = export.OcpWinExport
+			case export.SpriteImpCatcher:
+				s.ExportFormat = export.SpriteImpCatcher
+			case export.SpriteCompiled:
+				s.ExportFormat = export.SpriteCompiled
+			case export.SpriteHard:
+				s.ExportFormat = export.SpriteHard
 			default:
 				log.GetLogger().Error("error while getting sprite export format %s\n", v)
 			}
@@ -126,7 +127,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		return
 	}
 	switch s.ExportFormat {
-	case menu.SpriteCompiled:
+	case export.SpriteCompiled:
 		spr := make([][]byte, 0)
 		for _, v := range s.SpritesData {
 			spr = append(spr, v...)
@@ -154,7 +155,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		}
 
 		pi.Hide()
-	case menu.SpriteFilesExport:
+	case export.OcpWinExport:
 		for idxX, v := range s.SpritesData {
 			for idxY, v0 := range v {
 				filename := s.ExportFolderPath + string(filepath.Separator) + fmt.Sprintf("L%.2dC%.2d.WIN", idxX, idxY)
@@ -167,7 +168,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			}
 		}
 		pi.Hide()
-	case menu.SpriteFlatExport:
+	case export.SpriteFlatExport:
 		buf := make([]byte, 0)
 		for _, v := range s.SpritesData {
 			for _, v0 := range v {
@@ -205,7 +206,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			}
 		}
 		pi.Hide()
-	case menu.SpriteImpCatcher:
+	case export.SpriteImpCatcher:
 		buf := make([]byte, 0)
 		for _, v := range s.SpritesData {
 			for _, v0 := range v {
@@ -231,7 +232,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			}
 		}
 		pi.Hide()
-	case menu.SpriteHard:
+	case export.SpriteHard:
 		data := spritehard.SprImpdraw{}
 		for _, v := range s.SpritesData {
 			sh := spritehard.SpriteHard{}
