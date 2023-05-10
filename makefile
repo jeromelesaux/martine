@@ -7,6 +7,7 @@ SOURCEDIR=./cli
 SOURCES := $(shell find $(SOURCEDIR) -name '*.go')
 
 
+ARCHITECTURE:=$(shell go env | grep GOARCH  | sed 's/[", ]//g' | cut -d= -f2)
 VERSION:=$(shell grep -m1 "AppVersion" ./common/app.go | sed 's/[", ]//g' | cut -d= -f2)
 suffix=$(shell grep -m1 "version" $(SOURCEDIR)/*.go | sed 's/[", ]//g' | cut -d= -f2 | sed 's/[0-9.]//g')
 snapshot=$(shell date +%FT%T)
@@ -66,9 +67,9 @@ archive:
 
 build-linux:
 	@echo "Compilation for linux"
-	(make init ARCH=amd64 OS=linux)
-	(make compile ARCH=amd64 OS=linux)
-	(make archive ARCH=amd64 OS=linux)
+	(make init ARCH=${ARCHITECTURE} OS=linux)
+	(make compile ARCH=${ARCHITECTURE} OS=linux)
+	(make archive ARCH=${ARCHITECTURE} OS=linux)
 
 build-windows:
 	@echo "Compilation for windows"
@@ -78,9 +79,9 @@ build-windows:
 
 build-darwin:
 	@echo "Compilation for macos"
-	(make init ARCH=arm64 OS=darwin)
-	(make compile ARCH=amd64 OS=darwin)
-	(make archive ARCH=amd64 OS=darwin)
+	(make init ARCH=${ARCHITECTURE} OS=darwin)
+	(make compile ARCH=${ARCHITECTURE} OS=darwin)
+	(make archive ARCH=${ARCHITECTURE} OS=darwin)
 
 build-raspbian:
 	@echo "Compilation for raspberry pi Raspbian 64 bits"
@@ -101,11 +102,11 @@ build-windows-i386:
 	(make archive ARCH=386 OS=windows  EXT=.exe)
 
 package-darwin:
-	(make init ARCH=amd64 OS=darwin)
+	(make init ARCH=${ARCHITECTURE} OS=darwin)
 	@echo "Compilation and packaging for darwin"
 	fyne package -os darwin -icon martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
-	cp -r martine.app ${BINARY}/martine-${OS}-${ARCH}/
-	(make archive ARCH=amd64 OS=darwin)
+	cp -r martine.app ${BINARY}/martine-${OS}-${ARCHITECTURE}/
+	(make archive ARCH=${ARCHITECTURE} OS=darwin)
 
 package-windows:
 	(make init ARCH=386 OS=windows  EXT=.exe)
