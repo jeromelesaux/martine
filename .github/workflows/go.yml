@@ -23,9 +23,12 @@ jobs:
         
     - name: install libX
       run: sudo apt install -y libgl1-mesa-dev xorg-dev
+    
+    - name: get dependencies
+      run: go mod download
       
     - name: Build
-      run: go mod download && go build -v -o martine ./cli/...
+      run: go build -v -o martine ./cli/...
 
     - name: Test
       run: go test -v ./...
