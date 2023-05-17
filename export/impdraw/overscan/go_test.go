@@ -10,9 +10,11 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/gfx"
+	"github.com/jeromelesaux/martine/log"
 )
 
 func TestSaveGo(t *testing.T) {
+	log.InitLoggerWithFile("test.log")
 	fileInput := "../../../samples/lena-512.png"
 	f, _ := os.Open(fileInput)
 	defer f.Close()

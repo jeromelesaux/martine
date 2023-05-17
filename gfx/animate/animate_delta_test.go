@@ -12,7 +12,12 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/transformation"
+	"github.com/jeromelesaux/martine/log"
 )
+
+func init() {
+	log.InitLoggerWithFile("test.log")
+}
 
 func TestOpenGif(t *testing.T) {
 	os.RemoveAll(("tests"))

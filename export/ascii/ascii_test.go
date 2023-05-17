@@ -7,9 +7,11 @@ import (
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/ascii"
+	"github.com/jeromelesaux/martine/log"
 )
 
 func TestAsciiByColumn(t *testing.T) {
+	log.InitLoggerWithFile("test.log")
 	data := []byte{
 		0x1, 0x2, 0x3, 0x4, 0x5,
 		0x1, 0x2, 0x3, 0x4, 0x5,

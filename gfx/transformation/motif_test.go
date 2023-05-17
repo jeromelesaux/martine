@@ -12,7 +12,12 @@ import (
 	"github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/transformation"
+	"github.com/jeromelesaux/martine/log"
 )
+
+func init() {
+	log.InitLoggerWithFile("test.log")
+}
 
 func TestMotifs(t *testing.T) {
 	err := os.MkdirAll("../test/motifs", 0700)
