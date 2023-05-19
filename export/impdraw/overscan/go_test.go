@@ -13,8 +13,11 @@ import (
 	"github.com/jeromelesaux/martine/log"
 )
 
-func TestSaveGo(t *testing.T) {
+func init() {
 	log.InitLoggerWithFile("test.log")
+}
+
+func TestSaveGo(t *testing.T) {
 	fileInput := "../../../samples/lena-512.png"
 	f, _ := os.Open(fileInput)
 	defer f.Close()

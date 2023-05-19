@@ -10,6 +10,10 @@ import (
 	"github.com/jeromelesaux/martine/log"
 )
 
+func init() {
+	log.InitLoggerWithFile("test.log")
+}
+
 func TestAsciiByColumn(t *testing.T) {
 	log.InitLoggerWithFile("test.log")
 	data := []byte{
