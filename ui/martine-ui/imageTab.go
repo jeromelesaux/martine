@@ -34,7 +34,20 @@ import (
 	w2 "github.com/jeromelesaux/martine/ui/martine-ui/widget"
 )
 
+func (m *MartineUI) CheckAmsdosHeaderExport(inDsk, addAmsdosHeader bool, win fyne.Window) bool {
+	resp := false
+	if inDsk && !addAmsdosHeader {
+		d := dialog.NewConfirm("Warning",
+			"You are about to export files in DSK without Amsdos header, continue ? ",
+			func(b bool) { resp = b },
+			win)
+		d.Show()
+	}
+	return resp
+}
+
 func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
+
 	pi := custom_widget.NewProgressInfinite("Saving...., Please wait.", m.window)
 	pi.Show()
 	cfg := m.NewConfig(me, true)
