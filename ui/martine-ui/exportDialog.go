@@ -71,14 +71,14 @@ func (m *MartineUI) exportDialog(ie *menu.ImageExport, w fyne.Window) {
 					// cancel button
 					return
 				}
-				directory.SetDefaultDirectoryURI(lu)
+				directory.SetExportDirectoryURI(lu)
 				ie.ExportFolderPath = lu.Path()
 				log.GetLogger().Infoln(ie.ExportFolderPath)
 				m.ExportOneImage(m.main)
 
 				// apply and export
 			}, m.window)
-			d, err := directory.DefaultDirectoryURI()
+			d, err := directory.ExportDirectoryURI()
 			if err == nil {
 				fo.SetLocation(d)
 			}

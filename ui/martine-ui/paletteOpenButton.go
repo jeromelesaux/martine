@@ -32,7 +32,7 @@ func NewOpenPaletteButton(m PaletteInterface, win fyne.Window) *widget.Button {
 			if reader == nil {
 				return
 			}
-			directory.SetDefaultDirectoryURI(reader.URI())
+			directory.SetImportDirectoryURI(reader.URI())
 			palettePath := reader.URI().Path()
 			switch strings.ToLower(filepath.Ext(palettePath)) {
 			case ".pal":
@@ -53,7 +53,7 @@ func NewOpenPaletteButton(m PaletteInterface, win fyne.Window) *widget.Button {
 				m.SetPaletteImage(png.PalToImage(p))
 			}
 		}, win)
-		path, err := directory.DefaultDirectoryURI()
+		path, err := directory.ImportDirectoryURI()
 		if err == nil {
 			d.SetLocation(path)
 		}

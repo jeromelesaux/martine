@@ -266,7 +266,7 @@ func (me *ImageMenu) NewImportButton(dialogSize fyne.Size, modeSelection *widget
 			}
 			refreshUI.OnTapped()
 		}, win)
-		path, err := directory.DefaultDirectoryURI()
+		path, err := directory.ImportDirectoryURI()
 		if err == nil {
 			d.SetLocation(path)
 		}

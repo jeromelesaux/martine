@@ -99,12 +99,12 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 					// cancel button
 					return
 				}
-				directory.SetDefaultDirectoryURI(lu)
+				directory.SetExportDirectoryURI(lu)
 				s.ExportFolderPath = lu.Path()
 				m.ExportSpriteBoard(s)
 				// apply and export
 			}, m.window)
-			d, err := directory.DefaultDirectoryURI()
+			d, err := directory.ExportDirectoryURI()
 			if err == nil {
 				fo.SetLocation(d)
 			}

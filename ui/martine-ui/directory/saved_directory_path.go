@@ -8,19 +8,36 @@ import (
 )
 
 var savedDirectoryPath fyne.URI
+var openDirectoryPath fyne.URI
 
-func DefaultDirectoryURI() (fyne.ListableURI, error) {
+func ExportDirectoryURI() (fyne.ListableURI, error) {
 	if savedDirectoryPath == nil {
 		return nil, fmt.Errorf("empty saved directory path")
 	}
 	return storage.ListerForURI(savedDirectoryPath)
 }
 
-func SetDefaultDirectoryURI(path fyne.URI) {
+func SetExportDirectoryURI(path fyne.URI) {
 	p, err := storage.Parent(path)
 	if err == nil {
 		savedDirectoryPath = p
 		return
 	}
 	savedDirectoryPath = path
+}
+
+func ImportDirectoryURI() (fyne.ListableURI, error) {
+	if openDirectoryPath == nil {
+		return nil, fmt.Errorf("empty saved directory path")
+	}
+	return storage.ListerForURI(openDirectoryPath)
+}
+
+func SetImportDirectoryURI(path fyne.URI) {
+	p, err := storage.Parent(path)
+	if err == nil {
+		openDirectoryPath = p
+		return
+	}
+	openDirectoryPath = path
 }

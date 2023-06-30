@@ -220,7 +220,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 			if reader == nil {
 				return
 			}
-			directory.SetDefaultDirectoryURI(reader.URI())
+			directory.SetImportDirectoryURI(reader.URI())
 			me.SetOriginalImagePath(reader.URI())
 			img, err := openImage(me.OriginalImagePath())
 			if err != nil {
@@ -229,7 +229,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 			}
 			me.SetOriginalImage(img)
 		}, m.window)
-		dir, err := directory.DefaultDirectoryURI()
+		dir, err := directory.ImportDirectoryURI()
 		if err != nil {
 			d.SetLocation(dir)
 		}
@@ -407,7 +407,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 									dialog.ShowError(err, m.window)
 								}
 							}, m.window)
-							dir, err := directory.DefaultDirectoryURI()
+							dir, err := directory.ExportDirectoryURI()
 							if err != nil {
 								d.SetLocation(dir)
 							}

@@ -44,7 +44,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						// cancel button
 						return
 					}
-					directory.SetDefaultDirectoryURI(lu)
+					directory.SetExportDirectoryURI(lu)
 					cfg := m.NewConfig(a.ImageMenu, false)
 					if cfg == nil {
 						return
@@ -84,7 +84,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 					}
 					dialog.ShowInformation("Save", "Your files are save in folder \n"+m.animateExport.ExportFolderPath, m.window)
 				}, m.window)
-				d, err := directory.DefaultDirectoryURI()
+				d, err := directory.ExportDirectoryURI()
 				if err == nil {
 					fo.SetLocation(d)
 				}
@@ -187,11 +187,11 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 			if reader == nil {
 				return
 			}
-			directory.SetDefaultDirectoryURI(reader.URI())
+			directory.SetImportDirectoryURI(reader.URI())
 			pi := custom_widget.NewProgressInfinite("Opening file, Please wait.", m.window)
 			pi.Show()
 			path := reader.URI()
-			directory.SetDefaultDirectoryURI(reader.URI())
+			directory.SetImportDirectoryURI(reader.URI())
 			if strings.ToUpper(filepath.Ext(path.Path())) != ".GIF" {
 				img, err := openImage(path.Path())
 				if err != nil {
@@ -247,7 +247,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 			m.window.Resize(m.window.Content().Size())
 		}, m.window)
 
-		path, err := directory.DefaultDirectoryURI()
+		path, err := directory.ImportDirectoryURI()
 		if err == nil {
 			d.SetLocation(path)
 		}
@@ -431,7 +431,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 									dialog.ShowError(err, m.window)
 								}
 							}, m.window)
-							dir, err := directory.DefaultDirectoryURI()
+							dir, err := directory.ExportDirectoryURI()
 							if err != nil {
 								d.SetLocation(dir)
 							}

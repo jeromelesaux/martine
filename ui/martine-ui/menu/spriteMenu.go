@@ -104,7 +104,7 @@ func (s *SpriteMenu) ImportSprite(win fyne.Window) *widget.Button {
 				return
 			}
 		}, win)
-		path, err := directory.DefaultDirectoryURI()
+		path, err := directory.ImportDirectoryURI()
 		if err == nil {
 			d.SetLocation(path)
 		}

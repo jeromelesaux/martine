@@ -99,7 +99,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 			if reader == nil {
 				return
 			}
-			directory.SetDefaultDirectoryURI(reader.URI())
+			directory.SetImportDirectoryURI(reader.URI())
 			s.FilePath = reader.URI().Path()
 			img, err := openImage(reader.URI().Path())
 			if err != nil {
@@ -108,7 +108,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 			}
 			s.SetOriginalBoard(img)
 		}, m.window)
-		path, err := directory.DefaultDirectoryURI()
+		path, err := directory.ImportDirectoryURI()
 		if err == nil {
 			d.SetLocation(path)
 		}
@@ -300,7 +300,7 @@ func applySpriteBoardFromGif(s *menu.SpriteMenu, m *MartineUI) fyne.Widget {
 				dialog.ShowError(errors.New("define dimension before"), m.window)
 				return
 			}
-			directory.SetDefaultDirectoryURI(reader.URI())
+			directory.SetImportDirectoryURI(reader.URI())
 			filePath := reader.URI()
 			fr, err := os.Open(filePath.Path())
 			if err != nil {
@@ -356,7 +356,7 @@ func applySpriteBoardFromGif(s *menu.SpriteMenu, m *MartineUI) fyne.Widget {
 			s.OriginalImages.Update(icache, icache.ImagesPerRow, icache.ImagesPerColumn)
 			s.SetPaletteImage(png.PalToImage(s.Palette()))
 		}, m.window)
-		path, err := directory.DefaultDirectoryURI()
+		path, err := directory.ImportDirectoryURI()
 		if err == nil {
 			d.SetLocation(path)
 		}
@@ -376,7 +376,7 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 			if reader == nil {
 				return
 			}
-			directory.SetDefaultDirectoryURI(reader.URI())
+			directory.SetImportDirectoryURI(reader.URI())
 			filePath := reader.URI()
 			if m.sprite.IsHardSprite {
 				spritesHard, err := spritehard.OpenSpr(filePath.Path())
@@ -473,7 +473,7 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 
 			}
 		}, m.window)
-		path, err := directory.DefaultDirectoryURI()
+		path, err := directory.ImportDirectoryURI()
 		if err == nil {
 			d.SetLocation(path)
 		}

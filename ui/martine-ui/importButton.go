@@ -29,7 +29,7 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 			if reader == nil {
 				return
 			}
-			directory.SetDefaultDirectoryURI(reader.URI())
+			directory.SetImportDirectoryURI(reader.URI())
 			me.SetOriginalImagePath(reader.URI())
 			if me.IsFullScreen {
 
@@ -85,7 +85,7 @@ func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 				me.SetOriginalImage(img)
 			}
 		}, m.window)
-		path, err := directory.DefaultDirectoryURI()
+		path, err := directory.ImportDirectoryURI()
 		if err == nil {
 			d.SetLocation(path)
 		}

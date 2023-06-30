@@ -37,17 +37,16 @@ import (
 func (m *MartineUI) CheckAmsdosHeaderExport(inDsk, addAmsdosHeader bool, win fyne.Window) bool {
 	resp := false
 	if inDsk && !addAmsdosHeader {
-		d := dialog.NewConfirm("Warning",
+		dialog.NewConfirm("Warning",
 			"You are about to export files in DSK without Amsdos header, continue ? ",
 			func(b bool) { resp = b },
-			win)
-		d.Show()
+			win).Show()
+
 	}
 	return resp
 }
 
 func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
-
 	pi := custom_widget.NewProgressInfinite("Saving...., Please wait.", m.window)
 	pi.Show()
 	cfg := m.NewConfig(me, true)
@@ -201,7 +200,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 			if reader == nil {
 				return
 			}
-			directory.SetDefaultDirectoryURI(reader.URI())
+			directory.SetImportDirectoryURI(reader.URI())
 			me.SetOriginalImagePath(reader.URI())
 			img, err := openImage(me.OriginalImagePath())
 			if err != nil {
@@ -212,7 +211,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 			// m.window.Canvas().Refresh(&me.OriginalImage)
 			// m.window.Resize(m.window.Content().Size())
 		}, m.window)
-		path, err := directory.DefaultDirectoryURI()
+		path, err := directory.ImportDirectoryURI()
 		if err == nil {
 			d.SetLocation(path)
 		}
@@ -410,7 +409,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 									dialog.ShowError(err, m.window)
 								}
 							}, m.window)
-							dir, err := directory.DefaultDirectoryURI()
+							dir, err := directory.ExportDirectoryURI()
 							if err != nil {
 								d.SetLocation(dir)
 							}

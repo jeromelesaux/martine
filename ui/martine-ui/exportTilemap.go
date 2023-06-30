@@ -98,13 +98,13 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 					// cancel button
 					return
 				}
-				directory.SetDefaultDirectoryURI(lu)
+				directory.SetExportDirectoryURI(lu)
 				m.tilemap.ExportFolderPath = lu.Path()
 				log.GetLogger().Infoln(m.tilemapExport.ExportFolderPath)
 				m.ExportTilemap(m.tilemap)
 				// apply and export
 			}, m.window)
-			d, err := directory.DefaultDirectoryURI()
+			d, err := directory.ExportDirectoryURI()
 			if err == nil {
 				fo.SetLocation(d)
 			}
