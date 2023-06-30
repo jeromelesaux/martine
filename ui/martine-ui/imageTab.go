@@ -34,16 +34,26 @@ import (
 	w2 "github.com/jeromelesaux/martine/ui/martine-ui/widget"
 )
 
-func (m *MartineUI) CheckAmsdosHeaderExport(inDsk, addAmsdosHeader bool, win fyne.Window) bool {
-	resp := false
+type dialogIface interface {
+	Show()
+}
+
+func (m *MartineUI) CheckAmsdosHeaderExport(inDsk, addAmsdosHeader bool, d dialogIface, win fyne.Window) {
 	if inDsk && !addAmsdosHeader {
 		dialog.NewConfirm("Warning",
 			"You are about to export files in DSK without Amsdos header, continue ? ",
-			func(b bool) { resp = b },
+			func(b bool) {
+				if b {
+					d.Show()
+				} else {
+					return
+				}
+			},
 			win).Show()
 
+	} else {
+		d.Show()
 	}
-	return resp
 }
 
 func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {

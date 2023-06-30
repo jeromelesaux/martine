@@ -109,7 +109,7 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 				fo.SetLocation(d)
 			}
 			fo.Resize(savingDialogSize)
-			fo.Show()
+			m.CheckAmsdosHeaderExport(m.tilemap.ExportDsk, m.tilemap.ExportWithAmsdosHeader, fo, m.window)
 		}),
 	)
 

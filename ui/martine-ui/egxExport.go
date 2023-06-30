@@ -96,7 +96,7 @@ func (m *MartineUI) exportEgxDialog(ie *menu.ImageExport, w fyne.Window) {
 				fo.SetLocation(d)
 			}
 			fo.Resize(savingDialogSize)
-			fo.Show()
+			m.CheckAmsdosHeaderExport(ie.ExportDsk, ie.ExportWithAmsdosHeader, fo, m.window)
 		}),
 	)
 

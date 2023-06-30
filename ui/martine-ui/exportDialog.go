@@ -83,7 +83,8 @@ func (m *MartineUI) exportDialog(ie *menu.ImageExport, w fyne.Window) {
 				fo.SetLocation(d)
 			}
 			fo.Resize(savingDialogSize)
-			fo.Show()
+
+			m.CheckAmsdosHeaderExport(m.imageExport.ExportDsk, m.imageExport.ExportWithAmsdosHeader, fo, m.window)
 		}),
 	)
 

@@ -109,7 +109,7 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 				fo.SetLocation(d)
 			}
 			fo.Resize(savingDialogSize)
-			fo.Show()
+			m.CheckAmsdosHeaderExport(s.ExportDsk, s.ExportWithAmsdosHeader, fo, m.window)
 		}),
 	)
 
