@@ -114,7 +114,7 @@ func ApplyOneImageAndExport(in image.Image,
 ) error {
 	var palette color.Palette
 	var newPalette color.Palette
-	var downgraded *image.NRGBA
+	var downgraded, out *image.NRGBA
 	var err error
 
 	if cfg.PalettePath != "" {
@@ -145,7 +145,15 @@ func ApplyOneImageAndExport(in image.Image,
 		}
 	}
 
-	out := ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
+	if cfg.UseKmeans {
+		downgraded, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansInterations, in)
+		if err != nil {
+			return err
+		}
+		out = ci.Resize(downgraded, cfg.Size, cfg.ResizingAlgo)
+	} else {
+		out = ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
+	}
 	log.GetLogger().Info("Saving resized image into (%s)\n", filename+"_resized.png")
 	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_resized.png"), out); err != nil {
 		os.Exit(-2)
