@@ -16,7 +16,7 @@ import (
 )
 
 func init() {
-	log.InitLoggerWithFile("test.log")
+	_, _ = log.InitLoggerWithFile("test.log")
 }
 
 func TestMotifs(t *testing.T) {

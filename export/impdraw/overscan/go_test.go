@@ -14,7 +14,7 @@ import (
 )
 
 func init() {
-	log.InitLoggerWithFile("test.log")
+	_, _ = log.InitLoggerWithFile("test.log")
 }
 
 func TestSaveGo(t *testing.T) {
