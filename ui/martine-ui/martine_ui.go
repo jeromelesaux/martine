@@ -153,6 +153,8 @@ func (m *MartineUI) NewConfig(me *menu.ImageMenu, checkOriginalImage bool) *conf
 	cfg.ExportAsGoFile = m.imageExport.ExportAsGoFiles
 	cfg.OneLine = me.OneLine
 	cfg.OneRow = me.OneRow
+	cfg.UseKmeans = me.UseKmeans
+	cfg.KmeansInterations = me.KmeansIteration
 	return cfg
 }
 

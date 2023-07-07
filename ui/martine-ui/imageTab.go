@@ -261,6 +261,21 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 	resize := w2.NewResizeAlgorithmSelect(me)
 	resizeLabel := widget.NewLabel("Resize algorithm")
 
+	kmeansLabel := widget.NewLabel("Reduce palette with Kmeans")
+	useKmeans := widget.NewCheck("Use Kmeans", func(b bool) {
+		me.UseKmeans = b
+	})
+	kmeansIteration := widget.NewEntry()
+	kmeansIteration.SetPlaceHolder("enter the number of iterations")
+	kmeansIteration.OnChanged = func(s string) {
+		iter, err := strconv.Atoi(s)
+		if err != nil {
+			dialog.ShowError(err, m.window)
+			return
+		}
+		me.KmeansIteration = iter
+	}
+
 	ditheringMultiplier := widget.NewSlider(0., 2.5)
 	ditheringMultiplier.Step = 0.1
 	ditheringMultiplier.SetValue(1.18)
@@ -367,7 +382,13 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 			container.New(
 				layout.NewGridLayoutWithRows(7),
 				container.New(
-					layout.NewGridLayoutWithRows(2),
+					layout.NewGridLayoutWithRows(3),
+					container.New(
+						layout.NewGridLayoutWithColumns(3),
+						kmeansLabel,
+						useKmeans,
+						kmeansIteration,
+					),
 					container.New(
 						layout.NewGridLayoutWithColumns(2),
 						resizeLabel,

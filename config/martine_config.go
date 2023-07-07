@@ -106,6 +106,8 @@ type MartineConfig struct {
 	Brightness                  float64
 	ExportAsGoFile              bool
 	DoubleScreenAddress         bool
+	UseKmeans                   bool
+	KmeansInterations           int
 }
 
 func MaskIsAllowed(mode uint8, value uint8) bool {

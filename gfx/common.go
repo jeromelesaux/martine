@@ -284,10 +284,18 @@ func ApplyOneImage(in image.Image,
 	screenMode uint8,
 ) ([]byte, *image.NRGBA, color.Palette, int, error) {
 	var newPalette color.Palette
-	var downgraded *image.NRGBA
+	var downgraded, out *image.NRGBA
 	var err error
 
-	out := ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
+	if cfg.UseKmeans {
+		downgraded, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansInterations, in)
+		if err != nil {
+			return []byte{}, downgraded, palette, 0, err
+		}
+		out = ci.Resize(downgraded, cfg.Size, cfg.ResizingAlgo)
+	} else {
+		out = ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
+	}
 
 	if cfg.Reducer > -1 {
 		out = ci.Reducer(out, cfg.Reducer)

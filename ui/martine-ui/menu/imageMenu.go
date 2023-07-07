@@ -55,6 +55,8 @@ type ImageMenu struct {
 	OneLine             bool
 	OneRow              bool
 	CmdLineGenerate     string
+	UseKmeans           bool
+	KmeansIteration     int
 }
 
 func NewImageMenu() *ImageMenu {
