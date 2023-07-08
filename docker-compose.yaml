@@ -1,0 +1,13 @@
+version: "3.8"
+
+
+services:
+  cross-compil:
+    build:
+      context: ./.
+      dockerfile: Dockerfile
+    platform: linux/amd64
+    entrypoint: /root/martine/build/entrypoint.sh
+    volumes:
+      - ./build:/root/martine/build
+    
