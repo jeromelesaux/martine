@@ -145,18 +145,25 @@ func ApplyOneImageAndExport(in image.Image,
 		}
 	}
 
-	if cfg.UseKmeans {
-		downgraded, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansInterations, in)
-		if err != nil {
-			return err
-		}
-		out = ci.Resize(downgraded, cfg.Size, cfg.ResizingAlgo)
-	} else {
-		out = ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
-	}
+	// if cfg.UseKmeans {
+	// 	downgraded, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansInterations, in)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	out = ci.Resize(downgraded, cfg.Size, cfg.ResizingAlgo)
+	// } else {
+	out = ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
+	// }
 	log.GetLogger().Info("Saving resized image into (%s)\n", filename+"_resized.png")
 	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_resized.png"), out); err != nil {
 		os.Exit(-2)
+	}
+
+	if cfg.UseKmeans {
+		out, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansInterations, out)
+		if err != nil {
+			return err
+		}
 	}
 
 	if cfg.Reducer > 0 {
@@ -295,16 +302,22 @@ func ApplyOneImage(in image.Image,
 	var downgraded, out *image.NRGBA
 	var err error
 
+	// if cfg.UseKmeans {
+	// 	downgraded, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansInterations, in)
+	// 	if err != nil {
+	// 		return []byte{}, downgraded, palette, 0, err
+	// 	}
+	out = ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
+	// } else {
+	// 	out = ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
+	// }
+
 	if cfg.UseKmeans {
-		downgraded, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansInterations, in)
+		out, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansInterations, out)
 		if err != nil {
 			return []byte{}, downgraded, palette, 0, err
 		}
-		out = ci.Resize(downgraded, cfg.Size, cfg.ResizingAlgo)
-	} else {
-		out = ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
 	}
-
 	if cfg.Reducer > -1 {
 		out = ci.Reducer(out, cfg.Reducer)
 	}

@@ -267,6 +267,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 	})
 	kmeansIteration := widget.NewEntry()
 	kmeansIteration.SetPlaceHolder("enter the number of iterations")
+	kmeansIteration.SetText("100")
 	kmeansIteration.OnChanged = func(s string) {
 		iter, err := strconv.Atoi(s)
 		if err != nil {
