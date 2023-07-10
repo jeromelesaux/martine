@@ -162,6 +162,7 @@ func ApplyOneImageAndExport(in image.Image,
 	if cfg.UseKmeans {
 		out, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansInterations, out)
 		if err != nil {
+			log.GetLogger().Info("error while applying kmeans with iterations [%d] (%v)\n", cfg.KmeansInterations, err)
 			return err
 		}
 	}
@@ -315,7 +316,8 @@ func ApplyOneImage(in image.Image,
 	if cfg.UseKmeans {
 		out, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansInterations, out)
 		if err != nil {
-			return []byte{}, downgraded, palette, 0, err
+			log.GetLogger().Info("error while applying kmeans with iterations [%d] (%v)\n", cfg.KmeansInterations, err)
+			return []byte{}, out, palette, 0, err
 		}
 	}
 	if cfg.Reducer > -1 {
