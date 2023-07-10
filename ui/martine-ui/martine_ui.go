@@ -155,6 +155,10 @@ func (m *MartineUI) NewConfig(me *menu.ImageMenu, checkOriginalImage bool) *conf
 	cfg.OneRow = me.OneRow
 	cfg.UseKmeans = me.UseKmeans
 	cfg.KmeansInterations = me.KmeansIteration
+	if cfg.UseKmeans && me.KmeansIteration == 0 {
+		cfg.KmeansInterations = 100
+	}
+
 	return cfg
 }
 
