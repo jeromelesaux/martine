@@ -271,7 +271,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 	kmeansIteration.OnChanged = func(s string) {
 		iter, err := strconv.Atoi(s)
 		if err != nil {
-			dialog.ShowError(err, m.window)
+			log.GetLogger().Error("error while parsing the iterations number for kmeans [%v]", err)
 			return
 		}
 		me.KmeansIteration = iter

@@ -117,6 +117,22 @@ func ApplyOneImageAndExport(in image.Image,
 	var downgraded, out *image.NRGBA
 	var err error
 
+	if cfg.UseKmeans {
+		log.GetLogger().Info("kmeans with %d iterations", cfg.KmeansInterations)
+		downgraded, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansInterations, in)
+		if err != nil {
+			log.GetLogger().Error("error while applying kmeans with iterations [%d] (%v)\n", cfg.KmeansInterations, err)
+			return err
+		}
+		out = ci.Resize(downgraded, cfg.Size, cfg.ResizingAlgo)
+	} else {
+		out = ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
+	}
+	log.GetLogger().Info("Saving resized image into (%s)\n", filename+"_resized.png")
+	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_resized.png"), out); err != nil {
+		os.Exit(-2)
+	}
+
 	if cfg.PalettePath != "" {
 		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PalettePath)
 		palette, _, err = ocpartstudio.OpenPal(cfg.PalettePath)
@@ -146,26 +162,13 @@ func ApplyOneImageAndExport(in image.Image,
 	}
 
 	// if cfg.UseKmeans {
-	// 	downgraded, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansInterations, in)
+	// 	log.GetLogger().Info("kmeans with %d iterations", cfg.KmeansInterations)
+	// 	out, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansInterations, out)
 	// 	if err != nil {
+	// 		log.GetLogger().Error("error while applying kmeans with iterations [%d] (%v)\n", cfg.KmeansInterations, err)
 	// 		return err
 	// 	}
-	// 	out = ci.Resize(downgraded, cfg.Size, cfg.ResizingAlgo)
-	// } else {
-	out = ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
 	// }
-	log.GetLogger().Info("Saving resized image into (%s)\n", filename+"_resized.png")
-	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_resized.png"), out); err != nil {
-		os.Exit(-2)
-	}
-
-	if cfg.UseKmeans {
-		out, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansInterations, out)
-		if err != nil {
-			log.GetLogger().Info("error while applying kmeans with iterations [%d] (%v)\n", cfg.KmeansInterations, err)
-			return err
-		}
-	}
 
 	if cfg.Reducer > 0 {
 		out = ci.Reducer(out, cfg.Reducer)
@@ -314,9 +317,10 @@ func ApplyOneImage(in image.Image,
 	// }
 
 	if cfg.UseKmeans {
+		log.GetLogger().Info("kmeans with %d iterations", cfg.KmeansInterations)
 		out, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansInterations, out)
 		if err != nil {
-			log.GetLogger().Info("error while applying kmeans with iterations [%d] (%v)\n", cfg.KmeansInterations, err)
+			log.GetLogger().Error("error while applying kmeans with iterations [%d] (%v)\n", cfg.KmeansInterations, err)
 			return []byte{}, out, palette, 0, err
 		}
 	}
