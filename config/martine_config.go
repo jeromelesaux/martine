@@ -107,7 +107,7 @@ type MartineConfig struct {
 	ExportAsGoFile              bool
 	DoubleScreenAddress         bool
 	UseKmeans                   bool
-	KmeansInterations           int
+	KmeansThreshold             float64
 }
 
 func MaskIsAllowed(mode uint8, value uint8) bool {

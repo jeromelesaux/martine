@@ -117,17 +117,29 @@ func ApplyOneImageAndExport(in image.Image,
 	var downgraded, out *image.NRGBA
 	var err error
 
+	out = ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
 	if cfg.UseKmeans {
-		log.GetLogger().Info("kmeans with %d iterations", cfg.KmeansInterations)
-		downgraded, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansInterations, in)
+		log.GetLogger().Info("kmeans with %f threshold", cfg.KmeansThreshold)
+		out, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansThreshold, out)
 		if err != nil {
-			log.GetLogger().Error("error while applying kmeans with iterations [%d] (%v)\n", cfg.KmeansInterations, err)
 			return err
 		}
-		out = ci.Resize(downgraded, cfg.Size, cfg.ResizingAlgo)
-	} else {
-		out = ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
-	}
+		// out = ci.Resize(downgraded, cfg.Size, cfg.ResizingAlgo)
+	} //else {
+	// 	out = ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
+	// }
+
+	// if cfg.UseKmeans {
+	// 	log.GetLogger().Info("kmeans with %f iterations", cfg.KmeansThreshold)
+	// 	downgraded, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansThreshold, in)
+	// 	if err != nil {
+	// 		log.GetLogger().Error("error while applying kmeans with threshold [%f] (%v)\n", cfg.KmeansThreshold, err)
+	// 		return err
+	// 	}
+	// 	out = ci.Resize(downgraded, cfg.Size, cfg.ResizingAlgo)
+	// } else {
+	// 	out = ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
+	// }
 	log.GetLogger().Info("Saving resized image into (%s)\n", filename+"_resized.png")
 	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_resized.png"), out); err != nil {
 		os.Exit(-2)
@@ -306,24 +318,23 @@ func ApplyOneImage(in image.Image,
 	var downgraded, out *image.NRGBA
 	var err error
 
-	// if cfg.UseKmeans {
-	// 	downgraded, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansInterations, in)
-	// 	if err != nil {
-	// 		return []byte{}, downgraded, palette, 0, err
-	// 	}
 	out = ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
-	// } else {
-	// 	out = ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
-	// }
-
 	if cfg.UseKmeans {
-		log.GetLogger().Info("kmeans with %d iterations", cfg.KmeansInterations)
-		out, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansInterations, out)
+		log.GetLogger().Info("kmeans with %f threshold", cfg.KmeansThreshold)
+		out, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansThreshold, out)
 		if err != nil {
-			log.GetLogger().Error("error while applying kmeans with iterations [%d] (%v)\n", cfg.KmeansInterations, err)
 			return []byte{}, out, palette, 0, err
 		}
+		// out = ci.Resize(downgraded, cfg.Size, cfg.ResizingAlgo)
 	}
+	// if cfg.UseKmeans {
+	// 	log.GetLogger().Info("kmeans with %f threshold", cfg.KmeansThreshold)
+	// 	out, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansThreshold, out)
+	// 	if err != nil {
+	// 		log.GetLogger().Error("error while applying kmeans with threshold [%f] (%v)\n", cfg.KmeansThreshold, err)
+	// 		return []byte{}, out, palette, 0, err
+	// 	}
+	// }
 	if cfg.Reducer > -1 {
 		out = ci.Reducer(out, cfg.Reducer)
 	}

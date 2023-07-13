@@ -265,16 +265,11 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 	useKmeans := widget.NewCheck("Use Kmeans", func(b bool) {
 		me.UseKmeans = b
 	})
-	kmeansIteration := widget.NewEntry()
-	kmeansIteration.SetPlaceHolder("enter the number of iterations")
-	kmeansIteration.SetText("100")
-	kmeansIteration.OnChanged = func(s string) {
-		iter, err := strconv.Atoi(s)
-		if err != nil {
-			log.GetLogger().Error("error while parsing the iterations number for kmeans [%v]", err)
-			return
-		}
-		me.KmeansIteration = iter
+	kmeansIteration := widget.NewSlider(0.01, .9)
+	kmeansIteration.SetValue(.01)
+	kmeansIteration.Step = .01
+	kmeansIteration.OnChanged = func(f float64) {
+		me.KmeansThreshold = f
 	}
 
 	ditheringMultiplier := widget.NewSlider(0., 2.5)

@@ -4,17 +4,21 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/mccutchen/palettor"
+	"github.com/Baldomo/paletter"
 )
 
-func Kmeans(nbColors, iteration int, img image.Image) (*image.NRGBA, error) {
-	newPalette, err := palettor.Extract(nbColors, iteration, img)
-	if err != nil {
-		return &image.NRGBA{}, err
+func Kmeans(nbColors int, threshold float64, img image.Image) (*image.NRGBA, error) {
+
+	if threshold != 0. {
+		paletter.DeltaThreshold = threshold
 	}
+	obs := paletter.ImageToObservation(img)
+	cs, _ := paletter.CalculatePalette(obs, nbColors)
+	colors := paletter.ColorsFromClusters(cs)
+
 	var p color.Palette
 
-	for _, c := range newPalette.Colors() {
+	for _, c := range colors {
 		p = append(p, c)
 	}
 
