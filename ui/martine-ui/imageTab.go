@@ -272,7 +272,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 		me.KmeansThreshold = f
 	}
 
-	ditheringMultiplier := widget.NewSlider(0., 2.5)
+	ditheringMultiplier := widget.NewSlider(0., 5.)
 	ditheringMultiplier.Step = 0.1
 	ditheringMultiplier.SetValue(1.18)
 	ditheringMultiplier.OnChanged = func(f float64) {

@@ -13,7 +13,10 @@ func Kmeans(nbColors int, threshold float64, img image.Image) (*image.NRGBA, err
 		paletter.DeltaThreshold = threshold
 	}
 	obs := paletter.ImageToObservation(img)
-	cs, _ := paletter.CalculatePalette(obs, nbColors)
+	cs, err := paletter.CalculatePalette(obs, nbColors)
+	if err != nil {
+		return nil, err
+	}
 	colors := paletter.ColorsFromClusters(cs)
 
 	var p color.Palette

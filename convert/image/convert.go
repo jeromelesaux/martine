@@ -197,12 +197,12 @@ func DowngradingWithPalette(in *image.NRGBA, p color.Palette) (color.Palette, *i
 
 func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (color.Palette, *image.NRGBA, error) {
 	//	log.GetLogger().Info( "* Step 2 * Downgrading palette image\n")
-	p, out := downgrade(in, isCpcPlus)
+	p := ExtractPalette(in, isCpcPlus, size.ColorsAvailable)
 	//	log.GetLogger().Info( "Downgraded palette contains (%d) colors\n", len(p))
 	if len(p) > size.ColorsAvailable {
 		log.GetLogger().Error("Downgraded palette size (%d) is greater than the available colors in this mode (%d)\n", len(p), size.ColorsAvailable)
 		log.GetLogger().Error("Check color usage in image.\n")
-		colorUsage := computePaletteUsage(out, p)
+		colorUsage := computePaletteUsage(in, p)
 		// feed sort palette colors structure
 		paletteToReduce := constants.NewPaletteReducer()
 
@@ -212,10 +212,10 @@ func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (c
 		// launch analyse
 		newPalette := paletteToReduce.Reduce(size.ColorsAvailable)
 		log.GetLogger().Info("Phasis downgrade colors palette palette (%d)\n", len(newPalette))
-		return newPalette, downgradeWithPalette(out, newPalette), nil
+		return newPalette, downgradeWithPalette(in, newPalette), nil
 
 	}
-	return p, out, nil
+	return p, in, nil
 }
 
 func computePaletteUsage(in *image.NRGBA, p color.Palette) map[color.Color]int {
@@ -279,12 +279,15 @@ func ExtractPalette(in *image.NRGBA, isCpcPlus bool, nbColors int) color.Palette
 		return s[i].Value > s[j].Value
 	})
 
+	log.GetLogger().Info("colors distribution:%v", s)
+
 	for i, v := range s {
 		if i >= nbColors {
 			break
 		}
 		p = append(p, v.Key)
 	}
+
 	return p
 }
 
@@ -313,33 +316,6 @@ func PaletteUsed(in *image.NRGBA, isCpcPlus bool) color.Palette {
 		}
 	}
 	return p
-}
-
-func downgrade(in *image.NRGBA, isCpcPlus bool) (color.Palette, *image.NRGBA) {
-	log.GetLogger().Info("Plus palette :%d\n", len(constants.CpcPlusPalette))
-	cache := make(map[color.Color]color.Color)
-	p := color.Palette{}
-	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
-		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
-			c := in.At(x, y)
-			var cPalette color.Color
-			if cc := cache[c]; cc != nil {
-				cPalette = cc
-			} else {
-				if isCpcPlus {
-					cPalette = constants.CpcPlusPalette.Convert(c)
-				} else {
-					cPalette = constants.CpcOldPalette.Convert(c)
-				}
-				cache[c] = cPalette
-			}
-			in.Set(x, y, cPalette)
-			if !paletteContains(p, cPalette) {
-				p = append(p, cPalette)
-			}
-		}
-	}
-	return p, in
 }
 
 func paletteContains(p color.Palette, c color.Color) bool {
