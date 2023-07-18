@@ -136,6 +136,11 @@ func (m *MartineUI) NewConfig(me *menu.ImageMenu, checkOriginalImage bool) *conf
 		cfg.DitheringAlgo = 0
 		cfg.DitheringMatrix = me.DitheringMatrix
 		cfg.DitheringType = me.DitheringType
+		if me.DitheringMultiplier == 0 {
+			cfg.DitheringMultiplier = .1
+		} else {
+			cfg.DitheringMultiplier = me.DitheringMultiplier
+		}
 	} else {
 		cfg.DitheringAlgo = -1
 	}

@@ -10,6 +10,23 @@ import (
 	"github.com/jeromelesaux/martine/log"
 )
 
+func PngImage(filePath string, in image.Image) error {
+	fwd, err := os.Create(filePath)
+	if err != nil {
+		log.GetLogger().Error("Cannot create new image (%s) error %v\n", filePath, err)
+		return err
+	}
+
+	if err := png.Encode(fwd, in); err != nil {
+		fwd.Close()
+		log.GetLogger().Error("Cannot create new image (%s) as png error %v\n", filePath, err)
+		return err
+	}
+	fwd.Close()
+	log.GetLogger().Info("Create output file (%s)\n", filePath)
+	return nil
+}
+
 func Png(filePath string, im *image.NRGBA) error {
 	fwd, err := os.Create(filePath)
 	if err != nil {

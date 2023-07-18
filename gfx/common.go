@@ -114,7 +114,7 @@ func ApplyOneImageAndExport(in image.Image,
 ) error {
 	var palette color.Palette
 	var newPalette color.Palette
-	var downgraded, out *image.NRGBA
+	var out *image.NRGBA
 	var err error
 
 	out = ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
@@ -190,9 +190,9 @@ func ApplyOneImageAndExport(in image.Image,
 	}
 
 	if len(palette) > 0 {
-		newPalette, downgraded = ci.DowngradingWithPalette(out, palette)
+		newPalette, out = ci.DowngradingWithPalette(out, palette)
 	} else {
-		newPalette, downgraded, err = ci.DowngradingPalette(out, cfg.Size, cfg.CpcPlus)
+		newPalette, out, err = ci.DowngradingPalette(out, cfg.Size, cfg.CpcPlus)
 		if err != nil {
 			log.GetLogger().Error("Cannot downgrade colors palette for this image %s\n", picturePath)
 		}
@@ -212,7 +212,7 @@ func ApplyOneImageAndExport(in image.Image,
 	out, _ = DoDithering(out, newPalette, cfg.DitheringAlgo, cfg.DitheringType, cfg.DitheringWithQuantification, cfg.DitheringMatrix, float32(cfg.DitheringMultiplier), cfg.CpcPlus, cfg.Size)
 	if cfg.Saturation > 0 || cfg.Brightness > 0 {
 		palette = ci.EnhanceBrightness(newPalette, cfg.Brightness, cfg.Saturation)
-		newPalette, downgraded = ci.DowngradingWithPalette(out, palette)
+		newPalette, out = ci.DowngradingWithPalette(out, palette)
 		var paletteToSort color.Palette
 		switch mode {
 		case 1:
@@ -235,11 +235,11 @@ func ApplyOneImageAndExport(in image.Image,
 	}
 
 	log.GetLogger().Info("Saving downgraded image into (%s)\n", filename+"_down.png")
-	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_down.png"), downgraded); err != nil {
+	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_down.png"), out); err != nil {
 		os.Exit(-2)
 	}
 
-	images, err := DoTransformation(downgraded, newPalette,
+	images, err := DoTransformation(out, newPalette,
 		screenMode, cfg.RollMode, cfg.RotationMode, cfg.Rotation3DMode,
 		cfg.RotationRlaBit, cfg.RotationSlaBit, cfg.RotationRraBit, cfg.RotationSraBit,
 		cfg.RotationKeephighBit, cfg.RotationLosthighBit,
@@ -261,24 +261,24 @@ func ApplyOneImageAndExport(in image.Image,
 	}
 
 	if !cfg.CustomDimension && !cfg.SpriteHard {
-		err = Transform(downgraded, newPalette, cfg.Size, picturePath, cfg)
+		err = Transform(out, newPalette, cfg.Size, picturePath, cfg)
 		if err != nil {
 			return err
 		}
 	} else {
 		if cfg.ZigZag {
 			// prepare zigzag transformation
-			downgraded = transformation.Zigzag(downgraded)
+			out = transformation.Zigzag(out)
 		}
 		if !cfg.SpriteHard {
 			// log.GetLogger().Info( "Transform image in sprite.\n")
-			err = sprite.ToSpriteAndExport(downgraded, newPalette, cfg.Size, screenMode, filename, false, cfg)
+			err = sprite.ToSpriteAndExport(out, newPalette, cfg.Size, screenMode, filename, false, cfg)
 			if err != nil {
 				return err
 			}
 		} else {
 			// log.GetLogger().Info( "Transform image in sprite hard.\n")
-			err = spritehard.ToSpriteHardAndExport(downgraded, newPalette, cfg.Size, screenMode, filename, cfg)
+			err = spritehard.ToSpriteHardAndExport(out, newPalette, cfg.Size, screenMode, filename, cfg)
 			if err != nil {
 				return err
 			}
@@ -315,7 +315,7 @@ func ApplyOneImage(in image.Image,
 	screenMode uint8,
 ) ([]byte, *image.NRGBA, color.Palette, int, error) {
 	var newPalette color.Palette
-	var downgraded, out *image.NRGBA
+	var out *image.NRGBA
 	var err error
 
 	out = ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
@@ -340,9 +340,9 @@ func ApplyOneImage(in image.Image,
 	}
 
 	if len(palette) > 0 {
-		newPalette, downgraded = ci.DowngradingWithPalette(out, palette)
+		newPalette, out = ci.DowngradingWithPalette(out, palette)
 	} else {
-		newPalette, downgraded, err = ci.DowngradingPalette(out, cfg.Size, cfg.CpcPlus)
+		newPalette, out, err = ci.DowngradingPalette(out, cfg.Size, cfg.CpcPlus)
 		if err != nil {
 			log.GetLogger().Error("Cannot downgrade colors palette for this image")
 		}
@@ -371,7 +371,7 @@ func ApplyOneImage(in image.Image,
 
 	if cfg.Saturation > 0 || cfg.Brightness > 0 {
 		palette = ci.EnhanceBrightness(newPalette, cfg.Brightness, cfg.Saturation)
-		newPalette, downgraded = ci.DowngradingWithPalette(out, palette)
+		newPalette, out = ci.DowngradingWithPalette(out, palette)
 		var paletteToSort color.Palette
 		switch mode {
 		case 1:
@@ -387,37 +387,37 @@ func ApplyOneImage(in image.Image,
 	var data []byte
 	var lineSize int
 	if !cfg.CustomDimension && !cfg.SpriteHard {
-		data = InternalTransform(downgraded, newPalette, cfg.Size, cfg)
+		data = InternalTransform(out, newPalette, cfg.Size, cfg)
 		lineSize = cfg.Size.Width
 	} else {
 		if cfg.ZigZag {
 			// prepare zigzag transformation
-			downgraded = transformation.Zigzag(downgraded)
+			out = transformation.Zigzag(out)
 		}
 		if !cfg.SpriteHard {
 			// log.GetLogger().Info( "Transform image in sprite.\n")
-			data, _, lineSize, err = sprite.ToSprite(downgraded, newPalette, cfg.Size, screenMode, cfg)
+			data, _, lineSize, err = sprite.ToSprite(out, newPalette, cfg.Size, screenMode, cfg)
 		} else {
 			//	log.GetLogger().Info( "Transform image in sprite hard.\n")
-			data, _ = spritehard.ToSpriteHard(downgraded, newPalette, cfg.Size, screenMode, cfg)
+			data, _ = spritehard.ToSpriteHard(out, newPalette, cfg.Size, screenMode, cfg)
 			lineSize = 16
 		}
 	}
 	if cfg.OneRow {
-		for y := 0; y < downgraded.Bounds().Max.Y; y += 2 {
-			for x := 0; x < downgraded.Bounds().Max.X; x++ {
-				downgraded.Set(x, y, newPalette[0])
+		for y := 0; y < out.Bounds().Max.Y; y += 2 {
+			for x := 0; x < out.Bounds().Max.X; x++ {
+				out.Set(x, y, newPalette[0])
 			}
 		}
 	}
 	if cfg.OneLine {
-		for y := 0; y < downgraded.Bounds().Max.Y; y++ {
-			for x := 0; x < downgraded.Bounds().Max.X; x += 2 {
-				downgraded.Set(x, y, newPalette[0])
+		for y := 0; y < out.Bounds().Max.Y; y++ {
+			for x := 0; x < out.Bounds().Max.X; x += 2 {
+				out.Set(x, y, newPalette[0])
 			}
 		}
 	}
-	return data, downgraded, newPalette, lineSize, err
+	return data, out, newPalette, lineSize, err
 }
 
 func fillColorPalette(p color.Palette) color.Palette {
