@@ -313,7 +313,11 @@ func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaColl
 
 	ascii.ByteToken = "db"
 	dataCode += "palette:\n" + ascii.ByteToken + " "
-	dataCode += ascii.FormatAssemblyBasicPalette(palette, "\n")
+	if cfg.CpcPlus {
+		dataCode += ascii.FormatAssemblyCPCPlusPalette(palette, "\n")
+	} else {
+		dataCode += ascii.FormatAssemblyBasicPalette(palette, "\n")
+	}
 
 	header := sourceCode
 	// replace the initial address
