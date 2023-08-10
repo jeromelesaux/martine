@@ -18,25 +18,27 @@ func init() {
 }
 
 func TestSaveGo(t *testing.T) {
-	fileInput := "../../../samples/lena-512.png"
-	f, _ := os.Open(fileInput)
+	os.Mkdir("overscanTests", 0777)
+	file := "../../../samples/lena-512.png"
+	f, _ := os.Open(file)
 	defer f.Close()
 	img, _ := png.Decode(f)
 
-	cfg := config.NewMartineConfig(fileInput, "")
+	cfg := config.NewMartineConfig(file, "./overscanTests")
 	cfg.Overscan = true
 	cfg.ExportAsGoFile = true
 	cfg.Dsk = true
 	cfg.CpcPlus = true
 	cfg.Size = constants.NewSizeMode(0, true)
-	err := gfx.ApplyOneImageAndExport(img, cfg, cfg.InputPath, filepath.Dir(fileInput), 0, 0)
+	err := gfx.ApplyOneImageAndExport(img, cfg, "lena", "./overscanTests/", 0, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
 	cfg.ExportAsGoFile = false
 	// gfx.ApplyOneImageAndExport(img, cfg, cfg.InputPath, filepath.Dir(fileInput), 0, 0)
-	err = diskimage.ImportInDsk(filepath.Dir(fileInput), cfg)
+	err = diskimage.ImportInDsk(filepath.Dir(file), cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
+	os.RemoveAll("overscanTests")
 }

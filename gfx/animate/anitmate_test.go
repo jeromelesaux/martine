@@ -69,6 +69,7 @@ func TestCompressZx0(t *testing.T) {
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
+	_ = os.Remove("TRIANGLE.asm")
 }
 
 func TestDisplayCode(t *testing.T) {

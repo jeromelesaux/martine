@@ -49,11 +49,12 @@ func TestOpenGif(t *testing.T) {
 }
 
 func TestInternalDelta(t *testing.T) {
+	os.Mkdir("InternalDelta", 0777)
 	ex := &config.MartineConfig{
 		Size:            constants.Size{Width: 100, Height: 100, ColorsAvailable: 4},
 		CustomDimension: true,
 		LineWidth:       0x50,
-		OutputPath:      "./",
+		OutputPath:      "./InternalDelta",
 		OneLine:         false,
 		OneRow:          false,
 		FilloutGif:      false,
@@ -62,6 +63,7 @@ func TestInternalDelta(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	os.RemoveAll("InternalDelta")
 }
 
 func TestHSPSimpleNodes(t *testing.T) {
