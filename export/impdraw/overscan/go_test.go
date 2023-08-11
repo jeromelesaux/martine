@@ -18,7 +18,7 @@ func init() {
 }
 
 func TestSaveGo(t *testing.T) {
-	os.Mkdir("overscanTests", 0777)
+	_ = os.Mkdir("overscanTests", 0777)
 	file := "../../../samples/lena-512.png"
 	f, _ := os.Open(file)
 	defer f.Close()

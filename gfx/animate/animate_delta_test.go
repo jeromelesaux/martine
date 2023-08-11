@@ -49,7 +49,7 @@ func TestOpenGif(t *testing.T) {
 }
 
 func TestInternalDelta(t *testing.T) {
-	os.Mkdir("InternalDelta", 0777)
+	_ = os.Mkdir("InternalDelta", 0777)
 	ex := &config.MartineConfig{
 		Size:            constants.Size{Width: 100, Height: 100, ColorsAvailable: 4},
 		CustomDimension: true,
