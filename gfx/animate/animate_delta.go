@@ -1473,7 +1473,7 @@ var deltaScreenCompressCodeDelta string = `
 large equ {{ .Large }}
 haut equ {{ .Haut }}
 loadingaddress equ #200
-linewidth equ{{ .LigneLarge }}
+linewidth equ {{ .LigneLarge }}
 nbdelta equ {{ len .Delta }} 
 nbcolors equ {{ len .Palette }}
 ;-----------------------------
