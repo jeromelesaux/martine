@@ -9,7 +9,6 @@ import (
 	"image/gif"
 	"os"
 	"path/filepath"
-	"strings"
 	"text/template"
 
 	"github.com/jeromelesaux/martine/config"
@@ -198,7 +197,8 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 	deltaData = append(deltaData, dc)
 	log.GetLogger().Info("%d bytes differ from the both images\n", len(dc.Items))
 	filename := string(cfg.OsFilename(".asm"))
-	return exportDeltaAnimate(rawImages[0], deltaData, palette, isSprite, cfg, initialAddress, mode, cfg.OutputPath+string(filepath.Separator)+filename, exportVersion)
+	_, err = ExportDeltaAnimate(rawImages[0], deltaData, palette, isSprite, cfg, initialAddress, mode, cfg.OutputPath+string(filepath.Separator)+filename, exportVersion)
+	return err
 }
 
 func ConvertToImage(g gif.GIF) []*image.NRGBA {
@@ -237,140 +237,7 @@ func filloutGif(g gif.GIF, cfg *config.MartineConfig) []image.Image {
 	return c
 }
 
-func ExportDeltaAnimate(imageReference []byte, delta []*transformation.DeltaCollection, palette color.Palette, isSprite bool, cfg *config.MartineConfig, initialAddress uint16, mode uint8, exportVersion DeltaExportFormat) (string, error) {
-	var sourceCode string
-	var dataCode string
-	var deltaIndex []string
-	var code string
-	nbDelta := len(delta)
-	if !isSprite {
-		if cfg.Compression != compression.NONE {
-
-			sourceCode = deltaScreenCompressCodeDelta
-			if exportVersion == DeltaExportV2 {
-				sourceCode = deltaScreenCompressCodeDeltaV2
-			}
-			if cfg.CpcPlus {
-				sourceCode = deltaScreenCompressCodeDeltaPlus
-			}
-		} else {
-			sourceCode = deltaScreenCodeDelta
-			if exportVersion == DeltaExportV2 {
-				sourceCode = deltaScreenCodeDeltaV2
-			}
-			if cfg.CpcPlus {
-				sourceCode = deltaScreenCodeDeltaPlus
-			}
-		}
-	} else {
-		sourceCode = deltaCodeDelta
-	}
-	// copy of the sprite
-	dataCode += "\nsprite:\n"
-	if cfg.Compression != compression.NONE {
-		if isSprite {
-			sourceCode = depackRoutine
-		}
-		log.GetLogger().Info("Using Zx0 cruncher")
-		data := zx0.Encode(imageReference)
-		dataCode += ascii.FormatAssemblyDatabyte(data, "\n")
-	} else {
-		dataCode += ascii.FormatAssemblyDatabyte(imageReference, "\n")
-	}
-	// copy of all delta
-	for i := 0; i < len(delta); i++ {
-		dc := delta[i]
-		var data []byte
-		var err error
-		if exportVersion == DeltaExportV1 {
-			data, err = dc.Marshall()
-			if err != nil {
-				return "", err
-			}
-		} else {
-			v2 := transformation.DeltaCollectionV2{DeltaCollection: dc}
-			data, err = v2.Marshall()
-			if err != nil {
-				return "", err
-			}
-		}
-		name := fmt.Sprintf("delta%.2d", i)
-		dataCode += name + ":\n"
-		if cfg.Compression != compression.NONE {
-			log.GetLogger().Info("Using Zx0 cruncher")
-			if dc.OccurencePerFrame != 0 {
-				d := zx0.Encode(data)
-				dataCode += ascii.FormatAssemblyDatabyte(d, "\n")
-			} else {
-				nbDelta--
-			}
-		} else {
-			dataCode += ascii.FormatAssemblyDatabyte(data, "\n")
-		}
-		deltaIndex = append(deltaIndex, name)
-	}
-	dataCode += "table_delta:\n"
-	ascii.ByteToken = "dw"
-	dataCode += ascii.FormatAssemblyString(deltaIndex, "\n")
-
-	ascii.ByteToken = "db"
-	dataCode += "palette:\n" + ascii.ByteToken + " "
-	if cfg.CpcPlus {
-		dataCode += ascii.FormatAssemblyCPCPlusPalette(palette, "\n")
-	} else {
-		dataCode += ascii.FormatAssemblyBasicPalette(palette, "\n")
-	}
-
-	header := sourceCode
-	// replace the initial address
-	if isSprite {
-		address := fmt.Sprintf("#%.4x", initialAddress)
-		header = strings.Replace(sourceCode, "$INITIALADDRESS$", address, 1)
-	}
-	// replace number of colors
-	nbColors := fmt.Sprintf("%d", len(palette))
-	header = strings.Replace(header, "$NBCOLORS$", nbColors, 1)
-
-	// replace the number of delta
-	nbDeltaLabel := fmt.Sprintf("%d", nbDelta)
-	header = strings.Replace(header, "$NBDELTA$", nbDeltaLabel, 1)
-
-	// replace char large for the screen
-	charLarge := fmt.Sprintf("#%.4x", 0xC000+cfg.LineWidth)
-	header = strings.Replace(header, "$LIGNELARGE$", charLarge, 1)
-
-	// replace heigth
-	height := fmt.Sprintf("%d", cfg.Size.Height)
-	header = strings.Replace(header, "$HAUT$", height, 1)
-
-	// replace width
-	var width string = fmt.Sprintf("%d", cfg.Size.ModeWidth(mode))
-	header = strings.Replace(header, "$LARGE$", width, 1)
-
-	var modeSet string
-	switch mode {
-	case 0:
-		modeSet = "0"
-	case 1:
-		modeSet = "1"
-	case 2:
-		modeSet = "2"
-	}
-
-	// replace mode
-	header = strings.Replace(header, "$SETMODE$", modeSet, 1)
-
-	code += header
-	code += dataCode
-	if cfg.Compression != compression.NONE {
-		code += "\nbuffer:\n"
-	}
-	code += "\nend\n"
-	code += "\nsave'disc.bin',#200, end - start,DSK,'martine-animate.dsk'"
-
-	return code, nil
-}
-func exportDeltaAnimate(
+func ExportDeltaAnimate(
 	imageReference []byte,
 	delta []*transformation.DeltaCollection,
 	palette color.Palette,
@@ -380,7 +247,7 @@ func exportDeltaAnimate(
 	mode uint8,
 	filename string,
 	exportVersion DeltaExportFormat,
-) error {
+) (string, error) {
 	an := AnimateValues{
 		InitialAddress: fmt.Sprintf("#%.4x", initialAddress),
 		Palette:        palette,
@@ -397,17 +264,20 @@ func exportDeltaAnimate(
 	}
 	data := make([][]byte, 0)
 	for _, v := range delta {
+		if v.OccurencePerFrame == 0 {
+			continue
+		}
 		if exportVersion == DeltaExportV2 {
 			v2 := &transformation.DeltaCollectionV2{DeltaCollection: v}
 			d, err := v2.Marshall()
 			if err != nil {
-				return err
+				return "", err
 			}
 			data = append(data, d)
 		} else {
 			d, err := v.Marshall()
 			if err != nil {
-				return err
+				return "", err
 			}
 			data = append(data, d)
 		}
@@ -416,27 +286,34 @@ func exportDeltaAnimate(
 
 	var sourceCode string
 
-	if exportVersion == DeltaExportV2 {
-		sourceCode = deltaScreenCodeDeltaV2
-	}
 	if !isSprite {
 		if cfg.Compression != compression.NONE {
 			sourceCode = deltaScreenCompressCodeDelta
-			if exportVersion == DeltaExportV2 {
-				sourceCode = deltaScreenCompressCodeDeltaV2
+			if cfg.CpcPlus {
+				sourceCode = deltaScreenCompressCodeDeltaPlus
+			} else {
+				if exportVersion == DeltaExportV2 {
+					sourceCode = deltaScreenCompressCodeDeltaV2
+				}
 			}
 		} else {
 			sourceCode = deltaScreenCodeDelta
-			if exportVersion == DeltaExportV2 {
-				sourceCode = deltaScreenCodeDeltaV2
+			if cfg.CpcPlus {
+				sourceCode = deltaScreenCodeDeltaPlus
+			} else {
+				if exportVersion == DeltaExportV2 {
+					sourceCode = deltaScreenCodeDeltaV2
+				}
 			}
 		}
+	} else {
+		sourceCode = deltaCodeDelta
 	}
 	var buf bytes.Buffer
 	temp := template.Must(template.New("code").Parse(sourceCode))
 	err := temp.Execute(&buf, an)
 	if err != nil {
-		return err
+		return "", err
 	}
 	fmt.Println(buf.String())
 
@@ -447,7 +324,15 @@ func exportDeltaAnimate(
 		code += "\nbuffer dw 0\n"
 	}
 
-	return amsdos.SaveStringOSFile(filename, code)
+	if filename != "" {
+		err = amsdos.SaveStringOSFile(filename, code)
+		if err != nil {
+			return "", err
+		}
+		return code, nil
+	}
+
+	return code, nil
 }
 
 type AnimateExportType struct {
@@ -475,7 +360,6 @@ type AnimateValues struct {
 func (a AnimateValues) DisplayCode() string {
 	var code string
 
-	code += "\nsprite:\n"
 	code += ascii.FormatAssemblyDatabyte(a.Image, "\n")
 
 	ascii.ByteToken = "db"
@@ -483,7 +367,7 @@ func (a AnimateValues) DisplayCode() string {
 		for i, v := range a.Delta {
 			log.GetLogger().Info("Using Zx0 cruncher")
 			d := zx0.Encode(v)
-			code += fmt.Sprintf("delta%.2d:", i)
+			code += fmt.Sprintf("delta%.2d:\n", i)
 			code += ascii.FormatAssemblyDatabyte(d, "\n")
 		}
 	} else {
@@ -497,7 +381,7 @@ func (a AnimateValues) DisplayCode() string {
 }
 
 func (a AnimateValues) TableDelta() string {
-	code := "table_delta:\n"
+	var code string
 	deltaIndexes := make([]string, 0)
 	for i := range a.Delta {
 		deltaIndexes = append(deltaIndexes, fmt.Sprintf("delta%.2d", i))
@@ -508,7 +392,9 @@ func (a AnimateValues) TableDelta() string {
 }
 
 func (a AnimateValues) DisplayPalette() string {
-	code := "palette:\n"
+	var code string
+	ascii.ByteToken = "db"
+	code += "db "
 	if a.Type.CPCPlus {
 		code += ascii.FormatAssemblyCPCPlusPalette(a.Palette, "\n")
 	} else {

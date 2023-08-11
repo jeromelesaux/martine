@@ -21,6 +21,7 @@ import (
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/export/amsdos"
+	"github.com/jeromelesaux/martine/export/compression"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
@@ -70,6 +71,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						cfg,
 						uint16(address),
 						uint8(a.Mode),
+						"",
 						a.ExportVersion,
 					)
 					pi.Hide()
@@ -323,9 +325,9 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	m.animateExport.ExportCompression = -1
 	compressData := widget.NewCheck("Compress data", func(b bool) {
 		if b {
-			m.animateExport.ExportCompression = 0
+			m.animateExport.ExportCompression = compression.LZ4
 		} else {
-			m.animateExport.ExportCompression = -1
+			m.animateExport.ExportCompression = compression.NONE
 		}
 	})
 
