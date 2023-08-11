@@ -89,22 +89,32 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 		}
 	} else {
 		// palette export
-		defer func() {
-			os.Remove("temporary_palette.kit")
-		}()
-		if err := impPalette.SaveKit("temporary_palette.kit", me.Palette(), false); err != nil {
+		userDir, err := os.UserHomeDir()
+		if err != nil {
 			pi.Hide()
 			dialog.ShowError(err, m.window)
 		}
-		cfg.KitPath = "temporary_palette.kit"
+		tmpPalette := userDir + string(filepath.Separator) + "temporary_palette.kit"
+		if err := impPalette.SaveKit(tmpPalette, me.Palette(), false); err != nil {
+			pi.Hide()
+			dialog.ShowError(err, m.window)
+		}
+		if me.UsePalette {
+			cfg.KitPath = tmpPalette
+		}
+
 		filename := filepath.Base(me.OriginalImagePath())
-		if err := gfx.ApplyOneImageAndExport(
+		err = gfx.ApplyOneImageAndExport(
 			me.OriginalImage().Image,
 			cfg,
 			filename,
 			m.imageExport.ExportFolderPath+string(filepath.Separator)+filename,
 			me.Mode,
-			uint8(me.Mode)); err != nil {
+			uint8(me.Mode))
+
+		os.Remove(tmpPalette)
+
+		if err != nil {
 			pi.Hide()
 			dialog.NewError(err, m.window).Show()
 			return
