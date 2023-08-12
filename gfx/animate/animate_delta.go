@@ -377,7 +377,7 @@ func (a AnimateValues) DisplayCode() string {
 		}
 	} else {
 		for i, v := range a.Delta {
-			code += fmt.Sprintf("delta%.2d:", i)
+			code += fmt.Sprintf("delta%.2d:\n", i)
 			code += ascii.FormatAssemblyDatabyte(v, "\n")
 		}
 	}
@@ -403,7 +403,7 @@ func (a AnimateValues) DisplayPalette() string {
 	if a.Type.CPCPlus {
 		code += ascii.FormatAssemblyCPCPlusPalette(a.Palette, "\n")
 	} else {
-		code += ascii.FormatAssemblyCPCPalette(a.Palette, "\n")
+		code += ascii.FormatAssemblyBasicPalette(a.Palette, "\n")
 	}
 	return code
 }

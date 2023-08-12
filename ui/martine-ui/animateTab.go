@@ -322,7 +322,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	isSprite := widget.NewCheck("Is sprite", func(b bool) {
 		a.IsSprite = b
 	})
-	m.animateExport.ExportCompression = -1
+	m.animateExport.ExportCompression = compression.NONE
 	compressData := widget.NewCheck("Compress data", func(b bool) {
 		if b {
 			m.animateExport.ExportCompression = compression.LZ4
