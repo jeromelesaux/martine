@@ -360,8 +360,13 @@ type AnimateValues struct {
 func (a AnimateValues) DisplayCode() string {
 	var code string
 
-	code += ascii.FormatAssemblyDatabyte(a.Image, "\n")
-
+	if a.Type.Compress {
+		log.GetLogger().Info("Using Zx0 cruncher")
+		d := zx0.Encode(a.Image)
+		code += ascii.FormatAssemblyDatabyte(d, "\n")
+	} else {
+		code += ascii.FormatAssemblyDatabyte(a.Image, "\n")
+	}
 	ascii.ByteToken = "db"
 	if a.Type.Compress {
 		for i, v := range a.Delta {
