@@ -319,7 +319,7 @@ func ExportDeltaAnimate(
 
 	code := buf.String()
 	if cfg.Compression != compression.NONE {
-		code += "\nbuffe:\n"
+		code += "\nbuffer:\n"
 	}
 	code += "\nend\n"
 	code += "\nsave'disc.bin',#200, end - start,DSK,'delta.dsk'"
