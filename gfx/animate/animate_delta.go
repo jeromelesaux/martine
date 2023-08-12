@@ -318,11 +318,11 @@ func ExportDeltaAnimate(
 	fmt.Println(buf.String())
 
 	code := buf.String()
+	if cfg.Compression != compression.NONE {
+		code += "\nbuffe:\n"
+	}
 	code += "\nend\n"
 	code += "\nsave'disc.bin',#200, end - start,DSK,'delta.dsk'"
-	if cfg.Compression != compression.NONE {
-		code += "\nbuffer dw 0\n"
-	}
 
 	if filename != "" {
 		err = amsdos.SaveStringOSFile(filename, code)
