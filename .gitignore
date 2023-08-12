@@ -13,5 +13,6 @@ samples/
 martine
 martine.exe
 Docs/
-martine.app/
+martine.*
 .idea/
+martine-*
