@@ -401,6 +401,14 @@ func (a AnimateValues) DisplayPalette() string {
 	ascii.ByteToken = "db"
 	code += "db "
 	if a.Type.CPCPlus {
+		switch a.Mode {
+		case 0:
+			code += " #8C\ndb "
+		case 1:
+			code += " #8D\ndb "
+		case 2:
+			code += " #8E\ndb "
+		}
 		code += ascii.FormatAssemblyCPCPlusPalette(a.Palette, "\n")
 	} else {
 		code += ascii.FormatAssemblyBasicPalette(a.Palette, "\n")
@@ -607,21 +615,15 @@ Palette:
 
 var deltaScreenCompressCodeDeltaPlus = `
 ;--- dimensions du sprite ----
-large equ {{ .Large }}
-haut equ {{ .Haut }}
 loadingaddress equ #200
 linewidth equ {{ .LigneLarge }}
-nbdelta equ {{ len .Delta }} 
+nbdelta equ {{ len .Delta }}
 nbcolors equ {{ len .Palette }}
 ;-----------------------------
 org loadingaddress
 run loadingaddress
 ;-----------------------------
 start
-;--- selection du mode ---------
-	ld a,{{ .Mode }}
-	call #BC0E
-;-------------------------------
 
 ;--- gestion de la palette ----
 	DI
@@ -641,8 +643,10 @@ Unlock:
 	OUT	(C),C
 	LD	HL,palette+1
 	LD	DE,#6400
-	LD	BC,#0022
+	LD	BC,{{ len .Palette }} +1
 	LDIR
+	LD	BC,#7FA0
+	OUT	(C),C
 	EI
 ;------------------------------
 
@@ -654,10 +658,7 @@ call xvbl
 	ld hl,sprite
 	call Depack
 ;------------------------------------
-
 mainloop    ; routine pour afficher les deltas provenant de martine
-
-;all #bb06
 
 call xvbl
 call next_delta
@@ -687,34 +688,26 @@ table_next:
 	ld de,buffer
 
 	call Depack
-
 	ld hl,buffer ; utilisation de la structure delta décompactée
-	delta
-	ld c,(hl) ; nombre de frame
-	inc hl
-	ld b,(hl)
-	ld (nbdeltas),bc
 
-init
+delta:
+	ld a,(hl) ; nombre de byte a poker
+	push af   ; stockage en mémoire
 	inc hl
+init
 	ld a,(hl) ; octet a poker
 	ld (pixel),a
-	inc hl
-	ld a,(hl) ;
-
-	ld (highbyte_value+1),a ; valeur du HighByte
 	inc hl
 	ld c,(hl) ; nbfois
 	inc hl
 	ld b,(hl)
-	ld (nblb), bc ; nombre de LowByte
-
-iter_lowbytes
-	;
 	inc hl
-	ld e,(hl) ; recuperation du lowbyte
-highbyte_value 	ld d,0
-
+;
+poke_octet
+	ld e,(hl)
+	inc hl
+	ld d,(hl) ; de=adresse
+	inc hl
 	ld a,(pixel)
 	push hl ; on ajoute l'adresse ecran
 	ld hl,#c000
@@ -723,30 +716,19 @@ highbyte_value 	ld d,0
 	ld e,l
 	pop hl
 	ld (de),a ; poke a l'adresse dans de
-
-	ld bc,(nblb)
 	dec bc
-	ld (nblb),bc
-	ld a,b ; test a t'on poke toutes les lowbytes
+	ld a,b ; test a t'on poke toutes les adresses compteur bc
 	or a
-	jr nz, iter_lowbytes
+	jr nz, poke_octet
 	ld a,c
 	or a
-	jr nz, iter_lowbytes
-
-	ld bc,(nbdeltas)
-	dec bc
-	ld (nbdeltas),bc
-	ld a,b
-	or a
+	jr nz, poke_octet
+	pop af
+; reste t'il d'autres bytes a poker ?
+	dec a
+	push af
 	jr nz,init
-	ld a,c
-	or a
-	jr nz, init
-
-	; a t'on encore des frames a traite
-
-
+	pop af
 	ret
 
 	;
@@ -754,7 +736,7 @@ highbyte_value 	ld d,0
 	; HL = source
 	; DE = destination
 	;
-	Depack:
+Depack:
 		ld    bc,#ffff        ; preserve default offset 1
 		push    bc
 		inc    bc
@@ -867,8 +849,6 @@ Palette:
 
 var deltaScreenCodeDeltaPlus = `
 ;--- dimensions du sprite ----
-large equ {{ .Large }}
-haut equ {{ .Haut }}
 loadingaddress equ #200
 linewidth equ {{ .LigneLarge }}
 nbdelta equ {{ len .Delta }}
@@ -878,10 +858,6 @@ org loadingaddress
 run loadingaddress
 ;-----------------------------
 start
-;--- selection du mode ---------
-	ld a,{{ .Mode }}
-	call #BC0E
-;-------------------------------
 
 ;--- gestion de la palette / unlock asic ----
 	DI
@@ -901,8 +877,10 @@ Unlock:
 	OUT	(C),C
 	LD	HL,palette+1
 	LD	DE,#6400
-	LD	BC,#0022
+	LD	BC,{{ len .Colors}} +1
 	LDIR
+	LD	BC,#7FA0
+	OUT	(C),C
 	EI
 ;------------------------------
 
@@ -916,8 +894,6 @@ call xvbl
 ;------------------------------------
 
 mainloop    ; routine pour afficher les deltas provenant de martine
-
-;all #bb06
 
 call xvbl
 call next_delta
