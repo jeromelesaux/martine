@@ -326,7 +326,7 @@ func FormatAssemblyCPCPlusPalette(p color.Palette, eol string) string {
 	for i := 0; i < len(p); i++ {
 		cp := constants.NewCpcPlusColor(p[i])
 		v := cp.Value()
-		out += fmt.Sprintf("#%.2x, #%.2x", byte(v>>8), byte(v))
+		out += fmt.Sprintf("#%.2x, #%.2x", byte(v), byte(v>>8))
 		if (i+1)%8 == 0 && i+1 < len(p) {
 			out += eol + ByteToken + " "
 		} else {

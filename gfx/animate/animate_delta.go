@@ -403,11 +403,11 @@ func (a AnimateValues) DisplayPalette() string {
 	if a.Type.CPCPlus {
 		switch a.Mode {
 		case 0:
-			code += " #8C\ndb "
+			code += "#8C\ndb "
 		case 1:
-			code += " #8D\ndb "
+			code += "#8D\ndb "
 		case 2:
-			code += " #8E\ndb "
+			code += "#8E\ndb "
 		}
 		code += ascii.FormatAssemblyCPCPlusPalette(a.Palette, "\n")
 	} else {
@@ -649,6 +649,20 @@ Unlock:
 	OUT	(C),C
 	EI
 ;------------------------------
+jp display_screen
+
+
+UnlockAsic:
+	DB	#FF,#00,#FF,#77,#B3,#51,#A8,#D4,#62,#39,#9C,#46,#2B,#15,#8A,#CD,#EE
+
+;---------------------------------------------
+
+Palette:
+{{ .DisplayPalette }}
+
+display_screen:
+LD HL,#b7f9
+call #bcdd
 
 call xvbl
 
@@ -814,10 +828,6 @@ vbl
 	ret
 ;---------------------------
 
-UnlockAsic:
-	DB	#FF,#00,#FF,#77,#B3,#51,#A8,#D4,#62,#39,#9C,#46,#2B,#15,#8A,#CD,#EE
-
-;---------------------------------------------
 
 ;---- recuperation de l'adresse de la ligne en dessous ------------
 bc26
@@ -843,8 +853,6 @@ sprite:
 table_delta 
 {{ .TableDelta }}
 
-Palette:
-{{ .DisplayPalette }}
 `
 
 var deltaScreenCodeDeltaPlus = `
@@ -883,6 +891,16 @@ Unlock:
 	OUT	(C),C
 	EI
 ;------------------------------
+jp display_screen
+
+UnlockAsic:
+	DB	#FF,#00,#FF,#77,#B3,#51,#A8,#D4,#62,#39,#9C,#46,#2B,#15,#8A,#CD,#EE
+
+
+Palette:
+{{ .DisplayPalette }}
+
+display_screen:
 
 call xvbl
 
@@ -996,10 +1014,6 @@ res 3,h
 ret
 ;-----------------------------------------------------------------
 
-
-UnlockAsic:
-	DB	#FF,#00,#FF,#77,#B3,#51,#A8,#D4,#62,#39,#9C,#46,#2B,#15,#8A,#CD,#EE
-
 ;--- variables memoires -----
 pixel db 0
 
@@ -1010,8 +1024,6 @@ sprite:
 table_delta 
 {{ .TableDelta }}
 
-Palette:
-{{ .DisplayPalette }}
 `
 
 var deltaScreenCompressCodeDeltaV2 = `
