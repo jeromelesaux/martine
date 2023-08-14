@@ -624,7 +624,9 @@ org loadingaddress
 run loadingaddress
 ;-----------------------------
 start
-
+;--- selection du mode ---------
+	ld a,{{ .Mode }}
+	call #BC0E
 ;--- gestion de la palette ----
 	DI
 	LD	BC,#BC11
@@ -635,12 +637,11 @@ Unlock:
 	INC	HL
 	DEC	C
 	JR	NZ,Unlock
-	LD	BC,#7FA0
+	LD BC,#7FB8
+	OUT	(C),C
 	LD	A,(palette)
 	OUT	(C),A
-	OUT	(C),C
-	LD	BC,#7FB8
-	OUT	(C),C
+
 	LD	HL,palette+1
 	LD	DE,#6400
 	LD	BC,{{ len .Palette }}+{{ len .Palette }}
@@ -866,6 +867,9 @@ org loadingaddress
 run loadingaddress
 ;-----------------------------
 start
+;--- selection du mode ---------
+	ld a,{{ .Mode }}
+	call #BC0E
 
 ;--- gestion de la palette / unlock asic ----
 	DI
@@ -877,15 +881,14 @@ Unlock:
 	INC	HL
 	DEC	C
 	JR	NZ,Unlock
-	LD	BC,#7FA0
+	LD BC,#7FB8
+	OUT	(C),C
 	LD	A,(palette)
 	OUT	(C),A
-	OUT	(C),C
-	LD	BC,#7FB8
-	OUT	(C),C
+
 	LD	HL,palette+1
 	LD	DE,#6400
-	LD	BC,{{ len .Palette}}+{{ len .Palette}}
+	LD	BC,{{ len .Palette }}+{{ len .Palette }}
 	LDIR
 	LD	BC,#7FA0
 	OUT	(C),C
