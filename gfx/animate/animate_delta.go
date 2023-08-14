@@ -422,8 +422,8 @@ large equ {{ .Large }}
 haut equ {{ .Haut }} 
 loadingaddress equ #200
 linewidth equ {{ .LigneLarge }}
-nbdelta equ {{ .NbDelta }}
-nbcolors equ {{ .NbColors }}
+nbdelta equ {{ .Delta }}
+nbcolors equ {{ .Palette }}
 ;-----------------------------
 org loadingaddress
 run loadingaddress
@@ -643,7 +643,7 @@ Unlock:
 	OUT	(C),C
 	LD	HL,palette+1
 	LD	DE,#6400
-	LD	BC,{{ len .Palette }} +1
+	LD	BC,{{ len .Palette }}+{{ len .Palette }}
 	LDIR
 	LD	BC,#7FA0
 	OUT	(C),C
@@ -885,7 +885,7 @@ Unlock:
 	OUT	(C),C
 	LD	HL,palette+1
 	LD	DE,#6400
-	LD	BC,{{ len .Colors}} +1
+	LD	BC,{{ len .Palette}}+{{ len .Palette}}
 	LDIR
 	LD	BC,#7FA0
 	OUT	(C),C
