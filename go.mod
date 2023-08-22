@@ -10,7 +10,7 @@ require (
 	github.com/esimov/colorquant v1.0.0
 	github.com/esimov/dithergo v0.0.0-20210215145655-7f9ddf55e848
 	github.com/jeromelesaux/dsk v0.0.0-20230417191026-0e405580626b
-	github.com/jeromelesaux/fyne-io v0.0.0-20230822120452-d4e9ad21bb52
+	github.com/jeromelesaux/fyne-io v0.0.0-20230822132042-0a6d8ef126d4
 	github.com/jeromelesaux/m4client v0.0.0-20230327092026-4e80fd2b1474
 	github.com/jeromelesaux/zx0 v0.0.0-20220922122216-619a0141f9e0
 	github.com/mccutchen/palettor v1.0.0
