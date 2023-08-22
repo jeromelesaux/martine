@@ -14,7 +14,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/jeromelesaux/fyne-io/custom_widget"
+	wgt "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert/image"
@@ -57,7 +57,7 @@ func (m *MartineUI) CheckAmsdosHeaderExport(inDsk, addAmsdosHeader bool, d dialo
 }
 
 func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
-	pi := custom_widget.NewProgressInfinite("Saving...., Please wait.", m.window)
+	pi := wgt.NewProgressInfinite("Saving...., Please wait.", m.window)
 	pi.Show()
 	cfg := m.NewConfig(me, true)
 	if cfg == nil {
@@ -181,7 +181,7 @@ func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 		}
 
 	}
-	pi := custom_widget.NewProgressInfinite("Computing, Please wait.", m.window)
+	pi := wgt.NewProgressInfinite("Computing, Please wait.", m.window)
 	pi.Show()
 	out, downgraded, palette, _, err := gfx.ApplyOneImage(me.OriginalImage().Image, cfg, me.Mode, inPalette, uint8(me.Mode))
 	pi.Hide()

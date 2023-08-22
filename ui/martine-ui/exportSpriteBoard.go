@@ -11,7 +11,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/jeromelesaux/fyne-io/custom_widget"
+	wgt "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
@@ -119,7 +119,7 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 }
 
 func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
-	pi := custom_widget.NewProgressInfinite("Saving...., Please wait.", m.window)
+	pi := wgt.NewProgressInfinite("Saving...., Please wait.", m.window)
 	pi.Show()
 	if err := impPalette.SaveKit(s.ExportFolderPath+string(filepath.Separator)+"SPRITES.KIT", s.Palette(), s.ExportWithAmsdosHeader); err != nil {
 		pi.Hide()

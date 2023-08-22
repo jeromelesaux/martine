@@ -7,14 +7,14 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
-	ui "github.com/jeromelesaux/fyne-io/custom_widget"
+	wgt "github.com/jeromelesaux/fyne-io/widget"
 )
 
 var colorSelectorIndex int
 var colorSelectorToChange color.Color
 
 func ColorSelector(setColor func(color.Color), p color.Palette, w fyne.Window, performActionAfter func()) {
-	pt := ui.NewPaletteTable(p, colorSelectorChanged, indexSelectorColor, nil)
+	pt := wgt.NewPaletteTable(p, colorSelectorChanged, indexSelectorColor, nil)
 	var cont *fyne.Container
 
 	cont = container.NewVBox(
@@ -24,7 +24,7 @@ func ColorSelector(setColor func(color.Color), p color.Palette, w fyne.Window, p
 				return
 			}
 			p[colorSelectorIndex] = colorSelectorToChange
-			npt := ui.NewPaletteTable(p, colorSelectorChanged, indexSelectorColor, nil)
+			npt := wgt.NewPaletteTable(p, colorSelectorChanged, indexSelectorColor, nil)
 			pt = npt
 			if setColor != nil {
 				setColor(colorSelectorToChange)

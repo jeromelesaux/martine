@@ -10,7 +10,7 @@ require (
 	github.com/esimov/colorquant v1.0.0
 	github.com/esimov/dithergo v0.0.0-20210215145655-7f9ddf55e848
 	github.com/jeromelesaux/dsk v0.0.0-20230417191026-0e405580626b
-	github.com/jeromelesaux/fyne-io v0.0.0-20221221180150-475e1a4063ce
+	github.com/jeromelesaux/fyne-io v0.0.0-20230822120452-d4e9ad21bb52
 	github.com/jeromelesaux/m4client v0.0.0-20230327092026-4e80fd2b1474
 	github.com/jeromelesaux/zx0 v0.0.0-20220922122216-619a0141f9e0
 	github.com/mccutchen/palettor v1.0.0
@@ -28,10 +28,10 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/fyne-io/gl-js v0.0.0-20230506162202-1fdaa286a934 // indirect
 	github.com/fyne-io/glfw-js v0.0.0-20220517201726-bebc2019cd33 // indirect
-	github.com/fyne-io/image v0.0.0-20221020213044-f609c6a24345 // indirect
+	github.com/fyne-io/image v0.0.0-20230811065323-ed435dc8bca6 // indirect
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6 // indirect
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b // indirect
-	github.com/go-text/typesetting v0.0.0-20230723131405-1ab587dd27cf // indirect
+	github.com/go-text/typesetting v0.0.0-20230803102845-24e03d8b5372 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/goki/freetype v1.0.1 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
@@ -43,12 +43,12 @@ require (
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/tevino/abool v1.2.0 // indirect
-	github.com/yuin/goldmark v1.5.5 // indirect
-	golang.org/x/image v0.9.0 // indirect
-	golang.org/x/mobile v0.0.0-20230531173138-3c911d8e3eda // indirect
-	golang.org/x/net v0.12.0 // indirect
-	golang.org/x/sys v0.10.0 // indirect
-	golang.org/x/text v0.11.0 // indirect
+	github.com/yuin/goldmark v1.5.6 // indirect
+	golang.org/x/image v0.11.0 // indirect
+	golang.org/x/mobile v0.0.0-20230818142238-7088062f872d // indirect
+	golang.org/x/net v0.14.0 // indirect
+	golang.org/x/sys v0.11.0 // indirect
+	golang.org/x/text v0.12.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	honnef.co/go/js/dom v0.0.0-20221001195520-26252dedbe70 // indirect
+	honnef.co/go/js/dom v0.0.0-20230808055721-96db8f4d5e3b // indirect
 )

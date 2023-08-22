@@ -17,7 +17,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/disintegration/imaging"
-	"github.com/jeromelesaux/fyne-io/custom_widget"
+	wgt "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/gfx"
@@ -42,7 +42,7 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 		dialog.ShowError(errors.New("define dimension before"), m.window)
 		return
 	}
-	pi := custom_widget.NewProgressInfinite("Computing...., Please wait.", m.window)
+	pi := wgt.NewProgressInfinite("Computing...., Please wait.", m.window)
 	pi.Show()
 	var colorsAvailable int
 	switch s.Mode {
@@ -77,7 +77,7 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 	s.SpritesCollection = sprites
 	s.SpritesData = raw
 
-	icache := custom_widget.NewImageTableCache(s.SpriteColumns, s.SpriteRows, fyne.NewSize(50, 50))
+	icache := wgt.NewImageTableCache(s.SpriteColumns, s.SpriteRows, fyne.NewSize(50, 50))
 
 	for x := 0; x < s.SpriteColumns; x++ {
 		for y := 0; y < s.SpriteRows; y++ {
@@ -346,7 +346,7 @@ func applySpriteBoardFromGif(s *menu.SpriteMenu, m *MartineUI) fyne.Widget {
 			s.SpritesData[0] = raw
 			s.SpriteColumns = 1
 			s.SpriteRows = len(resized)
-			icache := custom_widget.NewImageTableCache(s.SpriteColumns, s.SpriteRows, fyne.NewSize(50, 50))
+			icache := wgt.NewImageTableCache(s.SpriteColumns, s.SpriteRows, fyne.NewSize(50, 50))
 
 			for x := 0; x < s.SpriteColumns; x++ {
 				for y := 0; y < s.SpriteRows; y++ {
@@ -412,7 +412,7 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 					}
 				}
 
-				icache := custom_widget.NewImageTableCache(m.sprite.SpriteRows, m.sprite.SpriteColumns, fyne.NewSize(50, 50))
+				icache := wgt.NewImageTableCache(m.sprite.SpriteRows, m.sprite.SpriteColumns, fyne.NewSize(50, 50))
 
 				for y := 0; y < m.sprite.SpriteColumns; y++ {
 					for x := 0; x < m.sprite.SpriteRows; x++ {
@@ -462,7 +462,7 @@ func ImportSpriteBoard(m *MartineUI) fyne.Widget {
 					}
 				}
 
-				icache := custom_widget.NewImageTableCache(m.sprite.SpriteRows, m.sprite.SpriteColumns, fyne.NewSize(50, 50))
+				icache := wgt.NewImageTableCache(m.sprite.SpriteRows, m.sprite.SpriteColumns, fyne.NewSize(50, 50))
 
 				for y := 0; y < m.sprite.SpriteColumns; y++ {
 					for x := 0; x < m.sprite.SpriteRows; x++ {

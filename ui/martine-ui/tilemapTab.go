@@ -15,7 +15,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/jeromelesaux/fyne-io/custom_widget"
+	wgt "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/config"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
@@ -45,7 +45,7 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 
 	cfg.CustomDimension = true
 
-	pi := custom_widget.NewProgressInfinite("Computing, Please wait.", m.window)
+	pi := wgt.NewProgressInfinite("Computing, Please wait.", m.window)
 	pi.Show()
 	var analyze *transformation.AnalyzeBoard
 	var palette color.Palette
@@ -66,7 +66,7 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 
 	me.Result = analyze
 	me.SetPalette(palette)
-	tilesCanvas := custom_widget.NewImageTableCache(len(tiles), len(tiles[0]), fyne.NewSize(50, 50))
+	tilesCanvas := wgt.NewImageTableCache(len(tiles), len(tiles[0]), fyne.NewSize(50, 50))
 	for i, v := range tiles {
 		for i2, v2 := range v {
 			tilesCanvas.Set(i, i2, canvas.NewImageFromImage(v2))
@@ -149,7 +149,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 	heightLabel := widget.NewLabel("Height")
 	tm.Height().Validator = validation.NewRegexp("\\d+", "Must contain a number")
 
-	tm.TileImages = custom_widget.NewEmptyImageTable(fyne.NewSize(menu.TileSize, menu.TileSize))
+	tm.TileImages = wgt.NewEmptyImageTable(fyne.NewSize(menu.TileSize, menu.TileSize))
 
 	return container.New(
 		layout.NewGridLayoutWithRows(2),
