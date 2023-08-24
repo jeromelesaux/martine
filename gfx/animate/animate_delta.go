@@ -9,6 +9,7 @@ import (
 	"image/gif"
 	"os"
 	"path/filepath"
+	"sync"
 	"text/template"
 
 	"github.com/jeromelesaux/martine/config"
@@ -359,22 +360,34 @@ type AnimateValues struct {
 
 func (a AnimateValues) DisplayCode() string {
 	var code string
-
+	var mu sync.Mutex
 	if a.Type.Compress {
 		log.GetLogger().Info("Using Zx0 cruncher")
 		d := zx0.Encode(a.Image)
+		mu.Lock()
 		code += ascii.FormatAssemblyDatabyte(d, "\n")
+		mu.Unlock()
 	} else {
 		code += ascii.FormatAssemblyDatabyte(a.Image, "\n")
 	}
 	ascii.ByteToken = "db"
 	if a.Type.Compress {
+		var wg sync.WaitGroup
+
 		for i, v := range a.Delta {
-			log.GetLogger().Info("Using Zx0 cruncher")
-			d := zx0.Encode(v)
-			code += fmt.Sprintf("delta%.2d:\n", i)
-			code += ascii.FormatAssemblyDatabyte(d, "\n")
+			wg.Add(1)
+			go func(indice int, data []byte) {
+				defer wg.Done()
+				log.GetLogger().Info("Using Zx0 cruncher")
+				d := zx0.Encode(data)
+				mu.Lock()
+				code += fmt.Sprintf("delta%.2d:\n", indice) // add semaphore on code string
+				code += ascii.FormatAssemblyDatabyte(d, "\n")
+				mu.Unlock()
+			}(i, v)
+
 		}
+		wg.Wait()
 	} else {
 		for i, v := range a.Delta {
 			code += fmt.Sprintf("delta%.2d:\n", i)
