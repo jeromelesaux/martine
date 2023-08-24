@@ -23,7 +23,6 @@ type AnimateMenu struct {
 	DeltaCollection    []*transformation.DeltaCollection
 	InitialAddress     *widget.Entry
 	RawImages          [][]byte
-	IsEmpty            bool
 	OneLine            bool
 	OneRow             bool
 	ImageToRemoveIndex int

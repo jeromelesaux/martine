@@ -167,10 +167,6 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 	a.SetPaletteImage(png.PalToImage(a.Palette()))
 }
 
-/*func (m *MartineUI) ImageIndexToRemove(row, col int) {
-	m.animate.ImageToRemoveIndex = col
-}*/
-
 func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	importOpen := NewImportButton(m, a.ImageMenu)
 
@@ -201,10 +197,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 					dialog.ShowError(err, m.window)
 					return
 				}
-
 				a.AnimateImages.Append(canvas.NewImageFromImage(img))
-
-				a.IsEmpty = false
 				pi.Hide()
 			} else {
 				fr, err := os.Open(path.Path())
@@ -255,7 +248,6 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	resetButton := widget.NewButtonWithIcon("Reset", theme.CancelIcon(), func() {
 		a.AnimateImages.Reset()
 		canvas.Refresh(a.AnimateImages)
-		a.IsEmpty = true
 	})
 
 	exportButton := widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
@@ -318,8 +310,9 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	return container.New(
 		layout.NewGridLayout(1),
 		container.New(
-			layout.NewAdaptiveGridLayout(1),
-			a.AnimateImages),
+			layout.NewGridLayoutWithRows(1),
+			container.NewScroll(a.AnimateImages.Container),
+		),
 
 		container.New(
 			layout.NewVBoxLayout(),
