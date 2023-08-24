@@ -9,7 +9,7 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/jeromelesaux/fyne-io/custom_widget"
+	wgt "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/convert/export"
 	"github.com/jeromelesaux/martine/export/compression"
@@ -106,7 +106,7 @@ func (m *MartineUI) exportEgxDialog(ie *menu.ImageExport, w fyne.Window) {
 }
 
 func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
-	pi := custom_widget.NewProgressInfinite("Saving...., please wait.", m.window)
+	pi := wgt.NewProgressInfinite("Saving...., please wait.", m.window)
 	pi.Show()
 	cfg := m.NewConfig(me.LeftImage, true)
 	if cfg == nil {

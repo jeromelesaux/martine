@@ -17,7 +17,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/jeromelesaux/fyne-io/custom_widget"
+	wgt "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/export/amsdos"
@@ -61,7 +61,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 					}
 					m.animateExport.ExportFolderPath = lu.Path()
 					log.GetLogger().Infoln(m.animateExport.ExportFolderPath)
-					pi := custom_widget.NewProgressInfinite("Exporting, please wait.", m.window)
+					pi := wgt.NewProgressInfinite("Exporting, please wait.", m.window)
 					pi.Show()
 					code, err := animate.ExportDeltaAnimate(
 						a.RawImages[0],
@@ -137,7 +137,7 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 		return
 	}
 	cfg.Compression = m.animateExport.ExportCompression
-	pi := custom_widget.NewProgressInfinite("Computing, Please wait.", m.window)
+	pi := wgt.NewProgressInfinite("Computing, Please wait.", m.window)
 	pi.Show()
 	address, err := strconv.ParseUint(a.InitialAddress.Text, 16, 64)
 	if err != nil {
@@ -154,7 +154,7 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 		dialog.ShowError(fmt.Errorf("the width in not a multiple of color per pixel, increase the width"), m.window)
 		return
 	}
-	imgs := a.AnimateImages.Images()[0]
+	imgs := a.AnimateImages.Images()
 	deltaCollection, rawImages, palette, err := animate.DeltaPackingMemory(imgs, cfg, uint16(address), uint8(a.Mode))
 	pi.Hide()
 	if err != nil {
@@ -165,10 +165,6 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 	a.SetPalette(palette)
 	a.RawImages = rawImages
 	a.SetPaletteImage(png.PalToImage(a.Palette()))
-}
-
-func (m *MartineUI) ImageIndexToRemove(row, col int) {
-	m.animate.ImageToRemoveIndex = col
 }
 
 func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
@@ -190,7 +186,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 				return
 			}
 			directory.SetImportDirectoryURI(reader.URI())
-			pi := custom_widget.NewProgressInfinite("Opening file, Please wait.", m.window)
+			pi := wgt.NewProgressInfinite("Opening file, Please wait.", m.window)
 			pi.Show()
 			path := reader.URI()
 			directory.SetImportDirectoryURI(reader.URI())
@@ -201,12 +197,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 					dialog.ShowError(err, m.window)
 					return
 				}
-				if a.IsEmpty {
-					a.AnimateImages.SubstitueImage(0, 0, canvas.NewImageFromImage(img))
-				} else {
-					a.AnimateImages.AppendImage(0, canvas.NewImageFromImage(img))
-				}
-				a.IsEmpty = false
+				a.AnimateImages.Append(canvas.NewImageFromImage(img))
 				pi.Hide()
 			} else {
 				fr, err := os.Open(path.Path())
@@ -236,14 +227,10 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 					return
 				}
 				imgs := image.GifToImages(*gifImages)
-				for index, img := range imgs {
-					if index == 0 {
-						a.AnimateImages.SubstitueImage(0, 0, canvas.NewImageFromImage(img))
-					} else {
-						a.AnimateImages.AppendImage(0, canvas.NewImageFromImage(img))
-					}
-					a.IsEmpty = false
+				for _, img := range imgs {
+					a.AnimateImages.Append(canvas.NewImageFromImage(img))
 				}
+				canvas.Refresh(m.window.Content())
 				pi.Hide()
 			}
 			m.window.Resize(m.window.Content().Size())
@@ -260,7 +247,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 
 	resetButton := widget.NewButtonWithIcon("Reset", theme.CancelIcon(), func() {
 		a.AnimateImages.Reset()
-		a.IsEmpty = true
+		canvas.Refresh(a.AnimateImages)
 	})
 
 	exportButton := widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
@@ -270,23 +257,6 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	applyButton := widget.NewButtonWithIcon("Compute", theme.VisibilityIcon(), func() {
 		log.GetLogger().Infoln("compute.")
 		m.AnimateApply(a)
-	})
-
-	removeButton := widget.NewButtonWithIcon("Remove", theme.DeleteIcon(), func() {
-		log.GetLogger().Info("image index to remove %d\n", a.ImageToRemoveIndex)
-		images := a.AnimateImages.Images()
-		if len(images[0]) <= a.ImageToRemoveIndex {
-			return
-		}
-		images[0] = append(images[0][:a.ImageToRemoveIndex], images[0][a.ImageToRemoveIndex+1:]...)
-		canvasImages := custom_widget.NewImageTableCache(len(images), len(images[0]), fyne.NewSize(50, 50))
-		for x := 0; x < len(images); x++ {
-			for y := 0; y < len(images[x]); y++ {
-				canvasImages.Set(x, y, canvas.NewImageFromImage(images[x][y]))
-			}
-		}
-		a.AnimateImages.Update(canvasImages, canvasImages.ImagesPerRow, canvasImages.ImagesPerColumn)
-		a.AnimateImages.Refresh()
 	})
 
 	openFileWidget.Icon = theme.FileImageIcon()
@@ -311,9 +281,6 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 
 	heightLabel := widget.NewLabel("Height")
 	a.Height().Validator = validation.NewRegexp("\\d+", "Must contain a number")
-
-	a.AnimateImages = custom_widget.NewEmptyImageTable(fyne.NewSize(menu.AnimateSize, menu.AnimateSize))
-	a.AnimateImages.IndexCallbackFunc = m.ImageIndexToRemove
 
 	initalAddressLabel := widget.NewLabel("initial address")
 	a.InitialAddress = widget.NewEntry()
@@ -341,17 +308,16 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	return container.New(
 		layout.NewGridLayout(1),
 		container.New(
-			layout.NewGridLayoutWithRows(1),
-			container.NewScroll(
-				a.AnimateImages),
+			layout.NewGridLayoutWithColumns(1),
+			container.NewScroll(a.AnimateImages.Container),
 		),
+
 		container.New(
 			layout.NewVBoxLayout(),
 			container.New(
 				layout.NewHBoxLayout(),
 				openFileWidget,
 				resetButton,
-				removeButton,
 				paletteOpen,
 				applyButton,
 				exportButton,

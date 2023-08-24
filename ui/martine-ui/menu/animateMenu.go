@@ -8,22 +8,24 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/widget"
-	"github.com/jeromelesaux/fyne-io/custom_widget"
+	w "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/gfx/animate"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 	"github.com/jeromelesaux/martine/log"
 )
 
-var AnimateSize float32 = 150.
+const (
+	AnimateWidthSize  float32 = 350.
+	AnimateHeightSize float32 = 250.
+)
 
 type AnimateMenu struct {
 	*ImageMenu
 	Originalmages      []*canvas.Image
-	AnimateImages      *custom_widget.ImageTable
+	AnimateImages      *w.ImageSelectionTable
 	DeltaCollection    []*transformation.DeltaCollection
 	InitialAddress     *widget.Entry
 	RawImages          [][]byte
-	IsEmpty            bool
 	OneLine            bool
 	OneRow             bool
 	ImageToRemoveIndex int
@@ -34,7 +36,7 @@ func NewAnimateMenu() *AnimateMenu {
 	return &AnimateMenu{
 		ImageMenu:       NewImageMenu(),
 		Originalmages:   make([]*canvas.Image, 0),
-		AnimateImages:   custom_widget.NewEmptyImageTable(fyne.NewSize(AnimateSize, AnimateSize)),
+		AnimateImages:   w.NewImageSelectionTable(fyne.NewSize(AnimateWidthSize, AnimateHeightSize)),
 		DeltaCollection: make([]*transformation.DeltaCollection, 1),
 	}
 }

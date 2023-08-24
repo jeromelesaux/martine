@@ -9,7 +9,7 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
-	ui "github.com/jeromelesaux/fyne-io/custom_widget"
+	wgt "github.com/jeromelesaux/fyne-io/widget"
 )
 
 var colorIndex int
@@ -22,7 +22,7 @@ var swapColorContainer *fyne.Container
 func SwapColor(setPalette func(color.Palette), p color.Palette, w fyne.Window, performActionAfter func()) {
 	selectedColor.SetMinSize(fyne.NewSize(30, 30))
 	selectedColorContainer = container.New(layout.NewMaxLayout(), selectedColor)
-	pt := ui.NewPaletteTable(p, colorChanged, indexColor, nil)
+	pt := wgt.NewPaletteTable(p, colorChanged, indexColor, nil)
 
 	swapColorContainer = container.NewGridWithColumns(
 		2,
@@ -48,7 +48,7 @@ func SwapColor(setPalette func(color.Palette), p color.Palette, w fyne.Window, p
 						return
 					}
 					p[colorIndex] = colorToChange
-					npt := ui.NewPaletteTable(p, colorChanged, indexColor, nil)
+					npt := wgt.NewPaletteTable(p, colorChanged, indexColor, nil)
 					pt = npt
 					if setPalette != nil {
 						setPalette(pt.Palette)

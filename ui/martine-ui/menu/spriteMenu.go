@@ -12,7 +12,7 @@ import (
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/jeromelesaux/fyne-io/custom_widget"
+	w "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/compression"
 	"github.com/jeromelesaux/martine/log"
@@ -32,7 +32,7 @@ type SpriteMenu struct {
 	SpritesData            [][][]byte
 	CompileSprite          bool
 	IsCpcPlus              bool
-	OriginalImages         *custom_widget.ImageTable
+	OriginalImages         *w.ImageTable
 	SpritesCollection      [][]*image.NRGBA
 	SpriteColumns          int
 	SpriteRows             int
@@ -85,7 +85,7 @@ func (s *SpriteMenu) OriginalBoard() *canvas.Image {
 func NewSpriteMenu() *SpriteMenu {
 	return &SpriteMenu{
 		originalBoard:     &canvas.Image{},
-		OriginalImages:    custom_widget.NewEmptyImageTable(fyne.NewSize(SpriteSize, SpriteSize)),
+		OriginalImages:    w.NewEmptyImageTable(fyne.NewSize(SpriteSize, SpriteSize)),
 		SpritesCollection: make([][]*image.NRGBA, 0),
 		SpritesData:       make([][][]byte, 0),
 		originalPalette:   &canvas.Image{},
