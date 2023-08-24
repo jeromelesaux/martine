@@ -14,7 +14,10 @@ import (
 	"github.com/jeromelesaux/martine/log"
 )
 
-var AnimateSize float32 = 150.
+const (
+	AnimateWidthSize  float32 = 350.
+	AnimateHeightSize float32 = 250.
+)
 
 type AnimateMenu struct {
 	*ImageMenu
@@ -33,7 +36,7 @@ func NewAnimateMenu() *AnimateMenu {
 	return &AnimateMenu{
 		ImageMenu:       NewImageMenu(),
 		Originalmages:   make([]*canvas.Image, 0),
-		AnimateImages:   w.NewImageSelectionTable(fyne.NewSize(AnimateSize, AnimateSize)),
+		AnimateImages:   w.NewImageSelectionTable(fyne.NewSize(AnimateWidthSize, AnimateHeightSize)),
 		DeltaCollection: make([]*transformation.DeltaCollection, 1),
 	}
 }

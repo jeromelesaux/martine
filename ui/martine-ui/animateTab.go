@@ -282,8 +282,6 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	heightLabel := widget.NewLabel("Height")
 	a.Height().Validator = validation.NewRegexp("\\d+", "Must contain a number")
 
-	//a.AnimateImages = wgt.NewImageSelectionTable(fyne.NewSize(menu.AnimateSize, menu.AnimateSize))
-
 	initalAddressLabel := widget.NewLabel("initial address")
 	a.InitialAddress = widget.NewEntry()
 	a.InitialAddress.SetText("c000")
@@ -310,7 +308,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	return container.New(
 		layout.NewGridLayout(1),
 		container.New(
-			layout.NewGridLayoutWithRows(1),
+			layout.NewGridLayoutWithColumns(1),
 			container.NewScroll(a.AnimateImages.Container),
 		),
 
