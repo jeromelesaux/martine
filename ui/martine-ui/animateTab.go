@@ -201,11 +201,9 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 					dialog.ShowError(err, m.window)
 					return
 				}
-				if a.IsEmpty {
-					a.AnimateImages.Substitue(0, canvas.NewImageFromImage(img))
-				} else {
-					a.AnimateImages.Append(canvas.NewImageFromImage(img))
-				}
+
+				a.AnimateImages.Append(canvas.NewImageFromImage(img))
+
 				a.IsEmpty = false
 				pi.Hide()
 			} else {
@@ -236,14 +234,10 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 					return
 				}
 				imgs := image.GifToImages(*gifImages)
-				for index, img := range imgs {
-					if index == 0 {
-						a.AnimateImages.Substitue(0, canvas.NewImageFromImage(img))
-					} else {
-						a.AnimateImages.Append(canvas.NewImageFromImage(img))
-					}
-					a.IsEmpty = false
+				for _, img := range imgs {
+					a.AnimateImages.Append(canvas.NewImageFromImage(img))
 				}
+				canvas.Refresh(m.window.Content())
 				pi.Hide()
 			}
 			m.window.Resize(m.window.Content().Size())
@@ -260,6 +254,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 
 	resetButton := widget.NewButtonWithIcon("Reset", theme.CancelIcon(), func() {
 		a.AnimateImages.Reset()
+		canvas.Refresh(a.AnimateImages)
 		a.IsEmpty = true
 	})
 
@@ -270,13 +265,6 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	applyButton := widget.NewButtonWithIcon("Compute", theme.VisibilityIcon(), func() {
 		log.GetLogger().Infoln("compute.")
 		m.AnimateApply(a)
-	})
-
-	removeButton := widget.NewButtonWithIcon("Remove", theme.DeleteIcon(), func() {
-		log.GetLogger().Info("image index to remove %d\n", a.ImageToRemoveIndex)
-
-		a.AnimateImages.Remove(a.ImageToRemoveIndex)
-		a.AnimateImages.Refresh()
 	})
 
 	openFileWidget.Icon = theme.FileImageIcon()
@@ -302,7 +290,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	heightLabel := widget.NewLabel("Height")
 	a.Height().Validator = validation.NewRegexp("\\d+", "Must contain a number")
 
-	a.AnimateImages = wgt.NewImageSelectionTable(fyne.NewSize(menu.AnimateSize, menu.AnimateSize))
+	//a.AnimateImages = wgt.NewImageSelectionTable(fyne.NewSize(menu.AnimateSize, menu.AnimateSize))
 
 	initalAddressLabel := widget.NewLabel("initial address")
 	a.InitialAddress = widget.NewEntry()
@@ -330,17 +318,15 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 	return container.New(
 		layout.NewGridLayout(1),
 		container.New(
-			layout.NewGridLayoutWithRows(1),
-			container.NewScroll(
-				a.AnimateImages),
-		),
+			layout.NewAdaptiveGridLayout(1),
+			a.AnimateImages),
+
 		container.New(
 			layout.NewVBoxLayout(),
 			container.New(
 				layout.NewHBoxLayout(),
 				openFileWidget,
 				resetButton,
-				removeButton,
 				paletteOpen,
 				applyButton,
 				exportButton,

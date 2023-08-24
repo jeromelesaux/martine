@@ -229,6 +229,10 @@ github.com/jeromelesaux/fyne-io v0.0.0-20230822120452-d4e9ad21bb52 h1:KzmgPyN6N3
 github.com/jeromelesaux/fyne-io v0.0.0-20230822120452-d4e9ad21bb52/go.mod h1:PHMS7sRywpN563NOk5OKuI4LS6dEo7dZFfvApM6z/AE=
 github.com/jeromelesaux/fyne-io v0.0.0-20230822132042-0a6d8ef126d4 h1:vbuHKJFvpWjvAexgsajRDPdfSDlsPBPlT9EfcKVUEHY=
 github.com/jeromelesaux/fyne-io v0.0.0-20230822132042-0a6d8ef126d4/go.mod h1:PHMS7sRywpN563NOk5OKuI4LS6dEo7dZFfvApM6z/AE=
+github.com/jeromelesaux/fyne-io v0.0.0-20230823140411-0d503985d345 h1:kOloVw9N4U3y6QIO16APgzdlJKv+DwNZiO2NE6WBM4k=
+github.com/jeromelesaux/fyne-io v0.0.0-20230823140411-0d503985d345/go.mod h1:PHMS7sRywpN563NOk5OKuI4LS6dEo7dZFfvApM6z/AE=
+github.com/jeromelesaux/fyne-io v0.0.0-20230823143914-eb9b254e89f6 h1:b9GUg9Zk9Ila09jwAAcVTlnp3sIo1dzttsKMrEFkUYc=
+github.com/jeromelesaux/fyne-io v0.0.0-20230823143914-eb9b254e89f6/go.mod h1:PHMS7sRywpN563NOk5OKuI4LS6dEo7dZFfvApM6z/AE=
 github.com/jeromelesaux/m4client v0.0.0-20200309212559-efb59c22369c/go.mod h1:JO0ijl8YXO6FxogJoC3yAFbBjSAnkwFquc8W6C7k94E=
 github.com/jeromelesaux/m4client v0.0.0-20230327092026-4e80fd2b1474 h1:CWtkpA4Q63pkhHWRrd/e98JD4YVZhk3SZu58bUkQsuI=
 github.com/jeromelesaux/m4client v0.0.0-20230327092026-4e80fd2b1474/go.mod h1:Xc0HzC2TZ7fbDWyB8LosvziBQ5QvvwVt3xxAIEavWRc=
