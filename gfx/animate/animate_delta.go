@@ -365,9 +365,11 @@ func (a AnimateValues) DisplayCode() string {
 		log.GetLogger().Info("Using Zx0 cruncher")
 		d := zx0.Encode(a.Image)
 		mu.Lock()
+		code += "sprite:\n"
 		code += ascii.FormatAssemblyDatabyte(d, "\n")
 		mu.Unlock()
 	} else {
+		code += "sprite:\n"
 		code += ascii.FormatAssemblyDatabyte(a.Image, "\n")
 	}
 	ascii.ByteToken = "db"
@@ -616,7 +618,7 @@ nblb dw 0
 nbdeltas dw 0
 ;----------------------------
 
-sprite:
+
 {{ .DisplayCode }} 
 
 table_delta 
@@ -861,7 +863,7 @@ pixel db 0
 nblb dw 0
 nbdeltas dw 0
 ;----------------------------
-sprite:
+
 {{ .DisplayCode }} 
 
 table_delta 
@@ -1034,7 +1036,7 @@ ret
 pixel db 0
 
 ;----------------------------
-sprite:
+
 {{ .DisplayCode }} 
 
 table_delta 
@@ -1293,7 +1295,7 @@ pixel db 0
 nblb dw 0
 nbdeltas dw 0
 ;----------------------------
-sprite:
+
 {{ .DisplayCode }} 
 
 table_delta 
@@ -1467,7 +1469,7 @@ ret
 pixel db 0
 
 ;----------------------------
-sprite:
+
 {{ .DisplayCode }} 
 
 table_delta 
@@ -1712,7 +1714,7 @@ pixel db 0
 
 ;----------------------------
 
-sprite:
+
 {{ .DisplayCode }} 
 
 table_delta 
@@ -1889,7 +1891,7 @@ ret
 ;--- variables memoires -----
 pixel db 0
 ;----------------------------
-sprite:
+
 {{ .DisplayCode }} 
 
 table_delta 
