@@ -96,7 +96,7 @@ func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 }
 
 func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, cfg *config.MartineConfig) error {
-	o := make([]byte, 0x7e90-0x80)
+	o := make([]byte, 0x8000-0x80)
 
 	// remove first line to keep #38 address free
 	var width int
@@ -115,7 +115,6 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 
 	copy(o, OverscanBoot[:])
 	copy(o[0x200-0x170:], data[:])
-	// o[(0x1ac-0x170)] = 0 // cpc old
 	switch cfg.CpcPlus {
 	case true:
 		o[(0x1ac - 0x170)] = 1
@@ -144,7 +143,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 		for i := 0; i < len(p); i++ {
 			v, err := constants.HardwareValues(p[i])
 			if err == nil {
-				o[(0x7f00-0x170)+i] = v[0]
+				o[(0x7F00-0x170)+i] = v[0]
 			} else {
 				log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
