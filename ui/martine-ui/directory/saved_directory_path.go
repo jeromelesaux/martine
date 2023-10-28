@@ -18,11 +18,6 @@ func ExportDirectoryURI() (fyne.ListableURI, error) {
 }
 
 func SetExportDirectoryURI(path fyne.URI) {
-	p, err := storage.Parent(path)
-	if err == nil {
-		savedDirectoryPath = p
-		return
-	}
 	savedDirectoryPath = path
 }
 
