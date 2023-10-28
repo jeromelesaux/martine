@@ -123,7 +123,7 @@ var (
 // values 50% RGB = 0x7F
 // values 100% RGB = 0xFF
 var (
-	White         = CpcColor{HardwareNumber: 0, FirmwareNumber: 13, HardwareValues: []uint8{0x40}, Color: color.RGBA{A: 0xFF, R: 111, G: 125, B: 107}}
+	White         = CpcColor{HardwareNumber: 0, FirmwareNumber: 13, HardwareValues: []uint8{0x40, 0x41}, Color: color.RGBA{A: 0xFF, R: 111, G: 125, B: 107}}
 	SeaGreen      = CpcColor{HardwareNumber: 2, FirmwareNumber: 19, HardwareValues: []uint8{0x42, 0x51}, Color: color.RGBA{A: 0xFF, R: 0, G: 243, B: 107}}
 	PastelYellow  = CpcColor{HardwareNumber: 3, FirmwareNumber: 25, HardwareValues: []uint8{0x43, 0x49}, Color: color.RGBA{A: 0xFF, R: 244, G: 244, B: 109}}
 	Blue          = CpcColor{HardwareNumber: 4, FirmwareNumber: 1, HardwareValues: []uint8{0x44, 0x50}, Color: color.RGBA{A: 0xFF, R: 0, G: 2, B: 107}}

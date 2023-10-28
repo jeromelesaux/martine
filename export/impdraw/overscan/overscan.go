@@ -148,6 +148,9 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 				log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
+		for i := len(p); i < 16; i++ {
+			o[(0x7F00-0x170)+i] = 0x54
+		}
 	}
 
 	o, _ = compression.Compress(o, cfg.Compression)
