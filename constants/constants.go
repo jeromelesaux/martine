@@ -756,6 +756,18 @@ func CToF(c uint32) float64 {
 	return (float64(c) / 255. * 100)
 }
 
+func FillColorPalette(p color.Palette) color.Palette {
+	for i, v := range p {
+		if v == nil {
+			p[i] = color.Black
+		}
+	}
+	for i := len(p); i < 16; i++ {
+		p = append(p, color.Black)
+	}
+	return p
+}
+
 type ByDistance []color.Color
 
 func (p ByDistance) Len() int { return len(p) }

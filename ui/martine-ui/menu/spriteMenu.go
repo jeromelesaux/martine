@@ -47,11 +47,13 @@ type SpriteMenu struct {
 	ExportJson             bool
 	ExportCompression      compression.CompressionMethod
 	ExportFolderPath       string
+	UsePalette             bool
 
 	CmdLineGenerate string
 }
 
 func (s *SpriteMenu) SetPalette(p color.Palette) {
+	s.UsePalette = true
 	s.palette = p
 }
 

@@ -60,15 +60,21 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 	}
 	img := image.NewNRGBA(image.Rect(0, 0, b.Bounds().Max.X, b.Bounds().Max.Y))
 	draw.Draw(img, img.Bounds(), b, b.Bounds().Min, draw.Src)
-	pal, _, err := ci.DowngradingPalette(img, constants.Size{ColorsAvailable: colorsAvailable, Width: img.Bounds().Max.X, Height: img.Bounds().Max.Y}, s.IsCpcPlus)
-	if err != nil {
-		pi.Hide()
-		dialog.NewError(err, m.window).Show()
-		return
+	if !s.UsePalette {
+		pal, _, err := ci.DowngradingPalette(img, constants.Size{ColorsAvailable: colorsAvailable, Width: img.Bounds().Max.X, Height: img.Bounds().Max.Y}, s.IsCpcPlus)
+		if err != nil {
+			pi.Hide()
+			dialog.NewError(err, m.window).Show()
+			return
+		}
+		pal = constants.FillColorPalette(pal)
+		pal = constants.SortColorsByDistance(pal)
+		s.SetPalette(pal)
 	}
-	s.SetPalette(pal)
+
 	size := constants.Size{Width: s.SpriteWidth, Height: s.SpriteHeight}
-	raw, sprites, err := sprite.SplitBoardToSprite(s.OriginalBoard().Image, s.Palette(), s.SpriteColumns, s.SpriteRows, uint8(s.Mode), s.IsHardSprite, size)
+	pal := s.Palette()
+	raw, sprites, err := sprite.SplitBoardToSprite(s.OriginalBoard().Image, pal, s.SpriteColumns, s.SpriteRows, uint8(s.Mode), s.IsHardSprite, size)
 	if err != nil {
 		pi.Hide()
 		dialog.NewError(err, m.window).Show()
