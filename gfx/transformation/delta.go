@@ -140,24 +140,24 @@ func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.
 			c4 := next.At(i, j)
 			p1, err := palette.PalettePosition(c1, currentPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, i, j)
 				p1 = 0
 			}
 			p3, err := palette.PalettePosition(c3, currentPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, i, j)
 				p3 = 0
 			}
 			pixel1 := pixel.PixelMode0(p1, p3)
 
 			p2, err := palette.PalettePosition(c2, nextPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p2 = 0
 			}
 			p4, err := palette.PalettePosition(c4, nextPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p4 = 0
 			}
 			pixel2 := pixel.PixelMode0(p2, p4)
@@ -193,44 +193,44 @@ func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.
 			c8 := next.At(i, j)
 			p1, err := palette.PalettePosition(c1, currentPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, i, j)
 				p1 = 0
 			}
 			p3, err := palette.PalettePosition(c3, currentPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, i, j)
 				p3 = 0
 			}
 			p5, err := palette.PalettePosition(c5, currentPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c5, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c5, i, j)
 				p5 = 0
 			}
 			p7, err := palette.PalettePosition(c7, currentPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c7, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c7, i, j)
 				p7 = 0
 			}
 			pixel1 := pixel.PixelMode1(p1, p3, p5, p7)
 
 			p2, err := palette.PalettePosition(c2, nextPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p2 = 0
 			}
 			p4, err := palette.PalettePosition(c4, nextPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p4 = 0
 			}
 			p6, err := palette.PalettePosition(c6, nextPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c6, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c6, i, j)
 				p6 = 0
 			}
 			p8, err := palette.PalettePosition(c8, nextPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c8, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c8, i, j)
 				p8 = 0
 			}
 			pixel2 := pixel.PixelMode1(p2, p4, p6, p8)
@@ -278,84 +278,84 @@ func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.
 			c16 := next.At(i, j)
 			p1, err := palette.PalettePosition(c1, currentPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, i, j)
 				p1 = 0
 			}
 			p3, err := palette.PalettePosition(c3, currentPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, i, j)
 				p3 = 0
 			}
 			p5, err := palette.PalettePosition(c5, currentPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c5, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c5, i, j)
 				p5 = 0
 			}
 			p7, err := palette.PalettePosition(c7, currentPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c7, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c7, i, j)
 				p7 = 0
 			}
 			p9, err := palette.PalettePosition(c9, currentPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c9, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c9, i, j)
 				p9 = 0
 			}
 			p11, err := palette.PalettePosition(c11, currentPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c11, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c11, i, j)
 				p11 = 0
 			}
 			p13, err := palette.PalettePosition(c13, currentPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c13, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c13, i, j)
 				p13 = 0
 			}
 			p15, err := palette.PalettePosition(c15, currentPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c15, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c15, i, j)
 				p15 = 0
 			}
 			pixel1 := pixel.PixelMode2(p1, p3, p5, p7, p9, p11, p13, p15)
 
 			p2, err := palette.PalettePosition(c2, nextPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p2 = 0
 			}
 			p4, err := palette.PalettePosition(c4, nextPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p4 = 0
 			}
 			p6, err := palette.PalettePosition(c6, nextPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c6, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c6, i, j)
 				p6 = 0
 			}
 			p8, err := palette.PalettePosition(c8, nextPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c8, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c8, i, j)
 				p8 = 0
 			}
 			p10, err := palette.PalettePosition(c10, nextPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c10, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c10, i, j)
 				p10 = 0
 			}
 			p12, err := palette.PalettePosition(c12, nextPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c12, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c12, i, j)
 				p12 = 0
 			}
 			p14, err := palette.PalettePosition(c14, nextPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c14, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c14, i, j)
 				p14 = 0
 			}
 			p16, err := palette.PalettePosition(c16, nextPalette)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c16, i, j)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c16, i, j)
 				p16 = 0
 			}
 			pixel2 := pixel.PixelMode2(p2, p4, p6, p8, p10, p12, p14, p16)

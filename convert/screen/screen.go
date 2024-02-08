@@ -7,7 +7,6 @@ import (
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert/address"
-	"github.com/jeromelesaux/martine/log"
 
 	"github.com/jeromelesaux/martine/convert/palette"
 	"github.com/jeromelesaux/martine/convert/pixel"
@@ -38,7 +37,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c1 := in.At(x, y)
 			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
 			pp1 = cfg.SwapInk(pp1)
@@ -47,7 +46,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c2 := in.At(x+1, y)
 			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			pp2 = cfg.SwapInk(pp2)
@@ -55,7 +54,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c3 := in.At(x+2, y)
 			pp3, err := palette.PalettePosition(c3, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
 			pp3 = cfg.SwapInk(pp3)
@@ -63,7 +62,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c4 := in.At(x+3, y)
 			pp4, err := palette.PalettePosition(c4, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
 			pp4 = cfg.SwapInk(pp4)
@@ -71,7 +70,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c5 := in.At(x+4, y)
 			pp5, err := palette.PalettePosition(c5, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
 				pp5 = 0
 			}
 			pp5 = cfg.SwapInk(pp5)
@@ -80,7 +79,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c6 := in.At(x+5, y)
 			pp6, err := palette.PalettePosition(c6, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
 				pp6 = 0
 			}
 			pp6 = cfg.SwapInk(pp6)
@@ -88,7 +87,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c7 := in.At(x+6, y)
 			pp7, err := palette.PalettePosition(c7, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
 				pp7 = 0
 			}
 			pp7 = cfg.SwapInk(pp7)
@@ -96,7 +95,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c8 := in.At(x+7, y)
 			pp8, err := palette.PalettePosition(c8, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c8, x+7, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c8, x+7, y)
 				pp8 = 0
 			}
 			pp8 = cfg.SwapInk(pp8)
@@ -144,7 +143,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c1 := in.At(x, y)
 			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
 			pp1 = cfg.SwapInk(pp1)
@@ -153,7 +152,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c2 := in.At(x+1, y)
 			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			pp2 = cfg.SwapInk(pp2)
@@ -161,7 +160,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c3 := in.At(x+2, y)
 			pp3, err := palette.PalettePosition(c3, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
 			pp3 = cfg.SwapInk(pp3)
@@ -169,7 +168,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c4 := in.At(x+3, y)
 			pp4, err := palette.PalettePosition(c4, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
 			pp4 = cfg.SwapInk(pp4)
@@ -211,7 +210,7 @@ func ToMode0(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c1 := in.At(x, y)
 			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
 			pp1 = cfg.SwapInk(pp1)
@@ -220,7 +219,7 @@ func ToMode0(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			c2 := in.At(x+1, y)
 			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			pp2 = cfg.SwapInk(pp2)
