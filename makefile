@@ -104,7 +104,7 @@ build-windows-i386:
 package-darwin:
 	(make init ARCH=${ARCHITECTURE} OS=darwin)
 	@echo "Compilation and packaging for darwin"
-	fyne package -os darwin -icon ../martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
+	fyne package -os darwin -icon ./martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
 	cp -r martine.app ${BINARY}/martine-${OS}-${ARCHITECTURE}/
 	(make archive ARCH=${ARCHITECTURE} OS=darwin)
 
