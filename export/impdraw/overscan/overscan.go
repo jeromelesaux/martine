@@ -146,8 +146,8 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 			v, err := constants.HardwareValues(p[i])
 			if err == nil {
 				o[(0x7F00-0x170)+i] = v[0]
-			} else {
-				log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+				// } else {
+				// 	log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 		for i := len(p); i < 16; i++ {
@@ -275,8 +275,8 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 			v, err := constants.HardwareValues(p[i])
 			if err == nil {
 				o[(0x7f00-0x170)+i] = v[0]
-			} else {
-				log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+				// } else {
+				// 	log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 	}

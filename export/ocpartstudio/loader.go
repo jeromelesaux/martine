@@ -1467,8 +1467,8 @@ func BasicLoader(filePath string, p color.Palette, cfg *config.MartineConfig) er
 		v, err := constants.FirmwareNumber(p[i])
 		if err == nil {
 			out += fmt.Sprintf("%0.2d", v)
-		} else {
-			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+			// } else {
+			// 	log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 		if i+1 < len(p) {
 			out += ","

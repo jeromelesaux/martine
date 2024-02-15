@@ -12,12 +12,12 @@ func TestSaveDelta(t *testing.T) {
 	for i := 0; i < 320; i++ {
 		d.Add(0xFF, uint16(i))
 	}
-	if err := d.Save("delta.bin"); err != nil {
+	if err := d.Save("../../test/delta.bin"); err != nil {
 		t.Fatalf("expected no error and gets %v\n", err)
 	}
 	filesize := 4 + (320 * 2)
 
-	fi, err := os.Lstat("delta.bin")
+	fi, err := os.Lstat("../../test/delta.bin")
 	if err != nil {
 		t.Fatalf("expected no error while getting informations gets :%v\n", err)
 	}

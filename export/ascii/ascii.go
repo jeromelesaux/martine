@@ -60,8 +60,8 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cg
 			v, err := constants.FirmwareNumber(p[i])
 			if err == nil {
 				palette[i] = fmt.Sprintf("%.2d", v)
-			} else {
-				log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+				// } else {
+				// 	log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 		hardwarepalette := make([]string, len(p))
@@ -178,8 +178,8 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 			v, err := constants.FirmwareNumber(p[i])
 			if err == nil {
 				palette[i] = fmt.Sprintf("%.2d", v)
-			} else {
-				log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+				// } else {
+				// 	log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 		hardwarepalette := make([]string, len(p))
@@ -294,8 +294,8 @@ func FormatAssemblyCPCPalette(p color.Palette, eol string) string {
 					out += ", "
 				}
 			}
-		} else {
-			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+			// } else {
+			// 	log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
 	return out
@@ -314,8 +314,8 @@ func FormatAssemblyBasicPalette(p color.Palette, eol string) string {
 					out += ", "
 				}
 			}
-		} else {
-			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+			// } else {
+			// 	log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
 	return out

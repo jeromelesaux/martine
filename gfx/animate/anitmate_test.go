@@ -19,26 +19,21 @@ import (
 
 func TestAnimate(t *testing.T) {
 	file := "../../samples/sonic_rotate.gif"
-	err := os.MkdirAll("animation-test", os.ModePerm)
-	if err != nil {
-		t.Fatal(err)
-	}
-	e := config.NewMartineConfig(file, "animation-test")
+	e := config.NewMartineConfig(file, "../../test")
 	e.Size = constants.Size{Width: 40, Height: 50, ColorsAvailable: 8}
 	var screenMode uint8 = 0
 	fs := []string{file}
 
-	err = Animation(fs, screenMode, e)
+	err := Animation(fs, screenMode, e)
 	if err != nil {
 		t.Fatal(err)
 	}
-	os.RemoveAll("animation-test")
 }
 
 func TestDeltaMotif(t *testing.T) {
 	err := DeltaMotif(
 		"../../samples/coke.gif",
-		&config.MartineConfig{InputPath: "triangles.gif", OutputPath: "."},
+		&config.MartineConfig{InputPath: "triangles.gif", OutputPath: "../../test"},
 		20,
 		0xc000,
 		1)
@@ -65,11 +60,10 @@ func TestCompressZx0(t *testing.T) {
 		t.Fatalf("%v", err)
 	}
 	compressed := encode.Encode(b)
-	err = amsdos.SaveOSFile("../../samples/test.zx0", compressed)
+	err = amsdos.SaveOSFile("../../test/test.zx0", compressed)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
-	_ = os.Remove("TRIANGLE.asm")
 }
 
 func TestDisplayCode(t *testing.T) {
@@ -89,7 +83,7 @@ func TestMergeGifImages(t *testing.T) {
 	imgRect := image.Rectangle{Min: image.Point{X: 0, Y: 0}, Max: image.Point{X: gifs.Config.Width, Y: gifs.Config.Height}}
 	origImg := image.NewRGBA(imgRect)
 	draw.Draw(origImg, gifs.Image[0].Bounds(), gifs.Image[0], gifs.Image[0].Bounds().Min, 0)
-	err = savePng("origin.png", origImg)
+	err = savePng("../../test/origin.png", origImg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -100,7 +94,7 @@ func TestMergeGifImages(t *testing.T) {
 		draw.Draw(img, previousImg.Bounds(), previousImg, previousImg.Bounds().Min, draw.Over)
 		currImg := gifs.Image[i]
 		draw.Draw(img, currImg.Bounds(), currImg, currImg.Bounds().Min, draw.Over)
-		filename := fmt.Sprintf("origin-%.2d.png", i)
+		filename := fmt.Sprintf("../../test/origin-%.2d.png", i)
 		err = savePng(filename, img)
 		if err != nil {
 			t.Fatal(err)
