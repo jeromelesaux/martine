@@ -17,6 +17,7 @@ import (
 	"github.com/oliamb/cutter"
 )
 
+// nolint: funlen
 func TileMode(ex *config.MartineConfig, mode uint8, iterationX, iterationY int) error {
 	fr, err := os.Open(ex.InputPath)
 	if err != nil {
@@ -31,17 +32,14 @@ func TileMode(ex *config.MartineConfig, mode uint8, iterationX, iterationY int) 
 		return err
 	}
 
-	width := in.Bounds().Max.X
-	height := in.Bounds().Max.Y
-
-	factorX := width/iterationX + 1
-	factorY := height/iterationY + 1
+	factorX := in.Bounds().Max.X/iterationX + 1
+	factorY := in.Bounds().Max.Y/iterationY + 1
 
 	if factorX != factorY {
 		log.GetLogger().Info("factor x (%d) differs from factor y (%d)\n", factorX, factorY)
 	}
 	if factorY == 0 {
-		factorY = height
+		factorY = in.Bounds().Max.Y
 	}
 	index := 0
 	for i := 0; i < in.Bounds().Max.X; i += factorX {

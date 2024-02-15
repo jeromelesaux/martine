@@ -244,8 +244,8 @@ func getCloserTile(sprt Tile, t []Tile) Tile {
 }
 
 func AnalyzeTilesBoardWithTiles(im image.Image, size constants.Size, tiles []Tile) *AnalyzeBoard {
-	nbTileW := int(im.Bounds().Max.X / size.Width)
-	nbTileH := int(im.Bounds().Max.Y/size.Height) - 1
+	nbTileW := im.Bounds().Max.X / size.Width
+	nbTileH := (im.Bounds().Max.Y / size.Height) - 1
 	board := &AnalyzeBoard{
 		TileSize:   size,
 		ImageSize:  constants.Size{Width: im.Bounds().Max.X, Height: im.Bounds().Max.Y},
@@ -276,8 +276,8 @@ func AnalyzeTilesBoardWithTiles(im image.Image, size constants.Size, tiles []Til
 }
 
 func AnalyzeTilesBoard(im image.Image, size constants.Size) *AnalyzeBoard {
-	nbTileW := int(im.Bounds().Max.X / size.Width)
-	nbTileH := int(im.Bounds().Max.Y/size.Height) - 1
+	nbTileW := im.Bounds().Max.X / size.Width
+	nbTileH := (im.Bounds().Max.Y / size.Height) - 1
 	board := &AnalyzeBoard{
 		TileSize:   size,
 		ImageSize:  constants.Size{Width: im.Bounds().Max.X, Height: im.Bounds().Max.Y},

@@ -45,6 +45,7 @@ func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, cfg *con
 	return ocpartstudio.FlashLoader(filename1, filename2, p1, p2, uint8(m1), uint8(m2), cfg)
 }
 
+// nolint: funlen
 func AutoFlash(in image.Image,
 	cfg *config.MartineConfig,
 	filename, picturePath string,

@@ -13,6 +13,7 @@ import (
 	"github.com/jeromelesaux/martine/log"
 )
 
+// nolint: funlen, gocognit
 func ExportHandler() (*config.MartineConfig, constants.Size) {
 	var size constants.Size
 	cfg := config.NewMartineConfig(*picturePath, *output)
@@ -170,7 +171,7 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 
 		v, err := common.ParseHexadecimal8(*maskSprite)
 		if err == nil {
-			cfg.MaskSprite = uint8(v)
+			cfg.MaskSprite = v
 		}
 		if cfg.MaskSprite != 0 {
 			if *maskOrOperation {

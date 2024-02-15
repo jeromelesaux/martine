@@ -22,6 +22,7 @@ import (
 	"github.com/jeromelesaux/martine/log"
 )
 
+// nolint: funlen, gocognit
 func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cfg *config.MartineConfig) error {
 	p = constants.SortColorsByDistance(p)
 	if m1 == 0 && m2 == 1 || m2 == 0 && m1 == 1 {
@@ -121,11 +122,12 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cfg *config.M
 	return nil
 }
 
-func AutoEgx1(in image.Image,
+func prepareEgx(
+	in image.Image,
 	cfg *config.MartineConfig,
-	filename, picturePath string) error {
+	filename, picturePath string,
+) (*image.NRGBA, color.Palette) {
 	var err error
-
 	size := constants.Size{
 		Width:  cfg.Size.Width,
 		Height: cfg.Size.Height}
@@ -158,51 +160,20 @@ func AutoEgx1(in image.Image,
 		os.Exit(-2)
 	}
 
-	downgraded, p = gfx.DoDithering(downgraded, p, cfg.DitheringAlgo, cfg.DitheringType, cfg.DitheringWithQuantification, cfg.DitheringMatrix, float32(cfg.DitheringMultiplier), cfg.CpcPlus, cfg.Size)
+	return gfx.DoDithering(downgraded, p, cfg.DitheringAlgo, cfg.DitheringType, cfg.DitheringWithQuantification, cfg.DitheringMatrix, float32(cfg.DitheringMultiplier), cfg.CpcPlus, cfg.Size)
+}
 
+func AutoEgx1(in image.Image,
+	cfg *config.MartineConfig,
+	filename, picturePath string) error {
+	downgraded, p := prepareEgx(in, cfg, filename, picturePath)
 	return ToEgx1(downgraded, downgraded, p, 0, picturePath, cfg)
 }
 
 func AutoEgx2(in image.Image,
 	cfg *config.MartineConfig,
 	filename, picturePath string) error {
-	var err error
-
-	size := constants.Size{
-		Width:  cfg.Size.Width,
-		Height: cfg.Size.Height}
-
-	im := ci.Resize(in, size, cfg.ResizingAlgo)
-	var palette color.Palette // palette de l'image
-	var p color.Palette       // palette cpc de l'image
-	var downgraded *image.NRGBA
-
-	if cfg.PalettePath != "" {
-		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PalettePath)
-		palette, _, err = ocpartstudio.OpenPal(cfg.PalettePath)
-		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalettePath)
-		} else {
-			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
-		}
-	}
-
-	if len(palette) > 0 {
-		p, downgraded = ci.DowngradingWithPalette(im, palette)
-	} else {
-		p, downgraded, err = ci.DowngradingPalette(im, cfg.Size, cfg.CpcPlus)
-		if err != nil {
-			log.GetLogger().Error("Cannot downgrade colors palette for this image %s\n", picturePath)
-		}
-	}
-	p = constants.SortColorsByDistance(p)
-	log.GetLogger().Info("Saving downgraded image into (%s)\n", filename+"_down.png")
-	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_down.png"), downgraded); err != nil {
-		os.Exit(-2)
-	}
-
-	downgraded, p = gfx.DoDithering(downgraded, p, cfg.DitheringAlgo, cfg.DitheringType, cfg.DitheringWithQuantification, cfg.DitheringMatrix, float32(cfg.DitheringMultiplier), cfg.CpcPlus, cfg.Size)
-
+	downgraded, p := prepareEgx(in, cfg, filename, picturePath)
 	return ToEgx2(downgraded, downgraded, p, 1, picturePath, cfg)
 }
 
@@ -211,6 +182,7 @@ func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8,
 	return export.Export(picturePath, bw, p, 1, cfg)
 }
 
+// nolint: funlen
 func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8, cfg *config.MartineConfig) ([]byte, color.Palette) {
 	var bw []byte
 	if cfg.Overscan {
@@ -295,6 +267,7 @@ func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8,
 	return export.Export(picturePath, bw, p, 2, cfg)
 }
 
+// nolint: funlen, gocognit
 func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8, cfg *config.MartineConfig) ([]byte, color.Palette) {
 	var bw []byte
 	if cfg.Overscan {
@@ -417,6 +390,7 @@ func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uin
 	return bw, p
 }
 
+// nolint: funlen, gocognit
 func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cfg *config.MartineConfig) ([]byte, color.Palette, int, error) {
 	p = constants.SortColorsByDistance(p)
 	if mode1 == 0 && mode2 == 1 || mode2 == 0 && mode1 == 1 {
@@ -452,7 +426,7 @@ func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cfg *config.Ma
 				return nil, p, 0, err
 			}
 		}
-		res, p := ToEgx1Raw(in0, in1, p, uint8(mode1), cfg)
+		res, p := ToEgx1Raw(in0, in1, p, mode1, cfg)
 		return res, p, 1, nil
 	} else {
 		if mode1 == 1 && mode2 == 2 || mode2 == 1 && mode1 == 2 {
@@ -493,7 +467,7 @@ func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cfg *config.Ma
 					return nil, p, 0, err
 				}
 			}
-			res, p := ToEgx2Raw(in1, in2, p, uint8(mode1), cfg)
+			res, p := ToEgx2Raw(in1, in2, p, mode1, cfg)
 			return res, p, 2, err
 
 		} else {

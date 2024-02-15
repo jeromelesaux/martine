@@ -33,6 +33,7 @@ import (
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
+// nolint: funlen
 func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 	if s.SpriteColumns == 0 || s.SpriteRows == 0 {
 		dialog.NewError(errors.New("number of sprites per row or column are not set"), m.window).Show()
@@ -95,7 +96,8 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 	pi.Hide()
 }
 
-func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
+// nolint: funlen
+func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) *fyne.Container {
 	openFileWidget := widget.NewButton("Image", func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {
@@ -292,7 +294,8 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) fyne.CanvasObject {
 	)
 }
 
-func applySpriteBoardFromGif(s *menu.SpriteMenu, m *MartineUI) fyne.Widget {
+// nolint: funlen, gocognit
+func applySpriteBoardFromGif(s *menu.SpriteMenu, m *MartineUI) *widget.Button {
 	return widget.NewButtonWithIcon("From Gif", theme.FileImageIcon(), func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {
@@ -372,7 +375,8 @@ func applySpriteBoardFromGif(s *menu.SpriteMenu, m *MartineUI) fyne.Widget {
 	})
 }
 
-func ImportSpriteBoard(m *MartineUI) fyne.Widget {
+// nolint: funlen, gocognit
+func ImportSpriteBoard(m *MartineUI) *widget.Button {
 	return widget.NewButtonWithIcon("Import", theme.FileImageIcon(), func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {

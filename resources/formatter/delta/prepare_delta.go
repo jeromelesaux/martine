@@ -20,6 +20,7 @@ var (
 	eol        = "\n"
 )
 
+// nolint: funlen
 func main() {
 	log.Default("")
 	flag.Parse()
@@ -43,30 +44,7 @@ func main() {
 	out := "sprite\n"
 	for i := 0; i < len(s.Screen); i += 8 {
 		out += fmt.Sprintf("%s ", ascii.ByteToken)
-		if i < len(s.Screen) {
-			out += toDamsByte(s.Screen[i])
-		}
-		if i+1 < len(s.Screen) {
-			out += ", " + toDamsByte(s.Screen[i+1])
-		}
-		if i+2 < len(s.Screen) {
-			out += ", " + toDamsByte(s.Screen[i+2])
-		}
-		if i+3 < len(s.Screen) {
-			out += ", " + toDamsByte(s.Screen[i+3])
-		}
-		if i+4 < len(s.Screen) {
-			out += ", " + toDamsByte(s.Screen[i+4])
-		}
-		if i+5 < len(s.Screen) {
-			out += ", " + toDamsByte(s.Screen[i+5])
-		}
-		if i+6 < len(s.Screen) {
-			out += ", " + toDamsByte(s.Screen[i+6])
-		}
-		if i+7 < len(s.Screen) {
-			out += ", " + toDamsByte(s.Screen[i+7])
-		}
+		out += convertScreen(out, s.Screen)
 		out += eol
 	}
 	fl := []string{*deltafiles}
@@ -91,30 +69,7 @@ func main() {
 			out += fmt.Sprintf("delta%.2d\n", index)
 			for i := 0; i < len(d.Screen); i += 8 {
 				out += fmt.Sprintf("%s ", ascii.ByteToken)
-				if i < len(d.Screen) {
-					out += toDamsByte(d.Screen[i])
-				}
-				if i+1 < len(d.Screen) {
-					out += ", " + toDamsByte(d.Screen[i+1])
-				}
-				if i+2 < len(d.Screen) {
-					out += ", " + toDamsByte(d.Screen[i+2])
-				}
-				if i+3 < len(d.Screen) {
-					out += ", " + toDamsByte(d.Screen[i+3])
-				}
-				if i+4 < len(d.Screen) {
-					out += ", " + toDamsByte(d.Screen[i+4])
-				}
-				if i+5 < len(d.Screen) {
-					out += ", " + toDamsByte(d.Screen[i+5])
-				}
-				if i+6 < len(d.Screen) {
-					out += ", " + toDamsByte(d.Screen[i+6])
-				}
-				if i+7 < len(d.Screen) {
-					out += ", " + toDamsByte(d.Screen[i+7])
-				}
+				out += convertScreen(out, d.Screen)
 				out += eol
 			}
 		}
@@ -139,4 +94,36 @@ func main() {
 
 func toDamsByte(in string) string {
 	return strings.ReplaceAll(in, "0x", "#")
+}
+
+func convertScreen(out string, screen []string) string {
+	for i := 0; i < len(screen); i += 8 {
+		out += fmt.Sprintf("%s ", ascii.ByteToken)
+		if i < len(screen) {
+			out += toDamsByte(screen[i])
+		}
+		if i+1 < len(screen) {
+			out += ", " + toDamsByte(screen[i+1])
+		}
+		if i+2 < len(screen) {
+			out += ", " + toDamsByte(screen[i+2])
+		}
+		if i+3 < len(screen) {
+			out += ", " + toDamsByte(screen[i+3])
+		}
+		if i+4 < len(screen) {
+			out += ", " + toDamsByte(screen[i+4])
+		}
+		if i+5 < len(screen) {
+			out += ", " + toDamsByte(screen[i+5])
+		}
+		if i+6 < len(screen) {
+			out += ", " + toDamsByte(screen[i+6])
+		}
+		if i+7 < len(screen) {
+			out += ", " + toDamsByte(screen[i+7])
+		}
+		out += eol
+	}
+	return out
 }

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"os"
-	"path/filepath"
 	"strconv"
 
 	"fyne.io/fyne/v2"
@@ -15,14 +13,11 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
-	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/log"
 
 	ci "github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/convert/screen"
 	"github.com/jeromelesaux/martine/convert/screen/overscan"
-	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
-	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/effect"
@@ -31,7 +26,7 @@ import (
 	w2 "github.com/jeromelesaux/martine/ui/martine-ui/widget"
 )
 
-func (m *MartineUI) newEgxTab(di *menu.DoubleImageMenu) fyne.CanvasObject {
+func (m *MartineUI) newEgxTab(di *menu.DoubleImageMenu) *container.AppTabs {
 	return container.NewAppTabs(
 		container.NewTabItem("Image 1", m.newEgxImageTransfertTab(di.LeftImage)),
 		container.NewTabItem("Image 2", m.newEgxImageTransfertTab(di.RightImage)),
@@ -39,6 +34,7 @@ func (m *MartineUI) newEgxTab(di *menu.DoubleImageMenu) fyne.CanvasObject {
 	)
 }
 
+// nolint:funlen
 func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	if di.RightImage.Mode == di.LeftImage.Mode {
 		dialog.ShowError(fmt.Errorf("mode between the images must differ"), m.window)
@@ -124,7 +120,8 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	di.ResultImage.PaletteImage.Refresh()
 }
 
-func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) fyne.CanvasObject {
+// nolint: funlen
+func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) *fyne.Container {
 	di.ResultImage = menu.NewMergedImageMenu()
 	di.ResultImage.CpcLeftImage = di.LeftImage.CpcImage()
 	di.ResultImage.CpcRightImage = di.RightImage.CpcImage()
@@ -202,8 +199,9 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) fyne.CanvasObject {
 	)
 }
 
-func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
-	importOpen := NewImportButton(m, me)
+// nolint: funlen
+func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
+	importOpen := newImportButton(m, me)
 
 	paletteOpen := NewOpenPaletteButton(me, m.window)
 
@@ -385,34 +383,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObjec
 								forcePalette.SetChecked(true)
 							})
 						}),
-						widget.NewButtonWithIcon("export", theme.DocumentSaveIcon(), func() {
-							d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
-								if err != nil {
-									dialog.ShowError(err, m.window)
-									return
-								}
-								if uc == nil {
-									return
-								}
-
-								paletteExportPath := uc.URI().Path()
-								uc.Close()
-								os.Remove(uc.URI().Path())
-								cfg := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
-								cfg.NoAmsdosHeader = false
-								if err := impPalette.SaveKit(paletteExportPath+".kit", me.Palette(), false); err != nil {
-									dialog.ShowError(err, m.window)
-								}
-								if err := ocpartstudio.SavePal(paletteExportPath+".pal", me.Palette(), uint8(me.Mode), false); err != nil {
-									dialog.ShowError(err, m.window)
-								}
-							}, m.window)
-							dir, err := directory.ExportDirectoryURI()
-							if err != nil {
-								d.SetLocation(dir)
-							}
-							d.Show()
-						}),
+						m.newImageMenuExportButton(me),
 						widget.NewButton("Gray", func() {
 							if me.IsCpcPlus {
 								me.SetPalette(ci.MonochromePalette(me.Palette()))

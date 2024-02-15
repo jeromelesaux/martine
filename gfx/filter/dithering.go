@@ -183,6 +183,7 @@ func InitPalWithPalette(p color.Palette) []uint {
 	return pal
 }
 
+// nolint: funlen, gocognit
 func DeviseBestMixingPlan(color uint, pal []uint, matrixLenght uint) MixingPlan {
 	r := color >> 16
 	g := (color >> 8) & 0xFF

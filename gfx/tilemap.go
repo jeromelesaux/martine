@@ -31,6 +31,7 @@ var (
 	impTileFlag = true
 )
 
+// nolint: funlen, gocognit
 func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in image.Image, cfg *config.MartineConfig, criteria common.AnalyseTilemapOption) error {
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
 	m := ci.Resize(in, mapSize, cfg.ResizingAlgo)
@@ -185,29 +186,9 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 	if err != nil {
 		return err
 	}
-	index := 0
-	for y := 0; y < m.Bounds().Max.Y; y += (nbTilePixelHigh * choosenBoard.TileSize.Height) {
-		for x := 0; x < m.Bounds().Max.X; x += (nbTilePixelLarge * choosenBoard.TileSize.Width) {
-			m1 := image.NewNRGBA(image.Rect(0, 0, nbTilePixelLarge*choosenBoard.TileSize.Width, nbTilePixelHigh*choosenBoard.TileSize.Height))
-			// copy of the map
-			for i := 0; i < nbTilePixelLarge*choosenBoard.TileSize.Width; i++ {
-				for j := 0; j < nbTilePixelHigh*choosenBoard.TileSize.Height; j++ {
-					var c color.Color = color.RGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
-					if x+i < m.Bounds().Max.X && y+j < m.Bounds().Max.Y {
-						c = m.At(x+i, y+j)
-					}
-					m1.Set(i, j, c)
-				}
-			}
-			// store the map in the slice
-			scenes = append(scenes, m1)
-			scenePath := filepath.Join(cfg.OutputPath, fmt.Sprintf("%sscenes%sscene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
-			if err := png.Png(scenePath, m1); err != nil {
-				log.GetLogger().Error("Cannot create sscene-%.2d.png error %v\n", index, err)
-				return err
-			}
-			index++
-		}
+	scenes, err = fillImage(m, scenes, nbTilePixelHigh, nbTilePixelLarge, choosenBoard.TileSize.Width, choosenBoard.TileSize.Height, cfg.OutputPath)
+	if err != nil {
+		return err
 	}
 
 	// now thread all maps images
@@ -255,29 +236,9 @@ func ExportTilemapClassical(m image.Image, filename string, board *transformatio
 	if err != nil {
 		return err
 	}
-	index := 0
-	for y := 0; y < m.Bounds().Max.Y; y += (nbTilePixelHigh * board.TileSize.Height) {
-		for x := 0; x < m.Bounds().Max.X; x += (nbTilePixelLarge * board.TileSize.Width) {
-			m1 := image.NewNRGBA(image.Rect(0, 0, nbTilePixelLarge*board.TileSize.Width, nbTilePixelHigh*board.TileSize.Height))
-			// copy of the map
-			for i := 0; i < nbTilePixelLarge*board.TileSize.Width; i++ {
-				for j := 0; j < nbTilePixelHigh*board.TileSize.Height; j++ {
-					var c color.Color = color.RGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
-					if x+i < m.Bounds().Max.X && y+j < m.Bounds().Max.Y {
-						c = m.At(x+i, y+j)
-					}
-					m1.Set(i, j, c)
-				}
-			}
-			// store the map in the slice
-			scenes = append(scenes, m1)
-			scenePath := filepath.Join(cfg.OutputPath, fmt.Sprintf("%sscenes%sscene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
-			if err := png.Png(scenePath, m1); err != nil {
-				log.GetLogger().Error("Cannot encode in png scene scene-%.2d error %v\n", index, err)
-				return err
-			}
-			index++
-		}
+	scenes, err = fillImage(m, scenes, nbTilePixelHigh, nbTilePixelLarge, board.TileSize.Width, board.TileSize.Height, cfg.OutputPath)
+	if err != nil {
+		return err
 	}
 
 	// now thread all maps images
@@ -346,6 +307,7 @@ func sizeOctet(size constants.Size, mode uint8) int {
 	return 0
 }
 
+// nolint: funlen, gocognit
 func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in image.Image, cfg *config.MartineConfig) error {
 	/*
 		8x8 : 40x25
@@ -479,29 +441,9 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 	if err != nil {
 		return err
 	}
-	index := 0
-	for y := 0; y < m.Bounds().Max.Y; y += (nbTilePixelHigh * analyze.TileSize.Height) {
-		for x := 0; x < m.Bounds().Max.X; x += (nbTilePixelLarge * analyze.TileSize.Width) {
-			m1 := image.NewNRGBA(image.Rect(0, 0, nbTilePixelLarge*analyze.TileSize.Width, nbTilePixelHigh*analyze.TileSize.Height))
-			// copy of the map
-			for i := 0; i < nbTilePixelLarge*analyze.TileSize.Width; i++ {
-				for j := 0; j < nbTilePixelHigh*analyze.TileSize.Height; j++ {
-					var c color.Color = color.RGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
-					if x+i < m.Bounds().Max.X && y+j < m.Bounds().Max.Y {
-						c = m.At(x+i, y+j)
-					}
-					m1.Set(i, j, c)
-				}
-			}
-			// store the map in the slice
-			scenes = append(scenes, m1)
-			scenePath := filepath.Join(cfg.OutputPath, fmt.Sprintf("%sscenes%sscene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
-			if err := png.Png(scenePath, m1); err != nil {
-				log.GetLogger().Error("Cannot encode in png scene scene-%.2d error %v\n", index, err)
-				return err
-			}
-			index++
-		}
+	scenes, err = fillImage(m, scenes, nbTilePixelHigh, nbTilePixelLarge, analyze.TileSize.Width, analyze.TileSize.Height, cfg.OutputPath)
+	if err != nil {
+		return err
 	}
 
 	// now thread all maps images
@@ -526,6 +468,35 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 	return err
 }
 
+func fillImage(m image.Image, scenes []*image.NRGBA, nbTilePixelHigh, nbTilePixelLarge, tileWidth, tileHeight int, output string) ([]*image.NRGBA, error) {
+	index := 0
+	for y := 0; y < m.Bounds().Max.Y; y += (nbTilePixelHigh * tileHeight) {
+		for x := 0; x < m.Bounds().Max.X; x += (nbTilePixelLarge * tileWidth) {
+			m1 := image.NewNRGBA(image.Rect(0, 0, nbTilePixelLarge*tileWidth, nbTilePixelHigh*tileHeight))
+			// copy of the map
+			for i := 0; i < nbTilePixelLarge*tileWidth; i++ {
+				for j := 0; j < nbTilePixelHigh*tileHeight; j++ {
+					var c color.Color = color.RGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
+					if x+i < m.Bounds().Max.X && y+j < m.Bounds().Max.Y {
+						c = m.At(x+i, y+j)
+					}
+					m1.Set(i, j, c)
+				}
+			}
+			// store the map in the slice
+			scenes = append(scenes, m1)
+			scenePath := filepath.Join(output, fmt.Sprintf("%sscenes%sscene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
+			if err := png.Png(scenePath, m1); err != nil {
+				log.GetLogger().Error("Cannot encode in png scene scene-%.2d error %v\n", index, err)
+				return scenes, err
+			}
+			index++
+		}
+	}
+	return scenes, nil
+}
+
+// nolint: funlen
 func TilemapRaw(mode uint8, isCpcPlus bool, size constants.Size, in image.Image, cfg *config.MartineConfig) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette, error) {
 	/*
 		8x8 : 40x25
@@ -598,6 +569,7 @@ func TilemapRaw(mode uint8, isCpcPlus bool, size constants.Size, in image.Image,
 	return analyze, tilesImagesTilemap, palette, nil
 }
 
+// nolint: funlen
 func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palette color.Palette, mode uint8, in image.Image, flatExport bool, cfg *config.MartineConfig) (err error) {
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
 	tilesSize := sizeOctet(analyze.TileSize, mode) * len(analyze.BoardTiles)
@@ -662,6 +634,7 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 	return
 }
 
+// nolint: funlen, gocognit
 func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string, palette color.Palette, mode uint8, size constants.Size, in image.Image, cfg *config.MartineConfig) (err error) {
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
 	nbTilePixelLarge := 20
@@ -761,29 +734,10 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 	if err != nil {
 		return err
 	}
-	index := 0
-	for y := 0; y < m.Bounds().Max.Y; y += (nbTilePixelHigh * analyze.TileSize.Height) {
-		for x := 0; x < m.Bounds().Max.X; x += (nbTilePixelLarge * analyze.TileSize.Width) {
-			m1 := image.NewNRGBA(image.Rect(0, 0, nbTilePixelLarge*analyze.TileSize.Width, nbTilePixelHigh*analyze.TileSize.Height))
-			// copy of the map
-			for i := 0; i < nbTilePixelLarge*analyze.TileSize.Width; i++ {
-				for j := 0; j < nbTilePixelHigh*analyze.TileSize.Height; j++ {
-					var c color.Color = color.RGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
-					if x+i < m.Bounds().Max.X && y+j < m.Bounds().Max.Y {
-						c = m.At(x+i, y+j)
-					}
-					m1.Set(i, j, c)
-				}
-			}
-			// store the map in the slice
-			scenes = append(scenes, m1)
-			scenePath := filepath.Join(cfg.OutputPath, fmt.Sprintf("%sscenes%sscene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
-			if err := png.Png(scenePath, m1); err != nil {
-				log.GetLogger().Error("Cannot encode in png scene scene-%.2d error %v\n", index, err)
-				return err
-			}
-			index++
-		}
+
+	scenes, err = fillImage(m, scenes, nbTilePixelHigh, nbTilePixelLarge, analyze.TileSize.Width, analyze.TileSize.Height, cfg.OutputPath)
+	if err != nil {
+		return err
 	}
 
 	// now thread all maps images

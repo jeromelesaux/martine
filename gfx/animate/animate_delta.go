@@ -32,6 +32,7 @@ var (
 	DeltaExportV2 DeltaExportFormat = 2
 )
 
+// nolint: funlen
 func DeltaPackingMemory(images []image.Image, cfg *config.MartineConfig, initialAddress uint16, mode uint8) ([]*transformation.DeltaCollection, [][]byte, color.Palette, error) {
 	var isSprite bool = true
 	maxImages := 22
@@ -103,6 +104,7 @@ func DeltaPackingMemory(images []image.Image, cfg *config.MartineConfig, initial
 	return deltaData, rawImages, palette, nil
 }
 
+// nolint: funlen
 func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress uint16, mode uint8, exportVersion DeltaExportFormat) error {
 	isSprite := true
 	maxImages := 22
@@ -197,7 +199,7 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 	dc := transformation.Delta(d1, d2, isSprite, *realSize, mode, uint16(x0), uint16(y0), lineOctetsWidth)
 	deltaData = append(deltaData, dc)
 	log.GetLogger().Info("%d bytes differ from the both images\n", len(dc.Items))
-	filename := string(cfg.OsFilename(".asm"))
+	filename := cfg.OsFilename(".asm")
 	_, err = ExportDeltaAnimate(rawImages[0], deltaData, palette, isSprite, cfg, initialAddress, mode, cfg.OutputPath+string(filepath.Separator)+filename, exportVersion)
 	return err
 }
@@ -238,6 +240,7 @@ func filloutGif(g gif.GIF, cfg *config.MartineConfig) []image.Image {
 	return c
 }
 
+// nolint: funlen, gocognit
 func ExportDeltaAnimate(
 	imageReference []byte,
 	delta []*transformation.DeltaCollection,

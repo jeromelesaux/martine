@@ -38,8 +38,9 @@ func Animation(filepaths []string, screenMode uint8, export *config.MartineConfi
 	return nil
 }
 
+// nolint: funlen, gocognit
 func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, screenMode uint8, export *config.MartineConfig) (*image.NRGBA, color.Palette, error) {
-	nbImgWidth := int(sizeScreen.Width / spriteSize.Width)
+	nbImgWidth := sizeScreen.Width / spriteSize.Width
 	//nbImgHeight := int(sizeScreen.Height / size.Height)
 	largeMarge := (sizeScreen.Width - (spriteSize.Width * nbImgWidth)) / nbImgWidth
 

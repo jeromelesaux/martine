@@ -126,6 +126,7 @@ func (i *ImageMenu) GetHeight() (int, string, error) {
 	return v, i.height.Text, err
 }
 
+// nolint: funlen
 func (i *ImageMenu) CmdLine() string {
 	exec, err := os.Executable()
 	if err != nil {
@@ -201,6 +202,7 @@ func (me *ImageMenu) OriginalImage() *canvas.Image {
 	return me.originalImage
 }
 
+// nolint: funlen, gocognit
 func (me *ImageMenu) NewImportButton(dialogSize fyne.Size, modeSelection *widget.Select, refreshUI *widget.Button, win fyne.Window) *widget.Button {
 	return widget.NewButtonWithIcon("Import", theme.FileImageIcon(), func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {

@@ -125,6 +125,7 @@ func LoadProcessFile(filePath string) (*Process, error) {
 	return p, err
 }
 
+// nolint: funlen
 func (p *Process) Apply() {
 	*byteStatement = p.ByteStatement
 	*picturePath = p.PicturePath

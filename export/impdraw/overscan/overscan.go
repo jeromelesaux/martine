@@ -15,6 +15,7 @@ import (
 	"github.com/jeromelesaux/martine/log"
 )
 
+// nolint: funlen
 func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 	fr, err := os.Open(filePath)
 	if err != nil {
@@ -95,6 +96,7 @@ func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 	return palette, mode, nil
 }
 
+// nolint:funlen
 func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, cfg *config.MartineConfig) error {
 	o := make([]byte, 0x8000-0x80)
 
@@ -205,6 +207,7 @@ func RawOverscan(filePath string) ([]byte, error) {
 	return data, nil
 }
 
+// nolint: funlen
 func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uint8, cfg *config.MartineConfig) error {
 	o := make([]byte, 0x8000-0x80)
 	osFilepath := cfg.AmsdosFullPath(filePath, ".SCR")

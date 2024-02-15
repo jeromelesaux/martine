@@ -5,8 +5,6 @@ import (
 	ui "github.com/jeromelesaux/martine/ui/martine-ui"
 )
 
-
-
 func main() {
 
 	/* main application */

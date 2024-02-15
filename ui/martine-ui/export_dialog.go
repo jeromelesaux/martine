@@ -11,6 +11,7 @@ import (
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
+// nolint: funlen
 func (m *MartineUI) exportDialog(ie *menu.ImageExport, w fyne.Window) {
 	m2host := widget.NewEntry()
 	m2host.SetPlaceHolder("Set your M2 IP here.")

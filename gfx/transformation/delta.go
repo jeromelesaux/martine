@@ -170,6 +170,7 @@ func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.
 	return data, nil
 }
 
+// nolint: funlen, gocognit
 func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, cfg *config.MartineConfig) (*DeltaCollection, error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
@@ -243,6 +244,7 @@ func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.
 	return data, nil
 }
 
+// nolint:funlen, gocognit
 func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, cfg *config.MartineConfig) (*DeltaCollection, error) {
 	data := NewDeltaCollection()
 	if current.Bounds().Max.X != next.Bounds().Max.X {
@@ -453,7 +455,7 @@ func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8, x0
 		if scr1[offset] != scr2[offset] {
 			if isSprite {
 
-				y := int(offset/(size.Width)) + int(y0)
+				y := (offset / (size.Width)) + int(y0)
 				x := ((offset + int(x0)) - ((y - int(y0)) * (size.Width)))
 				newOffset := DeltaAddress(x, y, lineOctetWidth) + 0xC000
 				//	log.GetLogger().Info( "X0:%d,Y0:%d,X:%d,Y:%d,byte:#%.2x,addresse:#%.4x\n", x0, y0, x, y, scr2[offset], newOffset)
@@ -492,6 +494,7 @@ func ExportDelta(filename string, dc *DeltaCollection, mode uint8, cfg *config.M
 	return nil
 }
 
+// nolint:funlen, gocognit
 func ProceedDelta(filespath []string, initialAddress uint16, cfg *config.MartineConfig, mode uint8) error {
 
 	if len(filespath) == 1 {

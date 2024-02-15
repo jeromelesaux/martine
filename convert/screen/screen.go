@@ -14,6 +14,7 @@ import (
 	"github.com/jeromelesaux/martine/export/png"
 )
 
+// nolint: funlen, gocognit
 func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte {
 	var bw []byte
 
@@ -120,6 +121,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 	return bw
 }
 
+// nolint: funlen
 func ToMode1(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte {
 	var bw []byte
 
@@ -247,71 +249,89 @@ func ScrRawToImg(d []byte, mode uint8, p color.Palette) (*image.NRGBA, error) {
 
 	out := image.NewNRGBA(image.Rectangle{
 		Min: image.Point{X: 0, Y: 0},
-		Max: image.Point{X: int(m.Width), Y: int(m.Height)}})
+		Max: image.Point{X: m.Width, Y: m.Height}})
 
-	cpcRow := 0
 	switch mode {
 	case 0:
-		for y := 0; y < m.Height; y++ {
-			cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
-			for x := 0; x < m.Width; x += 2 {
-				val := d[cpcLine+cpcRow]
-				pp1, pp2 := pixel.RawPixelMode0(val)
-				c1 := p[pp1]
-				c2 := p[pp2]
-
-				out.Set(x, y, c1)
-				out.Set(x+1, y, c2)
-				cpcRow++
-			}
-			cpcRow = 0
-		}
+		out = setImageMode0(out, p, d, m.Width, m.Height)
 	case 1:
-		for y := 0; y < m.Height; y++ {
-			cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
-			for x := 0; x < m.Width; x += 4 {
-				val := d[cpcLine+cpcRow]
-				pp1, pp2, pp3, pp4 := pixel.RawPixelMode1(val)
-				c1 := p[pp1]
-				c2 := p[pp2]
-				c3 := p[pp3]
-				c4 := p[pp4]
-				out.Set(x, y, c1)
-				out.Set(x+1, y, c2)
-				out.Set(x+2, y, c3)
-				out.Set(x+3, y, c4)
-				cpcRow++
-			}
-			cpcRow = 0
-		}
+		out = setImageMode1(out, p, d, m.Width, m.Height)
 	case 2:
-		for y := 0; y < m.Height; y++ {
-			cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
-			for x := 0; x < m.Width; x += 8 {
-				val := d[cpcLine+cpcRow]
-				pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 := pixel.RawPixelMode2(val)
-				c1 := p[pp1]
-				c2 := p[pp2]
-				c3 := p[pp3]
-				c4 := p[pp4]
-				c5 := p[pp5]
-				c6 := p[pp6]
-				c7 := p[pp7]
-				c8 := p[pp8]
-				out.Set(x, y, c1)
-				out.Set(x+1, y, c2)
-				out.Set(x+2, y, c3)
-				out.Set(x+3, y, c4)
-				out.Set(x+4, y, c5)
-				out.Set(x+5, y, c6)
-				out.Set(x+6, y, c7)
-				out.Set(x+7, y, c8)
-				cpcRow++
-			}
-			cpcRow = 0
-		}
+		out = setImageMode2(out, p, d, m.Width, m.Height)
+
 	}
 	return out, nil
+}
+
+func setImageMode0(out *image.NRGBA, p color.Palette, d []byte, width, height int) *image.NRGBA {
+	cpcRow := 0
+	for y := 0; y < height; y++ {
+		cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
+		for x := 0; x < width; x += 2 {
+			val := d[cpcLine+cpcRow]
+			pp1, pp2 := pixel.RawPixelMode0(val)
+			c1 := p[pp1]
+			c2 := p[pp2]
+
+			out.Set(x, y, c1)
+			out.Set(x+1, y, c2)
+			cpcRow++
+		}
+		cpcRow = 0
+	}
+	return out
+}
+
+func setImageMode1(out *image.NRGBA, p color.Palette, d []byte, width, height int) *image.NRGBA {
+	cpcRow := 0
+	for y := 0; y < height; y++ {
+		cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
+		for x := 0; x < width; x += 4 {
+			val := d[cpcLine+cpcRow]
+			pp1, pp2, pp3, pp4 := pixel.RawPixelMode1(val)
+			c1 := p[pp1]
+			c2 := p[pp2]
+			c3 := p[pp3]
+			c4 := p[pp4]
+			out.Set(x, y, c1)
+			out.Set(x+1, y, c2)
+			out.Set(x+2, y, c3)
+			out.Set(x+3, y, c4)
+			cpcRow++
+		}
+		cpcRow = 0
+	}
+	return out
+}
+
+func setImageMode2(out *image.NRGBA, p color.Palette, d []byte, width, height int) *image.NRGBA {
+	cpcRow := 0
+	for y := 0; y < height; y++ {
+		cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
+		for x := 0; x < width; x += 8 {
+			val := d[cpcLine+cpcRow]
+			pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 := pixel.RawPixelMode2(val)
+			c1 := p[pp1]
+			c2 := p[pp2]
+			c3 := p[pp3]
+			c4 := p[pp4]
+			c5 := p[pp5]
+			c6 := p[pp6]
+			c7 := p[pp7]
+			c8 := p[pp8]
+			out.Set(x, y, c1)
+			out.Set(x+1, y, c2)
+			out.Set(x+2, y, c3)
+			out.Set(x+3, y, c4)
+			out.Set(x+4, y, c5)
+			out.Set(x+5, y, c6)
+			out.Set(x+6, y, c7)
+			out.Set(x+7, y, c8)
+			cpcRow++
+		}
+		cpcRow = 0
+	}
+	return out
 }
 
 // SrcToImg load the amstrad classical 17ko  screen image to image.NRBGA
@@ -321,73 +341,19 @@ func ScrToImg(scrPath string, mode uint8, p color.Palette) (*image.NRGBA, error)
 
 	out := image.NewNRGBA(image.Rectangle{
 		Min: image.Point{X: 0, Y: 0},
-		Max: image.Point{X: int(m.Width), Y: int(m.Height)}})
+		Max: image.Point{X: m.Width, Y: m.Height}})
 
 	d, err := ocpartstudio.RawScr(scrPath)
 	if err != nil {
 		return nil, err
 	}
-	cpcRow := 0
 	switch mode {
 	case 0:
-		for y := 0; y < m.Height; y++ {
-			cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
-			for x := 0; x < m.Width; x += 2 {
-				val := d[cpcLine+cpcRow]
-				pp1, pp2 := pixel.RawPixelMode0(val)
-				c1 := p[pp1]
-				c2 := p[pp2]
-
-				out.Set(x, y, c1)
-				out.Set(x+1, y, c2)
-				cpcRow++
-			}
-			cpcRow = 0
-		}
+		out = setImageMode0(out, p, d, m.Width, m.Height)
 	case 1:
-		for y := 0; y < m.Height; y++ {
-			cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
-			for x := 0; x < m.Width; x += 4 {
-				val := d[cpcLine+cpcRow]
-				pp1, pp2, pp3, pp4 := pixel.RawPixelMode1(val)
-				c1 := p[pp1]
-				c2 := p[pp2]
-				c3 := p[pp3]
-				c4 := p[pp4]
-				out.Set(x, y, c1)
-				out.Set(x+1, y, c2)
-				out.Set(x+2, y, c3)
-				out.Set(x+3, y, c4)
-				cpcRow++
-			}
-			cpcRow = 0
-		}
+		out = setImageMode1(out, p, d, m.Width, m.Height)
 	case 2:
-		for y := 0; y < m.Height; y++ {
-			cpcLine := ((y/0x8)*0x50 + ((y % 0x8) * 0x800))
-			for x := 0; x < m.Width; x += 8 {
-				val := d[cpcLine+cpcRow]
-				pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 := pixel.RawPixelMode2(val)
-				c1 := p[pp1]
-				c2 := p[pp2]
-				c3 := p[pp3]
-				c4 := p[pp4]
-				c5 := p[pp5]
-				c6 := p[pp6]
-				c7 := p[pp7]
-				c8 := p[pp8]
-				out.Set(x, y, c1)
-				out.Set(x+1, y, c2)
-				out.Set(x+2, y, c3)
-				out.Set(x+3, y, c4)
-				out.Set(x+4, y, c5)
-				out.Set(x+5, y, c6)
-				out.Set(x+6, y, c7)
-				out.Set(x+7, y, c8)
-				cpcRow++
-			}
-			cpcRow = 0
-		}
+		out = setImageMode2(out, p, d, m.Width, m.Height)
 	}
 	return out, nil
 }

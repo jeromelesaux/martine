@@ -1385,6 +1385,7 @@ func Loader(filePath string, p color.Palette, mode uint8, cfg *config.MartineCon
 	return BasicLoader(filePath, p, cfg)
 }
 
+// nolint: funlen
 func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cfg *config.MartineConfig) error {
 	// export de la palette assemblée
 	loader := paletteCPCPlusLoader
@@ -1405,7 +1406,7 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cfg *confi
 	paletteHeader.Size = uint16(binary.Size(loader)) - 128
 	paletteHeader.Size2 = uint16(binary.Size(loader)) - 128
 	paletteHeader.LogicalSize = uint16(binary.Size(loader)) - 128
-	paletteHeader.Checksum = uint16(paletteHeader.ComputedChecksum16())
+	paletteHeader.Checksum = paletteHeader.ComputedChecksum16()
 	data, err := paletteHeader.Bytes()
 	if err != nil {
 		return err
@@ -1500,6 +1501,7 @@ func BasicLoader(filePath string, p color.Palette, cfg *config.MartineConfig) er
 	return nil
 }
 
+// nolint: funlen
 func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, m1, m2 uint8, cfg *config.MartineConfig) error {
 	// modification du binaire flash
 	pal1 := make([]byte, 16)
@@ -1580,6 +1582,7 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 	return nil
 }
 
+// nolint: funlen, gocognit
 func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cfg *config.MartineConfig) error {
 	var out string
 	for i := 0; i < len(p); i++ {

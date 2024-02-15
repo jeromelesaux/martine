@@ -19,7 +19,8 @@ import (
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
-func NewImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
+// nolint: funlen, gocognit
+func newImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 	return widget.NewButtonWithIcon("Import", theme.FileImageIcon(), func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {

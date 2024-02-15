@@ -7,6 +7,7 @@ import (
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
+// nolint: funlen
 func NewDitheringSelect(me *menu.ImageMenu) *widget.Select {
 	dithering := widget.NewSelect([]string{
 		"FloydSteinberg",

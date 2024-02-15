@@ -1,4 +1,4 @@
-                                                    package main
+package main
 
 import (
 	"flag"
@@ -162,7 +162,9 @@ func printVersion() {
 @Todo : add zigzag on sprite and sprite hard.
 */
 
+// nolint: funlen, gocognit
 func main() {
+
 	var filename, extension string
 	var screenMode uint8
 	var in image.Image
@@ -174,12 +176,13 @@ func main() {
 	flag.Parse()
 
 	if len(os.Args) == 1 {
-		os.Setenv("FYNE_SCALE", "0.6")
+		os.Setenv("FYNE_SCALE", "0.75")
 		/* main application */
 		app := app.NewWithID("Martine @IMPact")
 		martineUI := ui.NewMartineUI()
 		martineUI.Load(app)
 		app.Run()
+
 		os.Exit(0)
 	}
 	if len(flag.Args()) > 0 {

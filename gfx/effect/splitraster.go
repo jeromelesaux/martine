@@ -44,6 +44,7 @@ func DoSpliteRaster(in image.Image, screenMode uint8, filename string, cfg *conf
 	return splitraster.ExportSplitRaster(filename, p, rasters, cfg)
 }
 
+// nolint: funlen, gocognit
 func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg *config.MartineConfig) (color.Palette, []byte, *constants.SplitRasterScreen, error) {
 
 	var bw []byte
@@ -261,6 +262,7 @@ func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	return bw, firmwareColorUsed
 }
 
+// nolint: funlen
 func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cfg *config.MartineConfig) ([]byte, map[int]int) {
 	c1 := in.At(x, y)
 	out.Set(x, y, c1)

@@ -28,6 +28,7 @@ import (
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
+// nolint: funlen
 func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 	formatSelect := widget.NewSelect(
 		[]string{
@@ -118,6 +119,7 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 	d.Show()
 }
 
+// nolint: funlen, gocognit
 func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 	pi := wgt.NewProgressInfinite("Saving...., Please wait.", m.window)
 	pi.Show()

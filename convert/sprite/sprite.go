@@ -18,6 +18,7 @@ import (
 	"github.com/jeromelesaux/martine/log"
 )
 
+// nolint:funlen
 func RawSpriteToImg(data []byte, height, width, mode uint8, p color.Palette) *image.NRGBA {
 	var out *image.NRGBA
 	switch mode {
@@ -109,6 +110,7 @@ func RawSpriteToImg(data []byte, height, width, mode uint8, p color.Palette) *im
 
 // spriteToImg load a OCP win filepath to image.NRGBA
 // using the mode and palette as arguments
+// nolint: funlen
 func SpriteToImg(winPath string, mode uint8, p color.Palette) (*image.NRGBA, constants.Size, error) {
 	var s constants.Size
 	footer, err := window.OpenWin(winPath)
@@ -274,6 +276,7 @@ func ToSpriteAndExport(in *image.NRGBA, p color.Palette, size constants.Size, mo
 	return ExportSprite(data, lineSize, p, size, mode, filename, dontImportDsk, ex)
 }
 
+// nolint:funlen, gocognit
 func ToSprite(in *image.NRGBA,
 	p color.Palette,
 	size constants.Size,

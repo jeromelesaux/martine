@@ -106,6 +106,7 @@ func DoTransformation(in *image.NRGBA,
 	return images, err
 }
 
+// nolint:funlen, gocognit
 func ApplyOneImageAndExport(in image.Image,
 	cfg *config.MartineConfig,
 	filename, picturePath string,
@@ -285,6 +286,7 @@ func ApplyImages(
 	return raw, images, palette, gErr
 }
 
+// nolint: funlen, gocognit
 func ApplyOneImage(in image.Image,
 	cfg *config.MartineConfig,
 	mode int,

@@ -8,7 +8,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func (m *MartineUI) newGreedings() fyne.CanvasObject {
+func (m *MartineUI) newGreedings() *fyne.Container {
 	return container.New(
 		layout.NewVBoxLayout(),
 		widget.NewRichTextFromMarkdown("# Some greedings.\n"+

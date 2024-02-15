@@ -19,6 +19,7 @@ import (
 	zx0 "github.com/jeromelesaux/zx0/encode"
 )
 
+// nolint: funlen
 func DeltaMotif(gitFilepath string, cfg *config.MartineConfig, threshold int, initialAddress uint16, mode uint8) error {
 	fr, err := os.Open(gitFilepath)
 	if err != nil {
@@ -105,7 +106,7 @@ func DeltaMotif(gitFilepath string, cfg *config.MartineConfig, threshold int, in
 		}
 		deltas = append(deltas, delta)
 	}
-	filename := string(cfg.OsFilename(".asm"))
+	filename := cfg.OsFilename(".asm")
 	return exportDeltaMotif(deltas, motifs, customPalette, cfg, cfg.OutputPath+string(filepath.Separator)+filename)
 }
 

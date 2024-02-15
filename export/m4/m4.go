@@ -11,6 +11,7 @@ import (
 
 var ErrorNoHostDefined = errors.New("no host defined")
 
+// nolint:funlen, gocognit
 func ImportInM4(cfg *config.MartineConfig) error {
 	if cfg.M4Host == "" {
 		return ErrorNoHostDefined
@@ -21,8 +22,7 @@ func ImportInM4(cfg *config.MartineConfig) error {
 	}
 
 	client := m4.M4Client{IPClient: cfg.M4Host}
-	err := client.ResetCpc()
-	if err != nil {
+	if err := client.ResetCpc(); err != nil {
 		return err
 	}
 	if !cfg.Sna {
@@ -70,8 +70,7 @@ func ImportInM4(cfg *config.MartineConfig) error {
 
 	if cfg.M4Autoexec {
 		if cfg.Sna {
-			err := client.Run(cfg.M4RemotePath + "test.sna")
-			return err
+			return client.Run(cfg.M4RemotePath + "test.sna")
 		}
 		p, err := client.Ls(cfg.M4RemotePath)
 		if err != nil {
@@ -91,15 +90,13 @@ func ImportInM4(cfg *config.MartineConfig) error {
 		}
 		if cfg.Scr {
 			log.GetLogger().Info("Execute basic file (%s)\n", "/"+cfg.M4RemotePath+"/"+basicFile)
-			err := client.Run("/" + cfg.M4RemotePath + "/" + basicFile)
-			if err != nil {
+			if err := client.Run("/" + cfg.M4RemotePath + "/" + basicFile); err != nil {
 				return err
 			}
 		} else {
 			if cfg.Overscan {
 				log.GetLogger().Info("Execute overscan file (%s)\n", "/"+cfg.M4RemotePath+"/"+overscanFile)
-				err := client.Run("/" + cfg.M4RemotePath + "/" + overscanFile)
-				if err != nil {
+				if err := client.Run("/" + cfg.M4RemotePath + "/" + overscanFile); err != nil {
 					return err
 				}
 			} else {

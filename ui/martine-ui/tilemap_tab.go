@@ -76,9 +76,41 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 	me.SetPaletteImage(png.PalToImage(me.Palette()))
 }
 
-func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
+func (m *MartineUI) newImageMenuExportButton(tm *menu.ImageMenu) *widget.Button {
+	return widget.NewButtonWithIcon("export", theme.DocumentSaveIcon(), func() {
+		d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
+			if err != nil {
+				dialog.ShowError(err, m.window)
+				return
+			}
+			if uc == nil {
+				return
+			}
+
+			paletteExportPath := uc.URI().Path()
+			uc.Close()
+			os.Remove(uc.URI().Path())
+			cfg := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
+			cfg.NoAmsdosHeader = false
+			if err := impPalette.SaveKit(paletteExportPath+".kit", tm.Palette(), false); err != nil {
+				dialog.ShowError(err, m.window)
+			}
+			if err := ocpartstudio.SavePal(paletteExportPath+".pal", tm.Palette(), uint8(tm.Mode), false); err != nil {
+				dialog.ShowError(err, m.window)
+			}
+		}, m.window)
+		dir, err := directory.ExportDirectoryURI()
+		if err != nil {
+			d.SetLocation(dir)
+		}
+		d.Show()
+	})
+}
+
+// nolint: funlen, gocognit
+func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 	tm.IsSprite = true
-	importOpen := NewImportButton(m, tm.ImageMenu)
+	importOpen := newImportButton(m, tm.ImageMenu)
 
 	paletteOpen := NewOpenPaletteButton(tm.ImageMenu, m.window)
 
@@ -206,34 +238,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) fyne.CanvasObject {
 								widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
 									w2.SwapColor(m.SetPalette, tm.Palette(), m.window, nil)
 								}),
-								widget.NewButtonWithIcon("export", theme.DocumentSaveIcon(), func() {
-									d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
-										if err != nil {
-											dialog.ShowError(err, m.window)
-											return
-										}
-										if uc == nil {
-											return
-										}
-
-										paletteExportPath := uc.URI().Path()
-										uc.Close()
-										os.Remove(uc.URI().Path())
-										cfg := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
-										cfg.NoAmsdosHeader = false
-										if err := impPalette.SaveKit(paletteExportPath+".kit", tm.Palette(), false); err != nil {
-											dialog.ShowError(err, m.window)
-										}
-										if err := ocpartstudio.SavePal(paletteExportPath+".pal", tm.Palette(), uint8(tm.Mode), false); err != nil {
-											dialog.ShowError(err, m.window)
-										}
-									}, m.window)
-									dir, err := directory.ExportDirectoryURI()
-									if err != nil {
-										d.SetLocation(dir)
-									}
-									d.Show()
-								}),
+								m.newImageMenuExportButton(tm.ImageMenu),
 							),
 						),
 

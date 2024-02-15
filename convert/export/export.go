@@ -32,6 +32,7 @@ func ToMode2AndExport(in *image.NRGBA, p color.Palette, size constants.Size, fil
 	return Export(filePath, bw, p, 2, cfg)
 }
 
+// nolint: funlen, gocognit
 func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, cfg *config.MartineConfig) error {
 	if cfg.Overscan {
 		if cfg.EgxFormat == 0 {

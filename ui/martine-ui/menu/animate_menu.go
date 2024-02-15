@@ -41,6 +41,7 @@ func NewAnimateMenu() *AnimateMenu {
 	}
 }
 
+// nolint: funlen
 func (i *AnimateMenu) CmdLine() string {
 	exec, err := os.Executable()
 	if err != nil {

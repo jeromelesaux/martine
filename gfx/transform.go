@@ -77,6 +77,7 @@ func revertColor(rawColor uint8, index int, isPlus bool) color.Color {
 	return newColor
 }
 
+// nolint: funlen, gocognit
 func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlus bool) (*image.NRGBA, error) {
 
 	in := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: width, Y: height}})

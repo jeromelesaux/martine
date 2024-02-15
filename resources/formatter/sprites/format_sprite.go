@@ -32,6 +32,7 @@ var (
 	eol     = "\n"
 )
 
+// nolint: funlen, gocognit
 func main() {
 	log.Default("")
 	var spritesFiles stringSlice

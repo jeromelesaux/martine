@@ -26,6 +26,7 @@ import (
 
 var egxFilename = "aa.scr"
 
+// nolint:funlen
 func (m *MartineUI) exportEgxDialog(ie *menu.ImageExport, w fyne.Window) {
 	m2host := widget.NewEntry()
 	m2host.SetPlaceHolder("Set your M2 IP here.")
@@ -105,6 +106,7 @@ func (m *MartineUI) exportEgxDialog(ie *menu.ImageExport, w fyne.Window) {
 	d.Show()
 }
 
+// nolint: funlen
 func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	pi := wgt.NewProgressInfinite("Saving...., please wait.", m.window)
 	pi.Show()

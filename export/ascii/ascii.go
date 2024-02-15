@@ -16,6 +16,7 @@ import (
 // ByteToken is the token by default
 var ByteToken = "db" // "BYTE"
 
+// nolint: funlen
 func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cgf *config.MartineConfig) error {
 	eol := "\n"
 	if runtime.GOOS == "windows" {
@@ -37,10 +38,8 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cg
 	if cgf.CpcPlus {
 		out += FormatAssemblyCPCPlusPalette(p, eol)
 	} else {
-		out += FormatAssemblyCPCPalette(p, eol)
-		out += eol + "; Basic Palette " + cpcFilename + eol + ".basic_palette:" + eol + ByteToken + " "
-		out += FormatAssemblyBasicPalette(p, eol)
-		out += eol
+		out += FormatAssemblyCPCPalette(p, eol) + eol + "; Basic Palette " + cpcFilename + eol + ".basic_palette:" + eol + ByteToken + " "
+		out += FormatAssemblyBasicPalette(p, eol) + eol
 	}
 	if !cgf.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".TXT", []byte(out), 0, 0, 0, 0); err != nil {
@@ -85,6 +84,7 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cg
 	return nil
 }
 
+// nolint: funlen, gocognit
 func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk bool, mode uint8, cfg *config.MartineConfig) error {
 	eol := "\n"
 	if runtime.GOOS == "windows" {
@@ -236,7 +236,7 @@ func SpritesHardText(data [][]byte, compressionType compression.CompressionMetho
 	var out string
 	for i, v := range data {
 		out += fmt.Sprintf("Sprite_%02d\n", i)
-		compressed, err := compression.Compress([]byte(v), compressionType)
+		compressed, err := compression.Compress(v, compressionType)
 		if err == nil {
 			out += FormatAssemblyDatabyte(compressed, "\n")
 		} else {

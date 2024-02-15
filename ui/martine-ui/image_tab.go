@@ -15,7 +15,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
-	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/export/amsdos"
@@ -25,7 +24,6 @@ import (
 	"github.com/jeromelesaux/martine/export/m4"
 	"github.com/jeromelesaux/martine/log"
 
-	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/export/snapshot"
 	"github.com/jeromelesaux/martine/gfx"
@@ -56,6 +54,7 @@ func (m *MartineUI) CheckAmsdosHeaderExport(inDsk, addAmsdosHeader bool, d dialo
 	}
 }
 
+// nolint: funlen, gocognit
 func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 	pi := wgt.NewProgressInfinite("Saving...., Please wait.", m.window)
 	pi.Show()
@@ -202,8 +201,9 @@ func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 	me.SetPaletteImage(png.PalToImage(me.Palette()))
 }
 
-func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
-	importOpen := NewImportButton(m, me)
+// nolint: funlen
+func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
+	importOpen := newImportButton(m, me)
 
 	paletteOpen := NewOpenPaletteButton(me, m.window)
 
@@ -424,34 +424,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) fyne.CanvasObject {
 								forcePalette.SetChecked(true)
 							})
 						}),
-						widget.NewButtonWithIcon("export", theme.DocumentSaveIcon(), func() {
-							d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
-								if err != nil {
-									dialog.ShowError(err, m.window)
-									return
-								}
-								if uc == nil {
-									return
-								}
-
-								paletteExportPath := uc.URI().Path()
-								uc.Close()
-								os.Remove(uc.URI().Path())
-								cfg := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
-								cfg.NoAmsdosHeader = false
-								if err := impPalette.SaveKit(paletteExportPath+".kit", me.Palette(), false); err != nil {
-									dialog.ShowError(err, m.window)
-								}
-								if err := ocpartstudio.SavePal(paletteExportPath+".pal", me.Palette(), uint8(me.Mode), false); err != nil {
-									dialog.ShowError(err, m.window)
-								}
-							}, m.window)
-							dir, err := directory.ExportDirectoryURI()
-							if err != nil {
-								d.SetLocation(dir)
-							}
-							d.Show()
-						}),
+						m.newImageMenuExportButton(me),
 						widget.NewButton("Gray", func() {
 							if me.IsCpcPlus {
 								me.SetPalette(image.MonochromePalette(me.Palette()))

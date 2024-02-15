@@ -74,6 +74,7 @@ func Min(v0, v1 uint32) uint32 {
 	return v1
 }
 
+// nolint: funlen
 func LumSaturation(c color.Color, lumi, satur float64) color.Color {
 	var r, g, b float64
 	r0, g0, b0, _ := c.RGBA()

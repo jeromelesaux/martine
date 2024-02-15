@@ -17,6 +17,7 @@ import (
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
+// nolint: funlen
 func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 	cont := container.NewVBox(
 		container.NewHBox(

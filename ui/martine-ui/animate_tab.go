@@ -18,12 +18,9 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
-	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/compression"
-	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
-	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/animate"
 	"github.com/jeromelesaux/martine/log"
@@ -32,6 +29,7 @@ import (
 	w2 "github.com/jeromelesaux/martine/ui/martine-ui/widget"
 )
 
+// nolint: funlen
 func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 	cont := container.NewVBox(
 		container.NewHBox(
@@ -167,8 +165,9 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 	a.SetPaletteImage(png.PalToImage(a.Palette()))
 }
 
-func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
-	importOpen := NewImportButton(m, a.ImageMenu)
+// nolint:funlen, gocognit
+func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
+	importOpen := newImportButton(m, a.ImageMenu)
 
 	paletteOpen := NewOpenPaletteButton(a.ImageMenu, m.window)
 
@@ -377,34 +376,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) fyne.CanvasObject {
 						widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
 							w2.SwapColor(m.SetPalette, a.Palette(), m.window, m.refreshAnimatePalette)
 						}),
-						widget.NewButtonWithIcon("export", theme.DocumentSaveIcon(), func() {
-							d := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
-								if err != nil {
-									dialog.ShowError(err, m.window)
-									return
-								}
-								if uc == nil {
-									return
-								}
-
-								paletteExportPath := uc.URI().Path()
-								uc.Close()
-								os.Remove(uc.URI().Path())
-								cfg := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
-								cfg.NoAmsdosHeader = false
-								if err := impPalette.SaveKit(paletteExportPath+".kit", a.Palette(), false); err != nil {
-									dialog.ShowError(err, m.window)
-								}
-								if err := ocpartstudio.SavePal(paletteExportPath+".pal", a.Palette(), uint8(a.Mode), false); err != nil {
-									dialog.ShowError(err, m.window)
-								}
-							}, m.window)
-							dir, err := directory.ExportDirectoryURI()
-							if err != nil {
-								d.SetLocation(dir)
-							}
-							d.Show()
-						}),
+						m.newImageMenuExportButton(a.ImageMenu),
 					),
 				),
 
