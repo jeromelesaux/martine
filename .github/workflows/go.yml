@@ -23,7 +23,7 @@ jobs:
         check-latest: true
         
     - name: install libX
-      run: sudo apt install -y libgl1-mesa-dev xorg-dev
+      run: sudo apt update && sudo apt install -y libgl1-mesa-dev xorg-dev
     
     - name: get dependencies
       run: go mod download
