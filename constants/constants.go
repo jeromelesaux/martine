@@ -638,7 +638,7 @@ func (p ByDistance) Less(i, j int) bool {
 }
 
 func SortColorsByDistance(p color.Palette) color.Palette {
-	sort.Sort(sort.Reverse(ByDistance(p)))
+	sort.Sort(ByDistance(p))
 	return p
 }
 

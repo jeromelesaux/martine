@@ -1511,7 +1511,7 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 	for i := 0; i < len(p1); i++ {
 		v, err := constants.HardwareValues(p1[i])
 		if err != nil {
-			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p1[i], err)
+			log.GetLogger().Info("Error while getting the hardware values for color %v, error :%v\n", p1[i], err)
 		}
 		pal1[index] = v[0]
 		index--
@@ -1520,7 +1520,7 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 	for i := 0; i < len(p2); i++ {
 		v, err := constants.HardwareValues(p2[i])
 		if err != nil {
-			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p2[i], err)
+			log.GetLogger().Info("Error while getting the hardware values for color %v, error :%v\n", p2[i], err)
 		}
 		pal2[index] = v[0]
 		index--
@@ -1590,7 +1590,7 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cfg *config
 		if err == nil {
 			out += fmt.Sprintf("%0.2d", v)
 		} else {
-			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+			log.GetLogger().Info("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 		if i+1 < len(p) {
 			out += ","
@@ -1635,7 +1635,7 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cfg *config
 		for i := 0; i < len(p); i++ {
 			v, err := constants.HardwareValues(p[i])
 			if err != nil {
-				log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[i], err)
+				log.GetLogger().Info("Error while getting the hardware values for color %v, error :%v\n", p[i], err)
 			}
 			pal[index] = v[0]
 			index--

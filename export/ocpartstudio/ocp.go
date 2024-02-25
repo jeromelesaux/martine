@@ -224,7 +224,7 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cfg *c
 			if err == nil {
 				data[(0x17D0)+i] = v[0]
 			} else {
-				log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+				log.GetLogger().Info("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 		copy(data[0x07d0:], codeScrStandard[:])
@@ -344,7 +344,7 @@ func SavePal(filePath string, p color.Palette, screenMode uint8, noAmsdosHeader 
 				data.PaletteColors[i][j] = v[0]
 			}
 		} else {
-			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+			log.GetLogger().Info("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
 
@@ -382,7 +382,7 @@ func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 				data.PaletteColors[i][j] = v[0]
 			}
 		} else {
-			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+			log.GetLogger().Info("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
 	osFilepath := cfg.AmsdosFullPath(filePath, ".PAL")
