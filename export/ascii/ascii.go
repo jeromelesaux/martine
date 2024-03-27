@@ -75,7 +75,7 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cg
 		}
 		j := x.NewJson(cgf.Filename(), cgf.Size.Width, cgf.Size.Height, screen, palette, hardwarepalette)
 		log.GetLogger().Info("Filepath:%s\n", filePath)
-		if cgf.TileMode {
+		if cgf.Transformation.TileMode {
 			cgf.Tiles.Sprites = append(cgf.Tiles.Sprites, j)
 			return nil
 		}
@@ -190,7 +190,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 
 		j := x.NewJson(cfg.Filename(), cfg.Size.Width, cfg.Size.Height, jsonData, palette, hardwarepalette)
 		log.GetLogger().Info("Filepath:%s\n", filePath)
-		if cfg.TileMode {
+		if cfg.Transformation.TileMode {
 			cfg.Tiles.Sprites = append(cfg.Tiles.Sprites, j)
 			return nil
 		}

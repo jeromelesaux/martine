@@ -138,7 +138,7 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 	log.GetLogger().Info("Let's go transform images files in win or scr\n")
 
 	if cfg.FilloutGif {
-		imgs := filloutGif(*gifImages, cfg)
+		imgs := filloutGif(*gifImages)
 		_, _, palette, _, err = gfx.ApplyOneImage(imgs[0], cfg, int(mode), palette, mode)
 		if err != nil {
 			return err
@@ -224,7 +224,7 @@ func ConvertToImage(g gif.GIF) []*image.NRGBA {
 	return c
 }
 
-func filloutGif(g gif.GIF, cfg *config.MartineConfig) []image.Image {
+func filloutGif(g gif.GIF) []image.Image {
 	c := make([]image.Image, 0)
 	width := g.Image[0].Bounds().Max.X
 	height := g.Image[0].Bounds().Max.Y

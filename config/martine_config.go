@@ -3,6 +3,8 @@ package config
 import (
 	"errors"
 	"fmt"
+	"image"
+	"image/color"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -23,91 +25,71 @@ var (
 
 var ErrorNotAllowed = errors.New("error not allowed")
 
+func (c MartineConfig) Img() *image.NRGBA {
+	return c.Image
+}
+func (c *MartineConfig) SetImg(i *image.NRGBA) {
+	c.Image = i
+}
+func (c MartineConfig) Palette() color.Palette {
+	return c.palette
+}
+func (c *MartineConfig) SetPalette(p color.Palette) {
+	c.palette = p
+}
+
 type MartineConfig struct {
-	InputPath                   string
-	OutputPath                  string
-	PalettePath                 string
-	InkPath                     string
-	KitPath                     string
-	M4RemotePath                string
-	M4Host                      string
-	M4Autoexec                  bool
-	Size                        constants.Size
-	Compression                 compression.CompressionMethod
-	NoAmsdosHeader              bool
-	RotationMode                bool
-	Rotation3DMode              bool
-	Rotation3DX0                int
-	Rotation3DY0                int
-	Rotation3DType              int
-	TileMode                    bool
-	RollMode                    bool
-	RollIteration               int
-	TileIterationX              int
-	TileIterationY              int
-	M4                          bool
-	Dsk                         bool
-	Ink                         bool
-	Kit                         bool
-	Pal                         bool
-	Scr                         bool
-	Win                         bool
-	Overscan                    bool
-	Json                        bool
-	Ascii                       bool
-	CpcPlus                     bool
-	CustomDimension             bool
-	amsdosFilename              []byte
-	DskFiles                    []string
-	Tiles                       *export.JsonSlice
-	DeltaMode                   bool
-	ExtendedDsk                 bool
-	ResizingAlgo                imaging.ResampleFilter
-	DitheringAlgo               int
-	DitheringMatrix             [][]float32
-	DitheringMultiplier         float64
-	DitheringWithQuantification bool
-	DitheringType               constants.DitheringType
-	RotationRraBit              int
-	RotationRlaBit              int
-	RotationSraBit              int
-	RotationSlaBit              int
-	RotationLosthighBit         int
-	RotationLostlowBit          int
-	RotationKeephighBit         int
-	RotationKeeplowBit          int
-	RotationIterations          int
-	Flash                       bool
-	FlashScreenFilepath1        string
-	FlashScreenFilepath2        string
-	FlashPaletteFilepath1       string
-	FlashPaletteFilepath2       string
-	EgxFormat                   int
-	EgxMode1                    uint8
-	EgxMode2                    uint8
-	Sna                         bool
-	SnaPath                     string
-	SpriteHard                  bool
-	SplitRaster                 bool
-	ScanlineSequence            []int
-	CustomScanlineSequence      bool
-	MaskSprite                  uint8
-	MaskOrOperation             bool
-	MaskAndOperation            bool
-	ZigZag                      bool
-	Animate                     bool
-	Reducer                     int
-	OneLine                     bool
-	OneRow                      bool
-	InkSwapper                  map[int]int
-	LineWidth                   int
-	FilloutGif                  bool
-	Saturation                  float64
-	Brightness                  float64
-	ExportAsGoFile              bool
-	DoubleScreenAddress         bool
-	UseKmeans                   bool
-	KmeansThreshold             float64
+	Image           *image.NRGBA
+	palette         color.Palette
+	InputPath       string
+	OutputPath      string
+	PalettePath     constants.PalettePath
+	M4              constants.M4
+	Size            constants.Size
+	Compression     compression.CompressionMethod
+	NoAmsdosHeader  bool
+	Transformation  constants.Transformation
+	Dsk             bool
+	Ink             bool
+	Kit             bool
+	Pal             bool
+	Scr             bool
+	Win             bool
+	Overscan        bool
+	Json            bool
+	Ascii           bool
+	CpcPlus         bool
+	CustomDimension bool
+	amsdosFilename  []byte
+	DskFiles        []string
+	Tiles           *export.JsonSlice
+	DeltaMode       bool
+	ExtendedDsk     bool
+	ResizingAlgo    imaging.ResampleFilter
+	Dithering       constants.Dithering
+
+	Flash                  constants.Flash
+	Egx                    constants.Egx
+	Sna                    constants.Sna
+	SpriteHard             bool
+	SplitRaster            bool
+	ScanlineSequence       []int
+	CustomScanlineSequence bool
+	Mask                   constants.Mask
+	ZigZag                 bool
+	Animate                bool
+	Reducer                int
+	OneLine                bool
+	OneRow                 bool
+	InkSwapper             map[int]int
+	LineWidth              int
+	FilloutGif             bool
+	Saturation             float64
+	Brightness             float64
+	ExportAsGoFile         bool
+	DoubleScreenAddress    bool
+	UseKmeans              bool
+	KmeansThreshold        float64
 }
 
 func MaskIsAllowed(mode uint8, value uint8) bool {
@@ -144,11 +126,13 @@ func NewMartineConfig(input, output string) *MartineConfig {
 		OutputPath:     output,
 		amsdosFilename: make([]byte, 8),
 		DskFiles:       make([]string, 0),
-		Rotation3DX0:   -1,
-		Rotation3DY0:   -1,
-		Tiles:          export.NewJsonSlice(),
-		InkSwapper:     make(map[int]int),
-		LineWidth:      0x50,
+		Transformation: constants.Transformation{
+			Rotation3DX0: -1,
+			Rotation3DY0: -1,
+		},
+		Tiles:      export.NewJsonSlice(),
+		InkSwapper: make(map[int]int),
+		LineWidth:  0x50,
 	}
 }
 

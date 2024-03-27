@@ -18,6 +18,75 @@ var (
 	ErrorDiffusionDither = DitheringType{"ErrorDiffusion"}
 )
 
+type Mask struct {
+	MaskSprite   uint8
+	OrOperation  bool
+	AndOperation bool
+}
+
+type Sna struct {
+	Enabled bool
+	SnaPath string
+}
+
+type Egx struct {
+	Enabled   bool
+	EgxFormat int
+	EgxMode1  uint8
+	EgxMode2  uint8
+}
+
+type Flash struct {
+	Enabled               bool
+	FlashScreenFilepath1  string
+	FlashScreenFilepath2  string
+	FlashPaletteFilepath1 string
+	FlashPaletteFilepath2 string
+}
+
+type Transformation struct {
+	RotationMode        bool
+	Rotation3DMode      bool
+	Rotation3DX0        int
+	Rotation3DY0        int
+	Rotation3DType      int
+	TileMode            bool
+	RollMode            bool
+	RollIteration       int
+	TileIterationX      int
+	TileIterationY      int
+	RotationRraBit      int
+	RotationRlaBit      int
+	RotationSraBit      int
+	RotationSlaBit      int
+	RotationLosthighBit int
+	RotationLostlowBit  int
+	RotationKeephighBit int
+	RotationKeeplowBit  int
+	RotationIterations  int
+}
+
+type PalettePath struct {
+	OcpPath string
+	InkPath string
+	KitPath string
+}
+
+type M4 struct {
+	RemotePath string
+	Host       string
+	Autoexec   bool
+	Enabled    bool
+}
+
+type Dithering struct {
+	DitheringAlgo               int
+	DitheringMatrix             [][]float32
+	DitheringMultiplier         float64
+	DitheringWithQuantification bool
+	DitheringType               DitheringType
+}
+
 type Size struct {
 	Width           int
 	Height          int

@@ -68,14 +68,15 @@ func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 		for i := 0; i < pens; i++ {
 			pc := binary.LittleEndian.Uint16(b[(0x801-0x170)+offset:])
 			log.GetLogger().Info("Read color %d\n", pc)
-			if err == nil {
+			if err != nil {
+				palette = append(palette, color.Black)
+				log.GetLogger().Error("Error while retreiving color from hardware value %X error %v\n", pc, err)
+
+			} else {
 				c := constants.NewRawCpcPlusColor(pc)
 				log.GetLogger().Info("PEN(%d) R(%d) G(%d) B(%d)\n", i, c.R, c.G, c.B)
 				col := color.RGBA{A: 0xff, B: uint8(c.B) << 4, G: uint8(c.G) << 4, R: uint8(c.R) << 4}
 				palette = append(palette, col)
-			} else {
-				palette = append(palette, color.Black)
-				log.GetLogger().Error("Error while retreiving color from hardware value %X error %v\n", pc, err)
 			}
 			offset += 2
 		}

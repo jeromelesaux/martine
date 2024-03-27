@@ -9,6 +9,7 @@ import (
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
+
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/log"
 )

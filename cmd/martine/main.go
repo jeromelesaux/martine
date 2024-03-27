@@ -346,48 +346,48 @@ func main() {
 	if *ditheringAlgo != -1 {
 		switch *ditheringAlgo {
 		case 0:
-			cfg.DitheringMatrix = filter.FloydSteinberg
-			cfg.DitheringType = constants.ErrorDiffusionDither
+			cfg.Dithering.DitheringMatrix = filter.FloydSteinberg
+			cfg.Dithering.DitheringType = constants.ErrorDiffusionDither
 			log.GetLogger().Info("Dither:FloydSteinberg, Type:ErrorDiffusionDither\n")
 		case 1:
-			cfg.DitheringMatrix = filter.JarvisJudiceNinke
-			cfg.DitheringType = constants.ErrorDiffusionDither
+			cfg.Dithering.DitheringMatrix = filter.JarvisJudiceNinke
+			cfg.Dithering.DitheringType = constants.ErrorDiffusionDither
 			log.GetLogger().Info("Dither:JarvisJudiceNinke, Type:ErrorDiffusionDither\n")
 		case 2:
-			cfg.DitheringMatrix = filter.Stucki
-			cfg.DitheringType = constants.ErrorDiffusionDither
+			cfg.Dithering.DitheringMatrix = filter.Stucki
+			cfg.Dithering.DitheringType = constants.ErrorDiffusionDither
 			log.GetLogger().Info("Dither:Stucki, Type:ErrorDiffusionDither\n")
 		case 3:
-			cfg.DitheringMatrix = filter.Atkinson
-			cfg.DitheringType = constants.ErrorDiffusionDither
+			cfg.Dithering.DitheringMatrix = filter.Atkinson
+			cfg.Dithering.DitheringType = constants.ErrorDiffusionDither
 			log.GetLogger().Info("Dither:Atkinson, Type:ErrorDiffusionDither\n")
 		case 4:
-			cfg.DitheringMatrix = filter.Sierra
-			cfg.DitheringType = constants.ErrorDiffusionDither
+			cfg.Dithering.DitheringMatrix = filter.Sierra
+			cfg.Dithering.DitheringType = constants.ErrorDiffusionDither
 			log.GetLogger().Info("Dither:Sierra, Type:ErrorDiffusionDither\n")
 		case 5:
-			cfg.DitheringMatrix = filter.SierraLite
-			cfg.DitheringType = constants.ErrorDiffusionDither
+			cfg.Dithering.DitheringMatrix = filter.SierraLite
+			cfg.Dithering.DitheringType = constants.ErrorDiffusionDither
 			log.GetLogger().Info("Dither:SierraLite, Type:ErrorDiffusionDither\n")
 		case 6:
-			cfg.DitheringMatrix = filter.Sierra3
-			cfg.DitheringType = constants.ErrorDiffusionDither
+			cfg.Dithering.DitheringMatrix = filter.Sierra3
+			cfg.Dithering.DitheringType = constants.ErrorDiffusionDither
 			log.GetLogger().Info("Dither:Sierra3, Type:ErrorDiffusionDither\n")
 		case 7:
-			cfg.DitheringMatrix = filter.Bayer2
-			cfg.DitheringType = constants.OrderedDither
+			cfg.Dithering.DitheringMatrix = filter.Bayer2
+			cfg.Dithering.DitheringType = constants.OrderedDither
 			log.GetLogger().Info("Dither:Bayer2, Type:OrderedDither\n")
 		case 8:
-			cfg.DitheringMatrix = filter.Bayer3
-			cfg.DitheringType = constants.OrderedDither
+			cfg.Dithering.DitheringMatrix = filter.Bayer3
+			cfg.Dithering.DitheringType = constants.OrderedDither
 			log.GetLogger().Info("Dither:Bayer3, Type:OrderedDither\n")
 		case 9:
-			cfg.DitheringMatrix = filter.Bayer4
-			cfg.DitheringType = constants.OrderedDither
+			cfg.Dithering.DitheringMatrix = filter.Bayer4
+			cfg.Dithering.DitheringType = constants.OrderedDither
 			log.GetLogger().Info("Dither:Bayer4, Type:OrderedDither\n")
 		case 10:
-			cfg.DitheringMatrix = filter.Bayer8
-			cfg.DitheringType = constants.OrderedDither
+			cfg.Dithering.DitheringMatrix = filter.Bayer8
+			cfg.Dithering.DitheringType = constants.OrderedDither
 			log.GetLogger().Info("Dither:Bayer8, Type:OrderedDither\n")
 		default:
 			log.GetLogger().Error("Dithering matrix not available.")
@@ -711,13 +711,13 @@ func main() {
 							os.Exit(-1)
 						}
 					} else {
-						if cfg.TileMode {
-							if cfg.TileIterationX == -1 || cfg.TileIterationY == -1 {
+						if cfg.Transformation.TileMode {
+							if cfg.Transformation.TileIterationX == -1 || cfg.Transformation.TileIterationY == -1 {
 								log.GetLogger().Error("missing arguments iterx and itery to use with tile mode.\n")
 								usage()
 								os.Exit(-1)
 							}
-							err := transformation.TileMode(cfg, uint8(*mode), cfg.TileIterationX, cfg.TileIterationY)
+							err := transformation.TileMode(cfg, uint8(*mode), cfg.Transformation.TileIterationX, cfg.Transformation.TileIterationY)
 							if err != nil {
 								log.GetLogger().Error("Tile mode on error : error :%v\n", err)
 								os.Exit(-1)
@@ -753,7 +753,7 @@ func main() {
 									}
 								}
 
-								if cfg.EgxFormat > 0 {
+								if cfg.Egx.EgxFormat > 0 {
 									if len(p) == 0 {
 										log.GetLogger().Error("Now colors found in palette, give up treatment.\n")
 										os.Exit(-1)
@@ -806,7 +806,7 @@ func main() {
 			log.GetLogger().Error("Cannot create or write into dsk file error :%v\n", err)
 		}
 	}
-	if cfg.Sna {
+	if cfg.Sna.Enabled {
 		if cfg.Overscan {
 			var gfxFile string
 			for _, v := range cfg.DskFiles {
@@ -815,17 +815,17 @@ func main() {
 					break
 				}
 			}
-			cfg.SnaPath = filepath.Join(*output, "test.sna")
-			if err := snapshot.ImportInSna(gfxFile, cfg.SnaPath, screenMode); err != nil {
+			cfg.Sna.SnaPath = filepath.Join(*output, "test.sna")
+			if err := snapshot.ImportInSna(gfxFile, cfg.Sna.SnaPath, screenMode); err != nil {
 				log.GetLogger().Error("Cannot create or write into sna file error :%v\n", err)
 			}
-			log.GetLogger().Info("Sna saved in file %s\n", cfg.SnaPath)
+			log.GetLogger().Info("Sna saved in file %s\n", cfg.Sna.SnaPath)
 		} else {
 			log.GetLogger().Error("Feature not implemented for this file.")
 			os.Exit(-1)
 		}
 	}
-	if cfg.M4 {
+	if cfg.M4.Enabled {
 		if err := m4.ImportInM4(cfg); err != nil {
 			log.GetLogger().Error("Cannot send to M4 error :%v\n", err)
 		}

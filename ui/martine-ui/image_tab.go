@@ -99,7 +99,7 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 			dialog.ShowError(err, m.window)
 		}
 		if me.UsePalette {
-			cfg.KitPath = tmpPalette
+			cfg.PalettePath.KitPath = tmpPalette
 		}
 
 		filename := filepath.Base(me.OriginalImagePath())
@@ -124,7 +124,7 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 				return
 			}
 		}
-		if cfg.Sna {
+		if cfg.Sna.Enabled {
 			if cfg.Overscan {
 				var gfxFile string
 				for _, v := range cfg.DskFiles {
@@ -133,8 +133,8 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 						break
 					}
 				}
-				cfg.SnaPath = filepath.Join(m.imageExport.ExportFolderPath, "test.sna")
-				if err := snapshot.ImportInSna(gfxFile, cfg.SnaPath, uint8(me.Mode)); err != nil {
+				cfg.Sna.SnaPath = filepath.Join(m.imageExport.ExportFolderPath, "test.sna")
+				if err := snapshot.ImportInSna(gfxFile, cfg.Sna.SnaPath, uint8(me.Mode)); err != nil {
 					dialog.NewError(err, m.window).Show()
 					return
 				}
