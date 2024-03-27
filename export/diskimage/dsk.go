@@ -10,10 +10,10 @@ import (
 
 func ImportInDsk(filePath string, cfg *config.MartineConfig) error {
 	var suffix string
-	if cfg.EgxFormat == config.Egx1Mode {
+	if cfg.Egx.EgxFormat == config.Egx1Mode {
 		suffix += "-egx1"
 	}
-	if cfg.EgxFormat == config.Egx2Mode {
+	if cfg.Egx.EgxFormat == config.Egx2Mode {
 		suffix += "-egx2"
 	}
 	if cfg.CpcPlus {
@@ -22,13 +22,13 @@ func ImportInDsk(filePath string, cfg *config.MartineConfig) error {
 	if cfg.Overscan {
 		suffix += "-overscan"
 	}
-	if cfg.Flash {
+	if cfg.Flash.Enabled {
 		suffix += "-flash"
 	}
 	if cfg.CustomDimension || cfg.SpriteHard {
 		suffix += "-sprite"
 	}
-	if cfg.DitheringAlgo != 0 {
+	if cfg.Dithering.DitheringAlgo != 0 {
 		suffix += "-dithering"
 	}
 	if cfg.SplitRaster {

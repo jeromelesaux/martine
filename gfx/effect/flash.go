@@ -132,7 +132,7 @@ func AutoFlash(in image.Image,
 	flashPaletteFilename2 := strings.ToUpper(name)[0:namesize] + "2.PAL"
 	flashPalettePath2 := filepath.Join(cfg.OutputPath, flashPaletteFilename2)
 
-	cfg.PalettePath = flashPalettePath1
+	cfg.PalettePath.OcpPath = flashPalettePath1
 
 	err = gfx.ApplyOneImageAndExport(rigthIm,
 		cfg,

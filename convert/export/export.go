@@ -35,7 +35,7 @@ func ToMode2AndExport(in *image.NRGBA, p color.Palette, size constants.Size, fil
 // nolint: funlen, gocognit
 func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, cfg *config.MartineConfig) error {
 	if cfg.Overscan {
-		if cfg.EgxFormat == 0 {
+		if cfg.Egx.EgxFormat == 0 {
 			if cfg.ExportAsGoFile {
 				data, err := co.ToGo(bw, screenMode, p, cfg)
 				if err != nil {
@@ -53,7 +53,7 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, cfg *
 				}
 			}
 		} else {
-			if err := overscan.EgxOverscan(filePath, bw, p, cfg.EgxMode1, cfg.EgxMode2, cfg); err != nil {
+			if err := overscan.EgxOverscan(filePath, bw, p, cfg.Egx.EgxMode1, cfg.Egx.EgxMode2, cfg); err != nil {
 				log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
 				return err
 			}

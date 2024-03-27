@@ -123,12 +123,12 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 		cfg.NoAmsdosHeader = true
 	}
 	if me.ResultImage.EgxType == 1 {
-		cfg.EgxFormat = config.Egx1Mode
+		cfg.Egx.EgxFormat = config.Egx1Mode
 	} else {
-		cfg.EgxFormat = config.Egx2Mode
+		cfg.Egx.EgxFormat = config.Egx2Mode
 	}
-	cfg.EgxMode1 = uint8(me.LeftImage.Mode)
-	cfg.EgxMode2 = uint8(me.RightImage.Mode)
+	cfg.Egx.EgxMode1 = uint8(me.LeftImage.Mode)
+	cfg.Egx.EgxMode2 = uint8(me.RightImage.Mode)
 
 	// palette export
 	defer func() {
@@ -138,7 +138,7 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 		pi.Hide()
 		dialog.ShowError(err, m.window)
 	}
-	cfg.KitPath = "temporary_palette.kit"
+	cfg.PalettePath.KitPath = "temporary_palette.kit"
 
 	if !cfg.Overscan {
 		if err := ocpartstudio.EgxLoader(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Palette, uint8(me.LeftImage.Mode), uint8(me.RightImage.Mode), cfg); err != nil {
@@ -159,7 +159,7 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 			return
 		}
 	}
-	if cfg.Sna {
+	if cfg.Sna.Enabled {
 		if cfg.Overscan {
 			var gfxFile string
 			for _, v := range cfg.DskFiles {
@@ -168,8 +168,8 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 					break
 				}
 			}
-			cfg.SnaPath = filepath.Join(me.ResultImage.Path, "test.sna")
-			if err := snapshot.ImportInSna(gfxFile, cfg.SnaPath, 0); err != nil {
+			cfg.Sna.SnaPath = filepath.Join(me.ResultImage.Path, "test.sna")
+			if err := snapshot.ImportInSna(gfxFile, cfg.Sna.SnaPath, 0); err != nil {
 				dialog.NewError(err, m.window).Show()
 				return
 			}

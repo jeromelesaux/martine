@@ -95,39 +95,39 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 
 	cfg.FilloutGif = *filloutGif
 	cfg.ExtendedDsk = *extendedDsk
-	cfg.TileMode = *tileMode
-	cfg.RollMode = *rollMode
-	cfg.RollIteration = *iterations
+	cfg.Transformation.TileMode = *tileMode
+	cfg.Transformation.RollMode = *rollMode
+	cfg.Transformation.RollIteration = *iterations
 	cfg.NoAmsdosHeader = *noAmsdosHeader
 	cfg.CpcPlus = *plusMode
-	cfg.TileIterationX = *tileIterationX
-	cfg.TileIterationY = *tileIterationY
+	cfg.Transformation.TileIterationX = *tileIterationX
+	cfg.Transformation.TileIterationY = *tileIterationY
 	cfg.Compression = compression.ToCompressMethod(*compress)
-	cfg.RotationMode = *rotateMode
-	cfg.Rotation3DMode = *rotate3dMode
-	cfg.Rotation3DType = *rotate3dType
-	cfg.Rotation3DX0 = *rotate3dX0
-	cfg.Rotation3DY0 = *rotate3dY0
-	cfg.M4Host = *m4Host
-	cfg.M4RemotePath = *m4RemotePath
-	cfg.M4Autoexec = *m4Autoexec
+	cfg.Transformation.RotationMode = *rotateMode
+	cfg.Transformation.Rotation3DMode = *rotate3dMode
+	cfg.Transformation.Rotation3DType = *rotate3dType
+	cfg.Transformation.Rotation3DX0 = *rotate3dX0
+	cfg.Transformation.Rotation3DY0 = *rotate3dY0
+	cfg.M4.Host = *m4Host
+	cfg.M4.RemotePath = *m4RemotePath
+	cfg.M4.Autoexec = *m4Autoexec
 	cfg.ResizingAlgo = resizeAlgo
-	cfg.DitheringMultiplier = *ditheringMultiplier
-	cfg.DitheringWithQuantification = *withQuantization
-	cfg.PalettePath = *palettePath
-	cfg.InkPath = *inkPath
-	cfg.KitPath = *kitPath
-	cfg.RotationRlaBit = *rla
-	cfg.RotationSraBit = *sra
-	cfg.RotationSlaBit = *sla
-	cfg.RotationRraBit = *rra
-	cfg.RotationKeephighBit = *keephigh
-	cfg.RotationKeeplowBit = *keeplow
-	cfg.RotationLosthighBit = *losthigh
-	cfg.RotationLostlowBit = *lostlow
-	cfg.RotationIterations = *iterations
-	cfg.Flash = *flash
-	cfg.Sna = *sna
+	cfg.Dithering.DitheringMultiplier = *ditheringMultiplier
+	cfg.Dithering.DitheringWithQuantification = *withQuantization
+	cfg.PalettePath.OcpPath = *palettePath
+	cfg.PalettePath.InkPath = *inkPath
+	cfg.PalettePath.KitPath = *kitPath
+	cfg.Transformation.RotationRlaBit = *rla
+	cfg.Transformation.RotationSraBit = *sra
+	cfg.Transformation.RotationSlaBit = *sla
+	cfg.Transformation.RotationRraBit = *rra
+	cfg.Transformation.RotationKeephighBit = *keephigh
+	cfg.Transformation.RotationKeeplowBit = *keeplow
+	cfg.Transformation.RotationLosthighBit = *losthigh
+	cfg.Transformation.RotationLostlowBit = *lostlow
+	cfg.Transformation.RotationIterations = *iterations
+	cfg.Flash.Enabled = *flash
+	cfg.Sna.Enabled = *sna
 	cfg.SpriteHard = *spriteHard
 	cfg.SplitRaster = *splitRasters
 	cfg.ZigZag = *zigzag
@@ -171,28 +171,28 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 
 		v, err := common.ParseHexadecimal8(*maskSprite)
 		if err == nil {
-			cfg.MaskSprite = v
+			cfg.Mask.MaskSprite = v
 		}
-		if cfg.MaskSprite != 0 {
+		if cfg.Mask.MaskSprite != 0 {
 			if *maskOrOperation {
-				cfg.MaskOrOperation = true
+				cfg.Mask.OrOperation = true
 			}
 			if *maskAdOperation {
-				cfg.MaskAndOperation = true
+				cfg.Mask.AndOperation = true
 			}
-			if cfg.MaskAndOperation && cfg.MaskOrOperation {
+			if cfg.Mask.AndOperation && cfg.Mask.OrOperation {
 				log.GetLogger().Error("Or and And operations are setted, will only apply And operation.\n")
-				cfg.MaskOrOperation = false
+				cfg.Mask.OrOperation = false
 			}
-			if !cfg.MaskAndOperation && !cfg.MaskOrOperation {
+			if !cfg.Mask.AndOperation && !cfg.Mask.OrOperation {
 				log.GetLogger().Error("Or and And operations are not setted, will only apply And operation.\n")
-				cfg.MaskAndOperation = true
+				cfg.Mask.AndOperation = true
 			}
 			log.GetLogger().Info("Applying sprite mask value [#%X] [%.8b] AND = %t, OR =%t\n",
-				cfg.MaskSprite,
-				cfg.MaskSprite,
-				cfg.MaskAndOperation,
-				cfg.MaskOrOperation)
+				cfg.Mask.MaskSprite,
+				cfg.Mask.MaskSprite,
+				cfg.Mask.AndOperation,
+				cfg.Mask.OrOperation)
 		}
 	}
 
@@ -205,21 +205,21 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 		cfg.Scr = false
 		cfg.Kit = true
 	}
-	if cfg.M4Host != "" {
-		cfg.M4 = true
+	if cfg.M4.Host != "" {
+		cfg.M4.Enabled = true
 	}
 
 	if *egx1 {
-		cfg.EgxFormat = config.Egx1Mode
+		cfg.Egx.EgxFormat = config.Egx1Mode
 	}
 	if *egx2 {
-		cfg.EgxFormat = config.Egx2Mode
+		cfg.Egx.EgxFormat = config.Egx2Mode
 	}
 	if *mode != -1 {
-		cfg.EgxMode1 = uint8(*mode)
+		cfg.Egx.EgxMode1 = uint8(*mode)
 	}
 	if *mode2 != -1 {
-		cfg.EgxMode2 = uint8(*mode2)
+		cfg.Egx.EgxMode2 = uint8(*mode2)
 	}
 
 	if *saturationPal > 0 || *brightnessPal > 0 {

@@ -15,8 +15,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	ci "github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/convert/sprite"
-	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
-	"github.com/jeromelesaux/martine/export/ocpartstudio"
+	palettepath "github.com/jeromelesaux/martine/export/palette_path"
 	p "github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/log"
@@ -45,34 +44,12 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 	largeMarge := (sizeScreen.Width - (spriteSize.Width * nbImgWidth)) / nbImgWidth
 
 	board := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: sizeScreen.Width, Y: sizeScreen.Height}})
-	var palette, newPalette color.Palette
-	if export.PalettePath != "" {
-		log.GetLogger().Info("Input palette to apply : (%s)\n", export.PalettePath)
-		palette, _, err := ocpartstudio.OpenPal(export.PalettePath)
-		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", export.PalettePath)
-		} else {
-			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
-		}
+	var newPalette color.Palette
+	palette, err := palettepath.Open(export.PalettePath)
+	if err != nil {
+		log.GetLogger().Error("Palette in file (%v) can not be read skipped\n", export.PalettePath)
 	}
-	if export.InkPath != "" {
-		log.GetLogger().Info("Input palette to apply : (%s)\n", export.InkPath)
-		palette, _, err := impPalette.OpenInk(export.InkPath)
-		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", export.InkPath)
-		} else {
-			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
-		}
-	}
-	if export.KitPath != "" {
-		log.GetLogger().Info("Input plus palette to apply : (%s)\n", export.KitPath)
-		palette, _, err := impPalette.OpenKit(export.KitPath)
-		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", export.KitPath)
-		} else {
-			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
-		}
-	}
+
 	var startX, startY int
 	nbLarge := 0
 	for index0, v := range filepaths {

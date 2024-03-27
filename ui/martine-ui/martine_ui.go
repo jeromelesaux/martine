@@ -101,7 +101,7 @@ func (m *MartineUI) NewConfig(me *menu.ImageMenu, checkOriginalImage bool) *conf
 	}
 	cfg.CpcPlus = me.IsCpcPlus
 	cfg.Overscan = me.IsFullScreen
-	cfg.DitheringMultiplier = me.DitheringMultiplier
+	cfg.Dithering.DitheringMultiplier = me.DitheringMultiplier
 	cfg.Brightness = me.Brightness
 	cfg.Saturation = me.Saturation
 
@@ -134,18 +134,18 @@ func (m *MartineUI) NewConfig(me *menu.ImageMenu, checkOriginalImage bool) *conf
 	}
 
 	if me.ApplyDithering {
-		cfg.DitheringAlgo = 0
-		cfg.DitheringMatrix = me.DitheringMatrix
-		cfg.DitheringType = me.DitheringType
+		cfg.Dithering.DitheringAlgo = 0
+		cfg.Dithering.DitheringMatrix = me.DitheringMatrix
+		cfg.Dithering.DitheringType = me.DitheringType
 		if me.DitheringMultiplier == 0 {
-			cfg.DitheringMultiplier = .1
+			cfg.Dithering.DitheringMultiplier = .1
 		} else {
-			cfg.DitheringMultiplier = me.DitheringMultiplier
+			cfg.Dithering.DitheringMultiplier = me.DitheringMultiplier
 		}
 	} else {
-		cfg.DitheringAlgo = -1
+		cfg.Dithering.DitheringAlgo = -1
 	}
-	cfg.DitheringWithQuantification = me.WithQuantification
+	cfg.Dithering.DitheringWithQuantification = me.WithQuantification
 	cfg.OutputPath = m.imageExport.ExportFolderPath
 	if checkOriginalImage {
 		cfg.InputPath = me.OriginalImagePath()

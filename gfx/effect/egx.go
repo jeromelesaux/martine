@@ -137,11 +137,11 @@ func prepareEgx(
 	var p color.Palette       // palette cpc de l'image
 	var downgraded *image.NRGBA
 
-	if cfg.PalettePath != "" {
-		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PalettePath)
-		palette, _, err = ocpartstudio.OpenPal(cfg.PalettePath)
+	if cfg.PalettePath.OcpPath != "" {
+		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PalettePath.OcpPath)
+		palette, _, err = ocpartstudio.OpenPal(cfg.PalettePath.OcpPath)
 		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalettePath)
+			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalettePath.OcpPath)
 		} else {
 			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
 		}
@@ -160,7 +160,7 @@ func prepareEgx(
 		os.Exit(-2)
 	}
 
-	return gfx.DoDithering(downgraded, p, cfg.DitheringAlgo, cfg.DitheringType, cfg.DitheringWithQuantification, cfg.DitheringMatrix, float32(cfg.DitheringMultiplier), cfg.CpcPlus, cfg.Size)
+	return gfx.DoDithering(downgraded, p, cfg.Dithering, cfg.CpcPlus, cfg.Size)
 }
 
 func AutoEgx1(in image.Image,
