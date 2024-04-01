@@ -164,7 +164,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 			return err
 		}
 	} else {
-		if err := amsdos.SaveOSFile(filePath, o); err != nil {
+		if err := amsdos.SaveOSFile(osFilepath, o); err != nil {
 			return err
 		}
 	}
