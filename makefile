@@ -63,7 +63,7 @@ compile:
 	GOOS=${OS} GOARCH=${ARCH} $(CC) build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/format_data${EXT} ./resources/formatter/data/format_data.go
 
 archive:
-	zip ${BINARY}/martine-$(appversion)-${OS}-${ARCH}.zip ${BINARY}/martine-${OS}-${ARCH}/* ./resources/*
+	zip -r ${BINARY}/martine-$(appversion)-${OS}-${ARCH}.zip ${BINARY}/martine-${OS}-${ARCH}/* ./resources/*
 
 build-linux:
 	@echo "Compilation for linux"
@@ -104,21 +104,22 @@ build-windows-i386:
 package-darwin:
 	(make init ARCH=${ARCHITECTURE} OS=darwin)
 	@echo "Compilation and packaging for darwin"
-	fyne package -os darwin -icon ../martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
-	cp -r martine.app ${BINARY}/martine-${OS}-${ARCHITECTURE}/
+	fyne package -os darwin -icon ../../martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
+	mkdir -p ${BINARY}/martine-darwin-${ARCHITECTURE}/
+	cp -r martine.app ${BINARY}/martine-darwin-${ARCHITECTURE}/
 	(make archive ARCH=${ARCHITECTURE} OS=darwin)
 
 package-windows:
 	(make init ARCH=386 OS=windows  EXT=.exe)
 	@echo "Compilation and packaging for windows"
-	fyne package -os windows -icon ../martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
+	fyne package -os windows -icon ../../martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
 	mv martine.exe ${BINARY}/martine-${OS}-${ARCH}/
 	(make archive)
 
 package-linux:
 	(make init)
 	@echo "Compilation and packaging for linux"
-	fyne package -os linux -icon ../martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
+	fyne package -os linux -icon ../../martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
 	mv martine ${BINARY}/martine-${OS}-${ARCH}/
 	(make archive)
 
