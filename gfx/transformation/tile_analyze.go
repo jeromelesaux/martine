@@ -13,6 +13,7 @@ import (
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert/sprite"
 	"github.com/jeromelesaux/martine/export/amsdos"
+	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx/errors"
 	"github.com/jeromelesaux/martine/log"
@@ -406,12 +407,14 @@ func (a *AnalyzeBoard) SaveFlatFile(folderpath string, palette color.Palette, mo
 }
 
 func (a *AnalyzeBoard) SaveSprites(folderpath string, palette color.Palette, mode uint8, cfg *config.MartineConfig) error {
+	var tiles string
 	spriteFolder := filepath.Join(folderpath, "sprites")
 	err := os.Mkdir(spriteFolder, os.ModePerm)
 	if err != nil {
 		return err
 	}
 	for index, v := range a.GetUniqTiles() {
+		tiles += fmt.Sprintf("tile_%0.2d\n", index)
 		sprt := v
 		im := image.NewNRGBA(
 			image.Rectangle{
@@ -434,8 +437,14 @@ func (a *AnalyzeBoard) SaveSprites(folderpath string, palette color.Palette, mod
 		if err != nil {
 			return err
 		}
+		d, _, _, err := sprite.ToSprite(im, palette, v.Size, mode, cfg)
+		if err != nil {
+			return err
+		}
+		tiles += ascii.FormatAssemblyDatabyte(d, "\n")
 	}
-	return nil
+
+	return amsdos.SaveStringOSFile(folderpath+string(filepath.Separator)+"tiles.asm", tiles)
 }
 
 func (a *AnalyzeBoard) SaveSchema(filePath string) error {
