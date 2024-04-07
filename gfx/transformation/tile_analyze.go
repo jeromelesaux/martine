@@ -91,6 +91,7 @@ func (a *AnalyzeBoard) NewTile(sprite *Tile, x, y int) {
 }
 
 type AnalyzeBoard struct {
+	Tiles      [][]image.Image
 	BoardTiles []BoardTile
 	TileSize   constants.Size
 	ImageSize  constants.Size
@@ -437,13 +438,32 @@ func (a *AnalyzeBoard) SaveSprites(folderpath string, palette color.Palette, mod
 		if err != nil {
 			return err
 		}
-		d, _, _, err := sprite.ToSprite(im, palette, v.Size, mode, cfg)
+		d, _, _, err := sprite.ToSprite(im, palette, a.TileSize, mode, cfg)
 		if err != nil {
 			return err
 		}
 		tiles += ascii.FormatAssemblyDatabyte(d, "\n")
 	}
 
+	return amsdos.SaveStringOSFile(folderpath+string(filepath.Separator)+"tiles.asm", tiles)
+}
+
+func (a *AnalyzeBoard) SaveAllSprites(folderpath string, palette color.Palette, mode uint8, cfg *config.MartineConfig) error {
+	var (
+		tiles string
+		index int
+	)
+	for _, pl := range a.Tiles {
+		for _, p := range pl {
+			tiles += fmt.Sprintf("tile_%0.2d\n", index)
+			d, _, _, err := sprite.ToSprite(p.(*image.NRGBA), palette, a.TileSize, mode, cfg)
+			if err != nil {
+				return err
+			}
+			tiles += ascii.FormatAssemblyDatabyte(d, "\n")
+			index++
+		}
+	}
 	return amsdos.SaveStringOSFile(folderpath+string(filepath.Separator)+"tiles.asm", tiles)
 }
 

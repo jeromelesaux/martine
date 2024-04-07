@@ -291,7 +291,7 @@ func TilemapClassical(mode uint8, isCpcPlus bool, filename, picturePath string, 
 		}
 		tilesImagesTilemap = append(tilesImagesTilemap, tilesmap)
 	}
-
+	tilemap.Tiles = tilesImagesTilemap
 	return tilemap, tilesImagesTilemap, palette
 }
 
@@ -560,7 +560,7 @@ func TilemapRaw(mode uint8, isCpcPlus bool, size constants.Size, in image.Image,
 		}
 		tilesImagesTilemap = append(tilesImagesTilemap, tilesmap)
 	}
-
+	analyze.Tiles = tilesImagesTilemap
 	// applyOneImage
 	// sort tiles
 	// check < 256 tiles

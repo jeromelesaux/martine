@@ -72,6 +72,7 @@ func NewImageMenu() *ImageMenu {
 
 func (i *ImageMenu) SetPalette(p color.Palette) {
 	i.palette = p
+	i.SetPaletteImage(png.PalToImage(i.Palette()))
 }
 
 func (i *ImageMenu) Palette() color.Palette {

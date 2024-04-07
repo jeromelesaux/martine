@@ -236,7 +236,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 								layout.NewHBoxLayout(),
 								forcePalette,
 								widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
-									w2.SwapColor(m.SetPalette, tm.Palette(), m.window, nil)
+									w2.SwapColor(tm.SetPalette, tm.Palette(), m.window, nil)
 								}),
 								m.newImageMenuExportButton(tm.ImageMenu),
 							),
