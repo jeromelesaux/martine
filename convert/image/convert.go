@@ -203,7 +203,7 @@ func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (c
 	if len(p) > size.ColorsAvailable {
 		log.GetLogger().Error("Downgraded palette size (%d) is greater than the available colors in this mode (%d)\n", len(p), size.ColorsAvailable)
 		log.GetLogger().Error("Check color usage in image.\n")
-		colorUsage := computePaletteUsage(in, p)
+		colorUsage := computePaletteUsage(in)
 		// feed sort palette colors structure
 		paletteToReduce := constants.NewPaletteReducer()
 
@@ -219,7 +219,7 @@ func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (c
 	return p, in, nil
 }
 
-func computePaletteUsage(in *image.NRGBA, p color.Palette) map[color.Color]int {
+func computePaletteUsage(in *image.NRGBA) map[color.Color]int {
 	usage := make(map[color.Color]int)
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
@@ -248,11 +248,16 @@ func downgradeWithPalette(in *image.NRGBA, p color.Palette) *image.NRGBA {
 }
 
 func ExtractPalette(in *image.NRGBA, isCpcPlus bool, nbColors int) color.Palette {
+	// colorUsage := computePaletteUsage(in)
+	// for c, _ := range colorUsage {
+	// 	fmt.Printf("original color [%v] : from palette [%v]\n", c, constants.CpcPlusPalette.Convert(c))
+	// }
 	p := []color.Color{}
 	type ks struct {
 		Key   color.Color
 		Value int
 	}
+
 	cache := make(map[color.Color]int)
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
