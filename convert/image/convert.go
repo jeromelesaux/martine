@@ -287,10 +287,7 @@ func ExtractPalette(in *image.NRGBA, isCpcPlus bool, nbColors int) color.Palette
 
 	log.GetLogger().Info("colors distribution:%v", s)
 
-	for i, v := range s {
-		if i >= nbColors {
-			break
-		}
+	for _, v := range s {
 		p = append(p, v.Key)
 	}
 
