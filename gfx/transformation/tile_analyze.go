@@ -49,22 +49,17 @@ func (b *BoardTile) AddTile(tp []TilePosition) {
 }
 
 func (a *AnalyzeBoard) Analyse(sprite *Tile, x, y int) int {
-	spriteExists := false
-	var spriteIndex int
+
 	for i, v := range a.BoardTiles {
-		s := v.Tile
-		if TilesAreEquals(s, sprite) {
-			spriteExists = true
+		if TilesAreEquals(v.Tile, sprite) {
 			a.SetAddTile(x, y, i)
-			spriteIndex = i
-			break
+			return i
 		}
 	}
-	if !spriteExists {
-		a.NewTile(sprite, x, y)
-		spriteIndex = len(a.BoardTiles)
-	}
-	return spriteIndex
+
+	a.NewTile(sprite, x, y)
+	return len(a.BoardTiles)
+
 }
 
 func (a *AnalyzeBoard) SetAddTile(x, y, index int) {
@@ -278,8 +273,12 @@ func AnalyzeTilesBoardWithTiles(im image.Image, size constants.Size, tiles []Til
 }
 
 func AnalyzeTilesBoard(im image.Image, size constants.Size) *AnalyzeBoard {
+	var heightCorrection int
+	if (im.Bounds().Max.Y % size.Height) != 0 {
+		heightCorrection = 1
+	}
 	nbTileW := im.Bounds().Max.X / size.Width
-	nbTileH := (im.Bounds().Max.Y / size.Height) - 1
+	nbTileH := (im.Bounds().Max.Y / size.Height) - (heightCorrection)
 	board := &AnalyzeBoard{
 		TileSize:   size,
 		ImageSize:  constants.Size{Width: im.Bounds().Max.X, Height: im.Bounds().Max.Y},
@@ -303,7 +302,7 @@ func AnalyzeTilesBoard(im image.Image, size constants.Size) *AnalyzeBoard {
 			sprt, err := ExtractTile(im, size, x, y)
 			if err != nil {
 				// log.GetLogger().Error( "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
-				break
+				continue
 			}
 			index := board.Analyse(sprt, x, y)
 			board.TileMap[indexY][indexX] = index
