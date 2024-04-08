@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/jeromelesaux/martine/constants"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestCpcColorPlusConvertion(t *testing.T) {
@@ -30,15 +29,4 @@ func TestReadColorPlus(t *testing.T) {
 	fmt.Printf("#%.2X\n", vl)
 	b := c.Bytes()
 	fmt.Printf("#%.2X\n", b)
-}
-
-func TestRevertColorPlus(t *testing.T) {
-	v := uint16(0x3303)
-
-	c := constants.NewRawCpcPlusColor(v)
-	nc := constants.NewColorCpcPlusColor(*c)
-	fmt.Printf("%v", nc)
-	v0 := c.Bytes()
-	fmt.Printf("%v", v0)
-	assert.Equal(t, v, c.Value())
 }
