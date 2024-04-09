@@ -278,7 +278,7 @@ func AnalyzeTilesBoard(im image.Image, size constants.Size) *AnalyzeBoard {
 		heightCorrection = 1
 	}
 	nbTileW := (im.Bounds().Max.X / size.Width) + 1
-	nbTileH := (im.Bounds().Max.Y / size.Height) - (heightCorrection)
+	nbTileH := (im.Bounds().Max.Y / size.Height) - (heightCorrection) + 1
 	board := &AnalyzeBoard{
 		TileSize:   size,
 		ImageSize:  constants.Size{Width: im.Bounds().Max.X, Height: im.Bounds().Max.Y},
