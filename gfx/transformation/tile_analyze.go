@@ -277,7 +277,7 @@ func AnalyzeTilesBoard(im image.Image, size constants.Size) *AnalyzeBoard {
 	if (im.Bounds().Max.Y % size.Height) != 0 {
 		heightCorrection = 1
 	}
-	nbTileW := im.Bounds().Max.X / size.Width
+	nbTileW := (im.Bounds().Max.X / size.Width) + 1
 	nbTileH := (im.Bounds().Max.Y / size.Height) - (heightCorrection)
 	board := &AnalyzeBoard{
 		TileSize:   size,
@@ -296,9 +296,9 @@ func AnalyzeTilesBoard(im image.Image, size constants.Size) *AnalyzeBoard {
 	board.TileMap[0][0] = 0
 
 	indexX := 1
-	for x := size.Width; x < im.Bounds().Max.X; x += size.Width {
+	for x := 0; x < im.Bounds().Max.X; x += size.Width {
 		indexY := 0
-		for y := size.Height; y < im.Bounds().Max.Y; y += size.Height {
+		for y := 0; y < im.Bounds().Max.Y; y += size.Height {
 			sprt, err := ExtractTile(im, size, x, y)
 			if err != nil {
 				// log.GetLogger().Error( "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
