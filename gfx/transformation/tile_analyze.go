@@ -432,11 +432,11 @@ func (a *AnalyzeBoard) SaveSprites(folderpath string, palette color.Palette, mod
 			return err
 		}
 
-		filename := filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", index))
-		err = sprite.ToSpriteAndExport(im, palette, v.Size, mode, filename, true, cfg)
-		if err != nil {
-			return err
-		}
+		// filename := filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", index))
+		// err = sprite.ToSpriteAndExport(im, palette, v.Size, mode, filename, true, cfg)
+		// if err != nil {
+		// 	return err
+		// }
 		d, _, _, err := sprite.ToSprite(im, palette, a.TileSize, mode, cfg)
 		if err != nil {
 			return err
@@ -530,6 +530,10 @@ func (a *AnalyzeBoard) SaveTilemap(filePath string) error {
 		return err
 	}
 	defer f.Close()
+	_, err = f.WriteString("tilemap\n")
+	if err != nil {
+		return err
+	}
 	for _, v := range a.TileMap {
 		for _, val := range v {
 			_, err := f.WriteString(fmt.Sprintf("%.2d", val) + ",")

@@ -118,7 +118,7 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 		log.GetLogger().Error("Cannot save tilemap schema error :%v\n", err)
 		return err
 	}
-	if err := choosenBoard.SaveTilemap(filepath.Join(cfg.OutputPath, "tilesmap.map")); err != nil {
+	if err := choosenBoard.SaveTilemap(filepath.Join(cfg.OutputPath, "tilesmap.asm")); err != nil {
 		log.GetLogger().Error("Cannot save tilemap csv file error :%v\n", err)
 		return err
 	}
@@ -219,7 +219,7 @@ func ExportTilemapClassical(m image.Image, filename string, board *transformatio
 		log.GetLogger().Error("Cannot save tilemap schema error :%v\n", err)
 		return err
 	}
-	if err := board.SaveTilemap(filepath.Join(cfg.OutputPath, "tilesmap.map")); err != nil {
+	if err := board.SaveTilemap(filepath.Join(cfg.OutputPath, "tilesmap.asm")); err != nil {
 		log.GetLogger().Error("Cannot save tilemap csv file error :%v\n", err)
 		return err
 	}
@@ -382,7 +382,7 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 		log.GetLogger().Error("Cannot save tilemap schema error :%v\n", err)
 		return err
 	}
-	if err := analyze.SaveTilemap(filepath.Join(cfg.OutputPath, "tilesmap.map")); err != nil {
+	if err := analyze.SaveTilemap(filepath.Join(cfg.OutputPath, "tilesmap.asm")); err != nil {
 		log.GetLogger().Error("Cannot save tilemap csv file error :%v\n", err)
 		return err
 	}
@@ -581,7 +581,7 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 		log.GetLogger().Error("Cannot save tilemap schema error :%v\n", err)
 		return err
 	}
-	if err = analyze.SaveTilemap(filepath.Join(cfg.OutputPath, "tilesmap.map")); err != nil {
+	if err = analyze.SaveTilemap(filepath.Join(cfg.OutputPath, "tilesmap.asm")); err != nil {
 		log.GetLogger().Error("Cannot save tilemap csv file error :%v\n", err)
 		return err
 	}
@@ -675,7 +675,7 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 		log.GetLogger().Error("Cannot save tilemap schema error :%v\n", err)
 		return err
 	}
-	if err = analyze.SaveTilemap(filepath.Join(cfg.OutputPath, "tilesmap.map")); err != nil {
+	if err = analyze.SaveTilemap(filepath.Join(cfg.OutputPath, "tilesmap.asm")); err != nil {
 		log.GetLogger().Error("Cannot save tilemap csv file error :%v\n", err)
 		return err
 	}
