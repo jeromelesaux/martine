@@ -296,9 +296,9 @@ func AnalyzeTilesBoard(im image.Image, size constants.Size) *AnalyzeBoard {
 	board.TileMap[0][0] = 0
 
 	indexX := 1
-	for x := 0; x < im.Bounds().Max.X; x += size.Width {
+	for x := 0; x <= im.Bounds().Max.X; x += size.Width {
 		indexY := 0
-		for y := 0; y < im.Bounds().Max.Y; y += size.Height {
+		for y := 0; y <= im.Bounds().Max.Y; y += size.Height {
 			sprt, err := ExtractTile(im, size, x, y)
 			if err != nil {
 				// log.GetLogger().Error( "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
@@ -535,13 +535,22 @@ func (a *AnalyzeBoard) SaveTilemap(filePath string) error {
 		return err
 	}
 	for _, v := range a.TileMap {
-		for _, val := range v {
+		_, err := f.WriteString("db ")
+		if err != nil {
+			return err
+		}
+		for x := 0; x < len(v)-1; x++ {
+			val := v[x]
 			_, err := f.WriteString(fmt.Sprintf("%.2d", val) + ",")
 			if err != nil {
 				return err
 			}
 		}
-		_, err := f.WriteString("\n")
+		_, err = f.WriteString(fmt.Sprintf("%.2d", v[len(v)-1]))
+		if err != nil {
+			return err
+		}
+		_, err = f.WriteString("\n")
 		if err != nil {
 			return err
 		}

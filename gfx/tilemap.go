@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"image/draw"
 	"math"
 	"os"
 	"path/filepath"
@@ -547,16 +548,19 @@ func TilemapRaw(mode uint8, isCpcPlus bool, size constants.Size, in image.Image,
 
 	analyze := transformation.AnalyzeTilesBoard(m, cfg.Size)
 
-	// now thread all maps images
-	for y := 0; y < m.Bounds().Max.Y; y += analyze.TileSize.Height {
+	// now display all maps images
+	for y := 0; y < len(analyze.TileMap); y++ {
 		tilesmap := make([]image.Image, 0)
-		for x := 0; x < m.Bounds().Max.X; x += analyze.TileSize.Width {
-			sprt, err := transformation.ExtractTile(m, analyze.TileSize, x, y)
-			if err != nil {
-				log.GetLogger().Error("Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
-				break
+		for x := 0; x < len(analyze.TileMap[y]); x++ {
+			i := analyze.TileMap[y][x]
+			if i < len(analyze.BoardTiles) {
+				tl := analyze.BoardTiles[i]
+				tilesmap = append(tilesmap, tl.Tile.Image())
+			} else {
+				bl := image.NewNRGBA(image.Rect(0, 0, analyze.TileSize.Width, analyze.TileSize.Height))
+				draw.Draw(bl, bl.Bounds(), &image.Uniform{color.Alpha16{0xFFF}}, image.Pt(0, 0), draw.Src)
+				tilesmap = append(tilesmap, bl)
 			}
-			tilesmap = append(tilesmap, sprt.Image())
 		}
 		tilesImagesTilemap = append(tilesImagesTilemap, tilesmap)
 	}
