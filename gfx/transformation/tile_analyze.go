@@ -49,7 +49,6 @@ func (b *BoardTile) AddTile(tp []TilePosition) {
 }
 
 func (a *AnalyzeBoard) Analyse(sprite *Tile, x, y int) int {
-
 	for i, v := range a.BoardTiles {
 		if TilesAreEquals(v.Tile, sprite) {
 			a.SetAddTile(x, y, i)
@@ -58,7 +57,7 @@ func (a *AnalyzeBoard) Analyse(sprite *Tile, x, y int) int {
 	}
 
 	a.NewTile(sprite, x, y)
-	return len(a.BoardTiles)
+	return len(a.BoardTiles) - 1
 
 }
 
@@ -295,10 +294,10 @@ func AnalyzeTilesBoard(im image.Image, size constants.Size) *AnalyzeBoard {
 	board.NewTile(sprt0, 0, 0)
 	board.TileMap[0][0] = 0
 
-	indexX := 1
-	for x := 0; x <= im.Bounds().Max.X; x += size.Width {
+	indexX := 0
+	for x := 0; x < im.Bounds().Max.X; x += size.Width {
 		indexY := 0
-		for y := 0; y <= im.Bounds().Max.Y; y += size.Height {
+		for y := 0; y < im.Bounds().Max.Y; y += size.Height {
 			sprt, err := ExtractTile(im, size, x, y)
 			if err != nil {
 				// log.GetLogger().Error( "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
