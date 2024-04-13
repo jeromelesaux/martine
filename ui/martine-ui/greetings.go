@@ -11,7 +11,7 @@ import (
 func (m *MartineUI) newGreedings() *fyne.Container {
 	return container.New(
 		layout.NewVBoxLayout(),
-		widget.NewRichTextFromMarkdown("# Some greedings.\n"+
+		widget.NewRichTextFromMarkdown("# Some greetings.\n"+
 			"\n## Thanks a lot to all the Impact members.\n"+
 			"\n **Ast, CMP, Demoniak, Kris and Drill**\n"+
 			"\n Specials thanks for support to :\n"+
