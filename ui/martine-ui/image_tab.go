@@ -205,7 +205,7 @@ func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 }
 
 func (m *MartineUI) syncImagePalette(i im.Image, p color.Palette) {
-	m.main.SetOriginalImage(i)
+	m.main.SetCpcImage(i)
 	m.main.SetPalette(p)
 }
 
@@ -355,7 +355,10 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 		if me.IsCpcPlus {
 			p = constants.CpcPlusPalette
 		}
-		edit := editor.NewEditor(me.OriginalImage().Image,
+		if me.CpcImage().Image == nil || me.PaletteImage().Image == nil {
+			return
+		}
+		edit := editor.NewEditor(me.CpcImage().Image,
 			editor.MagnifyX2,
 			me.Palette(),
 			p, m.syncImagePalette)
@@ -365,6 +368,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 		size = fyne.Size{Width: size.Width, Height: size.Height}
 		d.Resize(size)
 		d.Show()
+		// after the me.CpcImage().Image must be used to export
 	})
 
 	return container.New(
