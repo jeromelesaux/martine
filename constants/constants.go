@@ -163,6 +163,7 @@ func NewCpcPlusPalette() color.Palette {
 			}
 		}
 	}
+	plusPalette = SortColorsByDistance(plusPalette)
 	return plusPalette
 }
 
