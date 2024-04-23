@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
+	"github.com/jeromelesaux/fyne-io/widget/editor"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/export/amsdos"
@@ -23,6 +24,8 @@ import (
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/m4"
 	"github.com/jeromelesaux/martine/log"
+
+	im "image"
 
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/export/snapshot"
@@ -201,6 +204,11 @@ func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 	me.SetPaletteImage(png.PalToImage(me.Palette()))
 }
 
+func (m *MartineUI) syncImagePalette(i im.Image, p color.Palette) {
+	m.main.SetOriginalImage(i)
+	m.main.SetPalette(p)
+}
+
 // nolint: funlen
 func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 	importOpen := newImportButton(m, me)
@@ -342,6 +350,23 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 	warningLabel := widget.NewLabel("Setting thoses parameters will affect your palette, you can't force palette.")
 	warningLabel.TextStyle = fyne.TextStyle{Bold: true}
 
+	editButton := widget.NewButtonWithIcon("Edit", theme.DocumentCreateIcon(), func() {
+		p := constants.CpcOldPalette
+		if me.IsCpcPlus {
+			p = constants.CpcPlusPalette
+		}
+		edit := editor.NewEditor(me.OriginalImage().Image,
+			editor.MagnifyX2,
+			me.Palette(),
+			p, m.syncImagePalette)
+
+		d := dialog.NewCustom("Editor", "Ok", edit.NewEditor(), m.window)
+		size := m.window.Content().Size()
+		size = fyne.Size{Width: size.Width, Height: size.Height}
+		d.Resize(size)
+		d.Show()
+	})
+
 	return container.New(
 		layout.NewGridLayoutWithColumns(2),
 		container.New(
@@ -360,6 +385,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 				applyButton,
 				exportButton,
 				importOpen,
+				editButton,
 			),
 			container.New(
 				layout.NewHBoxLayout(),
