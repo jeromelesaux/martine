@@ -84,7 +84,7 @@ func (m *MartineUI) NewTabs() *container.AppTabs {
 		container.NewTabItem("Tile", m.newTilemapTab(m.tilemap)),
 		container.NewTabItem("Animate", m.newAnimateTab(m.animate)),
 		container.NewTabItem("Sprite Board", m.newSpriteTab(m.sprite)),
-		container.NewTabItem("Greedings", m.newGreedings()),
+		container.NewTabItem("Greetings", m.newGreedings()),
 	)
 }
 

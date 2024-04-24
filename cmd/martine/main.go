@@ -176,7 +176,7 @@ func main() {
 	flag.Parse()
 
 	if len(os.Args) == 1 {
-		os.Setenv("FYNE_SCALE", "0.75")
+		os.Setenv("FYNE_SCALE", "0.7")
 		/* main application */
 		app := app.NewWithID("Martine @IMPact")
 		martineUI := ui.NewMartineUI()
