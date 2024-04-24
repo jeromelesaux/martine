@@ -57,6 +57,7 @@ type ImageMenu struct {
 	CmdLineGenerate     string
 	UseKmeans           bool
 	KmeansThreshold     float64
+	Edited              bool
 }
 
 func NewImageMenu() *ImageMenu {
@@ -202,6 +203,12 @@ func (me *ImageMenu) SetOriginalImage(img image.Image) {
 
 func (me *ImageMenu) OriginalImage() *canvas.Image {
 	return me.originalImage
+}
+
+func (me *ImageMenu) SetImagePalette(i image.Image, p color.Palette) {
+	me.SetCpcImage(i)
+	me.SetPalette(p)
+	me.Edited = true
 }
 
 // nolint: funlen, gocognit

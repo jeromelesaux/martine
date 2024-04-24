@@ -390,3 +390,49 @@ func ApplyOneImage(in image.Image,
 	}
 	return data, out, newPalette, lineSize, err
 }
+
+func ExportRawImage(in image.Image,
+	palette color.Palette,
+	cfg *config.MartineConfig,
+	filename, picturePath string,
+	screenMode uint8) error {
+	var err error
+	//check the palette and sort it
+	palette = constants.FillColorPalette(palette)
+	palette = constants.SortColorsByDistance(palette)
+
+	// at least resize the image to be sure
+	out := ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
+	if cfg.UseKmeans {
+		log.GetLogger().Info("kmeans with %f threshold", cfg.KmeansThreshold)
+		out, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansThreshold, out)
+		if err != nil {
+			return err
+		}
+	}
+	if !cfg.CustomDimension && !cfg.SpriteHard {
+		err = Transform(out, palette, cfg.Size, picturePath, cfg)
+		if err != nil {
+			return err
+		}
+	} else {
+		if cfg.ZigZag {
+			// prepare zigzag transformation
+			out = transformation.Zigzag(out)
+		}
+		if !cfg.SpriteHard {
+			// log.GetLogger().Info( "Transform image in sprite.\n")
+			err = sprite.ToSpriteAndExport(out, palette, cfg.Size, screenMode, filename, false, cfg)
+			if err != nil {
+				return err
+			}
+		} else {
+			// log.GetLogger().Info( "Transform image in sprite hard.\n")
+			err = spritehard.ToSpriteHardAndExport(out, palette, cfg.Size, screenMode, filename, cfg)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}

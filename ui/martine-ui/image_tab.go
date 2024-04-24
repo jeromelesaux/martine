@@ -25,8 +25,6 @@ import (
 	"github.com/jeromelesaux/martine/export/m4"
 	"github.com/jeromelesaux/martine/log"
 
-	im "image"
-
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/export/snapshot"
 	"github.com/jeromelesaux/martine/gfx"
@@ -106,14 +104,24 @@ func (m *MartineUI) ExportOneImage(me *menu.ImageMenu) {
 		}
 
 		filename := filepath.Base(me.OriginalImagePath())
-		err = gfx.ApplyOneImageAndExport(
-			me.OriginalImage().Image,
-			cfg,
-			filename,
-			m.imageExport.ExportFolderPath+string(filepath.Separator)+filename,
-			me.Mode,
-			uint8(me.Mode))
-
+		if me.Edited {
+			err = gfx.ExportRawImage(
+				me.CpcImage().Image,
+				me.Palette(),
+				cfg,
+				filename,
+				m.imageExport.ExportFolderPath+string(filepath.Separator)+filename,
+				uint8(me.Mode),
+			)
+		} else {
+			err = gfx.ApplyOneImageAndExport(
+				me.OriginalImage().Image,
+				cfg,
+				filename,
+				m.imageExport.ExportFolderPath+string(filepath.Separator)+filename,
+				me.Mode,
+				uint8(me.Mode))
+		}
 		os.Remove(tmpPalette)
 
 		if err != nil {
@@ -160,6 +168,7 @@ func (m *MartineUI) monochromeColor(c color.Color) {
 }
 
 func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
+	me.Edited = false
 	cfg := m.NewConfig(me, true)
 	if cfg == nil {
 		return
@@ -202,11 +211,6 @@ func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 	}
 	me.SetCpcImage(me.Downgraded)
 	me.SetPaletteImage(png.PalToImage(me.Palette()))
-}
-
-func (m *MartineUI) syncImagePalette(i im.Image, p color.Palette) {
-	m.main.SetCpcImage(i)
-	m.main.SetPalette(p)
 }
 
 // nolint: funlen
@@ -361,7 +365,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 		edit := editor.NewEditor(me.CpcImage().Image,
 			editor.MagnifyX2,
 			me.Palette(),
-			p, m.syncImagePalette)
+			p, me.SetImagePalette)
 
 		d := dialog.NewCustom("Editor", "Ok", edit.NewEditor(), m.window)
 		size := m.window.Content().Size()
