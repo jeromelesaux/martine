@@ -10,7 +10,6 @@ require (
 	github.com/esimov/colorquant v1.0.0
 	github.com/esimov/dithergo v0.0.0-20210215145655-7f9ddf55e848
 	github.com/jeromelesaux/dsk v0.0.0-20230417191026-0e405580626b
-	github.com/jeromelesaux/fyne-io v0.0.0-20240423152922-6b0078cfa196
 	github.com/jeromelesaux/m4client v0.0.0-20230327092026-4e80fd2b1474
 	github.com/jeromelesaux/zx0 v0.0.0-20220922122216-619a0141f9e0
 	github.com/mccutchen/palettor v1.0.0
@@ -35,6 +34,7 @@ require (
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/goki/freetype v1.0.1 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
+	github.com/jeromelesaux/fyne-io v0.0.0-20240425064507-610406c0b788 // indirect
 	github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/muesli/clusters v0.0.0-20200529215643-2700303c1762 // indirect

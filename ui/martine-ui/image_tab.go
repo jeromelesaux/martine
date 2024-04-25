@@ -365,7 +365,8 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 		edit := editor.NewEditor(me.CpcImage().Image,
 			editor.MagnifyX2,
 			me.Palette(),
-			p, me.SetImagePalette)
+			p, me.SetImagePalette,
+			m.window)
 
 		d := dialog.NewCustom("Editor", "Ok", edit.NewEditor(), m.window)
 		size := m.window.Content().Size()
