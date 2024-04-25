@@ -75,8 +75,8 @@ func (m *MartineUI) exportDialog(ie *menu.ImageExport, w fyne.Window) {
 				directory.SetExportDirectoryURI(lu)
 				ie.ExportFolderPath = lu.Path()
 				log.GetLogger().Infoln(ie.ExportFolderPath)
-				m.ExportOneImage(m.main)
-
+				// m.ExportOneImage(m.main)
+				m.main.ExportImage(m.imageExport, m.window, m.NewConfig)
 				// apply and export
 			}, m.window)
 			d, err := directory.ExportDirectoryURI()

@@ -10,6 +10,7 @@ import (
 var savedDirectoryPath fyne.URI
 var openDirectoryPath fyne.URI
 
+// nolint: ireturn
 func ExportDirectoryURI() (fyne.ListableURI, error) {
 	if savedDirectoryPath == nil {
 		return nil, fmt.Errorf("empty saved directory path")
@@ -21,6 +22,7 @@ func SetExportDirectoryURI(path fyne.URI) {
 	savedDirectoryPath = path
 }
 
+// nolint: ireturn
 func ImportDirectoryURI() (fyne.ListableURI, error) {
 	if openDirectoryPath == nil {
 		return nil, fmt.Errorf("empty saved directory path")

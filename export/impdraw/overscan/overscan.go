@@ -71,7 +71,7 @@ func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 			// if err == nil {
 			c := constants.NewRawCpcPlusColor(pc)
 			log.GetLogger().Info("PEN(%d) R(%d) G(%d) B(%d)\n", i, c.R, c.G, c.B)
-			col := color.RGBA{A: 0xff, B: uint8(c.B) << 4, G: uint8(c.G) << 4, R: uint8(c.R) << 4}
+			col := color.RGBA{A: 0xff, B: c.B << 4, G: c.G << 4, R: c.R << 4}
 			palette = append(palette, col)
 			// } else {
 			// 	palette = append(palette, color.Black)
