@@ -13,6 +13,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
+	"github.com/jeromelesaux/fyne-io/widget/editor"
+	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/log"
 
 	ci "github.com/jeromelesaux/martine/convert/image"
@@ -322,6 +324,27 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 		me.OneRow = b
 	})
 
+	editButton := widget.NewButtonWithIcon("Edit", theme.DocumentCreateIcon(), func() {
+		p := constants.CpcOldPalette
+		if me.IsCpcPlus {
+			p = constants.CpcPlusPalette
+		}
+		if me.CpcImage().Image == nil || me.PaletteImage().Image == nil {
+			return
+		}
+		edit := editor.NewEditor(me.CpcImage().Image,
+			editor.MagnifyX2,
+			me.Palette(),
+			p, me.SetImagePalette,
+			m.window)
+
+		d := dialog.NewCustom("Editor", "Ok", edit.NewEditor(), m.window)
+		size := m.window.Content().Size()
+		size = fyne.Size{Width: size.Width, Height: size.Height}
+		d.Resize(size)
+		d.Show()
+		// after the me.CpcImage().Image must be used to export
+	})
 	return container.New(
 		layout.NewGridLayoutWithColumns(2),
 		container.New(
@@ -340,6 +363,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 				applyButton,
 				exportButton,
 				importOpen,
+				editButton,
 			),
 			container.New(
 				layout.NewHBoxLayout(),
