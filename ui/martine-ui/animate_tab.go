@@ -45,7 +45,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						return
 					}
 					directory.SetExportDirectoryURI(lu)
-					cfg := a.ImageMenu.NewConfig(m.imageExport, false)
+					cfg := a.NewConfig(m.animateExport, false)
 					if cfg == nil {
 						return
 					}
@@ -131,7 +131,7 @@ func CheckWidthSize(width, mode int) bool {
 }
 
 func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
-	cfg := a.ImageMenu.NewConfig(m.imageExport, true)
+	cfg := a.NewConfig(m.animateExport, false)
 	if cfg == nil {
 		return
 	}

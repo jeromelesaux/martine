@@ -13,6 +13,7 @@ type ImageExport struct {
 	M2IP                   string
 	ExportToM2             bool
 	ExportAsGoFiles        bool
+	ExportImpdraw          bool
 }
 
 func (ie *ImageExport) Reset() {
