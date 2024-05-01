@@ -1,6 +1,7 @@
 package screen
 
 import (
+	"errors"
 	"image"
 	"image/color"
 
@@ -368,6 +369,9 @@ func ScrToImg(scrPath string, mode uint8, p color.Palette) (*image.NRGBA, error)
 	d, err := ocpartstudio.RawScr(scrPath)
 	if err != nil {
 		return nil, err
+	}
+	if len(d) < (m.Width * m.Height) {
+		return nil, errors.New("bad format")
 	}
 	switch mode {
 	case 0:
