@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
@@ -32,6 +33,7 @@ import (
 	"github.com/jeromelesaux/martine/export/snapshot"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/log"
+	dl "github.com/jeromelesaux/martine/ui/martine-ui/dialog"
 	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 )
 
@@ -68,6 +70,7 @@ type ImageMenu struct {
 	UseKmeans           bool
 	KmeansThreshold     float64
 	Edited              bool
+	w                   fyne.Window
 }
 
 func NewImageMenu() *ImageMenu {
@@ -79,6 +82,10 @@ func NewImageMenu() *ImageMenu {
 		height:        widget.NewEntry(),
 		Downgraded:    &image.NRGBA{},
 	}
+}
+
+func (i *ImageMenu) SetWindow(w fyne.Window) {
+	i.w = w
 }
 
 func (i *ImageMenu) SetPalette(p color.Palette) {
@@ -221,89 +228,11 @@ func (me *ImageMenu) SetImagePalette(i image.Image, p color.Palette) {
 	me.Edited = true
 }
 
-// nolint: funlen, gocognit
-func (me *ImageMenu) NewImportButton(dialogSize fyne.Size, modeSelection *widget.Select, refreshUI *widget.Button, win fyne.Window) *widget.Button {
-	return widget.NewButtonWithIcon("Import", theme.FileImageIcon(), func() {
-		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
-			if err != nil {
-				dialog.ShowError(err, win)
-				return
-			}
-			if reader == nil {
-				return
-			}
-			me.originalImagePath = reader.URI()
-			if me.IsFullScreen {
-
-				// open palette widget to get palette
-				p, mode, err := overscan.OverscanPalette(me.originalImagePath.Path())
-				if err != nil {
-					dialog.ShowError(err, win)
-					return
-				}
-				if len(p) == 0 {
-					dialog.ShowError(fmt.Errorf("no palette found in selected file, try to normal option and open the associated palette"), win)
-					return
-				}
-				img, err := ovs.OverscanToImg(me.originalImagePath.Path(), mode, p)
-				if err != nil {
-					dialog.ShowError(err, win)
-					return
-				}
-				if len(p) == 0 {
-					dialog.ShowError(errors.New("palette is empty"), win)
-					return
-				}
-				me.palette = p
-				me.Mode = int(mode)
-				modeSelection.SetSelectedIndex(me.Mode)
-
-				me.SetPaletteImage(png.PalToImage(p))
-				me.SetOriginalImage(img)
-			} else if me.IsSprite {
-				// loading sprite file
-				if len(me.palette) == 0 {
-					dialog.ShowError(errors.New("palette is empty, please import palette first"), win)
-					return
-				}
-				img, size, err := sprite.SpriteToImg(me.originalImagePath.Path(), uint8(me.Mode), me.Palette())
-				if err != nil {
-					dialog.ShowError(err, win)
-					return
-				}
-				me.width.SetText(strconv.Itoa(size.Width))
-				me.height.SetText(strconv.Itoa(size.Height))
-				me.SetOriginalImage(img)
-			} else {
-				// loading classical screen
-				if len(me.Palette()) == 0 {
-					dialog.ShowError(errors.New("palette is empty,  please import palette first, or select fullscreen option to open a fullscreen option"), win)
-					return
-				}
-				img, err := screen.ScrToImg(me.originalImagePath.Path(), uint8(me.Mode), me.Palette())
-				if err != nil {
-					dialog.ShowError(err, win)
-					return
-				}
-				me.SetOriginalImage(img)
-			}
-			refreshUI.OnTapped()
-		}, win)
-		path, err := directory.ImportDirectoryURI()
-		if err == nil {
-			d.SetLocation(path)
-		}
-		d.SetFilter(storage.NewExtensionFileFilter([]string{".scr", ".win", ".bin"}))
-		d.Resize(dialogSize)
-		d.Show()
-	})
-}
-
 // nolint:funlen, gocognit
-func (me *ImageMenu) ExportImage(e *ImageExport, w fyne.Window, getCfg func(me *ImageMenu, checkOriginalImage bool) *config.MartineConfig) {
+func (me *ImageMenu) ExportImage(e *ImageExport, w fyne.Window, getCfg func(me *ImageExport, checkOriginalImage bool) *config.MartineConfig) {
 	pi := wgt.NewProgressInfinite("Saving...., Please wait.", w)
 	pi.Show()
-	cfg := getCfg(me, true)
+	cfg := getCfg(e, true)
 	if cfg == nil {
 		return
 	}
@@ -404,4 +333,269 @@ func (me *ImageMenu) ExportImage(e *ImageExport, w fyne.Window, getCfg func(me *
 	}
 	pi.Hide()
 	dialog.ShowInformation("Save", "Your files are save in folder \n"+e.ExportFolderPath, w)
+}
+
+func (me *ImageMenu) NewConfig(ex *ImageExport, checkOriginalImage bool) *config.MartineConfig {
+	if checkOriginalImage && me.OriginalImagePath() == "" {
+		return nil
+	}
+	var cfg *config.MartineConfig
+	if checkOriginalImage {
+		cfg = config.NewMartineConfig(me.OriginalImagePath(), "")
+	} else {
+		cfg = config.NewMartineConfig("", "")
+	}
+	cfg.CpcPlus = me.IsCpcPlus
+	cfg.Overscan = me.IsFullScreen
+	cfg.DitheringMultiplier = me.DitheringMultiplier
+	cfg.Brightness = me.Brightness
+	cfg.Saturation = me.Saturation
+
+	if me.Brightness > 0 && me.Saturation == 0 {
+		cfg.Saturation = me.Brightness
+	}
+	if me.Brightness == 0 && me.Saturation > 0 {
+		cfg.Brightness = me.Saturation
+	}
+	cfg.Reducer = me.Reducer
+	cfg.Size = constants.NewSizeMode(uint8(me.Mode), me.IsFullScreen)
+	if me.IsSprite {
+		width, _, err := me.GetWidth()
+		if err != nil {
+			dialog.NewError(err, me.w).Show()
+			return nil
+		}
+		height, _, err := me.GetHeight()
+		if err != nil {
+			dialog.NewError(err, me.w).Show()
+			return nil
+		}
+		cfg.Size.Height = height
+		cfg.Size.Width = width
+		cfg.CustomDimension = true
+	}
+	if me.IsHardSprite {
+		cfg.Size.Height = 16
+		cfg.Size.Width = 16
+	}
+
+	if me.ApplyDithering {
+		cfg.DitheringAlgo = 0
+		cfg.DitheringMatrix = me.DitheringMatrix
+		cfg.DitheringType = me.DitheringType
+		if me.DitheringMultiplier == 0 {
+			cfg.DitheringMultiplier = .1
+		} else {
+			cfg.DitheringMultiplier = me.DitheringMultiplier
+		}
+	} else {
+		cfg.DitheringAlgo = -1
+	}
+	cfg.DitheringWithQuantification = me.WithQuantification
+	cfg.OutputPath = ex.ExportFolderPath
+	if checkOriginalImage {
+		cfg.InputPath = me.OriginalImagePath()
+	}
+	cfg.Json = ex.ExportJson
+	cfg.Ascii = ex.ExportText
+	cfg.NoAmsdosHeader = !ex.ExportWithAmsdosHeader
+	cfg.ZigZag = ex.ExportZigzag
+	cfg.Compression = ex.ExportCompression
+	cfg.Dsk = ex.ExportDsk
+	cfg.ExportAsGoFile = ex.ExportAsGoFiles
+	cfg.OneLine = me.OneLine
+	cfg.OneRow = me.OneRow
+	cfg.UseKmeans = me.UseKmeans
+	cfg.KmeansThreshold = me.KmeansThreshold
+	if cfg.UseKmeans && me.KmeansThreshold == 0 {
+		cfg.KmeansThreshold = 0.01
+	}
+
+	return cfg
+}
+
+func (me *ImageMenu) ExportDialog(ie *ImageExport) {
+	m2host := widget.NewEntry()
+	m2host.SetPlaceHolder("Set your M2 IP here.")
+	ie.Reset()
+
+	cont := container.NewVBox(
+		container.NewHBox(
+			widget.NewCheck("import all file in Dsk", func(b bool) {
+				ie.ExportDsk = b
+			}),
+			widget.NewCheck("export as Go1 and Go2 files", func(b bool) {
+				ie.ExportAsGoFiles = b
+			}),
+			widget.NewCheck("export text file", func(b bool) {
+				ie.ExportText = b
+			}),
+			widget.NewCheck("export Json file", func(b bool) {
+				ie.ExportJson = b
+			}),
+			widget.NewCheck("add amsdos header", func(b bool) {
+				ie.ExportWithAmsdosHeader = b
+			}),
+			widget.NewCheck("apply zigzag", func(b bool) {
+				ie.ExportZigzag = b
+			}),
+			widget.NewCheck("export to M2", func(b bool) {
+				ie.ExportToM2 = b
+				ie.M2IP = m2host.Text
+			}),
+		),
+
+		widget.NewLabel("Compression type:"),
+		widget.NewSelect([]string{"none", "rle", "rle 16bits", "Lz4 Classic", "Lz4 Raw", "zx0 crunch"},
+			func(s string) {
+				switch s {
+				case "none":
+					ie.ExportCompression = 0
+				case "rle":
+					ie.ExportCompression = 1
+				case "rle 16bits":
+					ie.ExportCompression = 2
+				case "Lz4 Classic":
+					ie.ExportCompression = 3
+				case "Lz4 Raw":
+					ie.ExportCompression = 4
+				case "zx0 crunch":
+					ie.ExportCompression = 5
+				}
+			}),
+		m2host,
+		widget.NewButtonWithIcon("Export into folder", theme.DocumentSaveIcon(), func() {
+			fo := dialog.NewFolderOpen(func(lu fyne.ListableURI, err error) {
+				if err != nil {
+					dialog.ShowError(err, me.w)
+					return
+				}
+				if lu == nil {
+					// cancel button
+					return
+				}
+				directory.SetExportDirectoryURI(lu)
+				ie.ExportFolderPath = lu.Path()
+				log.GetLogger().Infoln(ie.ExportFolderPath)
+				// m.ExportOneImage(m.main)
+				me.ExportImage(ie, me.w, me.NewConfig)
+				// apply and export
+			}, me.w)
+			d, err := directory.ExportDirectoryURI()
+			if err == nil {
+				fo.SetLocation(d)
+			}
+			fo.Resize(me.w.Content().Size())
+
+			dl.CheckAmsdosHeaderExport(ie.ExportDsk, ie.ExportWithAmsdosHeader, fo, me.w)
+		}),
+	)
+
+	d := dialog.NewCustom("Export options", "Ok", cont, me.w)
+	d.Resize(me.w.Canvas().Size())
+	d.Show()
+}
+
+func (i *ImageMenu) NewImportButton(modeSelection *widget.Select, callBack func()) *widget.Button {
+	return widget.NewButtonWithIcon("Import", theme.FileImageIcon(), func() {
+		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+			if err != nil {
+				dialog.ShowError(err, i.w)
+				return
+			}
+			if reader == nil {
+				return
+			}
+			directory.SetImportDirectoryURI(reader.URI())
+			i.SetOriginalImagePath(reader.URI())
+			if i.IsFullScreen {
+
+				// open palette widget to get palette
+				p, mode, err := overscan.OverscanPalette(i.OriginalImagePath())
+				if err != nil {
+					dialog.ShowError(err, i.w)
+					return
+				}
+				if len(p) == 0 {
+					dialog.ShowError(fmt.Errorf("no palette found in selected file, try to normal option and open the associated palette"), i.w)
+					return
+				}
+				img, err := ovs.OverscanToImg(i.OriginalImagePath(), mode, p)
+				if err != nil {
+					dialog.ShowError(err, i.w)
+					return
+				}
+				if len(p) == 0 {
+					dialog.ShowError(errors.New("palette is empty"), i.w)
+					return
+				}
+				i.SetPalette(p)
+				i.Mode = int(mode)
+				modeSelection.SetSelectedIndex(i.Mode)
+				i.SetPaletteImage(png.PalToImage(p))
+				i.SetOriginalImage(img)
+			} else if i.IsSprite {
+				// loading sprite file
+				if len(i.Palette()) == 0 {
+					dialog.ShowError(errors.New("palette is empty, please import palette first"), i.w)
+					return
+				}
+				img, size, err := sprite.SpriteToImg(i.OriginalImagePath(), uint8(i.Mode), i.Palette())
+				if err != nil {
+					dialog.ShowError(err, i.w)
+					return
+				}
+				i.Width().SetText(strconv.Itoa(size.Width))
+				i.Height().SetText(strconv.Itoa(size.Height))
+				i.SetOriginalImage(img)
+			} else {
+				// loading classical screen
+				if len(i.Palette()) == 0 {
+					dialog.ShowError(errors.New("palette is empty,  please import palette first, or select fullscreen option to open a fullscreen option"), i.w)
+					return
+				}
+				img, err := screen.ScrToImg(i.OriginalImagePath(), uint8(i.Mode), i.Palette())
+				if err != nil {
+					dialog.ShowError(err, i.w)
+					return
+				}
+				i.SetOriginalImage(img)
+			}
+			if callBack != nil {
+				callBack()
+			}
+		}, i.w)
+		path, err := directory.ImportDirectoryURI()
+		if err == nil {
+			d.SetLocation(path)
+		}
+		d.SetFilter(storage.NewExtensionFileFilter([]string{".scr", ".win", ".bin"}))
+		d.Resize(i.w.Content().Size())
+		d.Show()
+	})
+}
+
+func (me *ImageMenu) NewFormatRadio() *widget.Select {
+	winFormat := widget.NewSelect([]string{"Normal", "Fullscreen", "Sprite", "Sprite Hard"}, func(s string) {
+		switch s {
+		case "Normal":
+			me.IsFullScreen = false
+			me.IsSprite = false
+			me.IsHardSprite = false
+		case "Fullscreen":
+			me.IsFullScreen = true
+			me.IsSprite = false
+			me.IsHardSprite = false
+		case "Sprite":
+			me.IsFullScreen = false
+			me.IsSprite = true
+			me.IsHardSprite = false
+		case "Sprite Hard":
+			me.IsFullScreen = false
+			me.IsSprite = false
+			me.IsHardSprite = true
+		}
+	})
+	winFormat.SetSelected("Normal")
+	return winFormat
 }

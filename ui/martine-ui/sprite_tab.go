@@ -31,6 +31,7 @@ import (
 	"github.com/jeromelesaux/martine/gfx/sprite"
 	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
+	pal "github.com/jeromelesaux/martine/ui/martine-ui/palette"
 )
 
 // nolint: funlen
@@ -202,7 +203,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) *fyne.Container {
 		s.IsCpcPlus = b
 	})
 
-	paletteOpen := NewOpenPaletteButton(s, m.window)
+	paletteOpen := pal.NewOpenPaletteButton(s, m.window)
 	importOpen := ImportSpriteBoard(m)
 	gifOpen := applySpriteBoardFromGif(s, m)
 

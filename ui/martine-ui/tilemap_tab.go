@@ -25,6 +25,7 @@ import (
 	"github.com/jeromelesaux/martine/log"
 	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
+	pal "github.com/jeromelesaux/martine/ui/martine-ui/palette"
 	w2 "github.com/jeromelesaux/martine/ui/martine-ui/widget"
 )
 
@@ -38,7 +39,7 @@ func (m *MartineUI) IsClassicalTilemap(width, height int) bool {
 }
 
 func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
-	cfg := m.NewConfig(me.ImageMenu, true)
+	cfg := me.ImageMenu.NewConfig(m.imageExport, true)
 	if cfg == nil {
 		return
 	}
@@ -109,10 +110,11 @@ func (m *MartineUI) newImageMenuExportButton(tm *menu.ImageMenu) *widget.Button 
 
 // nolint: funlen, gocognit
 func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
+	tm.ImageMenu.SetWindow(m.window)
 	tm.IsSprite = true
 	importOpen := newImportButton(m, tm.ImageMenu)
 
-	paletteOpen := NewOpenPaletteButton(tm.ImageMenu, m.window)
+	paletteOpen := pal.NewOpenPaletteButton(tm.ImageMenu, m.window)
 
 	forcePalette := widget.NewCheck("use palette", func(b bool) {
 		tm.UsePalette = b

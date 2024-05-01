@@ -19,6 +19,7 @@ import (
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
+// TODO to suppres this function
 // nolint: funlen, gocognit
 func newImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 	return widget.NewButtonWithIcon("Import", theme.FileImageIcon(), func() {

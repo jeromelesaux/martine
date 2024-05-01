@@ -25,6 +25,7 @@ import (
 	"github.com/jeromelesaux/martine/gfx/effect"
 	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
+	pal "github.com/jeromelesaux/martine/ui/martine-ui/palette"
 	w2 "github.com/jeromelesaux/martine/ui/martine-ui/widget"
 )
 
@@ -67,7 +68,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 		palette = di.RightImage.Palette()
 		secondIm = di.LeftImage
 	}
-	cfg := m.NewConfig(im, false)
+	cfg := im.NewConfig(m.imageExport, false)
 	if cfg == nil {
 		return
 	}
@@ -203,9 +204,10 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) *fyne.Container {
 
 // nolint: funlen
 func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
+	me.SetWindow(m.window)
 	importOpen := newImportButton(m, me)
 
-	paletteOpen := NewOpenPaletteButton(me, m.window)
+	paletteOpen := pal.NewOpenPaletteButton(me, m.window)
 
 	forcePalette := widget.NewCheck("use palette", func(b bool) {
 		me.UsePalette = b
@@ -239,7 +241,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 	})
 
 	exportButton := widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
-		m.exportDialog(m.imageExport, m.window)
+		me.ExportDialog(m.imageExport)
 	})
 
 	applyButton := widget.NewButtonWithIcon("Apply", theme.VisibilityIcon(), func() {
@@ -249,7 +251,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 
 	openFileWidget.Icon = theme.FileImageIcon()
 
-	winFormat := w2.NewScreenFormatRadio(me)
+	winFormat := me.NewFormatRadio()
 
 	colorReducerLabel := widget.NewLabel("Color reducer")
 	colorReducer := widget.NewSelect([]string{"none", "Lower", "Medium", "Strong"}, func(s string) {

@@ -26,6 +26,7 @@ import (
 	"github.com/jeromelesaux/martine/log"
 	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
+	pal "github.com/jeromelesaux/martine/ui/martine-ui/palette"
 	w2 "github.com/jeromelesaux/martine/ui/martine-ui/widget"
 )
 
@@ -44,7 +45,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						return
 					}
 					directory.SetExportDirectoryURI(lu)
-					cfg := m.NewConfig(a.ImageMenu, false)
+					cfg := a.ImageMenu.NewConfig(m.imageExport, false)
 					if cfg == nil {
 						return
 					}
@@ -130,7 +131,7 @@ func CheckWidthSize(width, mode int) bool {
 }
 
 func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
-	cfg := m.NewConfig(a.ImageMenu, false)
+	cfg := a.ImageMenu.NewConfig(m.imageExport, true)
 	if cfg == nil {
 		return
 	}
@@ -167,9 +168,10 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 
 // nolint:funlen, gocognit
 func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
+	a.ImageMenu.SetWindow(m.window)
 	importOpen := newImportButton(m, a.ImageMenu)
 
-	paletteOpen := NewOpenPaletteButton(a.ImageMenu, m.window)
+	paletteOpen := pal.NewOpenPaletteButton(a.ImageMenu, m.window)
 
 	forcePalette := widget.NewCheck("use palette", func(b bool) {
 		a.UsePalette = b

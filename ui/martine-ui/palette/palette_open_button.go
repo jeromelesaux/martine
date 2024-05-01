@@ -1,4 +1,4 @@
-package ui
+package palette
 
 import (
 	"image"
@@ -58,7 +58,7 @@ func NewOpenPaletteButton(m PaletteInterface, win fyne.Window) *widget.Button {
 			d.SetLocation(path)
 		}
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".pal", ".kit"}))
-		d.Resize(dialogSize)
+		d.Resize(win.Content().Size())
 		d.Show()
 	})
 }
