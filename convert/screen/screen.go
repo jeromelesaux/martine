@@ -11,6 +11,7 @@ import (
 	"github.com/jeromelesaux/martine/convert/palette"
 	"github.com/jeromelesaux/martine/convert/pixel"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
+	"github.com/jeromelesaux/martine/export/ocpartstudio/window"
 	"github.com/jeromelesaux/martine/export/png"
 )
 
@@ -332,6 +333,27 @@ func setImageMode2(out *image.NRGBA, p color.Palette, d []byte, width, height in
 		cpcRow = 0
 	}
 	return out
+}
+
+func WinToImg(path string, mode uint8, p color.Palette) (*image.NRGBA, error) {
+	footer, err := window.OpenWin(path)
+	if err != nil {
+		return nil, err
+	}
+	data, err := window.RawWin(path)
+	if err != nil {
+		return nil, err
+	}
+	out := image.NewNRGBA(image.Rectangle{
+		Min: image.Point{X: 0, Y: 0},
+		Max: image.Point{X: int(footer.Width), Y: int(footer.Height)}})
+	for w := 0; w < int(footer.Width); w++ {
+		for h := 0; h < int(footer.Height); h++ {
+			d := data[h+(w*int(footer.Width))]
+			out.Set(w, h, p[d])
+		}
+	}
+	return out, nil
 }
 
 // SrcToImg load the amstrad classical 17ko  screen image to image.NRBGA

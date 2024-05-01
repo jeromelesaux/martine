@@ -45,6 +45,7 @@ type ImageMenu struct {
 	IsFullScreen        bool
 	IsSprite            bool
 	IsHardSprite        bool
+	IsWin               bool
 	Mode                int
 	width               *widget.Entry
 	height              *widget.Entry
@@ -554,12 +555,26 @@ func (i *ImageMenu) NewImportButton(modeSelection *widget.Select, callBack func(
 					dialog.ShowError(errors.New("palette is empty,  please import palette first, or select fullscreen option to open a fullscreen option"), i.w)
 					return
 				}
-				img, err := screen.ScrToImg(i.OriginalImagePath(), uint8(i.Mode), i.Palette())
-				if err != nil {
-					dialog.ShowError(err, i.w)
-					return
+				if i.IsWin {
+					img, err := screen.WinToImg(i.OriginalImagePath(), uint8(i.Mode), i.Palette())
+					if err != nil {
+						dialog.ShowError(err, i.w)
+						return
+					}
+					i.SetOriginalImage(img)
+				} else {
+					// loading classical screen
+					if len(i.Palette()) == 0 {
+						dialog.ShowError(errors.New("palette is empty,  please import palette first, or select fullscreen option to open a fullscreen option"), i.w)
+						return
+					}
+					img, err := screen.ScrToImg(i.OriginalImagePath(), uint8(i.Mode), i.Palette())
+					if err != nil {
+						dialog.ShowError(err, i.w)
+						return
+					}
+					i.SetOriginalImage(img)
 				}
-				i.SetOriginalImage(img)
 			}
 			if callBack != nil {
 				callBack()
@@ -576,24 +591,33 @@ func (i *ImageMenu) NewImportButton(modeSelection *widget.Select, callBack func(
 }
 
 func (me *ImageMenu) NewFormatRadio() *widget.Select {
-	winFormat := widget.NewSelect([]string{"Normal", "Fullscreen", "Sprite", "Sprite Hard"}, func(s string) {
+	winFormat := widget.NewSelect([]string{"Normal", "Fullscreen", "Window", "Sprite", "Sprite Hard"}, func(s string) {
 		switch s {
 		case "Normal":
 			me.IsFullScreen = false
 			me.IsSprite = false
+			me.IsWin = false
 			me.IsHardSprite = false
 		case "Fullscreen":
 			me.IsFullScreen = true
 			me.IsSprite = false
+			me.IsWin = false
 			me.IsHardSprite = false
 		case "Sprite":
 			me.IsFullScreen = false
 			me.IsSprite = true
+			me.IsWin = false
 			me.IsHardSprite = false
 		case "Sprite Hard":
 			me.IsFullScreen = false
 			me.IsSprite = false
+			me.IsWin = false
 			me.IsHardSprite = true
+		case "Window":
+			me.IsFullScreen = false
+			me.IsSprite = false
+			me.IsHardSprite = false
+			me.IsWin = true
 		}
 	})
 	winFormat.SetSelected("Normal")

@@ -19,6 +19,7 @@ func (m *MartineUI) newGreedings() *fyne.Container {
 			"\n - **Tronic**\n"+
 			"\n - **Siko**\n"+
 			"\n - **Roudoudou**\n"+
+			"\n - **Hwikaa**\n"+
 			"\n - and thanks a lot to all users^^\n"+
 			"\nfor more informations about this tool, go to [Martine's Github page](https://github.com/jeromelesaux/martine)\n"+
 			"\nfor more informations about my tool go to [github](https://github.com/jeromelesaux)\n"+

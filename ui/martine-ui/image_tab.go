@@ -103,7 +103,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 	me.SetWindow(m.window)
 	importOpen := newImportButton(m, me)
 
-	paletteOpen := pal.NewOpenPaletteButton(me, m.window)
+	paletteOpen := pal.NewOpenPaletteButton(me, m.window, nil)
 
 	forcePalette := widget.NewCheck("use palette", func(b bool) {
 		me.UsePalette = b

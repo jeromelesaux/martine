@@ -22,7 +22,7 @@ type PaletteInterface interface {
 	SetPaletteImage(image.Image)
 }
 
-func NewOpenPaletteButton(m PaletteInterface, win fyne.Window) *widget.Button {
+func NewOpenPaletteButton(m PaletteInterface, win fyne.Window, callback func()) *widget.Button {
 	return widget.NewButtonWithIcon("Palette", theme.ColorChromaticIcon(), func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {
@@ -51,6 +51,9 @@ func NewOpenPaletteButton(m PaletteInterface, win fyne.Window) *widget.Button {
 				}
 				m.SetPalette(p)
 				m.SetPaletteImage(png.PalToImage(p))
+			}
+			if callback != nil {
+				callback()
 			}
 		}, win)
 		path, err := directory.ImportDirectoryURI()

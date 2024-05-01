@@ -171,7 +171,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
 	a.ImageMenu.SetWindow(m.window)
 	importOpen := newImportButton(m, a.ImageMenu)
 
-	paletteOpen := pal.NewOpenPaletteButton(a.ImageMenu, m.window)
+	paletteOpen := pal.NewOpenPaletteButton(a.ImageMenu, m.window, nil)
 
 	forcePalette := widget.NewCheck("use palette", func(b bool) {
 		a.UsePalette = b

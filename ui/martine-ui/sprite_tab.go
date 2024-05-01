@@ -203,7 +203,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) *fyne.Container {
 		s.IsCpcPlus = b
 	})
 
-	paletteOpen := pal.NewOpenPaletteButton(s, m.window)
+	paletteOpen := pal.NewOpenPaletteButton(s, m.window, nil)
 	importOpen := ImportSpriteBoard(m)
 	gifOpen := applySpriteBoardFromGif(s, m)
 

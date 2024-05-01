@@ -114,7 +114,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 	tm.IsSprite = true
 	importOpen := newImportButton(m, tm.ImageMenu)
 
-	paletteOpen := pal.NewOpenPaletteButton(tm.ImageMenu, m.window)
+	paletteOpen := pal.NewOpenPaletteButton(tm.ImageMenu, m.window, nil)
 
 	forcePalette := widget.NewCheck("use palette", func(b bool) {
 		tm.UsePalette = b
