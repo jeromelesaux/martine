@@ -39,7 +39,7 @@ func (m *MartineUI) IsClassicalTilemap(width, height int) bool {
 }
 
 func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
-	cfg := me.ImageMenu.NewConfig(m.imageExport, true)
+	cfg := me.ImageMenu.NewConfig(m.tilemapExport, true)
 	if cfg == nil {
 		return
 	}

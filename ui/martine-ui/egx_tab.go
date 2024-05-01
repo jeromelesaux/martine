@@ -68,7 +68,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 		palette = di.RightImage.Palette()
 		secondIm = di.LeftImage
 	}
-	cfg := im.NewConfig(m.imageExport, false)
+	cfg := im.NewConfig(m.egxExport, false)
 	if cfg == nil {
 		return
 	}

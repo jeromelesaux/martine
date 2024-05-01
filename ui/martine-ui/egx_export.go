@@ -110,7 +110,7 @@ func (m *MartineUI) exportEgxDialog(ie *menu.ImageExport, w fyne.Window) {
 func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	pi := wgt.NewProgressInfinite("Saving...., please wait.", m.window)
 	pi.Show()
-	cfg := me.LeftImage.NewConfig(m.imageExport, true)
+	cfg := me.LeftImage.NewConfig(m.egxExport, true)
 	if cfg == nil {
 		pi.Hide()
 		return
