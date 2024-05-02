@@ -16,7 +16,7 @@ require (
 	github.com/oliamb/cutter v0.2.2
 	github.com/pbnjay/pixfont v0.0.0-20200714042608-33b744692567
 	github.com/pierrec/lz4 v2.6.1+incompatible
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
@@ -34,7 +34,7 @@ require (
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/goki/freetype v1.0.1 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
-	github.com/jeromelesaux/fyne-io v0.0.0-20240501091249-bc1d31dc25dd
+	github.com/jeromelesaux/fyne-io v0.0.0-20240501192640-7a74c8748a33
 	github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/muesli/clusters v0.0.0-20200529215643-2700303c1762 // indirect
