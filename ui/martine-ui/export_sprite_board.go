@@ -13,11 +13,13 @@ import (
 	"fyne.io/fyne/v2/widget"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/config"
+	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/compression"
 	"github.com/jeromelesaux/martine/export/diskimage"
+	"github.com/jeromelesaux/martine/export/impdraw/palette"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
 	"github.com/jeromelesaux/martine/export/ocpartstudio/window"
@@ -149,6 +151,13 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			code += fmt.Sprintf("spr_%.2d:\n", idx)
 			code += routine
 		}
+
+		kitPalette := palette.KitPalette{}
+		for i := 0; i < len(s.Palette()); i++ {
+			kitPalette.Colors[i] = constants.NewCpcPlusColor(s.Palette()[i])
+		}
+		code += "palette:\n"
+		code += kitPalette.ToString()
 
 		if err := amsdos.SaveStringOSFile(s.ExportFolderPath+string(filepath.Separator)+"compiled_sprites.asm", code); err != nil {
 			pi.Hide()
