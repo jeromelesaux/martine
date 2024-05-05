@@ -85,7 +85,6 @@ func OpenWin(filePath string) (*OcpWinFooter, error) {
 	}
 
 	ocpWinFooter := &OcpWinFooter{}
-	//_, err = fr.Seek(-5, io.SeekEnd)
 
 	log.GetLogger().Info("LogicalSize=%d\n", header.LogicalSize)
 	_, err = fr.Seek(0x80+int64(header.LogicalSize)-5, io.SeekStart)

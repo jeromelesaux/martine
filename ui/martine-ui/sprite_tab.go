@@ -72,6 +72,7 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 		pal = constants.FillColorPalette(pal)
 		pal = constants.SortColorsByDistance(pal)
 		s.SetPalette(pal)
+		s.UsePalette = false
 	}
 
 	size := constants.Size{Width: s.SpriteWidth, Height: s.SpriteHeight}
