@@ -264,7 +264,11 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) *fyne.Container {
 				),
 			),
 			container.New(
-				layout.NewGridLayoutWithRows(2),
+				layout.NewGridLayoutWithRows(3),
+				container.New(layout.NewVBoxLayout(),
+					widget.NewCheck("Use this palette", func(b bool) {
+						s.UsePalette = b
+					})),
 				container.New(
 					layout.NewVBoxLayout(),
 					widget.NewLabel("Palette"),

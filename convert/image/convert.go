@@ -238,7 +238,14 @@ func downgradeWithPalette(in *image.NRGBA, p color.Palette) *image.NRGBA {
 			if cc := cache[c]; cc != nil {
 				in.Set(x, y, cc)
 			} else {
-				cPalette := p.Convert(c)
+				var cPalette color.Color
+				// check value transparency
+				r, g, b, a := c.RGBA()
+				if r == 0 && g == 0 && b == 0 && a == 0 {
+					cPalette = p[0]
+				} else {
+					cPalette = p.Convert(c)
+				}
 				in.Set(x, y, cPalette)
 				cache[c] = cPalette
 			}
