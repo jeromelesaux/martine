@@ -231,6 +231,7 @@ func computePaletteUsage(in *image.NRGBA) map[color.Color]int {
 }
 
 func downgradeWithPalette(in *image.NRGBA, p color.Palette) *image.NRGBA {
+	transparencyExists := false
 	cache := make(map[color.Color]color.Color)
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
@@ -242,9 +243,14 @@ func downgradeWithPalette(in *image.NRGBA, p color.Palette) *image.NRGBA {
 				// check value transparency
 				r, g, b, a := c.RGBA()
 				if r == 0 && g == 0 && b == 0 && a == 0 {
+					transparencyExists = true
 					cPalette = p[0]
 				} else {
-					cPalette = p[1:].Convert(c)
+					if transparencyExists {
+						cPalette = p[1:].Convert(c)
+					} else {
+						cPalette = p.Convert(c)
+					}
 				}
 				in.Set(x, y, cPalette)
 				cache[c] = cPalette
