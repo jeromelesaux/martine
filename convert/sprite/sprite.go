@@ -18,6 +18,19 @@ import (
 	"github.com/jeromelesaux/martine/log"
 )
 
+func ToImg(d [][]byte, p color.Palette) *image.NRGBA {
+	o := image.NewNRGBA(image.Rectangle{
+		Min: image.Point{X: 0, Y: 0},
+		Max: image.Point{X: len(d[0]), Y: len(d)}})
+
+	for y := 0; y < len(d); y++ {
+		for x := 0; x < len(d[0]); x++ {
+			o.Set(x, y, p[d[y][x]])
+		}
+	}
+	return o
+}
+
 // nolint:funlen
 func RawSpriteToImg(data []byte, height, width, mode uint8, p color.Palette) *image.NRGBA {
 	var out *image.NRGBA

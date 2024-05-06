@@ -244,7 +244,7 @@ func downgradeWithPalette(in *image.NRGBA, p color.Palette) *image.NRGBA {
 				if r == 0 && g == 0 && b == 0 && a == 0 {
 					cPalette = p[0]
 				} else {
-					cPalette = p.Convert(c)
+					cPalette = p[1:].Convert(c)
 				}
 				in.Set(x, y, cPalette)
 				cache[c] = cPalette

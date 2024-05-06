@@ -14,6 +14,7 @@ import (
 	wgt "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/convert/sprite"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/ascii"
@@ -25,6 +26,7 @@ import (
 	"github.com/jeromelesaux/martine/export/ocpartstudio/window"
 	"github.com/jeromelesaux/martine/export/spritehard"
 	"github.com/jeromelesaux/martine/gfx/animate"
+	"github.com/jeromelesaux/martine/gfx/transformation"
 	"github.com/jeromelesaux/martine/log"
 	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
@@ -182,6 +184,16 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 	case export.SpriteFlatExport:
 		buf := make([]byte, 0)
 		for _, v := range s.SpritesData {
+			if s.ExportZigzag {
+				im := sprite.ToImg(v, s.Palette())
+				z := transformation.Zigzag(im)
+				for y := 0; y < z.Bounds().Max.Y; y++ {
+					for x := 0; x < z.Bounds().Max.X; x++ {
+						c := s.Palette().Index(z.At(x, y))
+						v[y][x] = byte(c)
+					}
+				}
+			}
 			for _, v0 := range v {
 				buf = append(buf, v0...)
 			}
@@ -275,7 +287,18 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 	if s.ExportText {
 		data := make([][]byte, 0)
 		for _, v := range s.SpritesData {
-			data = append(data, v...)
+			if s.ExportZigzag {
+				im := sprite.ToImg(v, s.Palette())
+				z := transformation.Zigzag(im)
+				for y := 0; y < z.Bounds().Max.Y; y++ {
+					for x := 0; x < z.Bounds().Max.X; x++ {
+						c := s.Palette().Index(z.At(x, y))
+						v[y][x] = byte(c)
+					}
+				}
+			} else {
+				data = append(data, v...)
+			}
 		}
 		kitPalette := palette.KitPalette{}
 		for i := 0; i < len(s.Palette()); i++ {
