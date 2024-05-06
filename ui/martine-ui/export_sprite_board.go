@@ -183,19 +183,32 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		pi.Hide()
 	case export.SpriteFlatExport:
 		buf := make([]byte, 0)
-		for _, v := range s.SpritesData {
-			if s.ExportZigzag {
-				im := sprite.ToImg(v, s.Palette())
-				z := transformation.Zigzag(im)
-				for y := 0; y < z.Bounds().Max.Y; y++ {
-					for x := 0; x < z.Bounds().Max.X; x++ {
-						c := s.Palette().Index(z.At(x, y))
-						v[y][x] = byte(c)
+		if s.ExportZigzag {
+			for x := 0; x < len(s.SpritesCollection); x++ {
+				for y := 0; y < len(s.SpritesCollection[x]); y++ {
+					z := transformation.Zigzag(s.SpritesCollection[x][y])
+					sp, _, _, err := sprite.ToSprite(z,
+						s.Palette(),
+						constants.Size{
+							Width:  s.SpriteWidth,
+							Height: s.SpriteHeight,
+						},
+						uint8(s.Mode),
+						config.NewMartineConfig("", ""),
+					)
+					if err != nil {
+						pi.Hide()
+						dialog.NewError(err, m.window).Show()
+						return
 					}
+					buf = append(buf, sp...)
 				}
 			}
-			for _, v0 := range v {
-				buf = append(buf, v0...)
+		} else {
+			for _, v := range s.SpritesData {
+				for _, v0 := range v {
+					buf = append(buf, v0...)
+				}
 			}
 		}
 		filename := s.ExportFolderPath + string(filepath.Separator) + "SPRITES.BIN"
@@ -286,17 +299,29 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 	}
 	if s.ExportText {
 		data := make([][]byte, 0)
-		for _, v := range s.SpritesData {
-			if s.ExportZigzag {
-				im := sprite.ToImg(v, s.Palette())
-				z := transformation.Zigzag(im)
-				for y := 0; y < z.Bounds().Max.Y; y++ {
-					for x := 0; x < z.Bounds().Max.X; x++ {
-						c := s.Palette().Index(z.At(x, y))
-						v[y][x] = byte(c)
+		if s.ExportZigzag {
+			for x := 0; x < len(s.SpritesCollection); x++ {
+				for y := 0; y < len(s.SpritesCollection[x]); y++ {
+					z := transformation.Zigzag(s.SpritesCollection[x][y])
+					sp, _, _, err := sprite.ToSprite(z,
+						s.Palette(),
+						constants.Size{
+							Width:  s.SpriteWidth,
+							Height: s.SpriteHeight,
+						},
+						uint8(s.Mode),
+						config.NewMartineConfig("", ""),
+					)
+					if err != nil {
+						pi.Hide()
+						dialog.NewError(err, m.window).Show()
+						return
 					}
+					data = append(data, sp)
 				}
-			} else {
+			}
+		} else {
+			for _, v := range s.SpritesData {
 				data = append(data, v...)
 			}
 		}
@@ -306,8 +331,8 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		}
 		header := fmt.Sprintf("' from file %s\n", s.FilePath)
 		code := header + ascii.SpritesHardText(data, s.ExportCompression)
-		code += "palette:\n"
-		code += kitPalette.ToString()
+		code += "Palette\n"
+		code += kitPalette.ToCode()
 
 		filename := s.ExportFolderPath + string(filepath.Separator) + "SPRITES.ASM"
 		err := amsdos.SaveStringOSFile(filename, code)
@@ -316,6 +341,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			dialog.NewError(err, m.window).Show()
 			return
 		}
+		pi.Hide()
 	}
 	dialog.ShowInformation("Saved", "Your export ended in the folder : "+s.ExportFolderPath, m.window)
 }

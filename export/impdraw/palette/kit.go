@@ -19,12 +19,8 @@ type KitPalette struct {
 	Colors [16]constants.CpcPlusColor
 }
 
-func (i *KitPalette) ToString() string {
+func (i KitPalette) ToCode() string {
 	var out string
-	for _, v := range i.Colors {
-		out += v.ToString() + "\n"
-	}
-
 	out += "db "
 	for index, v := range i.Colors {
 		out += fmt.Sprintf("#%0.2X, #%0.2X", v.Bytes()[0], v.Bytes()[1])
@@ -39,6 +35,16 @@ func (i *KitPalette) ToString() string {
 		}
 	}
 	out += "\n"
+	return out
+}
+
+func (i *KitPalette) ToString() string {
+	var out string
+	for _, v := range i.Colors {
+		out += v.ToString() + "\n"
+	}
+
+	out += i.ToCode()
 	return out
 }
 
