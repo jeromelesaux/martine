@@ -15,6 +15,7 @@ import (
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/png"
+	exspr "github.com/jeromelesaux/martine/export/sprite"
 	"github.com/jeromelesaux/martine/gfx/errors"
 	"github.com/jeromelesaux/martine/log"
 	"github.com/pbnjay/pixfont"
@@ -48,15 +49,32 @@ func (b *BoardTile) AddTile(tp []TilePosition) {
 	b.TilePositions = append(b.TilePositions, tp...)
 }
 
-func (a *AnalyzeBoard) Analyse(sprite *Tile, x, y int) int {
+func (a *AnalyzeBoard) Analyse(tile *Tile, x, y int) int {
+	var index int
+	if a.historicalTiles != nil {
+		index = a.historicalTiles.LastIndex()
+	}
 	for i, v := range a.BoardTiles {
-		if TilesAreEquals(v.Tile, sprite) {
-			a.SetAddTile(x, y, i)
-			return i
+		if a.historicalTiles != nil {
+			spt, found := a.historicalTiles.Tile(tile.Image())
+			if found {
+				a.SetAddTile(x, y, spt.Index)
+			}
+		} else {
+			if TilesAreEquals(v.Tile, tile) {
+				a.SetAddTile(x, y, i+index)
+				return i
+			} else {
+				a.newHistoricalTiles.Add(exspr.TileHistorical{
+					Label: fmt.Sprintf("tile_%02d", index+i),
+					Index: index + i,
+					Tile:  v.Tile.Image(),
+				})
+			}
 		}
 	}
 
-	a.NewTile(sprite, x, y)
+	a.NewTile(tile, x, y)
 	return len(a.BoardTiles) - 1
 
 }
@@ -85,11 +103,43 @@ func (a *AnalyzeBoard) NewTile(sprite *Tile, x, y int) {
 }
 
 type AnalyzeBoard struct {
-	Tiles      [][]image.Image
-	BoardTiles []BoardTile
-	TileSize   constants.Size
-	ImageSize  constants.Size
-	TileMap    [][]int
+	Tiles              [][]image.Image
+	BoardTiles         []BoardTile
+	TileSize           constants.Size
+	ImageSize          constants.Size
+	TileMap            [][]int
+	historicalTiles    *exspr.TilesHistorical
+	newHistoricalTiles *exspr.TilesHistorical
+}
+
+func NewAnalyzeBoard(
+	tilesize constants.Size,
+	imgSize image.Rectangle,
+	horizontalTileNumber int,
+	verticalTileNumber int,
+	historic *exspr.TilesHistorical,
+) *AnalyzeBoard {
+	a := &AnalyzeBoard{
+		TileSize:           tilesize,
+		ImageSize:          constants.Size{Width: imgSize.Max.X, Height: imgSize.Max.Y},
+		BoardTiles:         make([]BoardTile, 0),
+		TileMap:            make([][]int, horizontalTileNumber),
+		historicalTiles:    historic,
+		newHistoricalTiles: exspr.NewSpritesHistorical(tilesize.Width, tilesize.Height),
+	}
+	for i := 0; i < horizontalTileNumber; i++ {
+		a.TileMap[i] = make([]int, verticalTileNumber)
+	}
+	return a
+}
+
+func (a *AnalyzeBoard) SaveHistoric(folderpath string) error {
+	if a.historicalTiles == nil {
+		a.historicalTiles = a.newHistoricalTiles
+	} else {
+		a.historicalTiles.Append(a.newHistoricalTiles)
+	}
+	return a.historicalTiles.Save(folderpath)
 }
 
 func (a *AnalyzeBoard) TileIndex(tile *Tile, tiles []BoardTile) int {
@@ -242,15 +292,7 @@ func getCloserTile(sprt Tile, t []Tile) Tile {
 func AnalyzeTilesBoardWithTiles(im image.Image, size constants.Size, tiles []Tile) *AnalyzeBoard {
 	nbTileW := im.Bounds().Max.X / size.Width
 	nbTileH := (im.Bounds().Max.Y / size.Height) - 1
-	board := &AnalyzeBoard{
-		TileSize:   size,
-		ImageSize:  constants.Size{Width: im.Bounds().Max.X, Height: im.Bounds().Max.Y},
-		BoardTiles: make([]BoardTile, 0),
-		TileMap:    make([][]int, nbTileH),
-	}
-	for i := 0; i < nbTileH; i++ {
-		board.TileMap[i] = make([]int, nbTileW)
-	}
+	board := NewAnalyzeBoard(size, im.Bounds(), nbTileH, nbTileW, nil)
 
 	indexX := 1
 	for x := size.Width; x < im.Bounds().Max.X; x += size.Width {
@@ -268,25 +310,19 @@ func AnalyzeTilesBoardWithTiles(im image.Image, size constants.Size, tiles []Til
 		}
 		indexX++
 	}
+
 	return board
 }
 
-func AnalyzeTilesBoard(im image.Image, size constants.Size) *AnalyzeBoard {
+func AnalyzeTilesBoard(im image.Image, size constants.Size, tilesHistoric *exspr.TilesHistorical) *AnalyzeBoard {
 	var heightCorrection int
 	if (im.Bounds().Max.Y % size.Height) != 0 {
 		heightCorrection = 1
 	}
 	nbTileW := (im.Bounds().Max.X / size.Width) + 1
 	nbTileH := (im.Bounds().Max.Y / size.Height) - (heightCorrection) + 1
-	board := &AnalyzeBoard{
-		TileSize:   size,
-		ImageSize:  constants.Size{Width: im.Bounds().Max.X, Height: im.Bounds().Max.Y},
-		BoardTiles: make([]BoardTile, 0),
-		TileMap:    make([][]int, nbTileH),
-	}
-	for i := 0; i < nbTileH; i++ {
-		board.TileMap[i] = make([]int, nbTileW)
-	}
+	board := NewAnalyzeBoard(size, im.Bounds(), nbTileH, nbTileW, tilesHistoric)
+
 	sprt0, _ := ExtractTile(im, size, 0, 0)
 	/*	if err != nil {
 		log.GetLogger().Error( "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, 0, 0, err)
@@ -309,6 +345,7 @@ func AnalyzeTilesBoard(im image.Image, size constants.Size) *AnalyzeBoard {
 		}
 		indexX++
 	}
+
 	return board
 }
 

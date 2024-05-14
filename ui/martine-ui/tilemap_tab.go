@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"encoding/json"
 	"image"
 	"image/color"
 	"os"
@@ -13,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/data/validation"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
@@ -20,6 +22,7 @@ import (
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
+	exspr "github.com/jeromelesaux/martine/export/sprite"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 	"github.com/jeromelesaux/martine/log"
@@ -54,10 +57,10 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 	var err error
 	if m.IsClassicalTilemap(cfg.Size.Width, cfg.Size.Height) {
 		filename := filepath.Base(me.OriginalImagePath())
-		analyze, tiles, palette = gfx.TilemapClassical(uint8(me.Mode), me.IsCpcPlus, filename, me.OriginalImagePath(), me.OriginalImage().Image, cfg.Size, cfg)
+		analyze, tiles, palette = gfx.TilemapClassical(uint8(me.Mode), me.IsCpcPlus, filename, me.OriginalImagePath(), me.OriginalImage().Image, cfg.Size, cfg, me.Historic)
 		pi.Hide()
 	} else {
-		analyze, tiles, palette, err = gfx.TilemapRaw(uint8(me.Mode), me.IsCpcPlus, cfg.Size, me.OriginalImage().Image, cfg)
+		analyze, tiles, palette, err = gfx.TilemapRaw(uint8(me.Mode), me.IsCpcPlus, cfg.Size, me.OriginalImage().Image, cfg, me.Historic)
 		pi.Hide()
 		if err != nil {
 			dialog.NewError(err, m.window).Show()
@@ -159,6 +162,38 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 		m.TilemapApply(tm)
 	})
 
+	historicOpen := widget.NewButtonWithIcon("Open Historic", theme.FolderOpenIcon(), func() {
+		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+			if err != nil {
+				dialog.ShowError(err, m.window)
+				return
+			}
+			if reader == nil {
+				return
+			}
+			directory.SetImportDirectoryURI(reader.URI())
+
+			f, err := os.Open(reader.URI().Path())
+			if err != nil {
+				dialog.ShowError(err, m.window)
+				return
+			}
+			var h exspr.TilesHistorical
+			if err := json.NewDecoder(f).Decode(&h); err != nil {
+				dialog.ShowError(err, m.window)
+				return
+			}
+			tm.Historic = &h
+
+		}, m.window)
+		path, err := directory.ImportDirectoryURI()
+		if err == nil {
+			d.SetLocation(path)
+		}
+		d.SetFilter(storage.NewExtensionFileFilter([]string{".th", ".TH"}))
+		d.Resize(dialogSize)
+		d.Show()
+	})
 	openFileWidget.Icon = theme.FileImageIcon()
 
 	isPlus := widget.NewCheck("CPC Plus", func(b bool) {
@@ -205,6 +240,10 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 						applyButton,
 						exportButton,
 						importOpen,
+					),
+					container.New(
+						layout.NewHBoxLayout(),
+						historicOpen,
 					),
 					container.New(
 						layout.NewHBoxLayout(),

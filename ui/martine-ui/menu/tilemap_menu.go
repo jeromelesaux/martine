@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	w "github.com/jeromelesaux/fyne-io/widget"
+	"github.com/jeromelesaux/martine/export/sprite"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 	"github.com/jeromelesaux/martine/log"
 )
@@ -26,6 +27,7 @@ type TilemapMenu struct {
 	ExportFolderPath       string
 	ExportImpdraw          bool
 	ExportFlat             bool
+	Historic               *sprite.TilesHistorical
 }
 
 func (tm *TilemapMenu) ResetExport() {

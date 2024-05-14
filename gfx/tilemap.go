@@ -19,6 +19,7 @@ import (
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
 	"github.com/jeromelesaux/martine/export/png"
+	"github.com/jeromelesaux/martine/export/sprite"
 	"github.com/jeromelesaux/martine/gfx/errors"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 )
@@ -68,7 +69,7 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 	if !impTileFlag {
 		for size.Width <= 32 || size.Height <= 32 {
 			log.GetLogger().Info("Analyse the image for size [width:%d,height:%d]", size.Width, size.Height)
-			board := transformation.AnalyzeTilesBoard(m, size)
+			board := transformation.AnalyzeTilesBoard(m, size, nil)
 			tilesSize := sizeOctet(board.TileSize, mode) * len(board.BoardTiles)
 			log.GetLogger().Info(" found [%d] tiles full length [#%X]\n", len(board.BoardTiles), tilesSize)
 			boards = append(boards, board)
@@ -78,7 +79,7 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 	} else {
 		for _, s := range impTilesSizes {
 			log.GetLogger().Info("Analyse the image for size [width:%d,height:%d]", s.Width, s.Height)
-			board := transformation.AnalyzeTilesBoard(m, s)
+			board := transformation.AnalyzeTilesBoard(m, s, nil)
 			tilesSize := sizeOctet(board.TileSize, mode) * len(board.BoardTiles)
 			log.GetLogger().Info(" found [%d] tiles full length [#%X]\n", len(board.BoardTiles), tilesSize)
 			boards = append(boards, board)
@@ -263,10 +264,10 @@ func ExportTilemapClassical(m image.Image, filename string, board *transformatio
 		log.GetLogger().Error("Cannot export to Imp-TileMap the image %s error %v", cfg.OutputPath, err)
 		return err
 	}
-	return nil
+	return board.SaveHistoric(cfg.OutputPath)
 }
 
-func TilemapClassical(mode uint8, isCpcPlus bool, filename, picturePath string, in image.Image, size constants.Size, cfg *config.MartineConfig) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette) {
+func TilemapClassical(mode uint8, isCpcPlus bool, filename, picturePath string, in image.Image, size constants.Size, cfg *config.MartineConfig, tilesHistoric *sprite.TilesHistorical) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette) {
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
 	m := ci.Resize(in, mapSize, cfg.ResizingAlgo)
 	var palette color.Palette
@@ -278,7 +279,7 @@ func TilemapClassical(mode uint8, isCpcPlus bool, filename, picturePath string, 
 	palette = ci.ToCPCPalette(palette, refPalette)
 	palette = constants.SortColorsByDistance(palette)
 	_, m = ci.DowngradingWithPalette(m, palette)
-	tilemap := transformation.AnalyzeTilesBoard(m, size)
+	tilemap := transformation.AnalyzeTilesBoard(m, size, tilesHistoric)
 	var tilesImagesTilemap [][]image.Image
 	for y := 0; y < m.Bounds().Max.Y; y += tilemap.TileSize.Height {
 		tilesmap := make([]image.Image, 0)
@@ -309,7 +310,7 @@ func sizeOctet(size constants.Size, mode uint8) int {
 }
 
 // nolint: funlen, gocognit
-func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in image.Image, cfg *config.MartineConfig) error {
+func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in image.Image, cfg *config.MartineConfig, tilesHistoric *sprite.TilesHistorical) error {
 	/*
 		8x8 : 40x25
 		16x8 : 20x25
@@ -376,7 +377,7 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 	if err != nil {
 		return err
 	}
-	analyze := transformation.AnalyzeTilesBoard(m, cfg.Size)
+	analyze := transformation.AnalyzeTilesBoard(m, cfg.Size, tilesHistoric)
 	tilesSize := sizeOctet(analyze.TileSize, mode) * len(analyze.BoardTiles)
 	log.GetLogger().Info("board with number of tiles [%d] and size [width:%d, height:%d] size:#%X\n", len(analyze.BoardTiles), analyze.TileSize.Width, analyze.TileSize.Height, tilesSize)
 	if err := analyze.SaveSchema(filepath.Join(cfg.OutputPath, "tilesmap_schema.png")); err != nil {
@@ -498,7 +499,7 @@ func fillImage(m image.Image, scenes []*image.NRGBA, nbTilePixelHigh, nbTilePixe
 }
 
 // nolint: funlen
-func TilemapRaw(mode uint8, isCpcPlus bool, size constants.Size, in image.Image, cfg *config.MartineConfig) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette, error) {
+func TilemapRaw(mode uint8, isCpcPlus bool, size constants.Size, in image.Image, cfg *config.MartineConfig, tilesHistoric *sprite.TilesHistorical) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette, error) {
 	/*
 		8x8 : 40x25
 		16x8 : 20x25
@@ -546,7 +547,7 @@ func TilemapRaw(mode uint8, isCpcPlus bool, size constants.Size, in image.Image,
 	palette = constants.SortColorsByDistance(palette)
 	_, m = ci.DowngradingWithPalette(m, palette)
 
-	analyze := transformation.AnalyzeTilesBoard(m, cfg.Size)
+	analyze := transformation.AnalyzeTilesBoard(m, cfg.Size, tilesHistoric)
 
 	// now display all maps images
 	for y := 0; y < len(analyze.TileMap); y++ {
@@ -635,7 +636,8 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 			index++
 		}
 	}
-	return
+	// save historic
+	return analyze.SaveHistoric(cfg.OutputPath)
 }
 
 // nolint: funlen, gocognit

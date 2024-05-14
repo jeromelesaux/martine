@@ -69,5 +69,3 @@ func SplitBoardToSprite(
 	}*/
 	return results, rawSprites, nil
 }
-
-

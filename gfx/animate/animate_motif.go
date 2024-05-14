@@ -53,7 +53,7 @@ func DeltaMotif(gitFilepath string, cfg *config.MartineConfig, threshold int, in
 	}
 
 	// recuperation des motifs
-	a := transformation.AnalyzeTilesBoard(screens[0], constants.Size{Width: 4, Height: 4})
+	a := transformation.AnalyzeTilesBoard(screens[0], constants.Size{Width: 4, Height: 4}, nil)
 	refBoard := a.ReduceTilesNumber(float64(threshold))
 	btc := make([][]transformation.BoardTile, 0)
 	btc = append(btc, refBoard)

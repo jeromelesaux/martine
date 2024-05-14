@@ -706,7 +706,7 @@ func main() {
 							16x16 : 20x24
 						*/
 
-						if err := gfx.Tilemap(screenMode, filename, *picturePath, size, in, cfg); err != nil {
+						if err := gfx.Tilemap(screenMode, filename, *picturePath, size, in, cfg, nil); err != nil {
 							log.GetLogger().Error("Error whie do tilemap action with error :%v\n", err)
 							os.Exit(-1)
 						}
