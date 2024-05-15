@@ -31,6 +31,7 @@ func (s *TilePosition) String() string {
 }
 
 type BoardTile struct {
+	New           bool
 	Occurence     int
 	TilePositions []TilePosition
 	Index         int
@@ -59,11 +60,11 @@ func (a *AnalyzeBoard) Analyse(tile *Tile, x, y int) int {
 		if a.historicalTiles != nil {
 			spt, found := a.historicalTiles.Tile(tile.Image())
 			if found {
-				a.SetAddTile(x, y, spt.Index, spt.Tile)
+				a.SetAddTile(x, y, spt.Index, spt.Tile, false)
 			}
 		} else {
 			if TilesAreEquals(v.Tile, tile) {
-				a.SetAddTile(x, y, i+index, v.Tile.Image())
+				a.SetAddTile(x, y, i+index, v.Tile.Image(), true)
 				return i
 			} else {
 				a.newHistoricalTiles.Add(exspr.TileHistorical{
@@ -80,7 +81,7 @@ func (a *AnalyzeBoard) Analyse(tile *Tile, x, y int) int {
 
 }
 
-func (a *AnalyzeBoard) SetAddTile(x, y, index int, tl *image.NRGBA) {
+func (a *AnalyzeBoard) SetAddTile(x, y, index int, tl *image.NRGBA, isNew bool) {
 	//	a.TileMap[len(a.TileMap)] = append(a.TileMap[len(a.TileMap)], index)
 	for i, v := range a.BoardTiles {
 		if v.Index == index {
@@ -91,6 +92,7 @@ func (a *AnalyzeBoard) SetAddTile(x, y, index int, tl *image.NRGBA) {
 	}
 	a.BoardTiles = append(a.BoardTiles, BoardTile{
 		Occurence:     1,
+		New:           isNew,
 		TilePositions: []TilePosition{{PixelX: x, PixelY: y}},
 		Index:         index,
 		Tile:          TileFromImage(tl),
@@ -112,6 +114,7 @@ func (a *AnalyzeBoard) NewTile(sprite *Tile, x, y int, index int) {
 	// get the last index
 
 	b := BoardTile{
+		New:           true,
 		TilePositions: make([]TilePosition, 0),
 		Tile:          sprite,
 		Occurence:     1,
@@ -472,22 +475,24 @@ func (a *AnalyzeBoard) SaveTiles(folderpath string, palette color.Palette, mode 
 		return err
 	}
 	for _, v := range a.BoardTiles {
-		tiles += fmt.Sprintf("tile_%0.2d\n", v.Index)
-		err := png.Png(filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", v.Index)), v.Tile.Image())
-		if err != nil {
-			return err
-		}
+		if v.New {
+			tiles += fmt.Sprintf("tile_%0.2d\n", v.Index)
+			err := png.Png(filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", v.Index)), v.Tile.Image())
+			if err != nil {
+				return err
+			}
 
-		// filename := filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", index))
-		// err = sprite.ToSpriteAndExport(im, palette, v.Size, mode, filename, true, cfg)
-		// if err != nil {
-		// 	return err
-		// }
-		d, _, _, err := sprite.ToSprite(v.Tile.Image(), palette, a.TileSize, mode, cfg)
-		if err != nil {
-			return err
+			// filename := filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", index))
+			// err = sprite.ToSpriteAndExport(im, palette, v.Size, mode, filename, true, cfg)
+			// if err != nil {
+			// 	return err
+			// }
+			d, _, _, err := sprite.ToSprite(v.Tile.Image(), palette, a.TileSize, mode, cfg)
+			if err != nil {
+				return err
+			}
+			tiles += ascii.FormatAssemblyDatabyte(d, "\n")
 		}
-		tiles += ascii.FormatAssemblyDatabyte(d, "\n")
 	}
 
 	return amsdos.SaveStringOSFile(folderpath+string(filepath.Separator)+"tiles.asm", tiles)
@@ -496,17 +501,16 @@ func (a *AnalyzeBoard) SaveTiles(folderpath string, palette color.Palette, mode 
 func (a *AnalyzeBoard) SaveAllTiles(folderpath string, palette color.Palette, mode uint8, cfg *config.MartineConfig) error {
 	var (
 		tiles string
-		index int
 	)
 	for _, v := range a.BoardTiles {
-		tiles += fmt.Sprintf("tile_%0.2d\n", v.Index)
-		d, _, _, err := sprite.ToSprite(v.Tile.Image(), palette, a.TileSize, mode, cfg)
-		if err != nil {
-			return err
+		if v.New {
+			tiles += fmt.Sprintf("tile_%0.2d\n", v.Index)
+			d, _, _, err := sprite.ToSprite(v.Tile.Image(), palette, a.TileSize, mode, cfg)
+			if err != nil {
+				return err
+			}
+			tiles += ascii.FormatAssemblyDatabyte(d, "\n")
 		}
-		tiles += ascii.FormatAssemblyDatabyte(d, "\n")
-		index++
-
 	}
 	return amsdos.SaveStringOSFile(folderpath+string(filepath.Separator)+"tiles.asm", tiles)
 }
@@ -586,7 +590,8 @@ func (a *AnalyzeBoard) SaveTilemap(filePath string) error {
 		}
 		for x := 0; x < len(v)-1; x++ {
 			val := v[x]
-			_, err := f.WriteString(fmt.Sprintf("%.2d", val) + ",")
+			t := a.BoardTiles[val]
+			_, err := f.WriteString(fmt.Sprintf("%.2d", t.Index) + ",")
 			if err != nil {
 				return err
 			}
