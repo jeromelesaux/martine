@@ -52,7 +52,7 @@ func (s *TilesHistorical) Append(n *TilesHistorical) {
 }
 
 func (s *TilesHistorical) Save(folderpath string) error {
-	f, err := os.Open(filepath.Join(folderpath, tileHistoricalFilename))
+	f, err := os.Create(filepath.Join(folderpath, tileHistoricalFilename))
 	if err != nil {
 		return err
 	}

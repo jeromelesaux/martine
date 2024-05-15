@@ -140,6 +140,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 				return
 			}
 			tm.SetOriginalImage(img)
+			tm.Historic = nil
 			// m.window.Canvas().Refresh(&tm.OriginalImage)
 			// m.window.Resize(m.window.Content().Size())
 		}, m.window)

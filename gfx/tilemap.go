@@ -602,7 +602,7 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 			log.GetLogger().Error("Error while saving sprites in folder %s error :%v", cfg.OutputPath, err)
 		}
 	} else {
-		if err = analyze.SaveSprites(cfg.OutputPath, palette, mode, cfg); err != nil {
+		if err = analyze.SaveTiles(cfg.OutputPath, palette, mode, cfg); err != nil {
 			log.GetLogger().Error("Error while saving sprites in folder %s error :%v", cfg.OutputPath, err)
 		}
 	}
