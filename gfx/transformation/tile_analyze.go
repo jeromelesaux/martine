@@ -60,12 +60,11 @@ func (a *AnalyzeBoard) Analyse(tile *Tile, x, y int) int {
 		if a.historicalTiles != nil {
 			spt, found := a.historicalTiles.Tile(tile.Image())
 			if found {
-				a.SetAddTile(x, y, spt.Index, spt.Tile, false)
+				return a.SetAddTile(x, y, spt.Index, spt.Tile, false)
 			}
 		} else {
 			if TilesAreEquals(v.Tile, tile) {
-				a.SetAddTile(x, y, i+index, v.Tile.Image(), true)
-				return i
+				return a.SetAddTile(x, y, i+index, v.Tile.Image(), true)
 			} else {
 				a.newHistoricalTiles.Add(exspr.TileHistorical{
 					Label: fmt.Sprintf("tile_%02d", index+i),
@@ -81,13 +80,13 @@ func (a *AnalyzeBoard) Analyse(tile *Tile, x, y int) int {
 
 }
 
-func (a *AnalyzeBoard) SetAddTile(x, y, index int, tl *image.NRGBA, isNew bool) {
+func (a *AnalyzeBoard) SetAddTile(x, y, index int, tl *image.NRGBA, isNew bool) int {
 	//	a.TileMap[len(a.TileMap)] = append(a.TileMap[len(a.TileMap)], index)
 	for i, v := range a.BoardTiles {
 		if v.Index == index {
 			a.BoardTiles[i].Occurence++
 			a.BoardTiles[i].TilePositions = append(a.BoardTiles[i].TilePositions, TilePosition{PixelX: x, PixelY: y})
-			return
+			return i
 		}
 	}
 	a.BoardTiles = append(a.BoardTiles, BoardTile{
@@ -97,6 +96,7 @@ func (a *AnalyzeBoard) SetAddTile(x, y, index int, tl *image.NRGBA, isNew bool) 
 		Index:         index,
 		Tile:          TileFromImage(tl),
 	})
+	return len(a.BoardTiles) - 1
 }
 
 func (a *AnalyzeBoard) AddTile(sprite *Tile, x, y int) {
