@@ -360,11 +360,11 @@ func AnalyzeTilesBoard(im image.Image, size constants.Size, tilesHistoric *exspr
 	nbTileH := (im.Bounds().Max.Y / size.Height) - (heightCorrection) + 1
 	board := NewAnalyzeBoard(size, im.Bounds(), nbTileH, nbTileW, tilesHistoric)
 
-	sprt0, _ := ExtractTile(im, size, 0, 0)
+	//	sprt0, _ := ExtractTile(im, size, 0, 0)
 	/*	if err != nil {
 		log.GetLogger().Error( "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, 0, 0, err)
 	}*/
-	board.NewTile(sprt0, 0, 0, len(board.BoardTiles))
+	//	board.NewTile(sprt0, 0, 0, len(board.BoardTiles))
 	board.TileMap[0][0] = 0
 
 	indexX := 0
