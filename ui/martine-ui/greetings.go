@@ -1,10 +1,14 @@
 package ui
 
 import (
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
-	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -29,15 +33,22 @@ func (m *MartineUI) newGreedings() *fyne.Container {
 		layout.NewSpacer(),
 		container.New(
 			layout.NewHBoxLayout(),
-			widget.NewLabel("Change color scheme"),
-			widget.NewSelect([]string{"Black", "White"}, func(s string) {
-				switch s {
-				case "Black":
-					fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme()) // nolint:staticcheck
-
-				case "White":
-					fyne.CurrentApp().Settings().SetTheme(theme.LightTheme()) // nolint:staticcheck
+			widget.NewLabel("Change  application size "),
+			widget.NewButton("+", func() {
+				current := os.Getenv("FYNE_SCALE")
+				c, err := strconv.ParseFloat(current, 32)
+				if err != nil {
+					log.Default().Printf("error while getting FYNE_SCALE error [%v]", err)
 				}
+				os.Setenv("FYNE_SCALE", fmt.Sprintf("%f", c+0.1))
+			}),
+			widget.NewButton("-", func() {
+				current := os.Getenv("FYNE_SCALE")
+				c, err := strconv.ParseFloat(current, 32)
+				if err != nil {
+					log.Default().Printf("error while getting FYNE_SCALE error [%v]", err)
+				}
+				os.Setenv("FYNE_SCALE", fmt.Sprintf("%f", c-0.1))
 			}),
 		),
 	/*	container.New(

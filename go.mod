@@ -34,7 +34,7 @@ require (
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/goki/freetype v1.0.1 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
-	github.com/jeromelesaux/fyne-io v0.0.0-20240523193232-976a6c954474
+	github.com/jeromelesaux/fyne-io v0.0.0-20240527102448-14b1bf5c125c
 	github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/muesli/clusters v0.0.0-20200529215643-2700303c1762 // indirect
