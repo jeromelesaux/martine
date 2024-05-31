@@ -30,6 +30,19 @@ func (m *MartineUI) newGreedings() *fyne.Container {
 			"\nto follow me on my old website [sidhome](https://koaks.amstrad.free.fr/amstrad/)\n"+
 			"\nto chat with us got to our [Impact forum](https://amstradplus.forumforever.com/index.php)  or\n"+
 			"\n[discord chat](https://discord.com/channels/453480213032992768/454619697485447169)\n"),
+		widget.NewRichTextFromMarkdown("# Shorcuts: #\n"+
+			"\n## In editor : ## \n"+
+			"\nArrow UP : move up the cursor by one pixel\n"+
+			"\nArrow DOWN : move down the cursor by one pixel\n"+
+			"\nArrow LEFT : move left the cursor by one pixel\n"+
+			"\nArrow RIGHT : move right the cursor by one pixel\n"+
+			"\nA or Q key : move up the cursor by 10 pixel\n"+
+			"\nW key : move down the cursor by 10 pixel\n"+
+			"\nO key : move left the cursor by 10 pixel\n"+
+			"\nP key : move right the cursor by 10 pixel\n"+
+			"\nM key : change the magnify\n"+
+			"\nESCAPE key : undo the last color change from palette\n"+
+			"\nSPACE key : set the current pixel with the selected palette color \n"),
 		layout.NewSpacer(),
 		container.New(
 			layout.NewHBoxLayout(),
