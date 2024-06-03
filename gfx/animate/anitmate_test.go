@@ -17,6 +17,9 @@ import (
 	"github.com/jeromelesaux/zx0/encode"
 )
 
+func init() {
+	_ = os.Mkdir("../../test", os.ModePerm)
+}
 func TestAnimate(t *testing.T) {
 	file := "../../samples/sonic_rotate.gif"
 	e := config.NewMartineConfig(file, "../../test")
