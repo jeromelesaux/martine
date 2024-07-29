@@ -13,7 +13,7 @@ func main() {
 	/* main application */
 	scale := os.Getenv("FYNE_SCALE")
 	if scale == "" {
-		os.Setenv("FYNE_SCALE", "0.75")
+		os.Setenv("FYNE_SCALE", "0.7")
 	}
 	mapp := app.NewWithID("Martine @IMPact")
 	mapp.Settings().SetTheme(theme.DarkTheme()) // nolint:

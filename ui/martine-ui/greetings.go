@@ -1,14 +1,13 @@
 package ui
 
 import (
-	"fmt"
-	"log"
-	"os"
-	"strconv"
+	"image/color"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -47,38 +46,95 @@ func (m *MartineUI) newGreedings() *fyne.Container {
 		container.New(
 			layout.NewHBoxLayout(),
 			widget.NewLabel("Change  application size "),
-			widget.NewButton("+", func() {
-				current := os.Getenv("FYNE_SCALE")
-				c, err := strconv.ParseFloat(current, 32)
-				if err != nil {
-					log.Default().Printf("error while getting FYNE_SCALE error [%v]", err)
-				}
-				os.Setenv("FYNE_SCALE", fmt.Sprintf("%f", c+0.1))
+			widget.NewButton("Increase", func() {
+				m.scale += .03
+				theme := myTheme{foregroundColor: m.variant, scale: m.scale}
+				fyne.CurrentApp().Settings().SetTheme(theme)
+				canvas.Refresh(m.window.Canvas().Content())
+
 			}),
-			widget.NewButton("-", func() {
-				current := os.Getenv("FYNE_SCALE")
-				c, err := strconv.ParseFloat(current, 32)
-				if err != nil {
-					log.Default().Printf("error while getting FYNE_SCALE error [%v]", err)
+			widget.NewButton("Decrease", func() {
+
+				m.scale -= .03
+				theme := myTheme{foregroundColor: m.variant, scale: m.scale}
+				fyne.CurrentApp().Settings().SetTheme(theme)
+				canvas.Refresh(m.window.Canvas().Content())
+
+			}),
+			widget.NewButton("Change foreground color", func() {
+
+				if m.variant == theme.VariantDark {
+					m.variant = theme.VariantLight
+				} else {
+					m.variant = theme.VariantDark
 				}
-				os.Setenv("FYNE_SCALE", fmt.Sprintf("%f", c-0.1))
+				theme := myTheme{foregroundColor: m.variant, scale: fyne.CurrentApp().Settings().Scale()}
+				fyne.CurrentApp().Settings().SetTheme(theme)
+				canvas.Refresh(m.window.Canvas().Content())
+
 			}),
 		),
-	/*	container.New(
-		layout.NewHBoxLayout(),
-		widget.NewLabel("Font"),
-		widget.NewButtonWithIcon("Increase", theme.ContentAddIcon(), func() {
-			a := fyne.CurrentApp()
-			v := a.Settings().Scale()
-			v += .2
-			os.Setenv("FYNE_SCALE", fmt.Sprintf("%.2f", v))
-		}),
-		widget.NewButtonWithIcon("Decrease", theme.ContentRemoveIcon(), func() {
-			a := fyne.CurrentApp()
-			v := a.Settings().Scale()
-			v -= .2
-			os.Setenv("FYNE_SCALE", fmt.Sprintf("%.2f", v))
-		}),
-	),*/
 	)
+}
+
+type myTheme struct {
+	foregroundColor fyne.ThemeVariant
+	scale           float32
+}
+
+func (m myTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
+	if name == theme.ColorNameBackground {
+		if m.foregroundColor == theme.VariantLight {
+			return color.White
+		}
+		if variant == theme.VariantLight {
+			return color.White
+		}
+		return color.Black
+	}
+
+	return theme.DefaultTheme().Color(name, m.foregroundColor)
+}
+
+func (myTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
+	return theme.DefaultTheme().Icon(n)
+}
+
+func (m myTheme) Size(s fyne.ThemeSizeName) float32 {
+	switch s {
+	case theme.SizeNameCaptionText:
+		return 11 * m.scale
+	case theme.SizeNameInlineIcon:
+		return 20 * m.scale
+	case theme.SizeNamePadding:
+		return 4 * m.scale
+	case theme.SizeNameScrollBar:
+		return 16 * m.scale
+	case theme.SizeNameScrollBarSmall:
+		return 3 * m.scale
+	case theme.SizeNameSeparatorThickness:
+		return 1 * m.scale
+	case theme.SizeNameText:
+		return 14 * m.scale
+	case theme.SizeNameInputBorder:
+		return 2 * m.scale
+	default:
+		return theme.DefaultTheme().Size(s) * m.scale
+	}
+}
+
+func (myTheme) Font(s fyne.TextStyle) fyne.Resource {
+	if s.Monospace {
+		return theme.DefaultTheme().Font(s)
+	}
+	if s.Bold {
+		if s.Italic {
+			return theme.DefaultTheme().Font(s)
+		}
+		return theme.DefaultTheme().Font(s)
+	}
+	if s.Italic {
+		return theme.DefaultTheme().Font(s)
+	}
+	return theme.DefaultTheme().Font(s)
 }

@@ -28,6 +28,8 @@ var (
 )
 
 type MartineUI struct {
+	scale   float32
+	variant fyne.ThemeVariant
 	window  fyne.Window
 	main    *menu.ImageMenu
 	tilemap *menu.TilemapMenu
@@ -43,7 +45,10 @@ type MartineUI struct {
 }
 
 func NewMartineUI() *MartineUI {
+
 	m := &MartineUI{
+		scale:         fyne.CurrentApp().Settings().Scale(),
+		variant:       fyne.CurrentApp().Settings().ThemeVariant(),
 		main:          menu.NewImageMenu(),
 		tilemap:       menu.NewTilemapMenu(),
 		animate:       menu.NewAnimateMenu(),
