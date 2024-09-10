@@ -721,11 +721,6 @@ poke_octet
 	pop af
 	ret
 
-	;
-	; Decompactage ZX0
-	; HL = source
-	; DE = destination
-	;
 ` + assembly.DeltapackRoutine + `
 
 ;---------------------------------------------------------------
