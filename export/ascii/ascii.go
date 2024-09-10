@@ -323,6 +323,7 @@ func FormatAssemblyBasicPalette(p color.Palette, eol string) string {
 
 func FormatAssemblyCPCPlusPalette(p color.Palette, eol string) string {
 	var out string
+	out += ByteToken
 	for i := 0; i < len(p); i++ {
 		cp := constants.NewCpcPlusColor(p[i])
 		v := cp.Value()
