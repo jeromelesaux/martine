@@ -277,14 +277,18 @@ func (me *ImageMenu) ExportImage(e *ImageExport, w fyne.Window, getCfg func(me *
 				dialog.ShowError(err, w)
 				return
 			}
-
-			if cfg.Compression != compression.NONE {
+			var decompressRoutine string
+			if cfg.Compression != compression.NONE && cfg.Compression != -1 {
 				go1, _ = compression.Compress(go1, cfg.Compression)
 				go2, _ = compression.Compress(go2, cfg.Compression)
+				if cfg.Compression == compression.ZX0 {
+					decompressRoutine = assembly.DeltapackRoutine
+				}
 			}
 			code1 := ascii.FormatAssemblyDatabyte(go1, "\n")
 			code2 := ascii.FormatAssemblyDatabyte(go2, "\n")
 			var palCode string
+
 			if cfg.CpcPlus {
 				palCode = ascii.FormatAssemblyCPCPlusPalette(palette, "\n")
 			} else {
@@ -296,7 +300,7 @@ func (me *ImageMenu) ExportImage(e *ImageExport, w fyne.Window, getCfg func(me *
 				code1,
 				code2,
 				palCode,
-				assembly.DeltapackRoutine)
+				decompressRoutine)
 			filename := filepath.Base(me.OriginalImagePath())
 			fileExport := e.ExportFolderPath + string(filepath.Separator) + filename + ".asm"
 			if err = amsdos.SaveStringOSFile(fileExport, content); err != nil {
@@ -505,17 +509,17 @@ func (me *ImageMenu) ExportDialog(ie *ImageExport) {
 			func(s string) {
 				switch s {
 				case "none":
-					ie.ExportCompression = 0
+					ie.ExportCompression = compression.NONE
 				case "rle":
-					ie.ExportCompression = 1
+					ie.ExportCompression = compression.RLE
 				case "rle 16bits":
-					ie.ExportCompression = 2
+					ie.ExportCompression = compression.RLE16
 				case "Lz4 Classic":
-					ie.ExportCompression = 3
+					ie.ExportCompression = compression.LZ4
 				case "Lz4 Raw":
-					ie.ExportCompression = 4
+					ie.ExportCompression = compression.RawLZ4
 				case "zx0 crunch":
-					ie.ExportCompression = 5
+					ie.ExportCompression = compression.ZX0
 				}
 			}),
 		m2host,
