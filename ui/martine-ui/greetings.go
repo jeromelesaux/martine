@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+// nolint: ireturn, funlen
 func (m *MartineUI) newGreedings() *fyne.Container {
 	return container.New(
 		layout.NewVBoxLayout(),
@@ -96,6 +97,7 @@ func (m myTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) colo
 	return theme.DefaultTheme().Color(name, m.foregroundColor)
 }
 
+// nolint: ireturn
 func (myTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 	return theme.DefaultTheme().Icon(n)
 }
@@ -123,6 +125,7 @@ func (m myTheme) Size(s fyne.ThemeSizeName) float32 {
 	}
 }
 
+// nolint: ireturn
 func (myTheme) Font(s fyne.TextStyle) fyne.Resource {
 	if s.Monospace {
 		return theme.DefaultTheme().Font(s)

@@ -386,6 +386,7 @@ func (me *ImageMenu) ExportImage(e *ImageExport, w fyne.Window, getCfg func(me *
 	dialog.ShowInformation("Save", "Your files are save in folder \n"+e.ExportFolderPath, w)
 }
 
+// nolint: funlen
 func (me *ImageMenu) NewConfig(ex *ImageExport, checkOriginalImage bool) *config.MartineConfig {
 	if checkOriginalImage && me.OriginalImagePath() == "" {
 		return nil
@@ -461,6 +462,7 @@ func (me *ImageMenu) NewConfig(ex *ImageExport, checkOriginalImage bool) *config
 	return cfg
 }
 
+// nolint: funlen
 func (me *ImageMenu) ExportDialog(ie *ImageExport) {
 	m2host := widget.NewEntry()
 	m2host.SetPlaceHolder("Set your M2 IP here.")
@@ -556,6 +558,7 @@ func (me *ImageMenu) ExportDialog(ie *ImageExport) {
 	d.Show()
 }
 
+// nolint:funlen, gocognit
 func (i *ImageMenu) NewImportButton(modeSelection *widget.Select, callBack func()) *widget.Button {
 	return widget.NewButtonWithIcon("Import", theme.FileImageIcon(), func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {

@@ -16,7 +16,8 @@ func main() {
 		os.Setenv("FYNE_SCALE", "0.7")
 	}
 	mapp := app.NewWithID("Martine @IMPact")
-	mapp.Settings().SetTheme(theme.DarkTheme()) // nolint:
+	// nolint: staticcheck
+	mapp.Settings().SetTheme(theme.DarkTheme())
 	martineUI := ui.NewMartineUI()
 	martineUI.Load(mapp)
 
