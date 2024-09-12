@@ -13,6 +13,7 @@ import (
 
 	"fyne.io/fyne/v2/app"
 	"github.com/jeromelesaux/martine/common"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	ci "github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/convert/screen"
@@ -454,7 +455,7 @@ func main() {
 			for idxX, v := range raw {
 				for idxY, v0 := range v {
 					filename := cfg.OutputPath + string(filepath.Separator) + fmt.Sprintf("L%.2dC%.2d.WIN", idxX, idxY)
-					if err := window.Win(filename, v0, uint8(*mode), cfg.Size.Width, cfg.Size.Height, cfg.Dsk, cfg); err != nil {
+					if err := window.Win(filename, v0, uint8(*mode), cfg.Size.Width, cfg.Size.Height, cfg.ExportType(config.DskContainer), cfg); err != nil {
 						log.GetLogger().Error("error while exporting sprites error %s\n", err.Error())
 					}
 				}
@@ -484,7 +485,7 @@ func main() {
 					os.Exit(-2)
 				}
 			}
-			if cfg.Dsk {
+			if cfg.ExportType(config.DskContainer) {
 				if err := diskimage.ImportInDsk(filename, cfg); err != nil {
 					log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
 					os.Exit(-2)
@@ -503,7 +504,7 @@ func main() {
 				log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
 				os.Exit(-2)
 			}
-			if cfg.Dsk {
+			if cfg.ExportType(config.DskContainer) {
 				if err := diskimage.ImportInDsk(filename, cfg); err != nil {
 					log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
 					os.Exit(-2)
@@ -524,7 +525,7 @@ func main() {
 				log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
 				os.Exit(-2)
 			}
-			if cfg.Dsk {
+			if cfg.ExportType(config.DskContainer) {
 				if err := diskimage.ImportInDsk(filename, cfg); err != nil {
 					log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
 					os.Exit(-2)
@@ -801,12 +802,12 @@ func main() {
 		}
 	}
 	// export into bundle DSK or SNA
-	if cfg.Dsk {
+	if cfg.ExportType(config.DskContainer) {
 		if err := diskimage.ImportInDsk(*picturePath, cfg); err != nil {
 			log.GetLogger().Error("Cannot create or write into dsk file error :%v\n", err)
 		}
 	}
-	if cfg.Sna {
+	if cfg.ExportType(config.SnaContainer) {
 		if cfg.Overscan {
 			var gfxFile string
 			for _, v := range cfg.DskFiles {
@@ -815,17 +816,17 @@ func main() {
 					break
 				}
 			}
-			cfg.SnaPath = filepath.Join(*output, "test.sna")
-			if err := snapshot.ImportInSna(gfxFile, cfg.SnaPath, screenMode); err != nil {
+			cfg.ContainerCfg.Path = filepath.Join(*output, "test.sna")
+			if err := snapshot.ImportInSna(gfxFile, cfg.ContainerCfg.Path, screenMode); err != nil {
 				log.GetLogger().Error("Cannot create or write into sna file error :%v\n", err)
 			}
-			log.GetLogger().Info("Sna saved in file %s\n", cfg.SnaPath)
+			log.GetLogger().Info("Sna saved in file %s\n", cfg.ContainerCfg.Path)
 		} else {
 			log.GetLogger().Error("Feature not implemented for this file.")
 			os.Exit(-1)
 		}
 	}
-	if cfg.M4 {
+	if cfg.M4cfg.Enabled {
 		if err := m4.ImportInM4(cfg); err != nil {
 			log.GetLogger().Error("Cannot send to M4 error :%v\n", err)
 		}

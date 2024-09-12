@@ -145,7 +145,9 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	cfg.RotationLostlowBit = *lostlow
 	cfg.RotationIterations = *iterations
 	cfg.Flash = *flash
-	cfg.Sna = *sna
+	if sna != nil && *sna {
+		cfg.ContainerCfg.AddExport(config.SnaContainer)
+	}
 	cfg.SpriteHard = *spriteHard
 	cfg.SplitRaster = *splitRasters
 	cfg.ZigZag = *zigzag
@@ -215,13 +217,11 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	}
 
 	if cfg.CpcPlus {
-		cfg.Kit = true
-		cfg.Pal = false
+		cfg.PaletteCfg.Type = config.KitPalette
 	}
 	cfg.Overscan = *overscan
 	if cfg.Overscan {
-		cfg.Scr = false
-		cfg.Kit = true
+		cfg.PaletteCfg.Type = config.KitPalette
 	}
 
 	if *egx1 {
@@ -244,6 +244,8 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	}
 
 	cfg.DeltaMode = *deltaMode
-	cfg.Dsk = *dsk
+	if dsk != nil && *dsk {
+		cfg.ContainerCfg.AddExport(config.DskContainer)
+	}
 	return cfg, size
 }

@@ -116,7 +116,9 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 		return
 	}
 	cfg.OutputPath = me.ResultImage.Path
-	cfg.Dsk = m.egxExport.ExportDsk
+	if m.egxExport.ExportDsk {
+		cfg.ContainerCfg.AddExport(config.DskContainer)
+	}
 	if m.egxExport.ExportWithAmsdosHeader {
 		cfg.NoAmsdosHeader = false
 	} else {
@@ -159,7 +161,7 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 			return
 		}
 	}
-	if cfg.Sna {
+	if cfg.ExportType(config.SnaContainer) {
 		if cfg.Overscan {
 			var gfxFile string
 			for _, v := range cfg.DskFiles {
@@ -168,8 +170,8 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 					break
 				}
 			}
-			cfg.SnaPath = filepath.Join(me.ResultImage.Path, "test.sna")
-			if err := snapshot.ImportInSna(gfxFile, cfg.SnaPath, 0); err != nil {
+			cfg.ContainerCfg.Path = filepath.Join(me.ResultImage.Path, "test.sna")
+			if err := snapshot.ImportInSna(gfxFile, cfg.ContainerCfg.Path, 0); err != nil {
 				dialog.NewError(err, m.window).Show()
 				return
 			}

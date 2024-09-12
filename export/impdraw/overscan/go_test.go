@@ -27,7 +27,8 @@ func TestSaveGo(t *testing.T) {
 	cfg := config.NewMartineConfig(file, "./overscanTests")
 	cfg.Overscan = true
 	cfg.ExportAsGoFile = true
-	cfg.Dsk = true
+	cfg.ContainerCfg.AddExport(config.DskContainer)
+
 	cfg.CpcPlus = true
 	cfg.Size = constants.NewSizeMode(0, true)
 	err := gfx.ApplyOneImageAndExport(img, cfg, "lena", "./overscanTests/", 0, 0)

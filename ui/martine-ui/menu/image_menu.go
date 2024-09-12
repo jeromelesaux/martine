@@ -381,13 +381,13 @@ func (me *ImageMenu) ExportImage(e *ImageExport, w fyne.Window, getCfg func(me *
 			dialog.NewError(err, w).Show()
 			return
 		}
-		if cfg.Dsk {
+		if cfg.ExportType(config.DskContainer) {
 			if err := diskimage.ImportInDsk(me.OriginalImagePath(), cfg); err != nil {
 				dialog.NewError(err, w).Show()
 				return
 			}
 		}
-		if cfg.Sna {
+		if cfg.ExportType(config.SnaContainer) {
 			if cfg.Overscan {
 				var gfxFile string
 				for _, v := range cfg.DskFiles {
@@ -396,8 +396,8 @@ func (me *ImageMenu) ExportImage(e *ImageExport, w fyne.Window, getCfg func(me *
 						break
 					}
 				}
-				cfg.SnaPath = filepath.Join(e.ExportFolderPath, "test.sna")
-				if err := snapshot.ImportInSna(gfxFile, cfg.SnaPath, uint8(me.Mode)); err != nil {
+				cfg.ContainerCfg.Path = filepath.Join(e.ExportFolderPath, "test.sna")
+				if err := snapshot.ImportInSna(gfxFile, cfg.ContainerCfg.Path, uint8(me.Mode)); err != nil {
 					dialog.NewError(err, w).Show()
 					return
 				}
@@ -478,7 +478,9 @@ func (me *ImageMenu) NewConfig(ex *ImageExport, checkOriginalImage bool) *config
 	cfg.NoAmsdosHeader = !ex.ExportWithAmsdosHeader
 	cfg.ZigZag = ex.ExportZigzag
 	cfg.Compression = ex.ExportCompression
-	cfg.Dsk = ex.ExportDsk
+	if ex.ExportDsk {
+		cfg.ContainerCfg.AddExport(config.DskContainer)
+	}
 	cfg.ExportAsGoFile = ex.ExportAsGoFiles
 	cfg.OneLine = me.OneLine
 	cfg.OneRow = me.OneRow

@@ -25,7 +25,7 @@ func ImportInM4(cfg *config.MartineConfig) error {
 	if err := client.ResetCpc(); err != nil {
 		return err
 	}
-	if !cfg.Sna {
+	if !cfg.ExportType(config.SnaContainer) {
 		log.GetLogger().Info("Attempt to create remote directory (%s) to host (%s)\n", cfg.M4cfg.RemotePath, client.IPClient)
 		if err := client.MakeDirectory(cfg.M4cfg.RemotePath); err != nil {
 			log.GetLogger().Error("Cannot create directory on M4 (%s) error %v\n", cfg.M4cfg.RemotePath, err)
@@ -46,7 +46,7 @@ func ImportInM4(cfg *config.MartineConfig) error {
 			log.GetLogger().Error("Cannot create directory on M4 (%s) error %v\n", cfg.M4cfg.RemotePath, err)
 		}
 	}
-	if cfg.Dsk {
+	if cfg.ExportType(config.DskContainer) {
 		dskFile := cfg.Fullpath(".dsk")
 		log.GetLogger().Info("Attempt to uploading file (%s) on remote path (%s) to host (%s)\n", dskFile, cfg.M4cfg.RemotePath, client.IPClient)
 		if err := client.Upload(cfg.M4cfg.RemotePath, dskFile); err != nil {
@@ -58,18 +58,18 @@ func ImportInM4(cfg *config.MartineConfig) error {
 		}
 	}
 
-	if cfg.Sna {
-		if err := client.Upload(cfg.M4cfg.RemotePath, cfg.SnaPath); err != nil {
+	if cfg.ExportType(config.SnaContainer) {
+		if err := client.Upload(cfg.M4cfg.RemotePath, cfg.ContainerCfg.Path); err != nil {
 			log.GetLogger().Error("Something is wrong M4 host (%s) local file (%s) remote path (%s) error :%v\n",
 				cfg.M4cfg.Host,
-				cfg.SnaPath,
+				cfg.ContainerCfg.Path,
 				cfg.M4cfg.RemotePath,
 				err)
 		}
 	}
 
 	if cfg.M4cfg.Autoexec {
-		if cfg.Sna {
+		if cfg.ExportType(config.SnaContainer) {
 			return client.Run(cfg.M4cfg.RemotePath + "test.sna")
 		}
 		p, err := client.Ls(cfg.M4cfg.RemotePath)

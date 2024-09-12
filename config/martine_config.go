@@ -28,6 +28,7 @@ type MartineConfig struct {
 	OutputPath                  string
 	PaletteCfg                  PaletteConfig
 	M4cfg                       M4Config
+	ContainerCfg                ContainerConfig
 	Size                        constants.Size
 	Compression                 compression.CompressionMethod
 	NoAmsdosHeader              bool
@@ -41,11 +42,6 @@ type MartineConfig struct {
 	RollIteration               int
 	TileIterationX              int
 	TileIterationY              int
-	M4                          bool
-	Dsk                         bool
-	Ink                         bool
-	Kit                         bool
-	Pal                         bool
 	Scr                         bool
 	Win                         bool
 	Overscan                    bool
@@ -81,8 +77,6 @@ type MartineConfig struct {
 	EgxFormat                   int
 	EgxMode1                    uint8
 	EgxMode2                    uint8
-	Sna                         bool
-	SnaPath                     string
 	SpriteHard                  bool
 	SplitRaster                 bool
 	ScanlineSequence            []int
@@ -104,6 +98,10 @@ type MartineConfig struct {
 	DoubleScreenAddress         bool
 	UseKmeans                   bool
 	KmeansThreshold             float64
+}
+
+func (m MartineConfig) ExportType(c ContainerFormat) bool {
+	return m.ContainerCfg.Export(c)
 }
 
 func MaskIsAllowed(mode uint8, value uint8) bool {
@@ -133,9 +131,6 @@ func ModeMaskSprite(mode uint8) ([]uint8, error) {
 
 func NewMartineConfig(input, output string) *MartineConfig {
 	return &MartineConfig{
-		Scr:            true,
-		Pal:            true,
-		Ink:            true,
 		InputPath:      input,
 		OutputPath:     output,
 		amsdosFilename: make([]byte, 8),
