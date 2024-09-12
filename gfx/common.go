@@ -131,30 +131,28 @@ func ApplyOneImageAndExport(in image.Image,
 	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_resized.png"), out); err != nil {
 		os.Exit(-2)
 	}
-
-	if cfg.PalettePath != "" {
-		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PalettePath)
-		palette, _, err = ocpartstudio.OpenPal(cfg.PalettePath)
+	switch cfg.PaletteCfg.Type {
+	case config.PalPalette:
+		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PaletteCfg.Path)
+		palette, _, err = ocpartstudio.OpenPal(cfg.PaletteCfg.Path)
 		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalettePath)
+			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PaletteCfg.Path)
 		} else {
 			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
 		}
-	}
-	if cfg.InkPath != "" {
-		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.InkPath)
-		palette, _, err = impPalette.OpenInk(cfg.InkPath)
+	case config.InkPalette:
+		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PaletteCfg.Path)
+		palette, _, err = impPalette.OpenInk(cfg.PaletteCfg.Path)
 		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.InkPath)
+			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PaletteCfg.Path)
 		} else {
 			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
 		}
-	}
-	if cfg.KitPath != "" {
-		log.GetLogger().Info("Input plus palette to apply : (%s)\n", cfg.KitPath)
-		palette, _, err = impPalette.OpenKit(cfg.KitPath)
+	case config.KitPalette:
+		log.GetLogger().Info("Input plus palette to apply : (%s)\n", cfg.PaletteCfg.Path)
+		palette, _, err = impPalette.OpenKit(cfg.PaletteCfg.Path)
 		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.KitPath)
+			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PaletteCfg.Path)
 		} else {
 			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
 		}

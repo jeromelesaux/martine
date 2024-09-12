@@ -138,7 +138,7 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 		pi.Hide()
 		dialog.ShowError(err, m.window)
 	}
-	cfg.KitPath = "temporary_palette.kit"
+	cfg.PaletteCfg.Path = "temporary_palette.kit"
 
 	if !cfg.Overscan {
 		if err := ocpartstudio.EgxLoader(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Palette, uint8(me.LeftImage.Mode), uint8(me.RightImage.Mode), cfg); err != nil {

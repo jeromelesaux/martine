@@ -352,7 +352,7 @@ func (me *ImageMenu) ExportImage(e *ImageExport, w fyne.Window, getCfg func(me *
 			dialog.ShowError(err, w)
 		}
 		if me.UsePalette {
-			cfg.KitPath = tmpPalette
+			cfg.PaletteCfg.Path = tmpPalette
 		}
 
 		filename := filepath.Base(me.OriginalImagePath())

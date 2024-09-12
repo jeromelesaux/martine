@@ -46,33 +46,33 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 
 	board := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: sizeScreen.Width, Y: sizeScreen.Height}})
 	var palette, newPalette color.Palette
-	if export.PalettePath != "" {
-		log.GetLogger().Info("Input palette to apply : (%s)\n", export.PalettePath)
-		palette, _, err := ocpartstudio.OpenPal(export.PalettePath)
+	switch export.PaletteCfg.Type {
+	case config.PalPalette:
+		log.GetLogger().Info("Input palette to apply : (%s)\n", export.PaletteCfg.Path)
+		palette, _, err := ocpartstudio.OpenPal(export.PaletteCfg.Path)
 		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", export.PalettePath)
+			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", export.PaletteCfg.Path)
+		} else {
+			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
+		}
+	case config.InkPalette:
+		log.GetLogger().Info("Input palette to apply : (%s)\n", export.PaletteCfg.Path)
+		palette, _, err := impPalette.OpenInk(export.PaletteCfg.Path)
+		if err != nil {
+			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", export.PaletteCfg.Path)
+		} else {
+			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
+		}
+	case config.KitPalette:
+		log.GetLogger().Info("Input plus palette to apply : (%s)\n", export.PaletteCfg.Path)
+		palette, _, err := impPalette.OpenKit(export.PaletteCfg.Path)
+		if err != nil {
+			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", export.PaletteCfg.Path)
 		} else {
 			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
 		}
 	}
-	if export.InkPath != "" {
-		log.GetLogger().Info("Input palette to apply : (%s)\n", export.InkPath)
-		palette, _, err := impPalette.OpenInk(export.InkPath)
-		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", export.InkPath)
-		} else {
-			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
-		}
-	}
-	if export.KitPath != "" {
-		log.GetLogger().Info("Input plus palette to apply : (%s)\n", export.KitPath)
-		palette, _, err := impPalette.OpenKit(export.KitPath)
-		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", export.KitPath)
-		} else {
-			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
-		}
-	}
+
 	var startX, startY int
 	nbLarge := 0
 	for index0, v := range filepaths {

@@ -137,11 +137,11 @@ func prepareEgx(
 	var p color.Palette       // palette cpc de l'image
 	var downgraded *image.NRGBA
 
-	if cfg.PalettePath != "" {
-		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PalettePath)
-		palette, _, err = ocpartstudio.OpenPal(cfg.PalettePath)
+	if cfg.PaletteCfg.Type == config.PalPalette {
+		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PaletteCfg.Path)
+		palette, _, err = ocpartstudio.OpenPal(cfg.PaletteCfg.Path)
 		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalettePath)
+			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PaletteCfg.Path)
 		} else {
 			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
 		}

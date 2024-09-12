@@ -26,12 +26,8 @@ var ErrorNotAllowed = errors.New("error not allowed")
 type MartineConfig struct {
 	InputPath                   string
 	OutputPath                  string
-	PalettePath                 string
-	InkPath                     string
-	KitPath                     string
-	M4RemotePath                string
-	M4Host                      string
-	M4Autoexec                  bool
+	PaletteCfg                  PaletteConfig
+	M4cfg                       M4Config
 	Size                        constants.Size
 	Compression                 compression.CompressionMethod
 	NoAmsdosHeader              bool

@@ -108,15 +108,33 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	cfg.Rotation3DType = *rotate3dType
 	cfg.Rotation3DX0 = *rotate3dX0
 	cfg.Rotation3DY0 = *rotate3dY0
-	cfg.M4Host = *m4Host
-	cfg.M4RemotePath = *m4RemotePath
-	cfg.M4Autoexec = *m4Autoexec
+	cfg.M4cfg = config.M4Config{
+		Host:       *m4Host,
+		RemotePath: *m4RemotePath,
+		Autoexec:   *m4Autoexec,
+		Enabled:    true,
+	}
 	cfg.ResizingAlgo = resizeAlgo
 	cfg.DitheringMultiplier = *ditheringMultiplier
 	cfg.DitheringWithQuantification = *withQuantization
-	cfg.PalettePath = *palettePath
-	cfg.InkPath = *inkPath
-	cfg.KitPath = *kitPath
+	var ppath string
+	var ptype config.PaletteType
+	if palettePath != nil {
+		ppath = *palettePath
+		ptype = config.PalPalette
+	}
+	if inkPath != nil {
+		ppath = *inkPath
+		ptype = config.InkPalette
+	}
+	if kitPath != nil {
+		ppath = *kitPath
+		ptype = config.KitPalette
+	}
+	cfg.PaletteCfg = config.PaletteConfig{
+		Path: ppath,
+		Type: ptype,
+	}
 	cfg.RotationRlaBit = *rla
 	cfg.RotationSraBit = *sra
 	cfg.RotationSlaBit = *sla
@@ -204,9 +222,6 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	if cfg.Overscan {
 		cfg.Scr = false
 		cfg.Kit = true
-	}
-	if cfg.M4Host != "" {
-		cfg.M4 = true
 	}
 
 	if *egx1 {
