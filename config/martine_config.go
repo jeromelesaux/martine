@@ -36,7 +36,6 @@ type MartineConfig struct {
 	Json                        bool
 	Ascii                       bool
 	CustomDimension             bool
-	amsdosFilename              []byte
 	DskFiles                    []string
 	Tiles                       *export.JsonSlice
 	DeltaMode                   bool
@@ -119,13 +118,12 @@ func NewMartineConfig(input, output string) *MartineConfig {
 			InputPath:  input,
 			OutputPath: output,
 		},
-		amsdosFilename: make([]byte, 8),
-		DskFiles:       make([]string, 0),
-		Rotation3DX0:   -1,
-		Rotation3DY0:   -1,
-		Tiles:          export.NewJsonSlice(),
-		InkSwapper:     make(map[int]int),
-		LineWidth:      0x50,
+		DskFiles:     make([]string, 0),
+		Rotation3DX0: -1,
+		Rotation3DY0: -1,
+		Tiles:        export.NewJsonSlice(),
+		InkSwapper:   make(map[int]int),
+		LineWidth:    0x50,
 	}
 }
 
@@ -176,7 +174,7 @@ func RemoveUnsupportedChar(s string) string {
 
 func (e *MartineConfig) AmsdosFilename() []byte {
 	for i := 0; i < 8; i++ {
-		e.amsdosFilename[i] = ' '
+		e.ScreenCfg.amsdosFilename[i] = ' '
 	}
 	file := strings.ToUpper(filepath.Base(e.ScreenCfg.InputPath))
 	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
@@ -184,9 +182,9 @@ func (e *MartineConfig) AmsdosFilename() []byte {
 	if filenameSize > 8 {
 		filenameSize = 8
 	}
-	copy(e.amsdosFilename[:], file[0:filenameSize])
+	copy(e.ScreenCfg.amsdosFilename[:], file[0:filenameSize])
 
-	return e.amsdosFilename
+	return e.ScreenCfg.amsdosFilename[:]
 }
 
 func (e *MartineConfig) Filename() string {

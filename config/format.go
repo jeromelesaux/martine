@@ -63,6 +63,7 @@ type ScreenConfig struct {
 	Compression    compression.CompressionMethod
 	Export         []ScreenExport
 	Size           constants.Size
+	amsdosFilename [8]byte
 }
 
 var (
