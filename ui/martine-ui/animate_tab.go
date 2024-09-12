@@ -66,7 +66,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						a.RawImages[0],
 						a.DeltaCollection,
 						a.Palette(),
-						a.IsSprite,
+						a.Format.IsSprite(),
 						cfg,
 						uint16(address),
 						uint8(a.Mode),
@@ -288,7 +288,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
 	a.InitialAddress.SetText("c000")
 
 	isSprite := widget.NewCheck("Is sprite", func(b bool) {
-		a.IsSprite = b
+		a.Format = menu.SpriteFormat
 	})
 	m.animateExport.ExportCompression = compression.NONE
 	compressData := widget.NewCheck("Compress data", func(b bool) {

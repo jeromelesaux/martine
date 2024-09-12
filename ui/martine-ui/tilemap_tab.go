@@ -114,7 +114,7 @@ func (m *MartineUI) newImageMenuExportButton(tm *menu.ImageMenu) *widget.Button 
 // nolint: funlen, gocognit
 func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 	tm.ImageMenu.SetWindow(m.window)
-	tm.IsSprite = true
+	tm.Format = menu.SpriteFormat
 	importOpen := newImportButton(m, tm.ImageMenu)
 
 	paletteOpen := pal.NewOpenPaletteButton(tm.ImageMenu, m.window, nil)

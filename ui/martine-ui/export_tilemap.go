@@ -124,7 +124,7 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 	pi.Show()
 	cfg := t.ImageMenu.NewConfig(m.tilemapExport, true)
 	cfg.OutputPath = t.ExportFolderPath
-	if m.IsClassicalTilemap(cfg.Size.Width, cfg.Size.Height) && !m.tilemap.IsSprite {
+	if m.IsClassicalTilemap(cfg.Size.Width, cfg.Size.Height) && !m.tilemap.Format.IsSprite() {
 		filename := filepath.Base(t.OriginalImagePath())
 		if err := gfx.ExportTilemapClassical(t.OriginalImage().Image, filename, t.Result, cfg.Size, cfg); err != nil {
 			pi.Hide()

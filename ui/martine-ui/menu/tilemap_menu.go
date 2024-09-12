@@ -60,10 +60,10 @@ func (i *TilemapMenu) CmdLine() string {
 	if i.IsCpcPlus {
 		exec += " -plus"
 	}
-	if i.IsFullScreen {
+	if i.Format.IsFullScreen() {
 		exec += " -fullscreen"
 	}
-	if i.IsSprite {
+	if i.Format.IsSprite() {
 		width, widthText, err := i.GetWidth()
 		if err != nil {
 			log.GetLogger().Error("cannot convert width value :%s error :%v\n", widthText, err)
@@ -77,7 +77,7 @@ func (i *TilemapMenu) CmdLine() string {
 			exec += " -height " + strconv.Itoa(height)
 		}
 	}
-	if i.IsHardSprite {
+	if i.Format.IsSpriteHard() {
 		exec += " -spritehard"
 	}
 	if i.ApplyDithering {

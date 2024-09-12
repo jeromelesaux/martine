@@ -33,7 +33,7 @@ func newImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 			}
 			directory.SetImportDirectoryURI(reader.URI())
 			me.SetOriginalImagePath(reader.URI())
-			if me.IsFullScreen {
+			if me.Format.IsFullScreen() {
 
 				// open palette widget to get palette
 				p, mode, err := overscan.OverscanPalette(me.OriginalImagePath())
@@ -59,7 +59,7 @@ func newImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 				modeSelection.SetSelectedIndex(me.Mode)
 				me.SetPaletteImage(png.PalToImage(p))
 				me.SetOriginalImage(img)
-			} else if me.IsSprite {
+			} else if me.Format.IsSprite() {
 				// loading sprite file
 				if len(me.Palette()) == 0 {
 					dialog.ShowError(errors.New("palette is empty, please import palette first"), m.window)

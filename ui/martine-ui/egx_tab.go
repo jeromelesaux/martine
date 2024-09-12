@@ -47,11 +47,11 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 		dialog.ShowError(fmt.Errorf("plus mode between the images must differ"), m.window)
 		return
 	}
-	if di.RightImage.IsHardSprite != di.LeftImage.IsHardSprite {
+	if di.RightImage.Format.IsSpriteHard() != di.LeftImage.Format.IsSpriteHard() {
 		dialog.ShowError(fmt.Errorf("sprite hard mode between the images must differ"), m.window)
 		return
 	}
-	if di.RightImage.IsFullScreen != di.LeftImage.IsFullScreen {
+	if di.RightImage.Format.IsFullScreen() != di.LeftImage.Format.IsFullScreen() {
 		dialog.ShowError(fmt.Errorf("fullscreen mode between the images must  differ"), m.window)
 		return
 	}

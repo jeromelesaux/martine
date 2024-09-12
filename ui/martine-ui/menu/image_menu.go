@@ -40,15 +40,42 @@ import (
 	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 )
 
+type Format string
+
+var (
+	FullscreenFormat Format = "fullscreen"
+	SpriteFormat     Format = "sprite"
+	SpriteHardFormat Format = "sprite_hard"
+	ScreenFormat     Format = "screen"
+	WindowFormat     Format = "window"
+)
+
+func (f Format) IsSprite() bool {
+	return SpriteFormat == f
+}
+
+func (f Format) IsFullScreen() bool {
+	return FullscreenFormat == f
+}
+
+func (f Format) IsSpriteHard() bool {
+	return SpriteHardFormat == f
+}
+
+func (f Format) IsScreen() bool {
+	return ScreenFormat == f
+}
+
+func (f Format) IsWindow() bool {
+	return WindowFormat == f
+}
+
 type ImageMenu struct {
 	originalImage       *canvas.Image
 	cpcImage            *canvas.Image
 	originalImagePath   fyne.URI
 	IsCpcPlus           bool
-	IsFullScreen        bool
-	IsSprite            bool
-	IsHardSprite        bool
-	IsWin               bool
+	Format              Format
 	Mode                int
 	width               *widget.Entry
 	height              *widget.Entry
@@ -163,10 +190,11 @@ func (i *ImageMenu) CmdLine() string {
 	if i.IsCpcPlus {
 		exec += " -plus"
 	}
-	if i.IsFullScreen {
+
+	if i.Format.IsFullScreen() {
 		exec += " -fullscreen"
 	}
-	if i.IsSprite {
+	if i.Format.IsSprite() {
 		width, err := strconv.Atoi(i.width.Text)
 		if err != nil {
 			log.GetLogger().Error("cannot convert width value :%s error :%v\n", i.width.Text, err)
@@ -180,7 +208,7 @@ func (i *ImageMenu) CmdLine() string {
 			exec += " -height " + strconv.Itoa(height)
 		}
 	}
-	if i.IsHardSprite {
+	if i.Format.IsSpriteHard() {
 		exec += " -spritehard"
 	}
 	if i.ApplyDithering {
@@ -396,7 +424,7 @@ func (me *ImageMenu) NewConfig(ex *ImageExport, checkOriginalImage bool) *config
 		cfg = config.NewMartineConfig(me.OriginalImagePath(), "")
 	}
 	cfg.CpcPlus = me.IsCpcPlus
-	cfg.Overscan = me.IsFullScreen
+	cfg.Overscan = me.Format.IsFullScreen()
 	cfg.DitheringMultiplier = me.DitheringMultiplier
 	cfg.Brightness = me.Brightness
 	cfg.Saturation = me.Saturation
@@ -408,8 +436,8 @@ func (me *ImageMenu) NewConfig(ex *ImageExport, checkOriginalImage bool) *config
 		cfg.Brightness = me.Saturation
 	}
 	cfg.Reducer = me.Reducer
-	cfg.Size = constants.NewSizeMode(uint8(me.Mode), me.IsFullScreen)
-	if me.IsSprite {
+	cfg.Size = constants.NewSizeMode(uint8(me.Mode), me.Format.IsFullScreen())
+	if me.Format.IsSprite() {
 		width, _, err := me.GetWidth()
 		if err != nil {
 			dialog.NewError(err, me.w).Show()
@@ -424,7 +452,7 @@ func (me *ImageMenu) NewConfig(ex *ImageExport, checkOriginalImage bool) *config
 		cfg.Size.Width = width
 		cfg.CustomDimension = true
 	}
-	if me.IsHardSprite {
+	if me.Format.IsSpriteHard() {
 		cfg.Size.Height = 16
 		cfg.Size.Width = 16
 	}
@@ -571,8 +599,15 @@ func (i *ImageMenu) NewImportButton(modeSelection *widget.Select, callBack func(
 			}
 			directory.SetImportDirectoryURI(reader.URI())
 			i.SetOriginalImagePath(reader.URI())
-			if i.IsFullScreen {
-
+			if !i.Format.IsFullScreen() {
+				// load palette from file
+				if len(i.Palette()) == 0 {
+					dialog.ShowError(errors.New("palette is empty, please import palette first"), i.w)
+					return
+				}
+			}
+			switch i.Format {
+			case FullscreenFormat:
 				// open palette widget to get palette
 				p, mode, err := overscan.OverscanPalette(i.OriginalImagePath())
 				if err != nil {
@@ -597,12 +632,8 @@ func (i *ImageMenu) NewImportButton(modeSelection *widget.Select, callBack func(
 				modeSelection.SetSelectedIndex(i.Mode)
 				i.SetPaletteImage(png.PalToImage(p))
 				i.SetOriginalImage(img)
-			} else if i.IsSprite {
+			case SpriteFormat:
 				// loading sprite file
-				if len(i.Palette()) == 0 {
-					dialog.ShowError(errors.New("palette is empty, please import palette first"), i.w)
-					return
-				}
 				img, size, err := sprite.SpriteToImg(i.OriginalImagePath(), uint8(i.Mode), i.Palette())
 				if err != nil {
 					dialog.ShowError(err, i.w)
@@ -611,44 +642,29 @@ func (i *ImageMenu) NewImportButton(modeSelection *widget.Select, callBack func(
 				i.Width().SetText(strconv.Itoa(size.Width))
 				i.Height().SetText(strconv.Itoa(size.Height))
 				i.SetOriginalImage(img)
-			} else {
-				// loading classical screen
-				if len(i.Palette()) == 0 {
-					dialog.ShowError(errors.New("palette is empty,  please import palette first, or select fullscreen option to open a fullscreen option"), i.w)
+			case WindowFormat:
+				img, err := screen.WinToImg(i.OriginalImagePath(), uint8(i.Mode), i.Palette())
+				if err != nil {
+					dialog.ShowError(err, i.w)
 					return
 				}
-				if i.IsWin {
-					img, err := screen.WinToImg(i.OriginalImagePath(), uint8(i.Mode), i.Palette())
-					if err != nil {
-						dialog.ShowError(err, i.w)
-						return
-					}
-					i.SetOriginalImage(img)
-				} else {
-					// loading classical screen
-					if len(i.Palette()) == 0 {
-						dialog.ShowError(errors.New("palette is empty,  please import palette first, or select fullscreen option to open a fullscreen option"), i.w)
-						return
-					}
-					if i.IsHardSprite {
-						// loading hard sprite
-						img, err := spritehard.SpriteHardToImg(i.OriginalImagePath(), i.Palette())
-						if err != nil {
-							dialog.ShowError(err, i.w)
-							return
-						}
-						i.SetOriginalImage(img)
-
-					} else {
-						img, err := screen.ScrToImg(i.OriginalImagePath(), uint8(i.Mode), i.Palette())
-						if err != nil {
-							dialog.ShowError(err, i.w)
-							return
-						}
-						i.SetOriginalImage(img)
-					}
+				i.SetOriginalImage(img)
+			case SpriteHardFormat:
+				img, err := spritehard.SpriteHardToImg(i.OriginalImagePath(), i.Palette())
+				if err != nil {
+					dialog.ShowError(err, i.w)
+					return
 				}
+				i.SetOriginalImage(img)
+			case ScreenFormat:
+				img, err := screen.ScrToImg(i.OriginalImagePath(), uint8(i.Mode), i.Palette())
+				if err != nil {
+					dialog.ShowError(err, i.w)
+					return
+				}
+				i.SetOriginalImage(img)
 			}
+
 			if callBack != nil {
 				callBack()
 			}
@@ -667,30 +683,15 @@ func (me *ImageMenu) NewFormatRadio() *widget.Select {
 	winFormat := widget.NewSelect([]string{"Normal", "Fullscreen", "Window", "Sprite", "Sprite Hard"}, func(s string) {
 		switch s {
 		case "Normal":
-			me.IsFullScreen = false
-			me.IsSprite = false
-			me.IsWin = false
-			me.IsHardSprite = false
+			me.Format = ScreenFormat
 		case "Fullscreen":
-			me.IsFullScreen = true
-			me.IsSprite = false
-			me.IsWin = false
-			me.IsHardSprite = false
+			me.Format = FullscreenFormat
 		case "Sprite":
-			me.IsFullScreen = false
-			me.IsSprite = true
-			me.IsWin = false
-			me.IsHardSprite = false
+			me.Format = SpriteFormat
 		case "Sprite Hard":
-			me.IsFullScreen = false
-			me.IsSprite = false
-			me.IsWin = false
-			me.IsHardSprite = true
+			me.Format = SpriteHardFormat
 		case "Window":
-			me.IsFullScreen = false
-			me.IsSprite = false
-			me.IsHardSprite = false
-			me.IsWin = true
+			me.Format = WindowFormat
 		}
 	})
 	winFormat.SetSelected("Normal")
