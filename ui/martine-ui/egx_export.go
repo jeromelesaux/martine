@@ -27,31 +27,45 @@ import (
 var egxFilename = "aa.scr"
 
 // nolint:funlen
-func (m *MartineUI) exportEgxDialog(ie *menu.ImageExport, w fyne.Window) {
+func (m *MartineUI) exportEgxDialog(cfg *config.MartineConfig, w fyne.Window) {
 	m2host := widget.NewEntry()
 	m2host.SetPlaceHolder("Set your M2 IP here.")
 
-	ie.Reset()
+	cfg.Reset()
 	cont := container.NewVBox(
 		container.NewHBox(
 			widget.NewCheck("import all file in Dsk", func(b bool) {
-				ie.ExportDsk = b
+				if b {
+					cfg.ContainerCfg.AddExport(config.DskContainer)
+				} else {
+					cfg.ContainerCfg.RemoveExport(config.DskContainer)
+				}
+
 			}),
 			widget.NewCheck("export text file", func(b bool) {
-				ie.ExportText = b
+				if b {
+					cfg.ScreenCfg.AddExport(config.AssemblyExport)
+				} else {
+					cfg.ScreenCfg.RemoveExport(config.AssemblyExport)
+				}
 			}),
 			widget.NewCheck("export Json file", func(b bool) {
-				ie.ExportJson = b
+				if b {
+					cfg.ScreenCfg.AddExport(config.JsonExport)
+				} else {
+					cfg.ScreenCfg.RemoveExport(config.JsonExport)
+				}
 			}),
 			widget.NewCheck("add amsdos header", func(b bool) {
-				ie.ExportWithAmsdosHeader = b
+				cfg.ScreenCfg.NoAmsdosHeader = b == true
+
 			}),
 			widget.NewCheck("apply zigzag", func(b bool) {
-				ie.ExportZigzag = b
+				cfg.ZigZag = b
 			}),
 			widget.NewCheck("export to M2", func(b bool) {
-				ie.ExportToM2 = b
-				ie.M2IP = m2host.Text
+				cfg.M4cfg.Enabled = true
+				cfg.M4cfg.Host = m2host.Text
 			}),
 		),
 
@@ -60,17 +74,17 @@ func (m *MartineUI) exportEgxDialog(ie *menu.ImageExport, w fyne.Window) {
 			func(s string) {
 				switch s {
 				case "none":
-					ie.ExportCompression = compression.NONE
+					cfg.ScreenCfg.Compression = compression.NONE
 				case "rle":
-					ie.ExportCompression = compression.RLE
+					cfg.ScreenCfg.Compression = compression.RLE
 				case "rle 16bits":
-					ie.ExportCompression = compression.RLE16
+					cfg.ScreenCfg.Compression = compression.RLE16
 				case "Lz4 Classic":
-					ie.ExportCompression = compression.LZ4
+					cfg.ScreenCfg.Compression = compression.LZ4
 				case "Lz4 Raw":
-					ie.ExportCompression = compression.RawLZ4
+					cfg.ScreenCfg.Compression = compression.RawLZ4
 				case "zx0 crunch":
-					ie.ExportCompression = compression.ZX0
+					cfg.ScreenCfg.Compression = compression.ZX0
 				}
 			}),
 		m2host,
@@ -85,9 +99,9 @@ func (m *MartineUI) exportEgxDialog(ie *menu.ImageExport, w fyne.Window) {
 					return
 				}
 				directory.SetExportDirectoryURI(lu)
-				ie.ExportFolderPath = lu.Path()
+				cfg.ScreenCfg.OutputPath = lu.Path()
 				m.egx.ResultImage.Path = lu.Path()
-				log.GetLogger().Infoln(ie.ExportFolderPath)
+				log.GetLogger().Infoln(cfg.ScreenCfg.OutputPath)
 				m.ExportEgxImage(m.egx)
 
 				// apply and export
@@ -97,7 +111,8 @@ func (m *MartineUI) exportEgxDialog(ie *menu.ImageExport, w fyne.Window) {
 				fo.SetLocation(d)
 			}
 			fo.Resize(savingDialogSize)
-			m.CheckAmsdosHeaderExport(ie.ExportDsk, ie.ExportWithAmsdosHeader, fo, m.window)
+			m.CheckAmsdosHeaderExport(cfg.ContainerCfg.Export(config.DskContainer),
+				cfg.ScreenCfg.NoAmsdosHeader == false, fo, m.window)
 		}),
 	)
 
@@ -110,20 +125,13 @@ func (m *MartineUI) exportEgxDialog(ie *menu.ImageExport, w fyne.Window) {
 func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	pi := wgt.NewProgressInfinite("Saving...., please wait.", m.window)
 	pi.Show()
-	cfg := me.LeftImage.NewConfig(m.egxExport, true)
+	cfg := me.Cfg
 	if cfg == nil {
 		pi.Hide()
 		return
 	}
 	cfg.ScreenCfg.OutputPath = me.ResultImage.Path
-	if m.egxExport.ExportDsk {
-		cfg.ContainerCfg.AddExport(config.DskContainer)
-	}
-	if m.egxExport.ExportWithAmsdosHeader {
-		cfg.ScreenCfg.NoAmsdosHeader = false
-	} else {
-		cfg.ScreenCfg.NoAmsdosHeader = true
-	}
+
 	if me.ResultImage.EgxType == 1 {
 		cfg.ScreenCfg.Type = config.Egx1Format
 	} else {
@@ -155,7 +163,7 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 			return
 		}
 	}
-	if m.egxExport.ExportDsk {
+	if cfg.ExportType(config.DskContainer) {
 		if err := diskimage.ImportInDsk(me.ResultImage.Path, cfg); err != nil {
 			dialog.NewError(err, m.window).Show()
 			return
@@ -177,12 +185,12 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 			}
 		}
 	}
-	if m.egxExport.ExportToM2 {
+	if cfg.M4cfg.Enabled {
 		if err := m4.ImportInM4(cfg); err != nil {
 			dialog.NewError(err, m.window).Show()
 			log.GetLogger().Error("Cannot send to M4 error :%v\n", err)
 		}
 	}
 	pi.Hide()
-	dialog.ShowInformation("Save", "Your files are save in folder \n"+m.egxExport.ExportFolderPath, m.window)
+	dialog.ShowInformation("Save", "Your files are save in folder \n"+cfg.ScreenCfg.OutputPath, m.window)
 }

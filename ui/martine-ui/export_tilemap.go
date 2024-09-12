@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/config"
+	"github.com/jeromelesaux/martine/export/compression"
 	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/log"
@@ -26,13 +27,11 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 			widget.NewSelect([]string{"sprite", "impdraw", "flat"}, func(s string) {
 				switch s {
 				case "sprite":
-					m.tilemap.ExportImpdraw = false
-					m.tilemap.ExportFlat = false
+					m.tilemap.Cfg.ScreenCfg.Type = config.SpriteFormat
 				case "flat":
-					m.tilemap.ExportImpdraw = false
-					m.tilemap.ExportFlat = true
+					m.tilemap.Cfg.ScreenCfg.Type = config.WindowFormat
 				case "impdraw":
-					m.tilemap.ExportFlat = false
+					m.tilemap.Cfg.ScreenCfg.Type = config.ImpdrawTile
 					var width, height int
 					var err error
 					width, _, err = m.tilemap.GetWidth()
@@ -47,7 +46,7 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 					}
 
 					if !m.IsClassicalTilemap(width, height) {
-						m.tilemap.ExportImpdraw = true
+						m.tilemap.Cfg.ScreenCfg.Type = config.ImpdrawTile
 					} else {
 						err = fmt.Errorf("can not apply impdraw for tiles size. (8x8, 4x8, 4x16 or 8x16)")
 						dialog.NewError(err, m.window).Show()
@@ -56,16 +55,28 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 				}
 			}),
 			widget.NewCheck("import all file in Dsk", func(b bool) {
-				m.tilemap.ExportDsk = b
+				if b {
+					m.tilemap.Cfg.ContainerCfg.AddExport(config.DskContainer)
+				} else {
+					m.tilemap.Cfg.ContainerCfg.RemoveExport(config.DskContainer)
+				}
 			}),
 			widget.NewCheck("export text file", func(b bool) {
-				m.tilemap.ExportText = b
+				if b {
+					m.tilemap.Cfg.ScreenCfg.AddExport(config.AssemblyExport)
+				} else {
+					m.tilemap.Cfg.ScreenCfg.RemoveExport(config.AssemblyExport)
+				}
 			}),
 			widget.NewCheck("export Json file", func(b bool) {
-				m.tilemap.ExportJson = b
+				if b {
+					m.tilemap.Cfg.ScreenCfg.AddExport(config.JsonExport)
+				} else {
+					m.tilemap.Cfg.ScreenCfg.RemoveExport(config.JsonExport)
+				}
 			}),
 			widget.NewCheck("add amsdos header", func(b bool) {
-				m.tilemap.ExportWithAmsdosHeader = b
+				m.tilemap.Cfg.ScreenCfg.NoAmsdosHeader = b == false
 			}),
 			widget.NewCheck("apply zigzag", func(b bool) {
 				m.tilemap.ExportZigzag = b
@@ -77,17 +88,17 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 			func(s string) {
 				switch s {
 				case "none":
-					m.tilemap.ExportCompression = 0
+					m.tilemap.Cfg.ScreenCfg.Compression = compression.NONE
 				case "rle":
-					m.tilemap.ExportCompression = 1
+					m.tilemap.Cfg.ScreenCfg.Compression = compression.RLE
 				case "rle 16bits":
-					m.tilemap.ExportCompression = 2
+					m.tilemap.Cfg.ScreenCfg.Compression = compression.RLE16
 				case "Lz4 Classic":
-					m.tilemap.ExportCompression = 3
+					m.tilemap.Cfg.ScreenCfg.Compression = compression.LZ4
 				case "Lz4 Raw":
-					m.tilemap.ExportCompression = 4
+					m.tilemap.Cfg.ScreenCfg.Compression = compression.RawLZ4
 				case "zx0 crunch":
-					m.tilemap.ExportCompression = 5
+					m.tilemap.Cfg.ScreenCfg.Compression = compression.ZX0
 				}
 			}),
 		widget.NewButtonWithIcon("Export into folder", theme.DocumentSaveIcon(), func() {
@@ -101,8 +112,8 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 					return
 				}
 				directory.SetExportDirectoryURI(lu)
-				m.tilemap.ExportFolderPath = lu.Path()
-				log.GetLogger().Infoln(m.tilemapExport.ExportFolderPath)
+				m.tilemap.Cfg.ScreenCfg.OutputPath = lu.Path()
+				log.GetLogger().Infoln(m.tilemap.Cfg.ScreenCfg.OutputPath)
 				m.ExportTilemap(m.tilemap)
 				// apply and export
 			}, m.window)
@@ -111,7 +122,7 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 				fo.SetLocation(d)
 			}
 			fo.Resize(savingDialogSize)
-			m.CheckAmsdosHeaderExport(m.tilemap.ExportDsk, m.tilemap.ExportWithAmsdosHeader, fo, m.window)
+			m.CheckAmsdosHeaderExport(m.tilemap.Cfg.ContainerCfg.Export(config.DskContainer), m.tilemap.Cfg.ScreenCfg.NoAmsdosHeader == false, fo, m.window)
 		}),
 	)
 
@@ -123,17 +134,15 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 	pi := wgt.NewProgressInfinite("Saving...., Please wait.", m.window)
 	pi.Show()
-	cfg := t.ImageMenu.NewConfig(m.tilemapExport, true)
-	cfg.ScreenCfg.OutputPath = t.ExportFolderPath
-	if m.IsClassicalTilemap(cfg.ScreenCfg.Size.Width, cfg.ScreenCfg.Size.Height) && !m.tilemap.Format.IsSprite() {
+	if m.IsClassicalTilemap(t.Cfg.ScreenCfg.Size.Width, t.Cfg.ScreenCfg.Size.Height) && !t.Cfg.ScreenCfg.Type.IsSprite() {
 		filename := filepath.Base(t.OriginalImagePath())
-		if err := gfx.ExportTilemapClassical(t.OriginalImage().Image, filename, t.Result, cfg.ScreenCfg.Size, cfg); err != nil {
+		if err := gfx.ExportTilemapClassical(t.OriginalImage().Image, filename, t.Result, t.Cfg.ScreenCfg.Size, t.Cfg); err != nil {
 			pi.Hide()
 			dialog.NewError(err, m.window).Show()
 			return
 		}
-		if cfg.ExportType(config.DskContainer) {
-			if err := diskimage.ImportInDsk(t.OriginalImagePath(), cfg); err != nil {
+		if t.Cfg.ExportType(config.DskContainer) {
+			if err := diskimage.ImportInDsk(t.OriginalImagePath(), t.Cfg); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 				return
@@ -141,13 +150,13 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 		}
 		pi.Hide()
 	} else {
-		if t.ExportImpdraw {
-			if err := gfx.ExportImpdrawTilemap(t.Result, "tilemap", t.Palette(), uint8(t.Mode), cfg.ScreenCfg.Size, t.OriginalImage().Image, cfg); err != nil {
+		if t.Cfg.ContainerCfg.Export(config.DskContainer) {
+			if err := gfx.ExportImpdrawTilemap(t.Result, "tilemap", t.Palette(), uint8(t.Mode), t.Cfg.ScreenCfg.Size, t.OriginalImage().Image, t.Cfg); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 			}
-			if cfg.ExportType(config.DskContainer) {
-				if err := diskimage.ImportInDsk(t.OriginalImagePath(), cfg); err != nil {
+			if t.Cfg.ExportType(config.DskContainer) {
+				if err := diskimage.ImportInDsk(t.OriginalImagePath(), t.Cfg); err != nil {
 					pi.Hide()
 					dialog.NewError(err, m.window).Show()
 					return
@@ -156,12 +165,12 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 			pi.Hide()
 		} else {
 
-			if err := gfx.ExportTilemap(t.Result, "tilemap", t.Palette(), uint8(t.Mode), t.OriginalImage().Image, t.ExportFlat, cfg); err != nil {
+			if err := gfx.ExportTilemap(t.Result, "tilemap", t.Palette(), uint8(t.Mode), t.OriginalImage().Image, t.Cfg.ScreenCfg.Type == config.SpriteFormat, m.tilemap.Cfg); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 			}
-			if cfg.ExportType(config.DskContainer) {
-				if err := diskimage.ImportInDsk(t.OriginalImagePath(), cfg); err != nil {
+			if t.Cfg.ExportType(config.DskContainer) {
+				if err := diskimage.ImportInDsk(t.OriginalImagePath(), t.Cfg); err != nil {
 					pi.Hide()
 					dialog.NewError(err, m.window).Show()
 					return

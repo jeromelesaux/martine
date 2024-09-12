@@ -15,6 +15,7 @@ type DoubleImageMenu struct {
 	LeftImage   *ImageMenu
 	RightImage  *ImageMenu
 	ResultImage *MergedImageMenu
+	Cfg         *config.MartineConfig
 }
 
 func NewDoubleImageMenu() *DoubleImageMenu {
@@ -22,6 +23,7 @@ func NewDoubleImageMenu() *DoubleImageMenu {
 		LeftImage:   NewImageMenu(),
 		RightImage:  NewImageMenu(),
 		ResultImage: NewMergedImageMenu(),
+		Cfg:         config.NewMartineConfig("", ""),
 	}
 }
 
@@ -76,7 +78,7 @@ func (d *DoubleImageMenu) CmdLine() string {
 	} else {
 		cmd += " -egx2"
 	}
-	if d.LeftImage.Format.IsFullScreen() {
+	if d.LeftImage.Cfg.ScreenCfg.Type.IsFullScreen() {
 		cmd += " -fullscreen"
 	}
 	return cmd

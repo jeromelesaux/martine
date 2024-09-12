@@ -18,6 +18,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/compression"
@@ -45,11 +46,10 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						return
 					}
 					directory.SetExportDirectoryURI(lu)
-					cfg := a.NewConfig(m.animateExport, false)
+					cfg := a.Cfg
 					if cfg == nil {
 						return
 					}
-					cfg.ScreenCfg.Compression = m.animateExport.ExportCompression
 					if a.ExportVersion == 0 {
 						a.ExportVersion = animate.DeltaExportV1
 					}
@@ -58,15 +58,15 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						dialog.ShowError(err, m.window)
 						return
 					}
-					m.animateExport.ExportFolderPath = lu.Path()
-					log.GetLogger().Infoln(m.animateExport.ExportFolderPath)
+					a.Cfg.ScreenCfg.OutputPath = lu.Path()
+					log.GetLogger().Infoln(a.Cfg.ScreenCfg.OutputPath)
 					pi := wgt.NewProgressInfinite("Exporting, please wait.", m.window)
 					pi.Show()
 					code, err := animate.ExportDeltaAnimate(
 						a.RawImages[0],
 						a.DeltaCollection,
 						a.Palette(),
-						a.Format.IsSprite(),
+						a.Cfg.ScreenCfg.Type.IsSprite(),
 						cfg,
 						uint16(address),
 						uint8(a.Mode),
@@ -78,12 +78,12 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						dialog.ShowError(err, m.window)
 						return
 					}
-					err = amsdos.SaveOSFile(m.animateExport.ExportFolderPath+string(filepath.Separator)+"code.asm", []byte(code))
+					err = amsdos.SaveOSFile(a.Cfg.ScreenCfg.OutputPath+string(filepath.Separator)+"code.asm", []byte(code))
 					if err != nil {
 						dialog.ShowError(err, m.window)
 						return
 					}
-					dialog.ShowInformation("Save", "Your files are save in folder \n"+m.animateExport.ExportFolderPath, m.window)
+					dialog.ShowInformation("Save", "Your files are save in folder \n"+a.Cfg.ScreenCfg.OutputPath, m.window)
 				}, m.window)
 				d, err := directory.ExportDirectoryURI()
 				if err == nil {
@@ -131,11 +131,11 @@ func CheckWidthSize(width, mode int) bool {
 }
 
 func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
-	cfg := a.NewConfig(m.animateExport, false)
+	cfg := a.Cfg
 	if cfg == nil {
 		return
 	}
-	cfg.ScreenCfg.Compression = m.animateExport.ExportCompression
+
 	pi := wgt.NewProgressInfinite("Computing, Please wait.", m.window)
 	pi.Show()
 	address, err := strconv.ParseUint(a.InitialAddress.Text, 16, 64)
@@ -263,7 +263,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
 	openFileWidget.Icon = theme.FileImageIcon()
 
 	isPlus := widget.NewCheck("CPC Plus", func(b bool) {
-		a.IsCpcPlus = b
+		a.Cfg.ScreenCfg.IsPlus = b
 	})
 
 	modes := widget.NewSelect([]string{"0", "1", "2"}, func(s string) {
@@ -288,14 +288,14 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
 	a.InitialAddress.SetText("c000")
 
 	isSprite := widget.NewCheck("Is sprite", func(b bool) {
-		a.Format = menu.SpriteFormat
+		a.Cfg.ScreenCfg.Type = config.SpriteFormat
 	})
-	m.animateExport.ExportCompression = compression.NONE
+	a.Cfg.ScreenCfg.Compression = compression.NONE
 	compressData := widget.NewCheck("Compress data", func(b bool) {
 		if b {
-			m.animateExport.ExportCompression = compression.LZ4
+			a.Cfg.ScreenCfg.Compression = compression.LZ4
 		} else {
-			m.animateExport.ExportCompression = compression.NONE
+			a.Cfg.ScreenCfg.Compression = compression.NONE
 		}
 	})
 

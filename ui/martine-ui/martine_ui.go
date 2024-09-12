@@ -37,30 +37,21 @@ type MartineUI struct {
 	egx     *menu.DoubleImageMenu
 	sprite  *menu.SpriteMenu
 	editor  *menu.Editor
-
-	imageExport   *menu.ImageExport
-	tilemapExport *menu.ImageExport
-	animateExport *menu.ImageExport
-	egxExport     *menu.ImageExport
 }
 
 func NewMartineUI() *MartineUI {
 
 	m := &MartineUI{
-		scale:         fyne.CurrentApp().Settings().Scale(),
-		variant:       fyne.CurrentApp().Settings().ThemeVariant(),
-		main:          menu.NewImageMenu(),
-		tilemap:       menu.NewTilemapMenu(),
-		animate:       menu.NewAnimateMenu(),
-		egx:           menu.NewDoubleImageMenu(),
-		sprite:        menu.NewSpriteMenu(),
-		editor:        menu.NewEditor(),
-		imageExport:   &menu.ImageExport{},
-		tilemapExport: &menu.ImageExport{},
-		animateExport: &menu.ImageExport{},
-		egxExport:     &menu.ImageExport{},
+		scale:   fyne.CurrentApp().Settings().Scale(),
+		variant: fyne.CurrentApp().Settings().ThemeVariant(),
+		main:    menu.NewImageMenu(),
+		tilemap: menu.NewTilemapMenu(),
+		animate: menu.NewAnimateMenu(),
+		egx:     menu.NewDoubleImageMenu(),
+		sprite:  menu.NewSpriteMenu(),
+		editor:  menu.NewEditor(),
 	}
-	m.animateExport.ExportCompression = -1
+
 	return m
 }
 

@@ -44,15 +44,15 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 		dialog.ShowError(fmt.Errorf("mode between the images must differ"), m.window)
 		return
 	}
-	if di.RightImage.IsCpcPlus != di.LeftImage.IsCpcPlus {
+	if di.RightImage.Cfg.ScreenCfg.IsPlus != di.LeftImage.Cfg.ScreenCfg.IsPlus {
 		dialog.ShowError(fmt.Errorf("plus mode between the images must differ"), m.window)
 		return
 	}
-	if di.RightImage.Format.IsSpriteHard() != di.LeftImage.Format.IsSpriteHard() {
+	if di.RightImage.Cfg.ScreenCfg.Type.IsSpriteHard() != di.LeftImage.Cfg.ScreenCfg.Type.IsSpriteHard() {
 		dialog.ShowError(fmt.Errorf("sprite hard mode between the images must differ"), m.window)
 		return
 	}
-	if di.RightImage.Format.IsFullScreen() != di.LeftImage.Format.IsFullScreen() {
+	if di.RightImage.Cfg.ScreenCfg.Type.IsFullScreen() != di.LeftImage.Cfg.ScreenCfg.Type.IsFullScreen() {
 		dialog.ShowError(fmt.Errorf("fullscreen mode between the images must  differ"), m.window)
 		return
 	}
@@ -69,7 +69,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 		palette = di.RightImage.Palette()
 		secondIm = di.LeftImage
 	}
-	cfg := im.NewConfig(m.egxExport, false)
+	cfg := im.NewConfig(false)
 	if cfg == nil {
 		return
 	}
@@ -175,7 +175,7 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) *fyne.Container {
 				}),
 				widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
 					// export the egx image
-					m.exportEgxDialog(m.egxExport, m.window)
+					m.exportEgxDialog(di.LeftImage.Cfg, m.window)
 				}),
 				widget.NewButton("show cmd", func() {
 					e := widget.NewMultiLineEntry()
@@ -242,7 +242,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 	})
 
 	exportButton := widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
-		me.ExportDialog(m.imageExport)
+		me.ExportDialog(me.Cfg, me.GetConfig)
 	})
 
 	applyButton := widget.NewButtonWithIcon("Apply", theme.VisibilityIcon(), func() {
@@ -288,7 +288,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 		me.ApplyDithering = b
 	})
 	isPlus := widget.NewCheck("CPC Plus", func(b bool) {
-		me.IsCpcPlus = b
+		me.Cfg.ScreenCfg.IsPlus = b
 	})
 
 	modes := widget.NewSelect([]string{"0", "1", "2"}, func(s string) {
@@ -329,7 +329,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 
 	editButton := widget.NewButtonWithIcon("Edit", theme.DocumentCreateIcon(), func() {
 		p := constants.CpcOldPalette
-		if me.IsCpcPlus {
+		if me.Cfg.ScreenCfg.IsPlus {
 			p = constants.CpcPlusPalette
 		}
 		if me.CpcImage().Image == nil || me.PaletteImage().Image == nil {
@@ -412,7 +412,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 						}),
 						m.newImageMenuExportButton(me),
 						widget.NewButton("Gray", func() {
-							if me.IsCpcPlus {
+							if me.Cfg.ScreenCfg.IsPlus {
 								me.SetPalette(ci.MonochromePalette(me.Palette()))
 								me.SetPaletteImage(png.PalToImage(me.Palette()))
 								forcePalette.SetChecked(true)

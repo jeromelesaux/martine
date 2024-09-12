@@ -42,7 +42,7 @@ func (m *MartineUI) IsClassicalTilemap(width, height int) bool {
 }
 
 func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
-	cfg := me.ImageMenu.NewConfig(m.tilemapExport, true)
+	cfg := me.Cfg
 	if cfg == nil {
 		return
 	}
@@ -57,10 +57,10 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 	var err error
 	if m.IsClassicalTilemap(cfg.ScreenCfg.Size.Width, cfg.ScreenCfg.Size.Height) {
 		filename := filepath.Base(me.OriginalImagePath())
-		analyze, tiles, palette = gfx.TilemapClassical(uint8(me.Mode), me.IsCpcPlus, filename, me.OriginalImagePath(), me.OriginalImage().Image, cfg.ScreenCfg.Size, cfg, me.Historic)
+		analyze, tiles, palette = gfx.TilemapClassical(uint8(me.Mode), me.Cfg.ScreenCfg.IsPlus, filename, me.OriginalImagePath(), me.OriginalImage().Image, cfg.ScreenCfg.Size, cfg, me.Historic)
 		pi.Hide()
 	} else {
-		analyze, tiles, palette, err = gfx.TilemapRaw(uint8(me.Mode), me.IsCpcPlus, cfg.ScreenCfg.Size, me.OriginalImage().Image, cfg, me.Historic)
+		analyze, tiles, palette, err = gfx.TilemapRaw(uint8(me.Mode), me.Cfg.ScreenCfg.IsPlus, cfg.ScreenCfg.Size, me.OriginalImage().Image, cfg, me.Historic)
 		pi.Hide()
 		if err != nil {
 			dialog.NewError(err, m.window).Show()
@@ -114,7 +114,7 @@ func (m *MartineUI) newImageMenuExportButton(tm *menu.ImageMenu) *widget.Button 
 // nolint: funlen, gocognit
 func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 	tm.ImageMenu.SetWindow(m.window)
-	tm.Format = menu.SpriteFormat
+	tm.Cfg.ScreenCfg.Type = config.SpriteFormat
 	importOpen := newImportButton(m, tm.ImageMenu)
 
 	paletteOpen := pal.NewOpenPaletteButton(tm.ImageMenu, m.window, nil)
@@ -198,7 +198,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 	openFileWidget.Icon = theme.FileImageIcon()
 
 	isPlus := widget.NewCheck("CPC Plus", func(b bool) {
-		tm.IsCpcPlus = b
+		tm.Cfg.ScreenCfg.IsPlus = b
 	})
 
 	modes := widget.NewSelect([]string{"0", "1", "2"}, func(s string) {

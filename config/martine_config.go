@@ -33,8 +33,6 @@ type MartineConfig struct {
 	RollIteration               int
 	TileIterationX              int
 	TileIterationY              int
-	Json                        bool
-	Ascii                       bool
 	CustomDimension             bool
 	DskFiles                    []string
 	Tiles                       *export.JsonSlice
@@ -77,10 +75,14 @@ type MartineConfig struct {
 	FilloutGif                  bool
 	Saturation                  float64
 	Brightness                  float64
-	ExportAsGoFile              bool
 	DoubleScreenAddress         bool
 	UseKmeans                   bool
 	KmeansThreshold             float64
+}
+
+func (m *MartineConfig) Reset() {
+	m.ScreenCfg.Reset()
+	m.ContainerCfg.Reset()
 }
 
 func (m MartineConfig) ExportType(c ContainerFormat) bool {
@@ -117,6 +119,10 @@ func NewMartineConfig(input, output string) *MartineConfig {
 		ScreenCfg: ScreenConfig{
 			InputPath:  input,
 			OutputPath: output,
+			Export:     make([]ScreenExport, 0),
+		},
+		ContainerCfg: ContainerConfig{
+			Type: make([]ContainerFormat, 0),
 		},
 		DskFiles:     make([]string, 0),
 		Rotation3DX0: -1,

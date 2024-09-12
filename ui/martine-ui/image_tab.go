@@ -54,7 +54,7 @@ func (m *MartineUI) monochromeColor(c color.Color) {
 
 func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 	me.Edited = false
-	cfg := me.NewConfig(m.imageExport, true)
+	cfg := me.NewConfig(true)
 	if cfg == nil {
 		return
 	}
@@ -90,7 +90,7 @@ func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 	if !me.UsePalette {
 		me.SetPalette(palette)
 	}
-	if me.Format.IsSprite() || me.Format.IsSpriteHard() {
+	if me.Cfg.ScreenCfg.Type.IsSprite() || me.Cfg.ScreenCfg.Type.IsSpriteHard() {
 		newSize := constants.Size{Width: cfg.ScreenCfg.Size.Width * 50, Height: cfg.ScreenCfg.Size.Height * 50}
 		me.Downgraded = image.Resize(me.Downgraded, newSize, me.ResizeAlgo)
 	}
@@ -139,7 +139,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 	})
 
 	exportButton := widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
-		me.ExportDialog(m.imageExport)
+		me.ExportDialog(me.Cfg, me.GetConfig)
 	})
 
 	applyButton := widget.NewButtonWithIcon("Apply", theme.VisibilityIcon(), func() {
@@ -196,7 +196,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 		me.ApplyDithering = b
 	})
 	isPlus := widget.NewCheck("CPC Plus", func(b bool) {
-		me.IsCpcPlus = b
+		me.Cfg.ScreenCfg.IsPlus = b
 	})
 
 	oneLine := widget.NewCheck("Every other line", func(b bool) {
@@ -242,7 +242,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 
 	editButton := widget.NewButtonWithIcon("Edit", theme.DocumentCreateIcon(), func() {
 		p := constants.CpcOldPalette
-		if me.IsCpcPlus {
+		if me.Cfg.ScreenCfg.IsPlus {
 			p = constants.CpcPlusPalette
 		}
 		if me.CpcImage().Image == nil || me.PaletteImage().Image == nil {
@@ -347,7 +347,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 						}),
 						m.newImageMenuExportButton(me),
 						widget.NewButton("Gray", func() {
-							if me.IsCpcPlus {
+							if me.Cfg.ScreenCfg.IsPlus {
 								me.SetPalette(image.MonochromePalette(me.Palette()))
 								me.SetPaletteImage(png.PalToImage(me.Palette()))
 								forcePalette.SetChecked(true)
@@ -356,7 +356,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 						}),
 
 						widget.NewButton("Monochome", func() {
-							if me.IsCpcPlus {
+							if me.Cfg.ScreenCfg.IsPlus {
 								w2.ColorSelector(m.monochromeColor, me.Palette(), m.window, func() {
 									forcePalette.SetChecked(true)
 								})

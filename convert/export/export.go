@@ -36,7 +36,7 @@ func ToMode2AndExport(in *image.NRGBA, p color.Palette, size constants.Size, fil
 func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, cfg *config.MartineConfig) error {
 	if cfg.ScreenCfg.Type.IsFullScreen() {
 		if cfg.ScreenCfg.Type == config.Egx1Format || cfg.ScreenCfg.Type == config.Egx2Format {
-			if cfg.ExportAsGoFile {
+			if cfg.ScreenCfg.IsExport(config.GoImpdrawExport) {
 				data, err := co.ToGo(bw, screenMode, p, cfg)
 				if err != nil {
 					log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)

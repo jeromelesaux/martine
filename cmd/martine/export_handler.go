@@ -158,11 +158,17 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	cfg.ZigZag = *zigzag
 	cfg.Animate = *doAnimation
 	cfg.Reducer = *reducer
-	cfg.Json = *jsonOutput
-	cfg.Ascii = *txtOutput
+	if jsonOutput != nil && *jsonOutput {
+		cfg.ScreenCfg.AddExport(config.JsonExport)
+	}
+	if txtOutput != nil && *txtOutput {
+		cfg.ScreenCfg.AddExport(config.AssemblyExport)
+	}
+	if exportGoFiles != nil && *exportGoFiles {
+		cfg.ScreenCfg.AddExport(config.GoImpdrawExport)
+	}
 	cfg.OneLine = *oneLine
 	cfg.OneRow = *oneRow
-	cfg.ExportAsGoFile = *exportGoFiles
 
 	if *scanlineSequence != "" {
 		sequence := strings.Split(*scanlineSequence, ",")

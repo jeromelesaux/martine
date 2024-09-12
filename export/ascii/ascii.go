@@ -54,7 +54,7 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cg
 	if !dontImportDsk {
 		cgf.AddFile(osFilepath)
 	}
-	if cgf.Json {
+	if cgf.ScreenCfg.IsExport(config.JsonExport) {
 		palette := make([]string, len(p))
 		for i := 0; i < len(p); i++ {
 			v, err := constants.FirmwareNumber(p[i])
@@ -172,7 +172,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 		cfg.AddFile(osFilepath)
 	}
 
-	if cfg.Json {
+	if cfg.ScreenCfg.IsExport(config.JsonExport) {
 		palette := make([]string, len(p))
 		for i := 0; i < len(p); i++ {
 			v, err := constants.FirmwareNumber(p[i])

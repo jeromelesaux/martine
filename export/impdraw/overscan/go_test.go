@@ -26,7 +26,7 @@ func TestSaveGo(t *testing.T) {
 
 	cfg := config.NewMartineConfig(file, "./overscanTests")
 	cfg.ScreenCfg.Type = config.FullscreenFormat
-	cfg.ExportAsGoFile = true
+	cfg.ScreenCfg.AddExport(config.GoImpdrawExport)
 	cfg.ContainerCfg.AddExport(config.DskContainer)
 	cfg.ScreenCfg.IsPlus = true
 	cfg.ScreenCfg.Size = constants.NewSizeMode(0, true)
@@ -34,7 +34,6 @@ func TestSaveGo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cfg.ExportAsGoFile = false
 	// gfx.ApplyOneImageAndExport(img, cfg, cfg.InputPath, filepath.Dir(fileInput), 0, 0)
 	err = diskimage.ImportInDsk(filepath.Dir(file), cfg)
 	if err != nil {

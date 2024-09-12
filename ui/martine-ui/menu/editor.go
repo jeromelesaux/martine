@@ -18,7 +18,6 @@ import (
 
 type Editor struct {
 	im  *ImageMenu
-	ex  *ImageExport
 	ca  color.Palette
 	e   *editor.Editor
 	w   fyne.Window
@@ -29,7 +28,6 @@ func NewEditor() *Editor {
 	e := &Editor{
 		im: NewImageMenu(),
 		ca: constants.CpcOldPalette,
-		ex: &ImageExport{},
 	}
 	e.im.SetOriginalImage(image.NewNRGBA(image.Rect(0, 0, constants.Mode2.Width, constants.Mode2.Height)))
 	e.im.UsePalette = true
@@ -39,7 +37,7 @@ func NewEditor() *Editor {
 func (e *Editor) imageNPalette(i image.Image, p color.Palette) {
 	e.im.SetOriginalImage(i)
 	e.im.SetPalette(p)
-	e.im.ExportDialog(e.ex)
+	e.im.ExportDialog(e.im.Cfg, e.im.GetConfig)
 }
 func (e *Editor) refreshEditor() {
 	// set new image and palette in editor here
@@ -74,7 +72,7 @@ func (e *Editor) New(w fyne.Window) *fyne.Container {
 			e.im.NewImportButton(e.sel, e.refreshEditor),
 			palette.NewOpenPaletteButton(e.im, e.w, e.refreshEditor),
 			widget.NewCheck("CPC Plus", func(b bool) {
-				e.im.IsCpcPlus = b
+				e.im.Cfg.ScreenCfg.IsPlus = b
 				if !b {
 					e.e.NewAvailablePalette(constants.CpcOldPalette)
 				} else {

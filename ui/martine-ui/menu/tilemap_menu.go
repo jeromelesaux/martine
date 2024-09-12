@@ -16,28 +16,14 @@ var TileSize float32 = 20.
 
 type TilemapMenu struct {
 	*ImageMenu
-	Result                 *transformation.AnalyzeBoard
-	TileImages             *w.ImageTable
-	ExportDsk              bool
-	ExportText             bool
-	ExportWithAmsdosHeader bool
-	ExportZigzag           bool
-	ExportJson             bool
-	ExportCompression      int
-	ExportFolderPath       string
-	ExportImpdraw          bool
-	ExportFlat             bool
-	Historic               *sprite.TilesHistorical
+	Result       *transformation.AnalyzeBoard
+	TileImages   *w.ImageTable
+	ExportZigzag bool
+	Historic     *sprite.TilesHistorical
 }
 
 func (tm *TilemapMenu) ResetExport() {
-	tm.ExportDsk = false
-	tm.ExportText = false
-	tm.ExportWithAmsdosHeader = false
-	tm.ExportZigzag = false
-	tm.ExportJson = false
-	tm.ExportCompression = -1
-	tm.ExportImpdraw = false
+	tm.Cfg.Reset()
 }
 
 func NewTilemapMenu() *TilemapMenu {
@@ -57,13 +43,13 @@ func (i *TilemapMenu) CmdLine() string {
 	if i.OriginalImagePath() != "" {
 		exec += " -in " + i.OriginalImagePath()
 	}
-	if i.IsCpcPlus {
+	if i.Cfg.ScreenCfg.IsPlus {
 		exec += " -plus"
 	}
-	if i.Format.IsFullScreen() {
+	if i.Cfg.ScreenCfg.Type.IsFullScreen() {
 		exec += " -fullscreen"
 	}
-	if i.Format.IsSprite() {
+	if i.Cfg.ScreenCfg.Type.IsSprite() {
 		width, widthText, err := i.GetWidth()
 		if err != nil {
 			log.GetLogger().Error("cannot convert width value :%s error :%v\n", widthText, err)
@@ -77,7 +63,7 @@ func (i *TilemapMenu) CmdLine() string {
 			exec += " -height " + strconv.Itoa(height)
 		}
 	}
-	if i.Format.IsSpriteHard() {
+	if i.Cfg.ScreenCfg.Type.IsSpriteHard() {
 		exec += " -spritehard"
 	}
 	if i.ApplyDithering {
