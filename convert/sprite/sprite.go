@@ -243,7 +243,7 @@ func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Siz
 		log.GetLogger().Error("Error while saving file %s error :%v", filename, err)
 		return err
 	}
-	if !cfg.CpcPlus {
+	if !cfg.ScreenCfg.IsPlus {
 		if err := ocpartstudio.Pal(filename, p, mode, dontImportDsk, cfg); err != nil {
 			log.GetLogger().Error("Error while saving file %s error :%v", filename, err)
 			return err

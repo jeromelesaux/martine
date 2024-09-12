@@ -104,11 +104,11 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 	var width int
 	switch screenMode {
 	case 0:
-		width = cfg.Size.Width / 2
+		width = cfg.ScreenCfg.Size.Width / 2
 	case 1:
-		width = cfg.Size.Width / 4
+		width = cfg.ScreenCfg.Size.Width / 4
 	case 2:
-		width = cfg.Size.Width / 8
+		width = cfg.ScreenCfg.Size.Width / 8
 	}
 	for i := 0; i < width; i++ {
 		data[i] = 0
@@ -117,7 +117,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 
 	copy(o, OverscanBoot[:])
 	copy(o[0x200-0x170:], data[:])
-	switch cfg.CpcPlus {
+	switch cfg.ScreenCfg.IsPlus {
 	case true:
 		o[(0x1ac - 0x170)] = 1
 	case false:
@@ -132,7 +132,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 		o[0x184-0x170] = 0x10
 	}
 	// affectation de la palette CPC old
-	if cfg.CpcPlus {
+	if cfg.ScreenCfg.IsPlus {
 		offset := 0
 		for i := 0; i < len(p); i++ {
 			cp := constants.NewCpcPlusColor(p[i])
@@ -155,11 +155,11 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 		}
 	}
 
-	o, _ = compression.Compress(o, cfg.Compression)
+	o, _ = compression.Compress(o, cfg.ScreenCfg.Compression)
 
 	osFilepath := cfg.AmsdosFullPath(filePath, ".SCR")
 	log.GetLogger().Info("Saving overscan file (%s)\n", osFilepath)
-	if !cfg.NoAmsdosHeader {
+	if !cfg.ScreenCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".SCR", o, 0, 0, 0x170, 0); err != nil {
 			return err
 		}
@@ -216,7 +216,7 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 	// log.GetLogger().Error( "Header length %d\n", binary.Size(header))
 
 	var overscanTemplate []byte
-	if cfg.CpcPlus {
+	if cfg.ScreenCfg.IsPlus {
 		overscanTemplate = egxPlusOverscanTemplate
 	} else {
 		overscanTemplate = egxOverscanTemplate
@@ -224,7 +224,7 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 	copy(o[:], overscanTemplate[:])
 	copy(o[0x200-0x170:], data[:]) //  - 0x170  to have the file offset
 	// o[(0x1ac-0x170)] = 0 // cpc old
-	switch cfg.CpcPlus {
+	switch cfg.ScreenCfg.IsPlus {
 	case true:
 		o[(0x1ac - 0x170)] = 1
 	case false:
@@ -261,7 +261,7 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 	o[0x8f] = byte(extraFlag)
 
 	// affectation de la palette CPC old
-	if cfg.CpcPlus {
+	if cfg.ScreenCfg.IsPlus {
 		offset := 0
 		for i := 0; i < len(p); i++ {
 			cp := constants.NewCpcPlusColor(p[i])
@@ -280,13 +280,13 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 			}
 		}
 	}
-	if cfg.CpcPlus {
+	if cfg.ScreenCfg.IsPlus {
 		copy(o[0x6b2:0x6c8], egxPlusOverscanTemplate[0x6b2:0x6c8])
 		copy(o[0x7da0:], egxPlusOverscanTemplate[0x7da0:]) // copy egx routine
 	} else {
 		copy(o[0x7da0:], egxOverscanTemplate[0x7da0:]) // copy egx routine
 	}
-	if !cfg.NoAmsdosHeader {
+	if !cfg.ScreenCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".SCR", o, 0, 0, 0x170, 0x170); err != nil {
 			return err
 		}

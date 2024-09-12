@@ -25,23 +25,23 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cg
 
 	var out string
 
-	data, _ = compression.Compress(data, cgf.Compression)
+	data, _ = compression.Compress(data, cgf.ScreenCfg.Compression)
 
 	cpcFilename := string(cgf.AmsdosFilename()) + ".TXT"
 	osFilepath := cgf.AmsdosFullPath(filePath, ".TXT")
 	log.GetLogger().Info("Writing ascii file (%s) data length (%d)\n", osFilepath, len(data))
-	sizeInfos := fmt.Sprintf("; width %d height %d %s", cgf.Size.Width, cgf.Size.Height, eol)
+	sizeInfos := fmt.Sprintf("; width %d height %d %s", cgf.ScreenCfg.Size.Width, cgf.ScreenCfg.Size.Height, eol)
 	out += "; Screen " + cpcFilename + eol + ".screen:" + eol + sizeInfos
 	out += FormatAssemblyDatabyte(data, eol)
 	out += "; Palette " + cpcFilename + eol + ".palette:" + eol + ByteToken + " "
 
-	if cgf.CpcPlus {
+	if cgf.ScreenCfg.IsPlus {
 		out += FormatAssemblyCPCPlusPalette(p, eol)
 	} else {
 		out += FormatAssemblyCPCPalette(p, eol) + eol + "; Basic Palette " + cpcFilename + eol + ".basic_palette:" + eol + ByteToken + " "
 		out += FormatAssemblyBasicPalette(p, eol) + eol
 	}
-	if !cgf.NoAmsdosHeader {
+	if !cgf.ScreenCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".TXT", []byte(out), 0, 0, 0, 0); err != nil {
 			return err
 		}
@@ -73,7 +73,7 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cg
 		for i := 0; i < len(data); i++ {
 			screen[i] = fmt.Sprintf("0x%.2x", data[i])
 		}
-		j := x.NewJson(cgf.Filename(), cgf.Size.Width, cgf.Size.Height, screen, palette, hardwarepalette)
+		j := x.NewJson(cgf.Filename(), cgf.ScreenCfg.Size.Width, cgf.ScreenCfg.Size.Height, screen, palette, hardwarepalette)
 		log.GetLogger().Info("Filepath:%s\n", filePath)
 		if cgf.TileMode {
 			cgf.Tiles.Sprites = append(cgf.Tiles.Sprites, j)
@@ -98,7 +98,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 	cpcFilename := string(cfg.AmsdosFilename()) + "C.TXT"
 	osFilepath := cfg.AmsdosFullPath(filePath, "C.TXT")
 	log.GetLogger().Info("Writing ascii file (%s) values by columns data length (%d)\n", osFilepath, len(data))
-	sizeInfos := fmt.Sprintf("; width %d height %d %s", cfg.Size.Width, cfg.Size.Height, eol)
+	sizeInfos := fmt.Sprintf("; width %d height %d %s", cfg.ScreenCfg.Size.Width, cfg.ScreenCfg.Size.Height, eol)
 	out += "; Screen by column " + cpcFilename + eol + ".screen:" + eol + sizeInfos
 	var adjustMode int
 	switch mode {
@@ -109,13 +109,13 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 	case 2:
 		adjustMode = 8
 	}
-	pas := cfg.Size.Width / adjustMode
+	pas := cfg.ScreenCfg.Size.Width / adjustMode
 	h := 0
 	nbValues := 1
 	octetsRead := 0
 	end := 17
-	if (cfg.Size.Width + 1) < end {
-		end = (cfg.Size.Width + 1)
+	if (cfg.ScreenCfg.Size.Width + 1) < end {
+		end = (cfg.ScreenCfg.Size.Width + 1)
 	}
 	for {
 
@@ -148,7 +148,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 	out += eol
 	out += "; Palette " + cpcFilename + eol + ".palette:" + eol + ByteToken + " "
 
-	if cfg.CpcPlus {
+	if cfg.ScreenCfg.IsPlus {
 		out += FormatAssemblyCPCPlusPalette(p, eol)
 	} else {
 		out += FormatAssemblyCPCPalette(p, eol)
@@ -157,7 +157,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 		out += eol
 	}
 
-	if !cfg.NoAmsdosHeader {
+	if !cfg.ScreenCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".TXT", []byte(out), 0, 0, 0, 0); err != nil {
 			return err
 		}
@@ -188,7 +188,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 			hardwarepalette[i] = fmt.Sprintf("0x%.2x", fcolor)
 		}
 
-		j := x.NewJson(cfg.Filename(), cfg.Size.Width, cfg.Size.Height, jsonData, palette, hardwarepalette)
+		j := x.NewJson(cfg.Filename(), cfg.ScreenCfg.Size.Width, cfg.ScreenCfg.Size.Height, jsonData, palette, hardwarepalette)
 		log.GetLogger().Info("Filepath:%s\n", filePath)
 		if cfg.TileMode {
 			cfg.Tiles.Sprites = append(cfg.Tiles.Sprites, j)

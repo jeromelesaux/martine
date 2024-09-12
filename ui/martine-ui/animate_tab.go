@@ -49,7 +49,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 					if cfg == nil {
 						return
 					}
-					cfg.Compression = m.animateExport.ExportCompression
+					cfg.ScreenCfg.Compression = m.animateExport.ExportCompression
 					if a.ExportVersion == 0 {
 						a.ExportVersion = animate.DeltaExportV1
 					}
@@ -135,7 +135,7 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 	if cfg == nil {
 		return
 	}
-	cfg.Compression = m.animateExport.ExportCompression
+	cfg.ScreenCfg.Compression = m.animateExport.ExportCompression
 	pi := wgt.NewProgressInfinite("Computing, Please wait.", m.window)
 	pi.Show()
 	address, err := strconv.ParseUint(a.InitialAddress.Text, 16, 64)
@@ -145,7 +145,7 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 		return
 	}
 	// controle de de la taille de la largeur en fonction du mode
-	width := cfg.Size.Width
+	width := cfg.ScreenCfg.Size.Width
 	mode := a.Mode
 	// get all images from widget imagetable
 	if !CheckWidthSize(width, mode) {

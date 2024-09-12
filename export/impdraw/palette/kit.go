@@ -142,7 +142,7 @@ func Kit(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 	if err != nil {
 		return err
 	}
-	if !cfg.NoAmsdosHeader {
+	if !cfg.ScreenCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".KIT", res, 2, 0, 0x8809, 0x8809); err != nil {
 			return err
 		}

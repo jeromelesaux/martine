@@ -1,6 +1,9 @@
 package config
 
-import "github.com/jeromelesaux/martine/export/compression"
+import (
+	"github.com/jeromelesaux/martine/constants"
+	"github.com/jeromelesaux/martine/export/compression"
+)
 
 type ContainerFormat string
 
@@ -59,6 +62,7 @@ type ScreenConfig struct {
 	NoAmsdosHeader bool
 	Compression    compression.CompressionMethod
 	Export         []ScreenExport
+	Size           constants.Size
 }
 
 var (
@@ -67,17 +71,20 @@ var (
 	SpriteHardFormat ScreenFormat = "sprite_hard"
 	ScreenOldFormat  ScreenFormat = "screen"
 	WindowFormat     ScreenFormat = "window"
-	EgxFormat        ScreenFormat = "egx"
+	Egx1Format       ScreenFormat = "egx1"
+	Egx2Format       ScreenFormat = "egx2"
 )
 
 type ScreenExport string
 
 var (
-	Overscan        ScreenExport = "overscan"
-	ScreenOldExport ScreenExport = "screen"
-	GoImpdrawExport ScreenExport = "go"
-	AssemblyExport  ScreenExport = "asm"
-	JsonExport      ScreenExport = "json"
+	Overscan         ScreenExport = "overscan" // fichier fullscreen .scr
+	ScreenOldExport  ScreenExport = "screen"   // fichier classique .scr
+	SpriteExport     ScreenExport = "sprite"
+	SpriteHardExport ScreenExport = "sprite_hard"
+	GoImpdrawExport  ScreenExport = "go"   // deux fichiers .go1 et .go2
+	AssemblyExport   ScreenExport = "asm"  // texte assembleur
+	JsonExport       ScreenExport = "json" // json
 )
 
 func (f ScreenFormat) IsSprite() bool {

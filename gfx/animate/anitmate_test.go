@@ -23,7 +23,7 @@ func init() {
 func TestAnimate(t *testing.T) {
 	file := "../../samples/sonic_rotate.gif"
 	e := config.NewMartineConfig(file, "../../test")
-	e.Size = constants.Size{Width: 40, Height: 50, ColorsAvailable: 8}
+	e.ScreenCfg.Size = constants.Size{Width: 40, Height: 50, ColorsAvailable: 8}
 	var screenMode uint8 = 0
 	fs := []string{file}
 
@@ -36,7 +36,11 @@ func TestAnimate(t *testing.T) {
 func TestDeltaMotif(t *testing.T) {
 	err := DeltaMotif(
 		"../../samples/coke.gif",
-		&config.MartineConfig{InputPath: "triangles.gif", OutputPath: "../../test"},
+		&config.MartineConfig{
+			ScreenCfg: config.ScreenConfig{
+				InputPath:  "triangles.gif",
+				OutputPath: "../../test",
+			}},
 		20,
 		0xc000,
 		1)

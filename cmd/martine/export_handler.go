@@ -28,7 +28,7 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 
 		if *height != -1 {
 			cfg.CustomDimension = true
-			cfg.Win = true
+			cfg.ScreenCfg.Type = config.WindowFormat
 			size.Height = *height
 			if *width != -1 {
 				size.Width = *width
@@ -37,7 +37,7 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 			}
 		}
 		if *width != -1 {
-			cfg.Win = true
+			cfg.ScreenCfg.Type = config.WindowFormat
 			cfg.CustomDimension = true
 			size.Width = *width
 			if *height != -1 {
@@ -94,15 +94,17 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	}
 
 	cfg.FilloutGif = *filloutGif
-	cfg.ExtendedDsk = *extendedDsk
+	if extendedDsk != nil && *extendedDsk {
+		cfg.ContainerCfg.AddExport(config.ExtendedDskContainer)
+	}
 	cfg.TileMode = *tileMode
 	cfg.RollMode = *rollMode
 	cfg.RollIteration = *iterations
-	cfg.NoAmsdosHeader = *noAmsdosHeader
-	cfg.CpcPlus = *plusMode
+	cfg.ScreenCfg.NoAmsdosHeader = *noAmsdosHeader
+	cfg.ScreenCfg.IsPlus = *plusMode
 	cfg.TileIterationX = *tileIterationX
 	cfg.TileIterationY = *tileIterationY
-	cfg.Compression = compression.ToCompressMethod(*compress)
+	cfg.ScreenCfg.Compression = compression.ToCompressMethod(*compress)
 	cfg.RotationMode = *rotateMode
 	cfg.Rotation3DMode = *rotate3dMode
 	cfg.Rotation3DType = *rotate3dType
@@ -148,7 +150,10 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	if sna != nil && *sna {
 		cfg.ContainerCfg.AddExport(config.SnaContainer)
 	}
-	cfg.SpriteHard = *spriteHard
+	if spriteHard != nil && *spriteHard {
+		cfg.ScreenCfg.Type = config.SpriteHardFormat
+	}
+
 	cfg.SplitRaster = *splitRasters
 	cfg.ZigZag = *zigzag
 	cfg.Animate = *doAnimation
@@ -216,19 +221,21 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 		}
 	}
 
-	if cfg.CpcPlus {
+	if cfg.ScreenCfg.IsPlus {
 		cfg.PaletteCfg.Type = config.KitPalette
 	}
-	cfg.Overscan = *overscan
-	if cfg.Overscan {
+	if overscan != nil && *overscan {
+		cfg.ScreenCfg.Type = config.FullscreenFormat
+	}
+	if cfg.ScreenCfg.Type == config.FullscreenFormat {
 		cfg.PaletteCfg.Type = config.KitPalette
 	}
 
 	if *egx1 {
-		cfg.EgxFormat = config.Egx1Mode
+		cfg.ScreenCfg.Type = config.Egx1Format
 	}
 	if *egx2 {
-		cfg.EgxFormat = config.Egx2Mode
+		cfg.ScreenCfg.Type = config.Egx2Format
 	}
 	if *mode != -1 {
 		cfg.EgxMode1 = uint8(*mode)
@@ -238,7 +245,7 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	}
 
 	if *saturationPal > 0 || *brightnessPal > 0 {
-		cfg.CpcPlus = true
+		cfg.ScreenCfg.IsPlus = true
 		cfg.Saturation = *saturationPal
 		cfg.Brightness = *brightnessPal
 	}

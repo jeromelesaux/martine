@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/fyne-io/widget/editor"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/log"
 
@@ -104,7 +105,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	di.ResultImage.Palette = palette
 	di.ResultImage.EgxType = egxType
 	var img image.Image
-	if cfg.Overscan {
+	if cfg.ScreenCfg.Type == config.FullscreenFormat {
 		img, err = overscan.OverscanRawToImg(di.ResultImage.Data, 0, di.ResultImage.Palette)
 		if err != nil {
 			dialog.ShowError(err, m.window)

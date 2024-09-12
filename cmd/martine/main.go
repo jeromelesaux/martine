@@ -296,7 +296,7 @@ func main() {
 
 	if *deltaPacking || *deltaPacking2 {
 		screenAddress, err := common.ParseHexadecimal16(*initialAddress)
-		cfg.Size = size
+		cfg.ScreenCfg.Size = size
 		if err != nil {
 			log.GetLogger().Error("Error while parsing (%s) use the starting address #C000, err : %v\n", *initialAddress, err)
 			screenAddress = 0xC000
@@ -306,7 +306,7 @@ func main() {
 		if *deltaPacking2 {
 			exportVersion = animate.DeltaExportV2
 		}
-		if err := animate.DeltaPacking(cfg.InputPath, cfg, screenAddress, screenMode, exportVersion); err != nil {
+		if err := animate.DeltaPacking(cfg.ScreenCfg.InputPath, cfg, screenAddress, screenMode, exportVersion); err != nil {
 			log.GetLogger().Error("Error while deltapacking error: %v\n", err)
 		}
 		os.Exit(0)
@@ -330,7 +330,7 @@ func main() {
 	}
 
 	// gestion de la taille de l'image en sortie
-	if !cfg.CustomDimension && *rotateMode && !cfg.SpriteHard {
+	if !cfg.CustomDimension && *rotateMode && !cfg.ScreenCfg.Type.IsSpriteHard() {
 		size.Width = in.Bounds().Max.X
 		size.Height = in.Bounds().Max.Y
 	}
@@ -338,7 +338,7 @@ func main() {
 		size.Width = 16
 		size.Height = 16
 	}
-	cfg.Size = size
+	cfg.ScreenCfg.Size = size
 
 	if !*deltaMode {
 		log.GetLogger().Info("Filename :%s, extension:%s\n", filename, extension)
@@ -410,7 +410,7 @@ func main() {
 		}
 		img := image.NewNRGBA(image.Rect(0, 0, in.Bounds().Max.X, in.Bounds().Max.Y))
 		draw.Draw(img, img.Bounds(), in, in.Bounds().Min, draw.Src)
-		pal, _, err := ci.DowngradingPalette(img, constants.Size{ColorsAvailable: size.ColorsAvailable, Width: img.Bounds().Max.X, Height: img.Bounds().Max.Y}, cfg.CpcPlus)
+		pal, _, err := ci.DowngradingPalette(img, constants.Size{ColorsAvailable: size.ColorsAvailable, Width: img.Bounds().Max.X, Height: img.Bounds().Max.Y}, cfg.ScreenCfg.IsPlus)
 		if err != nil {
 			log.GetLogger().Error("Cannot downgrade palette %s error %v", *picturePath, err)
 			os.Exit(-2)
@@ -421,7 +421,7 @@ func main() {
 			log.GetLogger().Error("Cannot split the sprite board %s error %v", *picturePath, err)
 			os.Exit(-2)
 		}
-		if err := impPalette.SaveKit(cfg.OutputPath+string(filepath.Separator)+"SPRITES.KIT", pal, !cfg.NoAmsdosHeader); err != nil {
+		if err := impPalette.SaveKit(cfg.ScreenCfg.OutputPath+string(filepath.Separator)+"SPRITES.KIT", pal, !cfg.ScreenCfg.NoAmsdosHeader); err != nil {
 			log.GetLogger().Error("Cannot export palette %s error %v", *picturePath, err)
 			os.Exit(-2)
 		}
@@ -435,7 +435,7 @@ func main() {
 			var code string
 			for idx, diff := range diffs {
 				var routine string
-				if cfg.SpriteHard {
+				if cfg.ScreenCfg.Type == config.SpriteHardFormat {
 					routine = animate.ExportCompiledSpriteHard(diff)
 				} else {
 					log.GetLogger().Error("not yet implemented")
@@ -445,7 +445,7 @@ func main() {
 				code += routine
 			}
 
-			if err := amsdos.SaveStringOSFile(cfg.OutputPath+string(filepath.Separator)+"compiled_sprites.asm", code); err != nil {
+			if err := amsdos.SaveStringOSFile(cfg.ScreenCfg.OutputPath+string(filepath.Separator)+"compiled_sprites.asm", code); err != nil {
 				log.GetLogger().Error("error while saving sprite file error %v", err)
 				os.Exit(-2)
 			}
@@ -454,8 +454,8 @@ func main() {
 		if *spriteOcpWin {
 			for idxX, v := range raw {
 				for idxY, v0 := range v {
-					filename := cfg.OutputPath + string(filepath.Separator) + fmt.Sprintf("L%.2dC%.2d.WIN", idxX, idxY)
-					if err := window.Win(filename, v0, uint8(*mode), cfg.Size.Width, cfg.Size.Height, cfg.ExportType(config.DskContainer), cfg); err != nil {
+					filename := cfg.ScreenCfg.OutputPath + string(filepath.Separator) + fmt.Sprintf("L%.2dC%.2d.WIN", idxX, idxY)
+					if err := window.Win(filename, v0, uint8(*mode), cfg.ScreenCfg.Size.Width, cfg.ScreenCfg.Size.Height, cfg.ExportType(config.DskContainer), cfg); err != nil {
 						log.GetLogger().Error("error while exporting sprites error %s\n", err.Error())
 					}
 				}
@@ -468,11 +468,11 @@ func main() {
 					buf = append(buf, v0...)
 				}
 			}
-			filename := cfg.OutputPath + string(filepath.Separator) + "SPRITES.BIN"
-			buf, _ = compression.Compress(buf, cfg.Compression)
+			filename := cfg.ScreenCfg.OutputPath + string(filepath.Separator) + "SPRITES.BIN"
+			buf, _ = compression.Compress(buf, cfg.ScreenCfg.Compression)
 			var err error
 			// TODO add amsdos header
-			if !cfg.NoAmsdosHeader {
+			if !cfg.ScreenCfg.NoAmsdosHeader {
 				err = amsdos.SaveAmsdosFile(filename, ".WIN", buf, 2, 0, 0x4000, 0x4000)
 				if err != nil {
 					log.GetLogger().Error("Error while saving flat sprites file error %s\n", err.Error())
@@ -499,8 +499,8 @@ func main() {
 					buf = append(buf, v0...)
 				}
 			}
-			filename := cfg.OutputPath + string(filepath.Separator) + "sprites.imp"
-			if err := tile.Imp(buf, uint(*spritesPerRow*(*spritesPerColumn)), uint(cfg.Size.Width), uint(cfg.Size.Height), uint(*mode), filename, cfg); err != nil {
+			filename := cfg.ScreenCfg.OutputPath + string(filepath.Separator) + "sprites.imp"
+			if err := tile.Imp(buf, uint(*spritesPerRow*(*spritesPerColumn)), uint(cfg.ScreenCfg.Size.Width), uint(cfg.ScreenCfg.Size.Height), uint(*mode), filename, cfg); err != nil {
 				log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
 				os.Exit(-2)
 			}
@@ -520,7 +520,7 @@ func main() {
 					data.Data = append(data.Data, sh)
 				}
 			}
-			filename := cfg.OutputPath + string(filepath.Separator) + "sprites.spr"
+			filename := cfg.ScreenCfg.OutputPath + string(filepath.Separator) + "sprites.spr"
 			if err := spritehard.Spr(filename, data, cfg); err != nil {
 				log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
 				os.Exit(-2)
@@ -537,9 +537,9 @@ func main() {
 		for _, v := range raw {
 			data = append(data, v...)
 		}
-		header := fmt.Sprintf("' from file %s\n", cfg.InputPath)
-		code := header + ascii.SpritesHardText(data, cfg.Compression)
-		filename := cfg.OutputPath + string(filepath.Separator) + "SPRITES.ASM"
+		header := fmt.Sprintf("' from file %s\n", cfg.ScreenCfg.InputPath)
+		code := header + ascii.SpritesHardText(data, cfg.ScreenCfg.Compression)
+		filename := cfg.ScreenCfg.OutputPath + string(filepath.Separator) + "SPRITES.ASM"
 		err = amsdos.SaveStringOSFile(filename, code)
 		if err != nil {
 			log.GetLogger().Error("cannot save text data file error %v", err)
@@ -588,14 +588,14 @@ func main() {
 				sprites = append(sprites, data...)
 			}
 			finalFile := strings.ReplaceAll(filename, "?", "")
-			if err = tile.Imp(sprites, uint(len(spritesPaths)), uint(cfg.Size.Width), uint(cfg.Size.Height), uint(screenMode), finalFile, cfg); err != nil {
+			if err = tile.Imp(sprites, uint(len(spritesPaths)), uint(cfg.ScreenCfg.Size.Width), uint(cfg.ScreenCfg.Size.Height), uint(screenMode), finalFile, cfg); err != nil {
 				log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", *picturePath, err)
 			}
 			os.Exit(0)
 		} else if *reverse {
 
 			outpath := filepath.Join(*output, strings.Replace(strings.ToLower(filename), ".scr", ".png", 1))
-			if cfg.Overscan {
+			if cfg.ScreenCfg.Type == config.FullscreenFormat {
 				p, mode, err := ovs.OverscanPalette(*picturePath)
 				if err != nil {
 					log.GetLogger().Error("Cannot get the palette from file (%s) error %v\n", *picturePath, err)
@@ -736,7 +736,7 @@ func main() {
 							} else {
 								var p color.Palette
 								var err error
-								if cfg.CpcPlus {
+								if cfg.ScreenCfg.IsPlus {
 									p, _, err = impPalette.OpenKit(*kitPath)
 									if *kitPath != "" {
 										if err != nil {
@@ -754,7 +754,8 @@ func main() {
 									}
 								}
 
-								if cfg.EgxFormat > 0 {
+								if cfg.ScreenCfg.Type == config.Egx1Format ||
+									cfg.ScreenCfg.Type == config.Egx2Format {
 									if len(p) == 0 {
 										log.GetLogger().Error("Now colors found in palette, give up treatment.\n")
 										os.Exit(-1)
@@ -769,7 +770,7 @@ func main() {
 									}
 								} else {
 									if cfg.SplitRaster {
-										if cfg.Overscan {
+										if cfg.ScreenCfg.Type.IsFullScreen() {
 											if err := effect.DoSpliteRaster(in, screenMode, filename, cfg); err != nil {
 												log.GetLogger().Error("Error while applying splitraster on one image :%v\n", err)
 												os.Exit(-1)
@@ -808,7 +809,7 @@ func main() {
 		}
 	}
 	if cfg.ExportType(config.SnaContainer) {
-		if cfg.Overscan {
+		if cfg.ScreenCfg.Type.IsFullScreen() {
 			var gfxFile string
 			for _, v := range cfg.DskFiles {
 				if filepath.Ext(v) == ".SCR" {

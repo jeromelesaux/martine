@@ -40,7 +40,7 @@ func DeltaPackingMemory(images []image.Image, cfg *config.MartineConfig, initial
 	var pad int = 1
 	var err error
 	var palette color.Palette
-	if !cfg.CustomDimension && !cfg.SpriteHard {
+	if !cfg.CustomDimension && cfg.ScreenCfg.Type != config.SpriteHardFormat {
 		isSprite = false
 	}
 	if len(images) <= 1 {
@@ -79,7 +79,7 @@ func DeltaPackingMemory(images []image.Image, cfg *config.MartineConfig, initial
 	}
 
 	log.GetLogger().Info("Let's go deltapacking raw images\n")
-	realSize := &constants.Size{Width: cfg.Size.Width, Height: cfg.Size.Height}
+	realSize := &constants.Size{Width: cfg.ScreenCfg.Size.Width, Height: cfg.ScreenCfg.Size.Height}
 	if isSprite {
 		realSize.Width = realSize.ModeWidth(mode)
 	}
@@ -109,7 +109,7 @@ func DeltaPackingMemory(images []image.Image, cfg *config.MartineConfig, initial
 func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress uint16, mode uint8, exportVersion DeltaExportFormat) error {
 	isSprite := true
 	maxImages := 22
-	if !cfg.CustomDimension && !cfg.SpriteHard {
+	if !cfg.CustomDimension && cfg.ScreenCfg.Type != config.SpriteHardFormat {
 		isSprite = false
 	}
 	fr, err := os.Open(gitFilepath)
@@ -164,7 +164,7 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 			if err != nil {
 				return err
 			}
-			err = png.Png(cfg.OutputPath+fmt.Sprintf("/%.2d.png", i), in)
+			err = png.Png(cfg.ScreenCfg.OutputPath+fmt.Sprintf("/%.2d.png", i), in)
 			if err != nil {
 				return err
 			}
@@ -179,7 +179,7 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 	}
 
 	log.GetLogger().Info("Let's go deltapacking raw images\n")
-	realSize := &constants.Size{Width: cfg.Size.Width, Height: cfg.Size.Height}
+	realSize := &constants.Size{Width: cfg.ScreenCfg.Size.Width, Height: cfg.ScreenCfg.Size.Height}
 	realSize.Width = realSize.ModeWidth(mode)
 	var lastImage []byte
 	for i := 0; i < len(rawImages)-1; i++ {
@@ -201,7 +201,7 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 	deltaData = append(deltaData, dc)
 	log.GetLogger().Info("%d bytes differ from the both images\n", len(dc.Items))
 	filename := cfg.OsFilename(".asm")
-	_, err = ExportDeltaAnimate(rawImages[0], deltaData, palette, isSprite, cfg, initialAddress, mode, cfg.OutputPath+string(filepath.Separator)+filename, exportVersion)
+	_, err = ExportDeltaAnimate(rawImages[0], deltaData, palette, isSprite, cfg, initialAddress, mode, cfg.ScreenCfg.OutputPath+string(filepath.Separator)+filename, exportVersion)
 	return err
 }
 
@@ -258,13 +258,13 @@ func ExportDeltaAnimate(
 		Palette:        palette,
 		Mode:           int(mode),
 		LigneLarge:     fmt.Sprintf("#%.4x", 0xC000+cfg.LineWidth),
-		Haut:           fmt.Sprintf("%d", cfg.Size.Height),
-		Large:          fmt.Sprintf("%d", cfg.Size.ModeWidth(mode)),
+		Haut:           fmt.Sprintf("%d", cfg.ScreenCfg.Size.Height),
+		Large:          fmt.Sprintf("%d", cfg.ScreenCfg.Size.ModeWidth(mode)),
 		Image:          imageReference,
 		Type: AnimateExportType{
-			Compress: cfg.Compression != compression.NONE,
+			Compress: cfg.ScreenCfg.Compression != compression.NONE,
 			IsSprite: isSprite,
-			CPCPlus:  cfg.CpcPlus,
+			CPCPlus:  cfg.ScreenCfg.IsPlus,
 		},
 	}
 	data := make([][]byte, 0)
@@ -292,9 +292,9 @@ func ExportDeltaAnimate(
 	var sourceCode string
 
 	if !isSprite {
-		if cfg.Compression != compression.NONE {
+		if cfg.ScreenCfg.Compression != compression.NONE {
 			sourceCode = deltaScreenCompressCodeDelta
-			if cfg.CpcPlus {
+			if cfg.ScreenCfg.IsPlus {
 				sourceCode = deltaScreenCompressCodeDeltaPlus
 			} else {
 				if exportVersion == DeltaExportV2 {
@@ -303,7 +303,7 @@ func ExportDeltaAnimate(
 			}
 		} else {
 			sourceCode = deltaScreenCodeDelta
-			if cfg.CpcPlus {
+			if cfg.ScreenCfg.IsPlus {
 				sourceCode = deltaScreenCodeDeltaPlus
 			} else {
 				if exportVersion == DeltaExportV2 {
@@ -323,7 +323,7 @@ func ExportDeltaAnimate(
 	fmt.Println(buf.String())
 
 	code := buf.String()
-	if cfg.Compression != compression.NONE {
+	if cfg.ScreenCfg.Compression != compression.NONE {
 		code += "\nbuffer:\n"
 	}
 	code += "\nend\n"

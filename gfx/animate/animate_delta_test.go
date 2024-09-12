@@ -46,10 +46,12 @@ func TestOpenGif(t *testing.T) {
 func TestInternalDelta(t *testing.T) {
 	_ = os.Mkdir("InternalDelta", 0777)
 	ex := &config.MartineConfig{
-		Size:            constants.Size{Width: 100, Height: 100, ColorsAvailable: 4},
+		ScreenCfg: config.ScreenConfig{
+			Size:       constants.Size{Width: 100, Height: 100, ColorsAvailable: 4},
+			OutputPath: "./InternalDelta",
+		},
 		CustomDimension: true,
 		LineWidth:       0x50,
-		OutputPath:      "./InternalDelta",
 		OneLine:         false,
 		OneRow:          false,
 		FilloutGif:      false,

@@ -162,7 +162,7 @@ func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.
 			}
 			pixel2 := pixel.PixelMode0(p2, p4)
 			if pixel1 != pixel2 {
-				addr := address.CpcScreenAddress(0xc000, i, j, 0, cfg.Overscan, cfg.DoubleScreenAddress)
+				addr := address.CpcScreenAddress(0xc000, i, j, 0, cfg.ScreenCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 				data.Add(pixel2, uint16(addr))
 			}
 		}
@@ -236,7 +236,7 @@ func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.
 			}
 			pixel2 := pixel.PixelMode1(p2, p4, p6, p8)
 			if pixel1 != pixel2 {
-				addr := address.CpcScreenAddress(0xc000, i, j, 1, cfg.Overscan, cfg.DoubleScreenAddress)
+				addr := address.CpcScreenAddress(0xc000, i, j, 1, cfg.ScreenCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 				data.Add(pixel2, uint16(addr))
 			}
 		}
@@ -362,7 +362,7 @@ func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.
 			}
 			pixel2 := pixel.PixelMode2(p2, p4, p6, p8, p10, p12, p14, p16)
 			if pixel1 != pixel2 {
-				addr := address.CpcScreenAddress(0xc000, i, j, 2, cfg.Overscan, cfg.DoubleScreenAddress)
+				addr := address.CpcScreenAddress(0xc000, i, j, 2, cfg.ScreenCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 				data.Add(pixel2, uint16(addr))
 			}
 		}
@@ -481,12 +481,12 @@ func ExportDelta(filename string, dc *DeltaCollection, mode uint8, cfg *config.M
 	}
 
 	var emptyPalette []color.Color
-	outFilepath := filepath.Join(cfg.OutputPath, filename+".txt")
+	outFilepath := filepath.Join(cfg.ScreenCfg.OutputPath, filename+".txt")
 	if err = ascii.Ascii(outFilepath, data, emptyPalette, false, cfg); err != nil {
 		log.GetLogger().Error("Error while exporting data as ascii mode file (%s) error :%v\n", outFilepath, err)
 		return err
 	}
-	outFilepath = filepath.Join(cfg.OutputPath, filename+"c.txt")
+	outFilepath = filepath.Join(cfg.ScreenCfg.OutputPath, filename+"c.txt")
 	if err = ascii.AsciiByColumn(outFilepath, data, emptyPalette, false, mode, cfg); err != nil {
 		log.GetLogger().Error("Error while exporting data as ascii by column mode file (%s) error :%v\n", outFilepath, err)
 		return err
@@ -581,7 +581,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, cfg *config.Martine
 		log.GetLogger().Info("%d screen addresses are involved\n", dc.NbAdresses())
 		log.GetLogger().Info("Report:\n%s\n", dc.ToString())
 		if dc.OccurencePerFrame != 0 {
-			out := filepath.Join(cfg.OutputPath, fmt.Sprintf("%.2dto%.2d", i, (i+1)))
+			out := filepath.Join(cfg.ScreenCfg.OutputPath, fmt.Sprintf("%.2dto%.2d", i, (i+1)))
 			if err := ExportDelta(out, dc, mode, cfg); err != nil {
 				return err
 			}
@@ -654,7 +654,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, cfg *config.Martine
 	log.GetLogger().Info("%d screen addresses are involved\n", dc.NbAdresses())
 	log.GetLogger().Info("Report:\n%s\n", dc.ToString())
 	if dc.OccurencePerFrame != 0 {
-		out := filepath.Join(cfg.OutputPath, fmt.Sprintf("%.2dto00", len(filespath)-1))
+		out := filepath.Join(cfg.ScreenCfg.OutputPath, fmt.Sprintf("%.2dto00", len(filespath)-1))
 		if err := ExportDelta(out, dc, mode, cfg); err != nil {
 			return err
 		}

@@ -54,11 +54,11 @@ func AutoFlash(in image.Image,
 
 	var err error
 	size := constants.Size{
-		Width:  cfg.Size.Width * 2,
-		Height: cfg.Size.Height * 2}
+		Width:  cfg.ScreenCfg.Size.Width * 2,
+		Height: cfg.ScreenCfg.Size.Height * 2}
 	im := ci.Resize(in, size, cfg.ResizingAlgo)
-	leftIm := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{cfg.Size.Width, cfg.Size.Height}})
-	rigthIm := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{cfg.Size.Width, cfg.Size.Height}})
+	leftIm := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{cfg.ScreenCfg.Size.Width, cfg.ScreenCfg.Size.Height}})
+	rigthIm := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{cfg.ScreenCfg.Size.Width, cfg.ScreenCfg.Size.Height}})
 	indexExtFilename := strings.LastIndex(filename, ".")
 	indexExtPath := strings.LastIndex(picturePath, ".")
 
@@ -89,7 +89,7 @@ func AutoFlash(in image.Image,
 		namesize = 7
 	}
 	flashPaletteFilename1 := strings.ToUpper(name)[0:namesize] + "1.PAL"
-	flashPalettePath1 := filepath.Join(cfg.OutputPath, flashPaletteFilename1)
+	flashPalettePath1 := filepath.Join(cfg.ScreenCfg.OutputPath, flashPaletteFilename1)
 
 	err = gfx.ApplyOneImageAndExport(leftIm,
 		cfg,
@@ -122,15 +122,15 @@ func AutoFlash(in image.Image,
 
 	switch flashMode {
 	case 0:
-		cfg.Size = constants.Mode0
+		cfg.ScreenCfg.Size = constants.Mode0
 	case 1:
-		cfg.Size = constants.Mode1
+		cfg.ScreenCfg.Size = constants.Mode1
 	case 2:
-		cfg.Size = constants.Mode2
+		cfg.ScreenCfg.Size = constants.Mode2
 	}
 
 	flashPaletteFilename2 := strings.ToUpper(name)[0:namesize] + "2.PAL"
-	flashPalettePath2 := filepath.Join(cfg.OutputPath, flashPaletteFilename2)
+	flashPalettePath2 := filepath.Join(cfg.ScreenCfg.OutputPath, flashPaletteFilename2)
 
 	cfg.PaletteCfg.Path = flashPalettePath1
 

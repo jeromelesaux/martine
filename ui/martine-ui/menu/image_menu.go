@@ -269,7 +269,7 @@ func (me *ImageMenu) ExportImage(e *ImageExport, w fyne.Window, getCfg func(me *
 		return
 	}
 	if e.ExportText {
-		if cfg.Overscan {
+		if cfg.ScreenCfg.Type == config.FullscreenFormat {
 			cfg.ExportAsGoFile = true
 		}
 
@@ -282,7 +282,7 @@ func (me *ImageMenu) ExportImage(e *ImageExport, w fyne.Window, getCfg func(me *
 		if !cfg.ExportAsGoFile {
 			code := ascii.FormatAssemblyDatabyte(out, "\n")
 			var palCode string
-			if cfg.CpcPlus {
+			if cfg.ScreenCfg.IsPlus {
 				palCode = ascii.FormatAssemblyCPCPlusPalette(palette, "\n")
 			} else {
 				palCode = ascii.FormatAssemblyCPCPalette(palette, "\n")
@@ -307,10 +307,10 @@ func (me *ImageMenu) ExportImage(e *ImageExport, w fyne.Window, getCfg func(me *
 				return
 			}
 			var decompressRoutine string
-			if cfg.Compression != compression.NONE && cfg.Compression != -1 {
-				go1, _ = compression.Compress(go1, cfg.Compression)
-				go2, _ = compression.Compress(go2, cfg.Compression)
-				if cfg.Compression == compression.ZX0 {
+			if cfg.ScreenCfg.Compression != compression.NONE && cfg.ScreenCfg.Compression != -1 {
+				go1, _ = compression.Compress(go1, cfg.ScreenCfg.Compression)
+				go2, _ = compression.Compress(go2, cfg.ScreenCfg.Compression)
+				if cfg.ScreenCfg.Compression == compression.ZX0 {
 					decompressRoutine = assembly.DeltapackRoutine
 				}
 			}
@@ -318,7 +318,7 @@ func (me *ImageMenu) ExportImage(e *ImageExport, w fyne.Window, getCfg func(me *
 			code2 := ascii.FormatAssemblyDatabyte(go2, "\n")
 			var palCode string
 
-			if cfg.CpcPlus {
+			if cfg.ScreenCfg.IsPlus {
 				palCode = ascii.FormatAssemblyCPCPlusPalette(palette, "\n")
 			} else {
 				palCode = ascii.FormatAssemblyCPCPalette(palette, "\n")
@@ -388,7 +388,7 @@ func (me *ImageMenu) ExportImage(e *ImageExport, w fyne.Window, getCfg func(me *
 			}
 		}
 		if cfg.ExportType(config.SnaContainer) {
-			if cfg.Overscan {
+			if cfg.ScreenCfg.Type == config.FullscreenFormat {
 				var gfxFile string
 				for _, v := range cfg.DskFiles {
 					if filepath.Ext(v) == ".SCR" {
@@ -423,8 +423,10 @@ func (me *ImageMenu) NewConfig(ex *ImageExport, checkOriginalImage bool) *config
 	if checkOriginalImage {
 		cfg = config.NewMartineConfig(me.OriginalImagePath(), "")
 	}
-	cfg.CpcPlus = me.IsCpcPlus
-	cfg.Overscan = me.Format.IsFullScreen()
+	cfg.ScreenCfg.IsPlus = me.IsCpcPlus
+	if me.Format.IsFullScreen() {
+		cfg.ScreenCfg.Type = config.FullscreenFormat
+	}
 	cfg.DitheringMultiplier = me.DitheringMultiplier
 	cfg.Brightness = me.Brightness
 	cfg.Saturation = me.Saturation
@@ -436,7 +438,7 @@ func (me *ImageMenu) NewConfig(ex *ImageExport, checkOriginalImage bool) *config
 		cfg.Brightness = me.Saturation
 	}
 	cfg.Reducer = me.Reducer
-	cfg.Size = constants.NewSizeMode(uint8(me.Mode), me.Format.IsFullScreen())
+	cfg.ScreenCfg.Size = constants.NewSizeMode(uint8(me.Mode), me.Format.IsFullScreen())
 	if me.Format.IsSprite() {
 		width, _, err := me.GetWidth()
 		if err != nil {
@@ -448,13 +450,13 @@ func (me *ImageMenu) NewConfig(ex *ImageExport, checkOriginalImage bool) *config
 			dialog.NewError(err, me.w).Show()
 			return nil
 		}
-		cfg.Size.Height = height
-		cfg.Size.Width = width
+		cfg.ScreenCfg.Size.Height = height
+		cfg.ScreenCfg.Size.Width = width
 		cfg.CustomDimension = true
 	}
 	if me.Format.IsSpriteHard() {
-		cfg.Size.Height = 16
-		cfg.Size.Width = 16
+		cfg.ScreenCfg.Size.Height = 16
+		cfg.ScreenCfg.Size.Width = 16
 	}
 	if me.ApplyDithering {
 		cfg.DitheringAlgo = 0
@@ -469,15 +471,15 @@ func (me *ImageMenu) NewConfig(ex *ImageExport, checkOriginalImage bool) *config
 		cfg.DitheringAlgo = -1
 	}
 	cfg.DitheringWithQuantification = me.WithQuantification
-	cfg.OutputPath = ex.ExportFolderPath
+	cfg.ScreenCfg.OutputPath = ex.ExportFolderPath
 	if checkOriginalImage {
-		cfg.InputPath = me.OriginalImagePath()
+		cfg.ScreenCfg.InputPath = me.OriginalImagePath()
 	}
 	cfg.Json = ex.ExportJson
 	cfg.Ascii = ex.ExportText
-	cfg.NoAmsdosHeader = !ex.ExportWithAmsdosHeader
+	cfg.ScreenCfg.NoAmsdosHeader = !ex.ExportWithAmsdosHeader
 	cfg.ZigZag = ex.ExportZigzag
-	cfg.Compression = ex.ExportCompression
+	cfg.ScreenCfg.Compression = ex.ExportCompression
 	if ex.ExportDsk {
 		cfg.ContainerCfg.AddExport(config.DskContainer)
 	}

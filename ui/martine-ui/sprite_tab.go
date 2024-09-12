@@ -336,8 +336,10 @@ func applySpriteBoardFromGif(s *menu.SpriteMenu, m *MartineUI) *widget.Button {
 			}
 			cfg := config.NewMartineConfig("", "")
 			cfg.CustomDimension = true
-			cfg.Size = size
-			cfg.SpriteHard = s.IsHardSprite
+			cfg.ScreenCfg.Size = size
+			if s.IsHardSprite {
+				cfg.ScreenCfg.Type = config.SpriteHardFormat
+			}
 			var colorsAvailable int
 			switch s.Mode {
 			case 0:

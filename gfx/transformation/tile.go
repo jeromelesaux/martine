@@ -19,16 +19,16 @@ import (
 
 // nolint: funlen
 func TileMode(ex *config.MartineConfig, mode uint8, iterationX, iterationY int) error {
-	fr, err := os.Open(ex.InputPath)
+	fr, err := os.Open(ex.ScreenCfg.InputPath)
 	if err != nil {
-		log.GetLogger().Error("Cannot open (%s),error :%v\n", ex.InputPath, err)
+		log.GetLogger().Error("Cannot open (%s),error :%v\n", ex.ScreenCfg.InputPath, err)
 		return err
 	}
 	defer fr.Close()
 
 	in, _, err := image.Decode(fr)
 	if err != nil {
-		log.GetLogger().Error("Cannot decode image (%s) error :%v\n", ex.InputPath, err)
+		log.GetLogger().Error("Cannot decode image (%s) error :%v\n", ex.ScreenCfg.InputPath, err)
 		return err
 	}
 
@@ -55,13 +55,13 @@ func TileMode(ex *config.MartineConfig, mode uint8, iterationX, iterationY int) 
 				return err
 			}
 
-			resized := ci.Resize(cropped, ex.Size, ex.ResizingAlgo)
+			resized := ci.Resize(cropped, ex.ScreenCfg.Size, ex.ResizingAlgo)
 			ext := "_resized_" + strconv.Itoa(index) + ".png"
-			filePath := filepath.Join(ex.OutputPath, ex.OsFilename(ext))
+			filePath := filepath.Join(ex.ScreenCfg.OutputPath, ex.OsFilename(ext))
 			if err := png.Png(filePath, resized); err != nil {
 				log.GetLogger().Error("Cannot resized image, error %v\n", err)
 			}
-			p, downgraded, err := ci.DowngradingPalette(resized, ex.Size, ex.CpcPlus)
+			p, downgraded, err := ci.DowngradingPalette(resized, ex.ScreenCfg.Size, ex.ScreenCfg.IsPlus)
 			if err != nil {
 				log.GetLogger().Error("Cannot downgrad the palette, error :%v\n", err)
 			}
@@ -71,14 +71,14 @@ func TileMode(ex *config.MartineConfig, mode uint8, iterationX, iterationY int) 
 			}
 
 			ext = "_downgraded_" + strconv.Itoa(index) + ".png"
-			filePath = filepath.Join(ex.OutputPath, ex.OsFilename(ext))
+			filePath = filepath.Join(ex.ScreenCfg.OutputPath, ex.OsFilename(ext))
 			if err := png.Png(filePath, downgraded); err != nil {
 				log.GetLogger().Error("Cannot downgrade image, error %v\n", err)
 			}
 			ext = strconv.Itoa(index) + ".png"
-			ex.Size.Width = resized.Bounds().Max.X
-			ex.Size.Height = resized.Bounds().Max.Y
-			if err := sprite.ToSpriteAndExport(downgraded, p, ex.Size, mode, ex.OsFilename(ext), false, ex); err != nil {
+			ex.ScreenCfg.Size.Width = resized.Bounds().Max.X
+			ex.ScreenCfg.Size.Height = resized.Bounds().Max.Y
+			if err := sprite.ToSpriteAndExport(downgraded, p, ex.ScreenCfg.Size, mode, ex.OsFilename(ext), false, ex); err != nil {
 				log.GetLogger().Error("Cannot create sprite from image, error :%v\n", err)
 			}
 			index++

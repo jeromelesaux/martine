@@ -115,19 +115,19 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 		pi.Hide()
 		return
 	}
-	cfg.OutputPath = me.ResultImage.Path
+	cfg.ScreenCfg.OutputPath = me.ResultImage.Path
 	if m.egxExport.ExportDsk {
 		cfg.ContainerCfg.AddExport(config.DskContainer)
 	}
 	if m.egxExport.ExportWithAmsdosHeader {
-		cfg.NoAmsdosHeader = false
+		cfg.ScreenCfg.NoAmsdosHeader = false
 	} else {
-		cfg.NoAmsdosHeader = true
+		cfg.ScreenCfg.NoAmsdosHeader = true
 	}
 	if me.ResultImage.EgxType == 1 {
-		cfg.EgxFormat = config.Egx1Mode
+		cfg.ScreenCfg.Type = config.Egx1Format
 	} else {
-		cfg.EgxFormat = config.Egx2Mode
+		cfg.ScreenCfg.Type = config.Egx2Format
 	}
 	cfg.EgxMode1 = uint8(me.LeftImage.Mode)
 	cfg.EgxMode2 = uint8(me.RightImage.Mode)
@@ -142,7 +142,7 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	}
 	cfg.PaletteCfg.Path = "temporary_palette.kit"
 
-	if !cfg.Overscan {
+	if !cfg.ScreenCfg.Type.IsFullScreen() {
 		if err := ocpartstudio.EgxLoader(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Palette, uint8(me.LeftImage.Mode), uint8(me.RightImage.Mode), cfg); err != nil {
 			pi.Hide()
 			dialog.ShowError(err, m.window)
@@ -162,7 +162,7 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 		}
 	}
 	if cfg.ExportType(config.SnaContainer) {
-		if cfg.Overscan {
+		if cfg.ScreenCfg.Type.IsFullScreen() {
 			var gfxFile string
 			for _, v := range cfg.DskFiles {
 				if filepath.Ext(v) == ".SCR" {

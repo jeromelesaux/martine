@@ -42,7 +42,7 @@ func DeltaMotif(gitFilepath string, cfg *config.MartineConfig, threshold int, in
 	}
 
 	// downgrading palette
-	customPalette, _, err := ci.DowngradingPalette(screens[0], size, cfg.CpcPlus)
+	customPalette, _, err := ci.DowngradingPalette(screens[0], size, cfg.ScreenCfg.IsPlus)
 	if err != nil {
 		return err
 	}
@@ -107,7 +107,7 @@ func DeltaMotif(gitFilepath string, cfg *config.MartineConfig, threshold int, in
 		deltas = append(deltas, delta)
 	}
 	filename := cfg.OsFilename(".asm")
-	return exportDeltaMotif(deltas, motifs, customPalette, cfg, cfg.OutputPath+string(filepath.Separator)+filename)
+	return exportDeltaMotif(deltas, motifs, customPalette, cfg, cfg.ScreenCfg.OutputPath+string(filepath.Separator)+filename)
 }
 
 func exportDeltaMotif(images [][]byte, motifs [][]byte, p color.Palette, cfg *config.MartineConfig, filename string) error {

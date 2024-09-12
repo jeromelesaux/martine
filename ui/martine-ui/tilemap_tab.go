@@ -55,12 +55,12 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 	var palette color.Palette
 	var tiles [][]image.Image
 	var err error
-	if m.IsClassicalTilemap(cfg.Size.Width, cfg.Size.Height) {
+	if m.IsClassicalTilemap(cfg.ScreenCfg.Size.Width, cfg.ScreenCfg.Size.Height) {
 		filename := filepath.Base(me.OriginalImagePath())
-		analyze, tiles, palette = gfx.TilemapClassical(uint8(me.Mode), me.IsCpcPlus, filename, me.OriginalImagePath(), me.OriginalImage().Image, cfg.Size, cfg, me.Historic)
+		analyze, tiles, palette = gfx.TilemapClassical(uint8(me.Mode), me.IsCpcPlus, filename, me.OriginalImagePath(), me.OriginalImage().Image, cfg.ScreenCfg.Size, cfg, me.Historic)
 		pi.Hide()
 	} else {
-		analyze, tiles, palette, err = gfx.TilemapRaw(uint8(me.Mode), me.IsCpcPlus, cfg.Size, me.OriginalImage().Image, cfg, me.Historic)
+		analyze, tiles, palette, err = gfx.TilemapRaw(uint8(me.Mode), me.IsCpcPlus, cfg.ScreenCfg.Size, me.OriginalImage().Image, cfg, me.Historic)
 		pi.Hide()
 		if err != nil {
 			dialog.NewError(err, m.window).Show()
@@ -95,7 +95,7 @@ func (m *MartineUI) newImageMenuExportButton(tm *menu.ImageMenu) *widget.Button 
 			uc.Close()
 			os.Remove(uc.URI().Path())
 			cfg := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
-			cfg.NoAmsdosHeader = false
+			cfg.ScreenCfg.NoAmsdosHeader = false
 			if err := impPalette.SaveKit(paletteExportPath+".kit", tm.Palette(), false); err != nil {
 				dialog.ShowError(err, m.window)
 			}
