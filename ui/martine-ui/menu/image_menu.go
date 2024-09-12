@@ -24,6 +24,7 @@ import (
 	"github.com/jeromelesaux/martine/convert/screen"
 	ovs "github.com/jeromelesaux/martine/convert/screen/overscan"
 	"github.com/jeromelesaux/martine/convert/sprite"
+	"github.com/jeromelesaux/martine/convert/spritehard"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/compression"
@@ -626,12 +627,23 @@ func (i *ImageMenu) NewImportButton(modeSelection *widget.Select, callBack func(
 						dialog.ShowError(errors.New("palette is empty,  please import palette first, or select fullscreen option to open a fullscreen option"), i.w)
 						return
 					}
-					img, err := screen.ScrToImg(i.OriginalImagePath(), uint8(i.Mode), i.Palette())
-					if err != nil {
-						dialog.ShowError(err, i.w)
-						return
+					if i.IsHardSprite {
+						// loading hard sprite
+						img, err := spritehard.SpriteHardToImg(i.OriginalImagePath(), i.Palette())
+						if err != nil {
+							dialog.ShowError(err, i.w)
+							return
+						}
+						i.SetOriginalImage(img)
+
+					} else {
+						img, err := screen.ScrToImg(i.OriginalImagePath(), uint8(i.Mode), i.Palette())
+						if err != nil {
+							dialog.ShowError(err, i.w)
+							return
+						}
+						i.SetOriginalImage(img)
 					}
-					i.SetOriginalImage(img)
 				}
 			}
 			if callBack != nil {
@@ -642,7 +654,7 @@ func (i *ImageMenu) NewImportButton(modeSelection *widget.Select, callBack func(
 		if err == nil {
 			d.SetLocation(path)
 		}
-		d.SetFilter(storage.NewExtensionFileFilter([]string{".scr", ".win", ".bin"}))
+		d.SetFilter(storage.NewExtensionFileFilter([]string{".scr", ".win", ".bin", ".spr"}))
 		d.Resize(i.w.Content().Size())
 		d.Show()
 	})
