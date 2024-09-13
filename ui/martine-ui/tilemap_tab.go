@@ -46,7 +46,17 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 	if cfg == nil {
 		return
 	}
-
+	var err error
+	cfg.ScreenCfg.Size.Height, _, err = me.GetHeight()
+	if err != nil {
+		dialog.NewError(err, m.window).Show()
+		return
+	}
+	cfg.ScreenCfg.Size.Width, _, err = me.GetWidth()
+	if err != nil {
+		dialog.NewError(err, m.window).Show()
+		return
+	}
 	cfg.CustomDimension = true
 
 	pi := wgt.NewProgressInfinite("Computing, Please wait.", m.window)
@@ -54,7 +64,6 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 	var analyze *transformation.AnalyzeBoard
 	var palette color.Palette
 	var tiles [][]image.Image
-	var err error
 	if m.IsClassicalTilemap(cfg.ScreenCfg.Size.Width, cfg.ScreenCfg.Size.Height) {
 		filename := filepath.Base(me.OriginalImagePath())
 		analyze, tiles, palette = gfx.TilemapClassical(uint8(me.Mode), me.Cfg.ScreenCfg.IsPlus, filename, me.OriginalImagePath(), me.OriginalImage().Image, cfg.ScreenCfg.Size, cfg, me.Historic)

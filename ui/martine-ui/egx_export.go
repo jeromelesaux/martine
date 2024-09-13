@@ -31,7 +31,6 @@ func (m *MartineUI) exportEgxDialog(cfg *config.MartineConfig, w fyne.Window) {
 	m2host := widget.NewEntry()
 	m2host.SetPlaceHolder("Set your M2 IP here.")
 
-	cfg.Reset()
 	cont := container.NewVBox(
 		container.NewHBox(
 			widget.NewCheck("import all file in Dsk", func(b bool) {
@@ -57,7 +56,7 @@ func (m *MartineUI) exportEgxDialog(cfg *config.MartineConfig, w fyne.Window) {
 				}
 			}),
 			widget.NewCheck("add amsdos header", func(b bool) {
-				cfg.ScreenCfg.NoAmsdosHeader = b == true
+				cfg.ScreenCfg.NoAmsdosHeader = b == false
 
 			}),
 			widget.NewCheck("apply zigzag", func(b bool) {
@@ -125,7 +124,7 @@ func (m *MartineUI) exportEgxDialog(cfg *config.MartineConfig, w fyne.Window) {
 func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	pi := wgt.NewProgressInfinite("Saving...., please wait.", m.window)
 	pi.Show()
-	cfg := me.Cfg
+	cfg := me.LeftImage.Cfg
 	if cfg == nil {
 		pi.Hide()
 		return

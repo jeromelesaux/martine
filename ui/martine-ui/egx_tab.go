@@ -69,10 +69,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 		palette = di.RightImage.Palette()
 		secondIm = di.LeftImage
 	}
-	cfg := im.NewConfig(false)
-	if cfg == nil {
-		return
-	}
+	cfg := im.Cfg
 	out, downgraded, _, _, err := gfx.ApplyOneImage(secondIm.CpcImage().Image, cfg, secondIm.Mode, palette, uint8(secondIm.Mode))
 	if err != nil {
 		dialog.ShowError(err, m.window)

@@ -19,6 +19,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/config"
+	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/compression"
@@ -136,6 +137,27 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 		return
 	}
 
+	if cfg.ScreenCfg.Type != config.SpriteFormat {
+		switch a.Mode {
+		case 0:
+			cfg.ScreenCfg.Size = constants.Mode0
+		case 1:
+			cfg.ScreenCfg.Size = constants.Mode1
+		case 2:
+			cfg.ScreenCfg.Size = constants.Mode2
+		}
+	}
+	if cfg.ScreenCfg.Size.Height == 0 && cfg.ScreenCfg.Size.Width == 0 {
+		switch a.Mode {
+		case 0:
+			cfg.ScreenCfg.Size = constants.Mode0
+		case 1:
+			cfg.ScreenCfg.Size = constants.Mode1
+		case 2:
+			cfg.ScreenCfg.Size = constants.Mode2
+		}
+	}
+
 	pi := wgt.NewProgressInfinite("Computing, Please wait.", m.window)
 	pi.Show()
 	address, err := strconv.ParseUint(a.InitialAddress.Text, 16, 64)
@@ -168,6 +190,7 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 
 // nolint:funlen, gocognit
 func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
+	a.Cfg.ScreenCfg.Type = config.ScreenOldFormat
 	a.ImageMenu.SetWindow(m.window)
 	importOpen := newImportButton(m, a.ImageMenu)
 
