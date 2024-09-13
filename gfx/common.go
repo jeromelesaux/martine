@@ -51,6 +51,7 @@ func DoDithering(in *image.NRGBA,
 	return in, p
 }
 
+// nolint: funlen
 func DoTransformation(in *image.NRGBA,
 	p color.Palette,
 	screenMode uint8,

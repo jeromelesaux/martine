@@ -19,7 +19,7 @@ import (
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
-// nolint: funlen
+// nolint: funlen, gocognit
 func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 	cont := container.NewVBox(
 		container.NewHBox(
@@ -76,7 +76,7 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 				}
 			}),
 			widget.NewCheck("add amsdos header", func(b bool) {
-				m.tilemap.Cfg.ScrCfg.NoAmsdosHeader = b == false
+				m.tilemap.Cfg.ScrCfg.NoAmsdosHeader = !b
 			}),
 			widget.NewCheck("apply zigzag", func(b bool) {
 				m.tilemap.ExportZigzag = b
@@ -122,7 +122,7 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 				fo.SetLocation(d)
 			}
 			fo.Resize(savingDialogSize)
-			m.CheckAmsdosHeaderExport(m.tilemap.Cfg.ContainerCfg.HasExport(config.DskContainer), m.tilemap.Cfg.ScrCfg.NoAmsdosHeader == false, fo, m.window)
+			m.CheckAmsdosHeaderExport(m.tilemap.Cfg.ContainerCfg.HasExport(config.DskContainer), !m.tilemap.Cfg.ScrCfg.NoAmsdosHeader, fo, m.window)
 		}),
 	)
 

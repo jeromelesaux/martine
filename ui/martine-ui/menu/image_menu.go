@@ -442,7 +442,7 @@ func (me *ImageMenu) ExportDialog(cfg *config.MartineConfig, getCfg func(checkOr
 					}
 				}),
 				widget.NewCheck("add amsdos header", func(b bool) {
-					cfg.ScrCfg.NoAmsdosHeader = b == false
+					cfg.ScrCfg.NoAmsdosHeader = !b
 				}),
 			),
 			container.NewGridWithRows(3,
@@ -527,7 +527,7 @@ func (me *ImageMenu) ExportDialog(cfg *config.MartineConfig, getCfg func(checkOr
 			}
 			fo.Resize(me.w.Content().Size())
 
-			dl.CheckAmsdosHeaderExport(cfg.ContainerCfg.HasExport(config.DskContainer), cfg.ScrCfg.NoAmsdosHeader == false, fo, me.w)
+			dl.CheckAmsdosHeaderExport(cfg.ContainerCfg.HasExport(config.DskContainer), !cfg.ScrCfg.NoAmsdosHeader, fo, me.w)
 		}),
 	)
 

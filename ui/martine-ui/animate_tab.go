@@ -70,7 +70,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						a.Cfg.ScrCfg.Type.IsSprite(),
 						cfg,
 						uint16(address),
-						uint8(a.Cfg.ScrCfg.Mode),
+						a.Cfg.ScrCfg.Mode,
 						"",
 						a.ExportVersion,
 					)
@@ -133,10 +133,6 @@ func CheckWidthSize(width, mode int) bool {
 
 func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 	cfg := a.Cfg
-	if cfg == nil {
-		return
-	}
-
 	if cfg.ScrCfg.Type != config.SpriteFormat {
 		switch a.Cfg.ScrCfg.Mode {
 		case 0:
@@ -176,7 +172,7 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 		return
 	}
 	imgs := a.AnimateImages.Images()
-	deltaCollection, rawImages, palette, err := animate.DeltaPackingMemory(imgs, cfg, uint16(address), uint8(a.Cfg.ScrCfg.Mode))
+	deltaCollection, rawImages, palette, err := animate.DeltaPackingMemory(imgs, cfg, uint16(address), a.Cfg.ScrCfg.Mode)
 	pi.Hide()
 	if err != nil {
 		dialog.NewError(err, m.window).Show()

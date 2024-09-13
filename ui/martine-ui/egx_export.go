@@ -56,7 +56,7 @@ func (m *MartineUI) exportEgxDialog(cfg *config.MartineConfig, w fyne.Window) {
 				}
 			}),
 			widget.NewCheck("add amsdos header", func(b bool) {
-				cfg.ScrCfg.NoAmsdosHeader = b == false
+				cfg.ScrCfg.NoAmsdosHeader = !b
 
 			}),
 			widget.NewCheck("apply zigzag", func(b bool) {
@@ -111,7 +111,7 @@ func (m *MartineUI) exportEgxDialog(cfg *config.MartineConfig, w fyne.Window) {
 			}
 			fo.Resize(savingDialogSize)
 			m.CheckAmsdosHeaderExport(cfg.ContainerCfg.HasExport(config.DskContainer),
-				cfg.ScrCfg.NoAmsdosHeader == false, fo, m.window)
+				!cfg.ScrCfg.NoAmsdosHeader, fo, m.window)
 		}),
 	)
 
@@ -136,8 +136,8 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	} else {
 		cfg.ScrCfg.Type = config.Egx2Format
 	}
-	cfg.EgxMode1 = uint8(me.LeftImage.Cfg.ScrCfg.Mode)
-	cfg.EgxMode2 = uint8(me.RightImage.Cfg.ScrCfg.Mode)
+	cfg.EgxMode1 = me.LeftImage.Cfg.ScrCfg.Mode
+	cfg.EgxMode2 = me.RightImage.Cfg.ScrCfg.Mode
 
 	// palette export
 	defer func() {
@@ -150,7 +150,7 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	cfg.PalCfg.Path = "temporary_palette.kit"
 
 	if !cfg.ScrCfg.Type.IsFullScreen() {
-		if err := ocpartstudio.EgxLoader(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Palette, uint8(me.LeftImage.Cfg.ScrCfg.Mode), uint8(me.RightImage.Cfg.ScrCfg.Mode), cfg); err != nil {
+		if err := ocpartstudio.EgxLoader(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Palette, me.LeftImage.Cfg.ScrCfg.Mode, me.RightImage.Cfg.ScrCfg.Mode, cfg); err != nil {
 			pi.Hide()
 			dialog.ShowError(err, m.window)
 			return

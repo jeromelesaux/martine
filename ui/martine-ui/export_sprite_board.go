@@ -71,7 +71,7 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 			}
 		}),
 		widget.NewCheck("add amsdos header", func(b bool) {
-			s.Cfg.ScrCfg.NoAmsdosHeader = b == false
+			s.Cfg.ScrCfg.NoAmsdosHeader = !b
 		}),
 		widget.NewCheck("apply zigzag", func(b bool) {
 			s.Cfg.ZigZag = b
@@ -114,7 +114,7 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 				fo.SetLocation(d)
 			}
 			fo.Resize(savingDialogSize)
-			m.CheckAmsdosHeaderExport(s.Cfg.ContainerCfg.HasExport(config.DskContainer), s.Cfg.ScrCfg.NoAmsdosHeader == false, fo, m.window)
+			m.CheckAmsdosHeaderExport(s.Cfg.ContainerCfg.HasExport(config.DskContainer), !s.Cfg.ScrCfg.NoAmsdosHeader, fo, m.window)
 		}),
 	)
 
@@ -130,7 +130,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 	if err := impPalette.SaveKit(
 		s.Cfg.ScrCfg.OutputPath+string(filepath.Separator)+"SPRITES.KIT",
 		s.Palette(),
-		s.Cfg.ScrCfg.NoAmsdosHeader == false); err != nil {
+		!s.Cfg.ScrCfg.NoAmsdosHeader); err != nil {
 		pi.Hide()
 		dialog.ShowError(err, m.window)
 		return
