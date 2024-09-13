@@ -463,6 +463,10 @@ func ImportSpriteBoard(m *MartineUI) *widget.Button {
 
 				spriteLength := int(footer.Height) * int(footer.Width)
 				nbRow := (len(data) / spriteLength) / m.sprite.SpriteColumns
+				if nbRow == 0 {
+					dialog.ShowError(errors.New("bad format or file truncated"), m.window)
+					return
+				}
 				m.sprite.SpriteRows = nbRow
 				m.sprite.SpritesCollection = make([][]*image.NRGBA, nbRow)
 				m.sprite.SpritesData = make([][][]byte, nbRow)
