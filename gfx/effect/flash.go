@@ -56,7 +56,7 @@ func AutoFlash(in image.Image,
 	size := constants.Size{
 		Width:  cfg.ScrCfg.Size.Width * 2,
 		Height: cfg.ScrCfg.Size.Height * 2}
-	im := ci.Resize(in, size, cfg.ScrCfg.Treatment.ResizingAlgo)
+	im := ci.Resize(in, size, cfg.ScrCfg.Process.ResizingAlgo)
 	leftIm := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{cfg.ScrCfg.Size.Width, cfg.ScrCfg.Size.Height}})
 	rigthIm := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{cfg.ScrCfg.Size.Width, cfg.ScrCfg.Size.Height}})
 	indexExtFilename := strings.LastIndex(filename, ".")

@@ -55,8 +55,8 @@ func newImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 					return
 				}
 				me.SetPalette(p)
-				me.Mode = int(mode)
-				modeSelection.SetSelectedIndex(me.Mode)
+				me.Cfg.ScrCfg.Mode = mode
+				modeSelection.SetSelectedIndex(int(me.Cfg.ScrCfg.Mode))
 				me.SetPaletteImage(png.PalToImage(p))
 				me.SetOriginalImage(img)
 			} else if me.Cfg.ScrCfg.Type.IsSprite() {
@@ -65,7 +65,7 @@ func newImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 					dialog.ShowError(errors.New("palette is empty, please import palette first"), m.window)
 					return
 				}
-				img, size, err := sprite.SpriteToImg(me.OriginalImagePath(), uint8(me.Mode), me.Palette())
+				img, size, err := sprite.SpriteToImg(me.OriginalImagePath(), me.Cfg.ScrCfg.Mode, me.Palette())
 				if err != nil {
 					dialog.ShowError(err, m.window)
 					return
@@ -79,7 +79,7 @@ func newImportButton(m *MartineUI, me *menu.ImageMenu) *widget.Button {
 					dialog.ShowError(errors.New("palette is empty,  please import palette first, or select fullscreen option to open a fullscreen option"), m.window)
 					return
 				}
-				img, err := screen.ScrToImg(me.OriginalImagePath(), uint8(me.Mode), me.Palette())
+				img, err := screen.ScrToImg(me.OriginalImagePath(), me.Cfg.ScrCfg.Mode, me.Palette())
 				if err != nil {
 					dialog.ShowError(err, m.window)
 					return

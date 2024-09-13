@@ -28,7 +28,7 @@ func ImportInDsk(filePath string, cfg *config.MartineConfig) error {
 	if cfg.CustomDimension || cfg.ScrCfg.Type == config.SpriteHardFormat {
 		suffix += "-sprite"
 	}
-	if cfg.ScrCfg.Treatment.DitheringAlgo != 0 {
+	if cfg.ScrCfg.Process.DitheringAlgo != 0 {
 		suffix += "-dithering"
 	}
 	if cfg.SplitRaster {

@@ -136,8 +136,8 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	} else {
 		cfg.ScrCfg.Type = config.Egx2Format
 	}
-	cfg.EgxMode1 = uint8(me.LeftImage.Mode)
-	cfg.EgxMode2 = uint8(me.RightImage.Mode)
+	cfg.EgxMode1 = uint8(me.LeftImage.Cfg.ScrCfg.Mode)
+	cfg.EgxMode2 = uint8(me.RightImage.Cfg.ScrCfg.Mode)
 
 	// palette export
 	defer func() {
@@ -150,7 +150,7 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	cfg.PalCfg.Path = "temporary_palette.kit"
 
 	if !cfg.ScrCfg.Type.IsFullScreen() {
-		if err := ocpartstudio.EgxLoader(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Palette, uint8(me.LeftImage.Mode), uint8(me.RightImage.Mode), cfg); err != nil {
+		if err := ocpartstudio.EgxLoader(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Palette, uint8(me.LeftImage.Cfg.ScrCfg.Mode), uint8(me.RightImage.Cfg.ScrCfg.Mode), cfg); err != nil {
 			pi.Hide()
 			dialog.ShowError(err, m.window)
 			return

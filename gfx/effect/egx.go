@@ -132,7 +132,7 @@ func prepareEgx(
 		Width:  cfg.ScrCfg.Size.Width,
 		Height: cfg.ScrCfg.Size.Height}
 
-	im := ci.Resize(in, size, cfg.ScrCfg.Treatment.ResizingAlgo)
+	im := ci.Resize(in, size, cfg.ScrCfg.Process.ResizingAlgo)
 	var palette color.Palette // palette de l'image
 	var p color.Palette       // palette cpc de l'image
 	var downgraded *image.NRGBA
@@ -163,11 +163,11 @@ func prepareEgx(
 	return gfx.DoDithering(
 		downgraded,
 		p,
-		cfg.ScrCfg.Treatment.DitheringAlgo,
-		cfg.ScrCfg.Treatment.DitheringType,
-		cfg.ScrCfg.Treatment.DitheringWithQuantification,
-		cfg.ScrCfg.Treatment.DitheringMatrix,
-		float32(cfg.ScrCfg.Treatment.DitheringMultiplier),
+		cfg.ScrCfg.Process.DitheringAlgo,
+		cfg.ScrCfg.Process.DitheringType,
+		cfg.ScrCfg.Process.DitheringWithQuantification,
+		cfg.ScrCfg.Process.DitheringMatrix,
+		float32(cfg.ScrCfg.Process.DitheringMultiplier),
 		cfg.ScrCfg.IsPlus,
 		cfg.ScrCfg.Size)
 }

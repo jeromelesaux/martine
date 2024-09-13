@@ -41,22 +41,14 @@ type MartineConfig struct {
 	SplitRaster            bool
 	ScanlineSequence       []int
 	CustomScanlineSequence bool
-	MaskSprite             uint8
-	MaskOrOperation        bool
-	MaskAndOperation       bool
-	ZigZag                 bool
-	Animate                bool
-	Reducer                int
-	OneLine                bool
-	OneRow                 bool
-	InkSwapper             map[int]int
-	LineWidth              int
-	FilloutGif             bool
-	Saturation             float64
-	Brightness             float64
-	DoubleScreenAddress    bool
-	UseKmeans              bool
-	KmeansThreshold        float64
+
+	ZigZag  bool
+	Animate bool
+
+	InkSwapper          map[int]int
+	LineWidth           int
+	FilloutGif          bool
+	DoubleScreenAddress bool
 }
 
 func (m *MartineConfig) Reset() {

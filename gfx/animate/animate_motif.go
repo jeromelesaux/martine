@@ -107,10 +107,10 @@ func DeltaMotif(gitFilepath string, cfg *config.MartineConfig, threshold int, in
 		deltas = append(deltas, delta)
 	}
 	filename := cfg.OsFilename(".asm")
-	return exportDeltaMotif(deltas, motifs, customPalette, cfg, cfg.ScrCfg.OutputPath+string(filepath.Separator)+filename)
+	return exportDeltaMotif(deltas, motifs, customPalette, cfg.ScrCfg.OutputPath+string(filepath.Separator)+filename)
 }
 
-func exportDeltaMotif(images [][]byte, motifs [][]byte, p color.Palette, cfg *config.MartineConfig, filename string) error {
+func exportDeltaMotif(images [][]byte, motifs [][]byte, p color.Palette, filename string) error {
 	var deltaCode string
 	for i := 0; i < len(images); i++ {
 		deltaCode += fmt.Sprintf("delta%.2d\n", i)

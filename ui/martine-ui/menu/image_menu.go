@@ -40,35 +40,22 @@ import (
 )
 
 type ImageMenu struct {
-	originalImage       *canvas.Image
-	cpcImage            *canvas.Image
-	originalImagePath   fyne.URI
-	Cfg                 *config.MartineConfig
-	Mode                int
-	width               *widget.Entry
-	height              *widget.Entry
-	palette             color.Palette
-	Data                []byte
-	Downgraded          *image.NRGBA
-	DitheringMatrix     [][]float32
-	DitheringType       constants.DitheringType
-	DitheringAlgoNumber int
-	ApplyDithering      bool
-	ResizeAlgoNumber    int
-	paletteImage        *canvas.Image
-	UsePalette          bool
-	DitheringMultiplier float64
-	WithQuantification  bool
-	Brightness          float64
-	Saturation          float64
-	Reducer             int
-	OneLine             bool
-	OneRow              bool
-	CmdLineGenerate     string
-	UseKmeans           bool
-	KmeansThreshold     float64
-	Edited              bool
-	w                   fyne.Window
+	originalImage     *canvas.Image
+	cpcImage          *canvas.Image
+	originalImagePath fyne.URI
+	Cfg               *config.MartineConfig
+
+	width            *widget.Entry
+	height           *widget.Entry
+	Data             []byte
+	Downgraded       *image.NRGBA
+	ResizeAlgoNumber int
+	paletteImage     *canvas.Image
+	UsePalette       bool
+	CmdLineGenerate  string
+
+	Edited bool
+	w      fyne.Window
 }
 
 func NewImageMenu() *ImageMenu {
@@ -88,13 +75,13 @@ func (i *ImageMenu) SetWindow(w fyne.Window) {
 }
 
 func (i *ImageMenu) SetPalette(p color.Palette) {
-	i.palette = p
+	i.Cfg.PalCfg.Palette = p
 	i.SetPaletteImage(png.PalToImage(i.Palette()))
 	i.paletteImage.Refresh()
 }
 
 func (i *ImageMenu) Palette() color.Palette {
-	return i.palette
+	return i.Cfg.PalCfg.Palette
 }
 
 func (i *ImageMenu) SetPaletteImage(img image.Image) {
@@ -179,33 +166,33 @@ func (i *ImageMenu) CmdLine() string {
 	if i.Cfg.ScrCfg.Type.IsSpriteHard() {
 		exec += " -spritehard"
 	}
-	if i.ApplyDithering {
-		if i.WithQuantification {
+	if i.Cfg.ScrCfg.Process.ApplyDithering {
+		if i.Cfg.ScrCfg.Process.DitheringWithQuantification {
 			exec += " -quantization"
 		} else {
-			exec += " -multiplier " + fmt.Sprintf("%.2f", i.DitheringMultiplier)
+			exec += " -multiplier " + fmt.Sprintf("%.2f", i.Cfg.ScrCfg.Process.DitheringMultiplier)
 		}
-		exec += " -dithering " + strconv.Itoa(i.DitheringAlgoNumber)
+		exec += " -dithering " + strconv.Itoa(i.Cfg.ScrCfg.Process.DitheringAlgo)
 		// stockage du numéro d'algo
 	}
-	exec += " -mode " + strconv.Itoa(i.Mode)
-	if i.Reducer != 0 {
-		exec += " -reducer " + strconv.Itoa(i.Reducer)
+	exec += " -mode " + strconv.Itoa(int(i.Cfg.ScrCfg.Mode))
+	if i.Cfg.ScrCfg.Process.Reducer != 0 {
+		exec += " -reducer " + strconv.Itoa(i.Cfg.ScrCfg.Process.Reducer)
 	}
 	// resize algo
 	if i.ResizeAlgoNumber != 0 {
 		exec += " -algo " + strconv.Itoa(i.ResizeAlgoNumber)
 	}
-	if i.Brightness != 0 {
-		exec += " -brightness " + fmt.Sprintf("%.2f", i.Brightness)
+	if i.Cfg.ScrCfg.Process.Brightness != 0 {
+		exec += " -brightness " + fmt.Sprintf("%.2f", i.Cfg.ScrCfg.Process.Brightness)
 	}
-	if i.Saturation != 0 {
-		exec += " -saturation " + fmt.Sprintf("%.2f", i.Saturation)
+	if i.Cfg.ScrCfg.Process.Saturation != 0 {
+		exec += " -saturation " + fmt.Sprintf("%.2f", i.Cfg.ScrCfg.Process.Saturation)
 	}
-	if i.OneLine {
+	if i.Cfg.ScrCfg.Process.OneLine {
 		exec += " -oneline"
 	}
-	if i.OneRow {
+	if i.Cfg.ScrCfg.Process.OneRow {
 		exec += " -onerow"
 	}
 	i.CmdLineGenerate = exec
@@ -245,7 +232,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 			cfg.ScrCfg.AddExport(config.GoImpdrawExport)
 		}
 
-		out, _, palette, _, err := gfx.ApplyOneImage(me.OriginalImage().Image, cfg, me.Mode, me.Palette(), uint8(me.Mode))
+		out, _, palette, _, err := gfx.ApplyOneImage(me.OriginalImage().Image, cfg, int(me.Cfg.ScrCfg.Mode), me.Palette(), me.Cfg.ScrCfg.Mode)
 		if err != nil {
 			pi.Hide()
 			dialog.ShowError(err, w)
@@ -335,7 +322,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 				cfg,
 				filename,
 				cfg.ScrCfg.OutputPath+string(filepath.Separator)+filename,
-				uint8(me.Mode),
+				me.Cfg.ScrCfg.Mode,
 			)
 		} else {
 			err = gfx.ApplyOneImageAndExport(
@@ -343,8 +330,8 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 				cfg,
 				filename,
 				cfg.ScrCfg.OutputPath+string(filepath.Separator)+filename,
-				me.Mode,
-				uint8(me.Mode))
+				int(me.Cfg.ScrCfg.Mode),
+				me.Cfg.ScrCfg.Mode)
 		}
 		os.Remove(tmpPalette)
 
@@ -369,7 +356,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 					}
 				}
 				cfg.ContainerCfg.Path = filepath.Join(cfg.ContainerCfg.Path, "test.sna")
-				if err := snapshot.ImportInSna(gfxFile, cfg.ContainerCfg.Path, uint8(me.Mode)); err != nil {
+				if err := snapshot.ImportInSna(gfxFile, cfg.ContainerCfg.Path, me.Cfg.ScrCfg.Mode); err != nil {
 					dialog.NewError(err, w).Show()
 					return
 				}
@@ -395,19 +382,13 @@ func (me *ImageMenu) NewConfig(checkOriginalImage bool) *config.MartineConfig {
 	if checkOriginalImage {
 		me.Cfg.ScrCfg.InputPath = me.OriginalImagePath()
 	}
-
-	me.Cfg.ScrCfg.Treatment.DitheringMultiplier = me.DitheringMultiplier
-	me.Cfg.Brightness = me.Brightness
-	me.Cfg.Saturation = me.Saturation
-
-	if me.Brightness > 0 && me.Saturation == 0 {
-		me.Cfg.Saturation = me.Brightness
+	if me.Cfg.ScrCfg.Process.Brightness > 0 && me.Cfg.ScrCfg.Process.Saturation == 0 {
+		me.Cfg.ScrCfg.Process.Saturation = me.Cfg.ScrCfg.Process.Brightness
 	}
-	if me.Brightness == 0 && me.Saturation > 0 {
-		me.Cfg.Brightness = me.Saturation
+	if me.Cfg.ScrCfg.Process.Brightness == 0 && me.Cfg.ScrCfg.Process.Saturation > 0 {
+		me.Cfg.ScrCfg.Process.Brightness = me.Cfg.ScrCfg.Process.Saturation
 	}
-	me.Cfg.Reducer = me.Reducer
-	me.Cfg.ScrCfg.Size = constants.NewSizeMode(uint8(me.Mode), me.Cfg.ScrCfg.Type.IsFullScreen())
+	me.Cfg.ScrCfg.Size = constants.NewSizeMode(me.Cfg.ScrCfg.Mode, me.Cfg.ScrCfg.Type.IsFullScreen())
 	if me.Cfg.ScrCfg.Type.IsSprite() {
 		width, _, err := me.GetWidth()
 		if err != nil {
@@ -427,28 +408,19 @@ func (me *ImageMenu) NewConfig(checkOriginalImage bool) *config.MartineConfig {
 		me.Cfg.ScrCfg.Size.Height = 16
 		me.Cfg.ScrCfg.Size.Width = 16
 	}
-	if me.ApplyDithering {
-		me.Cfg.ScrCfg.Treatment.DitheringAlgo = 0
-		me.Cfg.ScrCfg.Treatment.DitheringMatrix = me.DitheringMatrix
-		me.Cfg.ScrCfg.Treatment.DitheringType = me.DitheringType
-		if me.DitheringMultiplier == 0 {
-			me.Cfg.ScrCfg.Treatment.DitheringMultiplier = .1
-		} else {
-			me.Cfg.ScrCfg.Treatment.DitheringMultiplier = me.DitheringMultiplier
+	if me.Cfg.ScrCfg.Process.ApplyDithering {
+		me.Cfg.ScrCfg.Process.DitheringAlgo = 0
+		if me.Cfg.ScrCfg.Process.DitheringMultiplier == 0 {
+			me.Cfg.ScrCfg.Process.DitheringMultiplier = .1
 		}
 	} else {
-		me.Cfg.ScrCfg.Treatment.DitheringAlgo = -1
+		me.Cfg.ScrCfg.Process.DitheringAlgo = -1
 	}
-	me.Cfg.ScrCfg.Treatment.DitheringWithQuantification = me.WithQuantification
 	if checkOriginalImage {
 		me.Cfg.ScrCfg.InputPath = me.OriginalImagePath()
 	}
-	me.Cfg.OneLine = me.OneLine
-	me.Cfg.OneRow = me.OneRow
-	me.Cfg.UseKmeans = me.UseKmeans
-	me.Cfg.KmeansThreshold = me.KmeansThreshold
-	if me.Cfg.UseKmeans && me.KmeansThreshold == 0 {
-		me.Cfg.KmeansThreshold = 0.01
+	if me.Cfg.ScrCfg.Process.UseKmeans && me.Cfg.ScrCfg.Process.KmeansThreshold == 0 {
+		me.Cfg.ScrCfg.Process.KmeansThreshold = 0.01
 	}
 	return me.Cfg
 }
@@ -606,13 +578,13 @@ func (i *ImageMenu) NewImportButton(modeSelection *widget.Select, callBack func(
 					return
 				}
 				i.SetPalette(p)
-				i.Mode = int(mode)
-				modeSelection.SetSelectedIndex(i.Mode)
+				i.Cfg.ScrCfg.Mode = mode
+				modeSelection.SetSelectedIndex(int(i.Cfg.ScrCfg.Mode))
 				i.SetPaletteImage(png.PalToImage(p))
 				i.SetOriginalImage(img)
 			case config.SpriteFormat:
 				// loading sprite file
-				img, size, err := sprite.SpriteToImg(i.OriginalImagePath(), uint8(i.Mode), i.Palette())
+				img, size, err := sprite.SpriteToImg(i.OriginalImagePath(), i.Cfg.ScrCfg.Mode, i.Palette())
 				if err != nil {
 					dialog.ShowError(err, i.w)
 					return
@@ -621,7 +593,7 @@ func (i *ImageMenu) NewImportButton(modeSelection *widget.Select, callBack func(
 				i.Height().SetText(strconv.Itoa(size.Height))
 				i.SetOriginalImage(img)
 			case config.WindowFormat:
-				img, err := screen.WinToImg(i.OriginalImagePath(), uint8(i.Mode), i.Palette())
+				img, err := screen.WinToImg(i.OriginalImagePath(), i.Cfg.ScrCfg.Mode, i.Palette())
 				if err != nil {
 					dialog.ShowError(err, i.w)
 					return
@@ -635,7 +607,7 @@ func (i *ImageMenu) NewImportButton(modeSelection *widget.Select, callBack func(
 				}
 				i.SetOriginalImage(img)
 			case config.OcpScreenFormat:
-				img, err := screen.ScrToImg(i.OriginalImagePath(), uint8(i.Mode), i.Palette())
+				img, err := screen.ScrToImg(i.OriginalImagePath(), i.Cfg.ScrCfg.Mode, i.Palette())
 				if err != nil {
 					dialog.ShowError(err, i.w)
 					return

@@ -63,7 +63,7 @@ func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 	if me.UsePalette {
 		inPalette = me.Palette()
 		maxPalette := len(inPalette)
-		switch me.Mode {
+		switch me.Cfg.ScrCfg.Mode {
 		case 1:
 			if maxPalette > 4 {
 				maxPalette = 4
@@ -79,7 +79,7 @@ func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 	}
 	pi := wgt.NewProgressInfinite("Computing, Please wait.", m.window)
 	pi.Show()
-	out, downgraded, palette, _, err := gfx.ApplyOneImage(me.OriginalImage().Image, cfg, me.Mode, inPalette, uint8(me.Mode))
+	out, downgraded, palette, _, err := gfx.ApplyOneImage(me.OriginalImage().Image, cfg, int(me.Cfg.ScrCfg.Mode), inPalette, me.Cfg.ScrCfg.Mode)
 	pi.Hide()
 	if err != nil {
 		dialog.NewError(err, m.window).Show()
@@ -92,7 +92,7 @@ func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 	}
 	if me.Cfg.ScrCfg.Type.IsSprite() || me.Cfg.ScrCfg.Type.IsSpriteHard() {
 		newSize := constants.Size{Width: cfg.ScrCfg.Size.Width * 50, Height: cfg.ScrCfg.Size.Height * 50}
-		me.Downgraded = image.Resize(me.Downgraded, newSize, me.Cfg.ScrCfg.Treatment.ResizingAlgo)
+		me.Downgraded = image.Resize(me.Downgraded, newSize, me.Cfg.ScrCfg.Process.ResizingAlgo)
 	}
 	me.SetCpcImage(me.Downgraded)
 	me.SetPaletteImage(png.PalToImage(me.Palette()))
@@ -155,13 +155,13 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 	colorReducer := widget.NewSelect([]string{"none", "Lower", "Medium", "Strong"}, func(s string) {
 		switch s {
 		case "none":
-			me.Reducer = 0
+			me.Cfg.ScrCfg.Process.Reducer = 0
 		case "Lower":
-			me.Reducer = 1
+			me.Cfg.ScrCfg.Process.Reducer = 1
 		case "Medium":
-			me.Reducer = 2
+			me.Cfg.ScrCfg.Process.Reducer = 2
 		case "Strong":
-			me.Reducer = 3
+			me.Cfg.ScrCfg.Process.Reducer = 3
 		}
 	})
 	colorReducer.SetSelected("none")
@@ -171,46 +171,46 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 
 	kmeansLabel := widget.NewLabel("Reduce palette with Kmeans")
 	useKmeans := widget.NewCheck("Use Kmeans", func(b bool) {
-		me.UseKmeans = b
+		me.Cfg.ScrCfg.Process.UseKmeans = b
 	})
 	kmeansIteration := widget.NewSlider(0.01, .9)
 	kmeansIteration.SetValue(.01)
 	kmeansIteration.Step = .01
 	kmeansIteration.OnChanged = func(f float64) {
-		me.KmeansThreshold = f
+		me.Cfg.ScrCfg.Process.KmeansThreshold = f
 	}
 
 	ditheringMultiplier := widget.NewSlider(0., 5.)
 	ditheringMultiplier.Step = 0.1
 	ditheringMultiplier.SetValue(.1)
 	ditheringMultiplier.OnChanged = func(f float64) {
-		me.DitheringMultiplier = f
+		me.Cfg.ScrCfg.Process.DitheringMultiplier = f
 	}
 	dithering := w2.NewDitheringSelect(me)
 
 	ditheringWithQuantification := widget.NewCheck("With quantification", func(b bool) {
-		me.WithQuantification = b
+		me.Cfg.ScrCfg.Process.DitheringWithQuantification = b
 	})
 
 	enableDithering := widget.NewCheck("Enable dithering", func(b bool) {
-		me.ApplyDithering = b
+		me.Cfg.ScrCfg.Process.ApplyDithering = b
 	})
 	isPlus := widget.NewCheck("CPC Plus", func(b bool) {
 		me.Cfg.ScrCfg.IsPlus = b
 	})
 
 	oneLine := widget.NewCheck("Every other line", func(b bool) {
-		me.OneLine = b
+		me.Cfg.ScrCfg.Process.OneLine = b
 	})
 	oneRow := widget.NewCheck("Every other row", func(b bool) {
-		me.OneRow = b
+		me.Cfg.ScrCfg.Process.OneRow = b
 	})
 	modes := widget.NewSelect([]string{"0", "1", "2"}, func(s string) {
 		mode, err := strconv.Atoi(s)
 		if err != nil {
 			log.GetLogger().Error("Error %s cannot be cast in int\n", s)
 		}
-		me.Mode = mode
+		me.Cfg.ScrCfg.Mode = uint8(mode)
 	})
 	modes.SetSelected("0")
 	modeSelection = modes
@@ -226,14 +226,14 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 	brightness.SetValue(1.)
 	brightness.Step = .01
 	brightness.OnChanged = func(f float64) {
-		me.Brightness = f
+		me.Cfg.ScrCfg.Process.Brightness = f
 	}
 	saturationLabel := widget.NewLabel("Saturation")
 	saturation := widget.NewSlider(0.0, 1.0)
 	saturation.SetValue(1.)
 	saturation.Step = .01
 	saturation.OnChanged = func(f float64) {
-		me.Saturation = f
+		me.Cfg.ScrCfg.Process.Saturation = f
 	}
 	brightnessLabel := widget.NewLabel("Brightness")
 

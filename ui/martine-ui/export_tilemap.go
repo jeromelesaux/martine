@@ -151,7 +151,7 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 		pi.Hide()
 	} else {
 		if t.Cfg.ContainerCfg.HasExport(config.DskContainer) {
-			if err := gfx.ExportImpdrawTilemap(t.Result, "tilemap", t.Palette(), uint8(t.Mode), t.Cfg.ScrCfg.Size, t.OriginalImage().Image, t.Cfg); err != nil {
+			if err := gfx.ExportImpdrawTilemap(t.Result, "tilemap", t.Palette(), t.Cfg.ScrCfg.Mode, t.Cfg.ScrCfg.Size, t.OriginalImage().Image, t.Cfg); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 			}
@@ -165,7 +165,7 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 			pi.Hide()
 		} else {
 
-			if err := gfx.ExportTilemap(t.Result, "tilemap", t.Palette(), uint8(t.Mode), t.OriginalImage().Image, t.Cfg.ScrCfg.Type == config.SpriteFormat, m.tilemap.Cfg); err != nil {
+			if err := gfx.ExportTilemap(t.Result, "tilemap", t.Palette(), t.Cfg.ScrCfg.Mode, t.OriginalImage().Image, t.Cfg.ScrCfg.Type == config.SpriteFormat, m.tilemap.Cfg); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 			}

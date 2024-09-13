@@ -102,7 +102,7 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 				}
 				var downgraded *image.NRGBA
 				filename := fmt.Sprintf("%.2d", index)
-				out := ci.Resize(in, export.ScrCfg.Size, export.ScrCfg.Treatment.ResizingAlgo)
+				out := ci.Resize(in, export.ScrCfg.Size, export.ScrCfg.Process.ResizingAlgo)
 				log.GetLogger().Info("Saving resized image into (%s)\n", filename+"_resized.png")
 				if err := p.Png(filepath.Join(export.ScrCfg.OutputPath, filename+"_resized.png"), out); err != nil {
 					os.Exit(-2)
@@ -153,7 +153,7 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 				}
 				var downgraded *image.NRGBA
 				filename := fmt.Sprintf("%.2d", index0)
-				out := ci.Resize(in, export.ScrCfg.Size, export.ScrCfg.Treatment.ResizingAlgo)
+				out := ci.Resize(in, export.ScrCfg.Size, export.ScrCfg.Process.ResizingAlgo)
 				log.GetLogger().Info("Saving resized image into (%s)\n", filename+"_resized.png")
 				if err := p.Png(filepath.Join(export.ScrCfg.OutputPath, filename+"_resized.png"), out); err != nil {
 					os.Exit(-2)

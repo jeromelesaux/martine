@@ -66,28 +66,28 @@ func (i *TilemapMenu) CmdLine() string {
 	if i.Cfg.ScrCfg.Type.IsSpriteHard() {
 		exec += " -spritehard"
 	}
-	if i.ApplyDithering {
-		if i.WithQuantification {
+	if i.Cfg.ScrCfg.Process.ApplyDithering {
+		if i.Cfg.ScrCfg.Process.DitheringWithQuantification {
 			exec += " -quantization"
 		} else {
-			exec += " -multiplier " + fmt.Sprintf("%.2f", i.DitheringMultiplier)
+			exec += " -multiplier " + fmt.Sprintf("%.2f", i.Cfg.ScrCfg.Process.DitheringMultiplier)
 		}
-		exec += " -dithering " + strconv.Itoa(i.DitheringAlgoNumber)
+		exec += " -dithering " + strconv.Itoa(i.Cfg.ScrCfg.Process.DitheringAlgo)
 		// stockage du numéro d'algo
 	}
-	exec += " -mode " + strconv.Itoa(i.Mode)
-	if i.Reducer != 0 {
-		exec += " -reducer " + strconv.Itoa(i.Reducer)
+	exec += " -mode " + strconv.Itoa(int(i.Cfg.ScrCfg.Mode))
+	if i.Cfg.ScrCfg.Process.Reducer != 0 {
+		exec += " -reducer " + strconv.Itoa(i.Cfg.ScrCfg.Process.Reducer)
 	}
 	// resize algo
 	if i.ResizeAlgoNumber != 0 {
 		exec += " -algo " + strconv.Itoa(i.ResizeAlgoNumber)
 	}
-	if i.Brightness != 0 {
-		exec += " -brightness " + fmt.Sprintf("%.2f", i.Brightness)
+	if i.Cfg.ScrCfg.Process.Brightness != 0 {
+		exec += " -brightness " + fmt.Sprintf("%.2f", i.Cfg.ScrCfg.Process.Brightness)
 	}
-	if i.Saturation != 0 {
-		exec += " -saturation " + fmt.Sprintf("%.2f", i.Saturation)
+	if i.Cfg.ScrCfg.Process.Saturation != 0 {
+		exec += " -saturation " + fmt.Sprintf("%.2f", i.Cfg.ScrCfg.Process.Saturation)
 	}
 
 	exec += " -tilemap"

@@ -301,7 +301,7 @@ func ToSprite(in *image.NRGBA,
 	size.Width = in.Bounds().Max.X
 	lineToAdd := 1
 
-	if ex.OneLine {
+	if ex.ScrCfg.Process.OneLine {
 		lineToAdd = 2
 	}
 	if mode == 0 {
@@ -328,15 +328,15 @@ func ToSprite(in *image.NRGBA,
 				}
 				pp2 = ex.SwapInk(pp2)
 				firmwareColorUsed[pp2]++
-				if ex.OneRow {
+				if ex.ScrCfg.Process.OneRow {
 					pp2 = 0
 				}
 				pixel := pixel.PixelMode0(pp1, pp2)
-				if ex.MaskAndOperation {
-					pixel = pixel & ex.MaskSprite
+				if ex.ScrCfg.Process.MaskAndOperation {
+					pixel = pixel & ex.ScrCfg.Process.MaskSprite
 				}
-				if ex.MaskOrOperation {
-					pixel = pixel | ex.MaskSprite
+				if ex.ScrCfg.Process.MaskOrOperation {
+					pixel = pixel | ex.ScrCfg.Process.MaskSprite
 				}
 				if len(ex.ScanlineSequence) > 0 {
 					scanlineSize := len(ex.ScanlineSequence)
@@ -349,7 +349,7 @@ func ToSprite(in *image.NRGBA,
 				}
 				offset++
 			}
-			if ex.OneLine {
+			if ex.ScrCfg.Process.OneLine {
 				y++
 				for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
 					pp := 0
@@ -410,7 +410,7 @@ func ToSprite(in *image.NRGBA,
 					}
 					pp4 = ex.SwapInk(pp4)
 					firmwareColorUsed[pp4]++
-					if ex.OneRow {
+					if ex.ScrCfg.Process.OneRow {
 						pp2 = 0
 						pp4 = 0
 					}
@@ -419,11 +419,11 @@ func ToSprite(in *image.NRGBA,
 					// MACRO PIXM0 COL2,COL1
 					// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 					//	MEND
-					if ex.MaskAndOperation {
-						pixel = pixel & ex.MaskSprite
+					if ex.ScrCfg.Process.MaskAndOperation {
+						pixel = pixel & ex.ScrCfg.Process.MaskSprite
 					}
-					if ex.MaskOrOperation {
-						pixel = pixel | ex.MaskSprite
+					if ex.ScrCfg.Process.MaskOrOperation {
+						pixel = pixel | ex.ScrCfg.Process.MaskSprite
 					}
 					if len(ex.ScanlineSequence) > 0 {
 						scanlineSize := len(ex.ScanlineSequence)
@@ -436,7 +436,7 @@ func ToSprite(in *image.NRGBA,
 					}
 					offset++
 				}
-				if ex.OneLine {
+				if ex.ScrCfg.Process.OneLine {
 					y++
 					for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 4 {
 						pp := 0
@@ -531,7 +531,7 @@ func ToSprite(in *image.NRGBA,
 						}
 						pp8 = ex.SwapInk(pp8)
 						firmwareColorUsed[pp8]++
-						if ex.OneRow {
+						if ex.ScrCfg.Process.OneRow {
 							pp2 = 0
 							pp4 = 0
 							pp6 = 0
@@ -553,7 +553,7 @@ func ToSprite(in *image.NRGBA,
 						}
 						offset++
 					}
-					if ex.OneLine {
+					if ex.ScrCfg.Process.OneLine {
 						y++
 						for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 8 {
 							pp := 0

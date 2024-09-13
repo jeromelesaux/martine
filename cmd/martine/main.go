@@ -347,48 +347,48 @@ func main() {
 	if *ditheringAlgo != -1 {
 		switch *ditheringAlgo {
 		case 0:
-			cfg.ScrCfg.Treatment.DitheringMatrix = filter.FloydSteinberg
-			cfg.ScrCfg.Treatment.DitheringType = constants.ErrorDiffusionDither
+			cfg.ScrCfg.Process.DitheringMatrix = filter.FloydSteinberg
+			cfg.ScrCfg.Process.DitheringType = constants.ErrorDiffusionDither
 			log.GetLogger().Info("Dither:FloydSteinberg, Type:ErrorDiffusionDither\n")
 		case 1:
-			cfg.ScrCfg.Treatment.DitheringMatrix = filter.JarvisJudiceNinke
-			cfg.ScrCfg.Treatment.DitheringType = constants.ErrorDiffusionDither
+			cfg.ScrCfg.Process.DitheringMatrix = filter.JarvisJudiceNinke
+			cfg.ScrCfg.Process.DitheringType = constants.ErrorDiffusionDither
 			log.GetLogger().Info("Dither:JarvisJudiceNinke, Type:ErrorDiffusionDither\n")
 		case 2:
-			cfg.ScrCfg.Treatment.DitheringMatrix = filter.Stucki
-			cfg.ScrCfg.Treatment.DitheringType = constants.ErrorDiffusionDither
+			cfg.ScrCfg.Process.DitheringMatrix = filter.Stucki
+			cfg.ScrCfg.Process.DitheringType = constants.ErrorDiffusionDither
 			log.GetLogger().Info("Dither:Stucki, Type:ErrorDiffusionDither\n")
 		case 3:
-			cfg.ScrCfg.Treatment.DitheringMatrix = filter.Atkinson
-			cfg.ScrCfg.Treatment.DitheringType = constants.ErrorDiffusionDither
+			cfg.ScrCfg.Process.DitheringMatrix = filter.Atkinson
+			cfg.ScrCfg.Process.DitheringType = constants.ErrorDiffusionDither
 			log.GetLogger().Info("Dither:Atkinson, Type:ErrorDiffusionDither\n")
 		case 4:
-			cfg.ScrCfg.Treatment.DitheringMatrix = filter.Sierra
-			cfg.ScrCfg.Treatment.DitheringType = constants.ErrorDiffusionDither
+			cfg.ScrCfg.Process.DitheringMatrix = filter.Sierra
+			cfg.ScrCfg.Process.DitheringType = constants.ErrorDiffusionDither
 			log.GetLogger().Info("Dither:Sierra, Type:ErrorDiffusionDither\n")
 		case 5:
-			cfg.ScrCfg.Treatment.DitheringMatrix = filter.SierraLite
-			cfg.ScrCfg.Treatment.DitheringType = constants.ErrorDiffusionDither
+			cfg.ScrCfg.Process.DitheringMatrix = filter.SierraLite
+			cfg.ScrCfg.Process.DitheringType = constants.ErrorDiffusionDither
 			log.GetLogger().Info("Dither:SierraLite, Type:ErrorDiffusionDither\n")
 		case 6:
-			cfg.ScrCfg.Treatment.DitheringMatrix = filter.Sierra3
-			cfg.ScrCfg.Treatment.DitheringType = constants.ErrorDiffusionDither
+			cfg.ScrCfg.Process.DitheringMatrix = filter.Sierra3
+			cfg.ScrCfg.Process.DitheringType = constants.ErrorDiffusionDither
 			log.GetLogger().Info("Dither:Sierra3, Type:ErrorDiffusionDither\n")
 		case 7:
-			cfg.ScrCfg.Treatment.DitheringMatrix = filter.Bayer2
-			cfg.ScrCfg.Treatment.DitheringType = constants.OrderedDither
+			cfg.ScrCfg.Process.DitheringMatrix = filter.Bayer2
+			cfg.ScrCfg.Process.DitheringType = constants.OrderedDither
 			log.GetLogger().Info("Dither:Bayer2, Type:OrderedDither\n")
 		case 8:
-			cfg.ScrCfg.Treatment.DitheringMatrix = filter.Bayer3
-			cfg.ScrCfg.Treatment.DitheringType = constants.OrderedDither
+			cfg.ScrCfg.Process.DitheringMatrix = filter.Bayer3
+			cfg.ScrCfg.Process.DitheringType = constants.OrderedDither
 			log.GetLogger().Info("Dither:Bayer3, Type:OrderedDither\n")
 		case 9:
-			cfg.ScrCfg.Treatment.DitheringMatrix = filter.Bayer4
-			cfg.ScrCfg.Treatment.DitheringType = constants.OrderedDither
+			cfg.ScrCfg.Process.DitheringMatrix = filter.Bayer4
+			cfg.ScrCfg.Process.DitheringType = constants.OrderedDither
 			log.GetLogger().Info("Dither:Bayer4, Type:OrderedDither\n")
 		case 10:
-			cfg.ScrCfg.Treatment.DitheringMatrix = filter.Bayer8
-			cfg.ScrCfg.Treatment.DitheringType = constants.OrderedDither
+			cfg.ScrCfg.Process.DitheringMatrix = filter.Bayer8
+			cfg.ScrCfg.Process.DitheringType = constants.OrderedDither
 			log.GetLogger().Info("Dither:Bayer8, Type:OrderedDither\n")
 		default:
 			log.GetLogger().Error("Dithering matrix not available.")

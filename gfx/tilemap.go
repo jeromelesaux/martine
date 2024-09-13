@@ -36,7 +36,7 @@ var (
 // nolint: funlen, gocognit
 func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in image.Image, cfg *config.MartineConfig, criteria common.AnalyseTilemapOption) error {
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
-	m := ci.Resize(in, mapSize, cfg.ScrCfg.Treatment.ResizingAlgo)
+	m := ci.Resize(in, mapSize, cfg.ScrCfg.Process.ResizingAlgo)
 	var palette color.Palette
 	var err error
 	palette = ci.ExtractPalette(m, isCpcPlus, cfg.ScrCfg.Size.ColorsAvailable)
@@ -269,7 +269,7 @@ func ExportTilemapClassical(m image.Image, filename string, board *transformatio
 
 func TilemapClassical(mode uint8, isCpcPlus bool, filename, picturePath string, in image.Image, size constants.Size, cfg *config.MartineConfig, tilesHistoric *sprite.TilesHistorical) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette) {
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
-	m := ci.Resize(in, mapSize, cfg.ScrCfg.Treatment.ResizingAlgo)
+	m := ci.Resize(in, mapSize, cfg.ScrCfg.Process.ResizingAlgo)
 	var palette color.Palette
 	palette = ci.ExtractPalette(m, isCpcPlus, cfg.ScrCfg.Size.ColorsAvailable)
 	refPalette := constants.CpcOldPalette
@@ -355,7 +355,7 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 		return errors.ErrorCustomDimensionMustBeSet
 	}
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
-	m := ci.Resize(in, mapSize, cfg.ScrCfg.Treatment.ResizingAlgo)
+	m := ci.Resize(in, mapSize, cfg.ScrCfg.Process.ResizingAlgo)
 	var palette color.Palette
 	var err error
 	palette, m, err = ci.DowngradingPalette(m, mapSize, true)
@@ -533,7 +533,7 @@ func TilemapRaw(mode uint8, isCpcPlus bool, size constants.Size, in image.Image,
 		return nil, tilesImagesTilemap, palette, errors.ErrorCustomDimensionMustBeSet
 	}
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: cfg.ScrCfg.Size.ColorsAvailable}
-	m := ci.Resize(in, mapSize, cfg.ScrCfg.Treatment.ResizingAlgo)
+	m := ci.Resize(in, mapSize, cfg.ScrCfg.Process.ResizingAlgo)
 	if isCpcPlus {
 		palette, _, _ = ci.DowngradingPalette(m, mapSize, isCpcPlus)
 	} else {
@@ -612,7 +612,7 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 		return err
 	}
 	index := 0
-	m := ci.Resize(in, mapSize, cfg.ScrCfg.Treatment.ResizingAlgo)
+	m := ci.Resize(in, mapSize, cfg.ScrCfg.Process.ResizingAlgo)
 	for y := 0; y < m.Bounds().Max.Y; y += (nbTilePixelHigh * analyze.TileSize.Height) {
 		for x := 0; x < m.Bounds().Max.X; x += (nbTilePixelLarge * analyze.TileSize.Width) {
 			m1 := image.NewNRGBA(image.Rect(0, 0, nbTilePixelLarge*analyze.TileSize.Width, nbTilePixelHigh*analyze.TileSize.Height))
@@ -733,7 +733,7 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 	if err = tile.Imp(data, uint(nbFrames), uint(analyze.TileSize.Width), uint(analyze.TileSize.Height), uint(mode), finalFile, cfg); err != nil {
 		log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", cfg.ScrCfg.OutputPath, err)
 	}
-	m := ci.Resize(in, mapSize, cfg.ScrCfg.Treatment.ResizingAlgo)
+	m := ci.Resize(in, mapSize, cfg.ScrCfg.Process.ResizingAlgo)
 	// save the tilemap
 	scenes := make([]*image.NRGBA, 0)
 	err = os.Mkdir(cfg.ScrCfg.OutputPath+string(filepath.Separator)+"scenes", os.ModePerm)

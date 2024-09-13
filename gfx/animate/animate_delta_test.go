@@ -49,11 +49,13 @@ func TestInternalDelta(t *testing.T) {
 		ScrCfg: config.ScreenConfig{
 			Size:       constants.Size{Width: 100, Height: 100, ColorsAvailable: 4},
 			OutputPath: "./InternalDelta",
+			Process: config.ScreenProcessing{
+				OneLine: false,
+				OneRow:  false,
+			},
 		},
 		CustomDimension: true,
 		LineWidth:       0x50,
-		OneLine:         false,
-		OneRow:          false,
 		FilloutGif:      false,
 	}
 	err := DeltaPacking("../../samples/coke.gif", ex, 0xc010, 1, DeltaExportV1)

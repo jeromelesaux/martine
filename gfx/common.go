@@ -161,10 +161,10 @@ func ApplyOneImageAndExport(in image.Image,
 	var out *image.NRGBA
 	var err error
 
-	out = ci.Resize(in, cfg.ScrCfg.Size, cfg.ScrCfg.Treatment.ResizingAlgo)
-	if cfg.UseKmeans {
-		log.GetLogger().Info("kmeans with %f threshold", cfg.KmeansThreshold)
-		out, err = ci.Kmeans(cfg.ScrCfg.Size.ColorsAvailable, cfg.KmeansThreshold, out)
+	out = ci.Resize(in, cfg.ScrCfg.Size, cfg.ScrCfg.Process.ResizingAlgo)
+	if cfg.ScrCfg.Process.UseKmeans {
+		log.GetLogger().Info("kmeans with %f threshold", cfg.ScrCfg.Process.KmeansThreshold)
+		out, err = ci.Kmeans(cfg.ScrCfg.Size.ColorsAvailable, cfg.ScrCfg.Process.KmeansThreshold, out)
 		if err != nil {
 			return err
 		}
@@ -201,8 +201,8 @@ func ApplyOneImageAndExport(in image.Image,
 		}
 	}
 
-	if cfg.Reducer > 0 {
-		out = ci.Reducer(out, cfg.Reducer)
+	if cfg.ScrCfg.Process.Reducer > 0 {
+		out = ci.Reducer(out, cfg.ScrCfg.Process.Reducer)
 		if err := png.Png(filepath.Join(cfg.ScrCfg.OutputPath, filename+"_resized.png"), out); err != nil {
 			os.Exit(-2)
 		}
@@ -231,15 +231,15 @@ func ApplyOneImageAndExport(in image.Image,
 	out, _ = DoDithering(
 		out,
 		newPalette,
-		cfg.ScrCfg.Treatment.DitheringAlgo,
-		cfg.ScrCfg.Treatment.DitheringType,
-		cfg.ScrCfg.Treatment.DitheringWithQuantification,
-		cfg.ScrCfg.Treatment.DitheringMatrix,
-		float32(cfg.ScrCfg.Treatment.DitheringMultiplier),
+		cfg.ScrCfg.Process.DitheringAlgo,
+		cfg.ScrCfg.Process.DitheringType,
+		cfg.ScrCfg.Process.DitheringWithQuantification,
+		cfg.ScrCfg.Process.DitheringMatrix,
+		float32(cfg.ScrCfg.Process.DitheringMultiplier),
 		cfg.ScrCfg.IsPlus,
 		cfg.ScrCfg.Size)
-	if cfg.Saturation > 0 || cfg.Brightness > 0 {
-		palette = ci.EnhanceBrightness(newPalette, cfg.Brightness, cfg.Saturation)
+	if cfg.ScrCfg.Process.Saturation > 0 || cfg.ScrCfg.Process.Brightness > 0 {
+		palette = ci.EnhanceBrightness(newPalette, cfg.ScrCfg.Process.Brightness, cfg.ScrCfg.Process.Saturation)
 		newPalette, out = ci.DowngradingWithPalette(out, palette)
 		var paletteToSort color.Palette
 		switch mode {
@@ -272,7 +272,7 @@ func ApplyOneImageAndExport(in image.Image,
 		cfg.RotateCfg.RotationRlaBit, cfg.RotateCfg.RotationSlaBit, cfg.RotateCfg.RotationRraBit, cfg.RotateCfg.RotationSraBit,
 		cfg.RotateCfg.RotationKeephighBit, cfg.RotateCfg.RotationLosthighBit,
 		cfg.RotateCfg.RotationKeeplowBit, cfg.RotateCfg.RotationLostlowBit, cfg.RotateCfg.RotationIterations,
-		cfg.RotateCfg.RollIteration, cfg.RotateCfg.Rotation3DX0, cfg.RotateCfg.Rotation3DY0, cfg.RotateCfg.Rotation3DType, cfg.ScrCfg.Treatment.ResizingAlgo, cfg.ScrCfg.Size)
+		cfg.RotateCfg.RollIteration, cfg.RotateCfg.Rotation3DX0, cfg.RotateCfg.Rotation3DY0, cfg.RotateCfg.Rotation3DType, cfg.ScrCfg.Process.ResizingAlgo, cfg.ScrCfg.Size)
 	if err != nil {
 		os.Exit(-2)
 	} else {
@@ -347,17 +347,17 @@ func ApplyOneImage(in image.Image,
 	var out *image.NRGBA
 	var err error
 
-	out = ci.Resize(in, cfg.ScrCfg.Size, cfg.ScrCfg.Treatment.ResizingAlgo)
-	if cfg.UseKmeans {
-		log.GetLogger().Info("kmeans with %f threshold", cfg.KmeansThreshold)
-		out, err = ci.Kmeans(cfg.ScrCfg.Size.ColorsAvailable, cfg.KmeansThreshold, out)
+	out = ci.Resize(in, cfg.ScrCfg.Size, cfg.ScrCfg.Process.ResizingAlgo)
+	if cfg.ScrCfg.Process.UseKmeans {
+		log.GetLogger().Info("kmeans with %f threshold", cfg.ScrCfg.Process.KmeansThreshold)
+		out, err = ci.Kmeans(cfg.ScrCfg.Size.ColorsAvailable, cfg.ScrCfg.Process.KmeansThreshold, out)
 		if err != nil {
 			return []byte{}, out, palette, 0, err
 		}
 	}
 
-	if cfg.Reducer > -1 {
-		out = ci.Reducer(out, cfg.Reducer)
+	if cfg.ScrCfg.Process.Reducer > -1 {
+		out = ci.Reducer(out, cfg.ScrCfg.Process.Reducer)
 	}
 
 	if len(palette) > 0 {
@@ -391,16 +391,16 @@ func ApplyOneImage(in image.Image,
 	out, _ = DoDithering(
 		out,
 		newPalette,
-		cfg.ScrCfg.Treatment.DitheringAlgo,
-		cfg.ScrCfg.Treatment.DitheringType,
-		cfg.ScrCfg.Treatment.DitheringWithQuantification,
-		cfg.ScrCfg.Treatment.DitheringMatrix,
-		float32(cfg.ScrCfg.Treatment.DitheringMultiplier),
+		cfg.ScrCfg.Process.DitheringAlgo,
+		cfg.ScrCfg.Process.DitheringType,
+		cfg.ScrCfg.Process.DitheringWithQuantification,
+		cfg.ScrCfg.Process.DitheringMatrix,
+		float32(cfg.ScrCfg.Process.DitheringMultiplier),
 		cfg.ScrCfg.IsPlus,
 		cfg.ScrCfg.Size)
 
-	if cfg.Saturation > 0 || cfg.Brightness > 0 {
-		palette = ci.EnhanceBrightness(newPalette, cfg.Brightness, cfg.Saturation)
+	if cfg.ScrCfg.Process.Saturation > 0 || cfg.ScrCfg.Process.Brightness > 0 {
+		palette = ci.EnhanceBrightness(newPalette, cfg.ScrCfg.Process.Brightness, cfg.ScrCfg.Process.Saturation)
 		newPalette, out = ci.DowngradingWithPalette(out, palette)
 		var paletteToSort color.Palette
 		switch mode {
@@ -433,14 +433,14 @@ func ApplyOneImage(in image.Image,
 			lineSize = 16
 		}
 	}
-	if cfg.OneRow {
+	if cfg.ScrCfg.Process.OneRow {
 		for y := 0; y < out.Bounds().Max.Y; y += 2 {
 			for x := 0; x < out.Bounds().Max.X; x++ {
 				out.Set(x, y, newPalette[0])
 			}
 		}
 	}
-	if cfg.OneLine {
+	if cfg.ScrCfg.Process.OneLine {
 		for y := 0; y < out.Bounds().Max.Y; y++ {
 			for x := 0; x < out.Bounds().Max.X; x += 2 {
 				out.Set(x, y, newPalette[0])
@@ -461,10 +461,10 @@ func ExportRawImage(in image.Image,
 	palette = constants.SortColorsByDistance(palette)
 
 	// at least resize the image to be sure
-	out := ci.Resize(in, cfg.ScrCfg.Size, cfg.ScrCfg.Treatment.ResizingAlgo)
-	if cfg.UseKmeans {
-		log.GetLogger().Info("kmeans with %f threshold", cfg.KmeansThreshold)
-		out, err = ci.Kmeans(cfg.ScrCfg.Size.ColorsAvailable, cfg.KmeansThreshold, out)
+	out := ci.Resize(in, cfg.ScrCfg.Size, cfg.ScrCfg.Process.ResizingAlgo)
+	if cfg.ScrCfg.Process.UseKmeans {
+		log.GetLogger().Info("kmeans with %f threshold", cfg.ScrCfg.Process.KmeansThreshold)
+		out, err = ci.Kmeans(cfg.ScrCfg.Size.ColorsAvailable, cfg.ScrCfg.Process.KmeansThreshold, out)
 		if err != nil {
 			return err
 		}

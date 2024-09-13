@@ -70,7 +70,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						a.Cfg.ScrCfg.Type.IsSprite(),
 						cfg,
 						uint16(address),
-						uint8(a.Mode),
+						uint8(a.Cfg.ScrCfg.Mode),
 						"",
 						a.ExportVersion,
 					)
@@ -138,7 +138,7 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 	}
 
 	if cfg.ScrCfg.Type != config.SpriteFormat {
-		switch a.Mode {
+		switch a.Cfg.ScrCfg.Mode {
 		case 0:
 			cfg.ScrCfg.Size = constants.Mode0
 		case 1:
@@ -148,7 +148,7 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 		}
 	}
 	if cfg.ScrCfg.Size.Height == 0 && cfg.ScrCfg.Size.Width == 0 {
-		switch a.Mode {
+		switch a.Cfg.ScrCfg.Mode {
 		case 0:
 			cfg.ScrCfg.Size = constants.Mode0
 		case 1:
@@ -168,15 +168,15 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 	}
 	// controle de de la taille de la largeur en fonction du mode
 	width := cfg.ScrCfg.Size.Width
-	mode := a.Mode
+	mode := a.Cfg.ScrCfg.Mode
 	// get all images from widget imagetable
-	if !CheckWidthSize(width, mode) {
+	if !CheckWidthSize(width, int(mode)) {
 		pi.Hide()
 		dialog.ShowError(fmt.Errorf("the width in not a multiple of color per pixel, increase the width"), m.window)
 		return
 	}
 	imgs := a.AnimateImages.Images()
-	deltaCollection, rawImages, palette, err := animate.DeltaPackingMemory(imgs, cfg, uint16(address), uint8(a.Mode))
+	deltaCollection, rawImages, palette, err := animate.DeltaPackingMemory(imgs, cfg, uint16(address), uint8(a.Cfg.ScrCfg.Mode))
 	pi.Hide()
 	if err != nil {
 		dialog.NewError(err, m.window).Show()
@@ -294,7 +294,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
 		if err != nil {
 			log.GetLogger().Error("Error %s cannot be cast in int\n", s)
 		}
-		a.Mode = mode
+		a.Cfg.ScrCfg.Mode = uint8(mode)
 	})
 	modes.SetSelected("0")
 	modeSelection = modes
@@ -323,10 +323,10 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
 	})
 
 	oneLine := widget.NewCheck("Every other line", func(b bool) {
-		a.ImageMenu.OneLine = b
+		a.ImageMenu.Cfg.ScrCfg.Process.OneLine = b
 	})
 	oneRow := widget.NewCheck("Every other row", func(b bool) {
-		a.ImageMenu.OneRow = b
+		a.ImageMenu.Cfg.ScrCfg.Process.OneRow = b
 	})
 
 	return container.New(

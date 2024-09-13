@@ -59,7 +59,7 @@ func (e *Editor) New(w fyne.Window) *fyne.Container {
 		if err != nil {
 			log.GetLogger().Error("Error %s cannot be cast in int\n", s)
 		}
-		e.im.Mode = mode
+		e.im.Cfg.ScrCfg.Mode = uint8(mode)
 	})
 	modes.SetSelected("0")
 	e.sel = modes

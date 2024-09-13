@@ -104,9 +104,9 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	cfg.TileIterationX = *tileIterationX
 	cfg.TileIterationY = *tileIterationY
 	cfg.ScrCfg.Compression = compression.ToCompressMethod(*compress)
-	cfg.ScrCfg.Treatment.ResizingAlgo = resizeAlgo
-	cfg.ScrCfg.Treatment.DitheringMultiplier = *ditheringMultiplier
-	cfg.ScrCfg.Treatment.DitheringWithQuantification = *withQuantization
+	cfg.ScrCfg.Process.ResizingAlgo = resizeAlgo
+	cfg.ScrCfg.Process.DitheringMultiplier = *ditheringMultiplier
+	cfg.ScrCfg.Process.DitheringWithQuantification = *withQuantization
 	cfg.M4cfg = config.M4Config{
 		Host:       *m4Host,
 		RemotePath: *m4RemotePath,
@@ -161,7 +161,7 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	cfg.SplitRaster = *splitRasters
 	cfg.ZigZag = *zigzag
 	cfg.Animate = *doAnimation
-	cfg.Reducer = *reducer
+	cfg.ScrCfg.Process.Reducer = *reducer
 	if jsonOutput != nil && *jsonOutput {
 		cfg.ScrCfg.AddExport(config.JsonExport)
 	}
@@ -171,8 +171,8 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	if exportGoFiles != nil && *exportGoFiles {
 		cfg.ScrCfg.AddExport(config.GoImpdrawExport)
 	}
-	cfg.OneLine = *oneLine
-	cfg.OneRow = *oneRow
+	cfg.ScrCfg.Process.OneLine = *oneLine
+	cfg.ScrCfg.Process.OneRow = *oneRow
 
 	if *scanlineSequence != "" {
 		sequence := strings.Split(*scanlineSequence, ",")
@@ -206,28 +206,28 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 
 		v, err := common.ParseHexadecimal8(*maskSprite)
 		if err == nil {
-			cfg.MaskSprite = v
+			cfg.ScrCfg.Process.MaskSprite = v
 		}
-		if cfg.MaskSprite != 0 {
+		if cfg.ScrCfg.Process.MaskSprite != 0 {
 			if *maskOrOperation {
-				cfg.MaskOrOperation = true
+				cfg.ScrCfg.Process.MaskOrOperation = true
 			}
 			if *maskAdOperation {
-				cfg.MaskAndOperation = true
+				cfg.ScrCfg.Process.MaskAndOperation = true
 			}
-			if cfg.MaskAndOperation && cfg.MaskOrOperation {
+			if cfg.ScrCfg.Process.MaskAndOperation && cfg.ScrCfg.Process.MaskOrOperation {
 				log.GetLogger().Error("Or and And operations are setted, will only apply And operation.\n")
-				cfg.MaskOrOperation = false
+				cfg.ScrCfg.Process.MaskOrOperation = false
 			}
-			if !cfg.MaskAndOperation && !cfg.MaskOrOperation {
+			if !cfg.ScrCfg.Process.MaskAndOperation && !cfg.ScrCfg.Process.MaskOrOperation {
 				log.GetLogger().Error("Or and And operations are not setted, will only apply And operation.\n")
-				cfg.MaskAndOperation = true
+				cfg.ScrCfg.Process.MaskAndOperation = true
 			}
 			log.GetLogger().Info("Applying sprite mask value [#%X] [%.8b] AND = %t, OR =%t\n",
-				cfg.MaskSprite,
-				cfg.MaskSprite,
-				cfg.MaskAndOperation,
-				cfg.MaskOrOperation)
+				cfg.ScrCfg.Process.MaskSprite,
+				cfg.ScrCfg.Process.MaskSprite,
+				cfg.ScrCfg.Process.MaskAndOperation,
+				cfg.ScrCfg.Process.MaskOrOperation)
 		}
 	}
 
@@ -256,8 +256,8 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 
 	if *saturationPal > 0 || *brightnessPal > 0 {
 		cfg.ScrCfg.IsPlus = true
-		cfg.Saturation = *saturationPal
-		cfg.Brightness = *brightnessPal
+		cfg.ScrCfg.Process.Saturation = *saturationPal
+		cfg.ScrCfg.Process.Brightness = *brightnessPal
 	}
 
 	cfg.DeltaMode = *deltaMode

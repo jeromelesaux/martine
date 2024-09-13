@@ -22,7 +22,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 
 	lineToAdd := 1
 
-	if cfg.OneRow {
+	if cfg.ScrCfg.Process.OneRow {
 		lineToAdd = 2
 	}
 
@@ -103,7 +103,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			}
 			pp8 = cfg.SwapInk(pp8)
 			firmwareColorUsed[pp8]++
-			if cfg.OneLine {
+			if cfg.ScrCfg.Process.OneLine {
 				pp2 = 0
 				pp4 = 0
 				pp6 = 0
@@ -129,7 +129,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 
 	lineToAdd := 1
 
-	if cfg.OneRow {
+	if cfg.ScrCfg.Process.OneRow {
 		lineToAdd = 2
 	}
 	if cfg.ScrCfg.Type.IsFullScreen() {
@@ -177,7 +177,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			}
 			pp4 = cfg.SwapInk(pp4)
 			firmwareColorUsed[pp4]++
-			if cfg.OneLine {
+			if cfg.ScrCfg.Process.OneLine {
 				pp4 = 0
 				pp2 = 0
 			}
@@ -197,7 +197,7 @@ func ToMode0(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 	var bw []byte
 
 	lineToAdd := 1
-	if cfg.OneRow {
+	if cfg.ScrCfg.Process.OneRow {
 		lineToAdd = 2
 	}
 	if cfg.ScrCfg.Type.IsFullScreen() {
@@ -228,7 +228,7 @@ func ToMode0(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			}
 			pp2 = cfg.SwapInk(pp2)
 			firmwareColorUsed[pp2]++
-			if cfg.OneLine {
+			if cfg.ScrCfg.Process.OneLine {
 				pp2 = 0
 			}
 			pixel := pixel.PixelMode0(pp1, pp2)

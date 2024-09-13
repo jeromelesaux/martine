@@ -55,7 +55,7 @@ func TileMode(ex *config.MartineConfig, mode uint8, iterationX, iterationY int) 
 				return err
 			}
 
-			resized := ci.Resize(cropped, ex.ScrCfg.Size, ex.ScrCfg.Treatment.ResizingAlgo)
+			resized := ci.Resize(cropped, ex.ScrCfg.Size, ex.ScrCfg.Process.ResizingAlgo)
 			ext := "_resized_" + strconv.Itoa(index) + ".png"
 			filePath := filepath.Join(ex.ScrCfg.OutputPath, ex.OsFilename(ext))
 			if err := png.Png(filePath, resized); err != nil {

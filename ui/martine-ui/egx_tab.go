@@ -40,7 +40,7 @@ func (m *MartineUI) newEgxTab(di *menu.DoubleImageMenu) *container.AppTabs {
 
 // nolint:funlen
 func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
-	if di.RightImage.Mode == di.LeftImage.Mode {
+	if di.RightImage.Cfg.ScrCfg.Mode == di.LeftImage.Cfg.ScrCfg.Mode {
 		dialog.ShowError(fmt.Errorf("mode between the images must differ"), m.window)
 		return
 	}
@@ -60,7 +60,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	var im *menu.ImageMenu
 	var secondIm *menu.ImageMenu
 	var palette color.Palette
-	if di.LeftImage.Mode < di.RightImage.Mode {
+	if di.LeftImage.Cfg.ScrCfg.Mode < di.RightImage.Cfg.ScrCfg.Mode {
 		im = di.LeftImage
 		palette = di.LeftImage.Palette()
 		secondIm = di.RightImage
@@ -70,7 +70,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 		secondIm = di.LeftImage
 	}
 	cfg := im.Cfg
-	out, downgraded, _, _, err := gfx.ApplyOneImage(secondIm.CpcImage().Image, cfg, secondIm.Mode, palette, uint8(secondIm.Mode))
+	out, downgraded, _, _, err := gfx.ApplyOneImage(secondIm.CpcImage().Image, cfg, int(secondIm.Cfg.ScrCfg.Mode), palette, secondIm.Cfg.ScrCfg.Mode)
 	if err != nil {
 		dialog.ShowError(err, m.window)
 		return
@@ -80,7 +80,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	secondIm.SetPalette(palette)
 
 	im.SetPaletteImage(png.PalToImage(secondIm.Palette()))
-	out, downgraded, _, _, err = gfx.ApplyOneImage(im.CpcImage().Image, cfg, im.Mode, palette, uint8(im.Mode))
+	out, downgraded, _, _, err = gfx.ApplyOneImage(im.CpcImage().Image, cfg, int(im.Cfg.ScrCfg.Mode), palette, im.Cfg.ScrCfg.Mode)
 	if err != nil {
 		dialog.ShowError(err, m.window)
 		return
@@ -92,7 +92,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 
 	pi := wgt.NewProgressInfinite("Computing, Please wait.", m.window)
 	pi.Show()
-	res, _, egxType, err := effect.EgxRaw(di.LeftImage.Data, di.RightImage.Data, palette, di.LeftImage.Mode, di.RightImage.Mode, cfg)
+	res, _, egxType, err := effect.EgxRaw(di.LeftImage.Data, di.RightImage.Data, palette, int(di.LeftImage.Cfg.ScrCfg.Mode), int(di.RightImage.Cfg.ScrCfg.Mode), cfg)
 	pi.Hide()
 	if err != nil {
 		dialog.ShowError(err, m.window)
@@ -255,13 +255,13 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 	colorReducer := widget.NewSelect([]string{"none", "Lower", "Medium", "Strong"}, func(s string) {
 		switch s {
 		case "none":
-			me.Reducer = 0
+			me.Cfg.ScrCfg.Process.Reducer = 0
 		case "Lower":
-			me.Reducer = 1
+			me.Cfg.ScrCfg.Process.Reducer = 1
 		case "Medium":
-			me.Reducer = 2
+			me.Cfg.ScrCfg.Process.Reducer = 2
 		case "Strong":
-			me.Reducer = 3
+			me.Cfg.ScrCfg.Process.Reducer = 3
 		}
 	})
 	colorReducer.SetSelected("none")
@@ -273,16 +273,16 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 	ditheringMultiplier.Step = 0.1
 	ditheringMultiplier.SetValue(1.18)
 	ditheringMultiplier.OnChanged = func(f float64) {
-		me.DitheringMultiplier = f
+		me.Cfg.ScrCfg.Process.DitheringMultiplier = f
 	}
 	dithering := w2.NewDitheringSelect(me)
 
 	ditheringWithQuantification := widget.NewCheck("With quantification", func(b bool) {
-		me.WithQuantification = b
+		me.Cfg.ScrCfg.Process.DitheringWithQuantification = b
 	})
 
 	enableDithering := widget.NewCheck("Enable dithering", func(b bool) {
-		me.ApplyDithering = b
+		me.Cfg.ScrCfg.Process.ApplyDithering = b
 	})
 	isPlus := widget.NewCheck("CPC Plus", func(b bool) {
 		me.Cfg.ScrCfg.IsPlus = b
@@ -293,7 +293,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 		if err != nil {
 			log.GetLogger().Error("Error %s cannot be cast in int\n", s)
 		}
-		me.Mode = mode
+		me.Cfg.ScrCfg.Mode = uint8(mode)
 	})
 	modes.SetSelected("0")
 	modeSelection = modes
@@ -303,14 +303,14 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 	brightness.SetValue(1.)
 	brightness.Step = .01
 	brightness.OnChanged = func(f float64) {
-		me.Brightness = f
+		me.Cfg.ScrCfg.Process.Brightness = f
 	}
 	saturationLabel := widget.NewLabel("Saturation")
 	saturation := widget.NewSlider(0.0, 1.0)
 	saturation.SetValue(1.)
 	saturation.Step = .01
 	saturation.OnChanged = func(f float64) {
-		me.Saturation = f
+		me.Cfg.ScrCfg.Process.Saturation = f
 	}
 	brightnessLabel := widget.NewLabel("Brightness")
 
@@ -318,10 +318,10 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 	warningLabel.TextStyle = fyne.TextStyle{Bold: true}
 
 	oneLine := widget.NewCheck("Every other line", func(b bool) {
-		me.OneLine = b
+		me.Cfg.ScrCfg.Process.OneLine = b
 	})
 	oneRow := widget.NewCheck("Every other row", func(b bool) {
-		me.OneRow = b
+		me.Cfg.ScrCfg.Process.OneRow = b
 	})
 
 	editButton := widget.NewButtonWithIcon("Edit", theme.DocumentCreateIcon(), func() {

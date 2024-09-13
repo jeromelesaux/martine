@@ -66,10 +66,10 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 	var tiles [][]image.Image
 	if m.IsClassicalTilemap(cfg.ScrCfg.Size.Width, cfg.ScrCfg.Size.Height) {
 		filename := filepath.Base(me.OriginalImagePath())
-		analyze, tiles, palette = gfx.TilemapClassical(uint8(me.Mode), me.Cfg.ScrCfg.IsPlus, filename, me.OriginalImagePath(), me.OriginalImage().Image, cfg.ScrCfg.Size, cfg, me.Historic)
+		analyze, tiles, palette = gfx.TilemapClassical(me.Cfg.ScrCfg.Mode, me.Cfg.ScrCfg.IsPlus, filename, me.OriginalImagePath(), me.OriginalImage().Image, cfg.ScrCfg.Size, cfg, me.Historic)
 		pi.Hide()
 	} else {
-		analyze, tiles, palette, err = gfx.TilemapRaw(uint8(me.Mode), me.Cfg.ScrCfg.IsPlus, cfg.ScrCfg.Size, me.OriginalImage().Image, cfg, me.Historic)
+		analyze, tiles, palette, err = gfx.TilemapRaw(me.Cfg.ScrCfg.Mode, me.Cfg.ScrCfg.IsPlus, cfg.ScrCfg.Size, me.OriginalImage().Image, cfg, me.Historic)
 		pi.Hide()
 		if err != nil {
 			dialog.NewError(err, m.window).Show()
@@ -108,7 +108,7 @@ func (m *MartineUI) newImageMenuExportButton(tm *menu.ImageMenu) *widget.Button 
 			if err := impPalette.SaveKit(paletteExportPath+".kit", tm.Palette(), false); err != nil {
 				dialog.ShowError(err, m.window)
 			}
-			if err := ocpartstudio.SavePal(paletteExportPath+".pal", tm.Palette(), uint8(tm.Mode), false); err != nil {
+			if err := ocpartstudio.SavePal(paletteExportPath+".pal", tm.Palette(), tm.Cfg.ScrCfg.Mode, false); err != nil {
 				dialog.ShowError(err, m.window)
 			}
 		}, m.window)
@@ -215,7 +215,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 		if err != nil {
 			log.GetLogger().Error("Error %s cannot be cast in int\n", s)
 		}
-		tm.Mode = mode
+		tm.Cfg.ScrCfg.Mode = uint8(mode)
 	})
 	modes.SetSelected("0")
 	modeSelection = modes

@@ -50,7 +50,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 	var bw []byte
 	var notSplitRaster bool
 	srs := constants.NewSplitRasterScreen()
-	out := ci.Resize(in, cfg.ScrCfg.Size, cfg.ScrCfg.Treatment.ResizingAlgo)
+	out := ci.Resize(in, cfg.ScrCfg.Size, cfg.ScrCfg.Process.ResizingAlgo)
 	log.GetLogger().Info("Saving resized image into (%s)\n", filename+"_resized.png")
 	if err := png.Png(filepath.Join(cfg.ScrCfg.OutputPath, filename+"_resized.png"), out); err != nil {
 		return nil, bw, srs, err

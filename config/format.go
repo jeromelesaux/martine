@@ -1,6 +1,8 @@
 package config
 
 import (
+	"image/color"
+
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/compression"
@@ -56,8 +58,9 @@ type M4Config struct {
 type PaletteType string
 
 type PaletteConfig struct {
-	Path string
-	Type PaletteType
+	Path    string
+	Type    PaletteType
+	Palette color.Palette
 }
 
 var (
@@ -78,7 +81,8 @@ type ScreenConfig struct {
 	Export         []ScreenExport
 	Size           constants.Size
 	amsdosFilename [8]byte
-	Treatment      ScreenTreatment
+	Process        ScreenProcessing
+	Mode           uint8
 }
 
 func (s *ScreenConfig) ResetExport() {
@@ -209,11 +213,22 @@ func Rotation3DType(v int) Rotation3d {
 	return RotateXAxis
 }
 
-type ScreenTreatment struct {
+type ScreenProcessing struct {
+	Saturation                  float64
+	Brightness                  float64
+	KmeansThreshold             float64
+	UseKmeans                   bool
 	ResizingAlgo                imaging.ResampleFilter
+	ApplyDithering              bool
 	DitheringAlgo               int
 	DitheringMatrix             [][]float32
 	DitheringMultiplier         float64
 	DitheringWithQuantification bool
 	DitheringType               constants.DitheringType
+	OneLine                     bool
+	OneRow                      bool
+	MaskSprite                  uint8
+	MaskOrOperation             bool
+	MaskAndOperation            bool
+	Reducer                     int
 }
