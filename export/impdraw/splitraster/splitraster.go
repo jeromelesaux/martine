@@ -85,9 +85,9 @@ func ExportSplitRaster(filename string, p color.Palette, rasters *constants.Spli
 	}
 	output = append(output, splitRasterRestore...)
 
-	basicPath := filepath.Join(cfg.OutputPath, cfg.GetAmsdosFilename(filename, ".SPL"))
+	basicPath := filepath.Join(cfg.ScrCfg.OutputPath, cfg.GetAmsdosFilename(filename, ".SPL"))
 
-	if !cfg.NoAmsdosHeader {
+	if !cfg.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(basicPath, ".SPL", output, 0, 0, 0x170, 0); err != nil {
 			return err
 		}

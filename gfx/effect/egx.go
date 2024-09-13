@@ -22,6 +22,7 @@ import (
 	"github.com/jeromelesaux/martine/log"
 )
 
+// nolint: funlen, gocognit
 func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cfg *config.MartineConfig) error {
 	p = constants.SortColorsByDistance(p)
 	if m1 == 0 && m2 == 1 || m2 == 0 && m1 == 1 {
@@ -38,7 +39,7 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cfg *config.M
 			f1 = filepath1
 		}
 		var in0, in1 *image.NRGBA
-		if cfg.Overscan {
+		if cfg.ScrCfg.Type == config.FullscreenFormat {
 			in0, err = overscan.OverscanToImg(f0, mode0, p)
 			if err != nil {
 				return err
@@ -60,7 +61,7 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cfg *config.M
 		if err = ToEgx1(in0, in1, p, uint8(m1), "egx.scr", cfg); err != nil {
 			return err
 		}
-		if !cfg.Overscan {
+		if cfg.ScrCfg.Type != config.FullscreenFormat {
 			if err = ocpartstudio.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), cfg); err != nil {
 				return err
 			}
@@ -86,7 +87,7 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cfg *config.M
 				f2 = filepath1
 			}
 			var in2, in1 *image.NRGBA
-			if cfg.Overscan {
+			if cfg.ScrCfg.Type.IsFullScreen() {
 				in1, err = overscan.OverscanToImg(f1, mode1, p)
 				if err != nil {
 					return err
@@ -108,7 +109,7 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cfg *config.M
 			if err = ToEgx2(in1, in2, p, uint8(m1), "egx.scr", cfg); err != nil {
 				return err
 			}
-			if !cfg.Overscan {
+			if cfg.ScrCfg.Type != config.FullscreenFormat {
 				if err = ocpartstudio.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), cfg); err != nil {
 					return err
 				}
@@ -121,25 +122,26 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cfg *config.M
 	return nil
 }
 
-func AutoEgx1(in image.Image,
+func prepareEgx(
+	in image.Image,
 	cfg *config.MartineConfig,
-	filename, picturePath string) error {
+	filename, picturePath string,
+) (*image.NRGBA, color.Palette) {
 	var err error
-
 	size := constants.Size{
-		Width:  cfg.Size.Width,
-		Height: cfg.Size.Height}
+		Width:  cfg.ScrCfg.Size.Width,
+		Height: cfg.ScrCfg.Size.Height}
 
-	im := ci.Resize(in, size, cfg.ResizingAlgo)
+	im := ci.Resize(in, size, cfg.ScrCfg.Process.ResizingAlgo)
 	var palette color.Palette // palette de l'image
 	var p color.Palette       // palette cpc de l'image
 	var downgraded *image.NRGBA
 
-	if cfg.PalettePath != "" {
-		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PalettePath)
-		palette, _, err = ocpartstudio.OpenPal(cfg.PalettePath)
+	if cfg.PalCfg.Type == config.PalPalette {
+		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PalCfg.Path)
+		palette, _, err = ocpartstudio.OpenPal(cfg.PalCfg.Path)
 		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalettePath)
+			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalCfg.Path)
 		} else {
 			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
 		}
@@ -147,62 +149,40 @@ func AutoEgx1(in image.Image,
 	if len(palette) > 0 {
 		p, downgraded = ci.DowngradingWithPalette(im, palette)
 	} else {
-		p, downgraded, err = ci.DowngradingPalette(im, cfg.Size, cfg.CpcPlus)
+		p, downgraded, err = ci.DowngradingPalette(im, cfg.ScrCfg.Size, cfg.ScrCfg.IsPlus)
 		if err != nil {
 			log.GetLogger().Error("Cannot downgrade colors palette for this image %s\n", picturePath)
 		}
 	}
 	p = constants.SortColorsByDistance(p)
 	log.GetLogger().Info("Saving downgraded image into (%s)\n", filename+"_down.png")
-	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_down.png"), downgraded); err != nil {
+	if err := png.Png(filepath.Join(cfg.ScrCfg.OutputPath, filename+"_down.png"), downgraded); err != nil {
 		os.Exit(-2)
 	}
 
-	downgraded, p = gfx.DoDithering(downgraded, p, cfg.DitheringAlgo, cfg.DitheringType, cfg.DitheringWithQuantification, cfg.DitheringMatrix, float32(cfg.DitheringMultiplier), cfg.CpcPlus, cfg.Size)
+	return gfx.DoDithering(
+		downgraded,
+		p,
+		cfg.ScrCfg.Process.Dithering.Algo,
+		cfg.ScrCfg.Process.Dithering.Type,
+		cfg.ScrCfg.Process.Dithering.WithQuantification,
+		cfg.ScrCfg.Process.Dithering.Matrix,
+		float32(cfg.ScrCfg.Process.Dithering.Multiplier),
+		cfg.ScrCfg.IsPlus,
+		cfg.ScrCfg.Size)
+}
 
+func AutoEgx1(in image.Image,
+	cfg *config.MartineConfig,
+	filename, picturePath string) error {
+	downgraded, p := prepareEgx(in, cfg, filename, picturePath)
 	return ToEgx1(downgraded, downgraded, p, 0, picturePath, cfg)
 }
 
 func AutoEgx2(in image.Image,
 	cfg *config.MartineConfig,
 	filename, picturePath string) error {
-	var err error
-
-	size := constants.Size{
-		Width:  cfg.Size.Width,
-		Height: cfg.Size.Height}
-
-	im := ci.Resize(in, size, cfg.ResizingAlgo)
-	var palette color.Palette // palette de l'image
-	var p color.Palette       // palette cpc de l'image
-	var downgraded *image.NRGBA
-
-	if cfg.PalettePath != "" {
-		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PalettePath)
-		palette, _, err = ocpartstudio.OpenPal(cfg.PalettePath)
-		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalettePath)
-		} else {
-			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
-		}
-	}
-
-	if len(palette) > 0 {
-		p, downgraded = ci.DowngradingWithPalette(im, palette)
-	} else {
-		p, downgraded, err = ci.DowngradingPalette(im, cfg.Size, cfg.CpcPlus)
-		if err != nil {
-			log.GetLogger().Error("Cannot downgrade colors palette for this image %s\n", picturePath)
-		}
-	}
-	p = constants.SortColorsByDistance(p)
-	log.GetLogger().Info("Saving downgraded image into (%s)\n", filename+"_down.png")
-	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_down.png"), downgraded); err != nil {
-		os.Exit(-2)
-	}
-
-	downgraded, p = gfx.DoDithering(downgraded, p, cfg.DitheringAlgo, cfg.DitheringType, cfg.DitheringWithQuantification, cfg.DitheringMatrix, float32(cfg.DitheringMultiplier), cfg.CpcPlus, cfg.Size)
-
+	downgraded, p := prepareEgx(in, cfg, filename, picturePath)
 	return ToEgx2(downgraded, downgraded, p, 1, picturePath, cfg)
 }
 
@@ -211,9 +191,10 @@ func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8,
 	return export.Export(picturePath, bw, p, 1, cfg)
 }
 
+// nolint: funlen
 func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8, cfg *config.MartineConfig) ([]byte, color.Palette) {
 	var bw []byte
-	if cfg.Overscan {
+	if cfg.ScrCfg.Type == config.FullscreenFormat {
 		bw = make([]byte, 0x8000)
 	} else {
 		bw = make([]byte, 0x4000)
@@ -231,7 +212,7 @@ func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uin
 			c1 := inMode0.At(x, y)
 			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
 			firmwareColorUsed[pp1]++
@@ -239,12 +220,12 @@ func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uin
 			c2 := inMode0.At(x+1, y)
 			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			firmwareColorUsed[pp2]++
 			pixel := pixel.PixelMode0(pp1, pp2)
-			addr := address.CpcScreenAddress(0, x, y, 0, cfg.Overscan, cfg.DoubleScreenAddress)
+			addr := address.CpcScreenAddress(0, x, y, 0, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 			bw[addr] = pixel
 		}
 	}
@@ -253,7 +234,7 @@ func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uin
 			c1 := inMode1.At(x, y)
 			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
 			firmwareColorUsed[pp1]++
@@ -261,29 +242,29 @@ func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uin
 			c2 := inMode1.At(x+1, y)
 			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			firmwareColorUsed[pp2]++
 			c3 := inMode1.At(x+2, y)
 			pp3, err := palette.PalettePosition(c3, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
 			firmwareColorUsed[pp3]++
 			c4 := inMode1.At(x+3, y)
 			pp4, err := palette.PalettePosition(c4, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
 			firmwareColorUsed[pp4]++
 
 			pixel := pixel.PixelMode1(pp1, pp2, pp3, pp4)
-			addr := address.CpcScreenAddress(0, x, y, 1, cfg.Overscan, cfg.DoubleScreenAddress)
+			addr := address.CpcScreenAddress(0, x, y, 1, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 			bw[addr] = pixel
-			addr = address.CpcScreenAddress(0, x+1, y, 1, cfg.Overscan, cfg.DoubleScreenAddress)
+			addr = address.CpcScreenAddress(0, x+1, y, 1, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 			bw[addr] = pixel
 		}
 	}
@@ -295,9 +276,10 @@ func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8,
 	return export.Export(picturePath, bw, p, 2, cfg)
 }
 
+// nolint: funlen, gocognit
 func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8, cfg *config.MartineConfig) ([]byte, color.Palette) {
 	var bw []byte
-	if cfg.Overscan {
+	if cfg.ScrCfg.Type.IsFullScreen() {
 		bw = make([]byte, 0x8000)
 	} else {
 		bw = make([]byte, 0x4000)
@@ -315,7 +297,7 @@ func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uin
 			c1 := inMode1.At(x, y)
 			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
 			firmwareColorUsed[pp1]++
@@ -323,27 +305,27 @@ func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uin
 			c2 := inMode1.At(x+1, y)
 			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			firmwareColorUsed[pp2]++
 			c3 := inMode1.At(x+2, y)
 			pp3, err := palette.PalettePosition(c3, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
 			firmwareColorUsed[pp3]++
 			c4 := inMode1.At(x+3, y)
 			pp4, err := palette.PalettePosition(c4, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
 			firmwareColorUsed[pp4]++
 
 			pixel := pixel.PixelMode1(pp1, pp2, pp3, pp4)
-			addr := address.CpcScreenAddress(0, x, y, 1, cfg.Overscan, cfg.DoubleScreenAddress)
+			addr := address.CpcScreenAddress(0, x, y, 1, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 			bw[addr] = pixel
 		}
 	}
@@ -352,7 +334,7 @@ func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uin
 			c1 := inMode2.At(x, y)
 			pp1, err := palette.PalettePosition(c1, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, x, y)
 				pp1 = 0
 			}
 			firmwareColorUsed[pp1]++
@@ -360,63 +342,64 @@ func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uin
 			c2 := inMode2.At(x+1, y)
 			pp2, err := palette.PalettePosition(c2, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, x+1, y)
 				pp2 = 0
 			}
 			firmwareColorUsed[pp2]++
 			c3 := inMode2.At(x+2, y)
 			pp3, err := palette.PalettePosition(c3, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, x+2, y)
 				pp3 = 0
 			}
 			firmwareColorUsed[pp3]++
 			c4 := inMode2.At(x+3, y)
 			pp4, err := palette.PalettePosition(c4, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c4, x+3, y)
 				pp4 = 0
 			}
 			firmwareColorUsed[pp4]++
 			c5 := inMode2.At(x+4, y)
 			pp5, err := palette.PalettePosition(c5, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c5, x+4, y)
 				pp5 = 0
 			}
 			firmwareColorUsed[pp5]++
 			//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 			c6 := inMode2.At(x+5, y)
-			pp6, err := palette.PalettePosition(c5, p)
+			pp6, err := palette.PalettePosition(c6, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c6, x+5, y)
 				pp6 = 0
 			}
 			firmwareColorUsed[pp6]++
 			c7 := inMode2.At(x+6, y)
 			pp7, err := palette.PalettePosition(c7, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c7, x+6, y)
 				pp7 = 0
 			}
 			firmwareColorUsed[pp7]++
 			c8 := inMode2.At(x+7, y)
 			pp8, err := palette.PalettePosition(c8, p)
 			if err != nil {
-				log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c8, x+3, y)
+				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c8, x+3, y)
 				pp8 = 0
 			}
 			firmwareColorUsed[pp8]++
 			pixel := pixel.PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
-			addr := address.CpcScreenAddress(0, x, y, 2, cfg.Overscan, cfg.DoubleScreenAddress)
+			addr := address.CpcScreenAddress(0, x, y, 2, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 			bw[addr] = pixel
-			addr = address.CpcScreenAddress(0, x+1, y, 2, cfg.Overscan, cfg.DoubleScreenAddress)
+			addr = address.CpcScreenAddress(0, x+1, y, 2, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 			bw[addr] = pixel
 		}
 	}
 	return bw, p
 }
 
+// nolint: funlen, gocognit
 func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cfg *config.MartineConfig) ([]byte, color.Palette, int, error) {
 	p = constants.SortColorsByDistance(p)
 	if mode1 == 0 && mode2 == 1 || mode2 == 0 && mode1 == 1 {
@@ -433,7 +416,7 @@ func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cfg *config.Ma
 			f1 = img1
 		}
 		var in0, in1 *image.NRGBA
-		if cfg.Overscan {
+		if cfg.ScrCfg.Type.IsFullScreen() {
 			in0, err = overscan.OverscanRawToImg(f0, mode0, p)
 			if err != nil {
 				return nil, p, 0, err
@@ -452,7 +435,7 @@ func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cfg *config.Ma
 				return nil, p, 0, err
 			}
 		}
-		res, p := ToEgx1Raw(in0, in1, p, uint8(mode1), cfg)
+		res, p := ToEgx1Raw(in0, in1, p, mode1, cfg)
 		return res, p, 1, nil
 	} else {
 		if mode1 == 1 && mode2 == 2 || mode2 == 1 && mode1 == 2 {
@@ -474,7 +457,7 @@ func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cfg *config.Ma
 				f2 = img1
 			}
 			var in2, in1 *image.NRGBA
-			if cfg.Overscan {
+			if cfg.ScrCfg.Type.IsFullScreen() {
 				in1, err = overscan.OverscanRawToImg(f1, mode1, p)
 				if err != nil {
 					return nil, p, 0, err
@@ -493,7 +476,7 @@ func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cfg *config.Ma
 					return nil, p, 0, err
 				}
 			}
-			res, p := ToEgx2Raw(in1, in2, p, uint8(mode1), cfg)
+			res, p := ToEgx2Raw(in1, in2, p, mode1, cfg)
 			return res, p, 2, err
 
 		} else {

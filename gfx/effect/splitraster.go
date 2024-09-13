@@ -24,10 +24,10 @@ func DoSpliteRaster(in image.Image, screenMode uint8, filename string, cfg *conf
 	var bw []byte
 	var rasters *constants.SplitRasterScreen
 	var err error
-	if !cfg.Overscan {
+	if !cfg.ScrCfg.Type.IsFullScreen() {
 		return errors.ErrorNotYetImplemented
 	}
-	switch cfg.CpcPlus {
+	switch cfg.ScrCfg.IsPlus {
 	case false:
 		p, bw, rasters, err = ToSplitRasterCPCOld(in, screenMode, filename, cfg)
 		if err != nil {
@@ -44,21 +44,22 @@ func DoSpliteRaster(in image.Image, screenMode uint8, filename string, cfg *conf
 	return splitraster.ExportSplitRaster(filename, p, rasters, cfg)
 }
 
+// nolint: funlen, gocognit
 func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg *config.MartineConfig) (color.Palette, []byte, *constants.SplitRasterScreen, error) {
 
 	var bw []byte
 	var notSplitRaster bool
 	srs := constants.NewSplitRasterScreen()
-	out := ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
+	out := ci.Resize(in, cfg.ScrCfg.Size, cfg.ScrCfg.Process.ResizingAlgo)
 	log.GetLogger().Info("Saving resized image into (%s)\n", filename+"_resized.png")
-	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_resized.png"), out); err != nil {
+	if err := png.Png(filepath.Join(cfg.ScrCfg.OutputPath, filename+"_resized.png"), out); err != nil {
 		return nil, bw, srs, err
 	}
-	p, newIm, err := ci.DowngradingPalette(out, cfg.Size, cfg.CpcPlus)
+	p, newIm, err := ci.DowngradingPalette(out, cfg.ScrCfg.Size, cfg.ScrCfg.IsPlus)
 	if err != nil {
 		return p, bw, srs, err
 	}
-	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_downgraded.png"), newIm); err != nil {
+	if err := png.Png(filepath.Join(cfg.ScrCfg.OutputPath, filename+"_downgraded.png"), newIm); err != nil {
 		return nil, bw, srs, err
 	}
 
@@ -69,15 +70,15 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 	log.GetLogger().Info("Informations palette (%d) for image (%d,%d)\n", len(p), newIm.Bounds().Max.X, newIm.Bounds().Max.Y)
 	log.GetLogger().Infoln(in.Bounds())
 
-	if cfg.Overscan {
+	if cfg.ScrCfg.Type.IsFullScreen() {
 		bw = make([]byte, 0x8000)
 	} else {
 		bw = make([]byte, 0x4000)
 	}
 	firmwareColorUsed := make(map[int]int)
 	backgroundColor := p[0]
-	for y := 0; y < cfg.Size.Height; y++ {
-		for x := 0; x < cfg.Size.Width; {
+	for y := 0; y < cfg.ScrCfg.Size.Height; y++ {
+		for x := 0; x < cfg.ScrCfg.Size.Width; {
 			if x%16 == 0 {
 				if !srs.IsFull() {
 					notSplitRaster = false
@@ -90,7 +91,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 					case 0:
 						for i := 0; i < 16; {
 							pixel := pixel.PixelMode0(pp, pp)
-							addr := address.CpcScreenAddress(0, x+i, y, 0, cfg.Overscan, cfg.DoubleScreenAddress)
+							addr := address.CpcScreenAddress(0, x+i, y, 0, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 							bw[addr] = pixel
 							i += 2
 							firmwareColorUsed[pp] += 2
@@ -98,7 +99,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 					case 1:
 						for i := 0; i < 16; {
 							pixel := pixel.PixelMode1(pp, pp, pp, pp)
-							addr := address.CpcScreenAddress(0, x+i, y, 1, cfg.Overscan, cfg.DoubleScreenAddress)
+							addr := address.CpcScreenAddress(0, x+i, y, 1, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 							bw[addr] = pixel
 							i += 4
 							firmwareColorUsed[pp] += 4
@@ -106,7 +107,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 					case 2:
 						for i := 0; i < 16; {
 							pixel := pixel.PixelMode2(pp, pp, pp, pp, pp, pp, pp, pp)
-							addr := address.CpcScreenAddress(0, x+i, y, 2, cfg.Overscan, cfg.DoubleScreenAddress)
+							addr := address.CpcScreenAddress(0, x+i, y, 2, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 							bw[addr] = pixel
 							i += 8
 							firmwareColorUsed[pp] += 8
@@ -140,7 +141,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 			}
 		}
 	}
-	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_splitraster.png"), srIm); err != nil {
+	if err := png.Png(filepath.Join(cfg.ScrCfg.OutputPath, filename+"_splitraster.png"), srIm); err != nil {
 		return nil, bw, srs, err
 	}
 	log.GetLogger().Infoln(firmwareColorUsed)
@@ -211,7 +212,7 @@ func setPixelMode0(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND
-	addr := address.CpcScreenAddress(0, x, y, 0, cfg.Overscan, cfg.DoubleScreenAddress)
+	addr := address.CpcScreenAddress(0, x, y, 0, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 	bw[addr] = pixel
 	return bw, firmwareColorUsed
 }
@@ -256,11 +257,12 @@ func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND
-	addr := address.CpcScreenAddress(0, x, y, 1, cfg.Overscan, cfg.DoubleScreenAddress)
+	addr := address.CpcScreenAddress(0, x, y, 1, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 	bw[addr] = pixel
 	return bw, firmwareColorUsed
 }
 
+// nolint: funlen
 func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cfg *config.MartineConfig) ([]byte, map[int]int) {
 	c1 := in.At(x, y)
 	out.Set(x, y, c1)
@@ -334,7 +336,7 @@ func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND
-	addr := address.CpcScreenAddress(0, x, y, 2, cfg.Overscan, cfg.DoubleScreenAddress)
+	addr := address.CpcScreenAddress(0, x, y, 2, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 	bw[addr] = pixel
 	return bw, firmwareColorUsed
 }

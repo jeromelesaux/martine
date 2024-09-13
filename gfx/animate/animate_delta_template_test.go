@@ -346,7 +346,7 @@ func TestTemplate(t *testing.T) {
 		Mode:    0,
 	}
 
-	temp := template.Must(template.New("code").Parse(string(AnimateTemplates[a])))
+	temp := template.Must(template.New("code").Parse(AnimateTemplates[a]))
 	err := temp.Execute(&buf, vals)
 	if err != nil {
 		panic(err)

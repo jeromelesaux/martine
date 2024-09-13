@@ -17,31 +17,29 @@ import (
 	"github.com/oliamb/cutter"
 )
 
+// nolint: funlen
 func TileMode(ex *config.MartineConfig, mode uint8, iterationX, iterationY int) error {
-	fr, err := os.Open(ex.InputPath)
+	fr, err := os.Open(ex.ScrCfg.InputPath)
 	if err != nil {
-		log.GetLogger().Error("Cannot open (%s),error :%v\n", ex.InputPath, err)
+		log.GetLogger().Error("Cannot open (%s),error :%v\n", ex.ScrCfg.InputPath, err)
 		return err
 	}
 	defer fr.Close()
 
 	in, _, err := image.Decode(fr)
 	if err != nil {
-		log.GetLogger().Error("Cannot decode image (%s) error :%v\n", ex.InputPath, err)
+		log.GetLogger().Error("Cannot decode image (%s) error :%v\n", ex.ScrCfg.InputPath, err)
 		return err
 	}
 
-	width := in.Bounds().Max.X
-	height := in.Bounds().Max.Y
-
-	factorX := width/iterationX + 1
-	factorY := height/iterationY + 1
+	factorX := in.Bounds().Max.X/iterationX + 1
+	factorY := in.Bounds().Max.Y/iterationY + 1
 
 	if factorX != factorY {
 		log.GetLogger().Info("factor x (%d) differs from factor y (%d)\n", factorX, factorY)
 	}
 	if factorY == 0 {
-		factorY = height
+		factorY = in.Bounds().Max.Y
 	}
 	index := 0
 	for i := 0; i < in.Bounds().Max.X; i += factorX {
@@ -57,13 +55,13 @@ func TileMode(ex *config.MartineConfig, mode uint8, iterationX, iterationY int) 
 				return err
 			}
 
-			resized := ci.Resize(cropped, ex.Size, ex.ResizingAlgo)
+			resized := ci.Resize(cropped, ex.ScrCfg.Size, ex.ScrCfg.Process.ResizingAlgo)
 			ext := "_resized_" + strconv.Itoa(index) + ".png"
-			filePath := filepath.Join(ex.OutputPath, ex.OsFilename(ext))
+			filePath := filepath.Join(ex.ScrCfg.OutputPath, ex.OsFilename(ext))
 			if err := png.Png(filePath, resized); err != nil {
 				log.GetLogger().Error("Cannot resized image, error %v\n", err)
 			}
-			p, downgraded, err := ci.DowngradingPalette(resized, ex.Size, ex.CpcPlus)
+			p, downgraded, err := ci.DowngradingPalette(resized, ex.ScrCfg.Size, ex.ScrCfg.IsPlus)
 			if err != nil {
 				log.GetLogger().Error("Cannot downgrad the palette, error :%v\n", err)
 			}
@@ -73,14 +71,14 @@ func TileMode(ex *config.MartineConfig, mode uint8, iterationX, iterationY int) 
 			}
 
 			ext = "_downgraded_" + strconv.Itoa(index) + ".png"
-			filePath = filepath.Join(ex.OutputPath, ex.OsFilename(ext))
+			filePath = filepath.Join(ex.ScrCfg.OutputPath, ex.OsFilename(ext))
 			if err := png.Png(filePath, downgraded); err != nil {
 				log.GetLogger().Error("Cannot downgrade image, error %v\n", err)
 			}
 			ext = strconv.Itoa(index) + ".png"
-			ex.Size.Width = resized.Bounds().Max.X
-			ex.Size.Height = resized.Bounds().Max.Y
-			if err := sprite.ToSpriteAndExport(downgraded, p, ex.Size, mode, ex.OsFilename(ext), false, ex); err != nil {
+			ex.ScrCfg.Size.Width = resized.Bounds().Max.X
+			ex.ScrCfg.Size.Height = resized.Bounds().Max.Y
+			if err := sprite.ToSpriteAndExport(downgraded, p, ex.ScrCfg.Size, mode, ex.OsFilename(ext), false, ex); err != nil {
 				log.GetLogger().Error("Cannot create sprite from image, error :%v\n", err)
 			}
 			index++

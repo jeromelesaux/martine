@@ -71,12 +71,13 @@ func revertColor(rawColor uint8, index int, isPlus bool) color.Color {
 		}
 	} else {
 		plusColor := constants.NewRawCpcPlusColor(uint16(rawColor))
-		c := color.RGBA{A: 0xFF, R: uint8(plusColor.R), G: uint8(plusColor.G), B: uint8(plusColor.B)}
+		c := color.RGBA{A: 0xFF, R: plusColor.R, G: plusColor.G, B: plusColor.B}
 		newColor = constants.CpcPlusPalette.Convert(c)
 	}
 	return newColor
 }
 
+// nolint: funlen, gocognit
 func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlus bool) (*image.NRGBA, error) {
 
 	in := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: width, Y: height}})

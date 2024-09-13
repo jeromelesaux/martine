@@ -1,7 +1,6 @@
 package transformation_test
 
 import (
-	"fmt"
 	"image/png"
 	"os"
 	"testing"
@@ -20,9 +19,9 @@ func TestBoardSprite(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Cannot decode png file error :%v\n", err)
 	}
-	a := transformation.AnalyzeTilesBoard(im, constants.Size{Width: 16, Height: 16})
-	t.Log(a.String())
-	fmt.Println(a.String())
+	a := transformation.AnalyzeTilesBoard(im, constants.Size{Width: 16, Height: 16}, nil)
+	//t.Log(a.String())
+	//fmt.Println(a.String())
 	err = a.SaveSchema("../../test/alexkidd_board.png")
 	if err != nil {
 		t.Fatal(err)

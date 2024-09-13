@@ -123,33 +123,34 @@ var (
 // values 50% RGB = 0x7F
 // values 100% RGB = 0xFF
 var (
-	White         = CpcColor{HardwareNumber: 0, FirmwareNumber: 13, HardwareValues: []uint8{0x40}, Color: color.RGBA{A: 0xFF, R: 0x7F, G: 0x7F, B: 0x7F}}
-	SeaGreen      = CpcColor{HardwareNumber: 2, FirmwareNumber: 19, HardwareValues: []uint8{0x42, 0x51}, Color: color.RGBA{A: 0xFF, R: 0, G: 0xFF, B: 0x7F}}
-	PastelYellow  = CpcColor{HardwareNumber: 3, FirmwareNumber: 25, HardwareValues: []uint8{0x43, 0x49}, Color: color.RGBA{A: 0xFF, R: 0xFF, G: 0xFF, B: 0x7F}}
-	Blue          = CpcColor{HardwareNumber: 4, FirmwareNumber: 1, HardwareValues: []uint8{0x44, 0x50}, Color: color.RGBA{A: 0xFF, R: 0, G: 0, B: 0x7F}}
-	Purple        = CpcColor{HardwareNumber: 5, FirmwareNumber: 7, HardwareValues: []uint8{0x45, 0x48}, Color: color.RGBA{A: 0xFF, R: 0xFF, G: 0, B: 0x7F}}
-	Cyan          = CpcColor{HardwareNumber: 6, FirmwareNumber: 10, HardwareValues: []uint8{0x46}, Color: color.RGBA{A: 0xFF, R: 0, G: 0x7F, B: 0x7F}}
-	Pink          = CpcColor{HardwareNumber: 7, FirmwareNumber: 16, HardwareValues: []uint8{0x47}, Color: color.RGBA{A: 0xFF, R: 0xFF, G: 0x7F, B: 0x7F}}
-	BrightYellow  = CpcColor{HardwareNumber: 10, FirmwareNumber: 24, HardwareValues: []uint8{0x4A}, Color: color.RGBA{A: 0xFF, R: 0xFF, G: 0xFF, B: 0}}
-	BrightWhite   = CpcColor{HardwareNumber: 11, FirmwareNumber: 26, HardwareValues: []uint8{0x4B}, Color: color.RGBA{A: 0xFF, R: 0xFF, G: 0xFF, B: 0xFF}}
-	BrightRed     = CpcColor{HardwareNumber: 12, FirmwareNumber: 6, HardwareValues: []uint8{0x4C}, Color: color.RGBA{A: 0xFF, R: 0xFF, G: 0, B: 0}}
-	BrightMagenta = CpcColor{HardwareNumber: 13, FirmwareNumber: 8, HardwareValues: []uint8{0x4D}, Color: color.RGBA{A: 0xFF, R: 0xFF, G: 0, B: 0xFF}}
-	Orange        = CpcColor{HardwareNumber: 14, FirmwareNumber: 15, HardwareValues: []uint8{0x4E}, Color: color.RGBA{A: 0xFF, R: 0xFF, G: 0x7F, B: 0}}
-	PastelMagenta = CpcColor{HardwareNumber: 15, FirmwareNumber: 17, HardwareValues: []uint8{0x4F}, Color: color.RGBA{A: 0xFF, R: 0xFF, G: 0x7F, B: 0xFF}}
-	BrightGreen   = CpcColor{HardwareNumber: 18, FirmwareNumber: 18, HardwareValues: []uint8{0x52}, Color: color.RGBA{A: 0xFF, R: 0, G: 0xFF, B: 0}}
-	BrightCyan    = CpcColor{HardwareNumber: 19, FirmwareNumber: 20, HardwareValues: []uint8{0x53}, Color: color.RGBA{A: 0xFF, R: 0, G: 0xFF, B: 0xFF}}
-	Black         = CpcColor{HardwareNumber: 20, FirmwareNumber: 0, HardwareValues: []uint8{0x54}, Color: color.RGBA{A: 0xFF, R: 0, G: 0, B: 0}}
-	BrightBlue    = CpcColor{HardwareNumber: 21, FirmwareNumber: 2, HardwareValues: []uint8{0x55}, Color: color.RGBA{A: 0xFF, R: 0, G: 0, B: 0xFF}}
-	Green         = CpcColor{HardwareNumber: 22, FirmwareNumber: 9, HardwareValues: []uint8{0x56}, Color: color.RGBA{A: 0xFF, R: 0, G: 0x7F, B: 0}}
-	SkyBlue       = CpcColor{HardwareNumber: 23, FirmwareNumber: 11, HardwareValues: []uint8{0x57}, Color: color.RGBA{A: 0xFF, R: 0, G: 0x7F, B: 0xFF}}
-	Magenta       = CpcColor{HardwareNumber: 24, FirmwareNumber: 4, HardwareValues: []uint8{0x58}, Color: color.RGBA{A: 0xFF, R: 0x7F, G: 0, B: 0x7F}}
-	PastelGreen   = CpcColor{HardwareNumber: 25, FirmwareNumber: 22, HardwareValues: []uint8{0x59}, Color: color.RGBA{A: 0xFF, R: 0x7F, G: 0xFF, B: 0x7F}}
-	Lime          = CpcColor{HardwareNumber: 26, FirmwareNumber: 21, HardwareValues: []uint8{0x5A}, Color: color.RGBA{A: 0xFF, R: 0x7F, G: 0xFF, B: 0}}
-	PastelCyan    = CpcColor{HardwareNumber: 27, FirmwareNumber: 23, HardwareValues: []uint8{0x5B}, Color: color.RGBA{A: 0xFF, R: 0x7F, G: 0xFF, B: 0xFF}}
-	Red           = CpcColor{HardwareNumber: 28, FirmwareNumber: 3, HardwareValues: []uint8{0x5C}, Color: color.RGBA{A: 0xFF, R: 0x7F, G: 0, B: 0}}
-	Mauve         = CpcColor{HardwareNumber: 29, FirmwareNumber: 5, HardwareValues: []uint8{0x5D}, Color: color.RGBA{A: 0xFF, R: 0x7F, G: 0, B: 0xFF}}
-	Yellow        = CpcColor{HardwareNumber: 30, FirmwareNumber: 12, HardwareValues: []uint8{0x5E}, Color: color.RGBA{A: 0xFF, R: 0x7F, G: 0x7F, B: 0}}
-	PastelBlue    = CpcColor{HardwareNumber: 31, FirmwareNumber: 14, HardwareValues: []uint8{0x5F}, Color: color.RGBA{A: 0xFF, R: 0x7F, G: 0x7F, B: 0xFF}}
+	White         = CpcColor{HardwareNumber: 0, FirmwareNumber: 13, HardwareValues: []uint8{0x40, 0x41}, Color: color.RGBA{A: 0xFF, R: 111, G: 125, B: 107}}
+	SeaGreen      = CpcColor{HardwareNumber: 2, FirmwareNumber: 19, HardwareValues: []uint8{0x42, 0x51}, Color: color.RGBA{A: 0xFF, R: 0, G: 243, B: 107}}
+	PastelYellow  = CpcColor{HardwareNumber: 3, FirmwareNumber: 25, HardwareValues: []uint8{0x43, 0x49}, Color: color.RGBA{A: 0xFF, R: 244, G: 244, B: 109}}
+	Blue          = CpcColor{HardwareNumber: 4, FirmwareNumber: 1, HardwareValues: []uint8{0x44, 0x50}, Color: color.RGBA{A: 0xFF, R: 0, G: 2, B: 107}}
+	Purple        = CpcColor{HardwareNumber: 5, FirmwareNumber: 7, HardwareValues: []uint8{0x45, 0x48}, Color: color.RGBA{A: 0xFF, R: 241, G: 2, B: 104}}
+	Cyan          = CpcColor{HardwareNumber: 6, FirmwareNumber: 10, HardwareValues: []uint8{0x46}, Color: color.RGBA{A: 0xFF, R: 0, G: 120, B: 104}}
+	Pink          = CpcColor{HardwareNumber: 7, FirmwareNumber: 16, HardwareValues: []uint8{0x47}, Color: color.RGBA{A: 0xFF, R: 243, G: 125, B: 107}}
+	BrightYellow  = CpcColor{HardwareNumber: 10, FirmwareNumber: 24, HardwareValues: []uint8{0x4A}, Color: color.RGBA{A: 0xFF, R: 244, G: 244, B: 13}}
+	BrightWhite   = CpcColor{HardwareNumber: 11, FirmwareNumber: 26, HardwareValues: []uint8{0x4B}, Color: color.RGBA{A: 0xFF, R: 255, G: 244, B: 250}}
+	BrightRed     = CpcColor{HardwareNumber: 12, FirmwareNumber: 6, HardwareValues: []uint8{0x4C}, Color: color.RGBA{A: 0xFF, R: 244, G: 5, B: 6}}
+	BrightMagenta = CpcColor{HardwareNumber: 13, FirmwareNumber: 8, HardwareValues: []uint8{0x4D}, Color: color.RGBA{A: 0xFF, R: 243, G: 2, B: 245}}
+	Orange        = CpcColor{HardwareNumber: 14, FirmwareNumber: 15, HardwareValues: []uint8{0x4E}, Color: color.RGBA{A: 0xFF, R: 243, G: 125, B: 13}}
+	PastelMagenta = CpcColor{HardwareNumber: 15, FirmwareNumber: 17, HardwareValues: []uint8{0x4F}, Color: color.RGBA{A: 0xFF, R: 251, G: 125, B: 250}}
+	BrightGreen   = CpcColor{HardwareNumber: 18, FirmwareNumber: 18, HardwareValues: []uint8{0x52}, Color: color.RGBA{A: 0xFF, R: 2, G: 241, B: 1}}
+	BrightCyan    = CpcColor{HardwareNumber: 19, FirmwareNumber: 20, HardwareValues: []uint8{0x53}, Color: color.RGBA{A: 0xFF, R: 15, G: 243, B: 242}}
+	Black         = CpcColor{HardwareNumber: 20, FirmwareNumber: 0, HardwareValues: []uint8{0x54}, Color: color.RGBA{A: 0xFF, R: 0, G: 2, B: 1}}
+	BrightBlue    = CpcColor{HardwareNumber: 21, FirmwareNumber: 2, HardwareValues: []uint8{0x55}, Color: color.RGBA{A: 0xFF, R: 12, G: 2, B: 245}}
+	Green         = CpcColor{HardwareNumber: 22, FirmwareNumber: 9, HardwareValues: []uint8{0x56}, Color: color.RGBA{A: 0xFF, R: 2, G: 120, B: 1}}
+	SkyBlue       = CpcColor{HardwareNumber: 23, FirmwareNumber: 11, HardwareValues: []uint8{0x57}, Color: color.RGBA{A: 0xFF, R: 12, G: 123, B: 245}}
+	Magenta       = CpcColor{HardwareNumber: 24, FirmwareNumber: 4, HardwareValues: []uint8{0x58}, Color: color.RGBA{A: 0xFF, R: 106, G: 2, B: 104}}
+	PastelGreen   = CpcColor{HardwareNumber: 25, FirmwareNumber: 22, HardwareValues: []uint8{0x59}, Color: color.RGBA{A: 0xFF, R: 113, G: 243, B: 107}}
+	Lime          = CpcColor{HardwareNumber: 26, FirmwareNumber: 21, HardwareValues: []uint8{0x5A}, Color: color.RGBA{A: 0xFF, R: 113, G: 243, B: 4}}
+	PastelCyan    = CpcColor{HardwareNumber: 27, FirmwareNumber: 23, HardwareValues: []uint8{0x5B}, Color: color.RGBA{A: 0xFF, R: 113, G: 243, B: 245}}
+	Red           = CpcColor{HardwareNumber: 28, FirmwareNumber: 3, HardwareValues: []uint8{0x5C}, Color: color.RGBA{A: 0xFF, R: 108, G: 2, B: 1}}
+	Mauve         = CpcColor{HardwareNumber: 29, FirmwareNumber: 5, HardwareValues: []uint8{0x5D}, Color: color.RGBA{A: 0xFF, R: 108, G: 2, B: 242}}
+	Yellow        = CpcColor{HardwareNumber: 30, FirmwareNumber: 12, HardwareValues: []uint8{0x5E}, Color: color.RGBA{A: 0xFF, R: 111, G: 123, B: 1}}
+	PastelBlue    = CpcColor{HardwareNumber: 31, FirmwareNumber: 14, HardwareValues: []uint8{0x5F}, Color: color.RGBA{A: 0xFF, R: 111, G: 125, B: 247}}
+	NotColor      = CpcColor{}
 )
 
 func NewCpcPlusPalette() color.Palette {
@@ -158,10 +159,11 @@ func NewCpcPlusPalette() color.Palette {
 	for g = 0; g < 0x10; g++ {
 		for r = 0; r < 0x10; r++ {
 			for b = 0; b < 0x10; b++ {
-				plusPalette = append(plusPalette, color.RGBA{R: r * 0x33, B: b * 0x33, G: g * 0x33, A: 0xFF})
+				plusPalette = append(plusPalette, color.RGBA{R: r * 16, B: b * 16, G: g * 16, A: 0xFF})
 			}
 		}
 	}
+	plusPalette = SortColorsByDistance(plusPalette)
 	return plusPalette
 }
 
@@ -316,6 +318,7 @@ func ColorDistance2(c1, c2 color.Color) int64 {
 	return distance
 }
 
+// nolint: funlen
 func CpcColorFromHardwareNumber(c int) (CpcColor, error) {
 	if White.HardwareNumber == c {
 		return White, nil
@@ -401,6 +404,7 @@ func CpcColorFromHardwareNumber(c int) (CpcColor, error) {
 	return CpcColor{HardwareNumber: -1}, ErrorCpcColorNotFound
 }
 
+// nolint: funlen
 func ColorFromHardware(c uint8) (color.Color, error) {
 	if HardwareValueAreEquals(White.HardwareValues, c) {
 		return White.Color, nil
@@ -487,260 +491,115 @@ func ColorFromHardware(c uint8) (color.Color, error) {
 }
 
 func HardwareValues(c color.Color) ([]uint8, error) {
-	if ColorsAreEquals(White.Color, c) {
-		return White.HardwareValues, nil
+	cc, err := selectColor(c)
+	if err != nil {
+		return nil, ErrorCpcColorNotFound
 	}
-	if ColorsAreEquals(SeaGreen.Color, c) {
-		return SeaGreen.HardwareValues, nil
-	}
-	if ColorsAreEquals(PastelYellow.Color, c) {
-		return PastelYellow.HardwareValues, nil
-	}
-	if ColorsAreEquals(Blue.Color, c) {
-		return Blue.HardwareValues, nil
-	}
-	if ColorsAreEquals(Purple.Color, c) {
-		return Purple.HardwareValues, nil
-	}
-	if ColorsAreEquals(Cyan.Color, c) {
-		return Cyan.HardwareValues, nil
-	}
-	if ColorsAreEquals(Pink.Color, c) {
-		return Pink.HardwareValues, nil
-	}
-	if ColorsAreEquals(BrightYellow.Color, c) {
-		return BrightYellow.HardwareValues, nil
-	}
-	if ColorsAreEquals(BrightWhite.Color, c) {
-		return BrightWhite.HardwareValues, nil
-	}
-	if ColorsAreEquals(BrightRed.Color, c) {
-		return BrightRed.HardwareValues, nil
-	}
-	if ColorsAreEquals(BrightMagenta.Color, c) {
-		return BrightMagenta.HardwareValues, nil
-	}
-	if ColorsAreEquals(Orange.Color, c) {
-		return Orange.HardwareValues, nil
-	}
-	if ColorsAreEquals(PastelMagenta.Color, c) {
-		return PastelMagenta.HardwareValues, nil
-	}
-	if ColorsAreEquals(BrightGreen.Color, c) {
-		return BrightGreen.HardwareValues, nil
-	}
-	if ColorsAreEquals(BrightCyan.Color, c) {
-		return BrightCyan.HardwareValues, nil
-	}
-	if ColorsAreEquals(Black.Color, c) {
-		return Black.HardwareValues, nil
-	}
-	if ColorsAreEquals(BrightBlue.Color, c) {
-		return BrightBlue.HardwareValues, nil
-	}
-	if ColorsAreEquals(Green.Color, c) {
-		return Green.HardwareValues, nil
-	}
-	if ColorsAreEquals(SkyBlue.Color, c) {
-		return SkyBlue.HardwareValues, nil
-	}
-	if ColorsAreEquals(Magenta.Color, c) {
-		return Magenta.HardwareValues, nil
-	}
-	if ColorsAreEquals(PastelGreen.Color, c) {
-		return PastelGreen.HardwareValues, nil
-	}
-	if ColorsAreEquals(Lime.Color, c) {
-		return Lime.HardwareValues, nil
-	}
-	if ColorsAreEquals(PastelCyan.Color, c) {
-		return PastelCyan.HardwareValues, nil
-	}
-	if ColorsAreEquals(Red.Color, c) {
-		return Red.HardwareValues, nil
-	}
-	if ColorsAreEquals(Mauve.Color, c) {
-		return Mauve.HardwareValues, nil
-	}
-	if ColorsAreEquals(Yellow.Color, c) {
-		return Yellow.HardwareValues, nil
-	}
-	if ColorsAreEquals(PastelBlue.Color, c) {
-		return PastelBlue.HardwareValues, nil
-	}
-	return nil, ErrorCpcColorNotFound
+	return cc.HardwareValues, nil
 
 }
 
-func FirmwareNumber(c color.Color) (int, error) {
+// nolint: funlen
+func selectColor(c color.Color) (CpcColor, error) {
 	if ColorsAreEquals(White.Color, c) {
-		return White.FirmwareNumber, nil
+		return White, nil
 	}
 	if ColorsAreEquals(SeaGreen.Color, c) {
-		return SeaGreen.FirmwareNumber, nil
+		return SeaGreen, nil
 	}
 	if ColorsAreEquals(PastelYellow.Color, c) {
-		return PastelYellow.FirmwareNumber, nil
+		return PastelYellow, nil
 	}
 	if ColorsAreEquals(Blue.Color, c) {
-		return Blue.FirmwareNumber, nil
+		return Blue, nil
 	}
 	if ColorsAreEquals(Purple.Color, c) {
-		return Purple.FirmwareNumber, nil
+		return Purple, nil
 	}
 	if ColorsAreEquals(Cyan.Color, c) {
-		return Cyan.FirmwareNumber, nil
+		return Cyan, nil
 	}
 	if ColorsAreEquals(Pink.Color, c) {
-		return Pink.FirmwareNumber, nil
+		return Pink, nil
 	}
 	if ColorsAreEquals(BrightYellow.Color, c) {
-		return BrightYellow.FirmwareNumber, nil
+		return BrightYellow, nil
 	}
 	if ColorsAreEquals(BrightWhite.Color, c) {
-		return BrightWhite.FirmwareNumber, nil
+		return BrightWhite, nil
 	}
 	if ColorsAreEquals(BrightRed.Color, c) {
-		return BrightRed.FirmwareNumber, nil
+		return BrightRed, nil
 	}
 	if ColorsAreEquals(BrightMagenta.Color, c) {
-		return BrightMagenta.FirmwareNumber, nil
+		return BrightMagenta, nil
 	}
 	if ColorsAreEquals(Orange.Color, c) {
-		return Orange.FirmwareNumber, nil
+		return Orange, nil
 	}
 	if ColorsAreEquals(PastelMagenta.Color, c) {
-		return PastelMagenta.FirmwareNumber, nil
+		return PastelMagenta, nil
 	}
 	if ColorsAreEquals(BrightGreen.Color, c) {
-		return BrightGreen.FirmwareNumber, nil
+		return BrightGreen, nil
 	}
 	if ColorsAreEquals(BrightCyan.Color, c) {
-		return BrightCyan.FirmwareNumber, nil
+		return BrightCyan, nil
 	}
 	if ColorsAreEquals(Black.Color, c) {
-		return Black.FirmwareNumber, nil
+		return Black, nil
 	}
 	if ColorsAreEquals(BrightBlue.Color, c) {
-		return BrightBlue.FirmwareNumber, nil
+		return BrightBlue, nil
 	}
 	if ColorsAreEquals(Green.Color, c) {
-		return Green.FirmwareNumber, nil
+		return Green, nil
 	}
 	if ColorsAreEquals(SkyBlue.Color, c) {
-		return SkyBlue.FirmwareNumber, nil
+		return SkyBlue, nil
 	}
 	if ColorsAreEquals(Magenta.Color, c) {
-		return Magenta.FirmwareNumber, nil
+		return Magenta, nil
 	}
 	if ColorsAreEquals(PastelGreen.Color, c) {
-		return PastelGreen.FirmwareNumber, nil
+		return PastelGreen, nil
 	}
 	if ColorsAreEquals(Lime.Color, c) {
-		return Lime.FirmwareNumber, nil
+		return Lime, nil
 	}
 	if ColorsAreEquals(PastelCyan.Color, c) {
-		return PastelCyan.FirmwareNumber, nil
+		return PastelCyan, nil
 	}
 	if ColorsAreEquals(Red.Color, c) {
-		return Red.FirmwareNumber, nil
+		return Red, nil
 	}
 	if ColorsAreEquals(Mauve.Color, c) {
-		return Mauve.FirmwareNumber, nil
+		return Mauve, nil
 	}
 	if ColorsAreEquals(Yellow.Color, c) {
-		return Yellow.FirmwareNumber, nil
+		return Yellow, nil
 	}
 	if ColorsAreEquals(PastelBlue.Color, c) {
-		return PastelBlue.FirmwareNumber, nil
+		return PastelBlue, nil
 	}
-	return -1, ErrorCpcColorNotFound
+	return NotColor, ErrorCpcColorNotFound
+}
+
+func FirmwareNumber(c color.Color) (int, error) {
+	cc, err := selectColor(c)
+	if err != nil {
+		return -1, ErrorCpcColorNotFound
+	}
+	return cc.FirmwareNumber, nil
 
 }
 
 func HardwareNumber(c color.Color) (int, error) {
-	if ColorsAreEquals(White.Color, c) {
-		return White.HardwareNumber, nil
+	cc, err := selectColor(c)
+	if err != nil {
+		return -1, ErrorCpcColorNotFound
 	}
-	if ColorsAreEquals(SeaGreen.Color, c) {
-		return SeaGreen.HardwareNumber, nil
-	}
-	if ColorsAreEquals(PastelYellow.Color, c) {
-		return PastelYellow.HardwareNumber, nil
-	}
-	if ColorsAreEquals(Blue.Color, c) {
-		return Blue.HardwareNumber, nil
-	}
-	if ColorsAreEquals(Purple.Color, c) {
-		return Purple.HardwareNumber, nil
-	}
-	if ColorsAreEquals(Cyan.Color, c) {
-		return Cyan.HardwareNumber, nil
-	}
-	if ColorsAreEquals(Pink.Color, c) {
-		return Pink.HardwareNumber, nil
-	}
-	if ColorsAreEquals(BrightYellow.Color, c) {
-		return BrightYellow.HardwareNumber, nil
-	}
-	if ColorsAreEquals(BrightWhite.Color, c) {
-		return BrightWhite.HardwareNumber, nil
-	}
-	if ColorsAreEquals(BrightRed.Color, c) {
-		return BrightRed.HardwareNumber, nil
-	}
-	if ColorsAreEquals(BrightMagenta.Color, c) {
-		return BrightMagenta.HardwareNumber, nil
-	}
-	if ColorsAreEquals(Orange.Color, c) {
-		return Orange.HardwareNumber, nil
-	}
-	if ColorsAreEquals(PastelMagenta.Color, c) {
-		return PastelMagenta.HardwareNumber, nil
-	}
-	if ColorsAreEquals(BrightGreen.Color, c) {
-		return BrightGreen.HardwareNumber, nil
-	}
-	if ColorsAreEquals(BrightCyan.Color, c) {
-		return BrightCyan.HardwareNumber, nil
-	}
-	if ColorsAreEquals(Black.Color, c) {
-		return Black.HardwareNumber, nil
-	}
-	if ColorsAreEquals(BrightBlue.Color, c) {
-		return BrightBlue.HardwareNumber, nil
-	}
-	if ColorsAreEquals(Green.Color, c) {
-		return Green.HardwareNumber, nil
-	}
-	if ColorsAreEquals(SkyBlue.Color, c) {
-		return SkyBlue.HardwareNumber, nil
-	}
-	if ColorsAreEquals(Magenta.Color, c) {
-		return Magenta.HardwareNumber, nil
-	}
-	if ColorsAreEquals(PastelGreen.Color, c) {
-		return PastelGreen.HardwareNumber, nil
-	}
-	if ColorsAreEquals(Lime.Color, c) {
-		return Lime.HardwareNumber, nil
-	}
-	if ColorsAreEquals(PastelCyan.Color, c) {
-		return PastelCyan.HardwareNumber, nil
-	}
-	if ColorsAreEquals(Red.Color, c) {
-		return Red.HardwareNumber, nil
-	}
-	if ColorsAreEquals(Mauve.Color, c) {
-		return Mauve.HardwareNumber, nil
-	}
-	if ColorsAreEquals(Yellow.Color, c) {
-		return Yellow.HardwareNumber, nil
-	}
-	if ColorsAreEquals(PastelBlue.Color, c) {
-		return PastelBlue.HardwareNumber, nil
-	}
-	return -1, ErrorCpcColorNotFound
+	return cc.HardwareNumber, nil
 
 }
 
@@ -756,6 +615,18 @@ func CToF(c uint32) float64 {
 	return (float64(c) / 255. * 100)
 }
 
+func FillColorPalette(p color.Palette) color.Palette {
+	for i, v := range p {
+		if v == nil {
+			p[i] = color.Black
+		}
+	}
+	for i := len(p); i < 16; i++ {
+		p = append(p, color.Black)
+	}
+	return p
+}
+
 type ByDistance []color.Color
 
 func (p ByDistance) Len() int { return len(p) }
@@ -768,7 +639,7 @@ func (p ByDistance) Less(i, j int) bool {
 }
 
 func SortColorsByDistance(p color.Palette) color.Palette {
-	sort.Sort(sort.Reverse(ByDistance(p)))
+	sort.Sort(ByDistance(p))
 	return p
 }
 
@@ -823,6 +694,7 @@ func (s *SplitRaster) Boundaries() (uint16, uint16) {
 	return s.Offset, s.Offset + uint16(s.Length)
 }
 
+// nolint: funlen
 func CpcColorStringFromHardwareNumber(c uint8) string {
 	if HardwareValueAreEquals(White.HardwareValues, c) {
 		return "White"

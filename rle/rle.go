@@ -7,6 +7,7 @@ import (
 	"github.com/jeromelesaux/martine/log"
 )
 
+// nolint: gocognit
 func Encode(in []byte) []byte {
 	out := make([]byte, 0)
 	nb := 1
@@ -19,16 +20,13 @@ func Encode(in []byte) []byte {
 
 			if nb > 255 {
 				for j := 0; j < (nb / 255); j++ {
-					out = append(out, 255)
-					out = append(out, c)
+					out = append(out, 255, c)
 				}
 				if nb%255 != 0 {
-					out = append(out, uint8(nb%255))
-					out = append(out, c)
+					out = append(out, uint8(nb%255), c)
 				}
 			} else {
-				out = append(out, uint8(nb))
-				out = append(out, c)
+				out = append(out, uint8(nb), c)
 			}
 
 			nb = 1
@@ -37,16 +35,13 @@ func Encode(in []byte) []byte {
 
 				if nb > 255 {
 					for j := 0; j < (nb / 255); j++ {
-						out = append(out, 255)
-						out = append(out, c)
+						out = append(out, 255, c)
 					}
 					if nb%255 != 0 {
-						out = append(out, uint8(nb%255))
-						out = append(out, c)
+						out = append(out, uint8(nb%255), c)
 					}
 				} else {
-					out = append(out, uint8(nb))
-					out = append(out, c)
+					out = append(out, uint8(nb), c)
 				}
 
 			}
@@ -58,16 +53,13 @@ func Encode(in []byte) []byte {
 	if nb > 1 {
 		if nb > 255 {
 			for j := 0; j < (nb / 255); j++ {
-				out = append(out, 255)
-				out = append(out, c)
+				out = append(out, 255, c)
 			}
 			if nb%255 != 0 {
-				out = append(out, uint8(nb%255))
-				out = append(out, c)
+				out = append(out, uint8(nb%255), c)
 			}
 		} else {
-			out = append(out, uint8(nb))
-			out = append(out, c)
+			out = append(out, uint8(nb), c)
 		}
 	}
 	return out

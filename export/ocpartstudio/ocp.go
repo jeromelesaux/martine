@@ -184,9 +184,9 @@ func RawScr(filePath string) ([]byte, error) {
 
 func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cfg *config.MartineConfig) error {
 	osFilepath := cfg.AmsdosFullPath(filePath, ".SCR")
-	log.GetLogger().Info( "Saving SCR file (%s)\n", osFilepath)
+	log.GetLogger().Info("Saving SCR file (%s)\n", osFilepath)
 	var exec uint16
-	if cfg.CpcPlus {
+	if cfg.ScrCfg.IsPlus {
 		exec = 0x821
 		switch screenMode {
 		case 0:
@@ -224,14 +224,14 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cfg *c
 			if err == nil {
 				data[(0x17D0)+i] = v[0]
 			} else {
-				log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+				log.GetLogger().Info("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 		copy(data[0x07d0:], codeScrStandard[:])
 	}
-	data, _ = compression.Compress(data, cfg.Compression)
+	data, _ = compression.Compress(data, cfg.ScrCfg.Compression)
 
-	if !cfg.NoAmsdosHeader {
+	if !cfg.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".SCR", data, 2, 0, 0xc000, exec); err != nil {
 			return err
 		}
@@ -318,7 +318,7 @@ func OpenPal(filePath string) (color.Palette, *OcpPalette, error) {
 		c, err := constants.ColorFromHardware(v[0])
 		if err != nil {
 			log.GetLogger().Error("Hardware color value %.2x is not recognized error :%v\n", v[0], err)
-			p = append(p, color.White)
+			p = append(p, color.Black)
 
 		} else {
 			p = append(p, c)
@@ -329,14 +329,14 @@ func OpenPal(filePath string) (color.Palette, *OcpPalette, error) {
 }
 
 func SavePal(filePath string, p color.Palette, screenMode uint8, noAmsdosHeader bool) error {
-	log.GetLogger().Info( "Saving PAL file (%s)\n", filePath)
+	log.GetLogger().Info("Saving PAL file (%s)\n", filePath)
 	data := OcpPalette{ScreenMode: screenMode, ColorAnimation: 0, ColorAnimationDelay: 0}
 	for i := 0; i < 16; i++ {
 		for j := 0; j < 12; j++ {
 			data.PaletteColors[i][j] = 54
 		}
 	}
-	log.GetLogger().Info( "Palette size %d\n", len(p))
+	log.GetLogger().Info("Palette size %d\n", len(p))
 	for i := 0; i < len(p); i++ {
 		v, err := constants.HardwareValues(p[i])
 		if err == nil {
@@ -344,7 +344,7 @@ func SavePal(filePath string, p color.Palette, screenMode uint8, noAmsdosHeader 
 				data.PaletteColors[i][j] = v[0]
 			}
 		} else {
-			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+			log.GetLogger().Info("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
 
@@ -367,14 +367,14 @@ func SavePal(filePath string, p color.Palette, screenMode uint8, noAmsdosHeader 
 }
 
 func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool, cfg *config.MartineConfig) error {
-	log.GetLogger().Info( "Saving PAL file (%s)\n", filePath)
+	log.GetLogger().Info("Saving PAL file (%s)\n", filePath)
 	data := OcpPalette{ScreenMode: screenMode, ColorAnimation: 0, ColorAnimationDelay: 0}
 	for i := 0; i < 16; i++ {
 		for j := 0; j < 12; j++ {
 			data.PaletteColors[i][j] = 54
 		}
 	}
-	log.GetLogger().Info( "Palette size %d\n", len(p))
+	log.GetLogger().Info("Palette size %d\n", len(p))
 	for i := 0; i < len(p); i++ {
 		v, err := constants.HardwareValues(p[i])
 		if err == nil {
@@ -382,7 +382,7 @@ func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 				data.PaletteColors[i][j] = v[0]
 			}
 		} else {
-			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+			log.GetLogger().Info("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
 	osFilepath := cfg.AmsdosFullPath(filePath, ".PAL")
@@ -391,7 +391,7 @@ func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 	if err != nil {
 		return err
 	}
-	if !cfg.NoAmsdosHeader {
+	if !cfg.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".PAL", res, 2, 0, 0x8809, 0x8809); err != nil {
 			return err
 		}
@@ -407,11 +407,11 @@ func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 }
 
 func PalInformation(filePath string) {
-	log.GetLogger().Info( "Input palette to open : (%s)\n", filePath)
+	log.GetLogger().Info("Input palette to open : (%s)\n", filePath)
 	_, palette, err := OpenPal(filePath)
 	if err != nil {
 		log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", filePath)
 	} else {
-		log.GetLogger().Info( "Palette from file %s\n\n%s", filePath, palette.ToString())
+		log.GetLogger().Info("Palette from file %s\n\n%s", filePath, palette.ToString())
 	}
 }

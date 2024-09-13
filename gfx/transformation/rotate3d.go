@@ -7,6 +7,7 @@ import (
 	"math"
 
 	"github.com/disintegration/imaging"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	ci "github.com/jeromelesaux/martine/convert/image"
 
@@ -21,7 +22,7 @@ func Rotate3d(in *image.NRGBA,
 	rollIteration,
 	rotation3DX0,
 	rotation3DY0 int,
-	rotation3DType int,
+	rotation3DType config.Rotation3d,
 ) ([]*image.NRGBA, error) {
 	images := make([]*image.NRGBA, 0)
 	if rollIteration == -1 {
@@ -58,7 +59,7 @@ func rotateImage(in, out *image.NRGBA,
 	angle float64,
 	rotation3DX0,
 	rotation3DY0 int,
-	rotation3DType int,
+	rotation3DType config.Rotation3d,
 ) *image.NRGBA {
 	var xc, yc int
 	if rotation3DX0 != -1 {
@@ -76,20 +77,20 @@ func rotateImage(in, out *image.NRGBA,
 			c := in.At(x, y)
 			var x3d, y3d int
 			switch rotation3DType {
-			case 1:
-				x3d, y3d = rotateXAxisCoordinates(x, y, xc, yc, angle)
-			case 2:
-				x3d, y3d = rotateYAxisCoordinates(x, y, xc, yc, angle)
-			case 3:
-				x3d, y3d = rotateToReverseXAxisCoordinates(x, y, xc, yc, angle)
-			case 4:
-				x3d, y3d = rotateLeftToRightYAxisCoordinates(x, y, xc, yc, angle)
-			case 5:
+			case config.RotateXAxis:
+				x3d, y3d = rotateXAxisCoordinates(x, y, yc, angle)
+			case config.RotateYAxis:
+				x3d, y3d = rotateYAxisCoordinates(x, y, xc, angle)
+			case config.ReverseRotateXAxis:
+				x3d, y3d = rotateToReverseXAxisCoordinates(x, y, yc, angle)
+			case config.RotateLeftToRightYAxis:
+				x3d, y3d = rotateLeftToRightYAxisCoordinates(x, y, xc, angle)
+			case config.RotateDiagonalXAxis:
 				x3d, y3d = rotateDiagonalXAxisCoordinates(x, y, xc, yc, angle)
-			case 6:
+			case config.RotateDiagonalYAxis:
 				x3d, y3d = rotateDiagonalYAxisCoordinates(x, y, xc, yc, angle)
 			default:
-				x3d, y3d = rotateXAxisCoordinates(x, y, xc, yc, angle)
+				x3d, y3d = rotateXAxisCoordinates(x, y, yc, angle)
 			}
 
 			out.Set(x3d, y3d, c)
@@ -109,7 +110,7 @@ func rotateCoordinates(x, y, xc, yc int, angle float64) (int, int) {
 }*/
 
 // source : https://slideplayer.com/slide/9723655/
-func rotateYAxisCoordinates(x, y, xc, yc int, angle float64) (int, int) {
+func rotateYAxisCoordinates(x, y, xc int, angle float64) (int, int) {
 	theta := angle * math.Pi / 180.
 	cosTheta := math.Cos(theta)
 	x3d := (float64(x-xc) * cosTheta) + float64(xc)
@@ -117,7 +118,7 @@ func rotateYAxisCoordinates(x, y, xc, yc int, angle float64) (int, int) {
 	return int(x3d), int(y3d)
 }
 
-func rotateXAxisCoordinates(x, y, xc, yc int, angle float64) (int, int) {
+func rotateXAxisCoordinates(x, y, yc int, angle float64) (int, int) {
 	theta := angle * math.Pi / 180.
 	cosTheta := math.Cos(theta)
 	x3d := (float64(x))
@@ -125,7 +126,7 @@ func rotateXAxisCoordinates(x, y, xc, yc int, angle float64) (int, int) {
 	return int(x3d), int(y3d)
 }
 
-func rotateLeftToRightYAxisCoordinates(x, y, xc, yc int, angle float64) (int, int) {
+func rotateLeftToRightYAxisCoordinates(x, y, xc int, angle float64) (int, int) {
 	theta := angle * math.Pi / 180.
 	sinTheta := math.Sin(theta)
 	x3d := (float64(x-xc) * sinTheta) + float64(xc)
@@ -133,7 +134,7 @@ func rotateLeftToRightYAxisCoordinates(x, y, xc, yc int, angle float64) (int, in
 	return int(x3d), int(y3d)
 }
 
-func rotateToReverseXAxisCoordinates(x, y, xc, yc int, angle float64) (int, int) {
+func rotateToReverseXAxisCoordinates(x, y, yc int, angle float64) (int, int) {
 	theta := angle * math.Pi / 180.
 	sinTheta := math.Sin(theta)
 	x3d := (float64(x))

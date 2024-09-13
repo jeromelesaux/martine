@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -100,7 +101,7 @@ func InitLoggerWithFile(prefix string) (*MLogger, error) {
 	if err != nil {
 		return nil, err
 	}
-	file := fmt.Sprintf(dir+string(filepath.Separator)+"%s %s.log", prefix, now.Format(time.DateTime))
+	file := fmt.Sprintf(dir+string(filepath.Separator)+"%s %s.log", prefix, strings.ReplaceAll(now.Format(time.DateTime), ":", " "))
 	writer, err := os.Create(file)
 	if err != nil {
 		return nil, err

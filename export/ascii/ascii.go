@@ -16,6 +16,7 @@ import (
 // ByteToken is the token by default
 var ByteToken = "db" // "BYTE"
 
+// nolint: funlen
 func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cgf *config.MartineConfig) error {
 	eol := "\n"
 	if runtime.GOOS == "windows" {
@@ -24,25 +25,23 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cg
 
 	var out string
 
-	data, _ = compression.Compress(data, cgf.Compression)
+	data, _ = compression.Compress(data, cgf.ScrCfg.Compression)
 
 	cpcFilename := string(cgf.AmsdosFilename()) + ".TXT"
 	osFilepath := cgf.AmsdosFullPath(filePath, ".TXT")
 	log.GetLogger().Info("Writing ascii file (%s) data length (%d)\n", osFilepath, len(data))
-	sizeInfos := fmt.Sprintf("; width %d height %d %s", cgf.Size.Width, cgf.Size.Height, eol)
+	sizeInfos := fmt.Sprintf("; width %d height %d %s", cgf.ScrCfg.Size.Width, cgf.ScrCfg.Size.Height, eol)
 	out += "; Screen " + cpcFilename + eol + ".screen:" + eol + sizeInfos
 	out += FormatAssemblyDatabyte(data, eol)
 	out += "; Palette " + cpcFilename + eol + ".palette:" + eol + ByteToken + " "
 
-	if cgf.CpcPlus {
+	if cgf.ScrCfg.IsPlus {
 		out += FormatAssemblyCPCPlusPalette(p, eol)
 	} else {
-		out += FormatAssemblyCPCPalette(p, eol)
-		out += eol + "; Basic Palette " + cpcFilename + eol + ".basic_palette:" + eol + ByteToken + " "
-		out += FormatAssemblyBasicPalette(p, eol)
-		out += eol
+		out += FormatAssemblyCPCPalette(p, eol) + eol + "; Basic Palette " + cpcFilename + eol + ".basic_palette:" + eol + ByteToken + " "
+		out += FormatAssemblyBasicPalette(p, eol) + eol
 	}
-	if !cgf.NoAmsdosHeader {
+	if !cgf.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".TXT", []byte(out), 0, 0, 0, 0); err != nil {
 			return err
 		}
@@ -55,14 +54,14 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cg
 	if !dontImportDsk {
 		cgf.AddFile(osFilepath)
 	}
-	if cgf.Json {
+	if cgf.ScrCfg.IsExport(config.JsonExport) {
 		palette := make([]string, len(p))
 		for i := 0; i < len(p); i++ {
 			v, err := constants.FirmwareNumber(p[i])
 			if err == nil {
 				palette[i] = fmt.Sprintf("%.2d", v)
-			} else {
-				log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+				// } else {
+				// 	log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 		hardwarepalette := make([]string, len(p))
@@ -74,7 +73,7 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cg
 		for i := 0; i < len(data); i++ {
 			screen[i] = fmt.Sprintf("0x%.2x", data[i])
 		}
-		j := x.NewJson(cgf.Filename(), cgf.Size.Width, cgf.Size.Height, screen, palette, hardwarepalette)
+		j := x.NewJson(cgf.Filename(), cgf.ScrCfg.Size.Width, cgf.ScrCfg.Size.Height, screen, palette, hardwarepalette)
 		log.GetLogger().Info("Filepath:%s\n", filePath)
 		if cgf.TileMode {
 			cgf.Tiles.Sprites = append(cgf.Tiles.Sprites, j)
@@ -85,6 +84,7 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cg
 	return nil
 }
 
+// nolint: funlen, gocognit
 func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk bool, mode uint8, cfg *config.MartineConfig) error {
 	eol := "\n"
 	if runtime.GOOS == "windows" {
@@ -98,7 +98,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 	cpcFilename := string(cfg.AmsdosFilename()) + "C.TXT"
 	osFilepath := cfg.AmsdosFullPath(filePath, "C.TXT")
 	log.GetLogger().Info("Writing ascii file (%s) values by columns data length (%d)\n", osFilepath, len(data))
-	sizeInfos := fmt.Sprintf("; width %d height %d %s", cfg.Size.Width, cfg.Size.Height, eol)
+	sizeInfos := fmt.Sprintf("; width %d height %d %s", cfg.ScrCfg.Size.Width, cfg.ScrCfg.Size.Height, eol)
 	out += "; Screen by column " + cpcFilename + eol + ".screen:" + eol + sizeInfos
 	var adjustMode int
 	switch mode {
@@ -109,13 +109,13 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 	case 2:
 		adjustMode = 8
 	}
-	pas := cfg.Size.Width / adjustMode
+	pas := cfg.ScrCfg.Size.Width / adjustMode
 	h := 0
 	nbValues := 1
 	octetsRead := 0
 	end := 17
-	if (cfg.Size.Width + 1) < end {
-		end = (cfg.Size.Width + 1)
+	if (cfg.ScrCfg.Size.Width + 1) < end {
+		end = (cfg.ScrCfg.Size.Width + 1)
 	}
 	for {
 
@@ -148,7 +148,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 	out += eol
 	out += "; Palette " + cpcFilename + eol + ".palette:" + eol + ByteToken + " "
 
-	if cfg.CpcPlus {
+	if cfg.ScrCfg.IsPlus {
 		out += FormatAssemblyCPCPlusPalette(p, eol)
 	} else {
 		out += FormatAssemblyCPCPalette(p, eol)
@@ -157,7 +157,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 		out += eol
 	}
 
-	if !cfg.NoAmsdosHeader {
+	if !cfg.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".TXT", []byte(out), 0, 0, 0, 0); err != nil {
 			return err
 		}
@@ -172,14 +172,14 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 		cfg.AddFile(osFilepath)
 	}
 
-	if cfg.Json {
+	if cfg.ScrCfg.IsExport(config.JsonExport) {
 		palette := make([]string, len(p))
 		for i := 0; i < len(p); i++ {
 			v, err := constants.FirmwareNumber(p[i])
 			if err == nil {
 				palette[i] = fmt.Sprintf("%.2d", v)
-			} else {
-				log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+				// } else {
+				// 	log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 		hardwarepalette := make([]string, len(p))
@@ -188,7 +188,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 			hardwarepalette[i] = fmt.Sprintf("0x%.2x", fcolor)
 		}
 
-		j := x.NewJson(cfg.Filename(), cfg.Size.Width, cfg.Size.Height, jsonData, palette, hardwarepalette)
+		j := x.NewJson(cfg.Filename(), cfg.ScrCfg.Size.Width, cfg.ScrCfg.Size.Height, jsonData, palette, hardwarepalette)
 		log.GetLogger().Info("Filepath:%s\n", filePath)
 		if cfg.TileMode {
 			cfg.Tiles.Sprites = append(cfg.Tiles.Sprites, j)
@@ -236,7 +236,7 @@ func SpritesHardText(data [][]byte, compressionType compression.CompressionMetho
 	var out string
 	for i, v := range data {
 		out += fmt.Sprintf("Sprite_%02d\n", i)
-		compressed, err := compression.Compress([]byte(v), compressionType)
+		compressed, err := compression.Compress(v, compressionType)
 		if err == nil {
 			out += FormatAssemblyDatabyte(compressed, "\n")
 		} else {
@@ -294,8 +294,8 @@ func FormatAssemblyCPCPalette(p color.Palette, eol string) string {
 					out += ", "
 				}
 			}
-		} else {
-			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+			// } else {
+			// 	log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
 	return out
@@ -314,8 +314,8 @@ func FormatAssemblyBasicPalette(p color.Palette, eol string) string {
 					out += ", "
 				}
 			}
-		} else {
-			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+			// } else {
+			// 	log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
 	return out
@@ -323,6 +323,7 @@ func FormatAssemblyBasicPalette(p color.Palette, eol string) string {
 
 func FormatAssemblyCPCPlusPalette(p color.Palette, eol string) string {
 	var out string
+	out += ByteToken
 	for i := 0; i < len(p); i++ {
 		cp := constants.NewCpcPlusColor(p[i])
 		v := cp.Value()

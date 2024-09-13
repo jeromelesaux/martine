@@ -10,14 +10,13 @@ require (
 	github.com/esimov/colorquant v1.0.0
 	github.com/esimov/dithergo v0.0.0-20210215145655-7f9ddf55e848
 	github.com/jeromelesaux/dsk v0.0.0-20230417191026-0e405580626b
-	github.com/jeromelesaux/fyne-io v0.0.0-20230824131551-ac61153d16f0
 	github.com/jeromelesaux/m4client v0.0.0-20230327092026-4e80fd2b1474
 	github.com/jeromelesaux/zx0 v0.0.0-20220922122216-619a0141f9e0
 	github.com/mccutchen/palettor v1.0.0
 	github.com/oliamb/cutter v0.2.2
 	github.com/pbnjay/pixfont v0.0.0-20200714042608-33b744692567
 	github.com/pierrec/lz4 v2.6.1+incompatible
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
@@ -35,6 +34,7 @@ require (
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/goki/freetype v1.0.1 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
+	github.com/jeromelesaux/fyne-io v0.0.0-20240530064356-5128e23c0093
 	github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/muesli/clusters v0.0.0-20200529215643-2700303c1762 // indirect
@@ -44,11 +44,11 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/tevino/abool v1.2.0 // indirect
 	github.com/yuin/goldmark v1.5.6 // indirect
-	golang.org/x/image v0.11.0 // indirect
+	golang.org/x/image v0.18.0 // indirect
 	golang.org/x/mobile v0.0.0-20230818142238-7088062f872d // indirect
-	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/net v0.27.0 // indirect
+	golang.org/x/sys v0.22.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	honnef.co/go/js/dom v0.0.0-20230808055721-96db8f4d5e3b // indirect
 )

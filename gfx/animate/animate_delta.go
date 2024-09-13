@@ -12,6 +12,7 @@ import (
 	"sync"
 	"text/template"
 
+	"github.com/jeromelesaux/martine/assembly"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/amsdos"
@@ -32,13 +33,14 @@ var (
 	DeltaExportV2 DeltaExportFormat = 2
 )
 
+// nolint: funlen
 func DeltaPackingMemory(images []image.Image, cfg *config.MartineConfig, initialAddress uint16, mode uint8) ([]*transformation.DeltaCollection, [][]byte, color.Palette, error) {
 	var isSprite bool = true
 	maxImages := 22
 	var pad int = 1
 	var err error
 	var palette color.Palette
-	if !cfg.CustomDimension && !cfg.SpriteHard {
+	if !cfg.CustomDimension && cfg.ScrCfg.Type != config.SpriteHardFormat {
 		isSprite = false
 	}
 	if len(images) <= 1 {
@@ -77,7 +79,7 @@ func DeltaPackingMemory(images []image.Image, cfg *config.MartineConfig, initial
 	}
 
 	log.GetLogger().Info("Let's go deltapacking raw images\n")
-	realSize := &constants.Size{Width: cfg.Size.Width, Height: cfg.Size.Height}
+	realSize := &constants.Size{Width: cfg.ScrCfg.Size.Width, Height: cfg.ScrCfg.Size.Height}
 	if isSprite {
 		realSize.Width = realSize.ModeWidth(mode)
 	}
@@ -103,10 +105,11 @@ func DeltaPackingMemory(images []image.Image, cfg *config.MartineConfig, initial
 	return deltaData, rawImages, palette, nil
 }
 
+// nolint: funlen
 func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress uint16, mode uint8, exportVersion DeltaExportFormat) error {
 	isSprite := true
 	maxImages := 22
-	if !cfg.CustomDimension && !cfg.SpriteHard {
+	if !cfg.CustomDimension && cfg.ScrCfg.Type != config.SpriteHardFormat {
 		isSprite = false
 	}
 	fr, err := os.Open(gitFilepath)
@@ -136,7 +139,7 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 	log.GetLogger().Info("Let's go transform images files in win or scr\n")
 
 	if cfg.FilloutGif {
-		imgs := filloutGif(*gifImages, cfg)
+		imgs := filloutGif(*gifImages)
 		_, _, palette, _, err = gfx.ApplyOneImage(imgs[0], cfg, int(mode), palette, mode)
 		if err != nil {
 			return err
@@ -161,7 +164,7 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 			if err != nil {
 				return err
 			}
-			err = png.Png(cfg.OutputPath+fmt.Sprintf("/%.2d.png", i), in)
+			err = png.Png(cfg.ScrCfg.OutputPath+fmt.Sprintf("/%.2d.png", i), in)
 			if err != nil {
 				return err
 			}
@@ -176,7 +179,7 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 	}
 
 	log.GetLogger().Info("Let's go deltapacking raw images\n")
-	realSize := &constants.Size{Width: cfg.Size.Width, Height: cfg.Size.Height}
+	realSize := &constants.Size{Width: cfg.ScrCfg.Size.Width, Height: cfg.ScrCfg.Size.Height}
 	realSize.Width = realSize.ModeWidth(mode)
 	var lastImage []byte
 	for i := 0; i < len(rawImages)-1; i++ {
@@ -197,8 +200,8 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 	dc := transformation.Delta(d1, d2, isSprite, *realSize, mode, uint16(x0), uint16(y0), lineOctetsWidth)
 	deltaData = append(deltaData, dc)
 	log.GetLogger().Info("%d bytes differ from the both images\n", len(dc.Items))
-	filename := string(cfg.OsFilename(".asm"))
-	_, err = ExportDeltaAnimate(rawImages[0], deltaData, palette, isSprite, cfg, initialAddress, mode, cfg.OutputPath+string(filepath.Separator)+filename, exportVersion)
+	filename := cfg.OsFilename(".asm")
+	_, err = ExportDeltaAnimate(rawImages[0], deltaData, palette, isSprite, cfg, initialAddress, mode, cfg.ScrCfg.OutputPath+string(filepath.Separator)+filename, exportVersion)
 	return err
 }
 
@@ -222,7 +225,7 @@ func ConvertToImage(g gif.GIF) []*image.NRGBA {
 	return c
 }
 
-func filloutGif(g gif.GIF, cfg *config.MartineConfig) []image.Image {
+func filloutGif(g gif.GIF) []image.Image {
 	c := make([]image.Image, 0)
 	width := g.Image[0].Bounds().Max.X
 	height := g.Image[0].Bounds().Max.Y
@@ -238,6 +241,7 @@ func filloutGif(g gif.GIF, cfg *config.MartineConfig) []image.Image {
 	return c
 }
 
+// nolint: funlen, gocognit
 func ExportDeltaAnimate(
 	imageReference []byte,
 	delta []*transformation.DeltaCollection,
@@ -254,13 +258,13 @@ func ExportDeltaAnimate(
 		Palette:        palette,
 		Mode:           int(mode),
 		LigneLarge:     fmt.Sprintf("#%.4x", 0xC000+cfg.LineWidth),
-		Haut:           fmt.Sprintf("%d", cfg.Size.Height),
-		Large:          fmt.Sprintf("%d", cfg.Size.ModeWidth(mode)),
+		Haut:           fmt.Sprintf("%d", cfg.ScrCfg.Size.Height),
+		Large:          fmt.Sprintf("%d", cfg.ScrCfg.Size.ModeWidth(mode)),
 		Image:          imageReference,
 		Type: AnimateExportType{
-			Compress: cfg.Compression != compression.NONE,
+			Compress: cfg.ScrCfg.Compression != compression.NONE,
 			IsSprite: isSprite,
-			CPCPlus:  cfg.CpcPlus,
+			CPCPlus:  cfg.ScrCfg.IsPlus,
 		},
 	}
 	data := make([][]byte, 0)
@@ -288,9 +292,9 @@ func ExportDeltaAnimate(
 	var sourceCode string
 
 	if !isSprite {
-		if cfg.Compression != compression.NONE {
+		if cfg.ScrCfg.Compression != compression.NONE {
 			sourceCode = deltaScreenCompressCodeDelta
-			if cfg.CpcPlus {
+			if cfg.ScrCfg.IsPlus {
 				sourceCode = deltaScreenCompressCodeDeltaPlus
 			} else {
 				if exportVersion == DeltaExportV2 {
@@ -299,7 +303,7 @@ func ExportDeltaAnimate(
 			}
 		} else {
 			sourceCode = deltaScreenCodeDelta
-			if cfg.CpcPlus {
+			if cfg.ScrCfg.IsPlus {
 				sourceCode = deltaScreenCodeDeltaPlus
 			} else {
 				if exportVersion == DeltaExportV2 {
@@ -319,7 +323,7 @@ func ExportDeltaAnimate(
 	fmt.Println(buf.String())
 
 	code := buf.String()
-	if cfg.Compression != compression.NONE {
+	if cfg.ScrCfg.Compression != compression.NONE {
 		code += "\nbuffer:\n"
 	}
 	code += "\nend\n"
@@ -565,52 +569,9 @@ xvbl ld e,50
 	ret
 ;-----------------------------------
 
-;---- attente vbl ----------
-waitvbl
-	ld b,#f5 ; attente vbl
-vbl
-	in a,(c)
-	rra
-	jp nc,vbl
-	ret
-;---------------------------
-
-;--- application palette firmware -------------
-palettefirmware ; hl pointe sur les valeurs de la palette
-ld e,nbcolors
-ld a,0
-ld hl,palette
-
-paletteloop
-ld b,(hl)
-ld c,b
-push af
-push de
-push hl
-call #bc32 ; af, de, hl corrupted
-pop hl
-pop de
-pop af
-inc a
-inc hl
-dec e
-jr nz,paletteloop
-ret
-;---------------------------------------------
-
-;---------------------------------------------
-
-;---- recuperation de l'adresse de la ligne en dessous ------------
-bc26
-ld a,h
-add a,8
-ld h,a ; <---- le fameux que tu as oublié !
-ret nc
-ld bc,linewidth ; on passe en 96 colonnes
-add hl,bc
-res 3,h
-ret
-;-----------------------------------------------------------------
+` + assembly.WaitVbl + `
+` + assembly.FirmwarePalette + `
+` + assembly.BC26 + `
 
 ;--- variables memoires -----
 pixel db 0
@@ -668,8 +629,7 @@ Unlock:
 jp display_screen
 
 
-UnlockAsic:
-	DB	#FF,#00,#FF,#77,#B3,#51,#A8,#D4,#62,#39,#9C,#46,#2B,#15,#8A,#CD,#EE
+` + assembly.UnlockAsicSequence + `
 
 ;---------------------------------------------
 
@@ -761,67 +721,7 @@ poke_octet
 	pop af
 	ret
 
-	;
-	; Decompactage ZX0
-	; HL = source
-	; DE = destination
-	;
-Depack:
-		ld    bc,#ffff        ; preserve default offset 1
-		push    bc
-		inc    bc
-		ld    a,#80
-	dzx0s_literals:
-		call    dzx0s_elias        ; obtain length
-		ldir                ; copy literals
-		add    a,a            ; copy from last offset or new offset?
-		jr    c,dzx0s_new_offset
-		call    dzx0s_elias        ; obtain length
-	dzx0s_copy:
-		ex    (sp),hl            ; preserve source,restore offset
-		push    hl            ; preserve offset
-		add    hl,de            ; calculate destination - offset
-		ldir                ; copy from offset
-		pop    hl            ; restore offset
-		ex    (sp),hl            ; preserve offset,restore source
-		add    a,a            ; copy from literals or new offset?
-		jr    nc,dzx0s_literals
-	dzx0s_new_offset:
-		call    dzx0s_elias        ; obtain offset MSB
-		ld b,a
-		pop    af            ; discard last offset
-		xor    a            ; adjust for negative offset
-		sub    c
-		RET    Z            ; Plus d'octets a traiter = fini
-
-		ld    c,a
-		ld    a,b
-		ld    b,c
-		ld    c,(hl)            ; obtain offset LSB
-		inc    hl
-		rr    b            ; last offset bit becomes first length bit
-		rr    c
-		push    bc            ; preserve new offset
-		ld    bc,1            ; obtain length
-		call    nc,dzx0s_elias_backtrack
-		inc    bc
-		jr    dzx0s_copy
-	dzx0s_elias:
-		inc    c            ; interlaced Elias gamma coding
-	dzx0s_elias_loop:
-		add    a,a
-		jr    nz,dzx0s_elias_skip
-		ld    a,(hl)            ; load another group of 8 bits
-		inc    hl
-		rla
-	dzx0s_elias_skip:
-		ret     c
-	dzx0s_elias_backtrack:
-		add    a,a
-		rl    c
-		rl    b
-		jr    dzx0s_elias_loop
-	ret
+` + assembly.DeltapackRoutine + `
 
 ;---------------------------------------------------------------
 ;
@@ -834,28 +734,8 @@ xvbl ld e,50
 	ret
 ;-----------------------------------
 
-;---- attente vbl ----------
-waitvbl
-	ld b,#f5 ; attente vbl
-vbl
-	in a,(c)
-	rra
-	jp nc,vbl
-	ret
-;---------------------------
-
-
-;---- recuperation de l'adresse de la ligne en dessous ------------
-bc26
-ld a,h
-add a,8
-ld h,a ; <---- le fameux que tu as oublié !
-ret nc
-ld bc,linewidth ; on passe en 96 colonnes
-add hl,bc
-res 3,h
-ret
-;-----------------------------------------------------------------
+` + assembly.WaitVbl + `
+` + assembly.BC26 + `
 
 
 ;--- variables memoires -----
@@ -911,8 +791,7 @@ Unlock:
 ;------------------------------
 jp display_screen
 
-UnlockAsic:
-	DB	#FF,#00,#FF,#77,#B3,#51,#A8,#D4,#62,#39,#9C,#46,#2B,#15,#8A,#CD,#EE
+` + assembly.UnlockAsicSequence + `
 
 
 Palette:
@@ -1008,29 +887,8 @@ xvbl ld e,50
 	ret
 ;-----------------------------------
 
-;---- attente vbl ----------
-waitvbl
-	ld b,#f5 ; attente vbl
-vbl
-	in a,(c)
-	rra
-	jp nc,vbl
-	ret
-;---------------------------
-
-;---------------------------------------------
-
-;---- recuperation de l'adresse de la ligne en dessous ------------
-bc26
-ld a,h
-add a,8
-ld h,a ; <---- le fameux que tu as oublié !
-ret nc
-ld bc,linewidth ; on passe en 96 colonnes
-add hl,bc
-res 3,h
-ret
-;-----------------------------------------------------------------
+` + assembly.WaitVbl + `
+` + assembly.BC26 + `
 
 ;--- variables memoires -----
 pixel db 0
@@ -1168,68 +1026,7 @@ highbyte_value 	ld d,0
 
 
 	ret
-
-	;
-	; Decompactage ZX0
-	; HL = source
-	; DE = destination
-	;
-	Depack:
-		ld    bc,#ffff        ; preserve default offset 1
-		push    bc
-		inc    bc
-		ld    a,#80
-	dzx0s_literals:
-		call    dzx0s_elias        ; obtain length
-		ldir                ; copy literals
-		add    a,a            ; copy from last offset or new offset?
-		jr    c,dzx0s_new_offset
-		call    dzx0s_elias        ; obtain length
-	dzx0s_copy:
-		ex    (sp),hl            ; preserve source,restore offset
-		push    hl            ; preserve offset
-		add    hl,de            ; calculate destination - offset
-		ldir                ; copy from offset
-		pop    hl            ; restore offset
-		ex    (sp),hl            ; preserve offset,restore source
-		add    a,a            ; copy from literals or new offset?
-		jr    nc,dzx0s_literals
-	dzx0s_new_offset:
-		call    dzx0s_elias        ; obtain offset MSB
-		ld b,a
-		pop    af            ; discard last offset
-		xor    a            ; adjust for negative offset
-		sub    c
-		RET    Z            ; Plus d'octets a traiter = fini
-
-		ld    c,a
-		ld    a,b
-		ld    b,c
-		ld    c,(hl)            ; obtain offset LSB
-		inc    hl
-		rr    b            ; last offset bit becomes first length bit
-		rr    c
-		push    bc            ; preserve new offset
-		ld    bc,1            ; obtain length
-		call    nc,dzx0s_elias_backtrack
-		inc    bc
-		jr    dzx0s_copy
-	dzx0s_elias:
-		inc    c            ; interlaced Elias gamma coding
-	dzx0s_elias_loop:
-		add    a,a
-		jr    nz,dzx0s_elias_skip
-		ld    a,(hl)            ; load another group of 8 bits
-		inc    hl
-		rla
-	dzx0s_elias_skip:
-		ret     c
-	dzx0s_elias_backtrack:
-		add    a,a
-		rl    c
-		rl    b
-		jr    dzx0s_elias_loop
-	ret
+` + assembly.DeltapackRoutine + `
 
 ;---------------------------------------------------------------
 ;
@@ -1242,52 +1039,9 @@ xvbl ld e,50
 	ret
 ;-----------------------------------
 
-;---- attente vbl ----------
-waitvbl
-	ld b,#f5 ; attente vbl
-vbl
-	in a,(c)
-	rra
-	jp nc,vbl
-	ret
-;---------------------------
-
-;--- application palette firmware -------------
-palettefirmware ; hl pointe sur les valeurs de la palette
-ld e,nbcolors
-ld a,0
-ld hl,palette
-
-paletteloop
-ld b,(hl)
-ld c,b
-push af
-push de
-push hl
-call #bc32 ; af, de, hl corrupted
-pop hl
-pop de
-pop af
-inc a
-inc hl
-dec e
-jr nz,paletteloop
-ret
-;---------------------------------------------
-
-;---------------------------------------------
-
-;---- recuperation de l'adresse de la ligne en dessous ------------
-bc26
-ld a,h
-add a,8
-ld h,a ; <---- le fameux que tu as oublié !
-ret nc
-ld bc,linewidth ; on passe en 96 colonnes
-add hl,bc
-res 3,h
-ret
-;-----------------------------------------------------------------
+` + assembly.WaitVbl + `
+` + assembly.FirmwarePalette + `
+` + assembly.BC26 + `
 
 
 ;--- variables memoires -----
@@ -1417,52 +1171,9 @@ xvbl ld e,50
 	ret
 ;-----------------------------------
 
-;---- attente vbl ----------
-waitvbl
-	ld b,#f5 ; attente vbl
-vbl
-	in a,(c)
-	rra
-	jp nc,vbl
-	ret
-;---------------------------
-
-;--- application palette firmware -------------
-palettefirmware ; hl pointe sur les valeurs de la palette
-ld e,nbcolors
-ld a,0
-ld hl,palette
-
-paletteloop
-ld b,(hl)
-ld c,b
-push af
-push de
-push hl
-call #bc32 ; af, de, hl corrupted
-pop hl
-pop de
-pop af
-inc a
-inc hl
-dec e
-jr nz,paletteloop
-ret
-;---------------------------------------------
-
-;---------------------------------------------
-
-;---- recuperation de l'adresse de la ligne en dessous ------------
-bc26
-ld a,h
-add a,8
-ld h,a ; <---- le fameux que tu as oublié !
-ret nc
-ld bc,linewidth ; on passe en 96 colonnes
-add hl,bc
-res 3,h
-ret
-;-----------------------------------------------------------------
+` + assembly.WaitVbl + `
+` + assembly.FirmwarePalette + `
+` + assembly.BC26 + `
 
 
 ;--- variables memoires -----
@@ -1587,68 +1298,7 @@ poke_octet
 	ret
 
 
-
-	;
-	; Decompactage ZX0
-	; HL = source
-	; DE = destination
-	;
-	Depack:
-		ld    bc,#ffff        ; preserve default offset 1
-		push    bc
-		inc    bc
-		ld    a,#80
-	dzx0s_literals:
-		call    dzx0s_elias        ; obtain length
-		ldir                ; copy literals
-		add    a,a            ; copy from last offset or new offset?
-		jr    c,dzx0s_new_offset
-		call    dzx0s_elias        ; obtain length
-	dzx0s_copy:
-		ex    (sp),hl            ; preserve source,restore offset
-		push    hl            ; preserve offset
-		add    hl,de            ; calculate destination - offset
-		ldir                ; copy from offset
-		pop    hl            ; restore offset
-		ex    (sp),hl            ; preserve offset,restore source
-		add    a,a            ; copy from literals or new offset?
-		jr    nc,dzx0s_literals
-	dzx0s_new_offset:
-		call    dzx0s_elias        ; obtain offset MSB
-		ld b,a
-		pop    af            ; discard last offset
-		xor    a            ; adjust for negative offset
-		sub    c
-		RET    Z            ; Plus d'octets a traiter = fini
-
-		ld    c,a
-		ld    a,b
-		ld    b,c
-		ld    c,(hl)            ; obtain offset LSB
-		inc    hl
-		rr    b            ; last offset bit becomes first length bit
-		rr    c
-		push    bc            ; preserve new offset
-		ld    bc,1            ; obtain length
-		call    nc,dzx0s_elias_backtrack
-		inc    bc
-		jr    dzx0s_copy
-	dzx0s_elias:
-		inc    c            ; interlaced Elias gamma coding
-	dzx0s_elias_loop:
-		add    a,a
-		jr    nz,dzx0s_elias_skip
-		ld    a,(hl)            ; load another group of 8 bits
-		inc    hl
-		rla
-	dzx0s_elias_skip:
-		ret     c
-	dzx0s_elias_backtrack:
-		add    a,a
-		rl    c
-		rl    b
-		jr    dzx0s_elias_loop
-	ret
+` + assembly.DeltapackRoutine + `
 
 ;---------------------------------------------------------------
 ;
@@ -1661,52 +1311,10 @@ xvbl ld e,50
 	ret
 ;-----------------------------------
 
-;---- attente vbl ----------
-waitvbl
-	ld b,#f5 ; attente vbl
-vbl
-	in a,(c)
-	rra
-	jp nc,vbl
-	ret
-;---------------------------
+` + assembly.WaitVbl + `
+` + assembly.FirmwarePalette + `
 
-;--- application palette firmware -------------
-palettefirmware ; hl pointe sur les valeurs de la palette
-ld e,nbcolors
-ld a,0
-ld hl,palette
-
-paletteloop
-ld b,(hl)
-ld c,b
-push af
-push de
-push hl
-call #bc32 ; af, de, hl corrupted
-pop hl
-pop de
-pop af
-inc a
-inc hl
-dec e
-jr nz,paletteloop
-ret
-;---------------------------------------------
-
-;---------------------------------------------
-
-;---- recuperation de l'adresse de la ligne en dessous ------------
-bc26
-ld a,h
-add a,8
-ld h,a ; <---- le fameux que tu as oublié !
-ret nc
-ld bc,linewidth ; on passe en 96 colonnes
-add hl,bc
-res 3,h
-ret
-;-----------------------------------------------------------------
+` + assembly.BC26 + `
 
 
 ;--- variables memoires -----
@@ -1840,52 +1448,9 @@ xvbl ld e,50
 	ret
 ;-----------------------------------
 
-;---- attente vbl ----------
-waitvbl
-	ld b,#f5 ; attente vbl
-vbl
-	in a,(c)
-	rra
-	jp nc,vbl
-	ret
-;---------------------------
-
-;--- application palette firmware -------------
-palettefirmware ; hl pointe sur les valeurs de la palette
-ld e,nbcolors
-ld a,0
-ld hl,palette
-
-paletteloop
-ld b,(hl)
-ld c,b
-push af
-push de
-push hl
-call #bc32 ; af, de, hl corrupted
-pop hl
-pop de
-pop af
-inc a
-inc hl
-dec e
-jr nz,paletteloop
-ret
-;---------------------------------------------
-
-;---------------------------------------------
-
-;---- recuperation de l'adresse de la ligne en dessous ------------
-bc26
-ld a,h
-add a,8
-ld h,a ; <---- le fameux que tu as oublié !
-ret nc
-ld bc,linewidth ; on passe en 96 colonnes
-add hl,bc
-res 3,h
-ret
-;-----------------------------------------------------------------
+` + assembly.WaitVbl + `
+` + assembly.FirmwarePalette + `
+` + assembly.BC26 + `
 
 
 ;--- variables memoires -----
@@ -2019,67 +1584,7 @@ poke_octet
 
 
 
-	;
-	; Decompactage ZX0
-	; HL = source
-	; DE = destination
-	;
-	Depack:
-		ld    bc,#ffff        ; preserve default offset 1
-		push    bc
-		inc    bc
-		ld    a,#80
-	dzx0s_literals:
-		call    dzx0s_elias        ; obtain length
-		ldir                ; copy literals
-		add    a,a            ; copy from last offset or new offset?
-		jr    c,dzx0s_new_offset
-		call    dzx0s_elias        ; obtain length
-	dzx0s_copy:
-		ex    (sp),hl            ; preserve source,restore offset
-		push    hl            ; preserve offset
-		add    hl,de            ; calculate destination - offset
-		ldir                ; copy from offset
-		pop    hl            ; restore offset
-		ex    (sp),hl            ; preserve offset,restore source
-		add    a,a            ; copy from literals or new offset?
-		jr    nc,dzx0s_literals
-	dzx0s_new_offset:
-		call    dzx0s_elias        ; obtain offset MSB
-		ld b,a
-		pop    af            ; discard last offset
-		xor    a            ; adjust for negative offset
-		sub    c
-		RET    Z            ; Plus d'octets a traiter = fini
-
-		ld    c,a
-		ld    a,b
-		ld    b,c
-		ld    c,(hl)            ; obtain offset LSB
-		inc    hl
-		rr    b            ; last offset bit becomes first length bit
-		rr    c
-		push    bc            ; preserve new offset
-		ld    bc,1            ; obtain length
-		call    nc,dzx0s_elias_backtrack
-		inc    bc
-		jr    dzx0s_copy
-	dzx0s_elias:
-		inc    c            ; interlaced Elias gamma coding
-	dzx0s_elias_loop:
-		add    a,a
-		jr    nz,dzx0s_elias_skip
-		ld    a,(hl)            ; load another group of 8 bits
-		inc    hl
-		rla
-	dzx0s_elias_skip:
-		ret     c
-	dzx0s_elias_backtrack:
-		add    a,a
-		rl    c
-		rl    b
-		jr    dzx0s_elias_loop
-	ret
+` + assembly.DeltapackRoutine + `
 
 ;---------------------------------------------------------------
 ;
@@ -2092,52 +1597,9 @@ xvbl ld e,50
 	ret
 ;-----------------------------------
 
-;---- attente vbl ----------
-waitvbl
-	ld b,#f5 ; attente vbl
-vbl
-	in a,(c)
-	rra
-	jp nc,vbl
-	ret
-;---------------------------
-
-;--- application palette firmware -------------
-palettefirmware ; hl pointe sur les valeurs de la palette
-ld e,nbcolors
-ld a,0
-ld hl,palette
-
-paletteloop
-ld b,(hl)
-ld c,b
-push af
-push de
-push hl
-call #bc32 ; af, de, hl corrupted
-pop hl
-pop de
-pop af
-inc a
-inc hl
-dec e
-jr nz,paletteloop
-ret
-;---------------------------------------------
-
-;---------------------------------------------
-
-;---- recuperation de l'adresse de la ligne en dessous ------------
-bc26
-ld a,h
-add a,8
-ld h,a ; <---- le fameux que tu as oublié !
-ret nc
-ld bc,linewidth ; on passe en 96 colonnes
-add hl,bc
-res 3,h
-ret
-;-----------------------------------------------------------------
+` + assembly.WaitVbl + `
+` + assembly.FirmwarePalette + `
+` + assembly.BC26 + `
 
 
 ;--- variables memoires -----

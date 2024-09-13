@@ -40,7 +40,7 @@ func TestMotifs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	a := transformation.AnalyzeTilesBoard(out, constants.Size{Width: 4, Height: 4})
+	a := transformation.AnalyzeTilesBoard(out, constants.Size{Width: 4, Height: 4}, nil)
 	threshold := 27
 	board := a.ReduceTilesNumber(float64(threshold))
 	fmt.Printf("number sprites inital [%d] [%d] with threshold :%d\n", len(a.BoardTiles), len(board), threshold)

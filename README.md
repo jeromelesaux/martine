@@ -511,7 +511,7 @@ This option allows to create allow tiles and tile map from the input image. If f
 
 By this command line, martine will analyse the image to find all tiles 16 pixels high and 16 pixels wide. It will keep in memory the tile position to produce the tile map.
 ![samples/mario-level1/tilesmap_schema.png](samples/mario-level1/tilesmap_schema.png)
-A csv ot the same tile map is also created (tilesmap.map).
+A csv ot the same tile map is also created (tilesmap.asm).
 Martine will also generate all tiles found.
 - ![samples/mario-level1/00.png](samples/mario-level1/00.png) tile 00 
 - ![samples/mario-level1/01.png](samples/mario-level1/01.png) tile 01

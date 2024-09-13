@@ -68,8 +68,8 @@ func DoTransformation(in *image.NRGBA,
 	rotationIterations,
 	rollIterations int,
 	rotation3DX0,
-	rotation3DY0,
-	rotation3DType int,
+	rotation3DY0 int,
+	rotation3DType config.Rotation3d,
 	resizingAlgo imaging.ResampleFilter,
 	size constants.Size,
 ) ([]*image.NRGBA, error) {
@@ -78,27 +78,70 @@ func DoTransformation(in *image.NRGBA,
 	var images []*image.NRGBA
 	if rollMode {
 		if rotationRlaBit != -1 || rotationSlaBit != -1 {
-			images = transformation.RollLeft(rotationRlaBit, rotationSlaBit, rotationIterations, screenMode, size, in, p)
+			images = transformation.RollLeft(
+				rotationRlaBit,
+				rotationSlaBit,
+				rotationIterations,
+				screenMode,
+				size,
+				in,
+				p)
 		} else {
 			if rotationRraBit != -1 || rotationSraBit != -1 {
-				images = transformation.RollRight(rotationRraBit, rotationSraBit, rotationIterations, screenMode, size, in, p)
+				images = transformation.RollRight(
+					rotationRraBit,
+					rotationSraBit,
+					rotationIterations,
+					screenMode,
+					size,
+					in,
+					p)
 			}
 		}
 		if rotationKeephighBit != -1 || rotationLosthighBit != -1 {
-			images = transformation.RollUp(rotationKeephighBit, rotationLosthighBit, rotationIterations, screenMode, size, in, p)
+			images = transformation.RollUp(
+				rotationKeephighBit,
+				rotationLosthighBit,
+				rotationIterations,
+				screenMode,
+				size,
+				in,
+				p)
 		} else {
 			if rotationKeeplowBit != -1 || rotationLostlowBit != -1 {
-				images = transformation.RollLow(rotationKeeplowBit, rotationLostlowBit, rotationIterations, screenMode, size, in, p)
+				images = transformation.RollLow(
+					rotationKeeplowBit,
+					rotationLostlowBit,
+					rotationIterations,
+					screenMode,
+					size,
+					in,
+					p)
 			}
 		}
 	}
 	if rotationMode {
-		if images, err = transformation.Rotate(in, p, size, screenMode, rollIterations, resizingAlgo); err != nil {
+		if images, err = transformation.Rotate(
+			in,
+			p,
+			size,
+			screenMode,
+			rollIterations,
+			resizingAlgo); err != nil {
 			log.GetLogger().Error("Error while perform rotation on image error :%v\n", err)
 		}
 	}
 	if rotation3DMode {
-		if images, err = transformation.Rotate3d(in, p, size, screenMode, resizingAlgo, rollIterations, rotation3DX0, rotation3DY0, rotation3DType); err != nil {
+		if images, err = transformation.Rotate3d(
+			in,
+			p,
+			size,
+			screenMode,
+			resizingAlgo,
+			rollIterations,
+			rotation3DX0,
+			rotation3DY0,
+			rotation3DType); err != nil {
 			log.GetLogger().Error("Error while perform rotation on image error :%v\n", err)
 		}
 	}
@@ -106,6 +149,7 @@ func DoTransformation(in *image.NRGBA,
 	return images, err
 }
 
+// nolint:funlen, gocognit
 func ApplyOneImageAndExport(in image.Image,
 	cfg *config.MartineConfig,
 	filename, picturePath string,
@@ -117,51 +161,49 @@ func ApplyOneImageAndExport(in image.Image,
 	var out *image.NRGBA
 	var err error
 
-	out = ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
-	if cfg.UseKmeans {
-		log.GetLogger().Info("kmeans with %f threshold", cfg.KmeansThreshold)
-		out, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansThreshold, out)
+	out = ci.Resize(in, cfg.ScrCfg.Size, cfg.ScrCfg.Process.ResizingAlgo)
+	if cfg.ScrCfg.Process.Kmeans.Used {
+		log.GetLogger().Info("kmeans with %f threshold", cfg.ScrCfg.Process.Kmeans.Threshold)
+		out, err = ci.Kmeans(cfg.ScrCfg.Size.ColorsAvailable, cfg.ScrCfg.Process.Kmeans.Threshold, out)
 		if err != nil {
 			return err
 		}
 	}
 
 	log.GetLogger().Info("Saving resized image into (%s)\n", filename+"_resized.png")
-	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_resized.png"), out); err != nil {
+	if err := png.Png(filepath.Join(cfg.ScrCfg.OutputPath, filename+"_resized.png"), out); err != nil {
 		os.Exit(-2)
 	}
-
-	if cfg.PalettePath != "" {
-		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PalettePath)
-		palette, _, err = ocpartstudio.OpenPal(cfg.PalettePath)
+	switch cfg.PalCfg.Type {
+	case config.PalPalette:
+		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PalCfg.Path)
+		palette, _, err = ocpartstudio.OpenPal(cfg.PalCfg.Path)
 		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalettePath)
+			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalCfg.Path)
 		} else {
 			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
 		}
-	}
-	if cfg.InkPath != "" {
-		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.InkPath)
-		palette, _, err = impPalette.OpenInk(cfg.InkPath)
+	case config.InkPalette:
+		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PalCfg.Path)
+		palette, _, err = impPalette.OpenInk(cfg.PalCfg.Path)
 		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.InkPath)
+			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalCfg.Path)
 		} else {
 			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
 		}
-	}
-	if cfg.KitPath != "" {
-		log.GetLogger().Info("Input plus palette to apply : (%s)\n", cfg.KitPath)
-		palette, _, err = impPalette.OpenKit(cfg.KitPath)
+	case config.KitPalette:
+		log.GetLogger().Info("Input plus palette to apply : (%s)\n", cfg.PalCfg.Path)
+		palette, _, err = impPalette.OpenKit(cfg.PalCfg.Path)
 		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.KitPath)
+			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalCfg.Path)
 		} else {
 			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
 		}
 	}
 
-	if cfg.Reducer > 0 {
-		out = ci.Reducer(out, cfg.Reducer)
-		if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_resized.png"), out); err != nil {
+	if cfg.ScrCfg.Process.Reducer > 0 {
+		out = ci.Reducer(out, cfg.ScrCfg.Process.Reducer)
+		if err := png.Png(filepath.Join(cfg.ScrCfg.OutputPath, filename+"_resized.png"), out); err != nil {
 			os.Exit(-2)
 		}
 	}
@@ -169,7 +211,7 @@ func ApplyOneImageAndExport(in image.Image,
 	if len(palette) > 0 {
 		newPalette, out = ci.DowngradingWithPalette(out, palette)
 	} else {
-		newPalette, out, err = ci.DowngradingPalette(out, cfg.Size, cfg.CpcPlus)
+		newPalette, out, err = ci.DowngradingPalette(out, cfg.ScrCfg.Size, cfg.ScrCfg.IsPlus)
 		if err != nil {
 			log.GetLogger().Error("Cannot downgrade colors palette for this image %s\n", picturePath)
 		}
@@ -183,12 +225,21 @@ func ApplyOneImageAndExport(in image.Image,
 	default:
 		paletteToSort = newPalette
 	}
-	paletteToSort = fillColorPalette(paletteToSort)
+	paletteToSort = constants.FillColorPalette(paletteToSort)
 	newPalette = constants.SortColorsByDistance(paletteToSort)
 
-	out, _ = DoDithering(out, newPalette, cfg.DitheringAlgo, cfg.DitheringType, cfg.DitheringWithQuantification, cfg.DitheringMatrix, float32(cfg.DitheringMultiplier), cfg.CpcPlus, cfg.Size)
-	if cfg.Saturation > 0 || cfg.Brightness > 0 {
-		palette = ci.EnhanceBrightness(newPalette, cfg.Brightness, cfg.Saturation)
+	out, _ = DoDithering(
+		out,
+		newPalette,
+		cfg.ScrCfg.Process.Dithering.Algo,
+		cfg.ScrCfg.Process.Dithering.Type,
+		cfg.ScrCfg.Process.Dithering.WithQuantification,
+		cfg.ScrCfg.Process.Dithering.Matrix,
+		float32(cfg.ScrCfg.Process.Dithering.Multiplier),
+		cfg.ScrCfg.IsPlus,
+		cfg.ScrCfg.Size)
+	if cfg.ScrCfg.Process.Saturation > 0 || cfg.ScrCfg.Process.Brightness > 0 {
+		palette = ci.EnhanceBrightness(newPalette, cfg.ScrCfg.Process.Brightness, cfg.ScrCfg.Process.Saturation)
 		newPalette, out = ci.DowngradingWithPalette(out, palette)
 		var paletteToSort color.Palette
 		switch mode {
@@ -207,38 +258,38 @@ func ApplyOneImageAndExport(in image.Image,
 		default:
 			paletteToSort = newPalette
 		}
-		paletteToSort = fillColorPalette(paletteToSort)
+		paletteToSort = constants.FillColorPalette(paletteToSort)
 		newPalette = constants.SortColorsByDistance(paletteToSort)
 	}
 
 	log.GetLogger().Info("Saving downgraded image into (%s)\n", filename+"_down.png")
-	if err := png.Png(filepath.Join(cfg.OutputPath, filename+"_down.png"), out); err != nil {
+	if err := png.Png(filepath.Join(cfg.ScrCfg.OutputPath, filename+"_down.png"), out); err != nil {
 		os.Exit(-2)
 	}
 
 	images, err := DoTransformation(out, newPalette,
-		screenMode, cfg.RollMode, cfg.RotationMode, cfg.Rotation3DMode,
-		cfg.RotationRlaBit, cfg.RotationSlaBit, cfg.RotationRraBit, cfg.RotationSraBit,
-		cfg.RotationKeephighBit, cfg.RotationLosthighBit,
-		cfg.RotationKeeplowBit, cfg.RotationLostlowBit, cfg.RotationIterations,
-		cfg.RollIteration, cfg.Rotation3DX0, cfg.Rotation3DY0, cfg.Rotation3DType, cfg.ResizingAlgo, cfg.Size)
+		screenMode, cfg.RotateCfg.RollMode, cfg.RotateCfg.RotationMode, cfg.RotateCfg.Rotation3DMode,
+		cfg.RotateCfg.RotationRlaBit, cfg.RotateCfg.RotationSlaBit, cfg.RotateCfg.RotationRraBit, cfg.RotateCfg.RotationSraBit,
+		cfg.RotateCfg.RotationKeephighBit, cfg.RotateCfg.RotationLosthighBit,
+		cfg.RotateCfg.RotationKeeplowBit, cfg.RotateCfg.RotationLostlowBit, cfg.RotateCfg.RotationIterations,
+		cfg.RotateCfg.RollIteration, cfg.RotateCfg.Rotation3DX0, cfg.RotateCfg.Rotation3DY0, cfg.RotateCfg.Rotation3DType, cfg.ScrCfg.Process.ResizingAlgo, cfg.ScrCfg.Size)
 	if err != nil {
 		os.Exit(-2)
 	} else {
-		for indice := 0; indice < cfg.RollIteration; indice++ {
+		for indice := 0; indice < cfg.RotateCfg.RollIteration; indice++ {
 			img := images[indice]
 			newFilename := cfg.OsFullPath(filename, fmt.Sprintf("%.2d", indice)+".png")
 			if err := png.Png(newFilename, img); err != nil {
 				log.GetLogger().Error("Cannot create image (%s) error :%v\n", newFilename, err)
 			}
-			if err := sprite.ToSpriteAndExport(img, newPalette, constants.Size{Width: cfg.Size.Width, Height: cfg.Size.Height}, screenMode, newFilename, false, cfg); err != nil {
+			if err := sprite.ToSpriteAndExport(img, newPalette, constants.Size{Width: cfg.ScrCfg.Size.Width, Height: cfg.ScrCfg.Size.Height}, screenMode, newFilename, false, cfg); err != nil {
 				log.GetLogger().Error("Cannot create sprite image (%s) error %v\n", newFilename, err)
 			}
 		}
 	}
 
-	if !cfg.CustomDimension && !cfg.SpriteHard {
-		err = Transform(out, newPalette, cfg.Size, picturePath, cfg)
+	if !cfg.CustomDimension && cfg.ScrCfg.Type != config.SpriteHardFormat {
+		err = Transform(out, newPalette, cfg.ScrCfg.Size, picturePath, cfg)
 		if err != nil {
 			return err
 		}
@@ -247,15 +298,15 @@ func ApplyOneImageAndExport(in image.Image,
 			// prepare zigzag transformation
 			out = transformation.Zigzag(out)
 		}
-		if !cfg.SpriteHard {
+		if cfg.ScrCfg.Type != config.SpriteHardFormat {
 			// log.GetLogger().Info( "Transform image in sprite.\n")
-			err = sprite.ToSpriteAndExport(out, newPalette, cfg.Size, screenMode, filename, false, cfg)
+			err = sprite.ToSpriteAndExport(out, newPalette, cfg.ScrCfg.Size, screenMode, filename, false, cfg)
 			if err != nil {
 				return err
 			}
 		} else {
 			// log.GetLogger().Info( "Transform image in sprite hard.\n")
-			err = spritehard.ToSpriteHardAndExport(out, newPalette, cfg.Size, screenMode, filename, cfg)
+			err = spritehard.ToSpriteHardAndExport(out, newPalette, cfg.ScrCfg.Size, screenMode, filename, cfg)
 			if err != nil {
 				return err
 			}
@@ -285,6 +336,7 @@ func ApplyImages(
 	return raw, images, palette, gErr
 }
 
+// nolint: funlen, gocognit
 func ApplyOneImage(in image.Image,
 	cfg *config.MartineConfig,
 	mode int,
@@ -295,23 +347,23 @@ func ApplyOneImage(in image.Image,
 	var out *image.NRGBA
 	var err error
 
-	out = ci.Resize(in, cfg.Size, cfg.ResizingAlgo)
-	if cfg.UseKmeans {
-		log.GetLogger().Info("kmeans with %f threshold", cfg.KmeansThreshold)
-		out, err = ci.Kmeans(cfg.Size.ColorsAvailable, cfg.KmeansThreshold, out)
+	out = ci.Resize(in, cfg.ScrCfg.Size, cfg.ScrCfg.Process.ResizingAlgo)
+	if cfg.ScrCfg.Process.Kmeans.Used {
+		log.GetLogger().Info("kmeans with %f threshold", cfg.ScrCfg.Process.Kmeans.Threshold)
+		out, err = ci.Kmeans(cfg.ScrCfg.Size.ColorsAvailable, cfg.ScrCfg.Process.Kmeans.Threshold, out)
 		if err != nil {
 			return []byte{}, out, palette, 0, err
 		}
 	}
 
-	if cfg.Reducer > -1 {
-		out = ci.Reducer(out, cfg.Reducer)
+	if cfg.ScrCfg.Process.Reducer > -1 {
+		out = ci.Reducer(out, cfg.ScrCfg.Process.Reducer)
 	}
 
 	if len(palette) > 0 {
 		newPalette, out = ci.DowngradingWithPalette(out, palette)
 	} else {
-		newPalette, out, err = ci.DowngradingPalette(out, cfg.Size, cfg.CpcPlus)
+		newPalette, out, err = ci.DowngradingPalette(out, cfg.ScrCfg.Size, cfg.ScrCfg.IsPlus)
 		if err != nil {
 			log.GetLogger().Error("Cannot downgrade colors palette for this image")
 		}
@@ -334,12 +386,21 @@ func ApplyOneImage(in image.Image,
 	default:
 		paletteToSort = newPalette
 	}
-	paletteToSort = fillColorPalette(paletteToSort)
+	paletteToSort = constants.FillColorPalette(paletteToSort)
 	newPalette = constants.SortColorsByDistance(paletteToSort)
-	out, _ = DoDithering(out, newPalette, cfg.DitheringAlgo, cfg.DitheringType, cfg.DitheringWithQuantification, cfg.DitheringMatrix, float32(cfg.DitheringMultiplier), cfg.CpcPlus, cfg.Size)
+	out, _ = DoDithering(
+		out,
+		newPalette,
+		cfg.ScrCfg.Process.Dithering.Algo,
+		cfg.ScrCfg.Process.Dithering.Type,
+		cfg.ScrCfg.Process.Dithering.WithQuantification,
+		cfg.ScrCfg.Process.Dithering.Matrix,
+		float32(cfg.ScrCfg.Process.Dithering.Multiplier),
+		cfg.ScrCfg.IsPlus,
+		cfg.ScrCfg.Size)
 
-	if cfg.Saturation > 0 || cfg.Brightness > 0 {
-		palette = ci.EnhanceBrightness(newPalette, cfg.Brightness, cfg.Saturation)
+	if cfg.ScrCfg.Process.Saturation > 0 || cfg.ScrCfg.Process.Brightness > 0 {
+		palette = ci.EnhanceBrightness(newPalette, cfg.ScrCfg.Process.Brightness, cfg.ScrCfg.Process.Saturation)
 		newPalette, out = ci.DowngradingWithPalette(out, palette)
 		var paletteToSort color.Palette
 		switch mode {
@@ -350,36 +411,36 @@ func ApplyOneImage(in image.Image,
 		default:
 			paletteToSort = newPalette
 		}
-		paletteToSort = fillColorPalette(paletteToSort)
+		paletteToSort = constants.FillColorPalette(paletteToSort)
 		newPalette = constants.SortColorsByDistance(paletteToSort)
 	}
 	var data []byte
 	var lineSize int
-	if !cfg.CustomDimension && !cfg.SpriteHard {
-		data = InternalTransform(out, newPalette, cfg.Size, cfg)
-		lineSize = cfg.Size.Width
+	if !cfg.CustomDimension && cfg.ScrCfg.Type != config.SpriteHardFormat {
+		data = InternalTransform(out, newPalette, cfg.ScrCfg.Size, cfg)
+		lineSize = cfg.ScrCfg.Size.Width
 	} else {
 		if cfg.ZigZag {
 			// prepare zigzag transformation
 			out = transformation.Zigzag(out)
 		}
-		if !cfg.SpriteHard {
+		if cfg.ScrCfg.Type != config.SpriteHardFormat {
 			// log.GetLogger().Info( "Transform image in sprite.\n")
-			data, _, lineSize, err = sprite.ToSprite(out, newPalette, cfg.Size, screenMode, cfg)
+			data, _, lineSize, err = sprite.ToSprite(out, newPalette, cfg.ScrCfg.Size, screenMode, cfg)
 		} else {
 			//	log.GetLogger().Info( "Transform image in sprite hard.\n")
-			data, _ = spritehard.ToSpriteHard(out, newPalette, cfg.Size, screenMode, cfg)
+			data, _ = spritehard.ToSpriteHard(out, newPalette, cfg.ScrCfg.Size, screenMode, cfg)
 			lineSize = 16
 		}
 	}
-	if cfg.OneRow {
+	if cfg.ScrCfg.Process.OneRow {
 		for y := 0; y < out.Bounds().Max.Y; y += 2 {
 			for x := 0; x < out.Bounds().Max.X; x++ {
 				out.Set(x, y, newPalette[0])
 			}
 		}
 	}
-	if cfg.OneLine {
+	if cfg.ScrCfg.Process.OneLine {
 		for y := 0; y < out.Bounds().Max.Y; y++ {
 			for x := 0; x < out.Bounds().Max.X; x += 2 {
 				out.Set(x, y, newPalette[0])
@@ -389,11 +450,48 @@ func ApplyOneImage(in image.Image,
 	return data, out, newPalette, lineSize, err
 }
 
-func fillColorPalette(p color.Palette) color.Palette {
-	for i, v := range p {
-		if v == nil {
-			p[i] = color.Black
+func ExportRawImage(in image.Image,
+	palette color.Palette,
+	cfg *config.MartineConfig,
+	filename, picturePath string,
+	screenMode uint8) error {
+	var err error
+	//check the palette and sort it
+	palette = constants.FillColorPalette(palette)
+	palette = constants.SortColorsByDistance(palette)
+
+	// at least resize the image to be sure
+	out := ci.Resize(in, cfg.ScrCfg.Size, cfg.ScrCfg.Process.ResizingAlgo)
+	if cfg.ScrCfg.Process.Kmeans.Used {
+		log.GetLogger().Info("kmeans with %f threshold", cfg.ScrCfg.Process.Kmeans.Threshold)
+		out, err = ci.Kmeans(cfg.ScrCfg.Size.ColorsAvailable, cfg.ScrCfg.Process.Kmeans.Threshold, out)
+		if err != nil {
+			return err
 		}
 	}
-	return p
+	if !cfg.CustomDimension && cfg.ScrCfg.Type != config.SpriteHardFormat {
+		err = Transform(out, palette, cfg.ScrCfg.Size, picturePath, cfg)
+		if err != nil {
+			return err
+		}
+	} else {
+		if cfg.ZigZag {
+			// prepare zigzag transformation
+			out = transformation.Zigzag(out)
+		}
+		if cfg.ScrCfg.Type != config.SpriteHardFormat {
+			// log.GetLogger().Info( "Transform image in sprite.\n")
+			err = sprite.ToSpriteAndExport(out, palette, cfg.ScrCfg.Size, screenMode, filename, false, cfg)
+			if err != nil {
+				return err
+			}
+		} else {
+			// log.GetLogger().Info( "Transform image in sprite hard.\n")
+			err = spritehard.ToSpriteHardAndExport(out, palette, cfg.ScrCfg.Size, screenMode, filename, cfg)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

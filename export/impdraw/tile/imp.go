@@ -129,9 +129,9 @@ func Imp(sprites []byte, nbFrames, width, height, mode uint, filename string, ex
 	}
 	output = append(output, buf.Bytes()...)
 
-	impPath := filepath.Join(export.OutputPath, export.GetAmsdosFilename(filename, ".IMP"))
+	impPath := filepath.Join(export.ScrCfg.OutputPath, export.GetAmsdosFilename(filename, ".IMP"))
 
-	if !export.NoAmsdosHeader {
+	if !export.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(impPath, ".IMP", output, 0, 0, 0x4000, 0x0); err != nil {
 			return err
 		}
@@ -150,9 +150,9 @@ func TileMap(data []byte, filename string, export *config.MartineConfig) error {
 	output := make([]byte, 0x4000)
 	copy(output[0:], data[:])
 
-	impPath := filepath.Join(export.OutputPath, export.GetAmsdosFilename(filename, ".TIL"))
+	impPath := filepath.Join(export.ScrCfg.OutputPath, export.GetAmsdosFilename(filename, ".TIL"))
 
-	if !export.NoAmsdosHeader {
+	if !export.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(impPath, ".TIL", output, 0, 0, 0x4000, 0); err != nil {
 			return err
 		}

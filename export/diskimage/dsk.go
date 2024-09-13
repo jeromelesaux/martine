@@ -10,25 +10,25 @@ import (
 
 func ImportInDsk(filePath string, cfg *config.MartineConfig) error {
 	var suffix string
-	if cfg.EgxFormat == config.Egx1Mode {
+	if cfg.ScrCfg.Type == config.Egx1Format {
 		suffix += "-egx1"
 	}
-	if cfg.EgxFormat == config.Egx2Mode {
+	if cfg.ScrCfg.Type == config.Egx2Format {
 		suffix += "-egx2"
 	}
-	if cfg.CpcPlus {
+	if cfg.ScrCfg.IsPlus {
 		suffix += "-cpcplus"
 	}
-	if cfg.Overscan {
+	if cfg.ScrCfg.Type == config.FullscreenFormat {
 		suffix += "-overscan"
 	}
 	if cfg.Flash {
 		suffix += "-flash"
 	}
-	if cfg.CustomDimension || cfg.SpriteHard {
+	if cfg.CustomDimension || cfg.ScrCfg.Type == config.SpriteHardFormat {
 		suffix += "-sprite"
 	}
-	if cfg.DitheringAlgo != 0 {
+	if cfg.ScrCfg.Process.Dithering.Algo != 0 {
 		suffix += "-dithering"
 	}
 	if cfg.SplitRaster {
@@ -38,7 +38,7 @@ func ImportInDsk(filePath string, cfg *config.MartineConfig) error {
 	dskFullpath := cfg.AmsdosFullPath(filePath, suffix+".dsk")
 
 	var floppy *dsk.DSK
-	if cfg.ExtendedDsk {
+	if cfg.HasContainerExport(config.ExtendedDskContainer) {
 		floppy = dsk.FormatDsk(10, 80, 1, 1, dsk.DataFormat)
 	} else {
 		floppy = dsk.FormatDsk(9, 40, 1, 0, dsk.DataFormat)

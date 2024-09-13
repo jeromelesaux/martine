@@ -74,6 +74,7 @@ func Min(v0, v1 uint32) uint32 {
 	return v1
 }
 
+// nolint: funlen
 func LumSaturation(c color.Color, lumi, satur float64) color.Color {
 	var r, g, b float64
 	r0, g0, b0, _ := c.RGBA()
@@ -202,7 +203,7 @@ func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (c
 	if len(p) > size.ColorsAvailable {
 		log.GetLogger().Error("Downgraded palette size (%d) is greater than the available colors in this mode (%d)\n", len(p), size.ColorsAvailable)
 		log.GetLogger().Error("Check color usage in image.\n")
-		colorUsage := computePaletteUsage(in, p)
+		colorUsage := computePaletteUsage(in)
 		// feed sort palette colors structure
 		paletteToReduce := constants.NewPaletteReducer()
 
@@ -218,7 +219,7 @@ func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (c
 	return p, in, nil
 }
 
-func computePaletteUsage(in *image.NRGBA, p color.Palette) map[color.Color]int {
+func computePaletteUsage(in *image.NRGBA) map[color.Color]int {
 	usage := make(map[color.Color]int)
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
@@ -230,6 +231,7 @@ func computePaletteUsage(in *image.NRGBA, p color.Palette) map[color.Color]int {
 }
 
 func downgradeWithPalette(in *image.NRGBA, p color.Palette) *image.NRGBA {
+	transparencyExists := false
 	cache := make(map[color.Color]color.Color)
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
@@ -237,7 +239,19 @@ func downgradeWithPalette(in *image.NRGBA, p color.Palette) *image.NRGBA {
 			if cc := cache[c]; cc != nil {
 				in.Set(x, y, cc)
 			} else {
-				cPalette := p.Convert(c)
+				var cPalette color.Color
+				// check value transparency
+				r, g, b, a := c.RGBA()
+				if r == 0 && g == 0 && b == 0 && a == 0 {
+					transparencyExists = true
+					cPalette = p[0]
+				} else {
+					if transparencyExists {
+						cPalette = p[1:].Convert(c)
+					} else {
+						cPalette = p.Convert(c)
+					}
+				}
 				in.Set(x, y, cPalette)
 				cache[c] = cPalette
 			}
@@ -247,11 +261,16 @@ func downgradeWithPalette(in *image.NRGBA, p color.Palette) *image.NRGBA {
 }
 
 func ExtractPalette(in *image.NRGBA, isCpcPlus bool, nbColors int) color.Palette {
+	// colorUsage := computePaletteUsage(in)
+	// for c, _ := range colorUsage {
+	// 	fmt.Printf("original color [%v] : from palette [%v]\n", c, constants.CpcPlusPalette.Convert(c))
+	// }
 	p := []color.Color{}
 	type ks struct {
 		Key   color.Color
 		Value int
 	}
+
 	cache := make(map[color.Color]int)
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
@@ -281,10 +300,7 @@ func ExtractPalette(in *image.NRGBA, isCpcPlus bool, nbColors int) color.Palette
 
 	log.GetLogger().Info("colors distribution:%v", s)
 
-	for i, v := range s {
-		if i >= nbColors {
-			break
-		}
+	for _, v := range s {
 		p = append(p, v.Key)
 	}
 

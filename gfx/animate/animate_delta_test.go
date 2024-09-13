@@ -20,11 +20,6 @@ func init() {
 }
 
 func TestOpenGif(t *testing.T) {
-	os.RemoveAll(("tests"))
-	err := os.Mkdir("tests", os.ModePerm)
-	if err != nil {
-		t.Fatal(err)
-	}
 	fr, err := os.Open("../../samples/coke.gif")
 	if err != nil {
 		t.Fatal(err)
@@ -41,7 +36,7 @@ func TestOpenGif(t *testing.T) {
 		rect := image.Rect(0, 0, v.Bounds().Max.X, v.Bounds().Max.Y)
 		img := image.NewNRGBA(rect)
 		draw.Draw(img, rect, v, rect.Min, draw.Over)
-		if err := png.Png(fmt.Sprintf("tests/%d.png", i), img); err != nil {
+		if err := png.Png(fmt.Sprintf(".././../test/%d.png", i), img); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -51,12 +46,16 @@ func TestOpenGif(t *testing.T) {
 func TestInternalDelta(t *testing.T) {
 	_ = os.Mkdir("InternalDelta", 0777)
 	ex := &config.MartineConfig{
-		Size:            constants.Size{Width: 100, Height: 100, ColorsAvailable: 4},
+		ScrCfg: config.ScreenConfig{
+			Size:       constants.Size{Width: 100, Height: 100, ColorsAvailable: 4},
+			OutputPath: "./InternalDelta",
+			Process: config.ScreenProcessing{
+				OneLine: false,
+				OneRow:  false,
+			},
+		},
 		CustomDimension: true,
 		LineWidth:       0x50,
-		OutputPath:      "./InternalDelta",
-		OneLine:         false,
-		OneRow:          false,
 		FilloutGif:      false,
 	}
 	err := DeltaPacking("../../samples/coke.gif", ex, 0xc010, 1, DeltaExportV1)

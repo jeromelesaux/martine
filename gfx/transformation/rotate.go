@@ -26,7 +26,7 @@ func Rotate(in *image.NRGBA,
 	angle := 360. / float64(rollIteration)
 	var maxSize constants.Size
 	for i := 0.; i < 360.; i += angle {
-		rin := imaging.Rotate(in, float64(i), color.Transparent)
+		rin := imaging.Rotate(in, i, color.Transparent)
 		if maxSize.Width < rin.Bounds().Max.X {
 			maxSize.Width = rin.Bounds().Max.X
 		}
@@ -38,7 +38,7 @@ func Rotate(in *image.NRGBA,
 	draw.Draw(background, background.Bounds(), &image.Uniform{p[0]}, image.Point{0, 0}, draw.Src)
 
 	for i := 0.; i < 360.; i += angle {
-		rin := imaging.Rotate(in, float64(i), p[0])
+		rin := imaging.Rotate(in, i, p[0])
 
 		if rin.Bounds().Max.X < maxSize.Width || rin.Bounds().Max.Y < maxSize.Height {
 			rin = imaging.PasteCenter(

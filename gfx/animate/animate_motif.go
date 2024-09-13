@@ -19,6 +19,7 @@ import (
 	zx0 "github.com/jeromelesaux/zx0/encode"
 )
 
+// nolint: funlen
 func DeltaMotif(gitFilepath string, cfg *config.MartineConfig, threshold int, initialAddress uint16, mode uint8) error {
 	fr, err := os.Open(gitFilepath)
 	if err != nil {
@@ -41,7 +42,7 @@ func DeltaMotif(gitFilepath string, cfg *config.MartineConfig, threshold int, in
 	}
 
 	// downgrading palette
-	customPalette, _, err := ci.DowngradingPalette(screens[0], size, cfg.CpcPlus)
+	customPalette, _, err := ci.DowngradingPalette(screens[0], size, cfg.ScrCfg.IsPlus)
 	if err != nil {
 		return err
 	}
@@ -52,7 +53,7 @@ func DeltaMotif(gitFilepath string, cfg *config.MartineConfig, threshold int, in
 	}
 
 	// recuperation des motifs
-	a := transformation.AnalyzeTilesBoard(screens[0], constants.Size{Width: 4, Height: 4})
+	a := transformation.AnalyzeTilesBoard(screens[0], constants.Size{Width: 4, Height: 4}, nil)
 	refBoard := a.ReduceTilesNumber(float64(threshold))
 	btc := make([][]transformation.BoardTile, 0)
 	btc = append(btc, refBoard)
@@ -105,11 +106,11 @@ func DeltaMotif(gitFilepath string, cfg *config.MartineConfig, threshold int, in
 		}
 		deltas = append(deltas, delta)
 	}
-	filename := string(cfg.OsFilename(".asm"))
-	return exportDeltaMotif(deltas, motifs, customPalette, cfg, cfg.OutputPath+string(filepath.Separator)+filename)
+	filename := cfg.OsFilename(".asm")
+	return exportDeltaMotif(deltas, motifs, customPalette, cfg.ScrCfg.OutputPath+string(filepath.Separator)+filename)
 }
 
-func exportDeltaMotif(images [][]byte, motifs [][]byte, p color.Palette, cfg *config.MartineConfig, filename string) error {
+func exportDeltaMotif(images [][]byte, motifs [][]byte, p color.Palette, filename string) error {
 	var deltaCode string
 	for i := 0; i < len(images); i++ {
 		deltaCode += fmt.Sprintf("delta%.2d\n", i)

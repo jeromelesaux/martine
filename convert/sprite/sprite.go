@@ -18,6 +18,20 @@ import (
 	"github.com/jeromelesaux/martine/log"
 )
 
+func ToImg(d [][]byte, p color.Palette) *image.NRGBA {
+	o := image.NewNRGBA(image.Rectangle{
+		Min: image.Point{X: 0, Y: 0},
+		Max: image.Point{X: len(d[0]), Y: len(d)}})
+
+	for y := 0; y < len(d); y++ {
+		for x := 0; x < len(d[0]); x++ {
+			o.Set(x, y, p[d[y][x]])
+		}
+	}
+	return o
+}
+
+// nolint:funlen
 func RawSpriteToImg(data []byte, height, width, mode uint8, p color.Palette) *image.NRGBA {
 	var out *image.NRGBA
 	switch mode {
@@ -109,6 +123,7 @@ func RawSpriteToImg(data []byte, height, width, mode uint8, p color.Palette) *im
 
 // spriteToImg load a OCP win filepath to image.NRGBA
 // using the mode and palette as arguments
+// nolint: funlen
 func SpriteToImg(winPath string, mode uint8, p color.Palette) (*image.NRGBA, constants.Size, error) {
 	var s constants.Size
 	footer, err := window.OpenWin(winPath)
@@ -228,7 +243,7 @@ func ExportSprite(data []byte, lineSize int, p color.Palette, size constants.Siz
 		log.GetLogger().Error("Error while saving file %s error :%v", filename, err)
 		return err
 	}
-	if !cfg.CpcPlus {
+	if !cfg.ScrCfg.IsPlus {
 		if err := ocpartstudio.Pal(filename, p, mode, dontImportDsk, cfg); err != nil {
 			log.GetLogger().Error("Error while saving file %s error :%v", filename, err)
 			return err
@@ -274,6 +289,7 @@ func ToSpriteAndExport(in *image.NRGBA, p color.Palette, size constants.Size, mo
 	return ExportSprite(data, lineSize, p, size, mode, filename, dontImportDsk, ex)
 }
 
+// nolint:funlen, gocognit
 func ToSprite(in *image.NRGBA,
 	p color.Palette,
 	size constants.Size,
@@ -285,7 +301,7 @@ func ToSprite(in *image.NRGBA,
 	size.Width = in.Bounds().Max.X
 	lineToAdd := 1
 
-	if ex.OneLine {
+	if ex.ScrCfg.Process.OneLine {
 		lineToAdd = 2
 	}
 	if mode == 0 {
@@ -312,15 +328,15 @@ func ToSprite(in *image.NRGBA,
 				}
 				pp2 = ex.SwapInk(pp2)
 				firmwareColorUsed[pp2]++
-				if ex.OneRow {
+				if ex.ScrCfg.Process.OneRow {
 					pp2 = 0
 				}
 				pixel := pixel.PixelMode0(pp1, pp2)
-				if ex.MaskAndOperation {
-					pixel = pixel & ex.MaskSprite
+				if ex.ScrCfg.Process.Mask.AndOperation {
+					pixel = pixel & ex.ScrCfg.Process.Mask.Sprite
 				}
-				if ex.MaskOrOperation {
-					pixel = pixel | ex.MaskSprite
+				if ex.ScrCfg.Process.Mask.OrOperation {
+					pixel = pixel | ex.ScrCfg.Process.Mask.Sprite
 				}
 				if len(ex.ScanlineSequence) > 0 {
 					scanlineSize := len(ex.ScanlineSequence)
@@ -333,7 +349,7 @@ func ToSprite(in *image.NRGBA,
 				}
 				offset++
 			}
-			if ex.OneLine {
+			if ex.ScrCfg.Process.OneLine {
 				y++
 				for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 2 {
 					pp := 0
@@ -394,7 +410,7 @@ func ToSprite(in *image.NRGBA,
 					}
 					pp4 = ex.SwapInk(pp4)
 					firmwareColorUsed[pp4]++
-					if ex.OneRow {
+					if ex.ScrCfg.Process.OneRow {
 						pp2 = 0
 						pp4 = 0
 					}
@@ -403,11 +419,11 @@ func ToSprite(in *image.NRGBA,
 					// MACRO PIXM0 COL2,COL1
 					// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 					//	MEND
-					if ex.MaskAndOperation {
-						pixel = pixel & ex.MaskSprite
+					if ex.ScrCfg.Process.Mask.AndOperation {
+						pixel = pixel & ex.ScrCfg.Process.Mask.Sprite
 					}
-					if ex.MaskOrOperation {
-						pixel = pixel | ex.MaskSprite
+					if ex.ScrCfg.Process.Mask.OrOperation {
+						pixel = pixel | ex.ScrCfg.Process.Mask.Sprite
 					}
 					if len(ex.ScanlineSequence) > 0 {
 						scanlineSize := len(ex.ScanlineSequence)
@@ -420,7 +436,7 @@ func ToSprite(in *image.NRGBA,
 					}
 					offset++
 				}
-				if ex.OneLine {
+				if ex.ScrCfg.Process.OneLine {
 					y++
 					for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 4 {
 						pp := 0
@@ -515,7 +531,7 @@ func ToSprite(in *image.NRGBA,
 						}
 						pp8 = ex.SwapInk(pp8)
 						firmwareColorUsed[pp8]++
-						if ex.OneRow {
+						if ex.ScrCfg.Process.OneRow {
 							pp2 = 0
 							pp4 = 0
 							pp6 = 0
@@ -537,7 +553,7 @@ func ToSprite(in *image.NRGBA,
 						}
 						offset++
 					}
-					if ex.OneLine {
+					if ex.ScrCfg.Process.OneLine {
 						y++
 						for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x += 8 {
 							pp := 0

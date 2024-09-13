@@ -7,107 +7,57 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/common"
-	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
-	"github.com/jeromelesaux/martine/export/compression"
 	"github.com/jeromelesaux/martine/log"
 )
 
 // var amsdosFilenameOnce sync.Once
-var (
-	Egx1Mode = 1
-	Egx2Mode = 2
-)
 
 var ErrorNotAllowed = errors.New("error not allowed")
 
 type MartineConfig struct {
-	InputPath                   string
-	OutputPath                  string
-	PalettePath                 string
-	InkPath                     string
-	KitPath                     string
-	M4RemotePath                string
-	M4Host                      string
-	M4Autoexec                  bool
-	Size                        constants.Size
-	Compression                 compression.CompressionMethod
-	NoAmsdosHeader              bool
-	RotationMode                bool
-	Rotation3DMode              bool
-	Rotation3DX0                int
-	Rotation3DY0                int
-	Rotation3DType              int
-	TileMode                    bool
-	RollMode                    bool
-	RollIteration               int
-	TileIterationX              int
-	TileIterationY              int
-	M4                          bool
-	Dsk                         bool
-	Ink                         bool
-	Kit                         bool
-	Pal                         bool
-	Scr                         bool
-	Win                         bool
-	Overscan                    bool
-	Json                        bool
-	Ascii                       bool
-	CpcPlus                     bool
-	CustomDimension             bool
-	amsdosFilename              []byte
-	DskFiles                    []string
-	Tiles                       *export.JsonSlice
-	DeltaMode                   bool
-	ExtendedDsk                 bool
-	ResizingAlgo                imaging.ResampleFilter
-	DitheringAlgo               int
-	DitheringMatrix             [][]float32
-	DitheringMultiplier         float64
-	DitheringWithQuantification bool
-	DitheringType               constants.DitheringType
-	RotationRraBit              int
-	RotationRlaBit              int
-	RotationSraBit              int
-	RotationSlaBit              int
-	RotationLosthighBit         int
-	RotationLostlowBit          int
-	RotationKeephighBit         int
-	RotationKeeplowBit          int
-	RotationIterations          int
-	Flash                       bool
-	FlashScreenFilepath1        string
-	FlashScreenFilepath2        string
-	FlashPaletteFilepath1       string
-	FlashPaletteFilepath2       string
-	EgxFormat                   int
-	EgxMode1                    uint8
-	EgxMode2                    uint8
-	Sna                         bool
-	SnaPath                     string
-	SpriteHard                  bool
-	SplitRaster                 bool
-	ScanlineSequence            []int
-	CustomScanlineSequence      bool
-	MaskSprite                  uint8
-	MaskOrOperation             bool
-	MaskAndOperation            bool
-	ZigZag                      bool
-	Animate                     bool
-	Reducer                     int
-	OneLine                     bool
-	OneRow                      bool
-	InkSwapper                  map[int]int
-	LineWidth                   int
-	FilloutGif                  bool
-	Saturation                  float64
-	Brightness                  float64
-	ExportAsGoFile              bool
-	DoubleScreenAddress         bool
-	UseKmeans                   bool
-	KmeansThreshold             float64
+	PalCfg       PaletteConfig
+	M4cfg        M4Config
+	ContainerCfg ContainerConfig
+	ScrCfg       ScreenConfig
+	RotateCfg    RotateConfig
+
+	TileMode        bool
+	TileIterationX  int
+	TileIterationY  int
+	CustomDimension bool
+	DskFiles        []string
+	Tiles           *export.JsonSlice
+	DeltaMode       bool
+
+	Flash                  bool
+	FlashScreenFilepath1   string
+	FlashScreenFilepath2   string
+	FlashPaletteFilepath1  string
+	FlashPaletteFilepath2  string
+	EgxMode1               uint8
+	EgxMode2               uint8
+	SplitRaster            bool
+	ScanlineSequence       []int
+	CustomScanlineSequence bool
+
+	ZigZag  bool
+	Animate bool
+
+	InkSwapper          map[int]int
+	LineWidth           int
+	FilloutGif          bool
+	DoubleScreenAddress bool
+}
+
+func (m *MartineConfig) Reset() {
+	m.ScrCfg.Reset()
+	m.ContainerCfg.Reset()
+}
+
+func (m MartineConfig) HasContainerExport(c ContainerFormat) bool {
+	return m.ContainerCfg.HasExport(c)
 }
 
 func MaskIsAllowed(mode uint8, value uint8) bool {
@@ -137,18 +87,22 @@ func ModeMaskSprite(mode uint8) ([]uint8, error) {
 
 func NewMartineConfig(input, output string) *MartineConfig {
 	return &MartineConfig{
-		Scr:            true,
-		Pal:            true,
-		Ink:            true,
-		InputPath:      input,
-		OutputPath:     output,
-		amsdosFilename: make([]byte, 8),
-		DskFiles:       make([]string, 0),
-		Rotation3DX0:   -1,
-		Rotation3DY0:   -1,
-		Tiles:          export.NewJsonSlice(),
-		InkSwapper:     make(map[int]int),
-		LineWidth:      0x50,
+		ScrCfg: ScreenConfig{
+			InputPath:  input,
+			OutputPath: output,
+			Export:     make([]ScreenExport, 0),
+		},
+		ContainerCfg: ContainerConfig{
+			Type: make([]ContainerFormat, 0),
+		},
+		DskFiles: make([]string, 0),
+		RotateCfg: RotateConfig{
+			Rotation3DX0: -1,
+			Rotation3DY0: -1,
+		},
+		Tiles:      export.NewJsonSlice(),
+		InkSwapper: make(map[int]int),
+		LineWidth:  0x50,
 	}
 }
 
@@ -199,17 +153,17 @@ func RemoveUnsupportedChar(s string) string {
 
 func (e *MartineConfig) AmsdosFilename() []byte {
 	for i := 0; i < 8; i++ {
-		e.amsdosFilename[i] = ' '
+		e.ScrCfg.amsdosFilename[i] = ' '
 	}
-	file := strings.ToUpper(filepath.Base(e.InputPath))
+	file := strings.ToUpper(filepath.Base(e.ScrCfg.InputPath))
 	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
 	filenameSize := len(filename)
 	if filenameSize > 8 {
 		filenameSize = 8
 	}
-	copy(e.amsdosFilename[:], file[0:filenameSize])
+	copy(e.ScrCfg.amsdosFilename[:], file[0:filenameSize])
 
-	return e.amsdosFilename
+	return e.ScrCfg.amsdosFilename[:]
 }
 
 func (e *MartineConfig) Filename() string {
@@ -217,12 +171,12 @@ func (e *MartineConfig) Filename() string {
 }
 
 func (e *MartineConfig) Fullpath(ext string) string {
-	return filepath.Join(e.OutputPath, e.OsFilename(ext))
+	return filepath.Join(e.ScrCfg.OutputPath, e.OsFilename(ext))
 }
 
 func (e *MartineConfig) TransformToAmsdosFile(filePath string) string {
 	amsdosFile := make([]byte, 8)
-	file := strings.ToUpper(filepath.Base(e.InputPath))
+	file := strings.ToUpper(filepath.Base(e.ScrCfg.InputPath))
 	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
 	filenameSize := len(filename)
 	if filenameSize > 8 {
@@ -245,7 +199,7 @@ func AmsdosFilename(inputPath, ext string) string {
 }
 
 func (e *MartineConfig) OsFilename(ext string) string {
-	file := strings.ToUpper(filepath.Base(e.InputPath))
+	file := strings.ToUpper(filepath.Base(e.ScrCfg.InputPath))
 	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
 	filenameSize := len(filename)
 	if filenameSize > 8 {
@@ -277,14 +231,14 @@ func (e *MartineConfig) AmsdosFullPath(filePath string, newExtension string) str
 	}
 
 	newFilename := file[0:length] + newExtension
-	return filepath.Join(e.OutputPath, strings.ToUpper(newFilename))
+	return filepath.Join(e.ScrCfg.OutputPath, strings.ToUpper(newFilename))
 }
 
 func (e *MartineConfig) OsFullPath(filePath string, newExtension string) string {
 	filename := filepath.Base(filePath)
 	file := RemoveUnsupportedChar(strings.TrimSuffix(filename, filepath.Ext(filename)))
 	newFilename := file + newExtension
-	return filepath.Join(e.OutputPath, newFilename)
+	return filepath.Join(e.ScrCfg.OutputPath, newFilename)
 }
 
 func (e *MartineConfig) SetLineWith(i string) error {

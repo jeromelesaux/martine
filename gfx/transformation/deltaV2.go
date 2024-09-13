@@ -60,6 +60,7 @@ func (dc *DeltaCollectionV2) Save(filename string) error {
 	return amsdos.SaveOSFile(filename, b)
 }
 
+// nolint: funlen
 func (dc *DeltaCollectionV2) Marshall() ([]byte, error) {
 	var b bytes.Buffer
 	/*

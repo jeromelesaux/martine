@@ -35,15 +35,15 @@ func Ink(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 			for j := 0; j < 12; j++ {
 				data[i] = uint8(v)
 			}
-		} else {
-			log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
+			// } else {
+			// 	log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
 
 	// log.GetLogger().Error( "Header length %d\n", binary.Size(header))
 	osFilepath := cfg.AmsdosFullPath(filePath, ".INK")
 
-	if !cfg.NoAmsdosHeader {
+	if !cfg.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".INK", data, 2, 0, 0x8809, 0x8809); err != nil {
 			return err
 		}

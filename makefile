@@ -3,7 +3,7 @@ RM=rm
 MV=mv
 
 
-SOURCEDIR=./cli
+SOURCEDIR=./cmd/martine/
 SOURCES := $(shell find $(SOURCEDIR) -name '*.go')
 
 
@@ -20,14 +20,14 @@ else
 	appversion=$(VERSION)
 endif 
 
-.DEFAULT_GOAL:=build
+.DEFAULT_GOAL:=build-exe
 
 clean:
-	rm -fr ${BINARY}
+	$(RM) -fr ${BINARY}
 	mkdir ${BINARY}
 
-build: 
-	rm -fr ${BINARY}
+build-exe:
+	$(RM) -fr ${BINARY}
 	mkdir ${BINARY}
 ifeq ($(UNAME),Linux)
 	(make build-linux)
@@ -40,7 +40,7 @@ endif
 endif
 
 package:
-	rm -fr ${BINARY}
+	$(RM) -fr ${BINARY}
 	mkdir ${BINARY}
 ifeq ($(UNAME),Linux)
 	(make package-linux ARCH=amd64 OS=linux)
@@ -57,13 +57,13 @@ init:
 	mkdir ${BINARY}/martine-${OS}-${ARCH}
 
 compile:
-	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/martine${EXT} $(SOURCEDIR)/main.go $(SOURCEDIR)/process.go $(SOURCEDIR)/export_handler.go
-	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/prepare_delta${EXT} ./resources/formatter/delta/prepare_delta.go
-	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/format_sprite${EXT} ./resources/formatter/sprites/format_sprite.go
-	GOOS=${OS} GOARCH=${ARCH} go build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/format_data${EXT} ./resources/formatter/data/format_data.go
+	GOOS=${OS} GOARCH=${ARCH} $(CC) build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/martine${EXT} $(SOURCEDIR)
+	GOOS=${OS} GOARCH=${ARCH} $(CC) build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/prepare_delta${EXT} ./resources/formatter/delta/prepare_delta.go
+	GOOS=${OS} GOARCH=${ARCH} $(CC) build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/format_sprite${EXT} ./resources/formatter/sprites/format_sprite.go
+	GOOS=${OS} GOARCH=${ARCH} $(CC) build ${LDFLAGS} -o ${BINARY}/martine-${OS}-${ARCH}/format_data${EXT} ./resources/formatter/data/format_data.go
 
 archive:
-	zip ${BINARY}/martine-$(appversion)-${OS}-${ARCH}.zip ${BINARY}/martine-${OS}-${ARCH}/* ./resources/*
+	zip -r ${BINARY}/martine-$(appversion)-${OS}-${ARCH}.zip ${BINARY}/martine-${OS}-${ARCH}/* ./resources/*
 
 build-linux:
 	@echo "Compilation for linux"
@@ -102,23 +102,24 @@ build-windows-i386:
 	(make archive ARCH=386 OS=windows  EXT=.exe)
 
 package-darwin:
-	(make init ARCH=${ARCHITECTURE} OS=darwin)
+	(make init ARCH=amd64 OS=darwin)
 	@echo "Compilation and packaging for darwin"
-	fyne package -os darwin -icon ../martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
-	cp -r martine.app ${BINARY}/martine-${OS}-${ARCHITECTURE}/
-	(make archive ARCH=${ARCHITECTURE} OS=darwin)
+	GOARCH=amd64 fyne package -os darwin -icon ../../martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
+	mkdir -p ${BINARY}/martine-darwin-amd64/
+	cp -r martine.app ${BINARY}/martine-darwin-amd64/
+	(make archive ARCH=amd64 OS=darwin)
 
 package-windows:
 	(make init ARCH=386 OS=windows  EXT=.exe)
 	@echo "Compilation and packaging for windows"
-	fyne package -os windows -icon ../martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
+	fyne package -os windows -icon ../../martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
 	mv martine.exe ${BINARY}/martine-${OS}-${ARCH}/
 	(make archive)
 
 package-linux:
 	(make init)
 	@echo "Compilation and packaging for linux"
-	fyne package -os linux -icon ../martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
+	fyne package -os linux -icon ../../martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
 	mv martine ${BINARY}/martine-${OS}-${ARCH}/
 	(make archive)
 
@@ -126,10 +127,10 @@ deps: get-linter get-vulncheck
 	@echo "Getting tools..."
 
 get-linter:
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	$(CC) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 get-vulncheck:
-	go install golang.org/x/vuln/cmd/govulncheck@latest
+	$(CC) install golang.org/x/vuln/cmd/govulncheck@latest
 
 lint:
 	@echo "Lint the whole project"
@@ -138,5 +139,5 @@ lint:
 vulncheck:
 	govulncheck ./...
 
-test: 
-	go test ./... -cover
+test-unit:
+	$(CC) test ./... -cover
