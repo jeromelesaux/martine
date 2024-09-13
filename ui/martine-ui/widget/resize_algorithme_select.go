@@ -27,49 +27,49 @@ func NewResizeAlgorithmSelect(me *menu.ImageMenu) *widget.Select {
 		switch s {
 		case "NearestNeighbor":
 			me.ResizeAlgoNumber = 0
-			me.ResizeAlgo = imaging.NearestNeighbor
+			me.Cfg.ScrCfg.Treatment.ResizingAlgo = imaging.NearestNeighbor
 		case "CatmullRom":
 			me.ResizeAlgoNumber = 1
-			me.ResizeAlgo = imaging.CatmullRom
+			me.Cfg.ScrCfg.Treatment.ResizingAlgo = imaging.CatmullRom
 		case "Lanczos":
 			me.ResizeAlgoNumber = 2
-			me.ResizeAlgo = imaging.Lanczos
+			me.Cfg.ScrCfg.Treatment.ResizingAlgo = imaging.Lanczos
 		case "Linear":
 			me.ResizeAlgoNumber = 3
-			me.ResizeAlgo = imaging.Linear
+			me.Cfg.ScrCfg.Treatment.ResizingAlgo = imaging.Linear
 		case "Box":
 			me.ResizeAlgoNumber = 4
-			me.ResizeAlgo = imaging.Box
+			me.Cfg.ScrCfg.Treatment.ResizingAlgo = imaging.Box
 		case "Hermite":
 			me.ResizeAlgoNumber = 5
-			me.ResizeAlgo = imaging.Hermite
+			me.Cfg.ScrCfg.Treatment.ResizingAlgo = imaging.Hermite
 		case "BSpline":
 			me.ResizeAlgoNumber = 6
-			me.ResizeAlgo = imaging.BSpline
+			me.Cfg.ScrCfg.Treatment.ResizingAlgo = imaging.BSpline
 		case "Hamming":
 			me.ResizeAlgoNumber = 7
-			me.ResizeAlgo = imaging.Hamming
+			me.Cfg.ScrCfg.Treatment.ResizingAlgo = imaging.Hamming
 		case "Hann":
 			me.ResizeAlgoNumber = 8
-			me.ResizeAlgo = imaging.Hann
+			me.Cfg.ScrCfg.Treatment.ResizingAlgo = imaging.Hann
 		case "Gaussian":
 			me.ResizeAlgoNumber = 9
-			me.ResizeAlgo = imaging.Gaussian
+			me.Cfg.ScrCfg.Treatment.ResizingAlgo = imaging.Gaussian
 		case "Blackman":
 			me.ResizeAlgoNumber = 10
-			me.ResizeAlgo = imaging.Blackman
+			me.Cfg.ScrCfg.Treatment.ResizingAlgo = imaging.Blackman
 		case "Bartlett":
 			me.ResizeAlgoNumber = 11
-			me.ResizeAlgo = imaging.Bartlett
+			me.Cfg.ScrCfg.Treatment.ResizingAlgo = imaging.Bartlett
 		case "Welch":
 			me.ResizeAlgoNumber = 12
-			me.ResizeAlgo = imaging.Welch
+			me.Cfg.ScrCfg.Treatment.ResizingAlgo = imaging.Welch
 		case "Cosine":
 			me.ResizeAlgoNumber = 13
-			me.ResizeAlgo = imaging.Cosine
+			me.Cfg.ScrCfg.Treatment.ResizingAlgo = imaging.Cosine
 		case "MitchellNetravali":
 			me.ResizeAlgoNumber = 14
-			me.ResizeAlgo = imaging.MitchellNetravali
+			me.Cfg.ScrCfg.Treatment.ResizingAlgo = imaging.MitchellNetravali
 		}
 	})
 

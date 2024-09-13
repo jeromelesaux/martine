@@ -92,7 +92,7 @@ func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 	}
 	if me.Cfg.ScrCfg.Type.IsSprite() || me.Cfg.ScrCfg.Type.IsSpriteHard() {
 		newSize := constants.Size{Width: cfg.ScrCfg.Size.Width * 50, Height: cfg.ScrCfg.Size.Height * 50}
-		me.Downgraded = image.Resize(me.Downgraded, newSize, me.ResizeAlgo)
+		me.Downgraded = image.Resize(me.Downgraded, newSize, me.Cfg.ScrCfg.Treatment.ResizingAlgo)
 	}
 	me.SetCpcImage(me.Downgraded)
 	me.SetPaletteImage(png.PalToImage(me.Palette()))

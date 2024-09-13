@@ -16,7 +16,6 @@ import (
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/disintegration/imaging"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/assembly"
 	"github.com/jeromelesaux/martine/config"
@@ -55,7 +54,6 @@ type ImageMenu struct {
 	DitheringType       constants.DitheringType
 	DitheringAlgoNumber int
 	ApplyDithering      bool
-	ResizeAlgo          imaging.ResampleFilter
 	ResizeAlgoNumber    int
 	paletteImage        *canvas.Image
 	UsePalette          bool
