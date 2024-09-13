@@ -36,7 +36,7 @@ func (cc *ContainerConfig) RemoveExport(c ContainerFormat) {
 	}
 }
 
-func (cc ContainerConfig) Export(c ContainerFormat) bool {
+func (cc ContainerConfig) HasExport(c ContainerFormat) bool {
 	for _, v := range cc.Type {
 		if v == c {
 			return true
@@ -115,7 +115,7 @@ var (
 	FullscreenFormat ScreenFormat = "fullscreen"
 	SpriteFormat     ScreenFormat = "sprite"
 	SpriteHardFormat ScreenFormat = "sprite_hard"
-	ScreenOldFormat  ScreenFormat = "screen"
+	OcpScreenFormat  ScreenFormat = "screen"
 	WindowFormat     ScreenFormat = "window"
 	Egx1Format       ScreenFormat = "egx1"
 	Egx2Format       ScreenFormat = "egx2"
@@ -125,14 +125,18 @@ var (
 type ScreenExport string
 
 var (
-	Overscan          ScreenExport = "overscan" // fichier fullscreen .scr
-	ScreenOldExport   ScreenExport = "screen"   // fichier classique .scr
-	SpriteExport      ScreenExport = "sprite"
-	SpriteHardExport  ScreenExport = "sprite_hard"
-	GoImpdrawExport   ScreenExport = "go"   // deux fichiers .go1 et .go2
-	AssemblyExport    ScreenExport = "asm"  // texte assembleur
-	JsonExport        ScreenExport = "json" // json
-	ImpdrawTileExport ScreenExport = "tile"
+	Overscan               ScreenExport = "overscan" // fichier fullscreen .scr
+	OcpScreenExport        ScreenExport = "screen"   // fichier classique .scr
+	SpriteExport           ScreenExport = "sprite"
+	SpriteHardExport       ScreenExport = "sprite_hard"
+	SpriteCompiledExport   ScreenExport = "sprite_compiled"
+	GoImpdrawExport        ScreenExport = "go_impdraw" // deux fichiers .go1 et .go2
+	AssemblyExport         ScreenExport = "asm"        // texte assembleur
+	JsonExport             ScreenExport = "json"       // json
+	ImpdrawTileExport      ScreenExport = "tile"
+	OcpWindowExport        ScreenExport = "window"
+	SpriteImpCatcherExport ScreenExport = "impcatcher"
+	SpriteFlatExport       ScreenExport = "flat_sprite"
 )
 
 func (f ScreenFormat) IsSprite() bool {
@@ -148,7 +152,7 @@ func (f ScreenFormat) IsSpriteHard() bool {
 }
 
 func (f ScreenFormat) IsScreen() bool {
-	return ScreenOldFormat == f
+	return OcpScreenFormat == f
 }
 
 func (f ScreenFormat) IsWindow() bool {

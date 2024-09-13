@@ -190,7 +190,7 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 
 // nolint:funlen, gocognit
 func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
-	a.Cfg.ScreenCfg.Type = config.ScreenOldFormat
+	a.Cfg.ScreenCfg.Type = config.OcpScreenFormat
 	a.ImageMenu.SetWindow(m.window)
 	importOpen := newImportButton(m, a.ImageMenu)
 

@@ -38,7 +38,7 @@ func ImportInDsk(filePath string, cfg *config.MartineConfig) error {
 	dskFullpath := cfg.AmsdosFullPath(filePath, suffix+".dsk")
 
 	var floppy *dsk.DSK
-	if cfg.ExportType(config.ExtendedDskContainer) {
+	if cfg.HasContainerExport(config.ExtendedDskContainer) {
 		floppy = dsk.FormatDsk(10, 80, 1, 1, dsk.DataFormat)
 	} else {
 		floppy = dsk.FormatDsk(9, 40, 1, 0, dsk.DataFormat)

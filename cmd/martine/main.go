@@ -455,7 +455,7 @@ func main() {
 			for idxX, v := range raw {
 				for idxY, v0 := range v {
 					filename := cfg.ScreenCfg.OutputPath + string(filepath.Separator) + fmt.Sprintf("L%.2dC%.2d.WIN", idxX, idxY)
-					if err := window.Win(filename, v0, uint8(*mode), cfg.ScreenCfg.Size.Width, cfg.ScreenCfg.Size.Height, cfg.ExportType(config.DskContainer), cfg); err != nil {
+					if err := window.Win(filename, v0, uint8(*mode), cfg.ScreenCfg.Size.Width, cfg.ScreenCfg.Size.Height, cfg.HasContainerExport(config.DskContainer), cfg); err != nil {
 						log.GetLogger().Error("error while exporting sprites error %s\n", err.Error())
 					}
 				}
@@ -485,7 +485,7 @@ func main() {
 					os.Exit(-2)
 				}
 			}
-			if cfg.ExportType(config.DskContainer) {
+			if cfg.HasContainerExport(config.DskContainer) {
 				if err := diskimage.ImportInDsk(filename, cfg); err != nil {
 					log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
 					os.Exit(-2)
@@ -504,7 +504,7 @@ func main() {
 				log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
 				os.Exit(-2)
 			}
-			if cfg.ExportType(config.DskContainer) {
+			if cfg.HasContainerExport(config.DskContainer) {
 				if err := diskimage.ImportInDsk(filename, cfg); err != nil {
 					log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
 					os.Exit(-2)
@@ -525,7 +525,7 @@ func main() {
 				log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
 				os.Exit(-2)
 			}
-			if cfg.ExportType(config.DskContainer) {
+			if cfg.HasContainerExport(config.DskContainer) {
 				if err := diskimage.ImportInDsk(filename, cfg); err != nil {
 					log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
 					os.Exit(-2)
@@ -803,12 +803,12 @@ func main() {
 		}
 	}
 	// export into bundle DSK or SNA
-	if cfg.ExportType(config.DskContainer) {
+	if cfg.HasContainerExport(config.DskContainer) {
 		if err := diskimage.ImportInDsk(*picturePath, cfg); err != nil {
 			log.GetLogger().Error("Cannot create or write into dsk file error :%v\n", err)
 		}
 	}
-	if cfg.ExportType(config.SnaContainer) {
+	if cfg.HasContainerExport(config.SnaContainer) {
 		if cfg.ScreenCfg.Type.IsFullScreen() {
 			var gfxFile string
 			for _, v := range cfg.DskFiles {

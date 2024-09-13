@@ -355,13 +355,13 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 			dialog.NewError(err, w).Show()
 			return
 		}
-		if cfg.ExportType(config.DskContainer) {
+		if cfg.HasContainerExport(config.DskContainer) {
 			if err := diskimage.ImportInDsk(me.OriginalImagePath(), cfg); err != nil {
 				dialog.NewError(err, w).Show()
 				return
 			}
 		}
-		if cfg.ExportType(config.SnaContainer) {
+		if cfg.HasContainerExport(config.SnaContainer) {
 			if cfg.ScreenCfg.Type == config.FullscreenFormat {
 				var gfxFile string
 				for _, v := range cfg.DskFiles {
@@ -557,7 +557,7 @@ func (me *ImageMenu) ExportDialog(cfg *config.MartineConfig, getCfg func(checkOr
 			}
 			fo.Resize(me.w.Content().Size())
 
-			dl.CheckAmsdosHeaderExport(cfg.ContainerCfg.Export(config.DskContainer), cfg.ScreenCfg.NoAmsdosHeader == false, fo, me.w)
+			dl.CheckAmsdosHeaderExport(cfg.ContainerCfg.HasExport(config.DskContainer), cfg.ScreenCfg.NoAmsdosHeader == false, fo, me.w)
 		}),
 	)
 
@@ -636,7 +636,7 @@ func (i *ImageMenu) NewImportButton(modeSelection *widget.Select, callBack func(
 					return
 				}
 				i.SetOriginalImage(img)
-			case config.ScreenOldFormat:
+			case config.OcpScreenFormat:
 				img, err := screen.ScrToImg(i.OriginalImagePath(), uint8(i.Mode), i.Palette())
 				if err != nil {
 					dialog.ShowError(err, i.w)
@@ -663,7 +663,7 @@ func (me *ImageMenu) NewFormatRadio() *widget.Select {
 	winFormat := widget.NewSelect([]string{"Normal", "Fullscreen", "Window", "Sprite", "Sprite Hard"}, func(s string) {
 		switch s {
 		case "Normal":
-			me.Cfg.ScreenCfg.Type = config.ScreenOldFormat
+			me.Cfg.ScreenCfg.Type = config.OcpScreenFormat
 		case "Fullscreen":
 			me.Cfg.ScreenCfg.Type = config.FullscreenFormat
 		case "Sprite":

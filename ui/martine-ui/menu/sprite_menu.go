@@ -13,7 +13,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	w "github.com/jeromelesaux/fyne-io/widget"
-	"github.com/jeromelesaux/martine/export"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/export/compression"
 	"github.com/jeromelesaux/martine/log"
 	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
@@ -22,32 +22,21 @@ import (
 var SpriteSize float32 = 80.
 
 type SpriteMenu struct {
-	IsHardSprite    bool
+	Cfg             *config.MartineConfig
 	originalBoard   *canvas.Image
 	originalPalette *canvas.Image
 	palette         color.Palette
 	paletteImage    *canvas.Image
 	FilePath        string
 
-	SpritesData            [][][]byte
-	CompileSprite          bool
-	IsCpcPlus              bool
-	OriginalImages         *w.ImageTable
-	SpritesCollection      [][]*image.NRGBA
-	SpriteColumns          int
-	SpriteRows             int
-	Mode                   int
-	SpriteWidth            int
-	SpriteHeight           int
-	ExportFormat           export.ExportFormat
-	ExportDsk              bool
-	ExportText             bool
-	ExportWithAmsdosHeader bool
-	ExportZigzag           bool
-	ExportJson             bool
-	ExportCompression      compression.CompressionMethod
-	ExportFolderPath       string
-	UsePalette             bool
+	SpritesData       [][][]byte
+	CompileSprite     bool
+	OriginalImages    *w.ImageTable
+	SpritesCollection [][]*image.NRGBA
+	SpriteColumns     int
+	SpriteRows        int
+	Mode              int
+	UsePalette        bool
 
 	CmdLineGenerate string
 }
@@ -92,6 +81,7 @@ func NewSpriteMenu() *SpriteMenu {
 		SpritesData:       make([][][]byte, 0),
 		originalPalette:   &canvas.Image{},
 		paletteImage:      &canvas.Image{},
+		Cfg:               config.NewMartineConfig("", ""),
 	}
 }
 
@@ -128,39 +118,46 @@ func (s *SpriteMenu) CmdLine() string {
 	exec += " -mode " + strconv.Itoa(s.Mode)
 	exec += " -spritesrow " + strconv.Itoa(s.SpriteRows)
 	exec += " -spritescolumn " + strconv.Itoa(s.SpriteColumns)
-	if s.IsHardSprite {
+	if s.Cfg.ScreenCfg.Type.IsSpriteHard() {
 		exec += " -height 16 -width 16"
 	} else {
-		exec += " -height " + strconv.Itoa(s.SpriteHeight)
-		exec += " -width " + strconv.Itoa(s.SpriteWidth)
+		exec += " -height " + strconv.Itoa(s.Cfg.ScreenCfg.Size.Height)
+		exec += " -width " + strconv.Itoa(s.Cfg.ScreenCfg.Size.Width)
 	}
 
-	if s.IsCpcPlus {
+	if s.Cfg.ScreenCfg.IsPlus {
 		exec += " -plus"
 	}
 
-	if s.ExportCompression != 0 {
-		exec += " -z " + strconv.Itoa((int(s.ExportCompression)))
+	if s.Cfg.ScreenCfg.Compression != compression.NONE {
+		exec += " -z " + strconv.Itoa((int(s.Cfg.ScreenCfg.Compression)))
 	}
 
-	if s.ExportDsk {
+	if s.Cfg.ContainerCfg.HasExport(config.DskContainer) {
 		exec += " -dsk"
 	}
 
-	if s.ExportWithAmsdosHeader {
+	if s.Cfg.ScreenCfg.NoAmsdosHeader {
 		exec += " -noheader"
 	}
 
-	switch s.ExportFormat {
-	case export.SpriteCompiled:
+	if s.Cfg.ScreenCfg.IsExport(config.SpriteCompiledExport) {
 		exec += " -compiled"
-	case export.OcpWinExport:
+	}
+
+	if s.Cfg.ScreenCfg.IsExport(config.OcpWindowExport) {
 		exec += " -ocpwin"
-	case export.SpriteImpCatcher:
+	}
+
+	if s.Cfg.ScreenCfg.IsExport(config.SpriteImpCatcherExport) {
 		exec += " -imp"
-	case export.SpriteFlatExport:
+	}
+
+	if s.Cfg.ScreenCfg.IsExport(config.SpriteFlatExport) {
 		exec += " -flat"
-	case export.SpriteHard:
+	}
+
+	if s.Cfg.ScreenCfg.IsExport(config.SpriteHardExport) {
 		exec += " -spritehard"
 	}
 

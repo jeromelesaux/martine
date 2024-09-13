@@ -15,7 +15,6 @@ import (
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert/sprite"
-	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/export/compression"
@@ -36,62 +35,63 @@ import (
 func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 	formatSelect := widget.NewSelect(
 		[]string{
-			string(export.SpriteImpCatcher),
-			string(export.SpriteFlatExport),
-			string(export.OcpWinExport),
-			string(export.SpriteCompiled),
-			string(export.SpriteHard),
+			string(config.SpriteImpCatcherExport),
+			string(config.SpriteFlatExport),
+			string(config.OcpWindowExport),
+			string(config.SpriteHardExport),
+			string(config.SpriteCompiledExport),
 		}, func(v string) {
-			switch export.ExportFormat(v) {
-			case export.SpriteFlatExport:
-				s.ExportFormat = export.SpriteFlatExport
-			case export.OcpWinExport:
-				s.ExportFormat = export.OcpWinExport
-			case export.SpriteImpCatcher:
-				s.ExportFormat = export.SpriteImpCatcher
-			case export.SpriteCompiled:
-				s.ExportFormat = export.SpriteCompiled
-			case export.SpriteHard:
-				s.ExportFormat = export.SpriteHard
-			default:
-				log.GetLogger().Error("error while getting sprite export format %s\n", v)
-			}
+			s.Cfg.ScreenCfg.ResetExport()
+			s.Cfg.ScreenCfg.AddExport(config.ScreenExport(v))
+
 		})
 	cont := container.New(
 		layout.NewVBoxLayout(),
 		widget.NewLabel("export type:"),
 		formatSelect,
 		widget.NewCheck("import all file in Dsk", func(b bool) {
-			s.ExportDsk = b
+			if b {
+				s.Cfg.ContainerCfg.AddExport(config.DskContainer)
+			} else {
+				s.Cfg.ContainerCfg.RemoveExport(config.DskContainer)
+			}
 		}),
 		widget.NewCheck("export text file", func(b bool) {
-			s.ExportText = b
+			if b {
+				s.Cfg.ScreenCfg.AddExport(config.AssemblyExport)
+			} else {
+				s.Cfg.ScreenCfg.RemoveExport(config.AssemblyExport)
+			}
 		}),
 		widget.NewCheck("export Json file", func(b bool) {
-			s.ExportJson = b
+			if b {
+				s.Cfg.ScreenCfg.AddExport(config.JsonExport)
+			} else {
+				s.Cfg.ScreenCfg.RemoveExport(config.JsonExport)
+			}
 		}),
 		widget.NewCheck("add amsdos header", func(b bool) {
-			s.ExportWithAmsdosHeader = b
+			s.Cfg.ScreenCfg.NoAmsdosHeader = b == false
 		}),
 		widget.NewCheck("apply zigzag", func(b bool) {
-			s.ExportZigzag = b
+			s.Cfg.ZigZag = b
 		}),
 		widget.NewLabel("Compression type:"),
 		widget.NewSelect([]string{"none", "rle", "rle 16bits", "Lz4 Classic", "Lz4 Raw", "zx0 crunch"},
 			func(v string) {
 				switch v {
 				case "none":
-					s.ExportCompression = 0
+					s.Cfg.ScreenCfg.Compression = compression.NONE
 				case "rle":
-					s.ExportCompression = 1
+					s.Cfg.ScreenCfg.Compression = compression.RLE
 				case "rle 16bits":
-					s.ExportCompression = 2
+					s.Cfg.ScreenCfg.Compression = compression.RLE16
 				case "Lz4 Classic":
-					s.ExportCompression = 3
+					s.Cfg.ScreenCfg.Compression = compression.LZ4
 				case "Lz4 Raw":
-					s.ExportCompression = 4
+					s.Cfg.ScreenCfg.Compression = compression.RawLZ4
 				case "zx0 crunch":
-					s.ExportCompression = 5
+					s.Cfg.ScreenCfg.Compression = compression.ZX0
 				}
 			}),
 		widget.NewButtonWithIcon("Export into folder", theme.DocumentSaveIcon(), func() {
@@ -105,7 +105,7 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 					return
 				}
 				directory.SetExportDirectoryURI(lu)
-				s.ExportFolderPath = lu.Path()
+				s.Cfg.ScreenCfg.OutputPath = lu.Path()
 				m.ExportSpriteBoard(s)
 				// apply and export
 			}, m.window)
@@ -114,7 +114,7 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 				fo.SetLocation(d)
 			}
 			fo.Resize(savingDialogSize)
-			m.CheckAmsdosHeaderExport(s.ExportDsk, s.ExportWithAmsdosHeader, fo, m.window)
+			m.CheckAmsdosHeaderExport(s.Cfg.ContainerCfg.HasExport(config.DskContainer), s.Cfg.ScreenCfg.NoAmsdosHeader == false, fo, m.window)
 		}),
 	)
 
@@ -127,13 +127,17 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 	pi := wgt.NewProgressInfinite("Saving...., Please wait.", m.window)
 	pi.Show()
-	if err := impPalette.SaveKit(s.ExportFolderPath+string(filepath.Separator)+"SPRITES.KIT", s.Palette(), s.ExportWithAmsdosHeader); err != nil {
+	if err := impPalette.SaveKit(
+		s.Cfg.ScreenCfg.OutputPath+string(filepath.Separator)+"SPRITES.KIT",
+		s.Palette(),
+		s.Cfg.ScreenCfg.NoAmsdosHeader == false); err != nil {
 		pi.Hide()
 		dialog.ShowError(err, m.window)
 		return
 	}
-	switch s.ExportFormat {
-	case export.SpriteCompiled:
+	cfg := s.Cfg
+
+	if s.Cfg.ScreenCfg.IsExport(config.SpriteCompiledExport) {
 		spr := make([][]byte, 0)
 		for _, v := range s.SpritesData {
 			spr = append(spr, v...)
@@ -142,7 +146,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		var code string
 		for idx, diff := range diffs {
 			var routine string
-			if s.IsHardSprite {
+			if s.Cfg.ScreenCfg.Type.IsSpriteHard() {
 				routine = animate.ExportCompiledSpriteHard(diff)
 			} else {
 				pi.Hide()
@@ -161,153 +165,155 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		code += "palette:\n"
 		code += kitPalette.ToString()
 
-		if err := amsdos.SaveStringOSFile(s.ExportFolderPath+string(filepath.Separator)+"compiled_sprites.asm", code); err != nil {
+		if err := amsdos.SaveStringOSFile(
+			s.Cfg.ScreenCfg.OutputPath+string(filepath.Separator)+"compiled_sprites.asm",
+			code); err != nil {
 			pi.Hide()
 			dialog.NewError(err, m.window).Show()
 			return
 		}
 
 		pi.Hide()
-	case export.OcpWinExport:
-		for idxX, v := range s.SpritesData {
-			for idxY, v0 := range v {
-				filename := s.ExportFolderPath + string(filepath.Separator) + fmt.Sprintf("L%.2dC%.2d.WIN", idxX, idxY)
-				cfg := config.NewMartineConfig("", s.ExportFolderPath)
-				cfg.ScreenCfg.Compression = s.ExportCompression
-				cfg.ScreenCfg.NoAmsdosHeader = !s.ExportWithAmsdosHeader
-				if err := window.Win(filename, v0, uint8(s.Mode), s.SpriteWidth, s.SpriteHeight, s.ExportDsk, cfg); err != nil {
-					log.GetLogger().Error("error while exporting sprites error %s\n", err.Error())
+	} else {
+		if s.Cfg.ScreenCfg.IsExport(config.OcpWindowExport) {
+			for idxX, v := range s.SpritesData {
+				for idxY, v0 := range v {
+					filename := s.Cfg.ScreenCfg.OutputPath + string(filepath.Separator) + fmt.Sprintf("L%.2dC%.2d.WIN", idxX, idxY)
+					if err := window.Win(filename, v0, uint8(s.Mode), s.Cfg.ScreenCfg.Size.Width, s.Cfg.ScreenCfg.Size.Height, s.Cfg.ContainerCfg.HasExport(config.DskContainer), cfg); err != nil {
+						log.GetLogger().Error("error while exporting sprites error %s\n", err.Error())
+					}
 				}
 			}
-		}
-		pi.Hide()
-	case export.SpriteFlatExport:
-		buf := make([]byte, 0)
-		if s.ExportZigzag {
-			for x := 0; x < len(s.SpritesCollection); x++ {
-				for y := 0; y < len(s.SpritesCollection[x]); y++ {
-					z := transformation.Zigzag(s.SpritesCollection[x][y])
-					sp, _, _, err := sprite.ToSprite(z,
-						s.Palette(),
-						constants.Size{
-							Width:  s.SpriteWidth,
-							Height: s.SpriteHeight,
-						},
-						uint8(s.Mode),
-						config.NewMartineConfig("", ""),
-					)
+			pi.Hide()
+		} else {
+			if s.Cfg.ScreenCfg.IsExport(config.SpriteFlatExport) {
+				buf := make([]byte, 0)
+				if s.Cfg.ZigZag {
+					for x := 0; x < len(s.SpritesCollection); x++ {
+						for y := 0; y < len(s.SpritesCollection[x]); y++ {
+							z := transformation.Zigzag(s.SpritesCollection[x][y])
+							sp, _, _, err := sprite.ToSprite(z,
+								s.Palette(),
+								constants.Size{
+									Width:  s.Cfg.ScreenCfg.Size.Width,
+									Height: s.Cfg.ScreenCfg.Size.Height,
+								},
+								uint8(s.Mode),
+								config.NewMartineConfig("", ""),
+							)
+							if err != nil {
+								pi.Hide()
+								dialog.NewError(err, m.window).Show()
+								return
+							}
+							buf = append(buf, sp...)
+						}
+					}
+				} else {
+					for _, v := range s.SpritesData {
+						for _, v0 := range v {
+							buf = append(buf, v0...)
+						}
+					}
+				}
+				filename := s.Cfg.ScreenCfg.OutputPath + string(filepath.Separator) + "SPRITES.BIN"
+				buf, _ = compression.Compress(buf, s.Cfg.ScreenCfg.Compression)
+				var err error
+				// TODO add amsdos header
+				if s.Cfg.ScreenCfg.NoAmsdosHeader {
+					err = amsdos.SaveAmsdosFile(filename, ".WIN", buf, 2, 0, 0x4000, 0x4000)
 					if err != nil {
 						pi.Hide()
 						dialog.NewError(err, m.window).Show()
+						log.GetLogger().Error("Error while saving flat sprites file error %s\n", err.Error())
 						return
 					}
-					buf = append(buf, sp...)
+				} else {
+					err = amsdos.SaveOSFile(filename, buf)
+					if err != nil {
+						pi.Hide()
+						dialog.NewError(err, m.window).Show()
+						log.GetLogger().Error("Error while saving flat sprites file error %s\n", err.Error())
+						return
+					}
+				}
+				if s.Cfg.ContainerCfg.HasExport(config.DskContainer) {
+					if err := diskimage.ImportInDsk(filename, cfg); err != nil {
+						pi.Hide()
+						dialog.NewError(err, m.window).Show()
+						log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
+						return
+					}
+				}
+				pi.Hide()
+			} else {
+				if s.Cfg.ScreenCfg.IsExport(config.SpriteImpCatcherExport) {
+					buf := make([]byte, 0)
+					for _, v := range s.SpritesData {
+						for _, v0 := range v {
+							buf = append(buf, v0...)
+						}
+					}
+					filename := s.Cfg.ScreenCfg.OutputPath + string(filepath.Separator) + "sprites.imp"
+					if err := tile.Imp(buf, uint(s.SpriteRows*s.SpriteColumns), uint(s.Cfg.ScreenCfg.Size.Width), uint(s.Cfg.ScreenCfg.Size.Height), uint(s.Mode), filename, cfg); err != nil {
+						pi.Hide()
+						dialog.NewError(err, m.window).Show()
+						log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
+						return
+					}
+					if s.Cfg.ContainerCfg.HasExport(config.DskContainer) {
+						if err := diskimage.ImportInDsk(filename, cfg); err != nil {
+							pi.Hide()
+							dialog.NewError(err, m.window).Show()
+							log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
+							return
+						}
+					}
+					pi.Hide()
+				} else {
+					if s.Cfg.ScreenCfg.IsExport(config.SpriteHardExport) {
+						data := spritehard.SprImpdraw{}
+						for _, v := range s.SpritesData {
+							sh := spritehard.SpriteHard{}
+							for _, v0 := range v {
+								copy(sh.Data[:], v0[:256])
+								data.Data = append(data.Data, sh)
+							}
+						}
+						filename := s.Cfg.ScreenCfg.OutputPath + string(filepath.Separator) + "sprites.spr"
+
+						if err := spritehard.Spr(filename, data, cfg); err != nil {
+							pi.Hide()
+							dialog.NewError(err, m.window).Show()
+							log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
+							return
+						}
+						if s.Cfg.ContainerCfg.HasExport(config.DskContainer) {
+							if err := diskimage.ImportInDsk(filename, cfg); err != nil {
+								pi.Hide()
+								dialog.NewError(err, m.window).Show()
+								log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
+								return
+							}
+						}
+						pi.Hide()
+					}
 				}
 			}
-		} else {
-			for _, v := range s.SpritesData {
-				for _, v0 := range v {
-					buf = append(buf, v0...)
-				}
-			}
 		}
-		filename := s.ExportFolderPath + string(filepath.Separator) + "SPRITES.BIN"
-		buf, _ = compression.Compress(buf, s.ExportCompression)
-		var err error
-		// TODO add amsdos header
-		if s.ExportWithAmsdosHeader {
-			err = amsdos.SaveAmsdosFile(filename, ".WIN", buf, 2, 0, 0x4000, 0x4000)
-			if err != nil {
-				pi.Hide()
-				dialog.NewError(err, m.window).Show()
-				log.GetLogger().Error("Error while saving flat sprites file error %s\n", err.Error())
-				return
-			}
-		} else {
-			err = amsdos.SaveOSFile(filename, buf)
-			if err != nil {
-				pi.Hide()
-				dialog.NewError(err, m.window).Show()
-				log.GetLogger().Error("Error while saving flat sprites file error %s\n", err.Error())
-				return
-			}
-		}
-		if s.ExportDsk {
-			cfg := config.NewMartineConfig("", s.ExportFolderPath)
-			if err := diskimage.ImportInDsk(filename, cfg); err != nil {
-				pi.Hide()
-				dialog.NewError(err, m.window).Show()
-				log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
-				return
-			}
-		}
-		pi.Hide()
-	case export.SpriteImpCatcher:
-		buf := make([]byte, 0)
-		for _, v := range s.SpritesData {
-			for _, v0 := range v {
-				buf = append(buf, v0...)
-			}
-		}
-		filename := s.ExportFolderPath + string(filepath.Separator) + "sprites.imp"
-		cfg := config.NewMartineConfig("", s.ExportFolderPath)
-		cfg.ScreenCfg.Compression = s.ExportCompression
-		cfg.ScreenCfg.NoAmsdosHeader = !s.ExportWithAmsdosHeader
-		if err := tile.Imp(buf, uint(s.SpriteRows*s.SpriteColumns), uint(s.SpriteWidth), uint(s.SpriteHeight), uint(s.Mode), filename, cfg); err != nil {
-			pi.Hide()
-			dialog.NewError(err, m.window).Show()
-			log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
-			return
-		}
-		if s.ExportDsk {
-			if err := diskimage.ImportInDsk(filename, cfg); err != nil {
-				pi.Hide()
-				dialog.NewError(err, m.window).Show()
-				log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
-				return
-			}
-		}
-		pi.Hide()
-	case export.SpriteHard:
-		data := spritehard.SprImpdraw{}
-		for _, v := range s.SpritesData {
-			sh := spritehard.SpriteHard{}
-			for _, v0 := range v {
-				copy(sh.Data[:], v0[:256])
-				data.Data = append(data.Data, sh)
-			}
-		}
-		filename := s.ExportFolderPath + string(filepath.Separator) + "sprites.spr"
-		cfg := config.NewMartineConfig("", s.ExportFolderPath)
-		cfg.ScreenCfg.Compression = s.ExportCompression
-		cfg.ScreenCfg.NoAmsdosHeader = !s.ExportWithAmsdosHeader
-		if err := spritehard.Spr(filename, data, cfg); err != nil {
-			pi.Hide()
-			dialog.NewError(err, m.window).Show()
-			log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
-			return
-		}
-		if s.ExportDsk {
-			if err := diskimage.ImportInDsk(filename, cfg); err != nil {
-				pi.Hide()
-				dialog.NewError(err, m.window).Show()
-				log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
-				return
-			}
-		}
-		pi.Hide()
 	}
-	if s.ExportText {
+
+	if s.Cfg.ScreenCfg.IsExport(config.AssemblyExport) {
 		data := make([][]byte, 0)
-		if s.ExportZigzag {
+		if s.Cfg.ZigZag {
 			for x := 0; x < len(s.SpritesCollection); x++ {
 				for y := 0; y < len(s.SpritesCollection[x]); y++ {
 					z := transformation.Zigzag(s.SpritesCollection[x][y])
 					sp, _, _, err := sprite.ToSprite(z,
 						s.Palette(),
 						constants.Size{
-							Width:  s.SpriteWidth,
-							Height: s.SpriteHeight,
+							Width:  s.Cfg.ScreenCfg.Size.Width,
+							Height: s.Cfg.ScreenCfg.Size.Height,
 						},
 						uint8(s.Mode),
 						config.NewMartineConfig("", ""),
@@ -330,11 +336,11 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			kitPalette.Colors[i] = constants.NewCpcPlusColor(s.Palette()[i])
 		}
 		header := fmt.Sprintf("' from file %s\n", s.FilePath)
-		code := header + ascii.SpritesHardText(data, s.ExportCompression)
+		code := header + ascii.SpritesHardText(data, s.Cfg.ScreenCfg.Compression)
 		code += "Palette\n"
 		code += kitPalette.ToCode()
 
-		filename := s.ExportFolderPath + string(filepath.Separator) + "SPRITES.ASM"
+		filename := s.Cfg.ScreenCfg.OutputPath + string(filepath.Separator) + "SPRITES.ASM"
 		err := amsdos.SaveStringOSFile(filename, code)
 		if err != nil {
 			pi.Hide()
@@ -343,5 +349,5 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		}
 		pi.Hide()
 	}
-	dialog.ShowInformation("Saved", "Your export ended in the folder : "+s.ExportFolderPath, m.window)
+	dialog.ShowInformation("Saved", "Your export ended in the folder : "+s.Cfg.ScreenCfg.OutputPath, m.window)
 }

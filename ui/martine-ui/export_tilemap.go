@@ -122,7 +122,7 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 				fo.SetLocation(d)
 			}
 			fo.Resize(savingDialogSize)
-			m.CheckAmsdosHeaderExport(m.tilemap.Cfg.ContainerCfg.Export(config.DskContainer), m.tilemap.Cfg.ScreenCfg.NoAmsdosHeader == false, fo, m.window)
+			m.CheckAmsdosHeaderExport(m.tilemap.Cfg.ContainerCfg.HasExport(config.DskContainer), m.tilemap.Cfg.ScreenCfg.NoAmsdosHeader == false, fo, m.window)
 		}),
 	)
 
@@ -141,7 +141,7 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 			dialog.NewError(err, m.window).Show()
 			return
 		}
-		if t.Cfg.ExportType(config.DskContainer) {
+		if t.Cfg.HasContainerExport(config.DskContainer) {
 			if err := diskimage.ImportInDsk(t.OriginalImagePath(), t.Cfg); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
@@ -150,12 +150,12 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 		}
 		pi.Hide()
 	} else {
-		if t.Cfg.ContainerCfg.Export(config.DskContainer) {
+		if t.Cfg.ContainerCfg.HasExport(config.DskContainer) {
 			if err := gfx.ExportImpdrawTilemap(t.Result, "tilemap", t.Palette(), uint8(t.Mode), t.Cfg.ScreenCfg.Size, t.OriginalImage().Image, t.Cfg); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 			}
-			if t.Cfg.ExportType(config.DskContainer) {
+			if t.Cfg.HasContainerExport(config.DskContainer) {
 				if err := diskimage.ImportInDsk(t.OriginalImagePath(), t.Cfg); err != nil {
 					pi.Hide()
 					dialog.NewError(err, m.window).Show()
@@ -169,7 +169,7 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 			}
-			if t.Cfg.ExportType(config.DskContainer) {
+			if t.Cfg.HasContainerExport(config.DskContainer) {
 				if err := diskimage.ImportInDsk(t.OriginalImagePath(), t.Cfg); err != nil {
 					pi.Hide()
 					dialog.NewError(err, m.window).Show()

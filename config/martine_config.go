@@ -85,8 +85,8 @@ func (m *MartineConfig) Reset() {
 	m.ContainerCfg.Reset()
 }
 
-func (m MartineConfig) ExportType(c ContainerFormat) bool {
-	return m.ContainerCfg.Export(c)
+func (m MartineConfig) HasContainerExport(c ContainerFormat) bool {
+	return m.ContainerCfg.HasExport(c)
 }
 
 func MaskIsAllowed(mode uint8, value uint8) bool {

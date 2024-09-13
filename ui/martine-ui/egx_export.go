@@ -110,7 +110,7 @@ func (m *MartineUI) exportEgxDialog(cfg *config.MartineConfig, w fyne.Window) {
 				fo.SetLocation(d)
 			}
 			fo.Resize(savingDialogSize)
-			m.CheckAmsdosHeaderExport(cfg.ContainerCfg.Export(config.DskContainer),
+			m.CheckAmsdosHeaderExport(cfg.ContainerCfg.HasExport(config.DskContainer),
 				cfg.ScreenCfg.NoAmsdosHeader == false, fo, m.window)
 		}),
 	)
@@ -162,13 +162,13 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 			return
 		}
 	}
-	if cfg.ExportType(config.DskContainer) {
+	if cfg.HasContainerExport(config.DskContainer) {
 		if err := diskimage.ImportInDsk(me.ResultImage.Path, cfg); err != nil {
 			dialog.NewError(err, m.window).Show()
 			return
 		}
 	}
-	if cfg.ExportType(config.SnaContainer) {
+	if cfg.HasContainerExport(config.SnaContainer) {
 		if cfg.ScreenCfg.Type.IsFullScreen() {
 			var gfxFile string
 			for _, v := range cfg.DskFiles {
