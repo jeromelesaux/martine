@@ -105,8 +105,8 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	cfg.TileIterationY = *tileIterationY
 	cfg.ScrCfg.Compression = compression.ToCompressMethod(*compress)
 	cfg.ScrCfg.Process.ResizingAlgo = resizeAlgo
-	cfg.ScrCfg.Process.DitheringMultiplier = *ditheringMultiplier
-	cfg.ScrCfg.Process.DitheringWithQuantification = *withQuantization
+	cfg.ScrCfg.Process.Dithering.Multiplier = *ditheringMultiplier
+	cfg.ScrCfg.Process.Dithering.WithQuantification = *withQuantization
 	cfg.M4cfg = config.M4Config{
 		Host:       *m4Host,
 		RemotePath: *m4RemotePath,
@@ -206,28 +206,28 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 
 		v, err := common.ParseHexadecimal8(*maskSprite)
 		if err == nil {
-			cfg.ScrCfg.Process.MaskSprite = v
+			cfg.ScrCfg.Process.Mask.Sprite = v
 		}
-		if cfg.ScrCfg.Process.MaskSprite != 0 {
+		if cfg.ScrCfg.Process.Mask.Sprite != 0 {
 			if *maskOrOperation {
-				cfg.ScrCfg.Process.MaskOrOperation = true
+				cfg.ScrCfg.Process.Mask.OrOperation = true
 			}
 			if *maskAdOperation {
-				cfg.ScrCfg.Process.MaskAndOperation = true
+				cfg.ScrCfg.Process.Mask.AndOperation = true
 			}
-			if cfg.ScrCfg.Process.MaskAndOperation && cfg.ScrCfg.Process.MaskOrOperation {
+			if cfg.ScrCfg.Process.Mask.AndOperation && cfg.ScrCfg.Process.Mask.OrOperation {
 				log.GetLogger().Error("Or and And operations are setted, will only apply And operation.\n")
-				cfg.ScrCfg.Process.MaskOrOperation = false
+				cfg.ScrCfg.Process.Mask.OrOperation = false
 			}
-			if !cfg.ScrCfg.Process.MaskAndOperation && !cfg.ScrCfg.Process.MaskOrOperation {
+			if !cfg.ScrCfg.Process.Mask.AndOperation && !cfg.ScrCfg.Process.Mask.OrOperation {
 				log.GetLogger().Error("Or and And operations are not setted, will only apply And operation.\n")
-				cfg.ScrCfg.Process.MaskAndOperation = true
+				cfg.ScrCfg.Process.Mask.AndOperation = true
 			}
 			log.GetLogger().Info("Applying sprite mask value [#%X] [%.8b] AND = %t, OR =%t\n",
-				cfg.ScrCfg.Process.MaskSprite,
-				cfg.ScrCfg.Process.MaskSprite,
-				cfg.ScrCfg.Process.MaskAndOperation,
-				cfg.ScrCfg.Process.MaskOrOperation)
+				cfg.ScrCfg.Process.Mask.Sprite,
+				cfg.ScrCfg.Process.Mask.Sprite,
+				cfg.ScrCfg.Process.Mask.AndOperation,
+				cfg.ScrCfg.Process.Mask.OrOperation)
 		}
 	}
 

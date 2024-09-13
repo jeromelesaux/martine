@@ -24,49 +24,49 @@ func NewDitheringSelect(me *menu.ImageMenu) *widget.Select {
 	}, func(s string) {
 		switch s {
 		case "FloydSteinberg":
-			me.Cfg.ScrCfg.Process.DitheringAlgo = 0
-			me.Cfg.ScrCfg.Process.DitheringMatrix = filter.FloydSteinberg
-			me.Cfg.ScrCfg.Process.DitheringType = constants.ErrorDiffusionDither
+			me.Cfg.ScrCfg.Process.Dithering.Algo = 0
+			me.Cfg.ScrCfg.Process.Dithering.Matrix = filter.FloydSteinberg
+			me.Cfg.ScrCfg.Process.Dithering.Type = constants.ErrorDiffusionDither
 		case "JarvisJudiceNinke":
-			me.Cfg.ScrCfg.Process.DitheringAlgo = 1
-			me.Cfg.ScrCfg.Process.DitheringMatrix = filter.JarvisJudiceNinke
-			me.Cfg.ScrCfg.Process.DitheringType = constants.ErrorDiffusionDither
+			me.Cfg.ScrCfg.Process.Dithering.Algo = 1
+			me.Cfg.ScrCfg.Process.Dithering.Matrix = filter.JarvisJudiceNinke
+			me.Cfg.ScrCfg.Process.Dithering.Type = constants.ErrorDiffusionDither
 		case "Stucki":
-			me.Cfg.ScrCfg.Process.DitheringAlgo = 2
-			me.Cfg.ScrCfg.Process.DitheringMatrix = filter.Stucki
-			me.Cfg.ScrCfg.Process.DitheringType = constants.ErrorDiffusionDither
+			me.Cfg.ScrCfg.Process.Dithering.Algo = 2
+			me.Cfg.ScrCfg.Process.Dithering.Matrix = filter.Stucki
+			me.Cfg.ScrCfg.Process.Dithering.Type = constants.ErrorDiffusionDither
 		case "Atkinson":
-			me.Cfg.ScrCfg.Process.DitheringAlgo = 3
-			me.Cfg.ScrCfg.Process.DitheringMatrix = filter.Atkinson
-			me.Cfg.ScrCfg.Process.DitheringType = constants.ErrorDiffusionDither
+			me.Cfg.ScrCfg.Process.Dithering.Algo = 3
+			me.Cfg.ScrCfg.Process.Dithering.Matrix = filter.Atkinson
+			me.Cfg.ScrCfg.Process.Dithering.Type = constants.ErrorDiffusionDither
 		case "Sierra":
-			me.Cfg.ScrCfg.Process.DitheringAlgo = 4
-			me.Cfg.ScrCfg.Process.DitheringMatrix = filter.Sierra
-			me.Cfg.ScrCfg.Process.DitheringType = constants.ErrorDiffusionDither
+			me.Cfg.ScrCfg.Process.Dithering.Algo = 4
+			me.Cfg.ScrCfg.Process.Dithering.Matrix = filter.Sierra
+			me.Cfg.ScrCfg.Process.Dithering.Type = constants.ErrorDiffusionDither
 		case "SierraLite":
-			me.Cfg.ScrCfg.Process.DitheringAlgo = 5
-			me.Cfg.ScrCfg.Process.DitheringMatrix = filter.SierraLite
-			me.Cfg.ScrCfg.Process.DitheringType = constants.ErrorDiffusionDither
+			me.Cfg.ScrCfg.Process.Dithering.Algo = 5
+			me.Cfg.ScrCfg.Process.Dithering.Matrix = filter.SierraLite
+			me.Cfg.ScrCfg.Process.Dithering.Type = constants.ErrorDiffusionDither
 		case "Sierra3":
-			me.Cfg.ScrCfg.Process.DitheringAlgo = 6
-			me.Cfg.ScrCfg.Process.DitheringMatrix = filter.Sierra3
-			me.Cfg.ScrCfg.Process.DitheringType = constants.ErrorDiffusionDither
+			me.Cfg.ScrCfg.Process.Dithering.Algo = 6
+			me.Cfg.ScrCfg.Process.Dithering.Matrix = filter.Sierra3
+			me.Cfg.ScrCfg.Process.Dithering.Type = constants.ErrorDiffusionDither
 		case "Bayer2":
-			me.Cfg.ScrCfg.Process.DitheringAlgo = 7
-			me.Cfg.ScrCfg.Process.DitheringMatrix = filter.Bayer2
-			me.Cfg.ScrCfg.Process.DitheringType = constants.OrderedDither
+			me.Cfg.ScrCfg.Process.Dithering.Algo = 7
+			me.Cfg.ScrCfg.Process.Dithering.Matrix = filter.Bayer2
+			me.Cfg.ScrCfg.Process.Dithering.Type = constants.OrderedDither
 		case "Bayer3":
-			me.Cfg.ScrCfg.Process.DitheringAlgo = 8
-			me.Cfg.ScrCfg.Process.DitheringMatrix = filter.Bayer3
-			me.Cfg.ScrCfg.Process.DitheringType = constants.OrderedDither
+			me.Cfg.ScrCfg.Process.Dithering.Algo = 8
+			me.Cfg.ScrCfg.Process.Dithering.Matrix = filter.Bayer3
+			me.Cfg.ScrCfg.Process.Dithering.Type = constants.OrderedDither
 		case "Bayer4":
-			me.Cfg.ScrCfg.Process.DitheringAlgo = 9
-			me.Cfg.ScrCfg.Process.DitheringMatrix = filter.Bayer4
-			me.Cfg.ScrCfg.Process.DitheringType = constants.OrderedDither
+			me.Cfg.ScrCfg.Process.Dithering.Algo = 9
+			me.Cfg.ScrCfg.Process.Dithering.Matrix = filter.Bayer4
+			me.Cfg.ScrCfg.Process.Dithering.Type = constants.OrderedDither
 		case "Bayer8":
-			me.Cfg.ScrCfg.Process.DitheringAlgo = 10
-			me.Cfg.ScrCfg.Process.DitheringMatrix = filter.Bayer8
-			me.Cfg.ScrCfg.Process.DitheringType = constants.OrderedDither
+			me.Cfg.ScrCfg.Process.Dithering.Algo = 10
+			me.Cfg.ScrCfg.Process.Dithering.Matrix = filter.Bayer8
+			me.Cfg.ScrCfg.Process.Dithering.Type = constants.OrderedDither
 		}
 	})
 	dithering.SetSelected("FloydSteinberg")

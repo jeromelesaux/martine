@@ -162,9 +162,9 @@ func ApplyOneImageAndExport(in image.Image,
 	var err error
 
 	out = ci.Resize(in, cfg.ScrCfg.Size, cfg.ScrCfg.Process.ResizingAlgo)
-	if cfg.ScrCfg.Process.UseKmeans {
-		log.GetLogger().Info("kmeans with %f threshold", cfg.ScrCfg.Process.KmeansThreshold)
-		out, err = ci.Kmeans(cfg.ScrCfg.Size.ColorsAvailable, cfg.ScrCfg.Process.KmeansThreshold, out)
+	if cfg.ScrCfg.Process.Kmeans.Used {
+		log.GetLogger().Info("kmeans with %f threshold", cfg.ScrCfg.Process.Kmeans.Threshold)
+		out, err = ci.Kmeans(cfg.ScrCfg.Size.ColorsAvailable, cfg.ScrCfg.Process.Kmeans.Threshold, out)
 		if err != nil {
 			return err
 		}
@@ -231,11 +231,11 @@ func ApplyOneImageAndExport(in image.Image,
 	out, _ = DoDithering(
 		out,
 		newPalette,
-		cfg.ScrCfg.Process.DitheringAlgo,
-		cfg.ScrCfg.Process.DitheringType,
-		cfg.ScrCfg.Process.DitheringWithQuantification,
-		cfg.ScrCfg.Process.DitheringMatrix,
-		float32(cfg.ScrCfg.Process.DitheringMultiplier),
+		cfg.ScrCfg.Process.Dithering.Algo,
+		cfg.ScrCfg.Process.Dithering.Type,
+		cfg.ScrCfg.Process.Dithering.WithQuantification,
+		cfg.ScrCfg.Process.Dithering.Matrix,
+		float32(cfg.ScrCfg.Process.Dithering.Multiplier),
 		cfg.ScrCfg.IsPlus,
 		cfg.ScrCfg.Size)
 	if cfg.ScrCfg.Process.Saturation > 0 || cfg.ScrCfg.Process.Brightness > 0 {
@@ -348,9 +348,9 @@ func ApplyOneImage(in image.Image,
 	var err error
 
 	out = ci.Resize(in, cfg.ScrCfg.Size, cfg.ScrCfg.Process.ResizingAlgo)
-	if cfg.ScrCfg.Process.UseKmeans {
-		log.GetLogger().Info("kmeans with %f threshold", cfg.ScrCfg.Process.KmeansThreshold)
-		out, err = ci.Kmeans(cfg.ScrCfg.Size.ColorsAvailable, cfg.ScrCfg.Process.KmeansThreshold, out)
+	if cfg.ScrCfg.Process.Kmeans.Used {
+		log.GetLogger().Info("kmeans with %f threshold", cfg.ScrCfg.Process.Kmeans.Threshold)
+		out, err = ci.Kmeans(cfg.ScrCfg.Size.ColorsAvailable, cfg.ScrCfg.Process.Kmeans.Threshold, out)
 		if err != nil {
 			return []byte{}, out, palette, 0, err
 		}
@@ -391,11 +391,11 @@ func ApplyOneImage(in image.Image,
 	out, _ = DoDithering(
 		out,
 		newPalette,
-		cfg.ScrCfg.Process.DitheringAlgo,
-		cfg.ScrCfg.Process.DitheringType,
-		cfg.ScrCfg.Process.DitheringWithQuantification,
-		cfg.ScrCfg.Process.DitheringMatrix,
-		float32(cfg.ScrCfg.Process.DitheringMultiplier),
+		cfg.ScrCfg.Process.Dithering.Algo,
+		cfg.ScrCfg.Process.Dithering.Type,
+		cfg.ScrCfg.Process.Dithering.WithQuantification,
+		cfg.ScrCfg.Process.Dithering.Matrix,
+		float32(cfg.ScrCfg.Process.Dithering.Multiplier),
 		cfg.ScrCfg.IsPlus,
 		cfg.ScrCfg.Size)
 
@@ -462,9 +462,9 @@ func ExportRawImage(in image.Image,
 
 	// at least resize the image to be sure
 	out := ci.Resize(in, cfg.ScrCfg.Size, cfg.ScrCfg.Process.ResizingAlgo)
-	if cfg.ScrCfg.Process.UseKmeans {
-		log.GetLogger().Info("kmeans with %f threshold", cfg.ScrCfg.Process.KmeansThreshold)
-		out, err = ci.Kmeans(cfg.ScrCfg.Size.ColorsAvailable, cfg.ScrCfg.Process.KmeansThreshold, out)
+	if cfg.ScrCfg.Process.Kmeans.Used {
+		log.GetLogger().Info("kmeans with %f threshold", cfg.ScrCfg.Process.Kmeans.Threshold)
+		out, err = ci.Kmeans(cfg.ScrCfg.Size.ColorsAvailable, cfg.ScrCfg.Process.Kmeans.Threshold, out)
 		if err != nil {
 			return err
 		}

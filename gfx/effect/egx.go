@@ -163,11 +163,11 @@ func prepareEgx(
 	return gfx.DoDithering(
 		downgraded,
 		p,
-		cfg.ScrCfg.Process.DitheringAlgo,
-		cfg.ScrCfg.Process.DitheringType,
-		cfg.ScrCfg.Process.DitheringWithQuantification,
-		cfg.ScrCfg.Process.DitheringMatrix,
-		float32(cfg.ScrCfg.Process.DitheringMultiplier),
+		cfg.ScrCfg.Process.Dithering.Algo,
+		cfg.ScrCfg.Process.Dithering.Type,
+		cfg.ScrCfg.Process.Dithering.WithQuantification,
+		cfg.ScrCfg.Process.Dithering.Matrix,
+		float32(cfg.ScrCfg.Process.Dithering.Multiplier),
 		cfg.ScrCfg.IsPlus,
 		cfg.ScrCfg.Size)
 }

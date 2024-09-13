@@ -214,21 +214,32 @@ func Rotation3DType(v int) Rotation3d {
 }
 
 type ScreenProcessing struct {
-	Saturation                  float64
-	Brightness                  float64
-	KmeansThreshold             float64
-	UseKmeans                   bool
-	ResizingAlgo                imaging.ResampleFilter
-	ApplyDithering              bool
-	DitheringAlgo               int
-	DitheringMatrix             [][]float32
-	DitheringMultiplier         float64
-	DitheringWithQuantification bool
-	DitheringType               constants.DitheringType
-	OneLine                     bool
-	OneRow                      bool
-	MaskSprite                  uint8
-	MaskOrOperation             bool
-	MaskAndOperation            bool
-	Reducer                     int
+	Saturation     float64
+	Brightness     float64
+	Kmeans         Kmeans
+	ResizingAlgo   imaging.ResampleFilter
+	ApplyDithering bool
+	Dithering      Dither
+	OneLine        bool
+	OneRow         bool
+	Mask           MaskBit
+	Reducer        int
+}
+
+type MaskBit struct {
+	Sprite       uint8
+	OrOperation  bool
+	AndOperation bool
+}
+
+type Kmeans struct {
+	Threshold float64
+	Used      bool
+}
+type Dither struct {
+	Algo               int
+	Matrix             [][]float32
+	Multiplier         float64
+	WithQuantification bool
+	Type               constants.DitheringType
 }

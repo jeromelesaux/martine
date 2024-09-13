@@ -75,12 +75,12 @@ func (i *AnimateMenu) CmdLine() string {
 		exec += " -spritehard"
 	}
 	if i.Cfg.ScrCfg.Process.ApplyDithering {
-		if i.Cfg.ScrCfg.Process.DitheringWithQuantification {
+		if i.Cfg.ScrCfg.Process.Dithering.WithQuantification {
 			exec += " -quantization"
 		} else {
-			exec += " -multiplier " + fmt.Sprintf("%.2f", i.Cfg.ScrCfg.Process.DitheringMultiplier)
+			exec += " -multiplier " + fmt.Sprintf("%.2f", i.Cfg.ScrCfg.Process.Dithering.Multiplier)
 		}
-		exec += " -dithering " + strconv.Itoa(i.Cfg.ScrCfg.Process.DitheringAlgo)
+		exec += " -dithering " + strconv.Itoa(i.Cfg.ScrCfg.Process.Dithering.Algo)
 		// stockage du numéro d'algo
 	}
 	exec += " -mode " + strconv.Itoa(int(i.Cfg.ScrCfg.Mode))

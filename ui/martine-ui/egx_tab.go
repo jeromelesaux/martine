@@ -273,12 +273,12 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 	ditheringMultiplier.Step = 0.1
 	ditheringMultiplier.SetValue(1.18)
 	ditheringMultiplier.OnChanged = func(f float64) {
-		me.Cfg.ScrCfg.Process.DitheringMultiplier = f
+		me.Cfg.ScrCfg.Process.Dithering.Multiplier = f
 	}
 	dithering := w2.NewDitheringSelect(me)
 
 	ditheringWithQuantification := widget.NewCheck("With quantification", func(b bool) {
-		me.Cfg.ScrCfg.Process.DitheringWithQuantification = b
+		me.Cfg.ScrCfg.Process.Dithering.WithQuantification = b
 	})
 
 	enableDithering := widget.NewCheck("Enable dithering", func(b bool) {

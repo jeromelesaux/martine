@@ -171,25 +171,25 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 
 	kmeansLabel := widget.NewLabel("Reduce palette with Kmeans")
 	useKmeans := widget.NewCheck("Use Kmeans", func(b bool) {
-		me.Cfg.ScrCfg.Process.UseKmeans = b
+		me.Cfg.ScrCfg.Process.Kmeans.Used = b
 	})
 	kmeansIteration := widget.NewSlider(0.01, .9)
 	kmeansIteration.SetValue(.01)
 	kmeansIteration.Step = .01
 	kmeansIteration.OnChanged = func(f float64) {
-		me.Cfg.ScrCfg.Process.KmeansThreshold = f
+		me.Cfg.ScrCfg.Process.Kmeans.Threshold = f
 	}
 
 	ditheringMultiplier := widget.NewSlider(0., 5.)
 	ditheringMultiplier.Step = 0.1
 	ditheringMultiplier.SetValue(.1)
 	ditheringMultiplier.OnChanged = func(f float64) {
-		me.Cfg.ScrCfg.Process.DitheringMultiplier = f
+		me.Cfg.ScrCfg.Process.Dithering.Multiplier = f
 	}
 	dithering := w2.NewDitheringSelect(me)
 
 	ditheringWithQuantification := widget.NewCheck("With quantification", func(b bool) {
-		me.Cfg.ScrCfg.Process.DitheringWithQuantification = b
+		me.Cfg.ScrCfg.Process.Dithering.WithQuantification = b
 	})
 
 	enableDithering := widget.NewCheck("Enable dithering", func(b bool) {

@@ -167,12 +167,12 @@ func (i *ImageMenu) CmdLine() string {
 		exec += " -spritehard"
 	}
 	if i.Cfg.ScrCfg.Process.ApplyDithering {
-		if i.Cfg.ScrCfg.Process.DitheringWithQuantification {
+		if i.Cfg.ScrCfg.Process.Dithering.WithQuantification {
 			exec += " -quantization"
 		} else {
-			exec += " -multiplier " + fmt.Sprintf("%.2f", i.Cfg.ScrCfg.Process.DitheringMultiplier)
+			exec += " -multiplier " + fmt.Sprintf("%.2f", i.Cfg.ScrCfg.Process.Dithering.Multiplier)
 		}
-		exec += " -dithering " + strconv.Itoa(i.Cfg.ScrCfg.Process.DitheringAlgo)
+		exec += " -dithering " + strconv.Itoa(i.Cfg.ScrCfg.Process.Dithering.Algo)
 		// stockage du numéro d'algo
 	}
 	exec += " -mode " + strconv.Itoa(int(i.Cfg.ScrCfg.Mode))
@@ -409,18 +409,18 @@ func (me *ImageMenu) NewConfig(checkOriginalImage bool) *config.MartineConfig {
 		me.Cfg.ScrCfg.Size.Width = 16
 	}
 	if me.Cfg.ScrCfg.Process.ApplyDithering {
-		me.Cfg.ScrCfg.Process.DitheringAlgo = 0
-		if me.Cfg.ScrCfg.Process.DitheringMultiplier == 0 {
-			me.Cfg.ScrCfg.Process.DitheringMultiplier = .1
+		me.Cfg.ScrCfg.Process.Dithering.Algo = 0
+		if me.Cfg.ScrCfg.Process.Dithering.Multiplier == 0 {
+			me.Cfg.ScrCfg.Process.Dithering.Multiplier = .1
 		}
 	} else {
-		me.Cfg.ScrCfg.Process.DitheringAlgo = -1
+		me.Cfg.ScrCfg.Process.Dithering.Algo = -1
 	}
 	if checkOriginalImage {
 		me.Cfg.ScrCfg.InputPath = me.OriginalImagePath()
 	}
-	if me.Cfg.ScrCfg.Process.UseKmeans && me.Cfg.ScrCfg.Process.KmeansThreshold == 0 {
-		me.Cfg.ScrCfg.Process.KmeansThreshold = 0.01
+	if me.Cfg.ScrCfg.Process.Kmeans.Used && me.Cfg.ScrCfg.Process.Kmeans.Threshold == 0 {
+		me.Cfg.ScrCfg.Process.Kmeans.Threshold = 0.01
 	}
 	return me.Cfg
 }
