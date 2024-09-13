@@ -72,7 +72,7 @@ func (e *Editor) New(w fyne.Window) *fyne.Container {
 			e.im.NewImportButton(e.sel, e.refreshEditor),
 			palette.NewOpenPaletteButton(e.im, e.w, e.refreshEditor),
 			widget.NewCheck("CPC Plus", func(b bool) {
-				e.im.Cfg.ScreenCfg.IsPlus = b
+				e.im.Cfg.ScrCfg.IsPlus = b
 				if !b {
 					e.e.NewAvailablePalette(constants.CpcOldPalette)
 				} else {

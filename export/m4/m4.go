@@ -88,13 +88,13 @@ func ImportInM4(cfg *config.MartineConfig) error {
 				overscanFile = path.Base(v)
 			}
 		}
-		if cfg.ScreenCfg.Type == config.OcpScreenFormat {
+		if cfg.ScrCfg.Type == config.OcpScreenFormat {
 			log.GetLogger().Info("Execute basic file (%s)\n", "/"+cfg.M4cfg.RemotePath+"/"+basicFile)
 			if err := client.Run("/" + cfg.M4cfg.RemotePath + "/" + basicFile); err != nil {
 				return err
 			}
 		} else {
-			if cfg.ScreenCfg.Type == config.FullscreenFormat {
+			if cfg.ScrCfg.Type == config.FullscreenFormat {
 				log.GetLogger().Info("Execute overscan file (%s)\n", "/"+cfg.M4cfg.RemotePath+"/"+overscanFile)
 				if err := client.Run("/" + cfg.M4cfg.RemotePath + "/" + overscanFile); err != nil {
 					return err

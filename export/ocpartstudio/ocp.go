@@ -186,7 +186,7 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cfg *c
 	osFilepath := cfg.AmsdosFullPath(filePath, ".SCR")
 	log.GetLogger().Info("Saving SCR file (%s)\n", osFilepath)
 	var exec uint16
-	if cfg.ScreenCfg.IsPlus {
+	if cfg.ScrCfg.IsPlus {
 		exec = 0x821
 		switch screenMode {
 		case 0:
@@ -229,9 +229,9 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cfg *c
 		}
 		copy(data[0x07d0:], codeScrStandard[:])
 	}
-	data, _ = compression.Compress(data, cfg.ScreenCfg.Compression)
+	data, _ = compression.Compress(data, cfg.ScrCfg.Compression)
 
-	if !cfg.ScreenCfg.NoAmsdosHeader {
+	if !cfg.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".SCR", data, 2, 0, 0xc000, exec); err != nil {
 			return err
 		}
@@ -391,7 +391,7 @@ func Pal(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 	if err != nil {
 		return err
 	}
-	if !cfg.ScreenCfg.NoAmsdosHeader {
+	if !cfg.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".PAL", res, 2, 0, 0x8809, 0x8809); err != nil {
 			return err
 		}

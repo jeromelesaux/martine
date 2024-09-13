@@ -7,9 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/common"
-	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export"
 	"github.com/jeromelesaux/martine/log"
 )
@@ -19,25 +17,19 @@ import (
 var ErrorNotAllowed = errors.New("error not allowed")
 
 type MartineConfig struct {
-	PaletteCfg   PaletteConfig
+	PalCfg       PaletteConfig
 	M4cfg        M4Config
 	ContainerCfg ContainerConfig
-	ScreenCfg    ScreenConfig
-	RotationCfg  RotateConfig
-	TileMode     bool
+	ScrCfg       ScreenConfig
+	RotateCfg    RotateConfig
 
-	TileIterationX              int
-	TileIterationY              int
-	CustomDimension             bool
-	DskFiles                    []string
-	Tiles                       *export.JsonSlice
-	DeltaMode                   bool
-	ResizingAlgo                imaging.ResampleFilter
-	DitheringAlgo               int
-	DitheringMatrix             [][]float32
-	DitheringMultiplier         float64
-	DitheringWithQuantification bool
-	DitheringType               constants.DitheringType
+	TileMode        bool
+	TileIterationX  int
+	TileIterationY  int
+	CustomDimension bool
+	DskFiles        []string
+	Tiles           *export.JsonSlice
+	DeltaMode       bool
 
 	Flash                  bool
 	FlashScreenFilepath1   string
@@ -68,7 +60,7 @@ type MartineConfig struct {
 }
 
 func (m *MartineConfig) Reset() {
-	m.ScreenCfg.Reset()
+	m.ScrCfg.Reset()
 	m.ContainerCfg.Reset()
 }
 
@@ -103,7 +95,7 @@ func ModeMaskSprite(mode uint8) ([]uint8, error) {
 
 func NewMartineConfig(input, output string) *MartineConfig {
 	return &MartineConfig{
-		ScreenCfg: ScreenConfig{
+		ScrCfg: ScreenConfig{
 			InputPath:  input,
 			OutputPath: output,
 			Export:     make([]ScreenExport, 0),
@@ -112,7 +104,7 @@ func NewMartineConfig(input, output string) *MartineConfig {
 			Type: make([]ContainerFormat, 0),
 		},
 		DskFiles: make([]string, 0),
-		RotationCfg: RotateConfig{
+		RotateCfg: RotateConfig{
 			Rotation3DX0: -1,
 			Rotation3DY0: -1,
 		},
@@ -169,17 +161,17 @@ func RemoveUnsupportedChar(s string) string {
 
 func (e *MartineConfig) AmsdosFilename() []byte {
 	for i := 0; i < 8; i++ {
-		e.ScreenCfg.amsdosFilename[i] = ' '
+		e.ScrCfg.amsdosFilename[i] = ' '
 	}
-	file := strings.ToUpper(filepath.Base(e.ScreenCfg.InputPath))
+	file := strings.ToUpper(filepath.Base(e.ScrCfg.InputPath))
 	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
 	filenameSize := len(filename)
 	if filenameSize > 8 {
 		filenameSize = 8
 	}
-	copy(e.ScreenCfg.amsdosFilename[:], file[0:filenameSize])
+	copy(e.ScrCfg.amsdosFilename[:], file[0:filenameSize])
 
-	return e.ScreenCfg.amsdosFilename[:]
+	return e.ScrCfg.amsdosFilename[:]
 }
 
 func (e *MartineConfig) Filename() string {
@@ -187,12 +179,12 @@ func (e *MartineConfig) Filename() string {
 }
 
 func (e *MartineConfig) Fullpath(ext string) string {
-	return filepath.Join(e.ScreenCfg.OutputPath, e.OsFilename(ext))
+	return filepath.Join(e.ScrCfg.OutputPath, e.OsFilename(ext))
 }
 
 func (e *MartineConfig) TransformToAmsdosFile(filePath string) string {
 	amsdosFile := make([]byte, 8)
-	file := strings.ToUpper(filepath.Base(e.ScreenCfg.InputPath))
+	file := strings.ToUpper(filepath.Base(e.ScrCfg.InputPath))
 	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
 	filenameSize := len(filename)
 	if filenameSize > 8 {
@@ -215,7 +207,7 @@ func AmsdosFilename(inputPath, ext string) string {
 }
 
 func (e *MartineConfig) OsFilename(ext string) string {
-	file := strings.ToUpper(filepath.Base(e.ScreenCfg.InputPath))
+	file := strings.ToUpper(filepath.Base(e.ScrCfg.InputPath))
 	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
 	filenameSize := len(filename)
 	if filenameSize > 8 {
@@ -247,14 +239,14 @@ func (e *MartineConfig) AmsdosFullPath(filePath string, newExtension string) str
 	}
 
 	newFilename := file[0:length] + newExtension
-	return filepath.Join(e.ScreenCfg.OutputPath, strings.ToUpper(newFilename))
+	return filepath.Join(e.ScrCfg.OutputPath, strings.ToUpper(newFilename))
 }
 
 func (e *MartineConfig) OsFullPath(filePath string, newExtension string) string {
 	filename := filepath.Base(filePath)
 	file := RemoveUnsupportedChar(strings.TrimSuffix(filename, filepath.Ext(filename)))
 	newFilename := file + newExtension
-	return filepath.Join(e.ScreenCfg.OutputPath, newFilename)
+	return filepath.Join(e.ScrCfg.OutputPath, newFilename)
 }
 
 func (e *MartineConfig) SetLineWith(i string) error {

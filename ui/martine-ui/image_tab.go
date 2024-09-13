@@ -90,8 +90,8 @@ func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 	if !me.UsePalette {
 		me.SetPalette(palette)
 	}
-	if me.Cfg.ScreenCfg.Type.IsSprite() || me.Cfg.ScreenCfg.Type.IsSpriteHard() {
-		newSize := constants.Size{Width: cfg.ScreenCfg.Size.Width * 50, Height: cfg.ScreenCfg.Size.Height * 50}
+	if me.Cfg.ScrCfg.Type.IsSprite() || me.Cfg.ScrCfg.Type.IsSpriteHard() {
+		newSize := constants.Size{Width: cfg.ScrCfg.Size.Width * 50, Height: cfg.ScrCfg.Size.Height * 50}
 		me.Downgraded = image.Resize(me.Downgraded, newSize, me.ResizeAlgo)
 	}
 	me.SetCpcImage(me.Downgraded)
@@ -196,7 +196,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 		me.ApplyDithering = b
 	})
 	isPlus := widget.NewCheck("CPC Plus", func(b bool) {
-		me.Cfg.ScreenCfg.IsPlus = b
+		me.Cfg.ScrCfg.IsPlus = b
 	})
 
 	oneLine := widget.NewCheck("Every other line", func(b bool) {
@@ -242,7 +242,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 
 	editButton := widget.NewButtonWithIcon("Edit", theme.DocumentCreateIcon(), func() {
 		p := constants.CpcOldPalette
-		if me.Cfg.ScreenCfg.IsPlus {
+		if me.Cfg.ScrCfg.IsPlus {
 			p = constants.CpcPlusPalette
 		}
 		if me.CpcImage().Image == nil || me.PaletteImage().Image == nil {
@@ -347,7 +347,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 						}),
 						m.newImageMenuExportButton(me),
 						widget.NewButton("Gray", func() {
-							if me.Cfg.ScreenCfg.IsPlus {
+							if me.Cfg.ScrCfg.IsPlus {
 								me.SetPalette(image.MonochromePalette(me.Palette()))
 								me.SetPaletteImage(png.PalToImage(me.Palette()))
 								forcePalette.SetChecked(true)
@@ -356,7 +356,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 						}),
 
 						widget.NewButton("Monochome", func() {
-							if me.Cfg.ScreenCfg.IsPlus {
+							if me.Cfg.ScrCfg.IsPlus {
 								w2.ColorSelector(m.monochromeColor, me.Palette(), m.window, func() {
 									forcePalette.SetChecked(true)
 								})

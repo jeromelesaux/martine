@@ -24,8 +24,8 @@ func TestAsciiByColumn(t *testing.T) {
 		0x1, 0x2, 0x3, 0x4, 0x5,
 	}
 	e := config.NewMartineConfig("input.bin", "./")
-	e.ScreenCfg.Size.Height = 5
-	e.ScreenCfg.Size.Width = 5
+	e.ScrCfg.Size.Height = 5
+	e.ScrCfg.Size.Width = 5
 	err := ascii.AsciiByColumn("test.bin", data, constants.CpcOldPalette, true, 1, e)
 	if err != nil {
 		t.Fatalf("expected no error and gets :%v", err)

@@ -78,7 +78,7 @@ func (d *DoubleImageMenu) CmdLine() string {
 	} else {
 		cmd += " -egx2"
 	}
-	if d.LeftImage.Cfg.ScreenCfg.Type.IsFullScreen() {
+	if d.LeftImage.Cfg.ScrCfg.Type.IsFullScreen() {
 		cmd += " -fullscreen"
 	}
 	return cmd

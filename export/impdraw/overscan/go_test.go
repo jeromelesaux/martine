@@ -25,11 +25,11 @@ func TestSaveGo(t *testing.T) {
 	img, _ := png.Decode(f)
 
 	cfg := config.NewMartineConfig(file, "./overscanTests")
-	cfg.ScreenCfg.Type = config.FullscreenFormat
-	cfg.ScreenCfg.AddExport(config.GoImpdrawExport)
+	cfg.ScrCfg.Type = config.FullscreenFormat
+	cfg.ScrCfg.AddExport(config.GoImpdrawExport)
 	cfg.ContainerCfg.AddExport(config.DskContainer)
-	cfg.ScreenCfg.IsPlus = true
-	cfg.ScreenCfg.Size = constants.NewSizeMode(0, true)
+	cfg.ScrCfg.IsPlus = true
+	cfg.ScrCfg.Size = constants.NewSizeMode(0, true)
 	err := gfx.ApplyOneImageAndExport(img, cfg, "lena", "./overscanTests/", 0, 0)
 	if err != nil {
 		t.Fatal(err)

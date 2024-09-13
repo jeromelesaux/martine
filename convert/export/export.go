@@ -34,9 +34,9 @@ func ToMode2AndExport(in *image.NRGBA, p color.Palette, size constants.Size, fil
 
 // nolint: funlen, gocognit
 func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, cfg *config.MartineConfig) error {
-	if cfg.ScreenCfg.Type.IsFullScreen() {
-		if cfg.ScreenCfg.Type == config.Egx1Format || cfg.ScreenCfg.Type == config.Egx2Format {
-			if cfg.ScreenCfg.IsExport(config.GoImpdrawExport) {
+	if cfg.ScrCfg.Type.IsFullScreen() {
+		if cfg.ScrCfg.Type == config.Egx1Format || cfg.ScrCfg.Type == config.Egx2Format {
+			if cfg.ScrCfg.IsExport(config.GoImpdrawExport) {
 				data, err := co.ToGo(bw, screenMode, p, cfg)
 				if err != nil {
 					log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
@@ -69,7 +69,7 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, cfg *
 			return err
 		}
 	}
-	if !cfg.ScreenCfg.IsPlus {
+	if !cfg.ScrCfg.IsPlus {
 		if err := ocpartstudio.Pal(filePath, p, screenMode, false, cfg); err != nil {
 			log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
 			return err

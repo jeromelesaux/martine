@@ -43,20 +43,20 @@ func (m *MartineUI) exportEgxDialog(cfg *config.MartineConfig, w fyne.Window) {
 			}),
 			widget.NewCheck("export text file", func(b bool) {
 				if b {
-					cfg.ScreenCfg.AddExport(config.AssemblyExport)
+					cfg.ScrCfg.AddExport(config.AssemblyExport)
 				} else {
-					cfg.ScreenCfg.RemoveExport(config.AssemblyExport)
+					cfg.ScrCfg.RemoveExport(config.AssemblyExport)
 				}
 			}),
 			widget.NewCheck("export Json file", func(b bool) {
 				if b {
-					cfg.ScreenCfg.AddExport(config.JsonExport)
+					cfg.ScrCfg.AddExport(config.JsonExport)
 				} else {
-					cfg.ScreenCfg.RemoveExport(config.JsonExport)
+					cfg.ScrCfg.RemoveExport(config.JsonExport)
 				}
 			}),
 			widget.NewCheck("add amsdos header", func(b bool) {
-				cfg.ScreenCfg.NoAmsdosHeader = b == false
+				cfg.ScrCfg.NoAmsdosHeader = b == false
 
 			}),
 			widget.NewCheck("apply zigzag", func(b bool) {
@@ -73,17 +73,17 @@ func (m *MartineUI) exportEgxDialog(cfg *config.MartineConfig, w fyne.Window) {
 			func(s string) {
 				switch s {
 				case "none":
-					cfg.ScreenCfg.Compression = compression.NONE
+					cfg.ScrCfg.Compression = compression.NONE
 				case "rle":
-					cfg.ScreenCfg.Compression = compression.RLE
+					cfg.ScrCfg.Compression = compression.RLE
 				case "rle 16bits":
-					cfg.ScreenCfg.Compression = compression.RLE16
+					cfg.ScrCfg.Compression = compression.RLE16
 				case "Lz4 Classic":
-					cfg.ScreenCfg.Compression = compression.LZ4
+					cfg.ScrCfg.Compression = compression.LZ4
 				case "Lz4 Raw":
-					cfg.ScreenCfg.Compression = compression.RawLZ4
+					cfg.ScrCfg.Compression = compression.RawLZ4
 				case "zx0 crunch":
-					cfg.ScreenCfg.Compression = compression.ZX0
+					cfg.ScrCfg.Compression = compression.ZX0
 				}
 			}),
 		m2host,
@@ -98,9 +98,9 @@ func (m *MartineUI) exportEgxDialog(cfg *config.MartineConfig, w fyne.Window) {
 					return
 				}
 				directory.SetExportDirectoryURI(lu)
-				cfg.ScreenCfg.OutputPath = lu.Path()
+				cfg.ScrCfg.OutputPath = lu.Path()
 				m.egx.ResultImage.Path = lu.Path()
-				log.GetLogger().Infoln(cfg.ScreenCfg.OutputPath)
+				log.GetLogger().Infoln(cfg.ScrCfg.OutputPath)
 				m.ExportEgxImage(m.egx)
 
 				// apply and export
@@ -111,7 +111,7 @@ func (m *MartineUI) exportEgxDialog(cfg *config.MartineConfig, w fyne.Window) {
 			}
 			fo.Resize(savingDialogSize)
 			m.CheckAmsdosHeaderExport(cfg.ContainerCfg.HasExport(config.DskContainer),
-				cfg.ScreenCfg.NoAmsdosHeader == false, fo, m.window)
+				cfg.ScrCfg.NoAmsdosHeader == false, fo, m.window)
 		}),
 	)
 
@@ -129,12 +129,12 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 		pi.Hide()
 		return
 	}
-	cfg.ScreenCfg.OutputPath = me.ResultImage.Path
+	cfg.ScrCfg.OutputPath = me.ResultImage.Path
 
 	if me.ResultImage.EgxType == 1 {
-		cfg.ScreenCfg.Type = config.Egx1Format
+		cfg.ScrCfg.Type = config.Egx1Format
 	} else {
-		cfg.ScreenCfg.Type = config.Egx2Format
+		cfg.ScrCfg.Type = config.Egx2Format
 	}
 	cfg.EgxMode1 = uint8(me.LeftImage.Mode)
 	cfg.EgxMode2 = uint8(me.RightImage.Mode)
@@ -147,9 +147,9 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 		pi.Hide()
 		dialog.ShowError(err, m.window)
 	}
-	cfg.PaletteCfg.Path = "temporary_palette.kit"
+	cfg.PalCfg.Path = "temporary_palette.kit"
 
-	if !cfg.ScreenCfg.Type.IsFullScreen() {
+	if !cfg.ScrCfg.Type.IsFullScreen() {
 		if err := ocpartstudio.EgxLoader(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Palette, uint8(me.LeftImage.Mode), uint8(me.RightImage.Mode), cfg); err != nil {
 			pi.Hide()
 			dialog.ShowError(err, m.window)
@@ -169,7 +169,7 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 		}
 	}
 	if cfg.HasContainerExport(config.SnaContainer) {
-		if cfg.ScreenCfg.Type.IsFullScreen() {
+		if cfg.ScrCfg.Type.IsFullScreen() {
 			var gfxFile string
 			for _, v := range cfg.DskFiles {
 				if filepath.Ext(v) == ".SCR" {
@@ -191,5 +191,5 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 		}
 	}
 	pi.Hide()
-	dialog.ShowInformation("Save", "Your files are save in folder \n"+cfg.ScreenCfg.OutputPath, m.window)
+	dialog.ShowInformation("Save", "Your files are save in folder \n"+cfg.ScrCfg.OutputPath, m.window)
 }

@@ -45,9 +45,9 @@ func SplitBoardToSprite(
 	rawSprites := make([][]*image.NRGBA, len(sprites))
 	results = make([][][]byte, len(sprites))
 
-	cfg.ScreenCfg.Size = size
+	cfg.ScrCfg.Size = size
 	if isSpriteHard {
-		cfg.ScreenCfg.Type = config.SpriteHardFormat
+		cfg.ScrCfg.Type = config.SpriteHardFormat
 	}
 	for i := 0; i < len(sprites); i++ {
 		results[i] = make([][]byte, len(sprites[i]))

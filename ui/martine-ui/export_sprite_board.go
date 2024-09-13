@@ -41,8 +41,8 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 			string(config.SpriteHardExport),
 			string(config.SpriteCompiledExport),
 		}, func(v string) {
-			s.Cfg.ScreenCfg.ResetExport()
-			s.Cfg.ScreenCfg.AddExport(config.ScreenExport(v))
+			s.Cfg.ScrCfg.ResetExport()
+			s.Cfg.ScrCfg.AddExport(config.ScreenExport(v))
 
 		})
 	cont := container.New(
@@ -58,20 +58,20 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 		}),
 		widget.NewCheck("export text file", func(b bool) {
 			if b {
-				s.Cfg.ScreenCfg.AddExport(config.AssemblyExport)
+				s.Cfg.ScrCfg.AddExport(config.AssemblyExport)
 			} else {
-				s.Cfg.ScreenCfg.RemoveExport(config.AssemblyExport)
+				s.Cfg.ScrCfg.RemoveExport(config.AssemblyExport)
 			}
 		}),
 		widget.NewCheck("export Json file", func(b bool) {
 			if b {
-				s.Cfg.ScreenCfg.AddExport(config.JsonExport)
+				s.Cfg.ScrCfg.AddExport(config.JsonExport)
 			} else {
-				s.Cfg.ScreenCfg.RemoveExport(config.JsonExport)
+				s.Cfg.ScrCfg.RemoveExport(config.JsonExport)
 			}
 		}),
 		widget.NewCheck("add amsdos header", func(b bool) {
-			s.Cfg.ScreenCfg.NoAmsdosHeader = b == false
+			s.Cfg.ScrCfg.NoAmsdosHeader = b == false
 		}),
 		widget.NewCheck("apply zigzag", func(b bool) {
 			s.Cfg.ZigZag = b
@@ -81,17 +81,17 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 			func(v string) {
 				switch v {
 				case "none":
-					s.Cfg.ScreenCfg.Compression = compression.NONE
+					s.Cfg.ScrCfg.Compression = compression.NONE
 				case "rle":
-					s.Cfg.ScreenCfg.Compression = compression.RLE
+					s.Cfg.ScrCfg.Compression = compression.RLE
 				case "rle 16bits":
-					s.Cfg.ScreenCfg.Compression = compression.RLE16
+					s.Cfg.ScrCfg.Compression = compression.RLE16
 				case "Lz4 Classic":
-					s.Cfg.ScreenCfg.Compression = compression.LZ4
+					s.Cfg.ScrCfg.Compression = compression.LZ4
 				case "Lz4 Raw":
-					s.Cfg.ScreenCfg.Compression = compression.RawLZ4
+					s.Cfg.ScrCfg.Compression = compression.RawLZ4
 				case "zx0 crunch":
-					s.Cfg.ScreenCfg.Compression = compression.ZX0
+					s.Cfg.ScrCfg.Compression = compression.ZX0
 				}
 			}),
 		widget.NewButtonWithIcon("Export into folder", theme.DocumentSaveIcon(), func() {
@@ -105,7 +105,7 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 					return
 				}
 				directory.SetExportDirectoryURI(lu)
-				s.Cfg.ScreenCfg.OutputPath = lu.Path()
+				s.Cfg.ScrCfg.OutputPath = lu.Path()
 				m.ExportSpriteBoard(s)
 				// apply and export
 			}, m.window)
@@ -114,7 +114,7 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 				fo.SetLocation(d)
 			}
 			fo.Resize(savingDialogSize)
-			m.CheckAmsdosHeaderExport(s.Cfg.ContainerCfg.HasExport(config.DskContainer), s.Cfg.ScreenCfg.NoAmsdosHeader == false, fo, m.window)
+			m.CheckAmsdosHeaderExport(s.Cfg.ContainerCfg.HasExport(config.DskContainer), s.Cfg.ScrCfg.NoAmsdosHeader == false, fo, m.window)
 		}),
 	)
 
@@ -128,16 +128,16 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 	pi := wgt.NewProgressInfinite("Saving...., Please wait.", m.window)
 	pi.Show()
 	if err := impPalette.SaveKit(
-		s.Cfg.ScreenCfg.OutputPath+string(filepath.Separator)+"SPRITES.KIT",
+		s.Cfg.ScrCfg.OutputPath+string(filepath.Separator)+"SPRITES.KIT",
 		s.Palette(),
-		s.Cfg.ScreenCfg.NoAmsdosHeader == false); err != nil {
+		s.Cfg.ScrCfg.NoAmsdosHeader == false); err != nil {
 		pi.Hide()
 		dialog.ShowError(err, m.window)
 		return
 	}
 	cfg := s.Cfg
 
-	if s.Cfg.ScreenCfg.IsExport(config.SpriteCompiledExport) {
+	if s.Cfg.ScrCfg.IsExport(config.SpriteCompiledExport) {
 		spr := make([][]byte, 0)
 		for _, v := range s.SpritesData {
 			spr = append(spr, v...)
@@ -146,7 +146,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		var code string
 		for idx, diff := range diffs {
 			var routine string
-			if s.Cfg.ScreenCfg.Type.IsSpriteHard() {
+			if s.Cfg.ScrCfg.Type.IsSpriteHard() {
 				routine = animate.ExportCompiledSpriteHard(diff)
 			} else {
 				pi.Hide()
@@ -166,7 +166,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		code += kitPalette.ToString()
 
 		if err := amsdos.SaveStringOSFile(
-			s.Cfg.ScreenCfg.OutputPath+string(filepath.Separator)+"compiled_sprites.asm",
+			s.Cfg.ScrCfg.OutputPath+string(filepath.Separator)+"compiled_sprites.asm",
 			code); err != nil {
 			pi.Hide()
 			dialog.NewError(err, m.window).Show()
@@ -175,18 +175,18 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 
 		pi.Hide()
 	} else {
-		if s.Cfg.ScreenCfg.IsExport(config.OcpWindowExport) {
+		if s.Cfg.ScrCfg.IsExport(config.OcpWindowExport) {
 			for idxX, v := range s.SpritesData {
 				for idxY, v0 := range v {
-					filename := s.Cfg.ScreenCfg.OutputPath + string(filepath.Separator) + fmt.Sprintf("L%.2dC%.2d.WIN", idxX, idxY)
-					if err := window.Win(filename, v0, uint8(s.Mode), s.Cfg.ScreenCfg.Size.Width, s.Cfg.ScreenCfg.Size.Height, s.Cfg.ContainerCfg.HasExport(config.DskContainer), cfg); err != nil {
+					filename := s.Cfg.ScrCfg.OutputPath + string(filepath.Separator) + fmt.Sprintf("L%.2dC%.2d.WIN", idxX, idxY)
+					if err := window.Win(filename, v0, uint8(s.Mode), s.Cfg.ScrCfg.Size.Width, s.Cfg.ScrCfg.Size.Height, s.Cfg.ContainerCfg.HasExport(config.DskContainer), cfg); err != nil {
 						log.GetLogger().Error("error while exporting sprites error %s\n", err.Error())
 					}
 				}
 			}
 			pi.Hide()
 		} else {
-			if s.Cfg.ScreenCfg.IsExport(config.SpriteFlatExport) {
+			if s.Cfg.ScrCfg.IsExport(config.SpriteFlatExport) {
 				buf := make([]byte, 0)
 				if s.Cfg.ZigZag {
 					for x := 0; x < len(s.SpritesCollection); x++ {
@@ -195,8 +195,8 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 							sp, _, _, err := sprite.ToSprite(z,
 								s.Palette(),
 								constants.Size{
-									Width:  s.Cfg.ScreenCfg.Size.Width,
-									Height: s.Cfg.ScreenCfg.Size.Height,
+									Width:  s.Cfg.ScrCfg.Size.Width,
+									Height: s.Cfg.ScrCfg.Size.Height,
 								},
 								uint8(s.Mode),
 								config.NewMartineConfig("", ""),
@@ -216,11 +216,11 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 						}
 					}
 				}
-				filename := s.Cfg.ScreenCfg.OutputPath + string(filepath.Separator) + "SPRITES.BIN"
-				buf, _ = compression.Compress(buf, s.Cfg.ScreenCfg.Compression)
+				filename := s.Cfg.ScrCfg.OutputPath + string(filepath.Separator) + "SPRITES.BIN"
+				buf, _ = compression.Compress(buf, s.Cfg.ScrCfg.Compression)
 				var err error
 				// TODO add amsdos header
-				if s.Cfg.ScreenCfg.NoAmsdosHeader {
+				if s.Cfg.ScrCfg.NoAmsdosHeader {
 					err = amsdos.SaveAmsdosFile(filename, ".WIN", buf, 2, 0, 0x4000, 0x4000)
 					if err != nil {
 						pi.Hide()
@@ -247,15 +247,15 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 				}
 				pi.Hide()
 			} else {
-				if s.Cfg.ScreenCfg.IsExport(config.SpriteImpCatcherExport) {
+				if s.Cfg.ScrCfg.IsExport(config.SpriteImpCatcherExport) {
 					buf := make([]byte, 0)
 					for _, v := range s.SpritesData {
 						for _, v0 := range v {
 							buf = append(buf, v0...)
 						}
 					}
-					filename := s.Cfg.ScreenCfg.OutputPath + string(filepath.Separator) + "sprites.imp"
-					if err := tile.Imp(buf, uint(s.SpriteRows*s.SpriteColumns), uint(s.Cfg.ScreenCfg.Size.Width), uint(s.Cfg.ScreenCfg.Size.Height), uint(s.Mode), filename, cfg); err != nil {
+					filename := s.Cfg.ScrCfg.OutputPath + string(filepath.Separator) + "sprites.imp"
+					if err := tile.Imp(buf, uint(s.SpriteRows*s.SpriteColumns), uint(s.Cfg.ScrCfg.Size.Width), uint(s.Cfg.ScrCfg.Size.Height), uint(s.Mode), filename, cfg); err != nil {
 						pi.Hide()
 						dialog.NewError(err, m.window).Show()
 						log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
@@ -271,7 +271,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 					}
 					pi.Hide()
 				} else {
-					if s.Cfg.ScreenCfg.IsExport(config.SpriteHardExport) {
+					if s.Cfg.ScrCfg.IsExport(config.SpriteHardExport) {
 						data := spritehard.SprImpdraw{}
 						for _, v := range s.SpritesData {
 							sh := spritehard.SpriteHard{}
@@ -280,7 +280,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 								data.Data = append(data.Data, sh)
 							}
 						}
-						filename := s.Cfg.ScreenCfg.OutputPath + string(filepath.Separator) + "sprites.spr"
+						filename := s.Cfg.ScrCfg.OutputPath + string(filepath.Separator) + "sprites.spr"
 
 						if err := spritehard.Spr(filename, data, cfg); err != nil {
 							pi.Hide()
@@ -303,7 +303,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		}
 	}
 
-	if s.Cfg.ScreenCfg.IsExport(config.AssemblyExport) {
+	if s.Cfg.ScrCfg.IsExport(config.AssemblyExport) {
 		data := make([][]byte, 0)
 		if s.Cfg.ZigZag {
 			for x := 0; x < len(s.SpritesCollection); x++ {
@@ -312,8 +312,8 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 					sp, _, _, err := sprite.ToSprite(z,
 						s.Palette(),
 						constants.Size{
-							Width:  s.Cfg.ScreenCfg.Size.Width,
-							Height: s.Cfg.ScreenCfg.Size.Height,
+							Width:  s.Cfg.ScrCfg.Size.Width,
+							Height: s.Cfg.ScrCfg.Size.Height,
 						},
 						uint8(s.Mode),
 						config.NewMartineConfig("", ""),
@@ -336,11 +336,11 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			kitPalette.Colors[i] = constants.NewCpcPlusColor(s.Palette()[i])
 		}
 		header := fmt.Sprintf("' from file %s\n", s.FilePath)
-		code := header + ascii.SpritesHardText(data, s.Cfg.ScreenCfg.Compression)
+		code := header + ascii.SpritesHardText(data, s.Cfg.ScrCfg.Compression)
 		code += "Palette\n"
 		code += kitPalette.ToCode()
 
-		filename := s.Cfg.ScreenCfg.OutputPath + string(filepath.Separator) + "SPRITES.ASM"
+		filename := s.Cfg.ScrCfg.OutputPath + string(filepath.Separator) + "SPRITES.ASM"
 		err := amsdos.SaveStringOSFile(filename, code)
 		if err != nil {
 			pi.Hide()
@@ -349,5 +349,5 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		}
 		pi.Hide()
 	}
-	dialog.ShowInformation("Saved", "Your export ended in the folder : "+s.Cfg.ScreenCfg.OutputPath, m.window)
+	dialog.ShowInformation("Saved", "Your export ended in the folder : "+s.Cfg.ScrCfg.OutputPath, m.window)
 }

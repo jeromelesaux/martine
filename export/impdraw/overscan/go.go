@@ -15,7 +15,7 @@ func SaveGo(filePath string, data []byte, p color.Palette, screenMode uint8, cfg
 	}
 	go1Filename := cfg.AmsdosFullPath(filePath, ".GO1")
 	go2Filename := cfg.AmsdosFullPath(filePath, ".GO2")
-	if !cfg.ScreenCfg.NoAmsdosHeader {
+	if !cfg.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(go1Filename, ".GO1", data1, 2, 0, 0x20, 0); err != nil {
 			return err
 		}

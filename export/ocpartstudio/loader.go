@@ -1379,7 +1379,7 @@ var (
 )
 
 func Loader(filePath string, p color.Palette, mode uint8, cfg *config.MartineConfig) error {
-	if cfg.ScreenCfg.IsPlus {
+	if cfg.ScrCfg.IsPlus {
 		return BasicLoaderCPCPlus(filePath, p, mode, cfg)
 	}
 	return BasicLoader(filePath, p, cfg)
@@ -1446,7 +1446,7 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cfg *confi
 
 	osFilepath = cfg.AmsdosFullPath(filePath, ".BAS")
 
-	if !cfg.ScreenCfg.NoAmsdosHeader {
+	if !cfg.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".BAS", loader, 0, 0, 0x170, 0); err != nil {
 			return err
 		}
@@ -1486,7 +1486,7 @@ func BasicLoader(filePath string, p color.Palette, cfg *config.MartineConfig) er
 
 	osFilepath := cfg.AmsdosFullPath(filePath, ".BAS")
 
-	if !cfg.ScreenCfg.NoAmsdosHeader {
+	if !cfg.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".BAS", loader, 0, 0, 0x170, 0); err != nil {
 			return err
 		}
@@ -1548,9 +1548,9 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 		flashLoader[flashMode2Offset] = 0x8e
 	}
 
-	flashBinPath := filepath.Join(cfg.ScreenCfg.OutputPath, "FLASH.BIN")
+	flashBinPath := filepath.Join(cfg.ScrCfg.OutputPath, "FLASH.BIN")
 
-	if !cfg.ScreenCfg.NoAmsdosHeader {
+	if !cfg.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(flashBinPath, ".BIN", flashLoader, 2, 0, 0x3000, 0x3000); err != nil {
 			return err
 		}
@@ -1567,9 +1567,9 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 	copy(basicLoader[flashScreen1Offset:], cfg.GetAmsdosFilename(screenFilename2, ""))
 	copy(basicLoader[flashScreen2Offset:], cfg.GetAmsdosFilename(screenFilename1, ""))
 
-	basicPath := filepath.Join(cfg.ScreenCfg.OutputPath, "-SWITCH.BAS")
+	basicPath := filepath.Join(cfg.ScrCfg.OutputPath, "-SWITCH.BAS")
 
-	if !cfg.ScreenCfg.NoAmsdosHeader {
+	if !cfg.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(basicPath, ".BAS", basicLoader, 0, 0, 0x170, 0); err != nil {
 			return err
 		}
@@ -1600,7 +1600,7 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cfg *config
 
 	filename := cfg.GetAmsdosFilename(filePath, "")
 	var loader []byte
-	if cfg.ScreenCfg.IsPlus {
+	if cfg.ScrCfg.IsPlus {
 		loader = egxPlusBasicLoader
 		copy(loader[startPlusScreenName:], filename[:])
 
@@ -1614,7 +1614,7 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cfg *config
 	log.GetLogger().Infoln(loader)
 	osFilepath := cfg.AmsdosFullPath(filePath, ".BAS")
 
-	if !cfg.ScreenCfg.NoAmsdosHeader {
+	if !cfg.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".BAS", loader, 0, 0, 0x170, 0); err != nil {
 			return err
 		}
@@ -1628,7 +1628,7 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cfg *config
 	var egxLoader []byte
 
 	var egxHeaderStartAddress uint16
-	if !cfg.ScreenCfg.IsPlus {
+	if !cfg.ScrCfg.IsPlus {
 		egxLoader = egxBinary
 		pal := make([]byte, 16)
 		index := 15
@@ -1693,9 +1693,9 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cfg *config
 		egxHeaderStartAddress = 0x8000
 	}
 
-	egxBinPath := filepath.Join(cfg.ScreenCfg.OutputPath, "EGX.BIN")
+	egxBinPath := filepath.Join(cfg.ScrCfg.OutputPath, "EGX.BIN")
 
-	if !cfg.ScreenCfg.NoAmsdosHeader {
+	if !cfg.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(egxBinPath, ".BIN", egxLoader, 2, 0, egxHeaderStartAddress, egxHeaderStartAddress); err != nil {
 			return err
 		}

@@ -10,25 +10,25 @@ import (
 
 func ImportInDsk(filePath string, cfg *config.MartineConfig) error {
 	var suffix string
-	if cfg.ScreenCfg.Type == config.Egx1Format {
+	if cfg.ScrCfg.Type == config.Egx1Format {
 		suffix += "-egx1"
 	}
-	if cfg.ScreenCfg.Type == config.Egx2Format {
+	if cfg.ScrCfg.Type == config.Egx2Format {
 		suffix += "-egx2"
 	}
-	if cfg.ScreenCfg.IsPlus {
+	if cfg.ScrCfg.IsPlus {
 		suffix += "-cpcplus"
 	}
-	if cfg.ScreenCfg.Type == config.FullscreenFormat {
+	if cfg.ScrCfg.Type == config.FullscreenFormat {
 		suffix += "-overscan"
 	}
 	if cfg.Flash {
 		suffix += "-flash"
 	}
-	if cfg.CustomDimension || cfg.ScreenCfg.Type == config.SpriteHardFormat {
+	if cfg.CustomDimension || cfg.ScrCfg.Type == config.SpriteHardFormat {
 		suffix += "-sprite"
 	}
-	if cfg.DitheringAlgo != 0 {
+	if cfg.ScrCfg.Treatment.DitheringAlgo != 0 {
 		suffix += "-dithering"
 	}
 	if cfg.SplitRaster {

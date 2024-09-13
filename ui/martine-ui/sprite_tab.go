@@ -40,7 +40,7 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 		dialog.NewError(errors.New("number of sprites per row or column are not set"), m.window).Show()
 		return
 	}
-	if (s.Cfg.ScreenCfg.Size.Width == 0 || s.Cfg.ScreenCfg.Size.Height == 0) && !s.Cfg.ScreenCfg.Type.IsSpriteHard() {
+	if (s.Cfg.ScrCfg.Size.Width == 0 || s.Cfg.ScrCfg.Size.Height == 0) && !s.Cfg.ScrCfg.Type.IsSpriteHard() {
 		dialog.ShowError(errors.New("define dimension before"), m.window)
 		return
 	}
@@ -63,7 +63,7 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 	img := image.NewNRGBA(image.Rect(0, 0, b.Bounds().Max.X, b.Bounds().Max.Y))
 	draw.Draw(img, img.Bounds(), b, b.Bounds().Min, draw.Src)
 	if !s.UsePalette {
-		pal, _, err := ci.DowngradingPalette(img, constants.Size{ColorsAvailable: colorsAvailable, Width: img.Bounds().Max.X, Height: img.Bounds().Max.Y}, s.Cfg.ScreenCfg.IsPlus)
+		pal, _, err := ci.DowngradingPalette(img, constants.Size{ColorsAvailable: colorsAvailable, Width: img.Bounds().Max.X, Height: img.Bounds().Max.Y}, s.Cfg.ScrCfg.IsPlus)
 		if err != nil {
 			pi.Hide()
 			dialog.NewError(err, m.window).Show()
@@ -75,9 +75,9 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 		s.UsePalette = false
 	}
 
-	size := constants.Size{Width: s.Cfg.ScreenCfg.Size.Width, Height: s.Cfg.ScreenCfg.Size.Height}
+	size := constants.Size{Width: s.Cfg.ScrCfg.Size.Width, Height: s.Cfg.ScrCfg.Size.Height}
 	pal := s.Palette()
-	raw, sprites, err := sprite.SplitBoardToSprite(s.OriginalBoard().Image, pal, s.SpriteColumns, s.SpriteRows, uint8(s.Mode), s.Cfg.ScreenCfg.Type.IsSpriteHard(), size)
+	raw, sprites, err := sprite.SplitBoardToSprite(s.OriginalBoard().Image, pal, s.SpriteColumns, s.SpriteRows, uint8(s.Mode), s.Cfg.ScrCfg.Type.IsSpriteHard(), size)
 	if err != nil {
 		pi.Hide()
 		dialog.NewError(err, m.window).Show()
@@ -178,7 +178,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) *fyne.Container {
 			log.GetLogger().Error("Error %s cannot be cast in int\n", v)
 			return
 		}
-		s.Cfg.ScreenCfg.Size.Width = r
+		s.Cfg.ScrCfg.Size.Width = r
 	}
 
 	spriteHeightSizeEntry := widget.NewEntry()
@@ -188,22 +188,22 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) *fyne.Container {
 			log.GetLogger().Error("Error %s cannot be cast in int\n", v)
 			return
 		}
-		s.Cfg.ScreenCfg.Size.Height = r
+		s.Cfg.ScrCfg.Size.Height = r
 	}
 
 	isSpriteHard := widget.NewCheck("is sprite hard", func(b bool) {
 		if b {
-			s.Cfg.ScreenCfg.Type = config.SpriteHardFormat
-			s.Cfg.ScreenCfg.Size.Height = 16
-			s.Cfg.ScreenCfg.Size.Width = 16
+			s.Cfg.ScrCfg.Type = config.SpriteHardFormat
+			s.Cfg.ScrCfg.Size.Height = 16
+			s.Cfg.ScrCfg.Size.Width = 16
 		} else {
-			s.Cfg.ScreenCfg.Type = config.SpriteFormat
+			s.Cfg.ScrCfg.Type = config.SpriteFormat
 		}
 
 	})
 
 	IsCpcPlus := widget.NewCheck("is CPC Plus", func(b bool) {
-		s.Cfg.ScreenCfg.IsPlus = b
+		s.Cfg.ScrCfg.IsPlus = b
 	})
 
 	paletteOpen := pal.NewOpenPaletteButton(s, m.window, nil)
@@ -313,7 +313,7 @@ func applySpriteBoardFromGif(s *menu.SpriteMenu, m *MartineUI) *widget.Button {
 			if reader == nil {
 				return
 			}
-			if (s.Cfg.ScreenCfg.Size.Height == 0 || s.Cfg.ScreenCfg.Size.Width == 0) && !s.Cfg.ScreenCfg.Type.IsSpriteHard() {
+			if (s.Cfg.ScrCfg.Size.Height == 0 || s.Cfg.ScrCfg.Size.Width == 0) && !s.Cfg.ScrCfg.Type.IsSpriteHard() {
 				dialog.ShowError(errors.New("define dimension before"), m.window)
 				return
 			}
@@ -331,16 +331,16 @@ func applySpriteBoardFromGif(s *menu.SpriteMenu, m *MartineUI) *widget.Button {
 			}
 			gifImages := ci.GifToImages(*gifImage)
 			resized := make([]*image.NRGBA, 0)
-			size := constants.Size{Width: s.Cfg.ScreenCfg.Size.Width, Height: s.Cfg.ScreenCfg.Size.Height}
+			size := constants.Size{Width: s.Cfg.ScrCfg.Size.Width, Height: s.Cfg.ScrCfg.Size.Height}
 			for _, v := range gifImages {
 				r := ci.Resize(v, size, imaging.NearestNeighbor)
 				resized = append(resized, r)
 			}
 			cfg := config.NewMartineConfig("", "")
 			cfg.CustomDimension = true
-			cfg.ScreenCfg.Size = size
-			if s.Cfg.ScreenCfg.Type.IsSpriteHard() {
-				cfg.ScreenCfg.Type = config.SpriteHardFormat
+			cfg.ScrCfg.Size = size
+			if s.Cfg.ScrCfg.Type.IsSpriteHard() {
+				cfg.ScrCfg.Type = config.SpriteHardFormat
 			}
 			var colorsAvailable int
 			switch s.Mode {
@@ -352,7 +352,7 @@ func applySpriteBoardFromGif(s *menu.SpriteMenu, m *MartineUI) *widget.Button {
 				colorsAvailable = constants.Mode2.ColorsAvailable
 			}
 			img := resized[0]
-			pal, _, err := ci.DowngradingPalette(img, constants.Size{ColorsAvailable: colorsAvailable, Width: img.Bounds().Max.X, Height: img.Bounds().Max.Y}, s.Cfg.ScreenCfg.IsPlus)
+			pal, _, err := ci.DowngradingPalette(img, constants.Size{ColorsAvailable: colorsAvailable, Width: img.Bounds().Max.X, Height: img.Bounds().Max.Y}, s.Cfg.ScrCfg.IsPlus)
 			if err != nil {
 				dialog.ShowError(err, m.window)
 				return
@@ -398,15 +398,15 @@ func ImportSpriteBoard(m *MartineUI) *widget.Button {
 			}
 			directory.SetImportDirectoryURI(reader.URI())
 			filePath := reader.URI()
-			if m.sprite.Cfg.ScreenCfg.Type.IsSpriteHard() {
+			if m.sprite.Cfg.ScrCfg.Type.IsSpriteHard() {
 				spritesHard, err := spritehard.OpenSpr(filePath.Path())
 				if err != nil {
 					dialog.ShowError(err, m.window)
 					return
 				}
 				m.sprite.Mode = 0
-				m.sprite.Cfg.ScreenCfg.Size.Width = 16
-				m.sprite.Cfg.ScreenCfg.Size.Height = 16
+				m.sprite.Cfg.ScrCfg.Size.Width = 16
+				m.sprite.Cfg.ScrCfg.Size.Height = 16
 				m.sprite.SpriteColumns = 8
 				var row, col int
 				nbRow := len(spritesHard.Data) / m.sprite.SpriteColumns
@@ -452,8 +452,8 @@ func ImportSpriteBoard(m *MartineUI) *widget.Button {
 					return
 				}
 
-				m.sprite.Cfg.ScreenCfg.Size.Width = int(footer.Width)
-				m.sprite.Cfg.ScreenCfg.Size.Height = int(footer.Height)
+				m.sprite.Cfg.ScrCfg.Size.Width = int(footer.Width)
+				m.sprite.Cfg.ScrCfg.Size.Height = int(footer.Height)
 				m.sprite.SpriteColumns = 8
 				data, err := tile.RawImp(filePath.Path())
 				if err != nil {

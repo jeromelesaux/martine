@@ -28,7 +28,7 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 
 		if *height != -1 {
 			cfg.CustomDimension = true
-			cfg.ScreenCfg.Type = config.WindowFormat
+			cfg.ScrCfg.Type = config.WindowFormat
 			size.Height = *height
 			if *width != -1 {
 				size.Width = *width
@@ -37,7 +37,7 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 			}
 		}
 		if *width != -1 {
-			cfg.ScreenCfg.Type = config.WindowFormat
+			cfg.ScrCfg.Type = config.WindowFormat
 			cfg.CustomDimension = true
 			size.Width = *width
 			if *height != -1 {
@@ -99,21 +99,21 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	}
 	cfg.TileMode = *tileMode
 
-	cfg.ScreenCfg.NoAmsdosHeader = *noAmsdosHeader
-	cfg.ScreenCfg.IsPlus = *plusMode
+	cfg.ScrCfg.NoAmsdosHeader = *noAmsdosHeader
+	cfg.ScrCfg.IsPlus = *plusMode
 	cfg.TileIterationX = *tileIterationX
 	cfg.TileIterationY = *tileIterationY
-	cfg.ScreenCfg.Compression = compression.ToCompressMethod(*compress)
-
+	cfg.ScrCfg.Compression = compression.ToCompressMethod(*compress)
+	cfg.ScrCfg.Treatment.ResizingAlgo = resizeAlgo
+	cfg.ScrCfg.Treatment.DitheringMultiplier = *ditheringMultiplier
+	cfg.ScrCfg.Treatment.DitheringWithQuantification = *withQuantization
 	cfg.M4cfg = config.M4Config{
 		Host:       *m4Host,
 		RemotePath: *m4RemotePath,
 		Autoexec:   *m4Autoexec,
 		Enabled:    true,
 	}
-	cfg.ResizingAlgo = resizeAlgo
-	cfg.DitheringMultiplier = *ditheringMultiplier
-	cfg.DitheringWithQuantification = *withQuantization
+
 	var ppath string
 	var ptype config.PaletteType
 	if palettePath != nil {
@@ -128,11 +128,11 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 		ppath = *kitPath
 		ptype = config.KitPalette
 	}
-	cfg.PaletteCfg = config.PaletteConfig{
+	cfg.PalCfg = config.PaletteConfig{
 		Path: ppath,
 		Type: ptype,
 	}
-	cfg.RotationCfg = config.RotateConfig{
+	cfg.RotateCfg = config.RotateConfig{
 		RollMode:            *rollMode,
 		RollIteration:       *iterations,
 		RotationRlaBit:      *rla,
@@ -155,7 +155,7 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 		cfg.ContainerCfg.AddExport(config.SnaContainer)
 	}
 	if spriteHard != nil && *spriteHard {
-		cfg.ScreenCfg.Type = config.SpriteHardFormat
+		cfg.ScrCfg.Type = config.SpriteHardFormat
 	}
 
 	cfg.SplitRaster = *splitRasters
@@ -163,13 +163,13 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	cfg.Animate = *doAnimation
 	cfg.Reducer = *reducer
 	if jsonOutput != nil && *jsonOutput {
-		cfg.ScreenCfg.AddExport(config.JsonExport)
+		cfg.ScrCfg.AddExport(config.JsonExport)
 	}
 	if txtOutput != nil && *txtOutput {
-		cfg.ScreenCfg.AddExport(config.AssemblyExport)
+		cfg.ScrCfg.AddExport(config.AssemblyExport)
 	}
 	if exportGoFiles != nil && *exportGoFiles {
-		cfg.ScreenCfg.AddExport(config.GoImpdrawExport)
+		cfg.ScrCfg.AddExport(config.GoImpdrawExport)
 	}
 	cfg.OneLine = *oneLine
 	cfg.OneRow = *oneRow
@@ -231,21 +231,21 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 		}
 	}
 
-	if cfg.ScreenCfg.IsPlus {
-		cfg.PaletteCfg.Type = config.KitPalette
+	if cfg.ScrCfg.IsPlus {
+		cfg.PalCfg.Type = config.KitPalette
 	}
 	if overscan != nil && *overscan {
-		cfg.ScreenCfg.Type = config.FullscreenFormat
+		cfg.ScrCfg.Type = config.FullscreenFormat
 	}
-	if cfg.ScreenCfg.Type == config.FullscreenFormat {
-		cfg.PaletteCfg.Type = config.KitPalette
+	if cfg.ScrCfg.Type == config.FullscreenFormat {
+		cfg.PalCfg.Type = config.KitPalette
 	}
 
 	if *egx1 {
-		cfg.ScreenCfg.Type = config.Egx1Format
+		cfg.ScrCfg.Type = config.Egx1Format
 	}
 	if *egx2 {
-		cfg.ScreenCfg.Type = config.Egx2Format
+		cfg.ScrCfg.Type = config.Egx2Format
 	}
 	if *mode != -1 {
 		cfg.EgxMode1 = uint8(*mode)
@@ -255,7 +255,7 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	}
 
 	if *saturationPal > 0 || *brightnessPal > 0 {
-		cfg.ScreenCfg.IsPlus = true
+		cfg.ScrCfg.IsPlus = true
 		cfg.Saturation = *saturationPal
 		cfg.Brightness = *brightnessPal
 	}

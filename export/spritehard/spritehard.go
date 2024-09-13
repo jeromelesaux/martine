@@ -91,12 +91,12 @@ func Spr(filePath string, spr SprImpdraw, cfg *config.MartineConfig) error {
 	for _, v := range spr.Data {
 		content = append(content, v.Data[:]...)
 	}
-	content, _ = compression.Compress(content, cfg.ScreenCfg.Compression)
+	content, _ = compression.Compress(content, cfg.ScrCfg.Compression)
 	ext := ".SPR"
-	if cfg.ScreenCfg.Compression != compression.NONE {
+	if cfg.ScrCfg.Compression != compression.NONE {
 		ext = ".SPR.zxo"
 	}
-	if !cfg.ScreenCfg.NoAmsdosHeader {
+	if !cfg.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilename, ext, content, 2, 0, 0x0, 0x4000); err != nil {
 			return err
 		}

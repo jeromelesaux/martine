@@ -107,7 +107,7 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, dont
 	log.GetLogger().Info("Saving WIN file (%s), screen mode %d, (%d,%d)\n", osFilepath, screenMode, width, height)
 	win := OcpWinFooter{Unused: 3, Height: byte(height), Unused2: 0, Width: uint16(width * 8)}
 
-	data, _ = compression.Compress(data, cfg.ScreenCfg.Compression)
+	data, _ = compression.Compress(data, cfg.ScrCfg.Compression)
 
 	// log.GetLogger().Error( "Header length %d\n", binary.Size(header))
 	log.GetLogger().Error("Data length %d\n", binary.Size(data))
@@ -126,7 +126,7 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, dont
 	content = append(content, footer...)
 
 	log.GetLogger().Info("%s, data size :%d\n", win.ToString(), len(data))
-	if !cfg.ScreenCfg.NoAmsdosHeader {
+	if !cfg.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilename, ".WIN", content, 2, 0, 0x4000, 0x4000); err != nil {
 			return err
 		}

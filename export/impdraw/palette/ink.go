@@ -43,7 +43,7 @@ func Ink(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 	// log.GetLogger().Error( "Header length %d\n", binary.Size(header))
 	osFilepath := cfg.AmsdosFullPath(filePath, ".INK")
 
-	if !cfg.ScreenCfg.NoAmsdosHeader {
+	if !cfg.ScrCfg.NoAmsdosHeader {
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".INK", data, 2, 0, 0x8809, 0x8809); err != nil {
 			return err
 		}

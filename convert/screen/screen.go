@@ -26,7 +26,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 		lineToAdd = 2
 	}
 
-	if cfg.ScreenCfg.Type.IsFullScreen() {
+	if cfg.ScrCfg.Type.IsFullScreen() {
 		bw = make([]byte, 0x8000)
 	} else {
 		bw = make([]byte, 0x4000)
@@ -114,7 +114,7 @@ func ToMode2(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			addr := address.CpcScreenAddress(0, x, y, 2, cfg.ScreenCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
+			addr := address.CpcScreenAddress(0, x, y, 2, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 			bw[addr] = pixel
 		}
 
@@ -132,7 +132,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 	if cfg.OneRow {
 		lineToAdd = 2
 	}
-	if cfg.ScreenCfg.Type.IsFullScreen() {
+	if cfg.ScrCfg.Type.IsFullScreen() {
 		bw = make([]byte, 0x8000)
 	} else {
 		bw = make([]byte, 0x4000)
@@ -186,7 +186,7 @@ func ToMode1(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			addr := address.CpcScreenAddress(0, x, y, 1, cfg.ScreenCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
+			addr := address.CpcScreenAddress(0, x, y, 1, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 			bw[addr] = pixel
 		}
 	}
@@ -200,7 +200,7 @@ func ToMode0(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 	if cfg.OneRow {
 		lineToAdd = 2
 	}
-	if cfg.ScreenCfg.Type.IsFullScreen() {
+	if cfg.ScrCfg.Type.IsFullScreen() {
 		bw = make([]byte, 0x8000)
 	} else {
 		bw = make([]byte, 0x4000)
@@ -236,7 +236,7 @@ func ToMode0(in *image.NRGBA, p color.Palette, cfg *config.MartineConfig) []byte
 			// MACRO PIXM0 COL2,COL1
 			// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 			//	MEND
-			addr := address.CpcScreenAddress(0, x, y, 0, cfg.ScreenCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
+			addr := address.CpcScreenAddress(0, x, y, 0, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 			bw[addr] = pixel
 		}
 	}

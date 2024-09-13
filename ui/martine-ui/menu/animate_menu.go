@@ -51,13 +51,13 @@ func (i *AnimateMenu) CmdLine() string {
 	if i.OriginalImagePath() != "" {
 		exec += " -in " + i.OriginalImagePath()
 	}
-	if i.Cfg.ScreenCfg.IsPlus {
+	if i.Cfg.ScrCfg.IsPlus {
 		exec += " -plus"
 	}
-	if i.Cfg.ScreenCfg.Type.IsFullScreen() {
+	if i.Cfg.ScrCfg.Type.IsFullScreen() {
 		exec += " -fullscreen"
 	}
-	if i.Cfg.ScreenCfg.Type.IsSprite() {
+	if i.Cfg.ScrCfg.Type.IsSprite() {
 		width, widthText, err := i.GetWidth()
 		if err != nil {
 			log.GetLogger().Error("cannot convert width value :%s error :%v\n", widthText, err)
@@ -71,7 +71,7 @@ func (i *AnimateMenu) CmdLine() string {
 			exec += " -height " + strconv.Itoa(height)
 		}
 	}
-	if i.Cfg.ScreenCfg.Type.IsSpriteHard() {
+	if i.Cfg.ScrCfg.Type.IsSpriteHard() {
 		exec += " -spritehard"
 	}
 	if i.ApplyDithering {
@@ -98,7 +98,7 @@ func (i *AnimateMenu) CmdLine() string {
 		exec += " -saturation " + fmt.Sprintf("%.2f", i.Saturation)
 	}
 
-	if i.Cfg.ScreenCfg.Type.IsSprite() {
+	if i.Cfg.ScrCfg.Type.IsSprite() {
 		exec += " -address 0x" + i.InitialAddress.Text
 	}
 

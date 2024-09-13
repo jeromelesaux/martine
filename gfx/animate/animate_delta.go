@@ -40,7 +40,7 @@ func DeltaPackingMemory(images []image.Image, cfg *config.MartineConfig, initial
 	var pad int = 1
 	var err error
 	var palette color.Palette
-	if !cfg.CustomDimension && cfg.ScreenCfg.Type != config.SpriteHardFormat {
+	if !cfg.CustomDimension && cfg.ScrCfg.Type != config.SpriteHardFormat {
 		isSprite = false
 	}
 	if len(images) <= 1 {
@@ -79,7 +79,7 @@ func DeltaPackingMemory(images []image.Image, cfg *config.MartineConfig, initial
 	}
 
 	log.GetLogger().Info("Let's go deltapacking raw images\n")
-	realSize := &constants.Size{Width: cfg.ScreenCfg.Size.Width, Height: cfg.ScreenCfg.Size.Height}
+	realSize := &constants.Size{Width: cfg.ScrCfg.Size.Width, Height: cfg.ScrCfg.Size.Height}
 	if isSprite {
 		realSize.Width = realSize.ModeWidth(mode)
 	}
@@ -109,7 +109,7 @@ func DeltaPackingMemory(images []image.Image, cfg *config.MartineConfig, initial
 func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress uint16, mode uint8, exportVersion DeltaExportFormat) error {
 	isSprite := true
 	maxImages := 22
-	if !cfg.CustomDimension && cfg.ScreenCfg.Type != config.SpriteHardFormat {
+	if !cfg.CustomDimension && cfg.ScrCfg.Type != config.SpriteHardFormat {
 		isSprite = false
 	}
 	fr, err := os.Open(gitFilepath)
@@ -139,7 +139,7 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 	log.GetLogger().Info("Let's go transform images files in win or scr\n")
 
 	if cfg.FilloutGif {
-		imgs := filloutGif(*gifImages, cfg)
+		imgs := filloutGif(*gifImages)
 		_, _, palette, _, err = gfx.ApplyOneImage(imgs[0], cfg, int(mode), palette, mode)
 		if err != nil {
 			return err
@@ -164,7 +164,7 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 			if err != nil {
 				return err
 			}
-			err = png.Png(cfg.ScreenCfg.OutputPath+fmt.Sprintf("/%.2d.png", i), in)
+			err = png.Png(cfg.ScrCfg.OutputPath+fmt.Sprintf("/%.2d.png", i), in)
 			if err != nil {
 				return err
 			}
@@ -179,7 +179,7 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 	}
 
 	log.GetLogger().Info("Let's go deltapacking raw images\n")
-	realSize := &constants.Size{Width: cfg.ScreenCfg.Size.Width, Height: cfg.ScreenCfg.Size.Height}
+	realSize := &constants.Size{Width: cfg.ScrCfg.Size.Width, Height: cfg.ScrCfg.Size.Height}
 	realSize.Width = realSize.ModeWidth(mode)
 	var lastImage []byte
 	for i := 0; i < len(rawImages)-1; i++ {
@@ -201,7 +201,7 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 	deltaData = append(deltaData, dc)
 	log.GetLogger().Info("%d bytes differ from the both images\n", len(dc.Items))
 	filename := cfg.OsFilename(".asm")
-	_, err = ExportDeltaAnimate(rawImages[0], deltaData, palette, isSprite, cfg, initialAddress, mode, cfg.ScreenCfg.OutputPath+string(filepath.Separator)+filename, exportVersion)
+	_, err = ExportDeltaAnimate(rawImages[0], deltaData, palette, isSprite, cfg, initialAddress, mode, cfg.ScrCfg.OutputPath+string(filepath.Separator)+filename, exportVersion)
 	return err
 }
 
@@ -225,7 +225,7 @@ func ConvertToImage(g gif.GIF) []*image.NRGBA {
 	return c
 }
 
-func filloutGif(g gif.GIF, cfg *config.MartineConfig) []image.Image {
+func filloutGif(g gif.GIF) []image.Image {
 	c := make([]image.Image, 0)
 	width := g.Image[0].Bounds().Max.X
 	height := g.Image[0].Bounds().Max.Y
@@ -258,13 +258,13 @@ func ExportDeltaAnimate(
 		Palette:        palette,
 		Mode:           int(mode),
 		LigneLarge:     fmt.Sprintf("#%.4x", 0xC000+cfg.LineWidth),
-		Haut:           fmt.Sprintf("%d", cfg.ScreenCfg.Size.Height),
-		Large:          fmt.Sprintf("%d", cfg.ScreenCfg.Size.ModeWidth(mode)),
+		Haut:           fmt.Sprintf("%d", cfg.ScrCfg.Size.Height),
+		Large:          fmt.Sprintf("%d", cfg.ScrCfg.Size.ModeWidth(mode)),
 		Image:          imageReference,
 		Type: AnimateExportType{
-			Compress: cfg.ScreenCfg.Compression != compression.NONE,
+			Compress: cfg.ScrCfg.Compression != compression.NONE,
 			IsSprite: isSprite,
-			CPCPlus:  cfg.ScreenCfg.IsPlus,
+			CPCPlus:  cfg.ScrCfg.IsPlus,
 		},
 	}
 	data := make([][]byte, 0)
@@ -292,9 +292,9 @@ func ExportDeltaAnimate(
 	var sourceCode string
 
 	if !isSprite {
-		if cfg.ScreenCfg.Compression != compression.NONE {
+		if cfg.ScrCfg.Compression != compression.NONE {
 			sourceCode = deltaScreenCompressCodeDelta
-			if cfg.ScreenCfg.IsPlus {
+			if cfg.ScrCfg.IsPlus {
 				sourceCode = deltaScreenCompressCodeDeltaPlus
 			} else {
 				if exportVersion == DeltaExportV2 {
@@ -303,7 +303,7 @@ func ExportDeltaAnimate(
 			}
 		} else {
 			sourceCode = deltaScreenCodeDelta
-			if cfg.ScreenCfg.IsPlus {
+			if cfg.ScrCfg.IsPlus {
 				sourceCode = deltaScreenCodeDeltaPlus
 			} else {
 				if exportVersion == DeltaExportV2 {
@@ -323,7 +323,7 @@ func ExportDeltaAnimate(
 	fmt.Println(buf.String())
 
 	code := buf.String()
-	if cfg.ScreenCfg.Compression != compression.NONE {
+	if cfg.ScrCfg.Compression != compression.NONE {
 		code += "\nbuffer:\n"
 	}
 	code += "\nend\n"

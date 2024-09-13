@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/compression"
 )
@@ -77,6 +78,7 @@ type ScreenConfig struct {
 	Export         []ScreenExport
 	Size           constants.Size
 	amsdosFilename [8]byte
+	Treatment      ScreenTreatment
 }
 
 func (s *ScreenConfig) ResetExport() {
@@ -205,4 +207,13 @@ func Rotation3DType(v int) Rotation3d {
 		return RotateDiagonalYAxis
 	}
 	return RotateXAxis
+}
+
+type ScreenTreatment struct {
+	ResizingAlgo                imaging.ResampleFilter
+	DitheringAlgo               int
+	DitheringMatrix             [][]float32
+	DitheringMultiplier         float64
+	DitheringWithQuantification bool
+	DitheringType               constants.DitheringType
 }

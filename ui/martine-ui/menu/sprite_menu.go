@@ -118,46 +118,46 @@ func (s *SpriteMenu) CmdLine() string {
 	exec += " -mode " + strconv.Itoa(s.Mode)
 	exec += " -spritesrow " + strconv.Itoa(s.SpriteRows)
 	exec += " -spritescolumn " + strconv.Itoa(s.SpriteColumns)
-	if s.Cfg.ScreenCfg.Type.IsSpriteHard() {
+	if s.Cfg.ScrCfg.Type.IsSpriteHard() {
 		exec += " -height 16 -width 16"
 	} else {
-		exec += " -height " + strconv.Itoa(s.Cfg.ScreenCfg.Size.Height)
-		exec += " -width " + strconv.Itoa(s.Cfg.ScreenCfg.Size.Width)
+		exec += " -height " + strconv.Itoa(s.Cfg.ScrCfg.Size.Height)
+		exec += " -width " + strconv.Itoa(s.Cfg.ScrCfg.Size.Width)
 	}
 
-	if s.Cfg.ScreenCfg.IsPlus {
+	if s.Cfg.ScrCfg.IsPlus {
 		exec += " -plus"
 	}
 
-	if s.Cfg.ScreenCfg.Compression != compression.NONE {
-		exec += " -z " + strconv.Itoa((int(s.Cfg.ScreenCfg.Compression)))
+	if s.Cfg.ScrCfg.Compression != compression.NONE {
+		exec += " -z " + strconv.Itoa((int(s.Cfg.ScrCfg.Compression)))
 	}
 
 	if s.Cfg.ContainerCfg.HasExport(config.DskContainer) {
 		exec += " -dsk"
 	}
 
-	if s.Cfg.ScreenCfg.NoAmsdosHeader {
+	if s.Cfg.ScrCfg.NoAmsdosHeader {
 		exec += " -noheader"
 	}
 
-	if s.Cfg.ScreenCfg.IsExport(config.SpriteCompiledExport) {
+	if s.Cfg.ScrCfg.IsExport(config.SpriteCompiledExport) {
 		exec += " -compiled"
 	}
 
-	if s.Cfg.ScreenCfg.IsExport(config.OcpWindowExport) {
+	if s.Cfg.ScrCfg.IsExport(config.OcpWindowExport) {
 		exec += " -ocpwin"
 	}
 
-	if s.Cfg.ScreenCfg.IsExport(config.SpriteImpCatcherExport) {
+	if s.Cfg.ScrCfg.IsExport(config.SpriteImpCatcherExport) {
 		exec += " -imp"
 	}
 
-	if s.Cfg.ScreenCfg.IsExport(config.SpriteFlatExport) {
+	if s.Cfg.ScrCfg.IsExport(config.SpriteFlatExport) {
 		exec += " -flat"
 	}
 
-	if s.Cfg.ScreenCfg.IsExport(config.SpriteHardExport) {
+	if s.Cfg.ScrCfg.IsExport(config.SpriteHardExport) {
 		exec += " -spritehard"
 	}
 

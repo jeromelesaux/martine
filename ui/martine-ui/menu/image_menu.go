@@ -157,14 +157,14 @@ func (i *ImageMenu) CmdLine() string {
 	if i.originalImagePath != nil {
 		exec += " -in " + i.originalImagePath.Path()
 	}
-	if i.Cfg.ScreenCfg.IsPlus {
+	if i.Cfg.ScrCfg.IsPlus {
 		exec += " -plus"
 	}
 
-	if i.Cfg.ScreenCfg.Type.IsFullScreen() {
+	if i.Cfg.ScrCfg.Type.IsFullScreen() {
 		exec += " -fullscreen"
 	}
-	if i.Cfg.ScreenCfg.Type.IsSprite() {
+	if i.Cfg.ScrCfg.Type.IsSprite() {
 		width, err := strconv.Atoi(i.width.Text)
 		if err != nil {
 			log.GetLogger().Error("cannot convert width value :%s error :%v\n", i.width.Text, err)
@@ -178,7 +178,7 @@ func (i *ImageMenu) CmdLine() string {
 			exec += " -height " + strconv.Itoa(height)
 		}
 	}
-	if i.Cfg.ScreenCfg.Type.IsSpriteHard() {
+	if i.Cfg.ScrCfg.Type.IsSpriteHard() {
 		exec += " -spritehard"
 	}
 	if i.ApplyDithering {
@@ -242,9 +242,9 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 	if cfg == nil {
 		return
 	}
-	if cfg.ScreenCfg.IsExport(config.AssemblyExport) {
-		if cfg.ScreenCfg.Type == config.FullscreenFormat {
-			cfg.ScreenCfg.AddExport(config.GoImpdrawExport)
+	if cfg.ScrCfg.IsExport(config.AssemblyExport) {
+		if cfg.ScrCfg.Type == config.FullscreenFormat {
+			cfg.ScrCfg.AddExport(config.GoImpdrawExport)
 		}
 
 		out, _, palette, _, err := gfx.ApplyOneImage(me.OriginalImage().Image, cfg, me.Mode, me.Palette(), uint8(me.Mode))
@@ -253,10 +253,10 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 			dialog.ShowError(err, w)
 			return
 		}
-		if !cfg.ScreenCfg.IsExport(config.GoImpdrawExport) {
+		if !cfg.ScrCfg.IsExport(config.GoImpdrawExport) {
 			code := ascii.FormatAssemblyDatabyte(out, "\n")
 			var palCode string
-			if cfg.ScreenCfg.IsPlus {
+			if cfg.ScrCfg.IsPlus {
 				palCode = ascii.FormatAssemblyCPCPlusPalette(palette, "\n")
 			} else {
 				palCode = ascii.FormatAssemblyCPCPalette(palette, "\n")
@@ -267,7 +267,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 				code,
 				palCode)
 			filename := filepath.Base(me.OriginalImagePath())
-			fileExport := cfg.ScreenCfg.OutputPath + string(filepath.Separator) + filename + ".asm"
+			fileExport := cfg.ScrCfg.OutputPath + string(filepath.Separator) + filename + ".asm"
 			if err = amsdos.SaveStringOSFile(fileExport, content); err != nil {
 				pi.Hide()
 				dialog.ShowError(err, w)
@@ -281,10 +281,10 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 				return
 			}
 			var decompressRoutine string
-			if cfg.ScreenCfg.Compression != compression.NONE && cfg.ScreenCfg.Compression != -1 {
-				go1, _ = compression.Compress(go1, cfg.ScreenCfg.Compression)
-				go2, _ = compression.Compress(go2, cfg.ScreenCfg.Compression)
-				if cfg.ScreenCfg.Compression == compression.ZX0 {
+			if cfg.ScrCfg.Compression != compression.NONE && cfg.ScrCfg.Compression != -1 {
+				go1, _ = compression.Compress(go1, cfg.ScrCfg.Compression)
+				go2, _ = compression.Compress(go2, cfg.ScrCfg.Compression)
+				if cfg.ScrCfg.Compression == compression.ZX0 {
 					decompressRoutine = assembly.DeltapackRoutine
 				}
 			}
@@ -292,7 +292,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 			code2 := ascii.FormatAssemblyDatabyte(go2, "\n")
 			var palCode string
 
-			if cfg.ScreenCfg.IsPlus {
+			if cfg.ScrCfg.IsPlus {
 				palCode = ascii.FormatAssemblyCPCPlusPalette(palette, "\n")
 			} else {
 				palCode = ascii.FormatAssemblyCPCPalette(palette, "\n")
@@ -305,7 +305,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 				palCode,
 				decompressRoutine)
 			filename := filepath.Base(me.OriginalImagePath())
-			fileExport := cfg.ScreenCfg.OutputPath + string(filepath.Separator) + filename + ".asm"
+			fileExport := cfg.ScrCfg.OutputPath + string(filepath.Separator) + filename + ".asm"
 			if err = amsdos.SaveStringOSFile(fileExport, content); err != nil {
 				pi.Hide()
 				dialog.ShowError(err, w)
@@ -326,7 +326,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 			dialog.ShowError(err, w)
 		}
 		if me.UsePalette {
-			cfg.PaletteCfg.Path = tmpPalette
+			cfg.PalCfg.Path = tmpPalette
 		}
 
 		filename := filepath.Base(me.OriginalImagePath())
@@ -336,7 +336,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 				me.Palette(),
 				cfg,
 				filename,
-				cfg.ScreenCfg.OutputPath+string(filepath.Separator)+filename,
+				cfg.ScrCfg.OutputPath+string(filepath.Separator)+filename,
 				uint8(me.Mode),
 			)
 		} else {
@@ -344,7 +344,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 				me.OriginalImage().Image,
 				cfg,
 				filename,
-				cfg.ScreenCfg.OutputPath+string(filepath.Separator)+filename,
+				cfg.ScrCfg.OutputPath+string(filepath.Separator)+filename,
 				me.Mode,
 				uint8(me.Mode))
 		}
@@ -362,7 +362,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 			}
 		}
 		if cfg.HasContainerExport(config.SnaContainer) {
-			if cfg.ScreenCfg.Type == config.FullscreenFormat {
+			if cfg.ScrCfg.Type == config.FullscreenFormat {
 				var gfxFile string
 				for _, v := range cfg.DskFiles {
 					if filepath.Ext(v) == ".SCR" {
@@ -385,7 +385,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 		}
 	}
 	pi.Hide()
-	dialog.ShowInformation("Save", "Your files are save in folder \n"+cfg.ScreenCfg.OutputPath, w)
+	dialog.ShowInformation("Save", "Your files are save in folder \n"+cfg.ScrCfg.OutputPath, w)
 }
 
 // nolint: funlen
@@ -395,10 +395,10 @@ func (me *ImageMenu) NewConfig(checkOriginalImage bool) *config.MartineConfig {
 	}
 
 	if checkOriginalImage {
-		me.Cfg.ScreenCfg.InputPath = me.OriginalImagePath()
+		me.Cfg.ScrCfg.InputPath = me.OriginalImagePath()
 	}
 
-	me.Cfg.DitheringMultiplier = me.DitheringMultiplier
+	me.Cfg.ScrCfg.Treatment.DitheringMultiplier = me.DitheringMultiplier
 	me.Cfg.Brightness = me.Brightness
 	me.Cfg.Saturation = me.Saturation
 
@@ -409,8 +409,8 @@ func (me *ImageMenu) NewConfig(checkOriginalImage bool) *config.MartineConfig {
 		me.Cfg.Brightness = me.Saturation
 	}
 	me.Cfg.Reducer = me.Reducer
-	me.Cfg.ScreenCfg.Size = constants.NewSizeMode(uint8(me.Mode), me.Cfg.ScreenCfg.Type.IsFullScreen())
-	if me.Cfg.ScreenCfg.Type.IsSprite() {
+	me.Cfg.ScrCfg.Size = constants.NewSizeMode(uint8(me.Mode), me.Cfg.ScrCfg.Type.IsFullScreen())
+	if me.Cfg.ScrCfg.Type.IsSprite() {
 		width, _, err := me.GetWidth()
 		if err != nil {
 			dialog.NewError(err, me.w).Show()
@@ -421,29 +421,29 @@ func (me *ImageMenu) NewConfig(checkOriginalImage bool) *config.MartineConfig {
 			dialog.NewError(err, me.w).Show()
 			return me.Cfg
 		}
-		me.Cfg.ScreenCfg.Size.Height = height
-		me.Cfg.ScreenCfg.Size.Width = width
+		me.Cfg.ScrCfg.Size.Height = height
+		me.Cfg.ScrCfg.Size.Width = width
 		me.Cfg.CustomDimension = true
 	}
-	if me.Cfg.ScreenCfg.Type.IsSpriteHard() {
-		me.Cfg.ScreenCfg.Size.Height = 16
-		me.Cfg.ScreenCfg.Size.Width = 16
+	if me.Cfg.ScrCfg.Type.IsSpriteHard() {
+		me.Cfg.ScrCfg.Size.Height = 16
+		me.Cfg.ScrCfg.Size.Width = 16
 	}
 	if me.ApplyDithering {
-		me.Cfg.DitheringAlgo = 0
-		me.Cfg.DitheringMatrix = me.DitheringMatrix
-		me.Cfg.DitheringType = me.DitheringType
+		me.Cfg.ScrCfg.Treatment.DitheringAlgo = 0
+		me.Cfg.ScrCfg.Treatment.DitheringMatrix = me.DitheringMatrix
+		me.Cfg.ScrCfg.Treatment.DitheringType = me.DitheringType
 		if me.DitheringMultiplier == 0 {
-			me.Cfg.DitheringMultiplier = .1
+			me.Cfg.ScrCfg.Treatment.DitheringMultiplier = .1
 		} else {
-			me.Cfg.DitheringMultiplier = me.DitheringMultiplier
+			me.Cfg.ScrCfg.Treatment.DitheringMultiplier = me.DitheringMultiplier
 		}
 	} else {
-		me.Cfg.DitheringAlgo = -1
+		me.Cfg.ScrCfg.Treatment.DitheringAlgo = -1
 	}
-	me.Cfg.DitheringWithQuantification = me.WithQuantification
+	me.Cfg.ScrCfg.Treatment.DitheringWithQuantification = me.WithQuantification
 	if checkOriginalImage {
-		me.Cfg.ScreenCfg.InputPath = me.OriginalImagePath()
+		me.Cfg.ScrCfg.InputPath = me.OriginalImagePath()
 	}
 	me.Cfg.OneLine = me.OneLine
 	me.Cfg.OneRow = me.OneRow
@@ -472,7 +472,7 @@ func (me *ImageMenu) ExportDialog(cfg *config.MartineConfig, getCfg func(checkOr
 					}
 				}),
 				widget.NewCheck("add amsdos header", func(b bool) {
-					cfg.ScreenCfg.NoAmsdosHeader = b == false
+					cfg.ScrCfg.NoAmsdosHeader = b == false
 				}),
 			),
 			container.NewGridWithRows(3,
@@ -480,9 +480,9 @@ func (me *ImageMenu) ExportDialog(cfg *config.MartineConfig, getCfg func(checkOr
 				widget.NewLabel("default screen .scr file"),
 				widget.NewCheck("export as Go1 and Go2 files", func(b bool) {
 					if b {
-						cfg.ScreenCfg.AddExport(config.GoImpdrawExport)
+						cfg.ScrCfg.AddExport(config.GoImpdrawExport)
 					} else {
-						cfg.ScreenCfg.RemoveExport(config.GoImpdrawExport)
+						cfg.ScrCfg.RemoveExport(config.GoImpdrawExport)
 					}
 				}),
 			),
@@ -490,16 +490,16 @@ func (me *ImageMenu) ExportDialog(cfg *config.MartineConfig, getCfg func(checkOr
 				widget.NewLabel("Treatment to apply :"),
 				widget.NewCheck("export assembly text file", func(b bool) {
 					if b {
-						cfg.ScreenCfg.AddExport(config.AssemblyExport)
+						cfg.ScrCfg.AddExport(config.AssemblyExport)
 					} else {
-						cfg.ScreenCfg.RemoveExport(config.AssemblyExport)
+						cfg.ScrCfg.RemoveExport(config.AssemblyExport)
 					}
 				}),
 				widget.NewCheck("export Json file", func(b bool) {
 					if b {
-						cfg.ScreenCfg.AddExport(config.JsonExport)
+						cfg.ScrCfg.AddExport(config.JsonExport)
 					} else {
-						cfg.ScreenCfg.RemoveExport(config.JsonExport)
+						cfg.ScrCfg.RemoveExport(config.JsonExport)
 					}
 				}),
 				widget.NewCheck("apply zigzag", func(b bool) {
@@ -520,17 +520,17 @@ func (me *ImageMenu) ExportDialog(cfg *config.MartineConfig, getCfg func(checkOr
 			func(s string) {
 				switch s {
 				case "none":
-					cfg.ScreenCfg.Compression = compression.NONE
+					cfg.ScrCfg.Compression = compression.NONE
 				case "rle":
-					cfg.ScreenCfg.Compression = compression.RLE
+					cfg.ScrCfg.Compression = compression.RLE
 				case "rle 16bits":
-					cfg.ScreenCfg.Compression = compression.RLE16
+					cfg.ScrCfg.Compression = compression.RLE16
 				case "Lz4 Classic":
-					cfg.ScreenCfg.Compression = compression.LZ4
+					cfg.ScrCfg.Compression = compression.LZ4
 				case "Lz4 Raw":
-					cfg.ScreenCfg.Compression = compression.RawLZ4
+					cfg.ScrCfg.Compression = compression.RawLZ4
 				case "zx0 crunch":
-					cfg.ScreenCfg.Compression = compression.ZX0
+					cfg.ScrCfg.Compression = compression.ZX0
 				}
 			}),
 		m2host,
@@ -545,8 +545,8 @@ func (me *ImageMenu) ExportDialog(cfg *config.MartineConfig, getCfg func(checkOr
 					return
 				}
 				directory.SetExportDirectoryURI(lu)
-				cfg.ScreenCfg.OutputPath = lu.Path()
-				log.GetLogger().Infoln(cfg.ScreenCfg.OutputPath)
+				cfg.ScrCfg.OutputPath = lu.Path()
+				log.GetLogger().Infoln(cfg.ScrCfg.OutputPath)
 				// m.ExportOneImage(m.main)
 				me.ExportImage(me.w, getCfg)
 				// apply and export
@@ -557,7 +557,7 @@ func (me *ImageMenu) ExportDialog(cfg *config.MartineConfig, getCfg func(checkOr
 			}
 			fo.Resize(me.w.Content().Size())
 
-			dl.CheckAmsdosHeaderExport(cfg.ContainerCfg.HasExport(config.DskContainer), cfg.ScreenCfg.NoAmsdosHeader == false, fo, me.w)
+			dl.CheckAmsdosHeaderExport(cfg.ContainerCfg.HasExport(config.DskContainer), cfg.ScrCfg.NoAmsdosHeader == false, fo, me.w)
 		}),
 	)
 
@@ -579,14 +579,14 @@ func (i *ImageMenu) NewImportButton(modeSelection *widget.Select, callBack func(
 			}
 			directory.SetImportDirectoryURI(reader.URI())
 			i.SetOriginalImagePath(reader.URI())
-			if !i.Cfg.ScreenCfg.Type.IsFullScreen() {
+			if !i.Cfg.ScrCfg.Type.IsFullScreen() {
 				// load palette from file
 				if len(i.Palette()) == 0 {
 					dialog.ShowError(errors.New("palette is empty, please import palette first"), i.w)
 					return
 				}
 			}
-			switch i.Cfg.ScreenCfg.Type {
+			switch i.Cfg.ScrCfg.Type {
 			case config.FullscreenFormat:
 				// open palette widget to get palette
 				p, mode, err := overscan.OverscanPalette(i.OriginalImagePath())
@@ -663,15 +663,15 @@ func (me *ImageMenu) NewFormatRadio() *widget.Select {
 	winFormat := widget.NewSelect([]string{"Normal", "Fullscreen", "Window", "Sprite", "Sprite Hard"}, func(s string) {
 		switch s {
 		case "Normal":
-			me.Cfg.ScreenCfg.Type = config.OcpScreenFormat
+			me.Cfg.ScrCfg.Type = config.OcpScreenFormat
 		case "Fullscreen":
-			me.Cfg.ScreenCfg.Type = config.FullscreenFormat
+			me.Cfg.ScrCfg.Type = config.FullscreenFormat
 		case "Sprite":
-			me.Cfg.ScreenCfg.Type = config.SpriteFormat
+			me.Cfg.ScrCfg.Type = config.SpriteFormat
 		case "Sprite Hard":
-			me.Cfg.ScreenCfg.Type = config.SpriteHardFormat
+			me.Cfg.ScrCfg.Type = config.SpriteHardFormat
 		case "Window":
-			me.Cfg.ScreenCfg.Type = config.WindowFormat
+			me.Cfg.ScrCfg.Type = config.WindowFormat
 		}
 	})
 	winFormat.SetSelected("Normal")

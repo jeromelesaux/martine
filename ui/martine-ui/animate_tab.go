@@ -59,15 +59,15 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						dialog.ShowError(err, m.window)
 						return
 					}
-					a.Cfg.ScreenCfg.OutputPath = lu.Path()
-					log.GetLogger().Infoln(a.Cfg.ScreenCfg.OutputPath)
+					a.Cfg.ScrCfg.OutputPath = lu.Path()
+					log.GetLogger().Infoln(a.Cfg.ScrCfg.OutputPath)
 					pi := wgt.NewProgressInfinite("Exporting, please wait.", m.window)
 					pi.Show()
 					code, err := animate.ExportDeltaAnimate(
 						a.RawImages[0],
 						a.DeltaCollection,
 						a.Palette(),
-						a.Cfg.ScreenCfg.Type.IsSprite(),
+						a.Cfg.ScrCfg.Type.IsSprite(),
 						cfg,
 						uint16(address),
 						uint8(a.Mode),
@@ -79,12 +79,12 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						dialog.ShowError(err, m.window)
 						return
 					}
-					err = amsdos.SaveOSFile(a.Cfg.ScreenCfg.OutputPath+string(filepath.Separator)+"code.asm", []byte(code))
+					err = amsdos.SaveOSFile(a.Cfg.ScrCfg.OutputPath+string(filepath.Separator)+"code.asm", []byte(code))
 					if err != nil {
 						dialog.ShowError(err, m.window)
 						return
 					}
-					dialog.ShowInformation("Save", "Your files are save in folder \n"+a.Cfg.ScreenCfg.OutputPath, m.window)
+					dialog.ShowInformation("Save", "Your files are save in folder \n"+a.Cfg.ScrCfg.OutputPath, m.window)
 				}, m.window)
 				d, err := directory.ExportDirectoryURI()
 				if err == nil {
@@ -137,24 +137,24 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 		return
 	}
 
-	if cfg.ScreenCfg.Type != config.SpriteFormat {
+	if cfg.ScrCfg.Type != config.SpriteFormat {
 		switch a.Mode {
 		case 0:
-			cfg.ScreenCfg.Size = constants.Mode0
+			cfg.ScrCfg.Size = constants.Mode0
 		case 1:
-			cfg.ScreenCfg.Size = constants.Mode1
+			cfg.ScrCfg.Size = constants.Mode1
 		case 2:
-			cfg.ScreenCfg.Size = constants.Mode2
+			cfg.ScrCfg.Size = constants.Mode2
 		}
 	}
-	if cfg.ScreenCfg.Size.Height == 0 && cfg.ScreenCfg.Size.Width == 0 {
+	if cfg.ScrCfg.Size.Height == 0 && cfg.ScrCfg.Size.Width == 0 {
 		switch a.Mode {
 		case 0:
-			cfg.ScreenCfg.Size = constants.Mode0
+			cfg.ScrCfg.Size = constants.Mode0
 		case 1:
-			cfg.ScreenCfg.Size = constants.Mode1
+			cfg.ScrCfg.Size = constants.Mode1
 		case 2:
-			cfg.ScreenCfg.Size = constants.Mode2
+			cfg.ScrCfg.Size = constants.Mode2
 		}
 	}
 
@@ -167,7 +167,7 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 		return
 	}
 	// controle de de la taille de la largeur en fonction du mode
-	width := cfg.ScreenCfg.Size.Width
+	width := cfg.ScrCfg.Size.Width
 	mode := a.Mode
 	// get all images from widget imagetable
 	if !CheckWidthSize(width, mode) {
@@ -190,7 +190,7 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 
 // nolint:funlen, gocognit
 func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
-	a.Cfg.ScreenCfg.Type = config.OcpScreenFormat
+	a.Cfg.ScrCfg.Type = config.OcpScreenFormat
 	a.ImageMenu.SetWindow(m.window)
 	importOpen := newImportButton(m, a.ImageMenu)
 
@@ -286,7 +286,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
 	openFileWidget.Icon = theme.FileImageIcon()
 
 	isPlus := widget.NewCheck("CPC Plus", func(b bool) {
-		a.Cfg.ScreenCfg.IsPlus = b
+		a.Cfg.ScrCfg.IsPlus = b
 	})
 
 	modes := widget.NewSelect([]string{"0", "1", "2"}, func(s string) {
@@ -311,14 +311,14 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
 	a.InitialAddress.SetText("c000")
 
 	isSprite := widget.NewCheck("Is sprite", func(b bool) {
-		a.Cfg.ScreenCfg.Type = config.SpriteFormat
+		a.Cfg.ScrCfg.Type = config.SpriteFormat
 	})
-	a.Cfg.ScreenCfg.Compression = compression.NONE
+	a.Cfg.ScrCfg.Compression = compression.NONE
 	compressData := widget.NewCheck("Compress data", func(b bool) {
 		if b {
-			a.Cfg.ScreenCfg.Compression = compression.LZ4
+			a.Cfg.ScrCfg.Compression = compression.LZ4
 		} else {
-			a.Cfg.ScreenCfg.Compression = compression.NONE
+			a.Cfg.ScrCfg.Compression = compression.NONE
 		}
 	})
 

@@ -39,7 +39,7 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cfg *config.M
 			f1 = filepath1
 		}
 		var in0, in1 *image.NRGBA
-		if cfg.ScreenCfg.Type == config.FullscreenFormat {
+		if cfg.ScrCfg.Type == config.FullscreenFormat {
 			in0, err = overscan.OverscanToImg(f0, mode0, p)
 			if err != nil {
 				return err
@@ -61,7 +61,7 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cfg *config.M
 		if err = ToEgx1(in0, in1, p, uint8(m1), "egx.scr", cfg); err != nil {
 			return err
 		}
-		if cfg.ScreenCfg.Type != config.FullscreenFormat {
+		if cfg.ScrCfg.Type != config.FullscreenFormat {
 			if err = ocpartstudio.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), cfg); err != nil {
 				return err
 			}
@@ -87,7 +87,7 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cfg *config.M
 				f2 = filepath1
 			}
 			var in2, in1 *image.NRGBA
-			if cfg.ScreenCfg.Type.IsFullScreen() {
+			if cfg.ScrCfg.Type.IsFullScreen() {
 				in1, err = overscan.OverscanToImg(f1, mode1, p)
 				if err != nil {
 					return err
@@ -109,7 +109,7 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cfg *config.M
 			if err = ToEgx2(in1, in2, p, uint8(m1), "egx.scr", cfg); err != nil {
 				return err
 			}
-			if cfg.ScreenCfg.Type != config.FullscreenFormat {
+			if cfg.ScrCfg.Type != config.FullscreenFormat {
 				if err = ocpartstudio.EgxLoader("egx.scr", p, uint8(m1), uint8(m2), cfg); err != nil {
 					return err
 				}
@@ -129,19 +129,19 @@ func prepareEgx(
 ) (*image.NRGBA, color.Palette) {
 	var err error
 	size := constants.Size{
-		Width:  cfg.ScreenCfg.Size.Width,
-		Height: cfg.ScreenCfg.Size.Height}
+		Width:  cfg.ScrCfg.Size.Width,
+		Height: cfg.ScrCfg.Size.Height}
 
-	im := ci.Resize(in, size, cfg.ResizingAlgo)
+	im := ci.Resize(in, size, cfg.ScrCfg.Treatment.ResizingAlgo)
 	var palette color.Palette // palette de l'image
 	var p color.Palette       // palette cpc de l'image
 	var downgraded *image.NRGBA
 
-	if cfg.PaletteCfg.Type == config.PalPalette {
-		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PaletteCfg.Path)
-		palette, _, err = ocpartstudio.OpenPal(cfg.PaletteCfg.Path)
+	if cfg.PalCfg.Type == config.PalPalette {
+		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PalCfg.Path)
+		palette, _, err = ocpartstudio.OpenPal(cfg.PalCfg.Path)
 		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PaletteCfg.Path)
+			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalCfg.Path)
 		} else {
 			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
 		}
@@ -149,18 +149,27 @@ func prepareEgx(
 	if len(palette) > 0 {
 		p, downgraded = ci.DowngradingWithPalette(im, palette)
 	} else {
-		p, downgraded, err = ci.DowngradingPalette(im, cfg.ScreenCfg.Size, cfg.ScreenCfg.IsPlus)
+		p, downgraded, err = ci.DowngradingPalette(im, cfg.ScrCfg.Size, cfg.ScrCfg.IsPlus)
 		if err != nil {
 			log.GetLogger().Error("Cannot downgrade colors palette for this image %s\n", picturePath)
 		}
 	}
 	p = constants.SortColorsByDistance(p)
 	log.GetLogger().Info("Saving downgraded image into (%s)\n", filename+"_down.png")
-	if err := png.Png(filepath.Join(cfg.ScreenCfg.OutputPath, filename+"_down.png"), downgraded); err != nil {
+	if err := png.Png(filepath.Join(cfg.ScrCfg.OutputPath, filename+"_down.png"), downgraded); err != nil {
 		os.Exit(-2)
 	}
 
-	return gfx.DoDithering(downgraded, p, cfg.DitheringAlgo, cfg.DitheringType, cfg.DitheringWithQuantification, cfg.DitheringMatrix, float32(cfg.DitheringMultiplier), cfg.ScreenCfg.IsPlus, cfg.ScreenCfg.Size)
+	return gfx.DoDithering(
+		downgraded,
+		p,
+		cfg.ScrCfg.Treatment.DitheringAlgo,
+		cfg.ScrCfg.Treatment.DitheringType,
+		cfg.ScrCfg.Treatment.DitheringWithQuantification,
+		cfg.ScrCfg.Treatment.DitheringMatrix,
+		float32(cfg.ScrCfg.Treatment.DitheringMultiplier),
+		cfg.ScrCfg.IsPlus,
+		cfg.ScrCfg.Size)
 }
 
 func AutoEgx1(in image.Image,
@@ -185,7 +194,7 @@ func ToEgx1(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8,
 // nolint: funlen
 func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uint8, cfg *config.MartineConfig) ([]byte, color.Palette) {
 	var bw []byte
-	if cfg.ScreenCfg.Type == config.FullscreenFormat {
+	if cfg.ScrCfg.Type == config.FullscreenFormat {
 		bw = make([]byte, 0x8000)
 	} else {
 		bw = make([]byte, 0x4000)
@@ -216,7 +225,7 @@ func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uin
 			}
 			firmwareColorUsed[pp2]++
 			pixel := pixel.PixelMode0(pp1, pp2)
-			addr := address.CpcScreenAddress(0, x, y, 0, cfg.ScreenCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
+			addr := address.CpcScreenAddress(0, x, y, 0, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 			bw[addr] = pixel
 		}
 	}
@@ -253,9 +262,9 @@ func ToEgx1Raw(inMode0, inMode1 *image.NRGBA, p color.Palette, firstLineMode uin
 			firmwareColorUsed[pp4]++
 
 			pixel := pixel.PixelMode1(pp1, pp2, pp3, pp4)
-			addr := address.CpcScreenAddress(0, x, y, 1, cfg.ScreenCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
+			addr := address.CpcScreenAddress(0, x, y, 1, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 			bw[addr] = pixel
-			addr = address.CpcScreenAddress(0, x+1, y, 1, cfg.ScreenCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
+			addr = address.CpcScreenAddress(0, x+1, y, 1, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 			bw[addr] = pixel
 		}
 	}
@@ -270,7 +279,7 @@ func ToEgx2(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8,
 // nolint: funlen, gocognit
 func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uint8, cfg *config.MartineConfig) ([]byte, color.Palette) {
 	var bw []byte
-	if cfg.ScreenCfg.Type.IsFullScreen() {
+	if cfg.ScrCfg.Type.IsFullScreen() {
 		bw = make([]byte, 0x8000)
 	} else {
 		bw = make([]byte, 0x4000)
@@ -316,7 +325,7 @@ func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uin
 			firmwareColorUsed[pp4]++
 
 			pixel := pixel.PixelMode1(pp1, pp2, pp3, pp4)
-			addr := address.CpcScreenAddress(0, x, y, 1, cfg.ScreenCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
+			addr := address.CpcScreenAddress(0, x, y, 1, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 			bw[addr] = pixel
 		}
 	}
@@ -381,9 +390,9 @@ func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uin
 			}
 			firmwareColorUsed[pp8]++
 			pixel := pixel.PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
-			addr := address.CpcScreenAddress(0, x, y, 2, cfg.ScreenCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
+			addr := address.CpcScreenAddress(0, x, y, 2, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 			bw[addr] = pixel
-			addr = address.CpcScreenAddress(0, x+1, y, 2, cfg.ScreenCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
+			addr = address.CpcScreenAddress(0, x+1, y, 2, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
 			bw[addr] = pixel
 		}
 	}
@@ -407,7 +416,7 @@ func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cfg *config.Ma
 			f1 = img1
 		}
 		var in0, in1 *image.NRGBA
-		if cfg.ScreenCfg.Type.IsFullScreen() {
+		if cfg.ScrCfg.Type.IsFullScreen() {
 			in0, err = overscan.OverscanRawToImg(f0, mode0, p)
 			if err != nil {
 				return nil, p, 0, err
@@ -448,7 +457,7 @@ func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cfg *config.Ma
 				f2 = img1
 			}
 			var in2, in1 *image.NRGBA
-			if cfg.ScreenCfg.Type.IsFullScreen() {
+			if cfg.ScrCfg.Type.IsFullScreen() {
 				in1, err = overscan.OverscanRawToImg(f1, mode1, p)
 				if err != nil {
 					return nil, p, 0, err

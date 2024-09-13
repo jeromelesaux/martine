@@ -47,12 +47,12 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 		return
 	}
 	var err error
-	cfg.ScreenCfg.Size.Height, _, err = me.GetHeight()
+	cfg.ScrCfg.Size.Height, _, err = me.GetHeight()
 	if err != nil {
 		dialog.NewError(err, m.window).Show()
 		return
 	}
-	cfg.ScreenCfg.Size.Width, _, err = me.GetWidth()
+	cfg.ScrCfg.Size.Width, _, err = me.GetWidth()
 	if err != nil {
 		dialog.NewError(err, m.window).Show()
 		return
@@ -64,12 +64,12 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 	var analyze *transformation.AnalyzeBoard
 	var palette color.Palette
 	var tiles [][]image.Image
-	if m.IsClassicalTilemap(cfg.ScreenCfg.Size.Width, cfg.ScreenCfg.Size.Height) {
+	if m.IsClassicalTilemap(cfg.ScrCfg.Size.Width, cfg.ScrCfg.Size.Height) {
 		filename := filepath.Base(me.OriginalImagePath())
-		analyze, tiles, palette = gfx.TilemapClassical(uint8(me.Mode), me.Cfg.ScreenCfg.IsPlus, filename, me.OriginalImagePath(), me.OriginalImage().Image, cfg.ScreenCfg.Size, cfg, me.Historic)
+		analyze, tiles, palette = gfx.TilemapClassical(uint8(me.Mode), me.Cfg.ScrCfg.IsPlus, filename, me.OriginalImagePath(), me.OriginalImage().Image, cfg.ScrCfg.Size, cfg, me.Historic)
 		pi.Hide()
 	} else {
-		analyze, tiles, palette, err = gfx.TilemapRaw(uint8(me.Mode), me.Cfg.ScreenCfg.IsPlus, cfg.ScreenCfg.Size, me.OriginalImage().Image, cfg, me.Historic)
+		analyze, tiles, palette, err = gfx.TilemapRaw(uint8(me.Mode), me.Cfg.ScrCfg.IsPlus, cfg.ScrCfg.Size, me.OriginalImage().Image, cfg, me.Historic)
 		pi.Hide()
 		if err != nil {
 			dialog.NewError(err, m.window).Show()
@@ -104,7 +104,7 @@ func (m *MartineUI) newImageMenuExportButton(tm *menu.ImageMenu) *widget.Button 
 			uc.Close()
 			os.Remove(uc.URI().Path())
 			cfg := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
-			cfg.ScreenCfg.NoAmsdosHeader = false
+			cfg.ScrCfg.NoAmsdosHeader = false
 			if err := impPalette.SaveKit(paletteExportPath+".kit", tm.Palette(), false); err != nil {
 				dialog.ShowError(err, m.window)
 			}
@@ -123,7 +123,7 @@ func (m *MartineUI) newImageMenuExportButton(tm *menu.ImageMenu) *widget.Button 
 // nolint: funlen, gocognit
 func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 	tm.ImageMenu.SetWindow(m.window)
-	tm.Cfg.ScreenCfg.Type = config.SpriteFormat
+	tm.Cfg.ScrCfg.Type = config.SpriteFormat
 	importOpen := newImportButton(m, tm.ImageMenu)
 
 	paletteOpen := pal.NewOpenPaletteButton(tm.ImageMenu, m.window, nil)
@@ -207,7 +207,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 	openFileWidget.Icon = theme.FileImageIcon()
 
 	isPlus := widget.NewCheck("CPC Plus", func(b bool) {
-		tm.Cfg.ScreenCfg.IsPlus = b
+		tm.Cfg.ScrCfg.IsPlus = b
 	})
 
 	modes := widget.NewSelect([]string{"0", "1", "2"}, func(s string) {
