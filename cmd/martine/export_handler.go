@@ -98,18 +98,13 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 		cfg.ContainerCfg.AddExport(config.ExtendedDskContainer)
 	}
 	cfg.TileMode = *tileMode
-	cfg.RollMode = *rollMode
-	cfg.RollIteration = *iterations
+
 	cfg.ScreenCfg.NoAmsdosHeader = *noAmsdosHeader
 	cfg.ScreenCfg.IsPlus = *plusMode
 	cfg.TileIterationX = *tileIterationX
 	cfg.TileIterationY = *tileIterationY
 	cfg.ScreenCfg.Compression = compression.ToCompressMethod(*compress)
-	cfg.RotationMode = *rotateMode
-	cfg.Rotation3DMode = *rotate3dMode
-	cfg.Rotation3DType = *rotate3dType
-	cfg.Rotation3DX0 = *rotate3dX0
-	cfg.Rotation3DY0 = *rotate3dY0
+
 	cfg.M4cfg = config.M4Config{
 		Host:       *m4Host,
 		RemotePath: *m4RemotePath,
@@ -137,15 +132,24 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 		Path: ppath,
 		Type: ptype,
 	}
-	cfg.RotationRlaBit = *rla
-	cfg.RotationSraBit = *sra
-	cfg.RotationSlaBit = *sla
-	cfg.RotationRraBit = *rra
-	cfg.RotationKeephighBit = *keephigh
-	cfg.RotationKeeplowBit = *keeplow
-	cfg.RotationLosthighBit = *losthigh
-	cfg.RotationLostlowBit = *lostlow
-	cfg.RotationIterations = *iterations
+	cfg.RotationCfg = config.RotateConfig{
+		RollMode:            *rollMode,
+		RollIteration:       *iterations,
+		RotationRlaBit:      *rla,
+		RotationSlaBit:      *sla,
+		RotationRraBit:      *rra,
+		RotationKeephighBit: *keephigh,
+		RotationKeeplowBit:  *keeplow,
+		RotationLosthighBit: *losthigh,
+		RotationLostlowBit:  *lostlow,
+		RotationIterations:  *iterations,
+		RotationMode:        *rotateMode,
+		Rotation3DMode:      *rotate3dMode,
+		Rotation3DType:      config.Rotation3DType(*rotate3dType),
+		Rotation3DX0:        *rotate3dX0,
+		Rotation3DY0:        *rotate3dY0,
+	}
+
 	cfg.Flash = *flash
 	if sna != nil && *sna {
 		cfg.ContainerCfg.AddExport(config.SnaContainer)

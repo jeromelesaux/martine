@@ -68,8 +68,8 @@ func DoTransformation(in *image.NRGBA,
 	rotationIterations,
 	rollIterations int,
 	rotation3DX0,
-	rotation3DY0,
-	rotation3DType int,
+	rotation3DY0 int,
+	rotation3DType config.Rotation3d,
 	resizingAlgo imaging.ResampleFilter,
 	size constants.Size,
 ) ([]*image.NRGBA, error) {
@@ -78,27 +78,70 @@ func DoTransformation(in *image.NRGBA,
 	var images []*image.NRGBA
 	if rollMode {
 		if rotationRlaBit != -1 || rotationSlaBit != -1 {
-			images = transformation.RollLeft(rotationRlaBit, rotationSlaBit, rotationIterations, screenMode, size, in, p)
+			images = transformation.RollLeft(
+				rotationRlaBit,
+				rotationSlaBit,
+				rotationIterations,
+				screenMode,
+				size,
+				in,
+				p)
 		} else {
 			if rotationRraBit != -1 || rotationSraBit != -1 {
-				images = transformation.RollRight(rotationRraBit, rotationSraBit, rotationIterations, screenMode, size, in, p)
+				images = transformation.RollRight(
+					rotationRraBit,
+					rotationSraBit,
+					rotationIterations,
+					screenMode,
+					size,
+					in,
+					p)
 			}
 		}
 		if rotationKeephighBit != -1 || rotationLosthighBit != -1 {
-			images = transformation.RollUp(rotationKeephighBit, rotationLosthighBit, rotationIterations, screenMode, size, in, p)
+			images = transformation.RollUp(
+				rotationKeephighBit,
+				rotationLosthighBit,
+				rotationIterations,
+				screenMode,
+				size,
+				in,
+				p)
 		} else {
 			if rotationKeeplowBit != -1 || rotationLostlowBit != -1 {
-				images = transformation.RollLow(rotationKeeplowBit, rotationLostlowBit, rotationIterations, screenMode, size, in, p)
+				images = transformation.RollLow(
+					rotationKeeplowBit,
+					rotationLostlowBit,
+					rotationIterations,
+					screenMode,
+					size,
+					in,
+					p)
 			}
 		}
 	}
 	if rotationMode {
-		if images, err = transformation.Rotate(in, p, size, screenMode, rollIterations, resizingAlgo); err != nil {
+		if images, err = transformation.Rotate(
+			in,
+			p,
+			size,
+			screenMode,
+			rollIterations,
+			resizingAlgo); err != nil {
 			log.GetLogger().Error("Error while perform rotation on image error :%v\n", err)
 		}
 	}
 	if rotation3DMode {
-		if images, err = transformation.Rotate3d(in, p, size, screenMode, resizingAlgo, rollIterations, rotation3DX0, rotation3DY0, rotation3DType); err != nil {
+		if images, err = transformation.Rotate3d(
+			in,
+			p,
+			size,
+			screenMode,
+			resizingAlgo,
+			rollIterations,
+			rotation3DX0,
+			rotation3DY0,
+			rotation3DType); err != nil {
 			log.GetLogger().Error("Error while perform rotation on image error :%v\n", err)
 		}
 	}
@@ -216,15 +259,15 @@ func ApplyOneImageAndExport(in image.Image,
 	}
 
 	images, err := DoTransformation(out, newPalette,
-		screenMode, cfg.RollMode, cfg.RotationMode, cfg.Rotation3DMode,
-		cfg.RotationRlaBit, cfg.RotationSlaBit, cfg.RotationRraBit, cfg.RotationSraBit,
-		cfg.RotationKeephighBit, cfg.RotationLosthighBit,
-		cfg.RotationKeeplowBit, cfg.RotationLostlowBit, cfg.RotationIterations,
-		cfg.RollIteration, cfg.Rotation3DX0, cfg.Rotation3DY0, cfg.Rotation3DType, cfg.ResizingAlgo, cfg.ScreenCfg.Size)
+		screenMode, cfg.RotationCfg.RollMode, cfg.RotationCfg.RotationMode, cfg.RotationCfg.Rotation3DMode,
+		cfg.RotationCfg.RotationRlaBit, cfg.RotationCfg.RotationSlaBit, cfg.RotationCfg.RotationRraBit, cfg.RotationCfg.RotationSraBit,
+		cfg.RotationCfg.RotationKeephighBit, cfg.RotationCfg.RotationLosthighBit,
+		cfg.RotationCfg.RotationKeeplowBit, cfg.RotationCfg.RotationLostlowBit, cfg.RotationCfg.RotationIterations,
+		cfg.RotationCfg.RollIteration, cfg.RotationCfg.Rotation3DX0, cfg.RotationCfg.Rotation3DY0, cfg.RotationCfg.Rotation3DType, cfg.ResizingAlgo, cfg.ScreenCfg.Size)
 	if err != nil {
 		os.Exit(-2)
 	} else {
-		for indice := 0; indice < cfg.RollIteration; indice++ {
+		for indice := 0; indice < cfg.RotationCfg.RollIteration; indice++ {
 			img := images[indice]
 			newFilename := cfg.OsFullPath(filename, fmt.Sprintf("%.2d", indice)+".png")
 			if err := png.Png(newFilename, img); err != nil {

@@ -7,6 +7,7 @@ import (
 	"math"
 
 	"github.com/disintegration/imaging"
+	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	ci "github.com/jeromelesaux/martine/convert/image"
 
@@ -21,7 +22,7 @@ func Rotate3d(in *image.NRGBA,
 	rollIteration,
 	rotation3DX0,
 	rotation3DY0 int,
-	rotation3DType int,
+	rotation3DType config.Rotation3d,
 ) ([]*image.NRGBA, error) {
 	images := make([]*image.NRGBA, 0)
 	if rollIteration == -1 {
@@ -58,7 +59,7 @@ func rotateImage(in, out *image.NRGBA,
 	angle float64,
 	rotation3DX0,
 	rotation3DY0 int,
-	rotation3DType int,
+	rotation3DType config.Rotation3d,
 ) *image.NRGBA {
 	var xc, yc int
 	if rotation3DX0 != -1 {
@@ -76,17 +77,17 @@ func rotateImage(in, out *image.NRGBA,
 			c := in.At(x, y)
 			var x3d, y3d int
 			switch rotation3DType {
-			case 1:
+			case config.RotateXAxis:
 				x3d, y3d = rotateXAxisCoordinates(x, y, yc, angle)
-			case 2:
+			case config.RotateYAxis:
 				x3d, y3d = rotateYAxisCoordinates(x, y, xc, angle)
-			case 3:
+			case config.ReverseRotateXAxis:
 				x3d, y3d = rotateToReverseXAxisCoordinates(x, y, yc, angle)
-			case 4:
+			case config.RotateLeftToRightYAxis:
 				x3d, y3d = rotateLeftToRightYAxisCoordinates(x, y, xc, angle)
-			case 5:
+			case config.RotateDiagonalXAxis:
 				x3d, y3d = rotateDiagonalXAxisCoordinates(x, y, xc, yc, angle)
-			case 6:
+			case config.RotateDiagonalYAxis:
 				x3d, y3d = rotateDiagonalYAxisCoordinates(x, y, xc, yc, angle)
 			default:
 				x3d, y3d = rotateXAxisCoordinates(x, y, yc, angle)

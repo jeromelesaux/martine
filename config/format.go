@@ -158,3 +158,51 @@ func (f ScreenFormat) IsScreen() bool {
 func (f ScreenFormat) IsWindow() bool {
 	return WindowFormat == f
 }
+
+type Rotation3d string
+
+var (
+	RotateXAxis            Rotation3d = "rotate_x_axis"
+	RotateYAxis            Rotation3d = "rotate_y_axis"
+	ReverseRotateXAxis     Rotation3d = "reverse_rotate_x_axis"
+	RotateLeftToRightYAxis Rotation3d = "rotate_left_to_right_y_axis"
+	RotateDiagonalXAxis    Rotation3d = "rotate_diagonal_x_axis"
+	RotateDiagonalYAxis    Rotation3d = "rotate_diagonal_y_Axis"
+)
+
+type RotateConfig struct {
+	RotationRraBit      int
+	RotationRlaBit      int
+	RotationSraBit      int
+	RotationSlaBit      int
+	RotationLosthighBit int
+	RotationLostlowBit  int
+	RotationKeephighBit int
+	RotationKeeplowBit  int
+	RotationIterations  int
+	RotationMode        bool
+	Rotation3DMode      bool
+	Rotation3DX0        int
+	Rotation3DY0        int
+	Rotation3DType      Rotation3d
+	RollMode            bool
+	RollIteration       int
+}
+
+func Rotation3DType(v int) Rotation3d {
+	switch v {
+	case 1:
+		return RotateXAxis
+	case 2:
+		return RotateYAxis
+	case 3:
+		return ReverseRotateXAxis
+	case 4:
+		return RotateLeftToRightYAxis
+	case 5:
+		return RotateDiagonalXAxis
+	case 6:
+		return RotateDiagonalYAxis
+	}
+	return RotateXAxis
+}

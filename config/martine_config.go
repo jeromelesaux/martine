@@ -19,18 +19,13 @@ import (
 var ErrorNotAllowed = errors.New("error not allowed")
 
 type MartineConfig struct {
-	PaletteCfg                  PaletteConfig
-	M4cfg                       M4Config
-	ContainerCfg                ContainerConfig
-	ScreenCfg                   ScreenConfig
-	RotationMode                bool
-	Rotation3DMode              bool
-	Rotation3DX0                int
-	Rotation3DY0                int
-	Rotation3DType              int
-	TileMode                    bool
-	RollMode                    bool
-	RollIteration               int
+	PaletteCfg   PaletteConfig
+	M4cfg        M4Config
+	ContainerCfg ContainerConfig
+	ScreenCfg    ScreenConfig
+	RotationCfg  RotateConfig
+	TileMode     bool
+
 	TileIterationX              int
 	TileIterationY              int
 	CustomDimension             bool
@@ -43,41 +38,33 @@ type MartineConfig struct {
 	DitheringMultiplier         float64
 	DitheringWithQuantification bool
 	DitheringType               constants.DitheringType
-	RotationRraBit              int
-	RotationRlaBit              int
-	RotationSraBit              int
-	RotationSlaBit              int
-	RotationLosthighBit         int
-	RotationLostlowBit          int
-	RotationKeephighBit         int
-	RotationKeeplowBit          int
-	RotationIterations          int
-	Flash                       bool
-	FlashScreenFilepath1        string
-	FlashScreenFilepath2        string
-	FlashPaletteFilepath1       string
-	FlashPaletteFilepath2       string
-	EgxMode1                    uint8
-	EgxMode2                    uint8
-	SplitRaster                 bool
-	ScanlineSequence            []int
-	CustomScanlineSequence      bool
-	MaskSprite                  uint8
-	MaskOrOperation             bool
-	MaskAndOperation            bool
-	ZigZag                      bool
-	Animate                     bool
-	Reducer                     int
-	OneLine                     bool
-	OneRow                      bool
-	InkSwapper                  map[int]int
-	LineWidth                   int
-	FilloutGif                  bool
-	Saturation                  float64
-	Brightness                  float64
-	DoubleScreenAddress         bool
-	UseKmeans                   bool
-	KmeansThreshold             float64
+
+	Flash                  bool
+	FlashScreenFilepath1   string
+	FlashScreenFilepath2   string
+	FlashPaletteFilepath1  string
+	FlashPaletteFilepath2  string
+	EgxMode1               uint8
+	EgxMode2               uint8
+	SplitRaster            bool
+	ScanlineSequence       []int
+	CustomScanlineSequence bool
+	MaskSprite             uint8
+	MaskOrOperation        bool
+	MaskAndOperation       bool
+	ZigZag                 bool
+	Animate                bool
+	Reducer                int
+	OneLine                bool
+	OneRow                 bool
+	InkSwapper             map[int]int
+	LineWidth              int
+	FilloutGif             bool
+	Saturation             float64
+	Brightness             float64
+	DoubleScreenAddress    bool
+	UseKmeans              bool
+	KmeansThreshold        float64
 }
 
 func (m *MartineConfig) Reset() {
@@ -124,12 +111,14 @@ func NewMartineConfig(input, output string) *MartineConfig {
 		ContainerCfg: ContainerConfig{
 			Type: make([]ContainerFormat, 0),
 		},
-		DskFiles:     make([]string, 0),
-		Rotation3DX0: -1,
-		Rotation3DY0: -1,
-		Tiles:        export.NewJsonSlice(),
-		InkSwapper:   make(map[int]int),
-		LineWidth:    0x50,
+		DskFiles: make([]string, 0),
+		RotationCfg: RotateConfig{
+			Rotation3DX0: -1,
+			Rotation3DY0: -1,
+		},
+		Tiles:      export.NewJsonSlice(),
+		InkSwapper: make(map[int]int),
+		LineWidth:  0x50,
 	}
 }
 
