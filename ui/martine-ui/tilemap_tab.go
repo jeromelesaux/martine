@@ -19,6 +19,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/config"
+	"github.com/jeromelesaux/martine/constants"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/png"
@@ -216,6 +217,14 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 			log.GetLogger().Error("Error %s cannot be cast in int\n", s)
 		}
 		tm.Cfg.ScrCfg.Mode = uint8(mode)
+		switch mode {
+		case 0:
+			tm.Cfg.ScrCfg.Size.ColorsAvailable = constants.Mode0.ColorsAvailable
+		case 1:
+			tm.Cfg.ScrCfg.Size.ColorsAvailable = constants.Mode1.ColorsAvailable
+		case 2:
+			tm.Cfg.ScrCfg.Size.ColorsAvailable = constants.Mode2.ColorsAvailable
+		}
 	})
 	modes.SetSelected("0")
 	modeSelection = modes

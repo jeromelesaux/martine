@@ -532,6 +532,7 @@ func TilemapRaw(mode uint8, isCpcPlus bool, size constants.Size, in image.Image,
 		log.GetLogger().Error("You must set height and width to define the tile dimensions (options -h and -w) error:%v\n", errors.ErrorCustomDimensionMustBeSet)
 		return nil, tilesImagesTilemap, palette, errors.ErrorCustomDimensionMustBeSet
 	}
+	// @todo pourquoi resize la tilemap ?
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: cfg.ScrCfg.Size.ColorsAvailable}
 	m := ci.Resize(in, mapSize, cfg.ScrCfg.Process.ResizingAlgo)
 	if isCpcPlus {
