@@ -283,7 +283,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 				editButton,
 			),
 			container.New(
-				layout.NewHBoxLayout(),
+				layout.NewVBoxLayout(),
 				isPlus,
 				winFormat,
 
