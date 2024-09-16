@@ -22,20 +22,17 @@ import (
 var SpriteSize float32 = 80.
 
 type SpriteMenu struct {
-	Cfg             *config.MartineConfig
-	originalBoard   *canvas.Image
-	originalPalette *canvas.Image
-	palette         color.Palette
-	paletteImage    *canvas.Image
-	FilePath        string
-
+	Cfg               *config.MartineConfig
+	originalBoard     *canvas.Image
+	originalPalette   *canvas.Image
+	palette           color.Palette
+	paletteImage      *canvas.Image
+	FilePath          string
 	SpritesData       [][][]byte
-	CompileSprite     bool
 	OriginalImages    *w.ImageTable
 	SpritesCollection [][]*image.NRGBA
 	SpriteColumns     int
 	SpriteRows        int
-	Mode              int
 	UsePalette        bool
 
 	CmdLineGenerate string
@@ -115,7 +112,7 @@ func (s *SpriteMenu) CmdLine() string {
 
 	exec += " -in " + s.FilePath
 	exec += " -split"
-	exec += " -mode " + strconv.Itoa(s.Mode)
+	exec += " -mode " + strconv.Itoa(int(s.Cfg.ScrCfg.Mode))
 	exec += " -spritesrow " + strconv.Itoa(s.SpriteRows)
 	exec += " -spritescolumn " + strconv.Itoa(s.SpriteColumns)
 	if s.Cfg.ScrCfg.Type.IsSpriteHard() {

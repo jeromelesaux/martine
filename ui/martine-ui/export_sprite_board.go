@@ -172,19 +172,20 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			dialog.NewError(err, m.window).Show()
 			return
 		}
-
-		pi.Hide()
 	} else {
 		if s.Cfg.ScrCfg.IsExport(config.OcpWindowExport) {
 			for idxX, v := range s.SpritesData {
 				for idxY, v0 := range v {
 					filename := s.Cfg.ScrCfg.OutputPath + string(filepath.Separator) + fmt.Sprintf("L%.2dC%.2d.WIN", idxX, idxY)
-					if err := window.Win(filename, v0, uint8(s.Mode), s.Cfg.ScrCfg.Size.Width, s.Cfg.ScrCfg.Size.Height, s.Cfg.ContainerCfg.HasExport(config.DskContainer), cfg); err != nil {
+					if err := window.Win(filename, v0, s.Cfg.ScrCfg.Mode, s.Cfg.ScrCfg.Size.Width, s.Cfg.ScrCfg.Size.Height, s.Cfg.ContainerCfg.HasExport(config.DskContainer), cfg); err != nil {
 						log.GetLogger().Error("error while exporting sprites error %s\n", err.Error())
+					}
+					if s.Cfg.ContainerCfg.HasExport(config.DskContainer) {
+						s.Cfg.DskFiles = append(s.Cfg.DskFiles, filename)
 					}
 				}
 			}
-			pi.Hide()
+
 		} else {
 			if s.Cfg.ScrCfg.IsExport(config.SpriteFlatExport) {
 				buf := make([]byte, 0)
@@ -198,8 +199,8 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 									Width:  s.Cfg.ScrCfg.Size.Width,
 									Height: s.Cfg.ScrCfg.Size.Height,
 								},
-								uint8(s.Mode),
-								config.NewMartineConfig("", ""),
+								s.Cfg.ScrCfg.Mode,
+								s.Cfg,
 							)
 							if err != nil {
 								pi.Hide()
@@ -238,14 +239,8 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 					}
 				}
 				if s.Cfg.ContainerCfg.HasExport(config.DskContainer) {
-					if err := diskimage.ImportInDsk(filename, cfg); err != nil {
-						pi.Hide()
-						dialog.NewError(err, m.window).Show()
-						log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
-						return
-					}
+					s.Cfg.DskFiles = append(s.Cfg.DskFiles, filename)
 				}
-				pi.Hide()
 			} else {
 				if s.Cfg.ScrCfg.IsExport(config.SpriteImpCatcherExport) {
 					buf := make([]byte, 0)
@@ -255,21 +250,15 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 						}
 					}
 					filename := s.Cfg.ScrCfg.OutputPath + string(filepath.Separator) + "sprites.imp"
-					if err := tile.Imp(buf, uint(s.SpriteRows*s.SpriteColumns), uint(s.Cfg.ScrCfg.Size.Width), uint(s.Cfg.ScrCfg.Size.Height), uint(s.Mode), filename, cfg); err != nil {
+					if err := tile.Imp(buf, uint(s.SpriteRows*s.SpriteColumns), uint(s.Cfg.ScrCfg.Size.Width), uint(s.Cfg.ScrCfg.Size.Height), uint(s.Cfg.ScrCfg.Mode), filename, cfg); err != nil {
 						pi.Hide()
 						dialog.NewError(err, m.window).Show()
 						log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
 						return
 					}
 					if s.Cfg.ContainerCfg.HasExport(config.DskContainer) {
-						if err := diskimage.ImportInDsk(filename, cfg); err != nil {
-							pi.Hide()
-							dialog.NewError(err, m.window).Show()
-							log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
-							return
-						}
+						s.Cfg.DskFiles = append(s.Cfg.DskFiles, filename)
 					}
-					pi.Hide()
 				} else {
 					if s.Cfg.ScrCfg.IsExport(config.SpriteHardExport) {
 						data := spritehard.SprImpdraw{}
@@ -289,17 +278,20 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 							return
 						}
 						if s.Cfg.ContainerCfg.HasExport(config.DskContainer) {
-							if err := diskimage.ImportInDsk(filename, cfg); err != nil {
-								pi.Hide()
-								dialog.NewError(err, m.window).Show()
-								log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
-								return
-							}
+							s.Cfg.DskFiles = append(s.Cfg.DskFiles, filename)
 						}
-						pi.Hide()
 					}
 				}
 			}
+		}
+	}
+
+	if s.Cfg.ContainerCfg.HasExport(config.DskContainer) {
+		if err := diskimage.ImportInDsk("sprites_dsk", s.Cfg); err != nil {
+			pi.Hide()
+			dialog.NewError(err, m.window).Show()
+			log.GetLogger().Error("error while saving files in dsk sprites_dsk.dsk error %v", err)
+			return
 		}
 	}
 
@@ -315,7 +307,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 							Width:  s.Cfg.ScrCfg.Size.Width,
 							Height: s.Cfg.ScrCfg.Size.Height,
 						},
-						uint8(s.Mode),
+						s.Cfg.ScrCfg.Mode,
 						config.NewMartineConfig("", ""),
 					)
 					if err != nil {
@@ -347,7 +339,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			dialog.NewError(err, m.window).Show()
 			return
 		}
-		pi.Hide()
 	}
+	pi.Hide()
 	dialog.ShowInformation("Saved", "Your export ended in the folder : "+s.Cfg.ScrCfg.OutputPath, m.window)
 }

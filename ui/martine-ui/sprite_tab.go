@@ -47,7 +47,7 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 	pi := wgt.NewProgressInfinite("Computing...., Please wait.", m.window)
 	pi.Show()
 	var colorsAvailable int
-	switch s.Mode {
+	switch s.Cfg.ScrCfg.Mode {
 	case 0:
 		colorsAvailable = constants.Mode0.ColorsAvailable
 	case 1:
@@ -77,7 +77,7 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 
 	size := constants.Size{Width: s.Cfg.ScrCfg.Size.Width, Height: s.Cfg.ScrCfg.Size.Height}
 	pal := s.Palette()
-	raw, sprites, err := sprite.SplitBoardToSprite(s.OriginalBoard().Image, pal, s.SpriteColumns, s.SpriteRows, uint8(s.Mode), s.Cfg.ScrCfg.Type.IsSpriteHard(), size)
+	raw, sprites, err := sprite.SplitBoardToSprite(s.OriginalBoard().Image, pal, s.SpriteColumns, s.SpriteRows, s.Cfg.ScrCfg.Mode, s.Cfg.ScrCfg.Type.IsSpriteHard(), size)
 	if err != nil {
 		pi.Hide()
 		dialog.NewError(err, m.window).Show()
@@ -143,7 +143,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) *fyne.Container {
 		if err != nil {
 			log.GetLogger().Error("Error %s cannot be cast in int\n", v)
 		}
-		s.Mode = mode
+		s.Cfg.ScrCfg.Mode = uint8(mode)
 	})
 
 	modeLabel := widget.NewLabel("Mode:")
@@ -194,10 +194,13 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) *fyne.Container {
 	isSpriteHard := widget.NewCheck("is sprite hard", func(b bool) {
 		if b {
 			s.Cfg.ScrCfg.Type = config.SpriteHardFormat
+			s.Cfg.ScrCfg.AddExport(config.SpriteHardExport)
 			s.Cfg.ScrCfg.Size.Height = 16
 			s.Cfg.ScrCfg.Size.Width = 16
 		} else {
 			s.Cfg.ScrCfg.Type = config.SpriteFormat
+			s.Cfg.ScrCfg.RemoveExport(config.SpriteHardExport)
+			s.Cfg.ScrCfg.AddExport(config.OcpWindowExport)
 		}
 
 	})
@@ -343,7 +346,7 @@ func applySpriteBoardFromGif(s *menu.SpriteMenu, m *MartineUI) *widget.Button {
 				cfg.ScrCfg.Type = config.SpriteHardFormat
 			}
 			var colorsAvailable int
-			switch s.Mode {
+			switch s.Cfg.ScrCfg.Mode {
 			case 0:
 				colorsAvailable = constants.Mode0.ColorsAvailable
 			case 1:
@@ -358,7 +361,7 @@ func applySpriteBoardFromGif(s *menu.SpriteMenu, m *MartineUI) *widget.Button {
 				return
 			}
 			s.SetPalette(pal)
-			raw, sprites, _, _ := gfx.ApplyImages(resized, cfg, s.Mode, pal, uint8(s.Mode))
+			raw, sprites, _, _ := gfx.ApplyImages(resized, cfg, int(s.Cfg.ScrCfg.Mode), pal, s.Cfg.ScrCfg.Mode)
 			s.SpritesCollection = make([][]*image.NRGBA, 1)
 			s.SpritesCollection[0] = sprites
 			s.SpritesData = make([][][]byte, 1)
@@ -404,7 +407,7 @@ func ImportSpriteBoard(m *MartineUI) *widget.Button {
 					dialog.ShowError(err, m.window)
 					return
 				}
-				m.sprite.Mode = 0
+				m.sprite.Cfg.ScrCfg.Mode = 0
 				m.sprite.Cfg.ScrCfg.Size.Width = 16
 				m.sprite.Cfg.ScrCfg.Size.Height = 16
 				m.sprite.SpriteColumns = 8
@@ -445,8 +448,8 @@ func ImportSpriteBoard(m *MartineUI) *widget.Button {
 				// len(spritesHard.Data)/m.sprite.SpriteNumberPerColumn
 			} else {
 				// load and display .imp file content
-				mode := m.sprite.Mode
-				footer, err := tile.OpenImp(filePath.Path(), mode)
+				mode := m.sprite.Cfg.ScrCfg.Mode
+				footer, err := tile.OpenImp(filePath.Path(), int(mode))
 				if err != nil {
 					dialog.ShowError(err, m.window)
 					return
@@ -478,7 +481,7 @@ func ImportSpriteBoard(m *MartineUI) *widget.Button {
 				var row, col int
 				for i := 0; i < len(data); i += spriteLength {
 					m.sprite.SpritesData[row][col] = append(m.sprite.SpritesData[row][col], data[i:(i+spriteLength)]...)
-					m.sprite.SpritesCollection[row][col] = spr.RawSpriteToImg(data[i:(i+spriteLength)], footer.Height, footer.Width, uint8(m.sprite.Mode), m.sprite.Palette())
+					m.sprite.SpritesCollection[row][col] = spr.RawSpriteToImg(data[i:(i+spriteLength)], footer.Height, footer.Width, m.sprite.Cfg.ScrCfg.Mode, m.sprite.Palette())
 					col++
 					if col%m.sprite.SpriteColumns == 0 {
 						col = 0
