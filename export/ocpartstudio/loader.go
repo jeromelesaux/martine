@@ -1637,7 +1637,11 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cfg *config
 			if err != nil {
 				log.GetLogger().Info("Error while getting the hardware values for color %v, error :%v\n", p[i], err)
 			}
-			pal[index] = v[0]
+			if len(v) == 0 {
+				pal[index] = constants.Black.HardwareValues[0]
+			} else {
+				pal[index] = v[0]
+			}
 			index--
 		}
 		copy(egxLoader[egxBinaryPaletteOffset:], pal)

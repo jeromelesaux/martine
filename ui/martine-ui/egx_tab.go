@@ -58,29 +58,22 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	}
 
 	var im *menu.ImageMenu
-	var secondIm *menu.ImageMenu
+	var im2 *menu.ImageMenu
 	var palette color.Palette
+	var palette2 color.Palette
 	if di.LeftImage.Cfg.ScrCfg.Mode < di.RightImage.Cfg.ScrCfg.Mode {
 		im = di.LeftImage
 		palette = di.LeftImage.Palette()
-		secondIm = di.RightImage
+		palette2 = append(palette2, palette...)
+		im2 = di.RightImage
 	} else {
 		im = di.RightImage
 		palette = di.RightImage.Palette()
-		secondIm = di.LeftImage
+		palette2 = append(palette2, palette...)
+		im2 = di.LeftImage
 	}
-	cfg := im.Cfg
-	out, downgraded, _, _, err := gfx.ApplyOneImage(secondIm.CpcImage().Image, cfg, int(secondIm.Cfg.ScrCfg.Mode), palette, secondIm.Cfg.ScrCfg.Mode)
-	if err != nil {
-		dialog.ShowError(err, m.window)
-		return
-	}
-	secondIm.Data = out
-	secondIm.SetCpcImage(downgraded)
-	secondIm.SetPalette(palette)
 
-	im.SetPaletteImage(png.PalToImage(secondIm.Palette()))
-	out, downgraded, _, _, err = gfx.ApplyOneImage(im.CpcImage().Image, cfg, int(im.Cfg.ScrCfg.Mode), palette, im.Cfg.ScrCfg.Mode)
+	out, downgraded, palette, _, err := gfx.ApplyOneImage(im.CpcImage().Image, im.Cfg, int(im.Cfg.ScrCfg.Mode), palette, im.Cfg.ScrCfg.Mode)
 	if err != nil {
 		dialog.ShowError(err, m.window)
 		return
@@ -88,11 +81,21 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	im.Data = out
 	im.SetCpcImage(downgraded)
 	im.SetPalette(palette)
-	im.SetPaletteImage(png.PalToImage(im.Palette()))
+	im.SetPaletteImage(png.PalToImage(palette))
+
+	out, downgraded, _, _, err = gfx.ApplyOneImage(im2.CpcImage().Image, im2.Cfg, int(im2.Cfg.ScrCfg.Mode), palette2, im2.Cfg.ScrCfg.Mode)
+	if err != nil {
+		dialog.ShowError(err, m.window)
+		return
+	}
+	im2.Data = out
+	im2.SetCpcImage(downgraded)
+	im2.SetPalette(palette)
+	im2.SetPaletteImage(png.PalToImage(palette))
 
 	pi := wgt.NewProgressInfinite("Computing, Please wait.", m.window)
 	pi.Show()
-	res, _, egxType, err := effect.EgxRaw(di.LeftImage.Data, di.RightImage.Data, palette, int(di.LeftImage.Cfg.ScrCfg.Mode), int(di.RightImage.Cfg.ScrCfg.Mode), cfg)
+	res, _, egxType, err := effect.EgxRaw(di.LeftImage.Data, di.RightImage.Data, palette, int(im.Cfg.ScrCfg.Mode), int(im2.Cfg.ScrCfg.Mode), im.Cfg)
 	pi.Hide()
 	if err != nil {
 		dialog.ShowError(err, m.window)
@@ -102,14 +105,14 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	di.ResultImage.Palette = palette
 	di.ResultImage.EgxType = egxType
 	var img image.Image
-	if cfg.ScrCfg.Type == config.FullscreenFormat {
-		img, err = overscan.OverscanRawToImg(di.ResultImage.Data, 0, di.ResultImage.Palette)
+	if im.Cfg.ScrCfg.Type == config.FullscreenFormat {
+		img, err = overscan.OverscanRawToImg(di.ResultImage.Data, im.Cfg.ScrCfg.Mode, di.ResultImage.Palette)
 		if err != nil {
 			dialog.ShowError(err, m.window)
 			return
 		}
 	} else {
-		img, err = screen.ScrRawToImg(di.ResultImage.Data, 0, di.ResultImage.Palette)
+		img, err = screen.ScrRawToImg(di.ResultImage.Data, im.Cfg.ScrCfg.Mode, di.ResultImage.Palette)
 		if err != nil {
 			dialog.ShowError(err, m.window)
 			return
@@ -117,7 +120,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	}
 	di.ResultImage.CpcResultImage.Image = img
 	di.ResultImage.CpcResultImage.Refresh()
-	di.ResultImage.PaletteImage.Image = png.PalToImage(di.ResultImage.Palette)
+	di.ResultImage.PaletteImage.Image = png.PalToImage(palette)
 	di.ResultImage.PaletteImage.Refresh()
 }
 
