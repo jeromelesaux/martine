@@ -215,7 +215,7 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 	return err
 }
 
-func ExportTilemapClassical(m image.Image, filename string, board *transformation.AnalyzeBoard, size constants.Size, cfg *config.MartineConfig) error {
+func ExportTilemapClassical(m image.Image, filename string, palette color.Palette, board *transformation.AnalyzeBoard, size constants.Size, cfg *config.MartineConfig) error {
 	finalFile := strings.ReplaceAll(filename, "?", "")
 	if err := board.SaveSchema(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap_schema.png")); err != nil {
 		log.GetLogger().Error("Cannot save tilemap schema error :%v\n", err)
@@ -223,6 +223,11 @@ func ExportTilemapClassical(m image.Image, filename string, board *transformatio
 	}
 	if err := board.SaveAssemblyTiles(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap.asm")); err != nil {
 		log.GetLogger().Error("Cannot save tilemap csv file error :%v\n", err)
+		return err
+	}
+
+	if err := impPalette.Kit(finalFile, palette, cfg.ScrCfg.Mode, false, cfg); err != nil {
+		log.GetLogger().Error("Error while saving file %s error :%v", finalFile, err)
 		return err
 	}
 	nbTilePixelLarge := 20
@@ -244,13 +249,13 @@ func ExportTilemapClassical(m image.Image, filename string, board *transformatio
 	}
 
 	if cfg.ScrCfg.Type == config.ScreenFormat(config.SpriteFlatExport) {
-		if err := board.SaveFlatFile(cfg.ScrCfg.OutputPath, board.Palette(), cfg.ScrCfg.Mode, cfg); err != nil {
+		if err := board.SaveFlatFile(cfg.ScrCfg.OutputPath, palette, cfg.ScrCfg.Mode, cfg); err != nil {
 			return err
 		}
 	}
 
 	if cfg.ScrCfg.Type == config.ScreenFormat(config.SpriteExport) {
-		if err := board.SaveOcpWindowFile(cfg.ScrCfg.OutputPath, board.Palette(), cfg.ScrCfg.Mode, cfg); err != nil {
+		if err := board.SaveOcpWindowFile(cfg.ScrCfg.OutputPath, palette, cfg.ScrCfg.Mode, cfg); err != nil {
 			return err
 		}
 	}

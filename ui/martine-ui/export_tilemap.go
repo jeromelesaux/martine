@@ -137,13 +137,13 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 
 	if !t.Cfg.ScrCfg.IsExport(config.ImpdrawTileExport) {
 		filename := filepath.Base(t.OriginalImagePath())
-		if err := gfx.ExportTilemapClassical(t.OriginalImage().Image, filename, t.Result, t.Cfg.ScrCfg.Size, t.Cfg); err != nil {
+		if err := gfx.ExportTilemapClassical(t.OriginalImage().Image, filename, t.Palette(), t.Result, t.Cfg.ScrCfg.Size, t.Cfg); err != nil {
 			pi.Hide()
 			dialog.NewError(err, m.window).Show()
 			return
 		}
 		if t.Cfg.HasContainerExport(config.DskContainer) {
-			if err := diskimage.ImportInDsk(t.OriginalImagePath(), t.Cfg); err != nil {
+			if err := diskimage.ImportInDsk(t.Cfg.ScrCfg.OutputPath, t.Cfg); err != nil {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 				return

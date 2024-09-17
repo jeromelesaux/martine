@@ -79,7 +79,7 @@ func (m *MartineUI) exportAnimationDialog(a *menu.AnimateMenu, w fyne.Window) {
 						dialog.ShowError(err, m.window)
 						return
 					}
-					err = amsdos.SaveOSFile(a.Cfg.ScrCfg.OutputPath+string(filepath.Separator)+"code.asm", []byte(code))
+					err = amsdos.SaveOSFile(filepath.Join(a.Cfg.ScrCfg.OutputPath, "code.asm"), []byte(code))
 					if err != nil {
 						dialog.ShowError(err, m.window)
 						return
