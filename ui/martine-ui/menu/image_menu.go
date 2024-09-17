@@ -227,6 +227,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 	if cfg == nil {
 		return
 	}
+	cfg.ResetDskFiles()
 	if cfg.ScrCfg.IsExport(config.AssemblyExport) {
 		if cfg.ScrCfg.Type == config.FullscreenFormat {
 			cfg.ScrCfg.AddExport(config.GoImpdrawExport)
@@ -340,7 +341,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 			return
 		}
 		if cfg.HasContainerExport(config.DskContainer) {
-			if err := diskimage.ImportInDsk(me.OriginalImagePath(), cfg); err != nil {
+			if err := diskimage.ImportInDsk(filepath.Join(cfg.ScrCfg.OutputPath, "IMG"), cfg); err != nil {
 				dialog.NewError(err, w).Show()
 				return
 			}

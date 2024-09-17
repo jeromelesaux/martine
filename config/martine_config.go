@@ -110,6 +110,10 @@ func (e *MartineConfig) AddFile(file string) {
 	e.DskFiles = append(e.DskFiles, file)
 }
 
+func (e *MartineConfig) ResetDskFiles() {
+	e.DskFiles = e.DskFiles[:0]
+}
+
 func (e *MartineConfig) ImportInkSwap(s string) error {
 	if s == "" {
 		return nil
