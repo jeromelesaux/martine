@@ -453,7 +453,7 @@ func (a *AnalyzeBoard) Image(filePath string, bt []BoardTile, size constants.Siz
 
 func (a *AnalyzeBoard) SaveBoardTile(folderpath string, bt []BoardTile) error {
 	for _, v := range bt {
-		err := png.Png(folderpath+string(filepath.Separator)+fmt.Sprintf("%.4d.png", v.Index), v.Tile.Image())
+		err := png.Png(filepath.Join(folderpath, fmt.Sprintf("%.4d.png", v.Index)), v.Tile.Image())
 		if err != nil {
 			return err
 		}
@@ -483,7 +483,7 @@ func (a *AnalyzeBoard) SaveOcpWindowFile(folderpath string, palette color.Palett
 	outpath := cfg.ScrCfg.OutputPath
 	for i, sprt := range a.GetUniqTiles() {
 		d := sprt.ToSprite(palette)
-		filename := folderpath + string(filepath.Separator) + fmt.Sprintf("%0.2d", i)
+		filename := filepath.Join(folderpath, fmt.Sprintf("%0.2d", i))
 		cfg.ScrCfg.OutputPath = filename
 		if err := window.Win(filename, d, cfg.ScrCfg.Mode, sprt.Size.Width, sprt.Size.Height, !cfg.HasContainerExport(config.DskContainer), cfg); err != nil {
 			return err
@@ -523,7 +523,7 @@ func (a *AnalyzeBoard) SaveTiles(folderpath string, palette color.Palette, mode 
 		}
 	}
 
-	return amsdos.SaveStringOSFile(folderpath+string(filepath.Separator)+"tiles.asm", tiles)
+	return amsdos.SaveStringOSFile(filepath.Join(folderpath, "tiles.asm"), tiles)
 }
 
 func (a *AnalyzeBoard) SaveAllTiles(folderpath string, palette color.Palette, mode uint8, cfg *config.MartineConfig) error {
@@ -540,7 +540,7 @@ func (a *AnalyzeBoard) SaveAllTiles(folderpath string, palette color.Palette, mo
 			tiles += ascii.FormatAssemblyDatabyte(d, "\n")
 		}
 	}
-	return amsdos.SaveStringOSFile(folderpath+string(filepath.Separator)+"tiles.asm", tiles)
+	return amsdos.SaveStringOSFile(filepath.Join(folderpath, "tiles.asm"), tiles)
 }
 
 func (a *AnalyzeBoard) SaveSchema(filePath string) error {

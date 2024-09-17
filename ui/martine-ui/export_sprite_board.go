@@ -128,7 +128,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 	pi := wgt.NewProgressInfinite("Saving...., Please wait.", m.window)
 	pi.Show()
 	if err := impPalette.SaveKit(
-		s.Cfg.ScrCfg.OutputPath+string(filepath.Separator)+"SPRITES.KIT",
+		filepath.Join(s.Cfg.ScrCfg.OutputPath, "SPRITES.KIT"),
 		s.Palette(),
 		!s.Cfg.ScrCfg.NoAmsdosHeader); err != nil {
 		pi.Hide()
@@ -166,7 +166,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		code += kitPalette.ToString()
 
 		if err := amsdos.SaveStringOSFile(
-			s.Cfg.ScrCfg.OutputPath+string(filepath.Separator)+"compiled_sprites.asm",
+			filepath.Join(s.Cfg.ScrCfg.OutputPath, "compiled_sprites.asm"),
 			code); err != nil {
 			pi.Hide()
 			dialog.NewError(err, m.window).Show()
@@ -176,7 +176,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		if s.Cfg.ScrCfg.IsExport(config.OcpWindowExport) {
 			for idxX, v := range s.SpritesData {
 				for idxY, v0 := range v {
-					filename := s.Cfg.ScrCfg.OutputPath + string(filepath.Separator) + fmt.Sprintf("L%.2dC%.2d.WIN", idxX, idxY)
+					filename := filepath.Join(s.Cfg.ScrCfg.OutputPath, fmt.Sprintf("L%.2dC%.2d.WIN", idxX, idxY))
 					if err := window.Win(filename, v0, s.Cfg.ScrCfg.Mode, s.Cfg.ScrCfg.Size.Width, s.Cfg.ScrCfg.Size.Height, s.Cfg.ContainerCfg.HasExport(config.DskContainer), cfg); err != nil {
 						log.GetLogger().Error("error while exporting sprites error %s\n", err.Error())
 					}
@@ -217,7 +217,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 						}
 					}
 				}
-				filename := s.Cfg.ScrCfg.OutputPath + string(filepath.Separator) + "SPRITES.BIN"
+				filename := filepath.Join(s.Cfg.ScrCfg.OutputPath, "SPRITES.BIN")
 				buf, _ = compression.Compress(buf, s.Cfg.ScrCfg.Compression)
 				var err error
 				// TODO add amsdos header
@@ -249,7 +249,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 							buf = append(buf, v0...)
 						}
 					}
-					filename := s.Cfg.ScrCfg.OutputPath + string(filepath.Separator) + "sprites.imp"
+					filename := filepath.Join(s.Cfg.ScrCfg.OutputPath, "sprites.imp")
 					if err := tile.Imp(buf, uint(s.SpriteRows*s.SpriteColumns), uint(s.Cfg.ScrCfg.Size.Width), uint(s.Cfg.ScrCfg.Size.Height), uint(s.Cfg.ScrCfg.Mode), filename, cfg); err != nil {
 						pi.Hide()
 						dialog.NewError(err, m.window).Show()
@@ -269,7 +269,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 								data.Data = append(data.Data, sh)
 							}
 						}
-						filename := s.Cfg.ScrCfg.OutputPath + string(filepath.Separator) + "sprites.spr"
+						filename := filepath.Join(s.Cfg.ScrCfg.OutputPath, "sprites.spr")
 
 						if err := spritehard.Spr(filename, data, cfg); err != nil {
 							pi.Hide()
@@ -332,7 +332,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 		code += "Palette\n"
 		code += kitPalette.ToCode()
 
-		filename := s.Cfg.ScrCfg.OutputPath + string(filepath.Separator) + "SPRITES.ASM"
+		filename := filepath.Join(s.Cfg.ScrCfg.OutputPath, "SPRITES.ASM")
 		err := amsdos.SaveStringOSFile(filename, code)
 		if err != nil {
 			pi.Hide()

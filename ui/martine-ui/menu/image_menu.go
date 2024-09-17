@@ -252,7 +252,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 				code,
 				palCode)
 			filename := filepath.Base(me.OriginalImagePath())
-			fileExport := cfg.ScrCfg.OutputPath + string(filepath.Separator) + filename + ".asm"
+			fileExport := filepath.Join(cfg.ScrCfg.OutputPath, filename+".asm")
 			if err = amsdos.SaveStringOSFile(fileExport, content); err != nil {
 				pi.Hide()
 				dialog.ShowError(err, w)
@@ -290,7 +290,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 				palCode,
 				decompressRoutine)
 			filename := filepath.Base(me.OriginalImagePath())
-			fileExport := cfg.ScrCfg.OutputPath + string(filepath.Separator) + filename + ".asm"
+			fileExport := filepath.Join(cfg.ScrCfg.OutputPath, filename+".asm")
 			if err = amsdos.SaveStringOSFile(fileExport, content); err != nil {
 				pi.Hide()
 				dialog.ShowError(err, w)
@@ -305,7 +305,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 			pi.Hide()
 			dialog.ShowError(err, w)
 		}
-		tmpPalette := userDir + string(filepath.Separator) + "temporary_palette.kit"
+		tmpPalette := filepath.Join(userDir, "temporary_palette.kit")
 		if err := impPalette.SaveKit(tmpPalette, me.Palette(), false); err != nil {
 			pi.Hide()
 			dialog.ShowError(err, w)
@@ -321,7 +321,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 				me.Palette(),
 				cfg,
 				filename,
-				cfg.ScrCfg.OutputPath+string(filepath.Separator)+filename,
+				filepath.Join(cfg.ScrCfg.OutputPath, filename),
 				me.Cfg.ScrCfg.Mode,
 			)
 		} else {
@@ -329,7 +329,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 				me.OriginalImage().Image,
 				cfg,
 				filename,
-				cfg.ScrCfg.OutputPath+string(filepath.Separator)+filename,
+				filepath.Join(cfg.ScrCfg.OutputPath, filename),
 				int(me.Cfg.ScrCfg.Mode),
 				me.Cfg.ScrCfg.Mode)
 		}

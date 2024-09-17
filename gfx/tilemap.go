@@ -139,7 +139,7 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 		return err
 	}
 	nbFrames := 0
-	err = os.Mkdir(cfg.ScrCfg.OutputPath+string(filepath.Separator)+"tiles", os.ModePerm)
+	err = os.Mkdir(filepath.Join(cfg.ScrCfg.OutputPath, "tiles"), os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -184,7 +184,7 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 		nbTilePixelLarge = 40
 	}
 	scenes := make([]*image.NRGBA, 0)
-	err = os.Mkdir(cfg.ScrCfg.OutputPath+string(filepath.Separator)+"scenes", os.ModePerm)
+	err = os.Mkdir(filepath.Join(cfg.ScrCfg.OutputPath, "scenes"), os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -239,7 +239,7 @@ func ExportTilemapClassical(m image.Image, filename string, palette color.Palett
 		nbTilePixelLarge = 40
 	}
 	scenes := make([]*image.NRGBA, 0)
-	err := os.Mkdir(cfg.ScrCfg.OutputPath+string(filepath.Separator)+"scenes", os.ModePerm)
+	err := os.Mkdir(filepath.Join(cfg.ScrCfg.OutputPath, "scenes"), os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -406,7 +406,7 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 		return err
 	}
 	nbFrames := 0
-	err = os.Mkdir(cfg.ScrCfg.OutputPath+string(filepath.Separator)+"tiles", os.ModePerm)
+	err = os.Mkdir(filepath.Join(cfg.ScrCfg.OutputPath, "tiles"), os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -442,7 +442,7 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 
 	// save the tilemap
 	scenes := make([]*image.NRGBA, 0)
-	err = os.Mkdir(cfg.ScrCfg.OutputPath+string(filepath.Separator)+"scenes", os.ModePerm)
+	err = os.Mkdir(filepath.Join(cfg.ScrCfg.OutputPath, "scenes"), os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -610,7 +610,7 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 		}
 	}
 	// scenes := make([]*image.NRGBA, 0)
-	err = os.Mkdir(cfg.ScrCfg.OutputPath+string(filepath.Separator)+"scenes", os.ModePerm)
+	err = os.Mkdir(filepath.Join(cfg.ScrCfg.OutputPath, "scenes"), os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -703,7 +703,7 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 		return err
 	}
 	nbFrames := 0
-	err = os.Mkdir(cfg.ScrCfg.OutputPath+string(filepath.Separator)+"tiles", os.ModePerm)
+	err = os.Mkdir(filepath.Join(cfg.ScrCfg.OutputPath, "tiles"), os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -739,7 +739,7 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 	m := ci.Resize(in, mapSize, cfg.ScrCfg.Process.ResizingAlgo)
 	// save the tilemap
 	scenes := make([]*image.NRGBA, 0)
-	err = os.Mkdir(cfg.ScrCfg.OutputPath+string(filepath.Separator)+"scenes", os.ModePerm)
+	err = os.Mkdir(filepath.Join(cfg.ScrCfg.OutputPath, "scenes"), os.ModePerm)
 	if err != nil {
 		return err
 	}

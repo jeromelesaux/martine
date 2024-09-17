@@ -201,7 +201,7 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 	deltaData = append(deltaData, dc)
 	log.GetLogger().Info("%d bytes differ from the both images\n", len(dc.Items))
 	filename := cfg.OsFilename(".asm")
-	_, err = ExportDeltaAnimate(rawImages[0], deltaData, palette, isSprite, cfg, initialAddress, mode, cfg.ScrCfg.OutputPath+string(filepath.Separator)+filename, exportVersion)
+	_, err = ExportDeltaAnimate(rawImages[0], deltaData, palette, isSprite, cfg, initialAddress, mode, filepath.Join(cfg.ScrCfg.OutputPath, filename), exportVersion)
 	return err
 }
 

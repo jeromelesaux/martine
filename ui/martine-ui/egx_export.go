@@ -150,13 +150,13 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	cfg.PalCfg.Path = "temporary_palette.kit"
 
 	if !cfg.ScrCfg.Type.IsFullScreen() {
-		if err := ocpartstudio.EgxLoader(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Palette, me.LeftImage.Cfg.ScrCfg.Mode, me.RightImage.Cfg.ScrCfg.Mode, cfg); err != nil {
+		if err := ocpartstudio.EgxLoader(filepath.Join(me.ResultImage.Path, egxFilename), me.ResultImage.Palette, me.LeftImage.Cfg.ScrCfg.Mode, me.RightImage.Cfg.ScrCfg.Mode, cfg); err != nil {
 			pi.Hide()
 			dialog.ShowError(err, m.window)
 			return
 		}
 	} else {
-		if err := export.Export(me.ResultImage.Path+string(filepath.Separator)+egxFilename, me.ResultImage.Data, me.ResultImage.Palette, uint8(me.ResultImage.EgxType), cfg); err != nil {
+		if err := export.Export(filepath.Join(me.ResultImage.Path, egxFilename), me.ResultImage.Data, me.ResultImage.Palette, uint8(me.ResultImage.EgxType), cfg); err != nil {
 			pi.Hide()
 			dialog.ShowError(err, m.window)
 			return

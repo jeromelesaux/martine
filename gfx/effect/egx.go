@@ -75,14 +75,9 @@ func Egx(filepath1, filepath2 string, p color.Palette, m1, m2 int, cfg *config.M
 			mode1 = 1
 			mode2 = 2
 			if m1 == 1 {
-				//filename := filepath.Base(filepath1)
-				//filePath = exportType.OutputPath + string(filepath.Separator) + filename
-
 				f1 = filepath1
 				f2 = filepath2
 			} else {
-				//filename := filepath.Base(filepath2)
-				//filePath = exportType.OutputPath + string(filepath.Separator) + filename
 				f1 = filepath2
 				f2 = filepath1
 			}
@@ -445,14 +440,9 @@ func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cfg *config.Ma
 			mode1 = 1
 			mode2 = 2
 			if mode1 == 1 {
-				//filename := filepath.Base(filepath1)
-				//filePath = exportType.OutputPath + string(filepath.Separator) + filename
-
 				f1 = img1
 				f2 = img2
 			} else {
-				//filename := filepath.Base(filepath2)
-				//filePath = exportType.OutputPath + string(filepath.Separator) + filename
 				f1 = img2
 				f2 = img1
 			}
