@@ -26,7 +26,7 @@ func TestBoardSprite(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = a.SaveTilemap("../../test/alexkidd.map")
+	err = a.SaveAssemblyTiles("../../test/alexkidd.map")
 	if err != nil {
 		t.Fatal(err)
 	}

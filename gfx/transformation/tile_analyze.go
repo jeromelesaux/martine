@@ -573,7 +573,7 @@ func (a *AnalyzeBoard) SaveSchema(filePath string) error {
 	return png.Png(filePath, im)
 }
 
-func (a *AnalyzeBoard) SaveTilemap(filePath string) error {
+func (a *AnalyzeBoard) SaveAssemblyTiles(filePath string) error {
 	f, err := os.Create(filePath)
 	if err != nil {
 		return err
@@ -606,6 +606,20 @@ func (a *AnalyzeBoard) SaveTilemap(filePath string) error {
 		}
 	}
 	return nil
+}
+
+func (a *AnalyzeBoard) TilesIndexTable() []byte {
+
+	data := make([]byte, 0)
+	for _, v := range a.TileMap {
+		for x := 0; x < len(v)-1; x++ {
+			val := v[x]
+			t := a.BoardTiles[val]
+			data = append(data, byte(t.Index))
+		}
+	}
+
+	return data
 }
 
 func computeTileDistance(t0, t1 *Tile) float64 {

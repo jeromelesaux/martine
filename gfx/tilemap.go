@@ -120,7 +120,7 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 		log.GetLogger().Error("Cannot save tilemap schema error :%v\n", err)
 		return err
 	}
-	if err := choosenBoard.SaveTilemap(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap.asm")); err != nil {
+	if err := choosenBoard.SaveAssemblyTiles(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap.asm")); err != nil {
 		log.GetLogger().Error("Cannot save tilemap csv file error :%v\n", err)
 		return err
 	}
@@ -221,7 +221,7 @@ func ExportTilemapClassical(m image.Image, filename string, board *transformatio
 		log.GetLogger().Error("Cannot save tilemap schema error :%v\n", err)
 		return err
 	}
-	if err := board.SaveTilemap(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap.asm")); err != nil {
+	if err := board.SaveAssemblyTiles(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap.asm")); err != nil {
 		log.GetLogger().Error("Cannot save tilemap csv file error :%v\n", err)
 		return err
 	}
@@ -384,7 +384,7 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 		log.GetLogger().Error("Cannot save tilemap schema error :%v\n", err)
 		return err
 	}
-	if err := analyze.SaveTilemap(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap.asm")); err != nil {
+	if err := analyze.SaveAssemblyTiles(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap.asm")); err != nil {
 		log.GetLogger().Error("Cannot save tilemap csv file error :%v\n", err)
 		return err
 	}
@@ -586,7 +586,7 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 		log.GetLogger().Error("Cannot save tilemap schema error :%v\n", err)
 		return err
 	}
-	if err = analyze.SaveTilemap(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap.asm")); err != nil {
+	if err = analyze.SaveAssemblyTiles(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap.asm")); err != nil {
 		log.GetLogger().Error("Cannot save tilemap csv file error :%v\n", err)
 		return err
 	}
@@ -642,7 +642,7 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 
 // nolint: funlen, gocognit
 func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string, palette color.Palette, mode uint8, size constants.Size, in image.Image, cfg *config.MartineConfig) (err error) {
-	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
+	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: cfg.ScrCfg.Size.ColorsAvailable}
 	nbTilePixelLarge := 20
 	nbTilePixelHigh := 25
 	maxTiles := 255
@@ -681,7 +681,7 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 		log.GetLogger().Error("Cannot save tilemap schema error :%v\n", err)
 		return err
 	}
-	if err = analyze.SaveTilemap(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap.asm")); err != nil {
+	if err = analyze.SaveAssemblyTiles(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap.asm")); err != nil {
 		log.GetLogger().Error("Cannot save tilemap csv file error :%v\n", err)
 		return err
 	}
@@ -741,26 +741,13 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 		return err
 	}
 
-	scenes, err = fillImage(m, scenes, nbTilePixelHigh, nbTilePixelLarge, analyze.TileSize.Width, analyze.TileSize.Height, cfg.ScrCfg.OutputPath)
+	_, err = fillImage(m, scenes, nbTilePixelHigh, nbTilePixelLarge, analyze.TileSize.Width, analyze.TileSize.Height, cfg.ScrCfg.OutputPath)
 	if err != nil {
 		return err
 	}
 
-	// now thread all maps images
-	tileMaps := make([]byte, 0)
-	for _, v := range scenes {
-		for y := 0; y < v.Bounds().Max.Y; y += analyze.TileSize.Height {
-			for x := 0; x < v.Bounds().Max.X; x += analyze.TileSize.Width {
-				sprt, err := transformation.ExtractTile(v, analyze.TileSize, x, y)
-				if err != nil {
-					log.GetLogger().Error("Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
-					break
-				}
-				index := analyze.TileIndex(sprt, tiles)
-				tileMaps = append(tileMaps, byte(index))
-			}
-		}
-	}
+	// now save all the sprites indexes
+	tileMaps := analyze.TilesIndexTable()
 
 	if err = tile.TileMap(tileMaps, finalFile, cfg); err != nil {
 		log.GetLogger().Error("Cannot export to Imp-TileMap the image %s error %v", cfg.ScrCfg.OutputPath, err)
