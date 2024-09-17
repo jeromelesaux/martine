@@ -480,14 +480,17 @@ func (a *AnalyzeBoard) SaveFlatFile(folderpath string, palette color.Palette, mo
 }
 
 func (a *AnalyzeBoard) SaveOcpWindowFile(folderpath string, palette color.Palette, mode uint8, cfg *config.MartineConfig) error {
+	outpath := cfg.ScrCfg.OutputPath
 	for i, sprt := range a.GetUniqTiles() {
-		d := sprt.ToSprite(a.Palette())
-		filename := folderpath + string(filepath.Separator) + fmt.Sprintf("%0.d.win", i)
-		if err := window.Win(filename, d, cfg.ScrCfg.Mode, sprt.Size.Width, sprt.Size.Height, cfg.HasContainerExport(config.DskContainer), cfg); err != nil {
+		d := sprt.ToSprite(palette)
+		filename := folderpath + string(filepath.Separator) + fmt.Sprintf("%0.2d", i)
+		cfg.ScrCfg.OutputPath = filename
+		if err := window.Win(filename, d, cfg.ScrCfg.Mode, sprt.Size.Width, sprt.Size.Height, !cfg.HasContainerExport(config.DskContainer), cfg); err != nil {
 			return err
 		}
 
 	}
+	cfg.ScrCfg.OutputPath = outpath
 
 	return nil
 }

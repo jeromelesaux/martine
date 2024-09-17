@@ -231,7 +231,8 @@ func (e *MartineConfig) AmsdosFullPath(filePath string, newExtension string) str
 	}
 
 	newFilename := file[0:length] + newExtension
-	return filepath.Join(e.ScrCfg.OutputPath, strings.ToUpper(newFilename))
+	path := filepath.Dir(filePath)
+	return filepath.Join(path, strings.ToUpper(newFilename))
 }
 
 func (e *MartineConfig) OsFullPath(filePath string, newExtension string) string {

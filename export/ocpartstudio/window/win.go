@@ -112,7 +112,6 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, dont
 	// log.GetLogger().Error( "Header length %d\n", binary.Size(header))
 	log.GetLogger().Error("Data length %d\n", binary.Size(data))
 	log.GetLogger().Error("Footer length %d\n", binary.Size(win))
-	osFilename := cfg.Fullpath(".WIN")
 
 	body, err := common.StructToBytes(data)
 	if err != nil {
@@ -127,11 +126,11 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, dont
 
 	log.GetLogger().Info("%s, data size :%d\n", win.ToString(), len(data))
 	if !cfg.ScrCfg.NoAmsdosHeader {
-		if err := amsdos.SaveAmsdosFile(osFilename, ".WIN", content, 2, 0, 0x4000, 0x4000); err != nil {
+		if err := amsdos.SaveAmsdosFile(osFilepath, ".WIN", content, 2, 0, 0x4000, 0x4000); err != nil {
 			return err
 		}
 	} else {
-		if err := amsdos.SaveOSFile(osFilename, content); err != nil {
+		if err := amsdos.SaveOSFile(osFilepath, content); err != nil {
 			return err
 		}
 	}

@@ -134,7 +134,8 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 	pi := wgt.NewProgressInfinite("Saving...., Please wait.", m.window)
 	pi.Show()
-	if m.IsClassicalTilemap(t.Cfg.ScrCfg.Size.Width, t.Cfg.ScrCfg.Size.Height) && !t.Cfg.ScrCfg.Type.IsSprite() {
+
+	if !t.Cfg.ScrCfg.IsExport(config.ImpdrawTileExport) {
 		filename := filepath.Base(t.OriginalImagePath())
 		if err := gfx.ExportTilemapClassical(t.OriginalImage().Image, filename, t.Result, t.Cfg.ScrCfg.Size, t.Cfg); err != nil {
 			pi.Hide()
