@@ -330,7 +330,6 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 				cfg,
 				filename,
 				filepath.Join(cfg.ScrCfg.OutputPath, filename),
-				int(me.Cfg.ScrCfg.Mode),
 				me.Cfg.ScrCfg.Mode)
 		}
 		os.Remove(tmpPalette)

@@ -167,7 +167,6 @@ func printVersion() {
 func main() {
 
 	var filename, extension string
-	var screenMode uint8
 	var in image.Image
 
 	log.Default(appPrefix)
@@ -288,8 +287,6 @@ func main() {
 	}
 
 	cfg, size := ExportHandler()
-	screenMode = uint8(*mode)
-
 	if *byteStatement != "" {
 		ascii.ByteToken = *byteStatement
 	}
@@ -306,7 +303,7 @@ func main() {
 		if *deltaPacking2 {
 			exportVersion = animate.DeltaExportV2
 		}
-		if err := animate.DeltaPacking(cfg.ScrCfg.InputPath, cfg, screenAddress, screenMode, exportVersion); err != nil {
+		if err := animate.DeltaPacking(cfg.ScrCfg.InputPath, cfg, screenAddress, uint8(*mode), exportVersion); err != nil {
 			log.GetLogger().Error("Error while deltapacking error: %v\n", err)
 		}
 		os.Exit(0)
@@ -574,8 +571,7 @@ func main() {
 					cfg,
 					filepath.Base(v),
 					v,
-					*mode,
-					screenMode)
+					uint8(*mode))
 				if err != nil {
 					log.GetLogger().Error("Cannot apply the image %s error %v", *picturePath, err)
 					os.Exit(-2)
@@ -588,7 +584,7 @@ func main() {
 				sprites = append(sprites, data...)
 			}
 			finalFile := strings.ReplaceAll(filename, "?", "")
-			if err = tile.Imp(sprites, uint(len(spritesPaths)), uint(cfg.ScrCfg.Size.Width), uint(cfg.ScrCfg.Size.Height), uint(screenMode), finalFile, cfg); err != nil {
+			if err = tile.Imp(sprites, uint(len(spritesPaths)), uint(cfg.ScrCfg.Size.Width), uint(cfg.ScrCfg.Size.Height), uint(*mode), finalFile, cfg); err != nil {
 				log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", *picturePath, err)
 			}
 			os.Exit(0)
@@ -658,7 +654,7 @@ func main() {
 				log.GetLogger().Error("Cannot parse wildcard in argument (%s) error %v\n", *picturePath, err)
 				os.Exit(-1)
 			}
-			if err := animate.Animation(files, screenMode, cfg); err != nil {
+			if err := animate.Animation(files, uint8(*mode), cfg); err != nil {
 				log.GetLogger().Error("Error while proceeding to animate export error : %v\n", err)
 				os.Exit(-1)
 			}
@@ -695,7 +691,7 @@ func main() {
 						log.GetLogger().Error("Error tilemap analyze option not found : choose between (%s,%s)\n", string(common.SizeTilemapOption), string(common.NumberTilemapOption))
 						os.Exit(-1)
 					}
-					if err := gfx.AnalyzeTilemap(screenMode, *plusMode, filename, *picturePath, in, cfg, criteria); err != nil {
+					if err := gfx.AnalyzeTilemap(uint8(*mode), *plusMode, filename, *picturePath, in, cfg, criteria); err != nil {
 						log.GetLogger().Error("Error whie do tilemap action with error :%v\n", err)
 						os.Exit(-1)
 					}
@@ -707,7 +703,7 @@ func main() {
 							16x16 : 20x24
 						*/
 
-						if err := gfx.Tilemap(screenMode, filename, *picturePath, size, in, cfg, nil); err != nil {
+						if err := gfx.Tilemap(uint8(*mode), filename, *picturePath, size, in, cfg, nil); err != nil {
 							log.GetLogger().Error("Error whie do tilemap action with error :%v\n", err)
 							os.Exit(-1)
 						}
@@ -771,7 +767,7 @@ func main() {
 								} else {
 									if cfg.SplitRaster {
 										if cfg.ScrCfg.Type.IsFullScreen() {
-											if err := effect.DoSpliteRaster(in, screenMode, filename, cfg); err != nil {
+											if err := effect.DoSpliteRaster(in, uint8(*mode), filename, cfg); err != nil {
 												log.GetLogger().Error("Error while applying splitraster on one image :%v\n", err)
 												os.Exit(-1)
 											}
@@ -784,8 +780,7 @@ func main() {
 											if err := gfx.ApplyOneImageAndExport(in,
 												cfg,
 												filename, *picturePath,
-												*mode,
-												screenMode); err != nil {
+												uint8(*mode)); err != nil {
 												log.GetLogger().Error("Error while applying on one image :%v\n", err)
 												os.Exit(-1)
 											}
@@ -818,7 +813,7 @@ func main() {
 				}
 			}
 			cfg.ContainerCfg.Path = filepath.Join(*output, "test.sna")
-			if err := snapshot.ImportInSna(gfxFile, cfg.ContainerCfg.Path, screenMode); err != nil {
+			if err := snapshot.ImportInSna(gfxFile, cfg.ContainerCfg.Path, uint8(*mode)); err != nil {
 				log.GetLogger().Error("Cannot create or write into sna file error :%v\n", err)
 			}
 			log.GetLogger().Info("Sna saved in file %s\n", cfg.ContainerCfg.Path)

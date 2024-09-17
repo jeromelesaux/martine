@@ -361,7 +361,7 @@ func applySpriteBoardFromGif(s *menu.SpriteMenu, m *MartineUI) *widget.Button {
 				return
 			}
 			s.SetPalette(pal)
-			raw, sprites, _, _ := gfx.ApplyImages(resized, cfg, int(s.Cfg.ScrCfg.Mode), pal, s.Cfg.ScrCfg.Mode)
+			raw, sprites, _, _ := gfx.ApplyImages(resized, cfg, pal, s.Cfg.ScrCfg.Mode)
 			s.SpritesCollection = make([][]*image.NRGBA, 1)
 			s.SpritesCollection[0] = sprites
 			s.SpritesData = make([][][]byte, 1)

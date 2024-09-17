@@ -94,7 +94,6 @@ func AutoFlash(in image.Image,
 	err = gfx.ApplyOneImageAndExport(leftIm,
 		cfg,
 		filenameLeft, filepathLeft,
-		mode,
 		screenMode)
 	if err != nil {
 		return err
@@ -137,7 +136,6 @@ func AutoFlash(in image.Image,
 	err = gfx.ApplyOneImageAndExport(rigthIm,
 		cfg,
 		filenameRigth, filepathRigth,
-		flashMode,
 		uint8(flashMode))
 	if err != nil {
 		return err

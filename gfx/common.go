@@ -154,8 +154,7 @@ func DoTransformation(in *image.NRGBA,
 func ApplyOneImageAndExport(in image.Image,
 	cfg *config.MartineConfig,
 	filename, picturePath string,
-	mode int,
-	screenMode uint8,
+	mode uint8,
 ) error {
 	var palette color.Palette
 	var newPalette color.Palette
@@ -269,7 +268,7 @@ func ApplyOneImageAndExport(in image.Image,
 	}
 
 	images, err := DoTransformation(out, newPalette,
-		screenMode, cfg.RotateCfg.RollMode, cfg.RotateCfg.RotationMode, cfg.RotateCfg.Rotation3DMode,
+		mode, cfg.RotateCfg.RollMode, cfg.RotateCfg.RotationMode, cfg.RotateCfg.Rotation3DMode,
 		cfg.RotateCfg.RotationRlaBit, cfg.RotateCfg.RotationSlaBit, cfg.RotateCfg.RotationRraBit, cfg.RotateCfg.RotationSraBit,
 		cfg.RotateCfg.RotationKeephighBit, cfg.RotateCfg.RotationLosthighBit,
 		cfg.RotateCfg.RotationKeeplowBit, cfg.RotateCfg.RotationLostlowBit, cfg.RotateCfg.RotationIterations,
@@ -283,7 +282,7 @@ func ApplyOneImageAndExport(in image.Image,
 			if err := png.Png(newFilename, img); err != nil {
 				log.GetLogger().Error("Cannot create image (%s) error :%v\n", newFilename, err)
 			}
-			if err := sprite.ToSpriteAndExport(img, newPalette, constants.Size{Width: cfg.ScrCfg.Size.Width, Height: cfg.ScrCfg.Size.Height}, screenMode, newFilename, false, cfg); err != nil {
+			if err := sprite.ToSpriteAndExport(img, newPalette, constants.Size{Width: cfg.ScrCfg.Size.Width, Height: cfg.ScrCfg.Size.Height}, mode, newFilename, false, cfg); err != nil {
 				log.GetLogger().Error("Cannot create sprite image (%s) error %v\n", newFilename, err)
 			}
 		}
@@ -301,13 +300,13 @@ func ApplyOneImageAndExport(in image.Image,
 		}
 		if cfg.ScrCfg.Type != config.SpriteHardFormat {
 			// log.GetLogger().Info( "Transform image in sprite.\n")
-			err = sprite.ToSpriteAndExport(out, newPalette, cfg.ScrCfg.Size, screenMode, filename, false, cfg)
+			err = sprite.ToSpriteAndExport(out, newPalette, cfg.ScrCfg.Size, mode, filename, false, cfg)
 			if err != nil {
 				return err
 			}
 		} else {
 			// log.GetLogger().Info( "Transform image in sprite hard.\n")
-			err = spritehard.ToSpriteHardAndExport(out, newPalette, cfg.ScrCfg.Size, screenMode, filename, cfg)
+			err = spritehard.ToSpriteHardAndExport(out, newPalette, cfg.ScrCfg.Size, mode, filename, cfg)
 			if err != nil {
 				return err
 			}
@@ -319,15 +318,14 @@ func ApplyOneImageAndExport(in image.Image,
 func ApplyImages(
 	in []*image.NRGBA,
 	cfg *config.MartineConfig,
-	mode int,
 	palette color.Palette,
-	screenMode uint8,
+	mode uint8,
 ) ([][]byte, []*image.NRGBA, color.Palette, error) {
 	var gErr error
 	raw := make([][]byte, 0)
 	images := make([]*image.NRGBA, 0)
 	for _, img := range in {
-		v, r, _, _, err := ApplyOneImage(img, cfg, mode, palette, screenMode)
+		v, r, _, _, err := ApplyOneImage(img, cfg, int(mode), palette, mode)
 		if err != nil {
 			gErr = err
 		}
@@ -455,7 +453,7 @@ func ExportRawImage(in image.Image,
 	palette color.Palette,
 	cfg *config.MartineConfig,
 	filename, picturePath string,
-	screenMode uint8) error {
+	mode uint8) error {
 	var err error
 	//check the palette and sort it
 	palette = constants.FillColorPalette(palette)
@@ -482,13 +480,13 @@ func ExportRawImage(in image.Image,
 		}
 		if cfg.ScrCfg.Type != config.SpriteHardFormat {
 			// log.GetLogger().Info( "Transform image in sprite.\n")
-			err = sprite.ToSpriteAndExport(out, palette, cfg.ScrCfg.Size, screenMode, filename, false, cfg)
+			err = sprite.ToSpriteAndExport(out, palette, cfg.ScrCfg.Size, mode, filename, false, cfg)
 			if err != nil {
 				return err
 			}
 		} else {
 			// log.GetLogger().Info( "Transform image in sprite hard.\n")
-			err = spritehard.ToSpriteHardAndExport(out, palette, cfg.ScrCfg.Size, screenMode, filename, cfg)
+			err = spritehard.ToSpriteHardAndExport(out, palette, cfg.ScrCfg.Size, mode, filename, cfg)
 			if err != nil {
 				return err
 			}

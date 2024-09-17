@@ -30,7 +30,7 @@ func TestSaveGo(t *testing.T) {
 	cfg.ContainerCfg.AddExport(config.DskContainer)
 	cfg.ScrCfg.IsPlus = true
 	cfg.ScrCfg.Size = constants.NewSizeMode(0, true)
-	err := gfx.ApplyOneImageAndExport(img, cfg, "lena", "./overscanTests/", 0, 0)
+	err := gfx.ApplyOneImageAndExport(img, cfg, "lena", "./overscanTests/", 0)
 	if err != nil {
 		t.Fatal(err)
 	}
