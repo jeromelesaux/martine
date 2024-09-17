@@ -175,7 +175,8 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) *fyne.Container {
 				}),
 				widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
 					// export the egx image
-					m.exportEgxDialog(di.LeftImage.Cfg, m.window)
+					di.ResultImage.Cfg.ScrCfg.IsPlus = di.LeftImage.Cfg.ScrCfg.IsPlus
+					m.exportEgxDialog(di.ResultImage.Cfg, m.window)
 				}),
 				widget.NewButton("show cmd", func() {
 					e := widget.NewMultiLineEntry()

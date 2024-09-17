@@ -15,7 +15,6 @@ type DoubleImageMenu struct {
 	LeftImage   *ImageMenu
 	RightImage  *ImageMenu
 	ResultImage *MergedImageMenu
-	Cfg         *config.MartineConfig
 }
 
 func NewDoubleImageMenu() *DoubleImageMenu {
@@ -23,7 +22,6 @@ func NewDoubleImageMenu() *DoubleImageMenu {
 		LeftImage:   NewImageMenu(),
 		RightImage:  NewImageMenu(),
 		ResultImage: NewMergedImageMenu(),
-		Cfg:         config.NewMartineConfig("", ""),
 	}
 }
 
@@ -41,6 +39,7 @@ type MergedImageMenu struct {
 	CmdLineGenerate   string
 	Path              string
 	EgxType           int
+	Cfg               *config.MartineConfig
 }
 
 func NewMergedImageMenu() *MergedImageMenu {
@@ -51,6 +50,7 @@ func NewMergedImageMenu() *MergedImageMenu {
 		LeftPaletteImage:  &canvas.Image{},
 		RightPaletteImage: &canvas.Image{},
 		PaletteImage:      &canvas.Image{},
+		Cfg:               config.NewMartineConfig("", ""),
 	}
 }
 

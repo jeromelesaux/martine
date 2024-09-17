@@ -30,7 +30,6 @@ var egxFilename = "aa.scr"
 func (m *MartineUI) exportEgxDialog(cfg *config.MartineConfig, w fyne.Window) {
 	m2host := widget.NewEntry()
 	m2host.SetPlaceHolder("Set your M2 IP here.")
-
 	cont := container.NewVBox(
 		container.NewHBox(
 			widget.NewCheck("import all file in Dsk", func(b bool) {
@@ -124,12 +123,13 @@ func (m *MartineUI) exportEgxDialog(cfg *config.MartineConfig, w fyne.Window) {
 func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	pi := wgt.NewProgressInfinite("Saving...., please wait.", m.window)
 	pi.Show()
-	cfg := me.LeftImage.Cfg
+	cfg := me.ResultImage.Cfg
 	if cfg == nil {
 		pi.Hide()
 		return
 	}
 	cfg.ScrCfg.OutputPath = me.ResultImage.Path
+	cfg.ScrCfg.Type = me.LeftImage.Cfg.ScrCfg.Type
 
 	if me.ResultImage.EgxType == 1 {
 		cfg.ScrCfg.Type = config.Egx1Format
@@ -155,15 +155,15 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 			dialog.ShowError(err, m.window)
 			return
 		}
-	} else {
-		if err := export.Export(filepath.Join(me.ResultImage.Path, egxFilename), me.ResultImage.Data, me.ResultImage.Palette, uint8(me.ResultImage.EgxType), cfg); err != nil {
-			pi.Hide()
-			dialog.ShowError(err, m.window)
-			return
-		}
 	}
+	if err := export.Export(filepath.Join(me.ResultImage.Cfg.ScrCfg.OutputPath, egxFilename), me.ResultImage.Data, me.ResultImage.Palette, uint8(me.ResultImage.EgxType), cfg); err != nil {
+		pi.Hide()
+		dialog.ShowError(err, m.window)
+		return
+	}
+
 	if cfg.HasContainerExport(config.DskContainer) {
-		if err := diskimage.ImportInDsk(me.ResultImage.Path, cfg); err != nil {
+		if err := diskimage.ImportInDsk(filepath.Join(me.ResultImage.Cfg.ScrCfg.OutputPath, "EGX"), cfg); err != nil {
 			dialog.NewError(err, m.window).Show()
 			return
 		}
