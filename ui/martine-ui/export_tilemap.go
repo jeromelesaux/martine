@@ -169,13 +169,6 @@ func (m *MartineUI) ExportTilemap(t *menu.TilemapMenu) {
 				pi.Hide()
 				dialog.NewError(err, m.window).Show()
 			}
-			if t.Cfg.HasContainerExport(config.DskContainer) {
-				if err := diskimage.ImportInDsk(t.OriginalImagePath(), t.Cfg); err != nil {
-					pi.Hide()
-					dialog.NewError(err, m.window).Show()
-					return
-				}
-			}
 			pi.Hide()
 		}
 	}

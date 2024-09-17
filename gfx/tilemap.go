@@ -238,27 +238,25 @@ func ExportTilemapClassical(m image.Image, filename string, board *transformatio
 	if err != nil {
 		return err
 	}
-	scenes, err = fillImage(m, scenes, nbTilePixelHigh, nbTilePixelLarge, board.TileSize.Width, board.TileSize.Height, cfg.ScrCfg.OutputPath)
+	_, err = fillImage(m, scenes, nbTilePixelHigh, nbTilePixelLarge, board.TileSize.Width, board.TileSize.Height, cfg.ScrCfg.OutputPath)
 	if err != nil {
 		return err
 	}
 
-	// now thread all maps images
-	tiles := board.Sort()
-	tileMaps := make([]byte, 0)
-	for _, v := range scenes {
-		for y := 0; y < v.Bounds().Max.Y; y += board.TileSize.Height {
-			for x := 0; x < v.Bounds().Max.X; x += board.TileSize.Width {
-				sprt, err := transformation.ExtractTile(v, board.TileSize, x, y)
-				if err != nil {
-					log.GetLogger().Error("Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
-					break
-				}
-				index := board.TileIndex(sprt, tiles)
-				tileMaps = append(tileMaps, byte(index))
-			}
+	if cfg.ScrCfg.Type == config.ScreenFormat(config.SpriteFlatExport) {
+		if err := board.SaveFlatFile(cfg.ScrCfg.OutputPath, board.Palette(), cfg.ScrCfg.Mode, cfg); err != nil {
+			return err
 		}
 	}
+
+	if cfg.ScrCfg.Type == config.ScreenFormat(config.SpriteExport) {
+		if err := board.SaveOcpWindowFile(cfg.ScrCfg.OutputPath, board.Palette(), cfg.ScrCfg.Mode, cfg); err != nil {
+			return err
+		}
+	}
+
+	// now save the tiles index table
+	tileMaps := board.TilesIndexTable()
 
 	if err := tile.TileMap(tileMaps, finalFile, cfg); err != nil {
 		log.GetLogger().Error("Cannot export to Imp-TileMap the image %s error %v", cfg.ScrCfg.OutputPath, err)

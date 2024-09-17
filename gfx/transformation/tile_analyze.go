@@ -14,6 +14,7 @@ import (
 	"github.com/jeromelesaux/martine/convert/sprite"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/ascii"
+	"github.com/jeromelesaux/martine/export/ocpartstudio/window"
 	"github.com/jeromelesaux/martine/export/png"
 	exspr "github.com/jeromelesaux/martine/export/sprite"
 	"github.com/jeromelesaux/martine/gfx/errors"
@@ -223,6 +224,17 @@ func (a *AnalyzeBoard) String() string {
 type Tile struct {
 	Size   constants.Size
 	Colors [][]color.Color
+}
+
+func (t Tile) ToSprite(palette color.Palette) []byte {
+	data := make([]byte, 0)
+	for x := 0; x < t.Size.Width; x++ {
+		for y := 0; y < t.Size.Height; y++ {
+			index := palette.Index(t.Colors[x][y])
+			data = append(data, byte(index))
+		}
+	}
+	return data
 }
 
 func TileFromImage(i *image.NRGBA) *Tile {
@@ -465,6 +477,19 @@ func (a *AnalyzeBoard) SaveFlatFile(folderpath string, palette color.Palette, mo
 		return err
 	}
 	return amsdos.SaveOSFile(filepath.Join(spriteFolder, "tiles.bin"), flatFile)
+}
+
+func (a *AnalyzeBoard) SaveOcpWindowFile(folderpath string, palette color.Palette, mode uint8, cfg *config.MartineConfig) error {
+	for i, sprt := range a.GetUniqTiles() {
+		d := sprt.ToSprite(a.Palette())
+		filename := folderpath + string(filepath.Separator) + fmt.Sprintf("%0.d.win", i)
+		if err := window.Win(filename, d, cfg.ScrCfg.Mode, sprt.Size.Width, sprt.Size.Height, cfg.HasContainerExport(config.DskContainer), cfg); err != nil {
+			return err
+		}
+
+	}
+
+	return nil
 }
 
 func (a *AnalyzeBoard) SaveTiles(folderpath string, palette color.Palette, mode uint8, cfg *config.MartineConfig) error {
