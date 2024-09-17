@@ -34,8 +34,8 @@ func SaveAmsdosFile(filename, extension string, data []byte, fileType, user byte
 	cpcFilename := AmsdosFilename(filename, extension)
 	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
 	header.Checksum = header.ComputedChecksum16()
-	log.GetLogger().Error("filesize:%d,#%.2x\n", filesize, filesize)
-	log.GetLogger().Error("Data length %d\n", binary.Size(data))
+	log.GetLogger().Info("filesize:%d,#%.2x\n", filesize, filesize)
+	log.GetLogger().Info("Data length %d\n", binary.Size(data))
 	fw, err := os.Create(filename)
 	if err != nil {
 		log.GetLogger().Error("Error while creating file (%s) error :%s\n", filename, err)
