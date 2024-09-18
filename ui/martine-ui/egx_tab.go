@@ -59,50 +59,50 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 
 	var im *menu.ImageMenu
 	var im2 *menu.ImageMenu
-	var palette color.Palette
 	var palette2 color.Palette
 	if di.LeftImage.Cfg.ScrCfg.Mode < di.RightImage.Cfg.ScrCfg.Mode {
 		im = di.LeftImage
-		palette = di.LeftImage.Palette()
-		palette2 = append(palette2, palette...)
+		palette2 = append(palette2, di.LeftImage.Palette()...)
 		im2 = di.RightImage
 	} else {
 		im = di.RightImage
-		palette = di.RightImage.Palette()
-		palette2 = append(palette2, palette...)
+		palette2 = append(palette2, di.RightImage.Palette()...)
 		im2 = di.LeftImage
 	}
 
-	out, downgraded, palette, _, err := gfx.ApplyOneImage(im.CpcImage().Image, im.Cfg, int(im.Cfg.ScrCfg.Mode), palette, im.Cfg.ScrCfg.Mode)
+	out, downgraded, pal, _, err := gfx.ApplyOneImage(im.CpcImage().Image, im.Cfg, int(im.Cfg.ScrCfg.Mode), im.Palette(), im.Cfg.ScrCfg.Mode)
 	if err != nil {
 		dialog.ShowError(err, m.window)
 		return
 	}
+	im.Cfg.PalCfg.Palette = pal
 	im.Data = out
 	im.SetCpcImage(downgraded)
-	im.SetPalette(palette)
-	im.SetPaletteImage(png.PalToImage(palette))
+	im.SetPalette(im.Palette())
+	im.SetPaletteImage(png.PalToImage(im.Palette()))
 
-	out, downgraded, _, _, err = gfx.ApplyOneImage(im2.CpcImage().Image, im2.Cfg, int(im2.Cfg.ScrCfg.Mode), palette2, im2.Cfg.ScrCfg.Mode)
+	out, downgraded, pal, _, err = gfx.ApplyOneImage(im2.CpcImage().Image, im2.Cfg, int(im2.Cfg.ScrCfg.Mode), palette2, im2.Cfg.ScrCfg.Mode)
 	if err != nil {
 		dialog.ShowError(err, m.window)
 		return
 	}
+	im2.Cfg.PalCfg.Palette = pal
 	im2.Data = out
 	im2.SetCpcImage(downgraded)
-	im2.SetPalette(palette)
-	im2.SetPaletteImage(png.PalToImage(palette))
+	im2.SetPalette(im2.Palette())
+	im2.SetPaletteImage(png.PalToImage(im.Palette()))
 
 	pi := wgt.NewProgressInfinite("Computing, Please wait.", m.window)
 	pi.Show()
-	res, _, egxType, err := effect.EgxRaw(di.LeftImage.Data, di.RightImage.Data, palette, int(im.Cfg.ScrCfg.Mode), int(im2.Cfg.ScrCfg.Mode), im.Cfg)
+	res, pal, egxType, err := effect.EgxRaw(im.Data, im2.Data, im.Palette(), int(im.Cfg.ScrCfg.Mode), int(im2.Cfg.ScrCfg.Mode), im.Cfg)
 	pi.Hide()
 	if err != nil {
 		dialog.ShowError(err, m.window)
 		return
 	}
+	di.ResultImage.Cfg.PalCfg.Palette = pal
 	di.ResultImage.Data = res
-	di.ResultImage.Palette = palette
+	di.ResultImage.Palette = di.ResultImage.Cfg.PalCfg.Palette
 	di.ResultImage.EgxType = egxType
 	var img image.Image
 	if im.Cfg.ScrCfg.Type == config.FullscreenFormat {
@@ -120,7 +120,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	}
 	di.ResultImage.CpcResultImage.Image = img
 	di.ResultImage.CpcResultImage.Refresh()
-	di.ResultImage.PaletteImage.Image = png.PalToImage(palette)
+	di.ResultImage.PaletteImage.Image = png.PalToImage(im.Palette())
 	di.ResultImage.PaletteImage.Refresh()
 }
 
