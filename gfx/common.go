@@ -325,7 +325,7 @@ func ApplyImages(
 	raw := make([][]byte, 0)
 	images := make([]*image.NRGBA, 0)
 	for _, img := range in {
-		v, r, _, _, err := ApplyOneImage(img, cfg, int(mode), palette, mode)
+		v, r, _, _, err := ApplyOneImage(img, cfg, palette, mode)
 		if err != nil {
 			gErr = err
 		}
@@ -338,9 +338,8 @@ func ApplyImages(
 // nolint: funlen, gocognit
 func ApplyOneImage(in image.Image,
 	cfg *config.MartineConfig,
-	mode int,
 	palette color.Palette,
-	screenMode uint8,
+	mode uint8,
 ) ([]byte, *image.NRGBA, color.Palette, int, error) {
 	var newPalette color.Palette
 	var out *image.NRGBA
@@ -425,10 +424,10 @@ func ApplyOneImage(in image.Image,
 		}
 		if cfg.ScrCfg.Type != config.SpriteHardFormat {
 			// log.GetLogger().Info( "Transform image in sprite.\n")
-			data, _, lineSize, err = sprite.ToSprite(out, newPalette, cfg.ScrCfg.Size, screenMode, cfg)
+			data, _, lineSize, err = sprite.ToSprite(out, newPalette, cfg.ScrCfg.Size, mode, cfg)
 		} else {
 			//	log.GetLogger().Info( "Transform image in sprite hard.\n")
-			data, _ = spritehard.ToSpriteHard(out, newPalette, cfg.ScrCfg.Size, screenMode, cfg)
+			data, _ = spritehard.ToSpriteHard(out, newPalette, cfg.ScrCfg.Size, mode, cfg)
 			lineSize = 16
 		}
 	}

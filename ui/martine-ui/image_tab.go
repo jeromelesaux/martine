@@ -79,7 +79,7 @@ func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 	}
 	pi := wgt.NewProgressInfinite("Computing, Please wait.", m.window)
 	pi.Show()
-	out, downgraded, palette, _, err := gfx.ApplyOneImage(me.OriginalImage().Image, cfg, int(me.Cfg.ScrCfg.Mode), inPalette, me.Cfg.ScrCfg.Mode)
+	out, downgraded, palette, _, err := gfx.ApplyOneImage(me.OriginalImage().Image, cfg, inPalette, me.Cfg.ScrCfg.Mode)
 	pi.Hide()
 	if err != nil {
 		dialog.NewError(err, m.window).Show()

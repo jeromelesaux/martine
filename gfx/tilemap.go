@@ -148,7 +148,6 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 			tile := v.Tile.Image()
 			d, _, _, _, err := ApplyOneImage(tile,
 				cfg,
-				int(mode),
 				palette,
 				mode)
 			if err != nil {
@@ -415,7 +414,6 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 			tile := v.Tile.Image()
 			d, _, _, _, err := ApplyOneImage(tile,
 				cfg,
-				int(mode),
 				palette,
 				mode)
 			if err != nil {
@@ -712,7 +710,6 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 			tile := v.Tile.Image()
 			d, _, _, _, err := ApplyOneImage(tile,
 				cfg,
-				int(mode),
 				palette,
 				mode)
 			if err != nil {

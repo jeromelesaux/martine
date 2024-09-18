@@ -233,7 +233,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 			cfg.ScrCfg.AddExport(config.GoImpdrawExport)
 		}
 
-		out, _, palette, _, err := gfx.ApplyOneImage(me.OriginalImage().Image, cfg, int(me.Cfg.ScrCfg.Mode), me.Palette(), me.Cfg.ScrCfg.Mode)
+		out, _, palette, _, err := gfx.ApplyOneImage(me.OriginalImage().Image, cfg, me.Palette(), me.Cfg.ScrCfg.Mode)
 		if err != nil {
 			pi.Hide()
 			dialog.ShowError(err, w)

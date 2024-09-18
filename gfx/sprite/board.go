@@ -53,7 +53,7 @@ func SplitBoardToSprite(
 		results[i] = make([][]byte, len(sprites[i]))
 		for j := 0; j < len(sprites[i]); j++ {
 			v := sprites[i][j]
-			r, sp, _, _, err := gfx.ApplyOneImage(v, cfg, int(mode), p, mode)
+			r, sp, _, _, err := gfx.ApplyOneImage(v, cfg, p, mode)
 			if err != nil {
 				return results, sprites, err
 			}

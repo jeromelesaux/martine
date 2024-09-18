@@ -58,13 +58,13 @@ func DeltaPackingMemory(images []image.Image, cfg *config.MartineConfig, initial
 	// now transform images as win or scr
 	log.GetLogger().Info("Let's go transform images files in win or scr\n")
 
-	_, _, palette, _, err = gfx.ApplyOneImage(images[0], cfg, int(mode), palette, mode)
+	_, _, palette, _, err = gfx.ApplyOneImage(images[0], cfg, palette, mode)
 	if err != nil {
 		return nil, nil, palette, err
 	}
 	for i := 0; i < len(images); i += pad {
 		in := images[i]
-		raw, _, _, _, err = gfx.ApplyOneImage(in, cfg, int(mode), palette, mode)
+		raw, _, _, _, err = gfx.ApplyOneImage(in, cfg, palette, mode)
 		if err != nil {
 			return nil, nil, palette, err
 		}
@@ -140,13 +140,13 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 
 	if cfg.FilloutGif {
 		imgs := filloutGif(*gifImages)
-		_, _, palette, _, err = gfx.ApplyOneImage(imgs[0], cfg, int(mode), palette, mode)
+		_, _, palette, _, err = gfx.ApplyOneImage(imgs[0], cfg, palette, mode)
 		if err != nil {
 			return err
 		}
 		for i := 0; i < len(imgs); i += pad {
 			in := imgs[i]
-			raw, _, _, _, err = gfx.ApplyOneImage(in, cfg, int(mode), palette, mode)
+			raw, _, _, _, err = gfx.ApplyOneImage(in, cfg, palette, mode)
 			if err != nil {
 				return err
 			}
@@ -154,13 +154,13 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 			log.GetLogger().Info("Image [%d] proceed\n", i)
 		}
 	} else {
-		_, _, palette, _, err = gfx.ApplyOneImage(images[0], cfg, int(mode), palette, mode)
+		_, _, palette, _, err = gfx.ApplyOneImage(images[0], cfg, palette, mode)
 		if err != nil {
 			return err
 		}
 		for i := 0; i < len(images); i += pad {
 			in := images[i]
-			raw, _, _, _, err = gfx.ApplyOneImage(in, cfg, int(mode), palette, mode)
+			raw, _, _, _, err = gfx.ApplyOneImage(in, cfg, palette, mode)
 			if err != nil {
 				return err
 			}
