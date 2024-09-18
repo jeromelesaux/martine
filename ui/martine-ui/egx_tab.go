@@ -70,6 +70,11 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 		im2 = di.LeftImage
 	}
 
+	di.ResultImage.Cfg.ScrCfg.Mode = im.Cfg.ScrCfg.Mode
+	di.ResultImage.Cfg.ScrCfg.Size = im.Cfg.ScrCfg.Size
+	di.ResultImage.Cfg.ScrCfg.Type = im.Cfg.ScrCfg.Type
+	di.ResultImage.Cfg.ScrCfg.Export = append(di.ResultImage.Cfg.ScrCfg.Export, im.Cfg.ScrCfg.Export...)
+
 	out, downgraded, pal, _, err := gfx.ApplyOneImage(im.CpcImage().Image, im.Cfg, im.Palette(), im.Cfg.ScrCfg.Mode)
 	if err != nil {
 		dialog.ShowError(err, m.window)
@@ -94,7 +99,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 
 	pi := wgt.NewProgressInfinite("Computing, Please wait.", m.window)
 	pi.Show()
-	res, pal, egxType, err := effect.EgxRaw(im.Data, im2.Data, im.Palette(), int(im.Cfg.ScrCfg.Mode), int(im2.Cfg.ScrCfg.Mode), im.Cfg)
+	res, pal, egxType, err := effect.EgxRaw(im.Data, im2.Data, im.Palette(), int(im.Cfg.ScrCfg.Mode), int(im2.Cfg.ScrCfg.Mode), di.ResultImage.Cfg)
 	pi.Hide()
 	if err != nil {
 		dialog.ShowError(err, m.window)
