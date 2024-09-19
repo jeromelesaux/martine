@@ -91,6 +91,9 @@ func NewMartineConfig(input, output string) *MartineConfig {
 			InputPath:  input,
 			OutputPath: output,
 			Export:     make([]ScreenExport, 0),
+			Process: ScreenProcessing{
+				Reducer: -1,
+			},
 		},
 		ContainerCfg: ContainerConfig{
 			Type: make([]ContainerFormat, 0),

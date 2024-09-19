@@ -228,16 +228,18 @@ func ApplyOneImageAndExport(in image.Image,
 	paletteToSort = constants.FillColorPalette(paletteToSort)
 	newPalette = constants.SortColorsByDistance(paletteToSort)
 
-	out, _ = DoDithering(
-		out,
-		newPalette,
-		cfg.ScrCfg.Process.Dithering.Algo,
-		cfg.ScrCfg.Process.Dithering.Type,
-		cfg.ScrCfg.Process.Dithering.WithQuantification,
-		cfg.ScrCfg.Process.Dithering.Matrix,
-		float32(cfg.ScrCfg.Process.Dithering.Multiplier),
-		cfg.ScrCfg.IsPlus,
-		cfg.ScrCfg.Size)
+	if cfg.ScrCfg.Process.ApplyDithering {
+		out, _ = DoDithering(
+			out,
+			newPalette,
+			cfg.ScrCfg.Process.Dithering.Algo,
+			cfg.ScrCfg.Process.Dithering.Type,
+			cfg.ScrCfg.Process.Dithering.WithQuantification,
+			cfg.ScrCfg.Process.Dithering.Matrix,
+			float32(cfg.ScrCfg.Process.Dithering.Multiplier),
+			cfg.ScrCfg.IsPlus,
+			cfg.ScrCfg.Size)
+	}
 	if cfg.ScrCfg.Process.Saturation > 0 || cfg.ScrCfg.Process.Brightness > 0 {
 		palette = ci.EnhanceBrightness(newPalette, cfg.ScrCfg.Process.Brightness, cfg.ScrCfg.Process.Saturation)
 		newPalette, out = ci.DowngradingWithPalette(out, palette)
@@ -386,17 +388,18 @@ func ApplyOneImage(in image.Image,
 	}
 	paletteToSort = constants.FillColorPalette(paletteToSort)
 	newPalette = constants.SortColorsByDistance(paletteToSort)
-	out, _ = DoDithering(
-		out,
-		newPalette,
-		cfg.ScrCfg.Process.Dithering.Algo,
-		cfg.ScrCfg.Process.Dithering.Type,
-		cfg.ScrCfg.Process.Dithering.WithQuantification,
-		cfg.ScrCfg.Process.Dithering.Matrix,
-		float32(cfg.ScrCfg.Process.Dithering.Multiplier),
-		cfg.ScrCfg.IsPlus,
-		cfg.ScrCfg.Size)
-
+	if cfg.ScrCfg.Process.ApplyDithering {
+		out, _ = DoDithering(
+			out,
+			newPalette,
+			cfg.ScrCfg.Process.Dithering.Algo,
+			cfg.ScrCfg.Process.Dithering.Type,
+			cfg.ScrCfg.Process.Dithering.WithQuantification,
+			cfg.ScrCfg.Process.Dithering.Matrix,
+			float32(cfg.ScrCfg.Process.Dithering.Multiplier),
+			cfg.ScrCfg.IsPlus,
+			cfg.ScrCfg.Size)
+	}
 	if cfg.ScrCfg.Process.Saturation > 0 || cfg.ScrCfg.Process.Brightness > 0 {
 		palette = ci.EnhanceBrightness(newPalette, cfg.ScrCfg.Process.Brightness, cfg.ScrCfg.Process.Saturation)
 		newPalette, out = ci.DowngradingWithPalette(out, palette)

@@ -45,18 +45,13 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 		return
 	}
 	if di.RightImage.Cfg.ScrCfg.IsPlus != di.LeftImage.Cfg.ScrCfg.IsPlus {
-		dialog.ShowError(fmt.Errorf("plus mode between the images must differ"), m.window)
+		dialog.ShowError(fmt.Errorf("plus mode between the images differs, set the same mode"), m.window)
 		return
 	}
-	if di.RightImage.Cfg.ScrCfg.Type.IsSpriteHard() != di.LeftImage.Cfg.ScrCfg.Type.IsSpriteHard() {
-		dialog.ShowError(fmt.Errorf("sprite hard mode between the images must differ"), m.window)
+	if di.RightImage.Cfg.ScrCfg.Type != di.LeftImage.Cfg.ScrCfg.Type {
+		dialog.ShowError(fmt.Errorf("the size of both image differs, set the same size for both"), m.window)
 		return
 	}
-	if di.RightImage.Cfg.ScrCfg.Type.IsFullScreen() != di.LeftImage.Cfg.ScrCfg.Type.IsFullScreen() {
-		dialog.ShowError(fmt.Errorf("fullscreen mode between the images must  differ"), m.window)
-		return
-	}
-
 	var im *menu.ImageMenu
 	var im2 *menu.ImageMenu
 	var palette2 color.Palette
@@ -99,25 +94,30 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 
 	pi := wgt.NewProgressInfinite("Computing, Please wait.", m.window)
 	pi.Show()
-	res, pal, egxType, err := effect.EgxRaw(im.Data, im2.Data, im.Palette(), int(im.Cfg.ScrCfg.Mode), int(im2.Cfg.ScrCfg.Mode), di.ResultImage.Cfg)
+	di.ResultImage.Cfg.PalCfg.Palette = im.Palette()
+	di.ResultImage.Cfg.ScrCfg.ResetExport()
+	di.ResultImage.Cfg.ScrCfg.Type = im.Cfg.ScrCfg.Type
+	di.ResultImage.Cfg.ScrCfg.Export = append(di.ResultImage.Cfg.ScrCfg.Export, im.Cfg.ScrCfg.Export...)
+	di.ResultImage.Cfg.ScrCfg.Size = im.Cfg.ScrCfg.Size
+
+	res, pal, egxType, err := effect.EgxRaw(im.Data, im2.Data, di.ResultImage.Cfg.PalCfg.Palette, int(im.Cfg.ScrCfg.Mode), int(im2.Cfg.ScrCfg.Mode), di.ResultImage.Cfg)
 	pi.Hide()
 	if err != nil {
 		dialog.ShowError(err, m.window)
 		return
 	}
-	di.ResultImage.Cfg.PalCfg.Palette = pal
-	di.ResultImage.Data = res
-	di.ResultImage.Palette = di.ResultImage.Cfg.PalCfg.Palette
 	di.ResultImage.EgxType = egxType
+	di.ResultImage.Data = res
+	di.ResultImage.Cfg.PalCfg.Palette = pal
 	var img image.Image
-	if im.Cfg.ScrCfg.Type == config.FullscreenFormat {
-		img, err = overscan.OverscanRawToImg(di.ResultImage.Data, im.Cfg.ScrCfg.Mode, di.ResultImage.Palette)
+	if di.ResultImage.Cfg.ScrCfg.Type == config.FullscreenFormat {
+		img, err = overscan.OverscanRawToImg(di.ResultImage.Data, im.Cfg.ScrCfg.Mode, di.ResultImage.Cfg.PalCfg.Palette)
 		if err != nil {
 			dialog.ShowError(err, m.window)
 			return
 		}
 	} else {
-		img, err = screen.ScrRawToImg(di.ResultImage.Data, im.Cfg.ScrCfg.Mode, di.ResultImage.Palette)
+		img, err = screen.ScrRawToImg(di.ResultImage.Data, 0, di.ResultImage.Cfg.PalCfg.Palette)
 		if err != nil {
 			dialog.ShowError(err, m.window)
 			return
@@ -175,7 +175,7 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) *fyne.Container {
 					di.ResultImage.LeftPaletteImage.Refresh()
 					di.ResultImage.RightPaletteImage.Image = di.RightImage.PaletteImage().Image
 					di.ResultImage.LeftPaletteImage.Refresh()
-					di.ResultImage.PaletteImage.Image = png.PalToImage(di.ResultImage.Palette)
+					di.ResultImage.PaletteImage.Image = png.PalToImage(di.ResultImage.Cfg.PalCfg.Palette)
 					di.ResultImage.PaletteImage.Refresh()
 				}),
 				widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {

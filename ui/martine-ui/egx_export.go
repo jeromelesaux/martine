@@ -143,20 +143,20 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	defer func() {
 		os.Remove("temporary_palette.kit")
 	}()
-	if err := impPalette.SaveKit("temporary_palette.kit", me.ResultImage.Palette, false); err != nil {
+	if err := impPalette.SaveKit("temporary_palette.kit", me.ResultImage.Cfg.PalCfg.Palette, false); err != nil {
 		pi.Hide()
 		dialog.ShowError(err, m.window)
 	}
 	cfg.PalCfg.Path = "temporary_palette.kit"
 
 	if !cfg.ScrCfg.Type.IsFullScreen() {
-		if err := ocpartstudio.EgxLoader(filepath.Join(me.ResultImage.Path, egxFilename), me.ResultImage.Palette, me.LeftImage.Cfg.ScrCfg.Mode, me.RightImage.Cfg.ScrCfg.Mode, cfg); err != nil {
+		if err := ocpartstudio.EgxLoader(filepath.Join(me.ResultImage.Path, egxFilename), me.ResultImage.Cfg.PalCfg.Palette, me.LeftImage.Cfg.ScrCfg.Mode, me.RightImage.Cfg.ScrCfg.Mode, cfg); err != nil {
 			pi.Hide()
 			dialog.ShowError(err, m.window)
 			return
 		}
 	}
-	if err := export.Export(filepath.Join(me.ResultImage.Cfg.ScrCfg.OutputPath, egxFilename), me.ResultImage.Data, me.ResultImage.Palette, uint8(me.ResultImage.EgxType), cfg); err != nil {
+	if err := export.Export(filepath.Join(me.ResultImage.Cfg.ScrCfg.OutputPath, egxFilename), me.ResultImage.Data, me.ResultImage.Cfg.PalCfg.Palette, uint8(me.ResultImage.EgxType), cfg); err != nil {
 		pi.Hide()
 		dialog.ShowError(err, m.window)
 		return
