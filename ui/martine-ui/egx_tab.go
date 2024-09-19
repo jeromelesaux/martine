@@ -100,7 +100,7 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	di.ResultImage.Cfg.ScrCfg.Export = append(di.ResultImage.Cfg.ScrCfg.Export, im.Cfg.ScrCfg.Export...)
 	di.ResultImage.Cfg.ScrCfg.Size = im.Cfg.ScrCfg.Size
 
-	res, pal, egxType, err := effect.EgxRaw(im.Data, im2.Data, di.ResultImage.Cfg.PalCfg.Palette, int(im.Cfg.ScrCfg.Mode), int(im2.Cfg.ScrCfg.Mode), di.ResultImage.Cfg)
+	res, pal, egxType, err := effect.EgxRaw(im.CpcImage().Image, im2.CpcImage().Image, di.ResultImage.Cfg.PalCfg.Palette, int(im.Cfg.ScrCfg.Mode), int(im2.Cfg.ScrCfg.Mode), di.ResultImage.Cfg)
 	pi.Hide()
 	if err != nil {
 		dialog.ShowError(err, m.window)

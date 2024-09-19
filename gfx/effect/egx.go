@@ -395,80 +395,33 @@ func ToEgx2Raw(inMode1, inMode2 *image.NRGBA, p color.Palette, firstLineMode uin
 }
 
 // nolint: funlen, gocognit
-func EgxRaw(img1, img2 []byte, p color.Palette, mode1, mode2 int, cfg *config.MartineConfig) ([]byte, color.Palette, int, error) {
+func EgxRaw(img1, img2 image.Image, p color.Palette, mode1, mode2 int, cfg *config.MartineConfig) ([]byte, color.Palette, int, error) {
 	// p = constants.SortColorsByDistance(p)
 	if mode1 == 0 && mode2 == 1 || mode2 == 0 && mode1 == 1 {
-		var f0, f1 []byte
-		var mode0, mode1 uint8
-		var err error
-		mode0 = 0
-		mode1 = 1
+		var in1, in0 *image.NRGBA
+		var firstLineMode uint8
 		if mode1 == 0 {
-			f0 = img1
-			f1 = img2
+			in0 = png.ImageToNRGBA(img1)
+			in1 = png.ImageToNRGBA(img2)
 		} else {
-			f0 = img2
-			f1 = img1
+			in0 = png.ImageToNRGBA(img2)
+			in1 = png.ImageToNRGBA(img1)
 		}
-		var in0, in1 *image.NRGBA
-		if cfg.ScrCfg.Type.IsFullScreen() {
-			in0, err = overscan.OverscanRawToImg(f0, mode0, p)
-			if err != nil {
-				return nil, p, 0, err
-			}
-			in1, err = overscan.OverscanRawToImg(f1, mode1, p)
-			if err != nil {
-				return nil, p, 0, err
-			}
-		} else {
-			in0, err = screen.ScrRawToImg(f0, 0, p)
-			if err != nil {
-				return nil, p, 0, err
-			}
-			in1, err = screen.ScrRawToImg(f1, 1, p)
-			if err != nil {
-				return nil, p, 0, err
-			}
-		}
-		res, p := ToEgx1Raw(in0, in1, p, mode1, cfg)
+		res, p := ToEgx1Raw(in0, in1, p, firstLineMode, cfg)
 		return res, p, 1, nil
 	} else {
 		if mode1 == 1 && mode2 == 2 || mode2 == 1 && mode1 == 2 {
-			var f2, f1 []byte
-			var mode2, mode1 uint8
-			var err error
-			mode1 = 1
-			mode2 = 2
-			if mode1 == 1 {
-				f1 = img1
-				f2 = img2
+			var in1, in0 *image.NRGBA
+			var firstLineMode uint8
+			if mode1 == 0 {
+				in0 = png.ImageToNRGBA(img1)
+				in1 = png.ImageToNRGBA(img2)
 			} else {
-				f1 = img2
-				f2 = img1
+				in0 = png.ImageToNRGBA(img2)
+				in1 = png.ImageToNRGBA(img1)
 			}
-			var in2, in1 *image.NRGBA
-			if cfg.ScrCfg.Type.IsFullScreen() {
-				in1, err = overscan.OverscanRawToImg(f1, mode1, p)
-				if err != nil {
-					return nil, p, 0, err
-				}
-				in2, err = overscan.OverscanRawToImg(f2, mode2, p)
-				if err != nil {
-					return nil, p, 0, err
-				}
-			} else {
-				in1, err = screen.ScrRawToImg(f1, mode1, p)
-				if err != nil {
-					return nil, p, 0, err
-				}
-				in2, err = screen.ScrRawToImg(f2, mode2, p)
-				if err != nil {
-					return nil, p, 0, err
-				}
-			}
-			res, p := ToEgx2Raw(in1, in2, p, mode1, cfg)
-			return res, p, 2, err
-
+			res, p := ToEgx2Raw(in0, in1, p, firstLineMode, cfg)
+			return res, p, 2, nil
 		} else {
 			return nil, p, 0, errors.ErrorFeatureNotImplemented
 		}

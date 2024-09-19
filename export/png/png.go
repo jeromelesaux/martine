@@ -86,3 +86,14 @@ func PalToImage(palette color.Palette) *image.NRGBA {
 	}
 	return im
 }
+
+func ImageToNRGBA(i image.Image) *image.NRGBA {
+	o := image.NewNRGBA(i.Bounds())
+	for x := 0; x < i.Bounds().Max.X; x++ {
+		for y := 0; y < i.Bounds().Max.Y; y++ {
+			c := i.At(x, y)
+			o.Set(x, y, c)
+		}
+	}
+	return o
+}
