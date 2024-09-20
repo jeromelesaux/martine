@@ -118,14 +118,16 @@ func (s ScreenConfig) IsExport(c ScreenExport) bool {
 }
 
 var (
-	FullscreenFormat ScreenFormat = "fullscreen"
-	SpriteFormat     ScreenFormat = "sprite"
-	SpriteHardFormat ScreenFormat = "sprite_hard"
-	OcpScreenFormat  ScreenFormat = "screen"
-	WindowFormat     ScreenFormat = "window"
-	Egx1Format       ScreenFormat = "egx1"
-	Egx2Format       ScreenFormat = "egx2"
-	ImpdrawTile      ScreenFormat = "tile"
+	FullscreenFormat     ScreenFormat = "fullscreen"
+	SpriteFormat         ScreenFormat = "sprite"
+	SpriteHardFormat     ScreenFormat = "sprite_hard"
+	OcpScreenFormat      ScreenFormat = "screen"
+	WindowFormat         ScreenFormat = "window"
+	Egx1Format           ScreenFormat = "egx1"
+	Egx2Format           ScreenFormat = "egx2"
+	Egx1FullscreenFormat ScreenFormat = "egx1_fullscreen"
+	Egx2FullscreenFormat ScreenFormat = "egx2_fullscreen"
+	ImpdrawTile          ScreenFormat = "tile"
 )
 
 type ScreenExport string

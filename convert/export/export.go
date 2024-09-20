@@ -34,32 +34,29 @@ func ToMode2AndExport(in *image.NRGBA, p color.Palette, size constants.Size, fil
 
 // nolint: funlen, gocognit
 func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, cfg *config.MartineConfig) error {
-	if cfg.ScrCfg.Type.IsFullScreen() {
-		if cfg.ScrCfg.Type == config.Egx1Format || cfg.ScrCfg.Type == config.Egx2Format {
-			if cfg.ScrCfg.IsExport(config.GoImpdrawExport) {
-				data, err := co.ToGo(bw, screenMode, p, cfg)
-				if err != nil {
-					log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
-					return err
-				}
-				if err := overscan.SaveGo(filePath, data, p, screenMode, cfg); err != nil {
-					log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
-					return err
-				}
-			} else {
-				if err := overscan.Overscan(filePath, bw, p, screenMode, cfg); err != nil {
-					log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
-					return err
-				}
+	switch cfg.ScrCfg.Type {
+	case config.FullscreenFormat:
+		if err := overscan.Overscan(filePath, bw, p, screenMode, cfg); err != nil {
+			log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
+			return err
+		}
+	case config.Egx1FullscreenFormat, config.Egx2FullscreenFormat:
+		if err := overscan.EgxOverscan(filePath, bw, p, cfg.EgxMode1, cfg.EgxMode2, cfg); err != nil {
+			log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
+			return err
+		}
+		if cfg.ScrCfg.IsExport(config.GoImpdrawExport) {
+			data, err := co.ToGo(bw, screenMode, p, cfg)
+			if err != nil {
+				log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
+				return err
 			}
-		} else {
-			if err := overscan.EgxOverscan(filePath, bw, p, cfg.EgxMode1, cfg.EgxMode2, cfg); err != nil {
+			if err := overscan.SaveGo(filePath, data, p, screenMode, cfg); err != nil {
 				log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
 				return err
 			}
 		}
-
-	} else {
+	default:
 		if err := ocpartstudio.Scr(filePath, bw, p, screenMode, cfg); err != nil {
 			log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
 			return err
@@ -69,6 +66,7 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, cfg *
 			return err
 		}
 	}
+
 	if !cfg.ScrCfg.IsPlus {
 		if err := ocpartstudio.Pal(filePath, p, screenMode, false, cfg); err != nil {
 			log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)

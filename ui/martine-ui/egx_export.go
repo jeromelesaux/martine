@@ -18,7 +18,6 @@ import (
 	"github.com/jeromelesaux/martine/export/m4"
 	"github.com/jeromelesaux/martine/log"
 
-	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/snapshot"
 	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
@@ -129,13 +128,6 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 		return
 	}
 	cfg.ScrCfg.OutputPath = me.ResultImage.Path
-	cfg.ScrCfg.Type = me.LeftImage.Cfg.ScrCfg.Type
-
-	if me.ResultImage.EgxType == 1 {
-		cfg.ScrCfg.Type = config.Egx1Format
-	} else {
-		cfg.ScrCfg.Type = config.Egx2Format
-	}
 	cfg.EgxMode1 = me.LeftImage.Cfg.ScrCfg.Mode
 	cfg.EgxMode2 = me.RightImage.Cfg.ScrCfg.Mode
 
@@ -149,13 +141,13 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	}
 	cfg.PalCfg.Path = "temporary_palette.kit"
 
-	if !cfg.ScrCfg.Type.IsFullScreen() {
-		if err := ocpartstudio.EgxLoader(filepath.Join(me.ResultImage.Path, egxFilename), me.ResultImage.Cfg.PalCfg.Palette, me.LeftImage.Cfg.ScrCfg.Mode, me.RightImage.Cfg.ScrCfg.Mode, cfg); err != nil {
-			pi.Hide()
-			dialog.ShowError(err, m.window)
-			return
-		}
-	}
+	// if cfg.ScrCfg.Type == config.Egx1Format || cfg.ScrCfg.Type == config.Egx2Format {
+	// 	if err := ocpartstudio.EgxLoader(filepath.Join(me.ResultImage.Path, egxFilename), me.ResultImage.Cfg.PalCfg.Palette, me.LeftImage.Cfg.ScrCfg.Mode, me.RightImage.Cfg.ScrCfg.Mode, cfg); err != nil {
+	// 		pi.Hide()
+	// 		dialog.ShowError(err, m.window)
+	// 		return
+	// 	}
+	// }
 	if err := export.Export(filepath.Join(me.ResultImage.Cfg.ScrCfg.OutputPath, egxFilename), me.ResultImage.Data, me.ResultImage.Cfg.PalCfg.Palette, uint8(me.ResultImage.EgxType), cfg); err != nil {
 		pi.Hide()
 		dialog.ShowError(err, m.window)

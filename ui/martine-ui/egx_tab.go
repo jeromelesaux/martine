@@ -123,6 +123,19 @@ func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 			return
 		}
 	}
+	if di.ResultImage.Cfg.ScrCfg.Type.IsFullScreen() {
+		if im.Cfg.ScrCfg.Mode == 2 || im2.Cfg.ScrCfg.Mode == 2 {
+			di.ResultImage.Cfg.ScrCfg.Type = config.Egx2FullscreenFormat
+		} else {
+			di.ResultImage.Cfg.ScrCfg.Type = config.Egx1FullscreenFormat
+		}
+	} else {
+		if im.Cfg.ScrCfg.Mode == 2 || im2.Cfg.ScrCfg.Mode == 2 {
+			di.ResultImage.Cfg.ScrCfg.Type = config.Egx2Format
+		} else {
+			di.ResultImage.Cfg.ScrCfg.Type = config.Egx1Format
+		}
+	}
 	di.ResultImage.CpcResultImage.Image = img
 	di.ResultImage.CpcResultImage.Refresh()
 	di.ResultImage.PaletteImage.Image = png.PalToImage(im.Palette())
