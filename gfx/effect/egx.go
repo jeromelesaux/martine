@@ -403,9 +403,11 @@ func EgxRaw(img1, img2 image.Image, p color.Palette, mode1, mode2 int, cfg *conf
 		if mode1 == 0 {
 			in0 = png.ImageToNRGBA(img1)
 			in1 = png.ImageToNRGBA(img2)
+			firstLineMode = 0
 		} else {
 			in0 = png.ImageToNRGBA(img2)
 			in1 = png.ImageToNRGBA(img1)
+			firstLineMode = 1
 		}
 		res, p := ToEgx1Raw(in0, in1, p, firstLineMode, cfg)
 		return res, p, 1, nil
@@ -413,12 +415,14 @@ func EgxRaw(img1, img2 image.Image, p color.Palette, mode1, mode2 int, cfg *conf
 		if mode1 == 1 && mode2 == 2 || mode2 == 1 && mode1 == 2 {
 			var in1, in0 *image.NRGBA
 			var firstLineMode uint8
-			if mode1 == 0 {
+			if mode1 == 1 {
 				in0 = png.ImageToNRGBA(img1)
 				in1 = png.ImageToNRGBA(img2)
+				firstLineMode = 1
 			} else {
 				in0 = png.ImageToNRGBA(img2)
 				in1 = png.ImageToNRGBA(img1)
+				firstLineMode = 2
 			}
 			res, p := ToEgx2Raw(in0, in1, p, firstLineMode, cfg)
 			return res, p, 2, nil
