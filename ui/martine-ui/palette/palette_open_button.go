@@ -51,6 +51,14 @@ func NewOpenPaletteButton(m PaletteInterface, win fyne.Window, callback func()) 
 				}
 				m.SetPalette(p)
 				m.SetPaletteImage(png.PalToImage(p))
+			case ".ink":
+				p, _, err := impPalette.OpenInk(palettePath)
+				if err != nil {
+					dialog.ShowError(err, win)
+					return
+				}
+				m.SetPalette(p)
+				m.SetPaletteImage(png.PalToImage(p))
 			}
 			if callback != nil {
 				callback()
