@@ -338,7 +338,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
 				layout.NewHBoxLayout(),
 				openFileWidget,
 				resetButton,
-				paletteOpen,
+
 				applyButton,
 				exportButton,
 				importOpen,
@@ -394,6 +394,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
 					container.New(
 						layout.NewHBoxLayout(),
 						forcePalette,
+						paletteOpen,
 						widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
 							w2.SwapColor(m.SetPalette, a.Palette(), m.window, m.refreshAnimatePalette)
 						}),

@@ -229,7 +229,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) *fyne.Container {
 					openFileWidget,
 					applyButton,
 					exportButton,
-					paletteOpen,
+
 					importOpen,
 					gifOpen,
 				),
@@ -269,11 +269,14 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) *fyne.Container {
 				),
 			),
 			container.New(
-				layout.NewGridLayoutWithRows(3),
-				container.New(layout.NewVBoxLayout(),
+				layout.NewGridLayoutWithRows(4),
+				container.New(layout.NewGridLayoutWithColumns(2),
 					widget.NewCheck("Use this palette", func(b bool) {
 						s.UsePalette = b
-					})),
+					}),
+					paletteOpen,
+				),
+
 				container.New(
 					layout.NewVBoxLayout(),
 					widget.NewLabel("Palette"),

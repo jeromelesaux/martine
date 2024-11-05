@@ -381,7 +381,6 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 			container.New(
 				layout.NewHBoxLayout(),
 				openFileWidget,
-				paletteOpen,
 				applyButton,
 				exportButton,
 				importOpen,
@@ -424,6 +423,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 					container.New(
 						layout.NewHBoxLayout(),
 						forcePalette,
+						paletteOpen,
 						widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
 							w2.SwapColor(m.SetPalette, me.Palette(), m.window, func() {
 								forcePalette.SetChecked(true)
