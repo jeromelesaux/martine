@@ -125,7 +125,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 				dialog.ShowError(err, m.window)
 				return
 			}
-			me.SetOriginalImage(img)
+			m.SetImage(img)
 			// m.window.Canvas().Refresh(&me.OriginalImage)
 			// m.window.Resize(m.window.Content().Size())
 		}, m.window)

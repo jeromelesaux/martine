@@ -84,6 +84,13 @@ func (m *MartineUI) NewTabs() *container.AppTabs {
 	)
 }
 
+func (m *MartineUI) SetImage(img image.Image) {
+	m.main.SetOriginalImage(img)
+	m.egx.LeftImage.SetOriginalImage(img)
+	m.egx.RightImage.SetOriginalImage(img)
+	m.tilemap.SetOriginalImage(img)
+}
+
 func openImage(path string) (image.Image, error) {
 	f, err := os.Open(path)
 	if err != nil {
