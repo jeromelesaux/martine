@@ -381,7 +381,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 			container.New(
 				layout.NewHBoxLayout(),
 				openFileWidget,
-				applyButton,
+
 				exportButton,
 				importOpen,
 				editButton,
@@ -394,7 +394,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 				container.New(
 					layout.NewVBoxLayout(),
 					container.New(
-						layout.NewVBoxLayout(),
+						layout.NewGridLayoutWithColumns(2),
 						modeLabel,
 						modes,
 					),
@@ -441,28 +441,34 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 					),
 				),
 				container.New(
-					layout.NewVBoxLayout(),
+					layout.NewHBoxLayout(),
 					oneLine,
 					oneRow,
 				),
 				container.New(
-					layout.NewVBoxLayout(),
+					layout.NewHBoxLayout(),
 					warningLabel,
 				),
 				container.New(
-					layout.NewVBoxLayout(),
+					layout.NewHBoxLayout(),
 					colorReducerLabel,
 					colorReducer,
 				),
 				container.New(
 					layout.NewVBoxLayout(),
-					brightnessLabel,
-					brightness,
+					container.New(
+						layout.NewGridLayoutWithColumns(2),
+						brightnessLabel,
+						brightness,
+					),
+					container.New(
+						layout.NewGridLayoutWithColumns(2),
+						saturationLabel,
+						saturation,
+					),
 				),
 				container.New(
-					layout.NewVBoxLayout(),
-					saturationLabel,
-					saturation,
+					layout.NewGridLayoutWithRows(2),
 					widget.NewButton("show cmd", func() {
 						e := widget.NewMultiLineEntry()
 						e.SetText(me.CmdLine())
@@ -477,6 +483,7 @@ func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container 
 						d.Resize(size)
 						d.Show()
 					}),
+					applyButton,
 				),
 			),
 		),

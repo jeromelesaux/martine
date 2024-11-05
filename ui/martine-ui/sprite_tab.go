@@ -227,9 +227,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) *fyne.Container {
 				container.New(
 					layout.NewHBoxLayout(),
 					openFileWidget,
-					applyButton,
 					exportButton,
-
 					importOpen,
 					gifOpen,
 				),
@@ -301,8 +299,8 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) *fyne.Container {
 					size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
 					d.Resize(size)
 					d.Show()
-				},
-				),
+				}),
+				applyButton,
 			),
 		),
 	)

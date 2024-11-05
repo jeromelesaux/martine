@@ -276,7 +276,6 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 			container.New(
 				layout.NewHBoxLayout(),
 				openFileWidget,
-				applyButton,
 				exportButton,
 				importOpen,
 				editButton,
@@ -289,24 +288,27 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 				container.New(
 					layout.NewVBoxLayout(),
 					container.New(
-						layout.NewVBoxLayout(),
+						layout.NewGridLayoutWithColumns(2),
 						modeLabel,
 						modes,
 					),
 					container.New(
-						layout.NewHBoxLayout(),
-						widthLabel,
-						me.Width(),
-					),
-					container.New(
-						layout.NewHBoxLayout(),
-						heightLabel,
-						me.Height(),
+						layout.NewGridLayoutWithColumns(2),
+						container.New(
+							layout.NewHBoxLayout(),
+							widthLabel,
+							me.Width(),
+						),
+						container.New(
+							layout.NewHBoxLayout(),
+							heightLabel,
+							me.Height(),
+						),
 					),
 				),
 			),
 			container.New(
-				layout.NewGridLayoutWithRows(7),
+				layout.NewVBoxLayout(),
 				container.New(
 					layout.NewGridLayoutWithRows(3),
 					container.New(
@@ -329,7 +331,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 					),
 				),
 				container.New(
-					layout.NewGridLayoutWithRows(2),
+					layout.NewGridLayoutWithColumns(2),
 					oneLine,
 					oneRow,
 				),
@@ -369,19 +371,22 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 					warningLabel,
 				),
 				container.New(
-					layout.NewVBoxLayout(),
+					layout.NewGridLayoutWithColumns(2),
 					colorReducerLabel,
 					colorReducer,
 				),
 				container.New(
-					layout.NewVBoxLayout(),
+					layout.NewGridLayoutWithColumns(2),
 					brightnessLabel,
 					brightness,
 				),
 				container.New(
-					layout.NewVBoxLayout(),
+					layout.NewGridLayoutWithColumns(2),
 					saturationLabel,
 					saturation,
+				),
+				container.New(
+					layout.NewVBoxLayout(),
 					widget.NewButton("show cmd", func() {
 						e := widget.NewMultiLineEntry()
 						e.SetText(me.CmdLine())
@@ -396,6 +401,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 						d.Resize(size)
 						d.Show()
 					}),
+					applyButton,
 				),
 			),
 		),

@@ -240,91 +240,91 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 	tm.TileImages = wgt.NewEmptyImageTable(fyne.NewSize(menu.TileSize, menu.TileSize))
 
 	return container.New(
-		layout.NewGridLayoutWithRows(2),
+		layout.NewGridLayoutWithColumns(2),
 		container.New(
-			layout.NewGridLayoutWithColumns(2),
-			container.New(
-				layout.NewGridLayoutWithColumns(1),
-				container.NewScroll(
-					tm.OriginalImage()),
-			),
+			layout.NewGridLayoutWithRows(2),
+			container.NewScroll(
+				tm.OriginalImage()),
+
+			container.NewScroll(
+				tm.TileImages),
+		),
+		container.New(
+
+			layout.NewVBoxLayout(),
 			container.New(
 				layout.NewVBoxLayout(),
 				container.New(
-					layout.NewVBoxLayout(),
+					layout.NewHBoxLayout(),
+					openFileWidget,
+					exportButton,
+					importOpen,
+				),
+				container.New(
+					layout.NewHBoxLayout(),
+					historicOpen,
+				),
+				container.New(
+					layout.NewHBoxLayout(),
+					isPlus,
 					container.New(
-						layout.NewHBoxLayout(),
-						openFileWidget,
+						layout.NewVBoxLayout(),
+						container.New(
+							layout.NewVBoxLayout(),
+							modeLabel,
+							modes,
+						),
+						container.New(
+							layout.NewHBoxLayout(),
+							widthLabel,
+							tm.Width(),
+						),
+						container.New(
+							layout.NewHBoxLayout(),
+							heightLabel,
+							tm.Height(),
+						),
+					),
+				),
+				container.New(
+					layout.NewGridLayoutWithRows(6),
+
+					container.New(
+						layout.NewGridLayoutWithColumns(2),
+						tm.PaletteImage(),
+						container.New(
+							layout.NewHBoxLayout(),
+							forcePalette,
+							paletteOpen,
+							widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
+								w2.SwapColor(tm.SetPalette, tm.Palette(), m.window, nil)
+							}),
+							m.newImageMenuExportButton(tm.ImageMenu),
+						),
+					),
+
+					container.New(
+						layout.NewVBoxLayout(),
+						widget.NewButton("show cmd", func() {
+							e := widget.NewMultiLineEntry()
+							e.SetText(tm.CmdLine())
+
+							d := dialog.NewCustom("Command line generated",
+								"Ok",
+								e,
+								m.window)
+							log.GetLogger().Info("%s\n", tm.CmdLine())
+							size := m.window.Content().Size()
+							size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
+							d.Resize(size)
+							d.Show()
+						}),
 
 						applyButton,
-						exportButton,
-						importOpen,
-					),
-					container.New(
-						layout.NewHBoxLayout(),
-						historicOpen,
-					),
-					container.New(
-						layout.NewHBoxLayout(),
-						isPlus,
-						container.New(
-							layout.NewVBoxLayout(),
-							container.New(
-								layout.NewVBoxLayout(),
-								modeLabel,
-								modes,
-							),
-							container.New(
-								layout.NewHBoxLayout(),
-								widthLabel,
-								tm.Width(),
-							),
-							container.New(
-								layout.NewHBoxLayout(),
-								heightLabel,
-								tm.Height(),
-							),
-						),
-					),
-					container.New(
-						layout.NewGridLayoutWithRows(6),
-
-						container.New(
-							layout.NewGridLayoutWithColumns(2),
-							tm.PaletteImage(),
-							container.New(
-								layout.NewHBoxLayout(),
-								forcePalette,
-								paletteOpen,
-								widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
-									w2.SwapColor(tm.SetPalette, tm.Palette(), m.window, nil)
-								}),
-								m.newImageMenuExportButton(tm.ImageMenu),
-							),
-						),
-
-						container.New(
-							layout.NewVBoxLayout(),
-							widget.NewButton("show cmd", func() {
-								e := widget.NewMultiLineEntry()
-								e.SetText(tm.CmdLine())
-
-								d := dialog.NewCustom("Command line generated",
-									"Ok",
-									e,
-									m.window)
-								log.GetLogger().Info("%s\n", tm.CmdLine())
-								size := m.window.Content().Size()
-								size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
-								d.Resize(size)
-								d.Show()
-							}),
-						),
 					),
 				),
 			),
 		),
-		container.NewScroll(
-			tm.TileImages),
 	)
+
 }

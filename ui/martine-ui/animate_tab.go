@@ -339,7 +339,6 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
 				openFileWidget,
 				resetButton,
 
-				applyButton,
 				exportButton,
 				importOpen,
 			),
@@ -384,7 +383,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
 			container.New(
 				layout.NewGridLayoutWithRows(3),
 				container.New(
-					layout.NewVBoxLayout(),
+					layout.NewGridLayoutWithColumns(2),
 					oneLine,
 					oneRow,
 				),
@@ -403,7 +402,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
 				),
 
 				container.New(
-					layout.NewVBoxLayout(),
+					layout.NewGridLayoutWithColumns(2),
 					widget.NewButton("show cmd", func() {
 						e := widget.NewMultiLineEntry()
 						e.SetText(a.CmdLine())
@@ -418,6 +417,8 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
 						d.Resize(size)
 						d.Show()
 					}),
+
+					applyButton,
 				),
 			),
 		),
