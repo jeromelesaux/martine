@@ -221,7 +221,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) *fyne.Container {
 			s.OriginalImages,
 		),
 		container.New(
-			layout.NewGridLayoutWithRows(3),
+			layout.NewVBoxLayout(),
 			container.New(
 				layout.NewVBoxLayout(),
 				container.New(

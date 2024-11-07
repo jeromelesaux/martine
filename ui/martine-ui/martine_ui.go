@@ -67,7 +67,7 @@ func (m *MartineUI) Load(app fyne.App) {
 	}
 	m.window = app.NewWindow("Martine @IMPact v" + common.AppVersion)
 	m.window.SetContent(m.NewTabs())
-	m.window.Resize(fyne.NewSize(1400, 1000))
+	m.window.Resize(fyne.NewSize(1000, 600))
 	m.window.SetTitle("Martine @IMPact v" + common.AppVersion)
 	m.window.Show()
 }
