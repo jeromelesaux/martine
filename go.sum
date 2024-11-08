@@ -217,12 +217,12 @@ github.com/jeandeaual/go-locale v0.0.0-20240223122105-ce5225dcaa49 h1:Po+wkNdMmN
 github.com/jeandeaual/go-locale v0.0.0-20240223122105-ce5225dcaa49/go.mod h1:YiutDnxPRLk5DLUFj6Rw4pRBBURZY07GFr54NdV9mQg=
 github.com/jeromelesaux/dsk v0.0.0-20230417191026-0e405580626b h1:KMI+CK5VfgVD/k5HmsAprsDOXCujV9tsICJd5l77LPs=
 github.com/jeromelesaux/dsk v0.0.0-20230417191026-0e405580626b/go.mod h1:yF2+YgO/6yWlK932z+qKOU8wY5rrbtsYAPlSXHfxIS8=
-github.com/jeromelesaux/fyne-io v0.0.0-20241106090145-745d8e199648 h1:4I6tfcGQ82jddDrPlZ2txVUb6E/Yc87HNJWrDo869AU=
-github.com/jeromelesaux/fyne-io v0.0.0-20241106090145-745d8e199648/go.mod h1:dsEn41lwXG/HadYC+I6sk0wDVFWeiFKtp+ADjO856QU=
-github.com/jeromelesaux/fyne-io v0.0.0-20241107211327-439df5b4ba7e h1:Ud4IBCZiJXK73YXbzr76jilVR5zVECAASqoO5YyWAXQ=
-github.com/jeromelesaux/fyne-io v0.0.0-20241107211327-439df5b4ba7e/go.mod h1:dsEn41lwXG/HadYC+I6sk0wDVFWeiFKtp+ADjO856QU=
 github.com/jeromelesaux/fyne-io v0.0.0-20241107213605-9c6834c8817e h1:j3O16iuT5uC/zfOoxO2eudkpIcbyPTMX/zUFcQhpEtg=
 github.com/jeromelesaux/fyne-io v0.0.0-20241107213605-9c6834c8817e/go.mod h1:dsEn41lwXG/HadYC+I6sk0wDVFWeiFKtp+ADjO856QU=
+github.com/jeromelesaux/fyne-io v0.0.0-20241108075048-fa6baca4f329 h1:HYIikz06h9QSd+NRiGWF/oMD5guaMsfWSqbAHUI0YzA=
+github.com/jeromelesaux/fyne-io v0.0.0-20241108075048-fa6baca4f329/go.mod h1:CfylT5HbwoZiniHx+zg+9fpOM4P8cE6XQuyUOTJHVOo=
+github.com/jeromelesaux/fyne-io v0.0.0-20241108081021-cb87ec93652b h1:NHMxRSYb4Dp2e6MnwbrZx1BgGJjf9VJlkRA42VUnVus=
+github.com/jeromelesaux/fyne-io v0.0.0-20241108081021-cb87ec93652b/go.mod h1:CfylT5HbwoZiniHx+zg+9fpOM4P8cE6XQuyUOTJHVOo=
 github.com/jeromelesaux/m4client v0.0.0-20200309212559-efb59c22369c/go.mod h1:JO0ijl8YXO6FxogJoC3yAFbBjSAnkwFquc8W6C7k94E=
 github.com/jeromelesaux/m4client v0.0.0-20230327092026-4e80fd2b1474 h1:CWtkpA4Q63pkhHWRrd/e98JD4YVZhk3SZu58bUkQsuI=
 github.com/jeromelesaux/m4client v0.0.0-20230327092026-4e80fd2b1474/go.mod h1:Xc0HzC2TZ7fbDWyB8LosvziBQ5QvvwVt3xxAIEavWRc=
