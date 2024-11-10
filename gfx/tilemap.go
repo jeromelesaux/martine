@@ -183,10 +183,7 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 		nbTilePixelLarge = 40
 	}
 	scenes := make([]*image.NRGBA, 0)
-	err = os.Mkdir(filepath.Join(cfg.ScrCfg.OutputPath, "scenes"), os.ModePerm)
-	if err != nil {
-		return err
-	}
+
 	scenes, err = fillImage(m, scenes, nbTilePixelHigh, nbTilePixelLarge, choosenBoard.TileSize.Width, choosenBoard.TileSize.Height, cfg.ScrCfg.OutputPath)
 	if err != nil {
 		return err
@@ -238,10 +235,7 @@ func ExportTilemapClassical(m image.Image, filename string, palette color.Palett
 		nbTilePixelLarge = 40
 	}
 	scenes := make([]*image.NRGBA, 0)
-	err := os.Mkdir(filepath.Join(cfg.ScrCfg.OutputPath, "scenes"), os.ModePerm)
-	if err != nil {
-		return err
-	}
+	var err error
 	_, err = fillImage(m, scenes, nbTilePixelHigh, nbTilePixelLarge, board.TileSize.Width, board.TileSize.Height, cfg.ScrCfg.OutputPath)
 	if err != nil {
 		return err
@@ -440,10 +434,7 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 
 	// save the tilemap
 	scenes := make([]*image.NRGBA, 0)
-	err = os.Mkdir(filepath.Join(cfg.ScrCfg.OutputPath, "scenes"), os.ModePerm)
-	if err != nil {
-		return err
-	}
+
 	scenes, err = fillImage(m, scenes, nbTilePixelHigh, nbTilePixelLarge, analyze.TileSize.Width, analyze.TileSize.Height, cfg.ScrCfg.OutputPath)
 	if err != nil {
 		return err
@@ -488,7 +479,7 @@ func fillImage(m image.Image, scenes []*image.NRGBA, nbTilePixelHigh, nbTilePixe
 			}
 			// store the map in the slice
 			scenes = append(scenes, m1)
-			scenePath := filepath.Join(output, fmt.Sprintf("%sscenes%sscene-%.2d.png", string(filepath.Separator), string(filepath.Separator), index))
+			scenePath := filepath.Join(output, fmt.Sprintf("%sscene-%.2d.png", string(filepath.Separator), index))
 			if err := png.Png(scenePath, m1); err != nil {
 				log.GetLogger().Error("Cannot encode in png scene scene-%.2d error %v\n", index, err)
 				return scenes, err
@@ -608,10 +599,6 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 		}
 	}
 	// scenes := make([]*image.NRGBA, 0)
-	err = os.Mkdir(filepath.Join(cfg.ScrCfg.OutputPath, "scenes"), os.ModePerm)
-	if err != nil {
-		return err
-	}
 	index := 0
 	m := ci.Resize(in, mapSize, cfg.ScrCfg.Process.ResizingAlgo)
 	for y := 0; y < m.Bounds().Max.Y; y += (nbTilePixelHigh * analyze.TileSize.Height) {
@@ -736,10 +723,6 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 	m := ci.Resize(in, mapSize, cfg.ScrCfg.Process.ResizingAlgo)
 	// save the tilemap
 	scenes := make([]*image.NRGBA, 0)
-	err = os.Mkdir(filepath.Join(cfg.ScrCfg.OutputPath, "scenes"), os.ModePerm)
-	if err != nil {
-		return err
-	}
 
 	_, err = fillImage(m, scenes, nbTilePixelHigh, nbTilePixelLarge, analyze.TileSize.Width, analyze.TileSize.Height, cfg.ScrCfg.OutputPath)
 	if err != nil {

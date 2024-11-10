@@ -266,11 +266,12 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 				),
 				container.New(
 					layout.NewHBoxLayout(),
-					isPlus,
+
 					container.New(
 						layout.NewVBoxLayout(),
 						container.New(
 							layout.NewVBoxLayout(),
+							isPlus,
 							modeLabel,
 							modes,
 						),
@@ -290,7 +291,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 					layout.NewGridLayoutWithRows(6),
 
 					container.New(
-						layout.NewGridLayoutWithColumns(2),
+						layout.NewVBoxLayout(),
 						tm.PaletteImage(),
 						container.New(
 							layout.NewHBoxLayout(),

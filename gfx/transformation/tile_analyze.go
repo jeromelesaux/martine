@@ -368,15 +368,18 @@ func AnalyzeTilesBoard(im image.Image, size constants.Size, tilesHistoric *exspr
 	if (im.Bounds().Max.Y % size.Height) != 0 {
 		heightCorrection = 1
 	}
-	nbTileW := (im.Bounds().Max.X / size.Width) + 1
-	nbTileH := (im.Bounds().Max.Y / size.Height) - (heightCorrection) + 1
+	tileWLeft := 0
+	if (im.Bounds().Max.X % size.Width) != 0 {
+		tileWLeft = 1
+	}
+	tileHLeft := 0
+	if (im.Bounds().Max.Y % size.Height) != 0 {
+		tileHLeft = 1
+	}
+	nbTileW := (im.Bounds().Max.X / size.Width) + tileWLeft
+	nbTileH := (im.Bounds().Max.Y / size.Height) - (heightCorrection) + tileHLeft
 	board := NewAnalyzeBoard(size, im.Bounds(), nbTileH, nbTileW, tilesHistoric)
 
-	//	sprt0, _ := ExtractTile(im, size, 0, 0)
-	/*	if err != nil {
-		log.GetLogger().Error( "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, 0, 0, err)
-	}*/
-	//	board.NewTile(sprt0, 0, 0, len(board.BoardTiles))
 	board.TileMap[0][0] = 0
 
 	indexX := 0
@@ -611,6 +614,7 @@ func (a *AnalyzeBoard) SaveAssemblyTiles(filePath string) error {
 	if err != nil {
 		return err
 	}
+	// To rework
 	for _, v := range a.TileMap {
 		_, err := f.WriteString("db ")
 		if err != nil {
