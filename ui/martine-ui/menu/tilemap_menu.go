@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	w "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/export/sprite"
 	"github.com/jeromelesaux/martine/gfx/transformation"
@@ -21,8 +22,8 @@ type TilemapMenu struct {
 	TileImages   *w.ImageTable
 	ExportZigzag bool
 	Historic     *sprite.TilesHistorical
-	col          int
-	row          int
+	Col          int
+	Row          int
 	tileImage    image.Image
 }
 
@@ -104,8 +105,8 @@ func (me *TilemapMenu) TileSelected(row, col int) {
 	if row < 0 || col < 0 {
 		return
 	}
-	me.row = row
-	me.col = col
+	me.Row = row
+	me.Col = col
 	if me.Result == nil {
 		return
 	}
@@ -117,4 +118,15 @@ func (me *TilemapMenu) TileSelected(row, col int) {
 
 func (me *TilemapMenu) TileImage() image.Image {
 	return me.tileImage
+}
+
+func (me *TilemapMenu) SetNewTilesImages(tiles [][]image.Image) {
+	tilesCanvas := w.NewImageTableCache(len(tiles), len(tiles[0]), fyne.NewSize(50, 50), nil)
+	for i, v := range tiles {
+		for i2, v2 := range v {
+			tilesCanvas.Set(i, i2, canvas.NewImageFromImage(v2))
+		}
+	}
+	me.TileImages.Update(tilesCanvas, len(tiles)-1, len(tiles[0])-1)
+	me.TileImages.Refresh()
 }

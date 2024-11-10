@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -13,27 +12,21 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
-	"github.com/jeromelesaux/fyne-io/widget/editor"
 	"github.com/jeromelesaux/martine/config"
-	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/log"
 
-	ci "github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/convert/screen"
 	"github.com/jeromelesaux/martine/convert/screen/overscan"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/gfx"
 	"github.com/jeromelesaux/martine/gfx/effect"
-	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
-	pal "github.com/jeromelesaux/martine/ui/martine-ui/palette"
-	w2 "github.com/jeromelesaux/martine/ui/martine-ui/widget"
 )
 
 func (m *MartineUI) newEgxTab(di *menu.DoubleImageMenu) *container.AppTabs {
 	return container.NewAppTabs(
-		container.NewTabItem("Image 1", m.newEgxImageTransfertTab(di.LeftImage)),
-		container.NewTabItem("Image 2", m.newEgxImageTransfertTab(di.RightImage)),
+		container.NewTabItem("Image 1", m.newImageTransfertTab(di.LeftImage)),
+		container.NewTabItem("Image 2", m.newImageTransfertTab(di.RightImage)),
 		container.NewTabItem("Egx", m.newEgxTabItem(di)),
 	)
 }
@@ -223,269 +216,269 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) *fyne.Container {
 }
 
 // nolint: funlen
-func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
-	me.SetWindow(m.window)
-	importOpen := newImportButton(m, me)
+// func (m *MartineUI) newEgxImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
+// 	me.SetWindow(m.window)
+// 	importOpen := newImportButton(m, me)
 
-	paletteOpen := pal.NewOpenPaletteButton(me, m.window, nil)
+// 	paletteOpen := pal.NewOpenPaletteButton(me, m.window, nil)
 
-	forcePalette := widget.NewCheck("use palette", func(b bool) {
-		me.UsePalette = b
-	})
+// 	forcePalette := widget.NewCheck("use palette", func(b bool) {
+// 		me.UsePalette = b
+// 	})
 
-	openFileWidget := widget.NewButton("Image", func() {
-		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
-			if err != nil {
-				dialog.ShowError(err, m.window)
-				return
-			}
-			if reader == nil {
-				return
-			}
-			directory.SetImportDirectoryURI(reader.URI())
-			me.SetOriginalImagePath(reader.URI())
-			img, err := openImage(me.OriginalImagePath())
-			if err != nil {
-				dialog.ShowError(err, m.window)
-				return
-			}
-			me.SetOriginalImage(img)
-		}, m.window)
-		dir, err := directory.ImportDirectoryURI()
-		if err != nil {
-			d.SetLocation(dir)
-		}
-		d.SetFilter(imagesFilesFilter)
-		d.Resize(dialogSize)
-		d.Show()
-	})
+// 	openFileWidget := widget.NewButton("Image", func() {
+// 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+// 			if err != nil {
+// 				dialog.ShowError(err, m.window)
+// 				return
+// 			}
+// 			if reader == nil {
+// 				return
+// 			}
+// 			directory.SetImportDirectoryURI(reader.URI())
+// 			me.SetOriginalImagePath(reader.URI())
+// 			img, err := openImage(me.OriginalImagePath())
+// 			if err != nil {
+// 				dialog.ShowError(err, m.window)
+// 				return
+// 			}
+// 			me.SetOriginalImage(img)
+// 		}, m.window)
+// 		dir, err := directory.ImportDirectoryURI()
+// 		if err != nil {
+// 			d.SetLocation(dir)
+// 		}
+// 		d.SetFilter(imagesFilesFilter)
+// 		d.Resize(dialogSize)
+// 		d.Show()
+// 	})
 
-	exportButton := widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
-		me.ExportDialog(me.Cfg, me.GetConfig)
-	})
+// 	exportButton := widget.NewButtonWithIcon("Export", theme.DocumentSaveIcon(), func() {
+// 		me.ExportDialog(me.Cfg, me.GetConfig)
+// 	})
 
-	applyButton := widget.NewButtonWithIcon("Apply", theme.VisibilityIcon(), func() {
-		log.GetLogger().Infoln("apply.")
-		m.ApplyOneImage(me)
-	})
+// 	applyButton := widget.NewButtonWithIcon("Apply", theme.VisibilityIcon(), func() {
+// 		log.GetLogger().Infoln("apply.")
+// 		m.ApplyOneImage(me)
+// 	})
 
-	openFileWidget.Icon = theme.FileImageIcon()
+// 	openFileWidget.Icon = theme.FileImageIcon()
 
-	winFormat := me.NewFormatRadio()
+// 	winFormat := me.NewFormatRadio()
 
-	colorReducerLabel := widget.NewLabel("Color reducer")
-	colorReducer := widget.NewSelect([]string{"none", "Lower", "Medium", "Strong"}, func(s string) {
-		switch s {
-		case "none":
-			me.Cfg.ScrCfg.Process.Reducer = 0
-		case "Lower":
-			me.Cfg.ScrCfg.Process.Reducer = 1
-		case "Medium":
-			me.Cfg.ScrCfg.Process.Reducer = 2
-		case "Strong":
-			me.Cfg.ScrCfg.Process.Reducer = 3
-		}
-	})
-	colorReducer.SetSelected("none")
+// 	colorReducerLabel := widget.NewLabel("Color reducer")
+// 	colorReducer := widget.NewSelect([]string{"none", "Lower", "Medium", "Strong"}, func(s string) {
+// 		switch s {
+// 		case "none":
+// 			me.Cfg.ScrCfg.Process.Reducer = 0
+// 		case "Lower":
+// 			me.Cfg.ScrCfg.Process.Reducer = 1
+// 		case "Medium":
+// 			me.Cfg.ScrCfg.Process.Reducer = 2
+// 		case "Strong":
+// 			me.Cfg.ScrCfg.Process.Reducer = 3
+// 		}
+// 	})
+// 	colorReducer.SetSelected("none")
 
-	resize := w2.NewResizeAlgorithmSelect(me)
-	resizeLabel := widget.NewLabel("Resize algorithm")
+// 	resize := w2.NewResizeAlgorithmSelect(me)
+// 	resizeLabel := widget.NewLabel("Resize algorithm")
 
-	ditheringMultiplier := widget.NewSlider(0., 2.5)
-	ditheringMultiplier.Step = 0.1
-	ditheringMultiplier.SetValue(1.18)
-	ditheringMultiplier.OnChanged = func(f float64) {
-		me.Cfg.ScrCfg.Process.Dithering.Multiplier = f
-	}
-	dithering := w2.NewDitheringSelect(me)
+// 	ditheringMultiplier := widget.NewSlider(0., 2.5)
+// 	ditheringMultiplier.Step = 0.1
+// 	ditheringMultiplier.SetValue(1.18)
+// 	ditheringMultiplier.OnChanged = func(f float64) {
+// 		me.Cfg.ScrCfg.Process.Dithering.Multiplier = f
+// 	}
+// 	dithering := w2.NewDitheringSelect(me)
 
-	ditheringWithQuantification := widget.NewCheck("With quantification", func(b bool) {
-		me.Cfg.ScrCfg.Process.Dithering.WithQuantification = b
-	})
+// 	ditheringWithQuantification := widget.NewCheck("With quantification", func(b bool) {
+// 		me.Cfg.ScrCfg.Process.Dithering.WithQuantification = b
+// 	})
 
-	enableDithering := widget.NewCheck("Enable dithering", func(b bool) {
-		me.Cfg.ScrCfg.Process.ApplyDithering = b
-	})
-	isPlus := widget.NewCheck("CPC Plus", func(b bool) {
-		me.Cfg.ScrCfg.IsPlus = b
-	})
+// 	enableDithering := widget.NewCheck("Enable dithering", func(b bool) {
+// 		me.Cfg.ScrCfg.Process.ApplyDithering = b
+// 	})
+// 	isPlus := widget.NewCheck("CPC Plus", func(b bool) {
+// 		me.Cfg.ScrCfg.IsPlus = b
+// 	})
 
-	modes := widget.NewSelect([]string{"0", "1", "2"}, func(s string) {
-		mode, err := strconv.Atoi(s)
-		if err != nil {
-			log.GetLogger().Error("Error %s cannot be cast in int\n", s)
-		}
-		me.Cfg.ScrCfg.Mode = uint8(mode)
-	})
-	modes.SetSelected("0")
-	modeSelection = modes
-	modeLabel := widget.NewLabel("Mode:")
+// 	modes := widget.NewSelect([]string{"0", "1", "2"}, func(s string) {
+// 		mode, err := strconv.Atoi(s)
+// 		if err != nil {
+// 			log.GetLogger().Error("Error %s cannot be cast in int\n", s)
+// 		}
+// 		me.Cfg.ScrCfg.Mode = uint8(mode)
+// 	})
+// 	modes.SetSelected("0")
+// 	modeSelection = modes
+// 	modeLabel := widget.NewLabel("Mode:")
 
-	brightness := widget.NewSlider(0.0, 1.0)
-	brightness.SetValue(1.)
-	brightness.Step = .01
-	brightness.OnChanged = func(f float64) {
-		me.Cfg.ScrCfg.Process.Brightness = f
-	}
-	saturationLabel := widget.NewLabel("Saturation")
-	saturation := widget.NewSlider(0.0, 1.0)
-	saturation.SetValue(1.)
-	saturation.Step = .01
-	saturation.OnChanged = func(f float64) {
-		me.Cfg.ScrCfg.Process.Saturation = f
-	}
-	brightnessLabel := widget.NewLabel("Brightness")
+// 	brightness := widget.NewSlider(0.0, 1.0)
+// 	brightness.SetValue(1.)
+// 	brightness.Step = .01
+// 	brightness.OnChanged = func(f float64) {
+// 		me.Cfg.ScrCfg.Process.Brightness = f
+// 	}
+// 	saturationLabel := widget.NewLabel("Saturation")
+// 	saturation := widget.NewSlider(0.0, 1.0)
+// 	saturation.SetValue(1.)
+// 	saturation.Step = .01
+// 	saturation.OnChanged = func(f float64) {
+// 		me.Cfg.ScrCfg.Process.Saturation = f
+// 	}
+// 	brightnessLabel := widget.NewLabel("Brightness")
 
-	warningLabel := widget.NewLabel("Setting thoses parameters will affect your palette, you can't force palette.")
-	warningLabel.TextStyle = fyne.TextStyle{Bold: true}
+// 	warningLabel := widget.NewLabel("Setting thoses parameters will affect your palette, you can't force palette.")
+// 	warningLabel.TextStyle = fyne.TextStyle{Bold: true}
 
-	oneLine := widget.NewCheck("Every other line", func(b bool) {
-		me.Cfg.ScrCfg.Process.OneLine = b
-	})
-	oneRow := widget.NewCheck("Every other row", func(b bool) {
-		me.Cfg.ScrCfg.Process.OneRow = b
-	})
+// 	oneLine := widget.NewCheck("Every other line", func(b bool) {
+// 		me.Cfg.ScrCfg.Process.OneLine = b
+// 	})
+// 	oneRow := widget.NewCheck("Every other row", func(b bool) {
+// 		me.Cfg.ScrCfg.Process.OneRow = b
+// 	})
 
-	editButton := widget.NewButtonWithIcon("Edit", theme.DocumentCreateIcon(), func() {
-		p := constants.CpcOldPalette
-		if me.Cfg.ScrCfg.IsPlus {
-			p = constants.CpcPlusPalette
-		}
-		if me.CpcImage().Image == nil || me.PaletteImage().Image == nil {
-			return
-		}
-		edit := editor.NewEditor(me.CpcImage().Image,
-			editor.MagnifyX2,
-			me.Palette(),
-			p, me.SetImagePalette,
-			m.window)
+// 	editButton := widget.NewButtonWithIcon("Edit", theme.DocumentCreateIcon(), func() {
+// 		p := constants.CpcOldPalette
+// 		if me.Cfg.ScrCfg.IsPlus {
+// 			p = constants.CpcPlusPalette
+// 		}
+// 		if me.CpcImage().Image == nil || me.PaletteImage().Image == nil {
+// 			return
+// 		}
+// 		edit := editor.NewEditor(me.CpcImage().Image,
+// 			editor.MagnifyX2,
+// 			me.Palette(),
+// 			p, me.SetImagePalette,
+// 			m.window)
 
-		d := dialog.NewCustom("Editor", "Ok", edit.NewEditor(), m.window)
-		size := m.window.Content().Size()
-		size = fyne.Size{Width: size.Width, Height: size.Height}
-		d.Resize(size)
-		d.Show()
-		// after the me.CpcImage().Image must be used to export
-	})
-	return container.New(
-		layout.NewGridLayoutWithColumns(2),
-		container.New(
-			layout.NewGridLayoutWithRows(2),
-			container.NewScroll(
-				me.OriginalImage()),
-			container.NewScroll(
-				me.CpcImage()),
-		),
-		container.New(
-			layout.NewVBoxLayout(),
-			container.New(
-				layout.NewHBoxLayout(),
-				openFileWidget,
+// 		d := dialog.NewCustom("Editor", "Ok", edit.NewEditor(), m.window)
+// 		size := m.window.Content().Size()
+// 		size = fyne.Size{Width: size.Width, Height: size.Height}
+// 		d.Resize(size)
+// 		d.Show()
+// 		// after the me.CpcImage().Image must be used to export
+// 	})
+// 	return container.New(
+// 		layout.NewGridLayoutWithColumns(2),
+// 		container.New(
+// 			layout.NewGridLayoutWithRows(2),
+// 			container.NewScroll(
+// 				me.OriginalImage()),
+// 			container.NewScroll(
+// 				me.CpcImage()),
+// 		),
+// 		container.New(
+// 			layout.NewVBoxLayout(),
+// 			container.New(
+// 				layout.NewHBoxLayout(),
+// 				openFileWidget,
 
-				exportButton,
-				importOpen,
-				editButton,
-			),
-			container.New(
-				layout.NewVBoxLayout(),
-				isPlus,
-				winFormat,
+// 				exportButton,
+// 				importOpen,
+// 				editButton,
+// 			),
+// 			container.New(
+// 				layout.NewVBoxLayout(),
+// 				isPlus,
+// 				winFormat,
 
-				container.New(
-					layout.NewVBoxLayout(),
-					container.New(
-						layout.NewGridLayoutWithColumns(2),
-						modeLabel,
-						modes,
-					),
-				),
-			),
-			container.New(
-				layout.NewGridLayoutWithRows(7),
-				container.New(
-					layout.NewGridLayoutWithRows(2),
-					container.New(
-						layout.NewGridLayoutWithColumns(2),
-						resizeLabel,
-						resize,
-					),
-					container.New(
-						layout.NewGridLayoutWithColumns(4),
-						enableDithering,
-						dithering,
-						ditheringMultiplier,
-						ditheringWithQuantification,
-					),
-				),
-				container.New(
-					layout.NewGridLayoutWithRows(2),
-					me.PaletteImage(),
-					container.New(
-						layout.NewHBoxLayout(),
-						forcePalette,
-						paletteOpen,
-						widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
-							w2.SwapColor(m.SetPalette, me.Palette(), m.window, func() {
-								forcePalette.SetChecked(true)
-							})
-						}),
-						m.newImageMenuExportButton(me),
-						widget.NewButton("Gray", func() {
-							if me.Cfg.ScrCfg.IsPlus {
-								me.SetPalette(ci.MonochromePalette(me.Palette()))
-								me.SetPaletteImage(png.PalToImage(me.Palette()))
-								forcePalette.SetChecked(true)
-								forcePalette.Refresh()
-							}
-						}),
-					),
-				),
-				container.New(
-					layout.NewHBoxLayout(),
-					oneLine,
-					oneRow,
-				),
-				container.New(
-					layout.NewHBoxLayout(),
-					warningLabel,
-				),
-				container.New(
-					layout.NewHBoxLayout(),
-					colorReducerLabel,
-					colorReducer,
-				),
-				container.New(
-					layout.NewVBoxLayout(),
-					container.New(
-						layout.NewGridLayoutWithColumns(2),
-						brightnessLabel,
-						brightness,
-					),
-					container.New(
-						layout.NewGridLayoutWithColumns(2),
-						saturationLabel,
-						saturation,
-					),
-				),
-				container.New(
-					layout.NewGridLayoutWithRows(2),
-					widget.NewButton("show cmd", func() {
-						e := widget.NewMultiLineEntry()
-						e.SetText(me.CmdLine())
+// 				container.New(
+// 					layout.NewVBoxLayout(),
+// 					container.New(
+// 						layout.NewGridLayoutWithColumns(2),
+// 						modeLabel,
+// 						modes,
+// 					),
+// 				),
+// 			),
+// 			container.New(
+// 				layout.NewGridLayoutWithRows(7),
+// 				container.New(
+// 					layout.NewGridLayoutWithRows(2),
+// 					container.New(
+// 						layout.NewGridLayoutWithColumns(2),
+// 						resizeLabel,
+// 						resize,
+// 					),
+// 					container.New(
+// 						layout.NewGridLayoutWithColumns(4),
+// 						enableDithering,
+// 						dithering,
+// 						ditheringMultiplier,
+// 						ditheringWithQuantification,
+// 					),
+// 				),
+// 				container.New(
+// 					layout.NewGridLayoutWithRows(2),
+// 					me.PaletteImage(),
+// 					container.New(
+// 						layout.NewHBoxLayout(),
+// 						forcePalette,
+// 						paletteOpen,
+// 						widget.NewButtonWithIcon("Swap", theme.ColorChromaticIcon(), func() {
+// 							w2.SwapColor(m.SetPalette, me.Palette(), m.window, func() {
+// 								forcePalette.SetChecked(true)
+// 							})
+// 						}),
+// 						m.newImageMenuExportButton(me),
+// 						widget.NewButton("Gray", func() {
+// 							if me.Cfg.ScrCfg.IsPlus {
+// 								me.SetPalette(ci.MonochromePalette(me.Palette()))
+// 								me.SetPaletteImage(png.PalToImage(me.Palette()))
+// 								forcePalette.SetChecked(true)
+// 								forcePalette.Refresh()
+// 							}
+// 						}),
+// 					),
+// 				),
+// 				container.New(
+// 					layout.NewHBoxLayout(),
+// 					oneLine,
+// 					oneRow,
+// 				),
+// 				container.New(
+// 					layout.NewHBoxLayout(),
+// 					warningLabel,
+// 				),
+// 				container.New(
+// 					layout.NewHBoxLayout(),
+// 					colorReducerLabel,
+// 					colorReducer,
+// 				),
+// 				container.New(
+// 					layout.NewVBoxLayout(),
+// 					container.New(
+// 						layout.NewGridLayoutWithColumns(2),
+// 						brightnessLabel,
+// 						brightness,
+// 					),
+// 					container.New(
+// 						layout.NewGridLayoutWithColumns(2),
+// 						saturationLabel,
+// 						saturation,
+// 					),
+// 				),
+// 				container.New(
+// 					layout.NewGridLayoutWithRows(2),
+// 					widget.NewButton("show cmd", func() {
+// 						e := widget.NewMultiLineEntry()
+// 						e.SetText(me.CmdLine())
 
-						d := dialog.NewCustom("Command line generated",
-							"Ok",
-							e,
-							m.window)
-						log.GetLogger().Info("%s\n", me.CmdLine())
-						size := m.window.Content().Size()
-						size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
-						d.Resize(size)
-						d.Show()
-					}),
-					applyButton,
-				),
-			),
-		),
-	)
-}
+// 						d := dialog.NewCustom("Command line generated",
+// 							"Ok",
+// 							e,
+// 							m.window)
+// 						log.GetLogger().Info("%s\n", me.CmdLine())
+// 						size := m.window.Content().Size()
+// 						size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
+// 						d.Resize(size)
+// 						d.Show()
+// 					}),
+// 					applyButton,
+// 				),
+// 			),
+// 		),
+// 	)
+// }

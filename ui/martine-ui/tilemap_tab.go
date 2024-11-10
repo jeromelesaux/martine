@@ -9,7 +9,6 @@ import (
 	"strconv"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/validation"
 	"fyne.io/fyne/v2/dialog"
@@ -81,13 +80,7 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 
 	me.Result = analyze
 	me.SetPalette(palette)
-	tilesCanvas := wgt.NewImageTableCache(len(tiles), len(tiles[0]), fyne.NewSize(50, 50), me.TileSelected)
-	for i, v := range tiles {
-		for i2, v2 := range v {
-			tilesCanvas.Set(i, i2, canvas.NewImageFromImage(v2))
-		}
-	}
-	me.TileImages.Update(tilesCanvas, len(tiles)-1, len(tiles[0])-1)
+	me.SetNewTilesImages(tiles)
 	me.SetPaletteImage(png.PalToImage(me.Palette()))
 }
 
@@ -122,11 +115,17 @@ func (m *MartineUI) newImageMenuExportButton(tm *menu.ImageMenu) *widget.Button 
 	})
 }
 
-func (m *MartineUI) SetTileImage(i image.Image, p color.Palette) {
+func (m *MartineUI) SetTileImage(newTile image.Image, p color.Palette) {
 	if m.tilemap.Result == nil {
 		return
 	}
-	// set the tile to replace
+	// set the tile to replace in result
+	m.tilemap.Result.ReplaceTileAt(m.tilemap.Row, m.tilemap.Col, newTile)
+	// get all the positions of the new Tile
+
+	m.tilemap.SetNewTilesImages(m.tilemap.Result.TilesImage())
+
+	// display in tiles display widget
 }
 
 // nolint: funlen, gocognit

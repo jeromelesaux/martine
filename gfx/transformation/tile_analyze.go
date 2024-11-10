@@ -173,6 +173,39 @@ func (a *AnalyzeBoard) TileIndex(tile *Tile, tiles []BoardTile) int {
 	return 0
 }
 
+// return the image in tiles image
+func (a *AnalyzeBoard) TilesImage() [][]image.Image {
+
+	tiles := make([][]image.Image, len(a.TileMap))
+	for x := 0; x < len(a.TileMap); x++ {
+		tiles[x] = make([]image.Image, len(a.TileMap[x]))
+		for y := 0; y < len(a.TileMap[x]); y++ {
+			tileIndex := a.TileMap[x][y]
+			tiles[x][y] = a.BoardTiles[tileIndex].Tile.Image()
+		}
+	}
+	return tiles
+}
+
+func (a *AnalyzeBoard) ReplaceTileAt(row, col int, newTile image.Image) int {
+
+	t := TileFromImage(a.Tiles[row][col].(*image.NRGBA))
+	newT := TileFromImage(newTile.(*image.NRGBA))
+	var index = -1
+	for i, v := range a.BoardTiles {
+		if TilesAreEquals(t, v.Tile) {
+			index = i
+			break
+		}
+	}
+
+	if index != -1 {
+		a.BoardTiles[index].Tile = newT
+
+	}
+	return index
+}
+
 func (a *AnalyzeBoard) Palette() color.Palette {
 	log.GetLogger().Info("Getting global tiles palette...\n")
 	var p color.Palette

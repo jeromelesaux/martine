@@ -84,6 +84,13 @@ func (m *MartineUI) NewTabs() *container.AppTabs {
 	)
 }
 
+func (m *MartineUI) SetOriginalImagePath(path fyne.URI) {
+	m.main.SetOriginalImagePath(path)
+	m.egx.LeftImage.SetOriginalImagePath(path)
+	m.egx.RightImage.SetOriginalImagePath(path)
+	m.tilemap.SetOriginalImagePath(path)
+}
+
 func (m *MartineUI) SetImage(img image.Image) {
 	m.main.SetOriginalImage(img)
 	m.egx.LeftImage.SetOriginalImage(img)

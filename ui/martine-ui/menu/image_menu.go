@@ -61,12 +61,14 @@ type ImageMenu struct {
 func NewImageMenu() *ImageMenu {
 	return &ImageMenu{
 		originalImage: &canvas.Image{},
-		cpcImage:      &canvas.Image{},
-		paletteImage:  &canvas.Image{},
-		width:         widget.NewEntry(),
-		height:        widget.NewEntry(),
-		Downgraded:    &image.NRGBA{},
-		Cfg:           config.NewMartineConfig("", ""),
+		cpcImage: &canvas.Image{
+			FillMode: canvas.ImageFillStretch,
+		},
+		paletteImage: &canvas.Image{},
+		width:        widget.NewEntry(),
+		height:       widget.NewEntry(),
+		Downgraded:   &image.NRGBA{},
+		Cfg:          config.NewMartineConfig("", ""),
 	}
 }
 
@@ -85,8 +87,8 @@ func (i *ImageMenu) Palette() color.Palette {
 }
 
 func (i *ImageMenu) SetPaletteImage(img image.Image) {
-	i.paletteImage.Image = img
-	i.paletteImage.Refresh()
+	i.PaletteImage().Image = img
+	i.PaletteImage().Refresh()
 }
 
 func (i *ImageMenu) PaletteImage() *canvas.Image {
@@ -98,9 +100,8 @@ func (i *ImageMenu) CpcImage() *canvas.Image {
 }
 
 func (i *ImageMenu) SetCpcImage(img image.Image) {
-	i.cpcImage.Image = img
-	i.cpcImage.FillMode = canvas.ImageFillStretch
-	i.cpcImage.Refresh()
+	i.CpcImage().Image = img
+	i.CpcImage().Refresh()
 }
 
 func (i *ImageMenu) OriginalImagePath() string {

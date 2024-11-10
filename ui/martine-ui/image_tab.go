@@ -96,6 +96,7 @@ func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 	}
 	me.SetCpcImage(me.Downgraded)
 	me.SetPaletteImage(png.PalToImage(me.Palette()))
+	//m.window.Content().Refresh()
 }
 
 // nolint: funlen
@@ -119,7 +120,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 				return
 			}
 			directory.SetImportDirectoryURI(reader.URI())
-			me.SetOriginalImagePath(reader.URI())
+			m.SetOriginalImagePath(reader.URI())
 			img, err := openImage(me.OriginalImagePath())
 			if err != nil {
 				dialog.ShowError(err, m.window)

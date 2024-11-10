@@ -491,7 +491,13 @@ func fillImage(m image.Image, scenes []*image.NRGBA, nbTilePixelHigh, nbTilePixe
 }
 
 // nolint: funlen
-func TilemapRaw(mode uint8, isCpcPlus bool, size constants.Size, in image.Image, cfg *config.MartineConfig, tilesHistoric *sprite.TilesHistorical) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette, error) {
+func TilemapRaw(
+	mode uint8,
+	isCpcPlus bool,
+	size constants.Size,
+	in image.Image,
+	cfg *config.MartineConfig,
+	tilesHistoric *sprite.TilesHistorical) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette, error) {
 	/*
 		8x8 : 40x25
 		16x8 : 20x25
