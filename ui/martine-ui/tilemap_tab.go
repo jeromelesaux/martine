@@ -125,7 +125,8 @@ func (m *MartineUI) SetTileImage(newTile image.Image, p color.Palette) {
 	// get all the positions of the new Tile
 
 	// display in tiles display widget
-	m.tilemap.SetNewTilesImages(m.tilemap.Result.TilesImage())
+	m.tilemap.Result.Tiles = m.tilemap.Result.TilesImage()
+	m.tilemap.SetNewTilesImages(m.tilemap.Result.Tiles)
 
 	m.window.Content().Refresh()
 }
