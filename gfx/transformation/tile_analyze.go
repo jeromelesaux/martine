@@ -187,13 +187,12 @@ func (a *AnalyzeBoard) TilesImage() [][]image.Image {
 	return tiles
 }
 
-func (a *AnalyzeBoard) ReplaceTileAt(row, col int, newTile image.Image) int {
+func (a *AnalyzeBoard) ReplaceTileAt(row, col int, newTile image.Image, prevTile Tile) int {
 
-	t := TileFromImage(a.Tiles[row][col].(*image.NRGBA))
 	newT := TileFromImage(newTile.(*image.NRGBA))
 	var index = -1
 	for i, v := range a.BoardTiles {
-		if TilesAreEquals(t, v.Tile) {
+		if TilesAreEquals(&prevTile, v.Tile) {
 			index = i
 			break
 		}

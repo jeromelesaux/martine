@@ -25,6 +25,11 @@ type TilemapMenu struct {
 	Col          int
 	Row          int
 	tileImage    image.Image
+	currentTile  transformation.Tile
+}
+
+func (tm *TilemapMenu) CurrentTile() transformation.Tile {
+	return tm.currentTile
 }
 
 func (tm *TilemapMenu) ResetExport() {
@@ -112,6 +117,7 @@ func (me *TilemapMenu) TileSelected(row, col int) {
 	}
 	if row < len(me.Result.Tiles) && col < len(me.Result.Tiles[0]) {
 		tile := me.Result.Tiles[row][col]
+		me.currentTile = *transformation.TileFromImage(tile.(*image.NRGBA))
 		me.tileImage = tile
 	}
 }

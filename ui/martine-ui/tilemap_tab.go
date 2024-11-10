@@ -120,12 +120,14 @@ func (m *MartineUI) SetTileImage(newTile image.Image, p color.Palette) {
 		return
 	}
 	// set the tile to replace in result
-	m.tilemap.Result.ReplaceTileAt(m.tilemap.Row, m.tilemap.Col, newTile)
+	prevTile := m.tilemap.CurrentTile()
+	m.tilemap.Result.ReplaceTileAt(m.tilemap.Row, m.tilemap.Col, newTile, prevTile)
 	// get all the positions of the new Tile
 
+	// display in tiles display widget
 	m.tilemap.SetNewTilesImages(m.tilemap.Result.TilesImage())
 
-	// display in tiles display widget
+	m.window.Content().Refresh()
 }
 
 // nolint: funlen, gocognit

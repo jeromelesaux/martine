@@ -21,7 +21,7 @@ var swapColorContainer *fyne.Container
 
 func SwapColor(setPalette func(color.Palette), p color.Palette, w fyne.Window, performActionAfter func()) {
 	selectedColor.SetMinSize(fyne.NewSize(30, 30))
-	selectedColorContainer = container.New(layout.NewMaxLayout(), selectedColor)
+	selectedColorContainer = container.New(layout.NewStackLayout(), selectedColor)
 	pt := wgt.NewPaletteTable(p, colorChanged, indexColor, nil)
 
 	swapColorContainer = container.NewGridWithColumns(
