@@ -18,6 +18,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
+	"github.com/jeromelesaux/fyne-io/widget/editor"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
@@ -80,7 +81,7 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 
 	me.Result = analyze
 	me.SetPalette(palette)
-	tilesCanvas := wgt.NewImageTableCache(len(tiles), len(tiles[0]), fyne.NewSize(50, 50))
+	tilesCanvas := wgt.NewImageTableCache(len(tiles), len(tiles[0]), fyne.NewSize(50, 50), me.TileSelected)
 	for i, v := range tiles {
 		for i2, v2 := range v {
 			tilesCanvas.Set(i, i2, canvas.NewImageFromImage(v2))
@@ -119,6 +120,13 @@ func (m *MartineUI) newImageMenuExportButton(tm *menu.ImageMenu) *widget.Button 
 		}
 		d.Show()
 	})
+}
+
+func (m *MartineUI) SetTileImage(i image.Image, p color.Palette) {
+	if m.tilemap.Result == nil {
+		return
+	}
+	// set the tile to replace
 }
 
 // nolint: funlen, gocognit
@@ -237,7 +245,29 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 	heightLabel := widget.NewLabel("Height")
 	tm.Height().Validator = validation.NewRegexp("\\d+", "Must contain a number")
 
-	tm.TileImages = wgt.NewEmptyImageTable(fyne.NewSize(menu.TileSize, menu.TileSize))
+	tm.TileImages = wgt.NewEmptyImageTable(fyne.NewSize(menu.TileSize, menu.TileSize), tm.TileSelected)
+
+	editButton := widget.NewButtonWithIcon("Edit", theme.DocumentCreateIcon(), func() {
+		p := constants.CpcOldPalette
+		if tm.Cfg.ScrCfg.IsPlus {
+			p = constants.CpcPlusPalette
+		}
+		if tm.TileImage() == nil || tm.PaletteImage().Image == nil {
+			return
+		}
+		edit := editor.NewEditor(tm.TileImage(),
+			editor.MagnifyX8,
+			tm.Palette(),
+			p, m.SetTileImage,
+			m.window)
+
+		d := dialog.NewCustom("Editor Selected Tile", "Ok", edit.NewEditor(), m.window)
+		size := m.window.Content().Size()
+		size = fyne.Size{Width: size.Width, Height: size.Height}
+		d.Resize(size)
+		d.Show()
+		// after the me.CpcImage().Image must be used to export
+	})
 
 	return container.New(
 		layout.NewGridLayoutWithColumns(2),
@@ -322,6 +352,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 						}),
 
 						applyButton,
+						editButton,
 					),
 				),
 			),

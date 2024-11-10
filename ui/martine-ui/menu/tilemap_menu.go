@@ -2,6 +2,7 @@ package menu
 
 import (
 	"fmt"
+	"image"
 	"os"
 	"strconv"
 
@@ -20,6 +21,9 @@ type TilemapMenu struct {
 	TileImages   *w.ImageTable
 	ExportZigzag bool
 	Historic     *sprite.TilesHistorical
+	col          int
+	row          int
+	tileImage    image.Image
 }
 
 func (tm *TilemapMenu) ResetExport() {
@@ -27,11 +31,12 @@ func (tm *TilemapMenu) ResetExport() {
 }
 
 func NewTilemapMenu() *TilemapMenu {
-	return &TilemapMenu{
-		ImageMenu:  NewImageMenu(),
-		Result:     &transformation.AnalyzeBoard{},
-		TileImages: w.NewEmptyImageTable(fyne.NewSize(TileSize, TileSize)),
+	t := &TilemapMenu{
+		ImageMenu: NewImageMenu(),
+		Result:    &transformation.AnalyzeBoard{},
 	}
+	t.TileImages = w.NewEmptyImageTable(fyne.NewSize(TileSize, TileSize), t.TileSelected)
+	return t
 }
 
 func (i *TilemapMenu) CmdLine() string {
@@ -93,4 +98,23 @@ func (i *TilemapMenu) CmdLine() string {
 	exec += " -tilemap"
 	i.CmdLineGenerate = exec
 	return exec
+}
+
+func (me *TilemapMenu) TileSelected(row, col int) {
+	if row < 0 || col < 0 {
+		return
+	}
+	me.row = row
+	me.col = col
+	if me.Result == nil {
+		return
+	}
+	if row < len(me.Result.Tiles) && col < len(me.Result.Tiles[0]) {
+		tile := me.Result.Tiles[row][col]
+		me.tileImage = tile
+	}
+}
+
+func (me *TilemapMenu) TileImage() image.Image {
+	return me.tileImage
 }

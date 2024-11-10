@@ -86,7 +86,7 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 	s.SpritesCollection = sprites
 	s.SpritesData = raw
 
-	icache := wgt.NewImageTableCache(s.SpriteColumns, s.SpriteRows, fyne.NewSize(50, 50))
+	icache := wgt.NewImageTableCache(s.SpriteColumns, s.SpriteRows, fyne.NewSize(50, 50), nil)
 
 	for x := 0; x < s.SpriteColumns; x++ {
 		for y := 0; y < s.SpriteRows; y++ {
@@ -369,7 +369,7 @@ func applySpriteBoardFromGif(s *menu.SpriteMenu, m *MartineUI) *widget.Button {
 			s.SpritesData[0] = raw
 			s.SpriteColumns = 1
 			s.SpriteRows = len(resized)
-			icache := wgt.NewImageTableCache(s.SpriteColumns, s.SpriteRows, fyne.NewSize(50, 50))
+			icache := wgt.NewImageTableCache(s.SpriteColumns, s.SpriteRows, fyne.NewSize(50, 50), nil)
 
 			for x := 0; x < s.SpriteColumns; x++ {
 				for y := 0; y < s.SpriteRows; y++ {
@@ -436,7 +436,7 @@ func ImportSpriteBoard(m *MartineUI) *widget.Button {
 					}
 				}
 
-				icache := wgt.NewImageTableCache(m.sprite.SpriteRows, m.sprite.SpriteColumns, fyne.NewSize(50, 50))
+				icache := wgt.NewImageTableCache(m.sprite.SpriteRows, m.sprite.SpriteColumns, fyne.NewSize(50, 50), nil)
 
 				for y := 0; y < m.sprite.SpriteColumns; y++ {
 					for x := 0; x < m.sprite.SpriteRows; x++ {
@@ -490,7 +490,7 @@ func ImportSpriteBoard(m *MartineUI) *widget.Button {
 					}
 				}
 
-				icache := wgt.NewImageTableCache(m.sprite.SpriteRows, m.sprite.SpriteColumns, fyne.NewSize(50, 50))
+				icache := wgt.NewImageTableCache(m.sprite.SpriteRows, m.sprite.SpriteColumns, fyne.NewSize(50, 50), nil)
 
 				for y := 0; y < m.sprite.SpriteColumns; y++ {
 					for x := 0; x < m.sprite.SpriteRows; x++ {

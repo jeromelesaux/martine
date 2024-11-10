@@ -73,7 +73,7 @@ func (s *SpriteMenu) OriginalBoard() *canvas.Image {
 func NewSpriteMenu() *SpriteMenu {
 	return &SpriteMenu{
 		originalBoard:     &canvas.Image{},
-		OriginalImages:    w.NewEmptyImageTable(fyne.NewSize(SpriteSize, SpriteSize)),
+		OriginalImages:    w.NewEmptyImageTable(fyne.NewSize(SpriteSize, SpriteSize), nil),
 		SpritesCollection: make([][]*image.NRGBA, 0),
 		SpritesData:       make([][][]byte, 0),
 		originalPalette:   &canvas.Image{},
