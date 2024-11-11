@@ -78,8 +78,8 @@ func (i *ImageMenu) SetWindow(w fyne.Window) {
 
 func (i *ImageMenu) SetPalette(p color.Palette) {
 	i.Cfg.PalCfg.Palette = p
-	i.SetPaletteImage(png.PalToImage(i.Palette()))
-	i.paletteImage.Refresh()
+	i.paletteImage.Image = png.PalToImage(i.Palette())
+	//i.paletteImage.Refresh()
 }
 
 func (i *ImageMenu) Palette() color.Palette {
@@ -87,8 +87,8 @@ func (i *ImageMenu) Palette() color.Palette {
 }
 
 func (i *ImageMenu) SetPaletteImage(img image.Image) {
-	i.PaletteImage().Image = img
-	i.PaletteImage().Refresh()
+	i.paletteImage.Image = img
+	i.paletteImage.Refresh()
 }
 
 func (i *ImageMenu) PaletteImage() *canvas.Image {

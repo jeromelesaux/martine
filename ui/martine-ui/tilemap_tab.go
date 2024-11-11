@@ -82,6 +82,7 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 	me.SetPalette(palette)
 	me.SetNewTilesImages(tiles)
 	me.SetPaletteImage(png.PalToImage(me.Palette()))
+
 }
 
 func (m *MartineUI) newImageMenuExportButton(tm *menu.ImageMenu) *widget.Button {
@@ -323,7 +324,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 					layout.NewGridLayoutWithRows(6),
 
 					container.New(
-						layout.NewVBoxLayout(),
+						layout.NewGridLayoutWithRows(2),
 						tm.PaletteImage(),
 						container.New(
 							layout.NewHBoxLayout(),
