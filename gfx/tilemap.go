@@ -267,7 +267,7 @@ func TilemapClassical(mode uint8, isCpcPlus bool, filename, picturePath string, 
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
 	m := ci.Resize(in, mapSize, cfg.ScrCfg.Process.ResizingAlgo)
 	var palette color.Palette
-	palette = ci.ExtractPalette(m, isCpcPlus, cfg.ScrCfg.Size.ColorsAvailable)
+	palette, _, _ = ci.DowngradingPalette(m, cfg.ScrCfg.Size, isCpcPlus)
 	refPalette := constants.CpcOldPalette
 	if cfg.ScrCfg.IsPlus {
 		refPalette = constants.CpcPlusPalette

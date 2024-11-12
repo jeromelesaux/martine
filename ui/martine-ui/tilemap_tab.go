@@ -134,6 +134,7 @@ func (m *MartineUI) SetTileImage(newTile image.Image, p color.Palette) {
 
 // nolint: funlen, gocognit
 func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
+	tm.Cfg.ScrCfg.Size.ColorsAvailable = constants.Mode0.ColorsAvailable // default value
 	tm.ImageMenu.SetWindow(m.window)
 	tm.Cfg.ScrCfg.Type = config.SpriteFormat
 	importOpen := newImportButton(m, tm.ImageMenu)
