@@ -279,7 +279,6 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 				openFileWidget,
 				exportButton,
 				importOpen,
-				editButton,
 			),
 			container.New(
 				layout.NewVBoxLayout(),
@@ -403,6 +402,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 						d.Show()
 					}),
 					applyButton,
+					editButton,
 				),
 			),
 		),
