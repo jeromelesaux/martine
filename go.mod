@@ -41,7 +41,7 @@ require (
 	github.com/go-text/typesetting v0.2.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
-	github.com/jeromelesaux/fyne-io v0.0.0-20241116153526-153ff10165e4
+	github.com/jeromelesaux/fyne-io v0.0.0-20241116172031-0b3e57a8b49b
 	github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/muesli/clusters v0.0.0-20200529215643-2700303c1762 // indirect
