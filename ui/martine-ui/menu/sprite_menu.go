@@ -161,3 +161,7 @@ func (s *SpriteMenu) CmdLine() string {
 	s.CmdLineGenerate = exec
 	return exec
 }
+
+func (s *SpriteMenu) SetOrderedPalette(p color.Palette) {
+	s.SetPalette(p)
+}

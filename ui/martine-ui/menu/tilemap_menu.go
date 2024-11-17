@@ -41,7 +41,10 @@ func NewTilemapMenu() *TilemapMenu {
 		ImageMenu: NewImageMenu(),
 		Result:    &transformation.AnalyzeBoard{},
 	}
-	t.TileImages = w.NewEmptyImageTable(fyne.NewSize(TileSize, TileSize), t.TileSelected)
+	t.TileImages = w.NewEmptyImageTable(
+		fyne.NewSize(TileSize, TileSize),
+		t.TileSelected,
+	)
 	return t
 }
 

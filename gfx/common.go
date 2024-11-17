@@ -346,6 +346,11 @@ func ApplyOneImage(in image.Image,
 	var newPalette color.Palette
 	var out *image.NRGBA
 	var err error
+	var ownPalette bool
+
+	if len(palette) > 0 {
+		ownPalette = true
+	}
 
 	out = ci.Resize(in, cfg.ScrCfg.Size, cfg.ScrCfg.Process.ResizingAlgo)
 	if cfg.ScrCfg.Process.Kmeans.Used {
@@ -360,7 +365,7 @@ func ApplyOneImage(in image.Image,
 		out = ci.Reducer(out, cfg.ScrCfg.Process.Reducer)
 	}
 
-	if len(palette) > 0 {
+	if ownPalette {
 		newPalette, out = ci.DowngradingWithPalette(out, palette)
 	} else {
 		newPalette, out, err = ci.DowngradingPalette(out, cfg.ScrCfg.Size, cfg.ScrCfg.IsPlus)
@@ -387,7 +392,11 @@ func ApplyOneImage(in image.Image,
 		paletteToSort = newPalette
 	}
 	paletteToSort = constants.FillColorPalette(paletteToSort)
-	newPalette = constants.SortColorsByDistance(paletteToSort)
+	if !ownPalette {
+		newPalette = constants.SortColorsByDistance(paletteToSort)
+	} else {
+		newPalette = paletteToSort
+	}
 	if cfg.ScrCfg.Process.ApplyDithering {
 		out, _ = DoDithering(
 			out,
@@ -413,7 +422,11 @@ func ApplyOneImage(in image.Image,
 			paletteToSort = newPalette
 		}
 		paletteToSort = constants.FillColorPalette(paletteToSort)
-		newPalette = constants.SortColorsByDistance(paletteToSort)
+		if !ownPalette {
+			newPalette = constants.SortColorsByDistance(paletteToSort)
+		} else {
+			newPalette = paletteToSort
+		}
 	}
 	var data []byte
 	var lineSize int
@@ -457,10 +470,16 @@ func ExportRawImage(in image.Image,
 	filename, picturePath string,
 	mode uint8) error {
 	var err error
-	//check the palette and sort it
-	palette = constants.FillColorPalette(palette)
-	palette = constants.SortColorsByDistance(palette)
+	var ownPalette bool
 
+	if len(palette) > 0 {
+		ownPalette = true
+	}
+	if !ownPalette {
+		//check the palette and sort it
+		palette = constants.FillColorPalette(palette)
+		palette = constants.SortColorsByDistance(palette)
+	}
 	// at least resize the image to be sure
 	out := ci.Resize(in, cfg.ScrCfg.Size, cfg.ScrCfg.Process.ResizingAlgo)
 	if cfg.ScrCfg.Process.Kmeans.Used {

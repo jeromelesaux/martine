@@ -79,7 +79,7 @@ func (i *ImageMenu) SetWindow(w fyne.Window) {
 func (i *ImageMenu) SetPalette(p color.Palette) {
 	i.Cfg.PalCfg.Palette = p
 	i.paletteImage.Image = png.PalToImage(i.Palette())
-	//i.paletteImage.Refresh()
+	i.paletteImage.Refresh()
 }
 
 func (i *ImageMenu) Palette() color.Palette {
@@ -647,4 +647,10 @@ func (me *ImageMenu) NewFormatRadio() *widget.Select {
 	})
 	winFormat.SetSelected("Normal")
 	return winFormat
+}
+
+func (i *ImageMenu) SetOrderedPalette(p color.Palette) {
+	i.SetPalette(p)
+	i.UsePalette = true
+	i.Edited = true
 }

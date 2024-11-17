@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/fyne-io/widget/editor"
+	"github.com/jeromelesaux/fyne-io/widget/palette/orderer"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert/image"
 	"github.com/jeromelesaux/martine/log"
@@ -263,6 +264,15 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 		// after the me.CpcImage().Image must be used to export
 	})
 
+	organizePalButton := widget.NewButtonWithIcon("Organize", theme.ContentPasteIcon(), func() {
+		organizePalette := orderer.NewOrderer(me.Palette(), me.SetOrderedPalette)
+		d := dialog.NewCustom("Edit Palette", "Cancel", organizePalette.NewOrderer(), m.window)
+		size := m.window.Content().Size()
+		size = fyne.Size{Width: size.Width, Height: size.Height}
+		d.Resize(size)
+		d.Show()
+	})
+
 	return container.New(
 		layout.NewGridLayoutWithColumns(2),
 		container.New(
@@ -364,6 +374,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 								})
 							}
 						}),
+						organizePalButton,
 					),
 				),
 				container.New(
