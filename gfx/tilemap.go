@@ -263,17 +263,26 @@ func ExportTilemapClassical(m image.Image, filename string, palette color.Palett
 	return board.SaveHistoric(cfg.ScrCfg.OutputPath)
 }
 
-func TilemapClassical(mode uint8, isCpcPlus bool, filename, picturePath string, in image.Image, size constants.Size, cfg *config.MartineConfig, tilesHistoric *sprite.TilesHistorical) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette) {
+func TilemapClassical(
+	mode uint8,
+	isCpcPlus bool,
+	filename, picturePath string,
+	palette color.Palette,
+	in image.Image,
+	size constants.Size,
+	cfg *config.MartineConfig,
+	tilesHistoric *sprite.TilesHistorical) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette) {
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
 	m := ci.Resize(in, mapSize, cfg.ScrCfg.Process.ResizingAlgo)
-	var palette color.Palette
-	palette, _, _ = ci.DowngradingPalette(m, cfg.ScrCfg.Size, isCpcPlus)
-	refPalette := constants.CpcOldPalette
-	if cfg.ScrCfg.IsPlus {
-		refPalette = constants.CpcPlusPalette
+	if len(palette) == 0 {
+		palette, _, _ = ci.DowngradingPalette(m, cfg.ScrCfg.Size, isCpcPlus)
+		refPalette := constants.CpcOldPalette
+		if cfg.ScrCfg.IsPlus {
+			refPalette = constants.CpcPlusPalette
+		}
+		palette = ci.ToCPCPalette(palette, refPalette)
+		palette = constants.SortColorsByDistance(palette)
 	}
-	palette = ci.ToCPCPalette(palette, refPalette)
-	palette = constants.SortColorsByDistance(palette)
 	_, m = ci.DowngradingWithPalette(m, palette)
 	tilemap := transformation.AnalyzeTilesBoard(m, size, tilesHistoric)
 	var tilesImagesTilemap [][]image.Image
@@ -496,6 +505,7 @@ func TilemapRaw(
 	isCpcPlus bool,
 	size constants.Size,
 	in image.Image,
+	palette color.Palette,
 	cfg *config.MartineConfig,
 	tilesHistoric *sprite.TilesHistorical) (*transformation.AnalyzeBoard, [][]image.Image, color.Palette, error) {
 	/*
@@ -503,7 +513,7 @@ func TilemapRaw(
 		16x8 : 20x25
 		16x16 : 20x24
 	*/
-	var palette color.Palette
+
 	var tilesImagesTilemap [][]image.Image
 	nbPixelWidth := 0
 
@@ -532,17 +542,19 @@ func TilemapRaw(
 	}
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: cfg.ScrCfg.Size.ColorsAvailable}
 	m := ci.Resize(in, mapSize, cfg.ScrCfg.Process.ResizingAlgo)
-	if isCpcPlus {
-		palette, _, _ = ci.DowngradingPalette(m, mapSize, isCpcPlus)
-	} else {
-		palette = ci.ExtractPalette(m, isCpcPlus, cfg.ScrCfg.Size.ColorsAvailable)
+	if len(palette) == 0 {
+		if isCpcPlus {
+			palette, _, _ = ci.DowngradingPalette(m, mapSize, isCpcPlus)
+		} else {
+			palette = ci.ExtractPalette(m, isCpcPlus, cfg.ScrCfg.Size.ColorsAvailable)
+		}
+		refPalette := constants.CpcOldPalette
+		if cfg.ScrCfg.IsPlus {
+			refPalette = constants.CpcPlusPalette
+		}
+		palette = ci.ToCPCPalette(palette, refPalette)
+		palette = constants.SortColorsByDistance(palette)
 	}
-	refPalette := constants.CpcOldPalette
-	if cfg.ScrCfg.IsPlus {
-		refPalette = constants.CpcPlusPalette
-	}
-	palette = ci.ToCPCPalette(palette, refPalette)
-	palette = constants.SortColorsByDistance(palette)
 	_, m = ci.DowngradingWithPalette(m, palette)
 
 	analyze := transformation.AnalyzeTilesBoard(m, cfg.ScrCfg.Size, tilesHistoric)

@@ -18,6 +18,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/fyne-io/widget/editor"
+	"github.com/jeromelesaux/fyne-io/widget/palette/orderer"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
@@ -67,10 +68,24 @@ func (m *MartineUI) TilemapApply(me *menu.TilemapMenu) {
 	var tiles [][]image.Image
 	if m.IsClassicalTilemap(cfg.ScrCfg.Size.Width, cfg.ScrCfg.Size.Height) {
 		filename := filepath.Base(me.OriginalImagePath())
-		analyze, tiles, palette = gfx.TilemapClassical(me.Cfg.ScrCfg.Mode, me.Cfg.ScrCfg.IsPlus, filename, me.OriginalImagePath(), me.OriginalImage().Image, cfg.ScrCfg.Size, cfg, me.Historic)
+		analyze, tiles, palette = gfx.TilemapClassical(
+			me.Cfg.ScrCfg.Mode,
+			me.Cfg.ScrCfg.IsPlus,
+			filename,
+			me.OriginalImagePath(),
+			me.Palette(),
+			me.OriginalImage().Image,
+			cfg.ScrCfg.Size,
+			cfg, me.Historic)
 		pi.Hide()
 	} else {
-		analyze, tiles, palette, err = gfx.TilemapRaw(me.Cfg.ScrCfg.Mode, me.Cfg.ScrCfg.IsPlus, cfg.ScrCfg.Size, me.OriginalImage().Image, cfg, me.Historic)
+		analyze, tiles, palette, err = gfx.TilemapRaw(
+			me.Cfg.ScrCfg.Mode,
+			me.Cfg.ScrCfg.IsPlus,
+			cfg.ScrCfg.Size,
+			me.OriginalImage().Image,
+			me.Palette(),
+			cfg, me.Historic)
 		pi.Hide()
 		if err != nil {
 			dialog.NewError(err, m.window).Show()
@@ -273,6 +288,14 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 		// after the me.CpcImage().Image must be used to export
 	})
 
+	organizePalButton := widget.NewButtonWithIcon("Organize", theme.ContentPasteIcon(), func() {
+		organizePalette := orderer.NewOrderer(tm.Palette(), tm.SetOrderedPalette)
+		d := dialog.NewCustom("Edit Palette", "Cancel", organizePalette.NewOrderer(), m.window)
+		size := m.window.Content().Size()
+		size = fyne.Size{Width: size.Width, Height: size.Height}
+		d.Resize(size)
+		d.Show()
+	})
 	return container.New(
 		layout.NewGridLayoutWithColumns(2),
 		container.New(
@@ -335,6 +358,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 								w2.SwapColor(tm.SetPalette, tm.Palette(), m.window, nil)
 							}),
 							m.newImageMenuExportButton(tm.ImageMenu),
+							organizePalButton,
 						),
 					),
 
