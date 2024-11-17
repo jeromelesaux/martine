@@ -15,6 +15,7 @@ import (
 	w "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/export/compression"
+	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/log"
 	"github.com/jeromelesaux/martine/ui/martine-ui/directory"
 )
@@ -41,6 +42,8 @@ type SpriteMenu struct {
 func (s *SpriteMenu) SetPalette(p color.Palette) {
 	s.UsePalette = true
 	s.palette = p
+	s.paletteImage.Image = png.PalToImage(s.Palette())
+	s.paletteImage.Refresh()
 }
 
 func (s *SpriteMenu) Palette() color.Palette {
@@ -164,4 +167,5 @@ func (s *SpriteMenu) CmdLine() string {
 
 func (s *SpriteMenu) SetOrderedPalette(p color.Palette) {
 	s.SetPalette(p)
+	s.UsePalette = true
 }

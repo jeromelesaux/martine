@@ -18,6 +18,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/disintegration/imaging"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
+	"github.com/jeromelesaux/fyne-io/widget/palette/orderer"
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/gfx"
@@ -213,6 +214,15 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) *fyne.Container {
 	importOpen := ImportSpriteBoard(m)
 	gifOpen := applySpriteBoardFromGif(s, m)
 
+	organizePalButton := widget.NewButtonWithIcon("Organize", theme.ContentPasteIcon(), func() {
+		organizePalette := orderer.NewOrderer(s.Palette(), s.SetOrderedPalette)
+		d := dialog.NewCustom("Edit Palette", "Cancel", organizePalette.NewOrderer(), m.window)
+		size := m.window.Content().Size()
+		size = fyne.Size{Width: size.Width, Height: size.Height}
+		d.Resize(size)
+		d.Show()
+	})
+
 	return container.New(
 		layout.NewGridLayoutWithColumns(2),
 		container.New(
@@ -267,7 +277,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) *fyne.Container {
 				),
 			),
 			container.New(
-				layout.NewGridLayoutWithRows(4),
+				layout.NewGridLayoutWithRows(5),
 				container.New(layout.NewGridLayoutWithColumns(2),
 					widget.NewCheck("Use this palette", func(b bool) {
 						s.UsePalette = b
@@ -283,6 +293,7 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) *fyne.Container {
 					layout.NewGridLayoutWithRows(2),
 					s.PaletteImage(),
 				),
+				organizePalButton,
 			),
 			container.New(
 				layout.NewVBoxLayout(),
