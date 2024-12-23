@@ -386,8 +386,14 @@ func (me *ImageMenu) NewConfig(checkOriginalImage bool) *config.MartineConfig {
 	if me.Cfg.ScrCfg.Process.Brightness > 0 && me.Cfg.ScrCfg.Process.Saturation == 0 {
 		me.Cfg.ScrCfg.Process.Saturation = me.Cfg.ScrCfg.Process.Brightness
 	}
+	if me.Cfg.ScrCfg.Process.Brightness > 0 {
+		me.Edited = true
+	}
 	if me.Cfg.ScrCfg.Process.Brightness == 0 && me.Cfg.ScrCfg.Process.Saturation > 0 {
 		me.Cfg.ScrCfg.Process.Brightness = me.Cfg.ScrCfg.Process.Saturation
+	}
+	if me.Cfg.ScrCfg.Process.Saturation > 0 {
+		me.Edited = true
 	}
 	me.Cfg.ScrCfg.Size = constants.NewSizeMode(me.Cfg.ScrCfg.Mode, me.Cfg.ScrCfg.Type.IsFullScreen())
 	if me.Cfg.ScrCfg.Type.IsSprite() {

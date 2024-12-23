@@ -229,6 +229,12 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 	brightness.Step = .01
 	brightness.OnChanged = func(f float64) {
 		me.Cfg.ScrCfg.Process.Brightness = f
+		if f == 1.0 {
+			me.Edited = false
+			me.UsePalette = false
+		} else {
+			me.Edited = true
+		}
 	}
 	saturationLabel := widget.NewLabel("Saturation")
 	saturation := widget.NewSlider(0.0, 1.0)
@@ -236,6 +242,13 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 	saturation.Step = .01
 	saturation.OnChanged = func(f float64) {
 		me.Cfg.ScrCfg.Process.Saturation = f
+		if f == 1.0 {
+			me.Edited = false
+			me.UsePalette = false
+		} else {
+			me.Edited = true
+		}
+
 	}
 	brightnessLabel := widget.NewLabel("Brightness")
 

@@ -411,6 +411,11 @@ func ApplyOneImage(in image.Image,
 	}
 	if cfg.ScrCfg.Process.Saturation > 0 || cfg.ScrCfg.Process.Brightness > 0 {
 		palette = ci.EnhanceBrightness(newPalette, cfg.ScrCfg.Process.Brightness, cfg.ScrCfg.Process.Saturation)
+		refPal := constants.CpcOldPalette
+		if cfg.ScrCfg.IsPlus {
+			refPal = constants.CpcPlusPalette
+		}
+		palette = ci.ConvertPalette(palette, refPal)
 		newPalette, out = ci.DowngradingWithPalette(out, palette)
 		var paletteToSort color.Palette
 		switch mode {
