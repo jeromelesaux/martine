@@ -1,6 +1,8 @@
 module github.com/jeromelesaux/martine
 
-go 1.21
+go 1.23
+
+toolchain go1.23.0
 
 require (
 	fyne.io/fyne/v2 v2.5.2
@@ -41,7 +43,7 @@ require (
 	github.com/go-text/typesetting v0.2.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
-	github.com/jeromelesaux/fyne-io v0.0.0-20241118165432-7a1511e3c611
+	github.com/jeromelesaux/fyne-io v0.0.0-20250103121724-3c6142c34596
 	github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/muesli/clusters v0.0.0-20200529215643-2700303c1762 // indirect
