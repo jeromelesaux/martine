@@ -104,7 +104,7 @@ build-windows-i386:
 package-darwin:
 	(make init ARCH=amd64 OS=darwin)
 	@echo "Compilation and packaging for darwin"
-	GOARCH=amd64 fyne package -os darwin -icon ../../martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
+	GOARCH=amd64 fyne package -os darwin -icon ../../martine-logo.png --source-dir ${SOURCEDIR} -name martine --app-version $(appversion)
 	mkdir -p ${BINARY}/martine-darwin-amd64/
 	cp -r martine.app ${BINARY}/martine-darwin-amd64/
 	(make archive ARCH=amd64 OS=darwin)
@@ -112,14 +112,14 @@ package-darwin:
 package-windows:
 	(make init ARCH=386 OS=windows  EXT=.exe)
 	@echo "Compilation and packaging for windows"
-	fyne package -os windows -icon ../../martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
+	fyne package -os windows -icon ../../martine-logo.png --source-dir ${SOURCEDIR} -name martine --app-version $(appversion)
 	mv martine.exe ${BINARY}/martine-${OS}-${ARCH}/
 	(make archive)
 
 package-linux:
 	(make init)
 	@echo "Compilation and packaging for linux"
-	fyne package -os linux -icon ../../martine-logo.png -sourceDir ${SOURCEDIR} -name martine -appVersion $(appversion)
+	fyne package -os linux -icon ../../martine-logo.png --source-dir ${SOURCEDIR} -name martine --app-version $(appversion)
 	mv martine ${BINARY}/martine-${OS}-${ARCH}/
 	(make archive)
 
@@ -141,3 +141,11 @@ vulncheck:
 
 test-unit:
 	$(CC) test ./... -cover
+
+all: 
+	(make clean)
+	(make package-darwin)
+	docker-compose build 
+	docker-compose up 
+	zip -r ${BINARY}/martine-$(appversion)-linux-amd64.zip ./build/martine.linux
+	zip -r ${BINARY}/martine-$(appversion)-windows-amd64.zip ./build/martine.exe
