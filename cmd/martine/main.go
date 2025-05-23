@@ -31,6 +31,7 @@ import (
 	"github.com/jeromelesaux/martine/export/spritehard"
 	gfxsprite "github.com/jeromelesaux/martine/gfx/sprite"
 	"github.com/jeromelesaux/martine/log"
+	ui "github.com/jeromelesaux/martine/ui/martine-ui"
 
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
 	"github.com/jeromelesaux/martine/export/snapshot"
@@ -40,7 +41,6 @@ import (
 	"github.com/jeromelesaux/martine/gfx/errors"
 	"github.com/jeromelesaux/martine/gfx/filter"
 	"github.com/jeromelesaux/martine/gfx/transformation"
-	ui "github.com/jeromelesaux/martine/ui/martine-ui"
 )
 
 type stringSlice []string
@@ -143,6 +143,7 @@ var (
 	spriteOcpWin        = flag.Bool("ocpwin", false, "Export sprite as OCP win file.")
 	version             = flag.Bool("version", false, "print martine's version")
 	appPrefix           = fmt.Sprintf("Martine (%v)", common.AppVersion)
+	isUI                = flag.Bool("ui", false, "Open Martine UI")
 )
 
 func usage() {
@@ -175,7 +176,7 @@ func main() {
 
 	flag.Parse()
 
-	if len(os.Args) == 1 {
+	if *isUI {
 		os.Setenv("FYNE_SCALE", "0.7")
 		/* main application */
 		app := app.NewWithID("Martine @IMPact")
