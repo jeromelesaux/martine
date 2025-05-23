@@ -143,7 +143,7 @@ var (
 	spriteOcpWin        = flag.Bool("ocpwin", false, "Export sprite as OCP win file.")
 	version             = flag.Bool("version", false, "print martine's version")
 	appPrefix           = fmt.Sprintf("Martine (%v)", common.AppVersion)
-	isUI                = flag.Bool("ui", false, "Open Martine UI")
+	noUI                = flag.Bool("ui", false, "Open Martine UI")
 )
 
 func usage() {
@@ -176,7 +176,7 @@ func main() {
 
 	flag.Parse()
 
-	if *isUI {
+	if !*noUI {
 		os.Setenv("FYNE_SCALE", "0.7")
 		/* main application */
 		app := app.NewWithID("Martine @IMPact")
