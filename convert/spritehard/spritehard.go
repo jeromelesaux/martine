@@ -31,7 +31,6 @@ func ToSpriteHard(in *image.NRGBA, p color.Palette, size constants.Size, mode ui
 			c := in.At(x, y)
 			pp, err := pal.PalettePosition(c, p)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c, x, y)
 				pp = 0
 			}
 			firmwareColorUsed[pp]++

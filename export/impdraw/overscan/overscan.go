@@ -116,7 +116,7 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 	// end of the hack
 
 	copy(o, OverscanBoot[:])
-	copy(o[0x200-0x170:], data[:])
+	copy(o[0x200-0x170:], data)
 	switch cfg.ScrCfg.IsPlus {
 	case true:
 		o[(0x1ac - 0x170)] = 1
@@ -136,9 +136,8 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 		offset := 0
 		for i := 0; i < len(p); i++ {
 			cp := constants.NewCpcPlusColor(p[i])
-			// log.GetLogger().Error( "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
 			v := cp.Bytes()
-			copy(o[(0x801-0x170)+offset:], v[:])
+			copy(o[(0x801-0x170)+offset:], v)
 			offset += 2
 		}
 	} else {
@@ -146,8 +145,6 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 			v, err := constants.HardwareValues(p[i])
 			if err == nil {
 				o[(0x7F00-0x170)+i] = v[0]
-				// } else {
-				// 	log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 		for i := len(p); i < 16; i++ {
@@ -157,10 +154,10 @@ func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, c
 
 	o, _ = compression.Compress(o, cfg.ScrCfg.Compression)
 
-	osFilepath := cfg.AmsdosFullPath(filePath, ".SCR")
+	osFilepath := cfg.AmsdosFullPath(filePath, constants.ScrExtension)
 	log.GetLogger().Info("Saving overscan file (%s)\n", osFilepath)
 	if !cfg.ScrCfg.NoAmsdosHeader {
-		if err := amsdos.SaveAmsdosFile(osFilepath, ".SCR", o, 0, 0, 0x170, 0); err != nil {
+		if err := amsdos.SaveAmsdosFile(osFilepath, constants.ScrExtension, o, 0, 0, 0x170, 0); err != nil {
 			return err
 		}
 	} else {
@@ -210,20 +207,16 @@ func RawOverscan(filePath string) ([]byte, error) {
 // nolint: funlen
 func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uint8, cfg *config.MartineConfig) error {
 	o := make([]byte, 0x8000-0x80)
-	osFilepath := cfg.AmsdosFullPath(filePath, ".SCR")
+	osFilepath := cfg.AmsdosFullPath(filePath, constants.ScrExtension)
 	log.GetLogger().Info("Saving overscan file (%s)\n", osFilepath)
-
-	// log.GetLogger().Error( "Header length %d\n", binary.Size(header))
-
 	var overscanTemplate []byte
 	if cfg.ScrCfg.IsPlus {
 		overscanTemplate = egxPlusOverscanTemplate
 	} else {
 		overscanTemplate = egxOverscanTemplate
 	}
-	copy(o[:], overscanTemplate[:])
-	copy(o[0x200-0x170:], data[:]) //  - 0x170  to have the file offset
-	// o[(0x1ac-0x170)] = 0 // cpc old
+	copy(o, overscanTemplate)
+	copy(o[0x200-0x170:], data) //  - 0x170  to have the file offset
 	switch cfg.ScrCfg.IsPlus {
 	case true:
 		o[(0x1ac - 0x170)] = 1
@@ -265,9 +258,8 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 		offset := 0
 		for i := 0; i < len(p); i++ {
 			cp := constants.NewCpcPlusColor(p[i])
-			// log.GetLogger().Error( "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
 			v := cp.Bytes()
-			copy(o[(0x801-0x170)+offset:], v[:])
+			copy(o[(0x801-0x170)+offset:], v)
 			offset += 2
 		}
 	} else {
@@ -275,8 +267,6 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 			v, err := constants.HardwareValues(p[i])
 			if err == nil {
 				o[(0x7f00-0x170)+i] = v[0]
-				// } else {
-				// 	log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 	}
@@ -287,7 +277,7 @@ func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uin
 		copy(o[0x7da0:], egxOverscanTemplate[0x7da0:]) // copy egx routine
 	}
 	if !cfg.ScrCfg.NoAmsdosHeader {
-		if err := amsdos.SaveAmsdosFile(osFilepath, ".SCR", o, 0, 0, 0x170, 0x170); err != nil {
+		if err := amsdos.SaveAmsdosFile(osFilepath, constants.ScrExtension, o, 0, 0, 0x170, 0x170); err != nil {
 			return err
 		}
 	} else {

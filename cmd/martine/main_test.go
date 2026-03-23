@@ -15,7 +15,7 @@ func TestMainBit(t *testing.T) {
 	a := mask4
 
 	t.Logf("%b", a)
-	a = a >> 1
+	a >>= 1
 	t.Logf("%b", a)
 
 	t.Logf("%b", 6)

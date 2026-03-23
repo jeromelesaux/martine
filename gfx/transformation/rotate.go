@@ -48,13 +48,6 @@ func Rotate(in *image.NRGBA,
 		}
 		_, rin = ci.DowngradingWithPalette(rin, p)
 		images = append(images, rin)
-		/*	newFilename := cont.OsFullPath(filePath, fmt.Sprintf("%.2d", indice)+".png")
-			if err := file.Png(newFilename, rin); err != nil {
-				log.GetLogger().Error( "Cannot create image (%s) error :%v\n", newFilename, err)
-			}
-			if err := common.ToSpriteAndExport(rin, p, maxSize, mode, newFilename, false, cont); err != nil {
-				log.GetLogger().Error( "Cannot create sprite image (%s) error %v\n", newFilename, err)
-			}*/
 		indice++
 	}
 	return images, nil

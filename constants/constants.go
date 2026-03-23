@@ -9,6 +9,11 @@ import (
 	"strconv"
 )
 
+const (
+	ScrExtension    = ".SCR"
+	WindowExtension = ".WIN"
+)
+
 type DitheringType struct {
 	string
 }
@@ -241,13 +246,13 @@ func NewPaletteReducer() *PaletteReducer {
 }
 
 type ColorReducer struct {
-	C         color.Color
-	Occurence int
-	Distances map[color.Color]float64
+	C          color.Color
+	Occurrence int
+	Distances  map[color.Color]float64
 }
 
 func NewColorReducer(c color.Color, occ int) ColorReducer {
-	return ColorReducer{C: c, Occurence: occ, Distances: make(map[color.Color]float64)}
+	return ColorReducer{C: c, Occurrence: occ, Distances: make(map[color.Color]float64)}
 }
 
 func (p *PaletteReducer) ComputeDistances() {
@@ -264,7 +269,7 @@ func (p *PaletteReducer) ComputeDistances() {
 type ByOccurence []ColorReducer
 
 func (b ByOccurence) Len() int           { return len(b) }
-func (b ByOccurence) Less(i, j int) bool { return b[i].Occurence < b[j].Occurence }
+func (b ByOccurence) Less(i, j int) bool { return b[i].Occurrence < b[j].Occurrence }
 func (b ByOccurence) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 
 func (p *PaletteReducer) OccurencesSort() {
@@ -300,7 +305,6 @@ func ColorsDistance(c1, c2 color.Color) float64 {
 	g := diffColor(g1>>8, g2>>8)
 	b := diffColor(b1>>8, b2>>8)
 	distance := sqrt((((512 + rmean) * r * r) >> 8) + (4 * g * g) + (((767 - rmean) * b * b) >> 8))
-	//log.GetLogger().Info( "distance :%d distanceMax:%d\n", distance, DistanceMax)
 	return float64(distance) / float64(DistanceMax) * 100.
 }
 
@@ -496,7 +500,6 @@ func HardwareValues(c color.Color) ([]uint8, error) {
 		return nil, ErrorCpcColorNotFound
 	}
 	return cc.HardwareValues, nil
-
 }
 
 // nolint: funlen
@@ -666,7 +669,7 @@ func (srs *SplitRasterScreen) IsFull() bool {
 type SplitRaster struct {
 	Offset        uint16
 	Length        int
-	Occurence     int
+	Occurrence    int
 	HardwareColor []int
 	PaletteIndex  []int
 }
@@ -680,11 +683,11 @@ func (s *SplitRaster) Add(paletteIndex, hardwareColor int) bool {
 	return true
 }
 
-func NewSpliteRaster(offset uint16, length, occurence int) SplitRaster {
+func NewSpliteRaster(offset uint16, length, occurrence int) SplitRaster {
 	return SplitRaster{
 		Offset:        offset,
 		Length:        length,
-		Occurence:     occurence,
+		Occurrence:    occurrence,
 		PaletteIndex:  make([]int, 0),
 		HardwareColor: make([]int, 0),
 	}

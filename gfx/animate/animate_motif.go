@@ -7,6 +7,7 @@ import (
 	"image/gif"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/config"
@@ -30,8 +31,8 @@ func DeltaMotif(gitFilepath string, cfg *config.MartineConfig, threshold int, in
 	if err != nil {
 		return err
 	}
-	images := ConvertToImage(*gifImages)
-	// convertion de la palette en mode 1
+	images := ConvertToImage(gifImages)
+	// conversion de la palette en mode 1
 	size := constants.Mode1
 
 	screens := make([]*image.NRGBA, 0)
@@ -81,7 +82,6 @@ func DeltaMotif(gitFilepath string, cfg *config.MartineConfig, threshold int, in
 	/* calcul des coordonnées */
 	deltas := make([][]byte, 0)
 	for _, v := range btc {
-		// nbCoords := size.Width * size.Height / 2 / 4
 		delta := make([]byte, 0)
 		index := 0
 		pixel := 0
@@ -111,21 +111,19 @@ func DeltaMotif(gitFilepath string, cfg *config.MartineConfig, threshold int, in
 }
 
 func exportDeltaMotif(images [][]byte, motifs [][]byte, p color.Palette, filename string) error {
-	var deltaCode string
-	for i := 0; i < len(images); i++ {
-		deltaCode += fmt.Sprintf("delta%.2d\n", i)
+	var deltaCode strings.Builder
+	for i := range images {
+		fmt.Fprintf(&deltaCode, "delta%.2d\n", i)
 		encoded := zx0.Encode(images[i])
-		deltaCode += ascii.FormatAssemblyDatabyte(encoded, "\n")
+		deltaCode.WriteString(ascii.FormatAssemblyDatabyte(encoded, "\n"))
 	}
 
-	for i := 0; i < len(motifs); i++ {
-		deltaCode += fmt.Sprintf("motif%.2d\n", i)
-		deltaCode += ascii.FormatAssemblyDatabyte(motifs[i], "\n")
+	for i := range motifs {
+		deltaCode.WriteString(fmt.Sprintf("motif%.2d\n", i))
+		deltaCode.WriteString(ascii.FormatAssemblyDatabyte(motifs[i], "\n"))
 	}
 
-	deltaCode += "palette:\n" + ascii.ByteToken + " "
-	deltaCode += ascii.FormatAssemblyBasicPalette(p, "\n")
-
-	//	log.GetLogger().Info("%s", deltaCode)
-	return amsdos.SaveStringOSFile(filename, deltaCode)
+	deltaCode.WriteString("palette:\n" + ascii.ByteToken + " ")
+	deltaCode.WriteString(ascii.FormatAssemblyBasicPalette(p, "\n"))
+	return amsdos.SaveStringOSFile(filename, deltaCode.String())
 }

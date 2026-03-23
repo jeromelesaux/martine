@@ -49,7 +49,7 @@ func TestDeltaMotif(t *testing.T) {
 	}
 	files, err := filepath.Glob("*.png")
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatal(err)
 	}
 	for _, v := range files {
 		os.Remove(v)

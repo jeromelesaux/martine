@@ -351,7 +351,7 @@ func (me *ImageMenu) ExportImage(w fyne.Window, getCfg func(checkOriginalImage b
 			if cfg.ScrCfg.Type == config.FullscreenFormat {
 				var gfxFile string
 				for _, v := range cfg.DskFiles {
-					if filepath.Ext(v) == ".SCR" {
+					if filepath.Ext(v) == constants.ScrExtension {
 						gfxFile = v
 						break
 					}
@@ -524,7 +524,6 @@ func (me *ImageMenu) ExportDialog(cfg *config.MartineConfig, getCfg func(checkOr
 				directory.SetExportDirectoryURI(lu)
 				cfg.ScrCfg.OutputPath = lu.Path()
 				log.GetLogger().Infoln(cfg.ScrCfg.OutputPath)
-				// m.ExportOneImage(m.main)
 				me.ExportImage(me.w, getCfg)
 				// apply and export
 			}, me.w)

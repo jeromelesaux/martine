@@ -47,7 +47,6 @@ var splitRasterSetMode = []byte{0x01, 0x00, 0x7F, 0x21, 0x8D, 0x8E, 0x16, 0x8C, 
 /*
 ld c,pen: out (c), c // selection du pen à modifier
 */
-//var splitRasterSelectPen = []byte{0x0E, 0x00, 0xED, 0x49}
 
 /*
 ld a,#54: out (c), a
@@ -71,14 +70,12 @@ func ExportSplitRaster(filename string, p color.Palette, rasters *constants.Spli
 		// set the set mode assembled opcode
 		setPal := splitRasterSetMode
 		setPal[1] = byte(v.PaletteIndex[0])
-		//log.GetLogger().Info( "Set pen {%d}\n", v.PaletteIndex[0])
 		output = append(output, setPal...)
 		// set the set color assembled opcode
 		for i, h := range v.HardwareColor {
 			if i%2 == 0 {
 				setColor := splitRasterSetColor
 				setColor[1] = byte(h)
-				//log.GetLogger().Info( "Set color {%d}\n", h)
 				output = append(output, setColor...)
 			}
 		}

@@ -117,7 +117,7 @@ var (
 	maskOrOperation     = flag.Bool("maskor", false, "Will apply an OR operation on each byte with the mask")
 	maskAdOperation     = flag.Bool("maskand", false, "Will apply an AND operation on each byte with the mask")
 	zigzag              = flag.Bool("zigzag", false, "generate data in zigzag order (inc first line and dec next line for tiles)")
-	tileMap             = flag.Bool("tilemap", false, "Analyse the input image and generate the tiles, the tile map and global schema.\n\t for instance: martine -in board.png -mode 0 -width 8 -height 8 -out folder -dsk\n")
+	tileMap             = flag.Bool("tilemap", false, "Analyze the input image and generate the tiles, the tile map and global schema.\n\t for instance: martine -in board.png -mode 0 -width 8 -height 8 -out folder -dsk\n")
 	initialAddress      = flag.String("address", "0xC000", "Starting address to display sprite in delta packing")
 	doAnimation         = flag.Bool("animate", false, "Will produce an full screen with all sprite on the same image (add -in image.gif or -in *.png)")
 	reducer             = flag.Int("reducer", -1, "Reducer mask will reduce original image colors. Available : \n\t1 : lower\n\t2 : medium\n\t3 : strong\n")
@@ -133,7 +133,7 @@ var (
 	filloutGif          = flag.Bool("fillout", false, "Fill out the gif frames needed some case with deltapacking")
 	saturationPal       = flag.Float64("contrast", 0., "apply contrast on the color of the palette on amstrad plus screen. (max value 100 and only on CPC PLUS).")
 	brightnessPal       = flag.Float64("brightness", 0., "apply brightness on the color of the palette on amstrad plus screen. (max value 100 and only on CPC PLUS).")
-	analyzeTilemap      = flag.String("analyzetilemap", "", "analyse the image to get the most accurate tilemap according to the  criteria :\n\tsize : lower export size\n\tnumber : lower number of tiles")
+	analyzeTilemap      = flag.String("analyzetilemap", "", "analyze the image to get the most accurate tilemap according to the  criteria :\n\tsize : lower export size\n\tnumber : lower number of tiles")
 	exportGoFiles       = flag.Bool("go", false, "Export results as .go1 and .go2 files.")
 	splitSpriteBoard    = flag.Bool("split", false, "Split sprite board to sprites.")
 	spritesPerRow       = flag.Int("spritesrow", 0, "Number of sprites in the board per row")
@@ -313,7 +313,7 @@ func main() {
 	if !*reverse {
 		log.GetLogger().Info("Informations :\n%s", size.ToString())
 	}
-	if !*impCatcher && !cfg.DeltaMode && !*reverse && !*doAnimation && strings.ToUpper(extension) != ".SCR" {
+	if !*impCatcher && !cfg.DeltaMode && !*reverse && !*doAnimation && !strings.EqualFold(extension, constants.ScrExtension) {
 		f, err := os.Open(*picturePath)
 		if err != nil {
 			log.GetLogger().Error("Error while opening file %s, error %v\n", *picturePath, err)
@@ -471,7 +471,7 @@ func main() {
 			var err error
 			// TODO add amsdos header
 			if !cfg.ScrCfg.NoAmsdosHeader {
-				err = amsdos.SaveAmsdosFile(filename, ".WIN", buf, 2, 0, 0x4000, 0x4000)
+				err = amsdos.SaveAmsdosFile(filename, constants.WindowExtension, buf, 2, 0, 0x4000, 0x4000)
 				if err != nil {
 					log.GetLogger().Error("Error while saving flat sprites file error %s\n", err.Error())
 					os.Exit(-2)
@@ -562,7 +562,6 @@ func main() {
 					log.GetLogger().Error("Error while opening file %s, error %v\n", *picturePath, err)
 					os.Exit(-2)
 				}
-				defer f.Close()
 				in, _, err = image.Decode(f)
 				if err != nil {
 					log.GetLogger().Error("Cannot decode the image %s error %v", *picturePath, err)
@@ -577,12 +576,13 @@ func main() {
 					log.GetLogger().Error("Cannot apply the image %s error %v", *picturePath, err)
 					os.Exit(-2)
 				}
-				spritePath := cfg.AmsdosFullPath(v, ".WIN")
+				spritePath := cfg.AmsdosFullPath(v, constants.WindowExtension)
 				data, err := window.RawWin(spritePath)
 				if err != nil {
 					log.GetLogger().Error("Error while extracting raw content, err:%s\n", err)
 				}
 				sprites = append(sprites, data...)
+				f.Close()
 			}
 			finalFile := strings.ReplaceAll(filename, "?", "")
 			if err = tile.Imp(sprites, uint(len(spritesPaths)), uint(cfg.ScrCfg.Size.Width), uint(cfg.ScrCfg.Size.Height), uint(*mode), finalFile, cfg); err != nil {
@@ -630,12 +630,12 @@ func main() {
 				}
 			}
 			switch strings.ToUpper(filepath.Ext(filename)) {
-			case ".WIN":
+			case constants.WindowExtension:
 				if err := sprite.SpriteToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
 					log.GetLogger().Error("Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
 					os.Exit(-1)
 				}
-			case ".SCR":
+			case constants.ScrExtension:
 				if err := screen.ScrToPng(*picturePath, outpath, uint8(*mode), p); err != nil {
 					log.GetLogger().Error("Cannot convert to PNG file (%s) error %v\n", *picturePath, err)
 					os.Exit(-1)
@@ -684,7 +684,7 @@ func main() {
 					switch *analyzeTilemap {
 					case string(common.SizeTilemapOption):
 						criteria = common.SizeTilemapOption
-						log.GetLogger().Info("go to analyse by size\n")
+						log.GetLogger().Info("go to analyze by size\n")
 					case string(common.NumberTilemapOption):
 						criteria = common.NumberTilemapOption
 						log.GetLogger().Info("search for the lower number of tiles\n")
@@ -741,13 +741,11 @@ func main() {
 											os.Exit(-1)
 										}
 									}
-								} else {
-									if *palettePath != "" {
-										p, _, err = ocpartstudio.OpenPal(*palettePath)
-										if err != nil {
-											log.GetLogger().Error("Error while reading palette file (%s) :%v\n", *palettePath, err)
-											os.Exit(-1)
-										}
+								} else if *palettePath != "" {
+									p, _, err = ocpartstudio.OpenPal(*palettePath)
+									if err != nil {
+										log.GetLogger().Error("Error while reading palette file (%s) :%v\n", *palettePath, err)
+										os.Exit(-1)
 									}
 								}
 
@@ -777,7 +775,7 @@ func main() {
 										}
 									} else {
 
-										if strings.ToUpper(extension) != ".SCR" {
+										if !strings.EqualFold(extension, constants.ScrExtension) {
 											if err := gfx.ApplyOneImageAndExport(in,
 												cfg,
 												filename, *picturePath,
@@ -808,7 +806,7 @@ func main() {
 		if cfg.ScrCfg.Type.IsFullScreen() {
 			var gfxFile string
 			for _, v := range cfg.DskFiles {
-				if filepath.Ext(v) == ".SCR" {
+				if filepath.Ext(v) == constants.ScrExtension {
 					gfxFile = v
 					break
 				}

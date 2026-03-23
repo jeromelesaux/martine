@@ -21,19 +21,15 @@ func WilcardedFiles(filespath []string) ([]string, error) {
 			return fullfilespath, err
 		}
 		reg := filepath.Base(v)
-		// log.GetLogger().Info( "Regular to match (%s)\n", reg)
 		for _, f := range fis {
 			if !f.IsDir() {
 				check := filepath.Join(dir, f.Name())
-				//	log.GetLogger().Info( "Checking regex for (%s) matches (%s)\n", f.Name(), reg)
 				matchs, err := filepath.Match(reg, f.Name())
 				if err != nil {
 					log.GetLogger().Error("Error while checking match with error %v\n", err)
 					return fullfilespath, err
 				}
-				// log.GetLogger().Info( "Returns %v\n", matchs)
 				if matchs {
-					//	log.GetLogger().Info( "Ok (%s) matches (%s)\n", reg, check)
 					if !ContainsFilepath(fullfilespath, check) {
 						fullfilespath = append(fullfilespath, check)
 					}
@@ -74,7 +70,7 @@ func sortName(filename string) string {
 	// empty string is zero, so integers are plus one
 	b64 := make([]byte, 64/8)
 	s64 := name[i:]
-	if len(s64) > 0 {
+	if s64 != "" {
 		u64, err := strconv.ParseUint(s64, 10, 64)
 		if err == nil {
 			binary.BigEndian.PutUint64(b64, u64+1)

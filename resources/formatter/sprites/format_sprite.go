@@ -66,7 +66,7 @@ func main() {
 				os.Exit(-1)
 			}
 			if len(d.Screen) != 1 {
-				filename := strings.Replace(filepath.Base(sprite), filepath.Ext(sprite), "", -1)
+				filename := strings.ReplaceAll(filepath.Base(sprite), filepath.Ext(sprite), "")
 				out += fmt.Sprintf("%s\n", filename)
 				for i := 0; i < len(d.Screen); i += 8 {
 					out += fmt.Sprintf("%s ", ascii.ByteToken)

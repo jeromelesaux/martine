@@ -61,13 +61,5 @@ func SplitBoardToSprite(
 			results[i][j] = append(results[i][j], r...)
 		}
 	}
-	/*for _, v := range sprites {
-		r, sp, _, _, err := gfx.ApplyOneImage(v, cont, int(mode), p, mode)
-		if err != nil {
-			return results, sprites, err
-		}
-		results = append(results, r)
-		rawSprites = append(rawSprites, sp)
-	}*/
 	return results, rawSprites, nil
 }

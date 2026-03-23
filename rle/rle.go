@@ -1,3 +1,4 @@
+// nolint: misspell
 package rle
 
 import (
@@ -7,7 +8,6 @@ import (
 	"github.com/jeromelesaux/martine/log"
 )
 
-// nolint: gocognit
 func Encode(in []byte) []byte {
 	out := make([]byte, 0)
 	nb := 1

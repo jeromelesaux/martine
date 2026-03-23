@@ -56,7 +56,7 @@ func (m *MartineConfig) Reset() {
 	m.ContainerCfg.Reset()
 }
 
-func (m MartineConfig) HasContainerExport(c ContainerFormat) bool {
+func (m *MartineConfig) HasContainerExport(c ContainerFormat) bool {
 	return m.ContainerCfg.HasExport(c)
 }
 
@@ -189,7 +189,7 @@ func (e *MartineConfig) TransformToAmsdosFile(filePath string) string {
 	if filenameSize > 8 {
 		filenameSize = 8
 	}
-	copy(amsdosFile[:], file[0:filenameSize])
+	copy(amsdosFile, file[0:filenameSize])
 	return string(amsdosFile)
 }
 
@@ -217,7 +217,7 @@ func (e *MartineConfig) OsFilename(ext string) string {
 	return string(osFile) + ext
 }
 
-func (e *MartineConfig) GetAmsdosFilename(filePath string, ext string) string {
+func (e *MartineConfig) GetAmsdosFilename(filePath, ext string) string {
 	file := strings.ToUpper(filepath.Base(filePath))
 	filename := RemoveUnsupportedChar(strings.TrimSuffix(file, filepath.Ext(file)))
 	filenameSize := 7
@@ -229,7 +229,7 @@ func (e *MartineConfig) GetAmsdosFilename(filePath string, ext string) string {
 	return osFile + strings.ToUpper(ext)
 }
 
-func (e *MartineConfig) AmsdosFullPath(filePath string, newExtension string) string {
+func (e *MartineConfig) AmsdosFullPath(filePath, newExtension string) string {
 	filename := filepath.Base(filePath)
 	file := RemoveUnsupportedChar(strings.TrimSuffix(filename, filepath.Ext(filename)))
 	length := 6
@@ -242,7 +242,7 @@ func (e *MartineConfig) AmsdosFullPath(filePath string, newExtension string) str
 	return filepath.Join(path, strings.ToUpper(newFilename))
 }
 
-func (e *MartineConfig) OsFullPath(filePath string, newExtension string) string {
+func (e *MartineConfig) OsFullPath(filePath, newExtension string) string {
 	filename := filepath.Base(filePath)
 	file := RemoveUnsupportedChar(strings.TrimSuffix(filename, filepath.Ext(filename)))
 	newFilename := file + newExtension

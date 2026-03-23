@@ -31,24 +31,12 @@ func Rotate3d(in *image.NRGBA,
 
 	var indice int
 	angle := 360. / float64(rollIteration)
-	//targetSize := in.Bounds().Max.X
-	//if in.Bounds().Max.Y > in.Bounds().Max.X {
-	//	targetSize = in.Bounds().Max.Y
-	//}
-
 	for i := 0.; i < 360.; i += angle {
 		background := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: size.Width, Y: size.Height}})
 		draw.Draw(background, background.Bounds(), &image.Uniform{p[0]}, image.Point{0, 0}, draw.Src)
 		rin := rotateImage(in, background, i, rotation3DX0, rotation3DY0, rotation3DType)
 		_, rin = ci.DowngradingWithPalette(rin, p)
 		images = append(images, rin)
-		/*newFilename := cont.OsFullPath(filePath, fmt.Sprintf("%.2d", indice)+".png")
-		if err := file.Png(newFilename, rin); err != nil {
-			log.GetLogger().Error( "Cannot create image (%s) error :%v\n", newFilename, err)
-		}
-		if err := common.ToSpriteAndExport(rin, p, constants.Size{Width: size.Width, Height: size.Height}, mode, newFilename, false, cont); err != nil {
-			log.GetLogger().Error( "Cannot create sprite image (%s) error %v\n", newFilename, err)
-		}*/
 		indice++
 	}
 

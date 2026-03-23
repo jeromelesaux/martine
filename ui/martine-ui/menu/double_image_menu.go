@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2/canvas"
 	"github.com/jeromelesaux/martine/config"
+	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/log"
 )
 
@@ -59,7 +60,7 @@ func (m *MergedImageMenu) CmdLine() string {
 
 func (d *DoubleImageMenu) CmdLine() string {
 	palFilename := config.AmsdosFilename(d.LeftImage.OriginalImagePath(), ".PAL")
-	scrFilename := config.AmsdosFilename(d.LeftImage.OriginalImagePath(), ".SCR")
+	scrFilename := config.AmsdosFilename(d.LeftImage.OriginalImagePath(), constants.ScrExtension)
 
 	cmd := "\n" + d.LeftImage.CmdLine() + " -out mode0"
 	cmd += "\n" + d.RightImage.CmdLine() + " -pal " + palFilename + " -out mode1"

@@ -87,18 +87,17 @@ func DoTransformation(in *image.NRGBA,
 				size,
 				in,
 				p)
-		} else {
-			if rotationRraBit != -1 || rotationSraBit != -1 {
-				images = transformation.RollRight(
-					rotationRraBit,
-					rotationSraBit,
-					rotationIterations,
-					screenMode,
-					size,
-					in,
-					p)
-			}
+		} else if rotationRraBit != -1 || rotationSraBit != -1 {
+			images = transformation.RollRight(
+				rotationRraBit,
+				rotationSraBit,
+				rotationIterations,
+				screenMode,
+				size,
+				in,
+				p)
 		}
+
 		if rotationKeephighBit != -1 || rotationLosthighBit != -1 {
 			images = transformation.RollUp(
 				rotationKeephighBit,
@@ -108,18 +107,17 @@ func DoTransformation(in *image.NRGBA,
 				size,
 				in,
 				p)
-		} else {
-			if rotationKeeplowBit != -1 || rotationLostlowBit != -1 {
-				images = transformation.RollLow(
-					rotationKeeplowBit,
-					rotationLostlowBit,
-					rotationIterations,
-					screenMode,
-					size,
-					in,
-					p)
-			}
+		} else if rotationKeeplowBit != -1 || rotationLostlowBit != -1 {
+			images = transformation.RollLow(
+				rotationKeeplowBit,
+				rotationLostlowBit,
+				rotationIterations,
+				screenMode,
+				size,
+				in,
+				p)
 		}
+
 	}
 	if rotationMode {
 		if images, err = transformation.Rotate(
@@ -301,13 +299,11 @@ func ApplyOneImageAndExport(in image.Image,
 			out = transformation.Zigzag(out)
 		}
 		if cfg.ScrCfg.Type != config.SpriteHardFormat {
-			// log.GetLogger().Info( "Transform image in sprite.\n")
 			err = sprite.ToSpriteAndExport(out, newPalette, cfg.ScrCfg.Size, mode, filename, false, cfg)
 			if err != nil {
 				return err
 			}
 		} else {
-			// log.GetLogger().Info( "Transform image in sprite hard.\n")
 			err = spritehard.ToSpriteHardAndExport(out, newPalette, cfg.ScrCfg.Size, mode, filename, cfg)
 			if err != nil {
 				return err
@@ -444,10 +440,8 @@ func ApplyOneImage(in image.Image,
 			out = transformation.Zigzag(out)
 		}
 		if cfg.ScrCfg.Type != config.SpriteHardFormat {
-			// log.GetLogger().Info( "Transform image in sprite.\n")
 			data, _, lineSize, err = sprite.ToSprite(out, newPalette, cfg.ScrCfg.Size, mode, cfg)
 		} else {
-			//	log.GetLogger().Info( "Transform image in sprite hard.\n")
 			data, _ = spritehard.ToSpriteHard(out, newPalette, cfg.ScrCfg.Size, mode, cfg)
 			lineSize = 16
 		}
@@ -481,7 +475,7 @@ func ExportRawImage(in image.Image,
 		ownPalette = true
 	}
 	if !ownPalette {
-		//check the palette and sort it
+		// check the palette and sort it
 		palette = constants.FillColorPalette(palette)
 		palette = constants.SortColorsByDistance(palette)
 	}
@@ -505,13 +499,11 @@ func ExportRawImage(in image.Image,
 			out = transformation.Zigzag(out)
 		}
 		if cfg.ScrCfg.Type != config.SpriteHardFormat {
-			// log.GetLogger().Info( "Transform image in sprite.\n")
 			err = sprite.ToSpriteAndExport(out, palette, cfg.ScrCfg.Size, mode, filename, false, cfg)
 			if err != nil {
 				return err
 			}
 		} else {
-			// log.GetLogger().Info( "Transform image in sprite hard.\n")
 			err = spritehard.ToSpriteHardAndExport(out, palette, cfg.ScrCfg.Size, mode, filename, cfg)
 			if err != nil {
 				return err

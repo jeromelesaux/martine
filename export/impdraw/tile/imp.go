@@ -100,7 +100,7 @@ func RawImp(filePath string) ([]byte, error) {
 		return nil, err
 	}
 	raw := make([]byte, len(bf)-3)
-	copy(raw[:], bf[0:len(bf)-3])
+	copy(raw, bf[0:len(bf)-3])
 
 	return raw, nil
 }
@@ -148,7 +148,7 @@ func Imp(sprites []byte, nbFrames, width, height, mode uint, filename string, ex
 
 func TileMap(data []byte, filename string, export *config.MartineConfig) error {
 	output := make([]byte, 0x4000)
-	copy(output[0:], data[:])
+	copy(output[0:], data)
 
 	impPath := filepath.Join(export.ScrCfg.OutputPath, export.GetAmsdosFilename(filename, ".TIL"))
 

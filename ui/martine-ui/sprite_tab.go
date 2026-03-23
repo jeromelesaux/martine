@@ -344,7 +344,7 @@ func applySpriteBoardFromGif(s *menu.SpriteMenu, m *MartineUI) *widget.Button {
 				dialog.ShowError(err, m.window)
 				return
 			}
-			gifImages := ci.GifToImages(*gifImage)
+			gifImages := ci.GifToImages(gifImage)
 			resized := make([]*image.NRGBA, 0)
 			size := constants.Size{Width: s.Cfg.ScrCfg.Size.Width, Height: s.Cfg.ScrCfg.Size.Height}
 			for _, v := range gifImages {

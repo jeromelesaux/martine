@@ -34,10 +34,7 @@ func TestSortingPalette(t *testing.T) {
 	white := color.NRGBA{R: 0, G: 0, B: 0, A: 255}
 	red := color.NRGBA{R: 255, G: 0, B: 0, A: 255}
 	var p color.Palette
-	p = append(p, blue)
-	p = append(p, black)
-	p = append(p, white)
-	p = append(p, red)
+	p = append(p, blue, black, white, red)
 	t.Logf("palette :%v\n", p)
 	sort.Sort(sort.Reverse(ByDistance(p)))
 	t.Logf("palette sorted :%v\n", p)

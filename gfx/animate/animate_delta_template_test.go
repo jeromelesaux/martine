@@ -34,7 +34,7 @@ type AnimateValues struct {
 	Palette        color.Palette
 }
 
-func (a AnimateValues) DisplayCode() string {
+func (a *AnimateValues) DisplayCode() string {
 	var code string
 
 	code += "\nsprite:\n"
@@ -58,7 +58,7 @@ func (a AnimateValues) DisplayCode() string {
 	return code
 }
 
-func (a AnimateValues) TableDelta() string {
+func (a *AnimateValues) TableDelta() string {
 	code := "table_delta:\n"
 	deltaIndexes := make([]string, 0)
 	for i := range a.Delta {
@@ -69,7 +69,7 @@ func (a AnimateValues) TableDelta() string {
 	return code
 }
 
-func (a AnimateValues) DisplayPalette() string {
+func (a *AnimateValues) DisplayPalette() string {
 	code := "palette:\n"
 	if a.Type.CPCPlus {
 		code += ascii.FormatAssemblyCPCPlusPalette(a.Palette, "\n")
@@ -79,6 +79,7 @@ func (a AnimateValues) DisplayPalette() string {
 	return code
 }
 
+// nolint: misspell
 var depackRoutine = `
 ;--- dimensions du sprite ----
 large equ {{ .Large }}

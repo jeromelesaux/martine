@@ -246,7 +246,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
 					dialog.ShowError(err, m.window)
 					return
 				}
-				imgs := image.GifToImages(*gifImages)
+				imgs := image.GifToImages(gifImages)
 				for _, img := range imgs {
 					a.AnimateImages.Append(canvas.NewImageFromImage(img))
 				}

@@ -121,7 +121,7 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 	if err != nil {
 		return err
 	}
-	images := ConvertToImage(*gifImages)
+	images := ConvertToImage(gifImages)
 	var pad int = 1
 	if len(images) <= 1 {
 		return fmt.Errorf("need more than one image to proceed")
@@ -139,7 +139,7 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 	log.GetLogger().Info("Let's go transform images files in win or scr\n")
 
 	if cfg.FilloutGif {
-		imgs := filloutGif(*gifImages)
+		imgs := filloutGif(gifImages)
 		_, _, palette, _, err = gfx.ApplyOneImage(imgs[0], cfg, palette, mode)
 		if err != nil {
 			return err
@@ -205,7 +205,7 @@ func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress 
 	return err
 }
 
-func ConvertToImage(g gif.GIF) []*image.NRGBA {
+func ConvertToImage(g *gif.GIF) []*image.NRGBA {
 	c := make([]*image.NRGBA, 0)
 	imgRect := image.Rectangle{Min: image.Point{X: 0, Y: 0}, Max: image.Point{X: g.Config.Width, Y: g.Config.Height}}
 	origImg := image.NewRGBA(imgRect)
@@ -225,7 +225,7 @@ func ConvertToImage(g gif.GIF) []*image.NRGBA {
 	return c
 }
 
-func filloutGif(g gif.GIF) []image.Image {
+func filloutGif(g *gif.GIF) []image.Image {
 	c := make([]image.Image, 0)
 	width := g.Image[0].Bounds().Max.X
 	height := g.Image[0].Bounds().Max.Y
@@ -296,20 +296,18 @@ func ExportDeltaAnimate(
 			sourceCode = deltaScreenCompressCodeDelta
 			if cfg.ScrCfg.IsPlus {
 				sourceCode = deltaScreenCompressCodeDeltaPlus
-			} else {
-				if exportVersion == DeltaExportV2 {
-					sourceCode = deltaScreenCompressCodeDeltaV2
-				}
+			} else if exportVersion == DeltaExportV2 {
+				sourceCode = deltaScreenCompressCodeDeltaV2
+
 			}
 		} else {
 			sourceCode = deltaScreenCodeDelta
 			if cfg.ScrCfg.IsPlus {
 				sourceCode = deltaScreenCodeDeltaPlus
-			} else {
-				if exportVersion == DeltaExportV2 {
-					sourceCode = deltaScreenCodeDeltaV2
-				}
+			} else if exportVersion == DeltaExportV2 {
+				sourceCode = deltaScreenCodeDeltaV2
 			}
+
 		}
 	} else {
 		sourceCode = deltaCodeDelta
@@ -362,7 +360,7 @@ type AnimateValues struct {
 	Palette        color.Palette
 }
 
-func (a AnimateValues) DisplayCode() string {
+func (a *AnimateValues) DisplayCode() string {
 	var code string
 	var mu sync.Mutex
 	if a.Type.Compress {
@@ -404,7 +402,7 @@ func (a AnimateValues) DisplayCode() string {
 	return code
 }
 
-func (a AnimateValues) TableDelta() string {
+func (a *AnimateValues) TableDelta() string {
 	var code string
 	deltaIndexes := make([]string, 0)
 	for i := range a.Delta {
@@ -415,7 +413,7 @@ func (a AnimateValues) TableDelta() string {
 	return code
 }
 
-func (a AnimateValues) DisplayPalette() string {
+func (a *AnimateValues) DisplayPalette() string {
 	var code string
 	ascii.ByteToken = "db"
 	code += "db "
@@ -589,6 +587,7 @@ Palette:
 {{ .DisplayPalette }}
 `
 
+// nolint: misspell
 var deltaScreenCompressCodeDeltaPlus = `
 ;--- dimensions du sprite ----
 loadingaddress equ #200
@@ -902,6 +901,7 @@ table_delta
 
 `
 
+// nolint: misspell
 var deltaScreenCompressCodeDeltaV2 = `
 ;--- dimensions du sprite ----
 large equ {{ .Large }}
@@ -1190,6 +1190,7 @@ Palette:
 {{ .DisplayPalette }}
 `
 
+// nolint:misspell
 var deltaScreenCompressCodeDelta string = `
 ;--- dimensions du sprite ----
 large equ {{ .Large }}
@@ -1332,6 +1333,7 @@ Palette:
 {{ .DisplayPalette }}
 `
 
+// nolint: misspell
 var deltaCodeDelta string = `;--- dimensions du sprite ----
 large equ {{ .Large }}
 haut equ {{ .Haut }}
@@ -1466,6 +1468,7 @@ Palette:
 {{ .DisplayPalette }}
 `
 
+// nolint: misspell
 var depackRoutine = `
 ;--- dimensions du sprite ----
 large equ {{ .Large }}

@@ -19,8 +19,8 @@ type InkPalette struct {
 
 func (i *InkPalette) ToString() string {
 	var out string
-	for _, v := range i.Colors {
-		out += v.ToString() + "\n"
+	for x := range i.Colors {
+		out += i.Colors[x].ToString() + "\n"
 	}
 	return out
 }
@@ -29,18 +29,14 @@ func Ink(filePath string, p color.Palette, screenMode uint8, dontImportDsk bool,
 	log.GetLogger().Info("Saving INK file (%s)\n", filePath)
 	data := make([]uint8, 16)
 	log.GetLogger().Info("Palette size %d\n", len(p))
-	for i := 0; i < len(p); i++ {
+	for i := range p {
 		v, err := constants.HardwareNumber(p[i])
 		if err == nil {
 			for j := 0; j < 12; j++ {
 				data[i] = uint8(v)
 			}
-			// } else {
-			// 	log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
-
-	// log.GetLogger().Error( "Header length %d\n", binary.Size(header))
 	osFilepath := cfg.AmsdosFullPath(filePath, ".INK")
 
 	if !cfg.ScrCfg.NoAmsdosHeader {
@@ -99,8 +95,8 @@ func OpenInk(filePath string) (color.Palette, *InkPalette, error) {
 	}
 
 	p := color.Palette{}
-	for _, v := range inkPalette.Colors {
-		c, err := constants.ColorFromHardware(uint8(v.HardwareNumber))
+	for i := range inkPalette.Colors {
+		c, err := constants.ColorFromHardware(uint8(inkPalette.Colors[i].HardwareNumber))
 		if err != nil {
 			log.GetLogger().Error("Color error :%v\n", err)
 		} else {

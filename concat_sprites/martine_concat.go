@@ -23,15 +23,15 @@ func main() {
 	spritesFiles := []string{*files}
 	filespath, err := common.WilcardedFiles(spritesFiles)
 	if err != nil {
-		log.GetLogger().Error( "error while getting the files path. %v\n", err)
+		log.GetLogger().Error("error while getting the files path. %v\n", err)
 		os.Exit(-1)
 	}
 	f, err := os.Create(*out)
 	if err != nil {
-		log.GetLogger().Error( "error while opening file %s error : %v\n.", *out, err)
+		log.GetLogger().Error("error while opening file %s error : %v\n.", *out, err)
 		os.Exit(-1)
 	}
-	defer f.Close()
+	f.Close()
 	for _, v := range filespath {
 		displaySprite(v, f)
 	}
@@ -41,16 +41,16 @@ func main() {
 func displaySprite(filePath string, out *os.File) {
 	f, err := os.Open(filePath)
 	if err != nil {
-		log.GetLogger().Error( "Cannot open file (%s) error :%v\n", filePath, err)
+		log.GetLogger().Error("Cannot open file (%s) error :%v\n", filePath, err)
 		return
 	}
 	defer f.Close()
 	base := filepath.Base(filePath)
 	ext := filepath.Ext(base)
 	spriteName := strings.Replace(base, ext, "", 1)
-	_, err = out.Write([]byte(fmt.Sprintf("%s\n", strings.ToLower(spriteName))))
+	_, err = fmt.Fprintf(out, "%s\n", strings.ToLower(spriteName))
 	if err != nil {
-		log.GetLogger().Error( "Error while writing : %v\n", err)
+		log.GetLogger().Error("Error while writing : %v\n", err)
 		return
 	}
 	scanner := bufio.NewScanner(f)
@@ -66,9 +66,9 @@ func displaySprite(filePath string, out *os.File) {
 		case '.':
 			continue
 		default:
-			_, err = out.Write([]byte(fmt.Sprintf("%s\n", in)))
+			_, err = fmt.Fprintf(out, "%s\n", in)
 			if err != nil {
-				log.GetLogger().Error( "Error while writing : %v\n", err)
+				log.GetLogger().Error("Error while writing : %v\n", err)
 				return
 			}
 		}

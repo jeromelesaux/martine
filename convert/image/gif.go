@@ -6,7 +6,7 @@ import (
 	"image/gif"
 )
 
-func GifToImages(g gif.GIF) []image.Image {
+func GifToImages(g *gif.GIF) []image.Image {
 	c := make([]image.Image, 0)
 	width := g.Image[0].Bounds().Max.X
 	height := g.Image[0].Bounds().Max.Y

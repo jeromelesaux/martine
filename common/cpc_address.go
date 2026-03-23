@@ -16,7 +16,7 @@ func ParseHexadecimal16(address string) (uint16, error) {
 
 	switch address[0] {
 	case '#':
-		value := strings.Replace(address, "#", "", -1)
+		value := strings.ReplaceAll(address, "#", "")
 		v, err := strconv.ParseUint(value, 16, 16)
 		if err != nil {
 			log.GetLogger().Error("cannot get the hexadecimal value fom %s, error : %v\n", address, err)
@@ -25,7 +25,7 @@ func ParseHexadecimal16(address string) (uint16, error) {
 			return uint16(v), nil
 		}
 	case '0':
-		value := strings.Replace(address, "0x", "", -1)
+		value := strings.ReplaceAll(address, "0x", "")
 		v, err := strconv.ParseUint(value, 16, 16)
 		if err != nil {
 			log.GetLogger().Error("cannot get the hexadecimal value fom %s, error : %v\n", address, err)

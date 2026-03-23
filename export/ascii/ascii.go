@@ -161,7 +161,6 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 		if err := amsdos.SaveAmsdosFile(osFilepath, ".TXT", []byte(out), 0, 0, 0, 0); err != nil {
 			return err
 		}
-		// binary.Write(fw, binary.LittleEndian, header)
 	} else {
 		if err := amsdos.SaveOSFile(osFilepath, []byte(out)); err != nil {
 			return err
@@ -289,13 +288,9 @@ func FormatAssemblyCPCPalette(p color.Palette, eol string) string {
 			out += fmt.Sprintf("#%0.2x", v[0])
 			if (i+1)%8 == 0 && i+1 < len(p) {
 				out += eol + ByteToken + " "
-			} else {
-				if i+1 < len(p) {
-					out += ", "
-				}
+			} else if i+1 < len(p) {
+				out += ", "
 			}
-			// } else {
-			// 	log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
 	return out
@@ -309,13 +304,9 @@ func FormatAssemblyBasicPalette(p color.Palette, eol string) string {
 			out += fmt.Sprintf("%0.2d", v)
 			if (i+1)%8 == 0 && i+1 < len(p) {
 				out += eol + ByteToken + " "
-			} else {
-				if i+1 < len(p) {
-					out += ", "
-				}
+			} else if i+1 < len(p) {
+				out += ", "
 			}
-			// } else {
-			// 	log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 		}
 	}
 	return out
@@ -330,11 +321,10 @@ func FormatAssemblyCPCPlusPalette(p color.Palette, eol string) string {
 		out += fmt.Sprintf("#%.2x, #%.2x", byte(v), byte(v>>8))
 		if (i+1)%8 == 0 && i+1 < len(p) {
 			out += eol + ByteToken + " "
-		} else {
-			if i+1 < len(p) {
-				out += ", "
-			}
+		} else if i+1 < len(p) {
+			out += ", "
 		}
+
 	}
 	return out
 }

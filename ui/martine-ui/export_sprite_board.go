@@ -151,7 +151,6 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 			} else {
 				pi.Hide()
 				dialog.NewError(errors.New("no yet implemented, try another option"), m.window).Show()
-				// routine = animate.ExportCompiledSprite(diff)
 				return
 			}
 			code += fmt.Sprintf("spr_%.2d:\n", idx)
@@ -222,7 +221,7 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 				var err error
 				// TODO add amsdos header
 				if s.Cfg.ScrCfg.NoAmsdosHeader {
-					err = amsdos.SaveAmsdosFile(filename, ".WIN", buf, 2, 0, 0x4000, 0x4000)
+					err = amsdos.SaveAmsdosFile(filename, constants.WindowExtension, buf, 2, 0, 0x4000, 0x4000)
 					if err != nil {
 						pi.Hide()
 						dialog.NewError(err, m.window).Show()
@@ -259,28 +258,27 @@ func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 					if s.Cfg.ContainerCfg.HasExport(config.DskContainer) {
 						s.Cfg.DskFiles = append(s.Cfg.DskFiles, filename)
 					}
-				} else {
-					if s.Cfg.ScrCfg.IsExport(config.SpriteHardExport) {
-						data := spritehard.SprImpdraw{}
-						for _, v := range s.SpritesData {
-							sh := spritehard.SpriteHard{}
-							for _, v0 := range v {
-								copy(sh.Data[:], v0[:256])
-								data.Data = append(data.Data, sh)
-							}
-						}
-						filename := filepath.Join(s.Cfg.ScrCfg.OutputPath, "sprites.spr")
-
-						if err := spritehard.Spr(filename, data, cfg); err != nil {
-							pi.Hide()
-							dialog.NewError(err, m.window).Show()
-							log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
-							return
-						}
-						if s.Cfg.ContainerCfg.HasExport(config.DskContainer) {
-							s.Cfg.DskFiles = append(s.Cfg.DskFiles, filename)
+				} else if s.Cfg.ScrCfg.IsExport(config.SpriteHardExport) {
+					data := spritehard.SprImpdraw{}
+					for _, v := range s.SpritesData {
+						sh := spritehard.SpriteHard{}
+						for _, v0 := range v {
+							copy(sh.Data[:], v0[:256])
+							data.Data = append(data.Data, sh)
 						}
 					}
+					filename := filepath.Join(s.Cfg.ScrCfg.OutputPath, "sprites.spr")
+
+					if err := spritehard.Spr(filename, data, cfg); err != nil {
+						pi.Hide()
+						dialog.NewError(err, m.window).Show()
+						log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", filename, err)
+						return
+					}
+					if s.Cfg.ContainerCfg.HasExport(config.DskContainer) {
+						s.Cfg.DskFiles = append(s.Cfg.DskFiles, filename)
+					}
+
 				}
 			}
 		}

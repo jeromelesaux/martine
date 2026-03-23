@@ -1,0 +1,68 @@
+run:
+  timeout: 5m
+  issues-exit-code: 1
+  tests: true
+  build-tags: []
+
+linters:
+  enable:
+    - goimports
+    - gocyclo
+    - goconst
+    - gocritic
+    - govet
+    - ineffassign
+    - misspell
+    - staticcheck
+    - unused
+    - errcheck
+    - gosimple
+    - typecheck
+  disable:
+    - funlen  # Temporarily disabled due to large functions in UI code
+    - gocognit  # Temporarily disabled for complex algorithms
+
+linters-settings:
+  gocyclo:
+    min-complexity: 15
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      - dupImport  # goimports handles this
+      - ifElseChain
+      - octalLiteral
+      - whyNoLint
+  misspell:
+    locale: US
+  staticcheck:
+    go: "1.19"
+    checks: ["all"]
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - goconst
+        - funlen
+        - gocognit
+    - path: ui/
+      linters:
+        - gocyclo  # UI code often has higher complexity
+    - text: "G404"  # Allow weak crypto for legacy compatibility
+      linters:
+        - gosec
+    - text: "G501"  # Allow weak crypto for legacy compatibility
+      linters:
+        - gosec
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  new: false

@@ -6,6 +6,7 @@ import (
 
 	"github.com/jeromelesaux/m4client/m4"
 	"github.com/jeromelesaux/martine/config"
+	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/log"
 )
 
@@ -84,7 +85,7 @@ func ImportInM4(cfg *config.MartineConfig) error {
 			switch path.Ext(v) {
 			case ".BAS":
 				basicFile = path.Base(v)
-			case ".SCR":
+			case constants.ScrExtension:
 				overscanFile = path.Base(v)
 			}
 		}

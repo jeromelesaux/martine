@@ -140,7 +140,6 @@ func BayerDiphering(input *image.NRGBA, filter [][]float32, palette color.Palett
 					color := rgbToQColor(plan.Colors[((y&1)*2 + (x & 1))])
 					image2.Set(x, y, color)
 				} else {
-					//log.GetLogger().Error("(%d,%d):(%d)(%d)\n",x,y,(x & filterRowLenght),((y & filterRowLenght) << 3))
 					mapValue := filter[(x & filterRowLenght)][(y&filterRowLenght)] / float32(filterLenght)
 					planIndex := 0
 					if mapValue < plan.Ratio {
@@ -150,7 +149,6 @@ func BayerDiphering(input *image.NRGBA, filter [][]float32, palette color.Palett
 					image2.Set(x, y, color)
 				}
 			}
-			//log.GetLogger().Info("Analyse done for column %d\n",y)
 			log.GetLogger().Info(".")
 		}
 	})

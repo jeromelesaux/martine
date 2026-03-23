@@ -101,7 +101,6 @@ func (s *SpriteMenu) ImportSprite(win fyne.Window) *widget.Button {
 			d.SetLocation(path)
 		}
 		d.SetFilter(storage.NewExtensionFileFilter([]string{".scr", ".win", ".bin"}))
-		// d.Resize(dialogSize)
 		d.Show()
 	})
 }

@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/config"
+	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/convert/export"
 	"github.com/jeromelesaux/martine/export/compression"
 	"github.com/jeromelesaux/martine/export/diskimage"
@@ -132,22 +133,13 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	cfg.EgxMode2 = me.RightImage.Cfg.ScrCfg.Mode
 
 	// palette export
-	defer func() {
-		os.Remove("temporary_palette.kit")
-	}()
+	defer os.Remove("temporary_palette.kit")
+
 	if err := impPalette.SaveKit("temporary_palette.kit", me.ResultImage.Cfg.PalCfg.Palette, false); err != nil {
 		pi.Hide()
 		dialog.ShowError(err, m.window)
 	}
 	cfg.PalCfg.Path = "temporary_palette.kit"
-
-	// if cfg.ScrCfg.Type == config.Egx1Format || cfg.ScrCfg.Type == config.Egx2Format {
-	// 	if err := ocpartstudio.EgxLoader(filepath.Join(me.ResultImage.Path, egxFilename), me.ResultImage.Cfg.PalCfg.Palette, me.LeftImage.Cfg.ScrCfg.Mode, me.RightImage.Cfg.ScrCfg.Mode, cfg); err != nil {
-	// 		pi.Hide()
-	// 		dialog.ShowError(err, m.window)
-	// 		return
-	// 	}
-	// }
 	if err := export.Export(filepath.Join(me.ResultImage.Cfg.ScrCfg.OutputPath, egxFilename), me.ResultImage.Data, me.ResultImage.Cfg.PalCfg.Palette, uint8(me.ResultImage.EgxType), cfg); err != nil {
 		pi.Hide()
 		dialog.ShowError(err, m.window)
@@ -164,7 +156,7 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 		if cfg.ScrCfg.Type.IsFullScreen() {
 			var gfxFile string
 			for _, v := range cfg.DskFiles {
-				if filepath.Ext(v) == ".SCR" {
+				if filepath.Ext(v) == constants.ScrExtension {
 					gfxFile = v
 					break
 				}

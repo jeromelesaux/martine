@@ -20,7 +20,6 @@ import (
 var ErrorCannotDowngradePalette = errors.New("cannot Downgrade colors palette")
 
 func Resize(in image.Image, size constants.Size, algo imaging.ResampleFilter) *image.NRGBA {
-	// log.GetLogger().Info( "* Step 1 * Resizing image to width %d pixels heigh %d\n", size.Width, size.Height)
 	return imaging.Resize(in, size.Width, size.Height, algo)
 }
 
@@ -192,14 +191,11 @@ func ColorMonochromePalette(co color.Color, p color.Palette) color.Palette {
 }
 
 func DowngradingWithPalette(in *image.NRGBA, p color.Palette) (color.Palette, *image.NRGBA) {
-	//	log.GetLogger().Info( "Downgrading image with input palette %d\n", len(p))
 	return p, downgradeWithPalette(in, p)
 }
 
 func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (color.Palette, *image.NRGBA, error) {
-	//	log.GetLogger().Info( "* Step 2 * Downgrading palette image\n")
 	p := ExtractPalette(in, isCpcPlus, size.ColorsAvailable)
-	//	log.GetLogger().Info( "Downgraded palette contains (%d) colors\n", len(p))
 	if len(p) > size.ColorsAvailable {
 		log.GetLogger().Error("Downgraded palette size (%d) is greater than the available colors in this mode (%d)\n", len(p), size.ColorsAvailable)
 		log.GetLogger().Error("Check color usage in image.\n")
@@ -210,7 +206,7 @@ func DowngradingPalette(in *image.NRGBA, size constants.Size, isCpcPlus bool) (c
 		for c, v := range colorUsage {
 			paletteToReduce.Cs = append(paletteToReduce.Cs, constants.NewColorReducer(c, v))
 		}
-		// launch analyse
+		// launch analyze
 		newPalette := paletteToReduce.Reduce(size.ColorsAvailable)
 		log.GetLogger().Info("Phasis downgrade colors palette palette (%d)\n", len(newPalette))
 		return newPalette, downgradeWithPalette(in, newPalette), nil
@@ -261,10 +257,6 @@ func downgradeWithPalette(in *image.NRGBA, p color.Palette) *image.NRGBA {
 }
 
 func ExtractPalette(in *image.NRGBA, isCpcPlus bool, nbColors int) color.Palette {
-	// colorUsage := computePaletteUsage(in)
-	// for c, _ := range colorUsage {
-	// 	fmt.Printf("original color [%v] : from palette [%v]\n", c, constants.CpcPlusPalette.Convert(c))
-	// }
 	p := []color.Color{}
 	type ks struct {
 		Key   color.Color
@@ -343,7 +335,7 @@ func paletteContains(p color.Palette, c color.Color) bool {
 	return false
 }
 
-func ConvertPalette(p color.Palette, p0 color.Palette) color.Palette {
+func ConvertPalette(p, p0 color.Palette) color.Palette {
 	var nP []color.Color
 	log.GetLogger().Info("Converting palette length %d\n", len(p))
 	for _, v := range p {
@@ -353,7 +345,7 @@ func ConvertPalette(p color.Palette, p0 color.Palette) color.Palette {
 	return nP
 }
 
-func ToCPCPalette(p color.Palette, cpcPalette color.Palette) color.Palette {
+func ToCPCPalette(p, cpcPalette color.Palette) color.Palette {
 	var out color.Palette
 	for _, v := range p {
 		c := cpcPalette.Convert(v)

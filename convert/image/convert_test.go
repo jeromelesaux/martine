@@ -14,8 +14,6 @@ func TestMask(t *testing.T) {
 	r2 := uint8(g)
 	r := r2
 	t.Logf("%b\n", g)
-	//r2 |= r2 - 128
-	//r = r ^ 128
 	if r > 128 {
 		r ^= 128
 	}

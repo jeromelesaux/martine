@@ -32,7 +32,7 @@ func SaveAmsdosFile(filename, extension string, data []byte, fileType, user byte
 		LogicalSize: uint16(filesize),
 	}
 	cpcFilename := AmsdosFilename(filename, extension)
-	copy(header.Filename[:], strings.Replace(cpcFilename, ".", "", -1))
+	copy(header.Filename[:], strings.ReplaceAll(cpcFilename, ".", ""))
 	header.Checksum = header.ComputedChecksum16()
 	log.GetLogger().Info("filesize:%d,#%.2x\n", filesize, filesize)
 	log.GetLogger().Info("Data length %d\n", binary.Size(data))

@@ -68,7 +68,7 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 	boards := make([]*transformation.AnalyzeBoard, 0)
 	if !impTileFlag {
 		for size.Width <= 32 || size.Height <= 32 {
-			log.GetLogger().Info("Analyse the image for size [width:%d,height:%d]", size.Width, size.Height)
+			log.GetLogger().Info("Analyze the image for size [width:%d,height:%d]", size.Width, size.Height)
 			board := transformation.AnalyzeTilesBoard(m, size, nil)
 			tilesSize := sizeOctet(board.TileSize, mode) * len(board.BoardTiles)
 			log.GetLogger().Info(" found [%d] tiles full length [#%X]\n", len(board.BoardTiles), tilesSize)
@@ -78,7 +78,7 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 		}
 	} else {
 		for _, s := range impTilesSizes {
-			log.GetLogger().Info("Analyse the image for size [width:%d,height:%d]", s.Width, s.Height)
+			log.GetLogger().Info("Analyze the image for size [width:%d,height:%d]", s.Width, s.Height)
 			board := transformation.AnalyzeTilesBoard(m, s, nil)
 			tilesSize := sizeOctet(board.TileSize, mode) * len(board.BoardTiles)
 			log.GetLogger().Info(" found [%d] tiles full length [#%X]\n", len(board.BoardTiles), tilesSize)
@@ -144,7 +144,7 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 		return err
 	}
 	for i, v := range tiles {
-		if v.Occurence > 0 {
+		if v.Occurrence > 0 {
 			tile := v.Tile.Image()
 			d, _, _, _, err := ApplyOneImage(tile,
 				cfg,
@@ -413,7 +413,7 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 		return err
 	}
 	for i, v := range tiles {
-		if v.Occurence > 0 {
+		if v.Occurrence > 0 {
 			tile := v.Tile.Image()
 			d, _, _, _, err := ApplyOneImage(tile,
 				cfg,
@@ -616,7 +616,6 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 			log.GetLogger().Error("Error while saving sprites in folder %s error :%v", cfg.ScrCfg.OutputPath, err)
 		}
 	}
-	// scenes := make([]*image.NRGBA, 0)
 	index := 0
 	m := ci.Resize(in, mapSize, cfg.ScrCfg.Process.ResizingAlgo)
 	for y := 0; y < m.Bounds().Max.Y; y += (nbTilePixelHigh * analyze.TileSize.Height) {
@@ -711,7 +710,7 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 		return err
 	}
 	for i, v := range tiles {
-		if v.Occurence > 0 {
+		if v.Occurrence > 0 {
 			tile := v.Tile.Image()
 			d, _, _, _, err := ApplyOneImage(tile,
 				cfg,

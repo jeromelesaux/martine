@@ -1393,8 +1393,7 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cfg *confi
 	for i := 0; i < len(p); i++ {
 		cp := constants.NewCpcPlusColor(p[i])
 		b := cp.Bytes()
-		loader = append(loader, b[0])
-		loader = append(loader, b[1])
+		loader = append(loader, b[0], b[1])
 	}
 
 	loader[0x9d] = uint8(len(p) * 2)
@@ -1423,8 +1422,8 @@ func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cfg *confi
 
 	// export fichier basic loader
 	loader = basicCPCPlusLoaderBasic
-	filename := cfg.AmsdosFullPath(filePath, ".SCR")
-	filename = amsdos.AmsdosFilename(filename, ".SCR")
+	filename := cfg.AmsdosFullPath(filePath, constants.ScrExtension)
+	filename = amsdos.AmsdosFilename(filename, constants.ScrExtension)
 	var scrFile [12]byte
 	for i := 0; i < 12; i++ {
 		scrFile[i] = ' '
@@ -1479,9 +1478,9 @@ func BasicLoader(filePath string, p color.Palette, cfg *config.MartineConfig) er
 	var loader []byte = basicLoaderBasic
 	copy(loader[startPaletteValues:], out[0:])
 	basicFile := cfg.AmsdosFullPath(filePath, "")
-	filename := filepath.Base(basicFile) // exportType.GetAmsdosFilename(filePath, "")
-	copy(loader[startPaletteName:], filename[:])
-	copy(loader[startScreenName:], filename[:])
+	filename := filepath.Base(basicFile)
+	copy(loader[startPaletteName:], filename)
+	copy(loader[startScreenName:], filename)
 	log.GetLogger().Infoln(loader)
 
 	osFilepath := cfg.AmsdosFullPath(filePath, ".BAS")
@@ -1602,13 +1601,13 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cfg *config
 	var loader []byte
 	if cfg.ScrCfg.IsPlus {
 		loader = egxPlusBasicLoader
-		copy(loader[startPlusScreenName:], filename[:])
+		copy(loader[startPlusScreenName:], filename)
 
 	} else {
 		loader = egxLoaderBasic
 		copy(loader[startPaletteValues:], out[0:])
-		copy(loader[startPaletteName:], filename[:])
-		copy(loader[startScreenName:], filename[:])
+		copy(loader[startPaletteName:], filename)
+		copy(loader[startScreenName:], filename)
 	}
 
 	log.GetLogger().Infoln(loader)
@@ -1675,7 +1674,7 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cfg *config
 			kit[index] = b[1]
 			index++
 		}
-		copy(egxLoader[egxPlusBinaryPaletteOffset:], kit[:])
+		copy(egxLoader[egxPlusBinaryPaletteOffset:], kit)
 		log.GetLogger().Infoln(kit)
 		switch mode2 {
 		case 0:

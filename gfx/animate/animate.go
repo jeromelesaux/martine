@@ -41,7 +41,6 @@ func Animation(filepaths []string, screenMode uint8, export *config.MartineConfi
 // nolint: funlen, gocognit
 func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, screenMode uint8, export *config.MartineConfig) (*image.NRGBA, color.Palette, error) {
 	nbImgWidth := sizeScreen.Width / spriteSize.Width
-	//nbImgHeight := int(sizeScreen.Height / size.Height)
 	largeMarge := (sizeScreen.Width - (spriteSize.Width * nbImgWidth)) / nbImgWidth
 
 	board := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: sizeScreen.Width, Y: sizeScreen.Height}})

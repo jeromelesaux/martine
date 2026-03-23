@@ -25,8 +25,8 @@ type SprImpdraw struct {
 
 func (s *SprImpdraw) Images(pal color.Palette) []*image.NRGBA {
 	imgs := make([]*image.NRGBA, 0)
-	for _, v := range s.Data {
-		imgs = append(imgs, v.Image(pal))
+	for i := range s.Data {
+		imgs = append(imgs, s.Data[i].Image(pal))
 	}
 	return imgs
 }
@@ -88,8 +88,8 @@ func Spr(filePath string, spr SprImpdraw, cfg *config.MartineConfig) error {
 	osFilename := cfg.AmsdosFullPath(filePath, ".SPR")
 	log.GetLogger().Info("Saving SPR file (%s)\n", osFilename)
 	content := make([]byte, 0)
-	for _, v := range spr.Data {
-		content = append(content, v.Data[:]...)
+	for i := range spr.Data {
+		content = append(content, spr.Data[i].Data[:]...)
 	}
 	content, _ = compression.Compress(content, cfg.ScrCfg.Compression)
 	ext := ".SPR"

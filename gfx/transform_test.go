@@ -7,8 +7,6 @@ import (
 )
 
 func TestPixels(t *testing.T) {
-
-	//t.Logf("74:%.b 74&2:%.8b\n",74,74&2)
 	p10 := 15
 	p20 := 14
 	v := pixel.PixelMode0(p10, p20)

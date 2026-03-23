@@ -8,6 +8,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
@@ -22,6 +23,16 @@ import (
 	"github.com/pbnjay/pixfont"
 )
 
+type AnalyzeBoard struct {
+	Tiles              [][]image.Image
+	BoardTiles         []BoardTile
+	TileSize           constants.Size
+	ImageSize          constants.Size
+	TileMap            [][]int
+	historicalTiles    *exspr.TilesHistorical
+	newHistoricalTiles *exspr.TilesHistorical
+}
+
 type TilePosition struct {
 	PixelX int
 	PixelY int
@@ -33,14 +44,14 @@ func (s *TilePosition) String() string {
 
 type BoardTile struct {
 	New           bool
-	Occurence     int
+	Occurrence    int
 	TilePositions []TilePosition
 	Index         int
 	Tile          *Tile
 }
 
 func (b *BoardTile) String() string {
-	out := fmt.Sprintf("Occurence:%d \n", b.Occurence)
+	out := fmt.Sprintf("Occurrence:%d \n", b.Occurrence)
 	for _, v := range b.TilePositions {
 		out += v.String() + "\n"
 	}
@@ -48,11 +59,11 @@ func (b *BoardTile) String() string {
 }
 
 func (b *BoardTile) AddTile(tp []TilePosition) {
-	b.Occurence++
+	b.Occurrence++
 	b.TilePositions = append(b.TilePositions, tp...)
 }
 
-func (a *AnalyzeBoard) Analyse(tile *Tile, x, y int) int {
+func (a *AnalyzeBoard) Analyze(tile *Tile, x, y int) int {
 	var index int
 	if a.historicalTiles != nil {
 		index = a.historicalTiles.LastIndex()
@@ -82,16 +93,15 @@ func (a *AnalyzeBoard) Analyse(tile *Tile, x, y int) int {
 }
 
 func (a *AnalyzeBoard) SetAddTile(x, y, index int, tl *image.NRGBA, isNew bool) int {
-	//	a.TileMap[len(a.TileMap)] = append(a.TileMap[len(a.TileMap)], index)
 	for i, v := range a.BoardTiles {
 		if v.Index == index {
-			a.BoardTiles[i].Occurence++
+			a.BoardTiles[i].Occurrence++
 			a.BoardTiles[i].TilePositions = append(a.BoardTiles[i].TilePositions, TilePosition{PixelX: x, PixelY: y})
 			return i
 		}
 	}
 	a.BoardTiles = append(a.BoardTiles, BoardTile{
-		Occurence:     1,
+		Occurrence:    1,
 		New:           isNew,
 		TilePositions: []TilePosition{{PixelX: x, PixelY: y}},
 		Index:         index,
@@ -103,35 +113,23 @@ func (a *AnalyzeBoard) SetAddTile(x, y, index int, tl *image.NRGBA, isNew bool) 
 func (a *AnalyzeBoard) AddTile(sprite *Tile, x, y int) {
 	for i, v := range a.BoardTiles {
 		if TilesAreEquals(v.Tile, sprite) {
-			a.BoardTiles[i].Occurence++
+			a.BoardTiles[i].Occurrence++
 			a.BoardTiles[i].TilePositions = append(a.BoardTiles[i].TilePositions, TilePosition{PixelX: x, PixelY: y})
 			break
 		}
 	}
 }
 
-func (a *AnalyzeBoard) NewTile(sprite *Tile, x, y int, index int) {
-	//	a.TileMap[index] = append(a.TileMap[index], len(a.BoardSprites))
+func (a *AnalyzeBoard) NewTile(sprite *Tile, x, y, index int) {
 	// get the last index
-
 	b := BoardTile{
 		New:           true,
 		TilePositions: make([]TilePosition, 0),
 		Tile:          sprite,
-		Occurence:     1,
+		Occurrence:    1,
 		Index:         index}
 	b.TilePositions = append(b.TilePositions, TilePosition{PixelX: x, PixelY: y})
 	a.BoardTiles = append(a.BoardTiles, b)
-}
-
-type AnalyzeBoard struct {
-	Tiles              [][]image.Image
-	BoardTiles         []BoardTile
-	TileSize           constants.Size
-	ImageSize          constants.Size
-	TileMap            [][]int
-	historicalTiles    *exspr.TilesHistorical
-	newHistoricalTiles *exspr.TilesHistorical
 }
 
 func NewAnalyzeBoard(
@@ -234,7 +232,7 @@ func (a *AnalyzeBoard) Sort() []BoardTile {
 	for _, v0 := range a.BoardTiles {
 		var index int
 		for i, v1 := range sorted {
-			if v1.Occurence < v0.Occurence {
+			if v1.Occurrence < v0.Occurrence {
 				index = i
 				break
 			}
@@ -385,7 +383,7 @@ func AnalyzeTilesBoardWithTiles(im image.Image, size constants.Size, tiles []Til
 				break
 			}
 			v := getCloserTile(*sprt, tiles)
-			index := board.Analyse(&v, x, y)
+			index := board.Analyze(&v, x, y)
 			board.TileMap[indexY][indexX] = index
 			indexY++
 		}
@@ -420,10 +418,9 @@ func AnalyzeTilesBoard(im image.Image, size constants.Size, tilesHistoric *exspr
 		for y := 0; y < im.Bounds().Max.Y; y += size.Height {
 			sprt, err := ExtractTile(im, size, x, y)
 			if err != nil {
-				// log.GetLogger().Error( "Error while extracting tile size(%d,%d) at position (%d,%d) error :%v\n", size.Width, size.Height, x, y, err)
 				continue
 			}
-			index := board.Analyse(sprt, x, y)
+			index := board.Analyze(sprt, x, y)
 			board.TileMap[indexY][indexX] = index
 			indexY++
 		}
@@ -531,7 +528,7 @@ func (a *AnalyzeBoard) SaveOcpWindowFile(folderpath string, palette color.Palett
 }
 
 func (a *AnalyzeBoard) SaveTiles(folderpath string, palette color.Palette, mode uint8, cfg *config.MartineConfig) error {
-	var tiles string
+	var tiles strings.Builder
 	spriteFolder := filepath.Join(folderpath, "sprites")
 	err := os.Mkdir(spriteFolder, os.ModePerm)
 	if err != nil {
@@ -539,26 +536,20 @@ func (a *AnalyzeBoard) SaveTiles(folderpath string, palette color.Palette, mode 
 	}
 	for _, v := range a.BoardTiles {
 		if v.New {
-			tiles += fmt.Sprintf("tile_%0.2d\n", v.Index)
+			fmt.Fprintf(&tiles, "tile_%0.2d\n", v.Index)
 			err := png.Png(filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", v.Index)), v.Tile.Image())
 			if err != nil {
 				return err
 			}
-
-			// filename := filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", index))
-			// err = sprite.ToSpriteAndExport(im, palette, v.Size, mode, filename, true, cfg)
-			// if err != nil {
-			// 	return err
-			// }
 			d, _, _, err := sprite.ToSprite(v.Tile.Image(), palette, a.TileSize, mode, cfg)
 			if err != nil {
 				return err
 			}
-			tiles += ascii.FormatAssemblyDatabyte(d, "\n")
+			tiles.WriteString(ascii.FormatAssemblyDatabyte(d, "\n"))
 		}
 	}
 
-	return amsdos.SaveStringOSFile(filepath.Join(folderpath, "tiles.asm"), tiles)
+	return amsdos.SaveStringOSFile(filepath.Join(folderpath, "tiles.asm"), tiles.String())
 }
 
 func (a *AnalyzeBoard) SaveAllTiles(folderpath string, palette color.Palette, mode uint8, cfg *config.MartineConfig) error {
@@ -613,7 +604,7 @@ func (a *AnalyzeBoard) SaveSchema(filePath string) error {
 		}
 
 		// draw sprite label
-		label := fmt.Sprintf(" Tile %.2d occurence %d", v.Index, v.Occurence)
+		label := fmt.Sprintf(" Tile %.2d occurrence %d", v.Index, v.Occurrence)
 		pixfont.DrawString(im, x0+sprt.Size.Width+5, y0, label, fontColor)
 		y0 += sprt.Size.Height + 5
 
@@ -660,7 +651,7 @@ func (a *AnalyzeBoard) SaveAssemblyTiles(filePath string) error {
 				return err
 			}
 		}
-		_, err = f.WriteString(fmt.Sprintf("%.2d", v[len(v)-1]))
+		_, err = fmt.Fprintf(f, "%.2d", v[len(v)-1])
 		if err != nil {
 			return err
 		}
@@ -721,7 +712,6 @@ func (a *AnalyzeBoard) ReduceTilesNumber(threshold float64) []BoardTile {
 					tp := a.BoardTiles[i].TilePositions
 					newBoard[len(newBoard)-1].AddTile(tp)
 					deleted = append(deleted, i)
-					//	log.GetLogger().Info("Tile[%d] and tile[%d] are similar distance :%f\n", index, i, d)
 				}
 			}
 		}

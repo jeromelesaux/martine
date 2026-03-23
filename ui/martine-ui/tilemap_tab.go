@@ -178,8 +178,6 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 			}
 			tm.SetOriginalImage(img)
 			tm.Historic = nil
-			// m.window.Canvas().Refresh(&tm.OriginalImage)
-			// m.window.Resize(m.window.Content().Size())
 		}, m.window)
 		path, err := directory.ImportDirectoryURI()
 		if err == nil {

@@ -2,6 +2,7 @@ package config
 
 import (
 	"image/color"
+	"slices"
 
 	"github.com/disintegration/imaging"
 	"github.com/jeromelesaux/martine/constants"
@@ -108,13 +109,8 @@ func (s *ScreenConfig) RemoveExport(c ScreenExport) {
 	}
 }
 
-func (s ScreenConfig) IsExport(c ScreenExport) bool {
-	for _, v := range s.Export {
-		if v == c {
-			return true
-		}
-	}
-	return false
+func (s *ScreenConfig) IsExport(c ScreenExport) bool {
+	return slices.Contains(s.Export, c)
 }
 
 var (

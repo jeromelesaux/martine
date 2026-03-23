@@ -106,14 +106,12 @@ func SaveKit(filePath string, p color.Palette, noAmsdosHeader bool) error {
 		data[i] = cp.Value()
 	}
 
-	// log.GetLogger().Error( "Header length %d\n", binary.Size(header))
-
 	v, err := common.StructToBytes(data)
 	if err != nil {
 		return err
 	}
 	if !noAmsdosHeader {
-		if err = amsdos.SaveAmsdosFile(filePath, ".KIT", v, 2, 0, 0x8809, 0x8809); err != nil {
+		if err := amsdos.SaveAmsdosFile(filePath, ".KIT", v, 2, 0, 0x8809, 0x8809); err != nil {
 			return err
 		}
 	} else {

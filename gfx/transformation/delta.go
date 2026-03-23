@@ -63,10 +63,9 @@ func (d *DeltaCollection) ItemsSortByByte() []DeltaItem {
 	occ
 */
 
-func (d *DeltaCollection) Occurences() int {
-	occurence := 0
-	occurence += len(d.Items)
-	return occurence
+func (d *DeltaCollection) Occurrences() int {
+	occurrence := len(d.Items)
+	return occurrence
 }
 
 func NewDeltaCollection() *DeltaCollection {
@@ -140,24 +139,20 @@ func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.
 			c4 := next.At(i, j)
 			p1, err := palette.PalettePosition(c1, currentPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, i, j)
 				p1 = 0
 			}
 			p3, err := palette.PalettePosition(c3, currentPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, i, j)
 				p3 = 0
 			}
 			pixel1 := pixel.PixelMode0(p1, p3)
 
 			p2, err := palette.PalettePosition(c2, nextPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p2 = 0
 			}
 			p4, err := palette.PalettePosition(c4, nextPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p4 = 0
 			}
 			pixel2 := pixel.PixelMode0(p2, p4)
@@ -194,44 +189,36 @@ func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.
 			c8 := next.At(i, j)
 			p1, err := palette.PalettePosition(c1, currentPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, i, j)
 				p1 = 0
 			}
 			p3, err := palette.PalettePosition(c3, currentPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, i, j)
 				p3 = 0
 			}
 			p5, err := palette.PalettePosition(c5, currentPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c5, i, j)
 				p5 = 0
 			}
 			p7, err := palette.PalettePosition(c7, currentPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c7, i, j)
 				p7 = 0
 			}
 			pixel1 := pixel.PixelMode1(p1, p3, p5, p7)
 
 			p2, err := palette.PalettePosition(c2, nextPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p2 = 0
 			}
 			p4, err := palette.PalettePosition(c4, nextPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p4 = 0
 			}
 			p6, err := palette.PalettePosition(c6, nextPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c6, i, j)
 				p6 = 0
 			}
 			p8, err := palette.PalettePosition(c8, nextPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c8, i, j)
 				p8 = 0
 			}
 			pixel2 := pixel.PixelMode1(p2, p4, p6, p8)
@@ -280,84 +267,68 @@ func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.
 			c16 := next.At(i, j)
 			p1, err := palette.PalettePosition(c1, currentPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c1, i, j)
 				p1 = 0
 			}
 			p3, err := palette.PalettePosition(c3, currentPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c3, i, j)
 				p3 = 0
 			}
 			p5, err := palette.PalettePosition(c5, currentPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c5, i, j)
 				p5 = 0
 			}
 			p7, err := palette.PalettePosition(c7, currentPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c7, i, j)
 				p7 = 0
 			}
 			p9, err := palette.PalettePosition(c9, currentPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c9, i, j)
 				p9 = 0
 			}
 			p11, err := palette.PalettePosition(c11, currentPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c11, i, j)
 				p11 = 0
 			}
 			p13, err := palette.PalettePosition(c13, currentPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c13, i, j)
 				p13 = 0
 			}
 			p15, err := palette.PalettePosition(c15, currentPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c15, i, j)
 				p15 = 0
 			}
 			pixel1 := pixel.PixelMode2(p1, p3, p5, p7, p9, p11, p13, p15)
 
 			p2, err := palette.PalettePosition(c2, nextPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p2 = 0
 			}
 			p4, err := palette.PalettePosition(c4, nextPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c2, i, j)
 				p4 = 0
 			}
 			p6, err := palette.PalettePosition(c6, nextPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c6, i, j)
 				p6 = 0
 			}
 			p8, err := palette.PalettePosition(c8, nextPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c8, i, j)
 				p8 = 0
 			}
 			p10, err := palette.PalettePosition(c10, nextPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c10, i, j)
 				p10 = 0
 			}
 			p12, err := palette.PalettePosition(c12, nextPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c12, i, j)
 				p12 = 0
 			}
 			p14, err := palette.PalettePosition(c14, nextPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c14, i, j)
 				p14 = 0
 			}
 			p16, err := palette.PalettePosition(c16, nextPalette)
 			if err != nil {
-				// log.GetLogger().Error("%v pixel position(%d,%d) not found in palette\n", c16, i, j)
 				p16 = 0
 			}
 			pixel2 := pixel.PixelMode2(p2, p4, p6, p8, p10, p12, p14, p16)
@@ -370,7 +341,7 @@ func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.
 	return data, nil
 }
 
-// format byte value, number of occurence, offsets values.
+// format byte value, number of occurrence, offsets values.
 func (dc *DeltaCollection) Marshall() ([]byte, error) {
 	var b bytes.Buffer
 
@@ -391,7 +362,6 @@ func (dc *DeltaCollection) Marshall() ([]byte, error) {
 		}
 		for i := 0; i < occ; i++ {
 			value := item.Offsets[i]
-			//			log.GetLogger().Info( "Value[%d]:%.4x\n", j, value)
 			if err := binary.Write(&b, binary.LittleEndian, value); err != nil {
 				return b.Bytes(), err
 			}
@@ -409,7 +379,6 @@ func (dc *DeltaCollection) Save(filename string) error {
 }
 
 func DeltaAddress(x, y, lineOctetWidth int) int {
-	//return (0x50 * (y / 8)) + (x + 1)
 	// lineOctetWidth == 0x50
 	if y > (8 * 0x800 / lineOctetWidth) {
 		log.GetLogger().Error("WARNING: y (%d) is superior to  (8 * 0x800 /#%x)\n", y, lineOctetWidth)
@@ -419,7 +388,6 @@ func DeltaAddress(x, y, lineOctetWidth int) int {
 
 func X(offset uint16, lineOctetWidth int) uint16 {
 	line := Y(offset, lineOctetWidth)
-	//log.GetLogger().Info( "res:%d\n", int(offset)-DeltaAddress(0, int(line)))
 	return uint16(int(offset) - DeltaAddress(0, int(line), lineOctetWidth))
 }
 
@@ -450,22 +418,20 @@ func CpcCoordinates(address, startingAddress uint16, lineOctetWidth int) (int, i
 
 func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8, x0, y0 uint16, lineOctetWidth int) *DeltaCollection {
 	data := NewDeltaCollection()
-	//var line int
-	for offset := 0; offset < len(scr1); offset++ { // a revoir car pour un sprite ce n'est le même mode d'adressage
+	for offset := range scr1 { // a revoir car pour un sprite ce n'est le même mode d'adressage
 		if scr1[offset] != scr2[offset] {
 			if isSprite {
 
 				y := (offset / (size.Width)) + int(y0)
 				x := ((offset + int(x0)) - ((y - int(y0)) * (size.Width)))
 				newOffset := DeltaAddress(x, y, lineOctetWidth) + 0xC000
-				//	log.GetLogger().Info( "X0:%d,Y0:%d,X:%d,Y:%d,byte:#%.2x,addresse:#%.4x\n", x0, y0, x, y, scr2[offset], newOffset)
 				data.Add(scr2[offset], uint16(newOffset))
 			} else {
 				data.Add(scr2[offset], uint16(offset))
 			}
 		}
 	}
-	data.OccurencePerFrame = uint8(data.Occurences())
+	data.OccurencePerFrame = uint8(data.Occurrences())
 	return data
 }
 
@@ -476,7 +442,7 @@ func ExportDelta(filename string, dc *DeltaCollection, mode uint8, cfg *config.M
 	}
 	data, err := dc.Marshall()
 	if err != nil {
-		log.GetLogger().Error("Error while marshalling delta structure error :%v\n", err)
+		log.GetLogger().Error("Error while marshaling delta structure error :%v\n", err)
 		return err
 	}
 
@@ -511,7 +477,6 @@ func ProceedDelta(filespath []string, initialAddress uint16, cfg *config.Martine
 	var err error
 	var isSprite = false
 	var size constants.Size
-	//var x0, y0 uint16
 	lineOctetsWidth := cfg.LineWidth
 	x0, y0, err := CpcCoordinates(initialAddress, 0xC000, lineOctetsWidth)
 	if err != nil {
@@ -521,7 +486,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, cfg *config.Martine
 	log.GetLogger().Info("Cpc coordinates X:%d,Y:%d [#%.4x]\n", x0, y0, initialAddress)
 	for i := 0; i < len(filespath)-1; i++ {
 		switch strings.ToUpper(filepath.Ext(filespath[i])) {
-		case ".WIN":
+		case constants.WindowExtension:
 			d1, err = window.RawWin(filespath[i])
 			if err != nil {
 				return err
@@ -533,7 +498,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, cfg *config.Martine
 			}
 			size.Width = int(footer.Width)
 			size.Height = int(footer.Height)
-		case ".SCR":
+		case constants.ScrExtension:
 			_, err = ocpartstudio.RawScr(filespath[i])
 			if err != nil {
 				log.GetLogger().Error("File (%s) is not a simple screen.\n", filespath[i])
@@ -547,7 +512,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, cfg *config.Martine
 		}
 
 		switch strings.ToUpper(filepath.Ext(filespath[i+1])) {
-		case ".WIN":
+		case constants.WindowExtension:
 			d2, err = window.RawWin(filespath[i+1])
 			if err != nil {
 				return err
@@ -559,7 +524,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, cfg *config.Martine
 			}
 			size.Width = int(footer.Width)
 			size.Height = int(footer.Height)
-		case ".SCR":
+		case constants.ScrExtension:
 			_, err = ocpartstudio.RawScr(filespath[i+1])
 			if err != nil {
 				log.GetLogger().Error("File (%s) is not a simple screen.\n", filespath[i+1])
@@ -589,7 +554,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, cfg *config.Martine
 	}
 
 	switch strings.ToUpper(filepath.Ext(filespath[len(filespath)-1])) {
-	case ".WIN":
+	case constants.WindowExtension:
 		d1, err = window.RawWin(filespath[len(filespath)-1])
 		if err != nil {
 			return err
@@ -600,7 +565,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, cfg *config.Martine
 		}
 		size.Width = int(footer.Width)
 		size.Height = int(footer.Height)
-	case ".SCR":
+	case constants.ScrExtension:
 		_, err = ocpartstudio.RawScr(filespath[len(filespath)-1])
 		if err != nil {
 			log.GetLogger().Error("File (%s) is not a simple screen.\n", filespath[len(filespath)-1])
@@ -614,7 +579,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, cfg *config.Martine
 	}
 
 	switch strings.ToUpper(filepath.Ext(filespath[0])) {
-	case ".WIN":
+	case constants.WindowExtension:
 		d2, err = window.RawWin(filespath[0])
 		if err != nil {
 			return err
@@ -625,7 +590,7 @@ func ProceedDelta(filespath []string, initialAddress uint16, cfg *config.Martine
 		}
 		size.Width = int(footer.Width)
 		size.Height = int(footer.Height)
-	case ".SCR":
+	case constants.ScrExtension:
 		_, err = ocpartstudio.RawScr(filespath[0])
 		if err != nil {
 			log.GetLogger().Error("File (%s) is not a simple screen.\n", filespath[0])

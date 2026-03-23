@@ -63,11 +63,6 @@ func (dc *DeltaCollectionV2) Save(filename string) error {
 // nolint: funlen
 func (dc *DeltaCollectionV2) Marshall() ([]byte, error) {
 	var b bytes.Buffer
-	/*
-		if err := binary.Write(&b, binary.LittleEndian, dc.OccurencePerFrame); err != nil {
-			return b.Bytes(), err
-		}
-	*/
 	if dc.OccurencePerFrame == 0 { // no difference between transitions
 		return b.Bytes(), nil
 	}
@@ -90,27 +85,11 @@ func (dc *DeltaCollectionV2) Marshall() ([]byte, error) {
 			} else {
 				deltas = append(deltas, delta)
 				// export all the value HB
-				/*		if err := binary.Write(&b, binary.LittleEndian, previousHB); err != nil {
-							return b.Bytes(), err
-						}
-						// export the number of LB
-						if err := binary.Write(&b, binary.LittleEndian, uint16(len(lowBytes))); err != nil {
-							return b.Bytes(), err
-						}
-						// export the LB values
-						for j := 0; j < len(lowBytes); j++ {
-							if err := binary.Write(&b, binary.LittleEndian, lowBytes[j]); err != nil {
-								return b.Bytes(), err
-							}
-						}
-				*/
 				delta = NewDeltaV2()
 				delta.HighByte = currentHB
 				delta.Byte = item.Byte
 				delta.AddLowByte(currentLB)
 			}
-			//			log.GetLogger().Info( "Value[%d]:%.4x\n", j, value)
-
 		}
 		deltas = append(deltas, delta)
 

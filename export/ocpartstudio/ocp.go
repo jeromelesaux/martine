@@ -183,7 +183,7 @@ func RawScr(filePath string) ([]byte, error) {
 }
 
 func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cfg *config.MartineConfig) error {
-	osFilepath := cfg.AmsdosFullPath(filePath, ".SCR")
+	osFilepath := cfg.AmsdosFullPath(filePath, constants.ScrExtension)
 	log.GetLogger().Info("Saving SCR file (%s)\n", osFilepath)
 	var exec uint16
 	if cfg.ScrCfg.IsPlus {
@@ -199,15 +199,14 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cfg *c
 		offset := 1
 		for i := 0; i < len(p); i++ {
 			cp := constants.NewCpcPlusColor(p[i])
-			// log.GetLogger().Error( "i:%d,r:%d,g:%d,b:%d\n", i, cp.R, cp.G, cp.B)
 			v := cp.Bytes()
 			data[0x17d0+offset] = v[0]
 			offset++
 			data[0x17d0+offset] = v[1]
 			offset++
 		}
-		copy(data[0x07d0:], codeScrPlusP0[:])
-		copy(data[0x0fd0:], codeScrPlusP1[:])
+		copy(data[0x07d0:], codeScrPlusP0)
+		copy(data[0x0fd0:], codeScrPlusP1)
 
 	} else {
 		exec = 0x811
@@ -227,12 +226,12 @@ func Scr(filePath string, data []byte, p color.Palette, screenMode uint8, cfg *c
 				log.GetLogger().Info("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
-		copy(data[0x07d0:], codeScrStandard[:])
+		copy(data[0x07d0:], codeScrStandard)
 	}
 	data, _ = compression.Compress(data, cfg.ScrCfg.Compression)
 
 	if !cfg.ScrCfg.NoAmsdosHeader {
-		if err := amsdos.SaveAmsdosFile(osFilepath, ".SCR", data, 2, 0, 0xc000, exec); err != nil {
+		if err := amsdos.SaveAmsdosFile(osFilepath, constants.ScrExtension, data, 2, 0, 0xc000, exec); err != nil {
 			return err
 		}
 	} else {

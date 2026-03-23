@@ -196,7 +196,6 @@ func setPixelMode0(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 		pp1 = 0
 	}
 	firmwareColorUsed[pp1]++
-	//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 	c2 := in.At(x+1, y)
 	out.Set(x+1, y, c2)
 	pp2, err := palette.PalettePosition(c2, p)
@@ -208,7 +207,6 @@ func setPixelMode0(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	firmwareColorUsed[pp2]++
 
 	pixel := pixel.PixelMode0(pp1, pp2)
-	//log.GetLogger().Info( "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND
@@ -226,7 +224,6 @@ func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 		pp1 = 0
 	}
 	firmwareColorUsed[pp1]++
-	//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 	c2 := in.At(x+1, y)
 	out.Set(x+1, y, c2)
 	pp2, err := palette.PalettePosition(c2, p)
@@ -253,7 +250,6 @@ func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	firmwareColorUsed[pp4]++
 
 	pixel := pixel.PixelMode1(pp1, pp2, pp3, pp4)
-	//log.GetLogger().Info( "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND
@@ -272,7 +268,6 @@ func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 		pp1 = 0
 	}
 	firmwareColorUsed[pp1]++
-	//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 	c2 := in.At(x+1, y)
 	out.Set(x+1, y, c2)
 	pp2, err := palette.PalettePosition(c2, p)
@@ -305,7 +300,6 @@ func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 		pp5 = 0
 	}
 	firmwareColorUsed[pp5]++
-	//log.GetLogger().Info( "(%d,%d), %v, position palette %d\n", x, y+j, c1, pp1)
 	c6 := in.At(x+5, y)
 	out.Set(x+5, y, c6)
 	pp6, err := palette.PalettePosition(c6, p)
@@ -332,7 +326,6 @@ func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	firmwareColorUsed[pp8]++
 
 	pixel := pixel.PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
-	//log.GetLogger().Info( "x(%d), y(%d), pp1(%.8b), pp2(%.8b) pixel(%.8b)(%d)(&%.2x)\n", x, y, pp1, pp2, pixel, pixel, pixel)
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND

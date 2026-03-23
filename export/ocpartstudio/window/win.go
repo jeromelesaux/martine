@@ -9,6 +9,7 @@ import (
 	"github.com/jeromelesaux/m4client/cpc"
 	"github.com/jeromelesaux/martine/common"
 	"github.com/jeromelesaux/martine/config"
+	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/amsdos"
 	"github.com/jeromelesaux/martine/export/compression"
 	"github.com/jeromelesaux/martine/export/ocpartstudio"
@@ -53,7 +54,7 @@ func RawWin(filePath string) ([]byte, error) {
 		return nil, err
 	}
 	raw := make([]byte, len(bf)-5)
-	copy(raw[:], bf[0:len(bf)-5])
+	copy(raw, bf[0:len(bf)-5])
 
 	if raw[0] == 'M' && raw[1] == 'J' && raw[2] == 'H' { // Compression OCP
 		return ocpartstudio.DepackOCP(raw)
@@ -103,13 +104,11 @@ func OpenWin(filePath string) (*OcpWinFooter, error) {
 }
 
 func Win(filePath string, data []byte, screenMode uint8, width, height int, dontImportDsk bool, cfg *config.MartineConfig) error {
-	osFilepath := cfg.AmsdosFullPath(filePath, ".WIN")
+	osFilepath := cfg.AmsdosFullPath(filePath, constants.WindowExtension)
 	log.GetLogger().Info("Saving WIN file (%s), screen mode %d, (%d,%d)\n", osFilepath, screenMode, width, height)
 	win := OcpWinFooter{Unused: 3, Height: byte(height), Unused2: 0, Width: uint16(width * 8)}
 
 	data, _ = compression.Compress(data, cfg.ScrCfg.Compression)
-
-	// log.GetLogger().Error( "Header length %d\n", binary.Size(header))
 	log.GetLogger().Error("Data length %d\n", binary.Size(data))
 	log.GetLogger().Error("Footer length %d\n", binary.Size(win))
 
@@ -126,7 +125,7 @@ func Win(filePath string, data []byte, screenMode uint8, width, height int, dont
 
 	log.GetLogger().Info("%s, data size :%d\n", win.ToString(), len(data))
 	if !cfg.ScrCfg.NoAmsdosHeader {
-		if err := amsdos.SaveAmsdosFile(osFilepath, ".WIN", content, 2, 0, 0x4000, 0x4000); err != nil {
+		if err := amsdos.SaveAmsdosFile(osFilepath, constants.WindowExtension, content, 2, 0, 0x4000, 0x4000); err != nil {
 			return err
 		}
 	} else {
