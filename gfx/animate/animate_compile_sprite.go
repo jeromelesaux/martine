@@ -28,10 +28,10 @@ type Z80HspNode struct {
 	samePreviousValue bool
 }
 
-func NewZ80HspNode(byte uint8, offset uint16, samevalue bool, register Z80Register, next *Z80HspNode) *Z80HspNode {
+func NewZ80HspNode(b uint8, offset uint16, samevalue bool, register Z80Register, next *Z80HspNode) *Z80HspNode {
 	return &Z80HspNode{
 		register:          register,
-		byte:              byte,
+		byte:              b,
 		next:              next,
 		offset:            offset,
 		samePreviousValue: samevalue,

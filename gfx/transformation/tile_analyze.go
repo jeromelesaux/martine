@@ -535,18 +535,20 @@ func (a *AnalyzeBoard) SaveTiles(folderpath string, palette color.Palette, mode 
 		return err
 	}
 	for _, v := range a.BoardTiles {
-		if v.New {
-			fmt.Fprintf(&tiles, "tile_%0.2d\n", v.Index)
-			err := png.Png(filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", v.Index)), v.Tile.Image())
-			if err != nil {
-				return err
-			}
-			d, _, _, err := sprite.ToSprite(v.Tile.Image(), palette, a.TileSize, mode, cfg)
-			if err != nil {
-				return err
-			}
-			tiles.WriteString(ascii.FormatAssemblyDatabyte(d, "\n"))
+		if !v.New {
+			continue
 		}
+		fmt.Fprintf(&tiles, "tile_%0.2d\n", v.Index)
+		err := png.Png(filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", v.Index)), v.Tile.Image())
+		if err != nil {
+			return err
+		}
+		d, _, _, err := sprite.ToSprite(v.Tile.Image(), palette, a.TileSize, mode, cfg)
+		if err != nil {
+			return err
+		}
+		tiles.WriteString(ascii.FormatAssemblyDatabyte(d, "\n"))
+
 	}
 
 	return amsdos.SaveStringOSFile(filepath.Join(folderpath, "tiles.asm"), tiles.String())
