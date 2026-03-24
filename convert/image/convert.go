@@ -8,6 +8,7 @@ import (
 	"image/png"
 	"math"
 	"os"
+	"slices"
 	"sort"
 
 	"github.com/disintegration/imaging"
@@ -161,7 +162,7 @@ func LumSaturation(c color.Color, lumi, satur float64) color.Color {
 }
 
 func EnhanceBrightness(p color.Palette, saturation, brightness float64) color.Palette {
-	for i := 0; i < len(p); i++ {
+	for i := range p {
 		p[i] = LumSaturation(p[i], brightness, saturation)
 	}
 	return p
@@ -327,12 +328,7 @@ func PaletteUsed(in *image.NRGBA, isCpcPlus bool) color.Palette {
 }
 
 func paletteContains(p color.Palette, c color.Color) bool {
-	for _, cp := range p {
-		if cp == c {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(p, c)
 }
 
 func ConvertPalette(p, p0 color.Palette) color.Palette {
