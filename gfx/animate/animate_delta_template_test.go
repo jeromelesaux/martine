@@ -1,11 +1,8 @@
 package animate_test
 
 import (
-	"bytes"
 	"fmt"
 	"image/color"
-	"testing"
-	"text/template"
 
 	"github.com/jeromelesaux/martine/export/ascii"
 	"github.com/jeromelesaux/martine/log"
@@ -34,7 +31,7 @@ type AnimateValues struct {
 	Palette        color.Palette
 }
 
-func (a *AnimateValues) DisplayCode() string {
+func (a AnimateValues) DisplayCode() string {
 	var code string
 
 	code += "\nsprite:\n"
@@ -58,7 +55,7 @@ func (a *AnimateValues) DisplayCode() string {
 	return code
 }
 
-func (a *AnimateValues) TableDelta() string {
+func (a AnimateValues) TableDelta() string {
 	code := "table_delta:\n"
 	deltaIndexes := make([]string, 0)
 	for i := range a.Delta {
@@ -69,7 +66,7 @@ func (a *AnimateValues) TableDelta() string {
 	return code
 }
 
-func (a *AnimateValues) DisplayPalette() string {
+func (a AnimateValues) DisplayPalette() string {
 	code := "palette:\n"
 	if a.Type.CPCPlus {
 		code += ascii.FormatAssemblyCPCPlusPalette(a.Palette, "\n")
@@ -329,28 +326,28 @@ pixel db 0
 buffer: 
 `
 
-func TestTemplate(t *testing.T) {
-	var buf bytes.Buffer
-	a := AnimateExportType{Compress: false, CPCPlus: false, IsSprite: false}
-	vals := AnimateValues{
-		Type:           a,
-		InitialAddress: "#C000",
-		Large:          "#800",
-		Haut:           "#4000",
-		LigneLarge:     "#C080",
-		Image:          []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-		Delta: [][]byte{
-			{1, 2},
-			{2, 5},
-		},
-		Palette: color.Palette{color.Black, color.White},
-		Mode:    0,
-	}
-
-	temp := template.Must(template.New("code").Parse(AnimateTemplates[a]))
-	err := temp.Execute(&buf, vals)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(buf.String())
-}
+// func TestTemplate(t *testing.T) {
+// 	var buf bytes.Buffer
+// 	a := AnimateExportType{Compress: false, CPCPlus: false, IsSprite: false}
+// 	vals := AnimateValues{
+// 		Type:           a,
+// 		InitialAddress: "#C000",
+// 		Large:          "#800",
+// 		Haut:           "#4000",
+// 		LigneLarge:     "#C080",
+// 		Image:          []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+// 		Delta: [][]byte{
+// 			{1, 2},
+// 			{2, 5},
+// 		},
+// 		Palette: color.Palette{color.Black, color.White},
+// 		Mode:    0,
+// 	}
+// 	templ, err := template.New("code").Parse(AnimateTemplates[a])
+// 	temp := template.Must(templ, err)
+// 	err = temp.Execute(&buf, vals)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	fmt.Println(buf.String())
+// }

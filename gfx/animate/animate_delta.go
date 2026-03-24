@@ -360,7 +360,7 @@ type AnimateValues struct {
 	Palette        color.Palette
 }
 
-func (a *AnimateValues) DisplayCode() string {
+func (a AnimateValues) DisplayCode() string {
 	var code string
 	var mu sync.Mutex
 	if a.Type.Compress {
@@ -402,7 +402,7 @@ func (a *AnimateValues) DisplayCode() string {
 	return code
 }
 
-func (a *AnimateValues) TableDelta() string {
+func (a AnimateValues) TableDelta() string {
 	var code string
 	deltaIndexes := make([]string, 0)
 	for i := range a.Delta {
@@ -413,7 +413,7 @@ func (a *AnimateValues) TableDelta() string {
 	return code
 }
 
-func (a *AnimateValues) DisplayPalette() string {
+func (a AnimateValues) DisplayPalette() string {
 	var code string
 	ascii.ByteToken = "db"
 	code += "db "
