@@ -148,7 +148,7 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 	return p, bw, srs, nil
 }
 
-func SetCpcOldSplitRaster(in *image.NRGBA, out *image.NRGBA, p color.Palette, s *constants.SplitRasterScreen, pos, y, length int) *constants.SplitRasterScreen {
+func SetCpcOldSplitRaster(in, out *image.NRGBA, p color.Palette, s *constants.SplitRasterScreen, pos, y, length int) *constants.SplitRasterScreen {
 	occ := 0
 	if !s.Add(constants.NewSpliteRaster(uint16(pos), length, occ)) {
 		return s
@@ -187,7 +187,7 @@ func isSplitRaster(in *image.NRGBA, pos, y, length int) bool {
 	return occ >= (length - 1)
 }
 
-func setPixelMode0(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cfg *config.MartineConfig) ([]byte, map[int]int) {
+func setPixelMode0(in, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cfg *config.MartineConfig) ([]byte, map[int]int) {
 	c1 := in.At(x, y)
 	out.Set(x, y, c1)
 	pp1, err := palette.PalettePosition(c1, p)
@@ -215,7 +215,7 @@ func setPixelMode0(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 	return bw, firmwareColorUsed
 }
 
-func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cfg *config.MartineConfig) ([]byte, map[int]int) {
+func setPixelMode1(in, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cfg *config.MartineConfig) ([]byte, map[int]int) {
 	c1 := in.At(x, y)
 	out.Set(x, y, c1)
 	pp1, err := palette.PalettePosition(c1, p)
@@ -259,7 +259,7 @@ func setPixelMode1(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int,
 }
 
 // nolint: funlen
-func setPixelMode2(in *image.NRGBA, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cfg *config.MartineConfig) ([]byte, map[int]int) {
+func setPixelMode2(in, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cfg *config.MartineConfig) ([]byte, map[int]int) {
 	c1 := in.At(x, y)
 	out.Set(x, y, c1)
 	pp1, err := palette.PalettePosition(c1, p)

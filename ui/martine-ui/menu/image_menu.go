@@ -123,14 +123,16 @@ func (i *ImageMenu) Height() *widget.Entry {
 	return i.height
 }
 
-func (i *ImageMenu) GetWidth() (int, string, error) {
-	v, err := strconv.Atoi(i.width.Text)
-	return v, i.width.Text, err
+func (i *ImageMenu) GetWidth() (width int, desc string, err error) {
+	width, err = strconv.Atoi(i.width.Text)
+	desc = i.width.Text
+	return
 }
 
-func (i *ImageMenu) GetHeight() (int, string, error) {
-	v, err := strconv.Atoi(i.height.Text)
-	return v, i.height.Text, err
+func (i *ImageMenu) GetHeight() (height int, desc string, err error) {
+	height, err = strconv.Atoi(i.height.Text)
+	desc = i.height.Text
+	return
 }
 
 // nolint: funlen
@@ -141,44 +143,44 @@ func (i *ImageMenu) CmdLine() string {
 		return exec
 	}
 	if i.originalImagePath != nil {
-		exec += " -in " + i.originalImagePath.Path()
+		exec += constants.InOptionLabel + i.originalImagePath.Path()
 	}
 	if i.Cfg.ScrCfg.IsPlus {
-		exec += " -plus"
+		exec += constants.PlusOptionLabel
 	}
 
 	if i.Cfg.ScrCfg.Type.IsFullScreen() {
-		exec += " -fullscreen"
+		exec += constants.FullscreenOptionLabel
 	}
 	if i.Cfg.ScrCfg.Type.IsSprite() {
 		width, err := strconv.Atoi(i.width.Text)
 		if err != nil {
 			log.GetLogger().Error("cannot convert width value :%s error :%v\n", i.width.Text, err)
 		} else {
-			exec += " -width " + strconv.Itoa(width)
+			exec += constants.WidthOptionLabel + strconv.Itoa(width)
 		}
 		height, err := strconv.Atoi(i.height.Text)
 		if err != nil {
 			log.GetLogger().Error("cannot convert height value :%s error :%v\n", i.height.Text, err)
 		} else {
-			exec += " -height " + strconv.Itoa(height)
+			exec += constants.HeightOptionLabel + strconv.Itoa(height)
 		}
 	}
 	if i.Cfg.ScrCfg.Type.IsSpriteHard() {
-		exec += " -spritehard"
+		exec += constants.SpritehardOptionLabel
 	}
 	if i.Cfg.ScrCfg.Process.ApplyDithering {
 		if i.Cfg.ScrCfg.Process.Dithering.WithQuantification {
-			exec += " -quantization"
+			exec += constants.QuantizationOptionLabel
 		} else {
-			exec += " -multiplier " + fmt.Sprintf("%.2f", i.Cfg.ScrCfg.Process.Dithering.Multiplier)
+			exec += constants.MultiplierOptionLabel + fmt.Sprintf("%.2f", i.Cfg.ScrCfg.Process.Dithering.Multiplier)
 		}
-		exec += " -dithering " + strconv.Itoa(i.Cfg.ScrCfg.Process.Dithering.Algo)
+		exec += constants.DitheringOptionLabel + strconv.Itoa(i.Cfg.ScrCfg.Process.Dithering.Algo)
 		// stockage du numéro d'algo
 	}
-	exec += " -mode " + strconv.Itoa(int(i.Cfg.ScrCfg.Mode))
+	exec += constants.ModeOptionLabel + strconv.Itoa(int(i.Cfg.ScrCfg.Mode))
 	if i.Cfg.ScrCfg.Process.Reducer != 0 {
-		exec += " -reducer " + strconv.Itoa(i.Cfg.ScrCfg.Process.Reducer)
+		exec += constants.ReducerOptionLabel + strconv.Itoa(i.Cfg.ScrCfg.Process.Reducer)
 	}
 	// resize algo
 	if i.ResizeAlgoNumber != 0 {
@@ -493,20 +495,20 @@ func (me *ImageMenu) ExportDialog(cfg *config.MartineConfig, getCfg func(checkOr
 		),
 
 		widget.NewLabel("Compression type:"),
-		widget.NewSelect([]string{"none", "rle", "rle 16bits", "Lz4 Classic", "Lz4 Raw", "zx0 crunch"},
+		widget.NewSelect([]string{constants.NoneLabel, constants.RleLabel, constants.Rle16BitsLabel, constants.Lz4ClassicLabel, constants.Lz4RawLabel, constants.Zx0CrunchLabel},
 			func(s string) {
 				switch s {
-				case "none":
+				case constants.NoneLabel:
 					cfg.ScrCfg.Compression = compression.NONE
-				case "rle":
+				case constants.RleLabel:
 					cfg.ScrCfg.Compression = compression.RLE
-				case "rle 16bits":
+				case constants.Rle16BitsLabel:
 					cfg.ScrCfg.Compression = compression.RLE16
-				case "Lz4 Classic":
+				case constants.Lz4ClassicLabel:
 					cfg.ScrCfg.Compression = compression.LZ4
-				case "Lz4 Raw":
+				case constants.Lz4RawLabel:
 					cfg.ScrCfg.Compression = compression.RawLZ4
-				case "zx0 crunch":
+				case constants.Zx0CrunchLabel:
 					cfg.ScrCfg.Compression = compression.ZX0
 				}
 			}),

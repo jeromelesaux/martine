@@ -230,7 +230,7 @@ func SpriteToImg(winPath string, mode uint8, p color.Palette) (*image.NRGBA, con
 
 // spriteToPng will save the sprite OCP win filepath in a png file
 // output will be the png filpath, using the mode and palette as arguments
-func SpriteToPng(winPath string, output string, mode uint8, p color.Palette) error {
+func SpriteToPng(winPath, output string, mode uint8, p color.Palette) error {
 	out, _, err := SpriteToImg(winPath, mode, p)
 	if err != nil {
 		return err

@@ -12,7 +12,7 @@ import (
 
 var ErrorNoHostDefined = errors.New("no host defined")
 
-// nolint:funlen, gocognit
+// nolint:funlen, gocognit, gocyclo
 func ImportInM4(cfg *config.MartineConfig) error {
 	if cfg.M4cfg.Enabled {
 		return ErrorNoHostDefined

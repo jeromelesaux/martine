@@ -8,6 +8,7 @@ import (
 	"github.com/jeromelesaux/martine/log"
 )
 
+// nolint: gocyclo
 func ImportInDsk(filePath string, cfg *config.MartineConfig) error {
 	var suffix string
 	if cfg.ScrCfg.Type == config.Egx1Format {

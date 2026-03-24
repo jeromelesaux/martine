@@ -32,7 +32,7 @@ var (
 	eol     = "\n"
 )
 
-// nolint: funlen, gocognit
+// nolint: funlen, gocognit, gocyclo
 func main() {
 	log.Default("")
 	var spritesFiles stringSlice
@@ -59,12 +59,14 @@ func main() {
 				log.GetLogger().Error("Error while opening file (%s) error %v\n", v, err)
 				os.Exit(-1)
 			}
-			defer f.Close()
+
 			d := &export.Json{}
 			if err := json.NewDecoder(f).Decode(d); err != nil {
 				log.GetLogger().Error("Cannot decode json file (%s) error :%v\n", v, err)
 				os.Exit(-1)
 			}
+			f.Close()
+
 			if len(d.Screen) != 1 {
 				filename := strings.ReplaceAll(filepath.Base(sprite), filepath.Ext(sprite), "")
 				out += fmt.Sprintf("%s\n", filename)
@@ -105,12 +107,12 @@ func main() {
 			log.GetLogger().Error("Error while creating file (%s) error %v\n", *outfile, err)
 			os.Exit(-1)
 		}
-		defer f.Close()
 		_, err = f.WriteString(out)
 		if err != nil {
 			log.GetLogger().Error("Error while writing in file (%s) error %v\n", *outfile, err)
 			os.Exit(-1)
 		}
+		f.Close()
 	} else {
 		log.GetLogger().Infoln(out)
 	}

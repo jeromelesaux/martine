@@ -38,7 +38,7 @@ func NewMLogger(
 
 func (m MLogger) Debug(format string, v ...any) {
 	s := fmt.Sprintf(format, v...)
-	m.debugLogger.Printf(s)
+	m.debugLogger.Printf("%s", s)
 }
 
 func (m MLogger) Debugln(v ...any) {
@@ -47,7 +47,7 @@ func (m MLogger) Debugln(v ...any) {
 
 func (m MLogger) Info(format string, v ...any) {
 	s := fmt.Sprintf(format, v...)
-	m.infoLogger.Printf(s)
+	m.infoLogger.Printf("%s", s)
 }
 
 func (m MLogger) Infoln(v ...any) {
@@ -56,7 +56,7 @@ func (m MLogger) Infoln(v ...any) {
 
 func (m MLogger) Error(format string, v ...any) {
 	s := fmt.Sprintf(format, v...)
-	m.errorLogger.Printf(s)
+	m.errorLogger.Printf("%s", s)
 }
 
 func (m MLogger) Errorln(v ...any) {

@@ -81,12 +81,11 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 			if err != nil {
 				return board, newPalette, err
 			}
-			defer f.Close()
 			g, err := gif.DecodeAll(f)
 			if err != nil {
 				return board, newPalette, err
 			}
-
+			f.Close()
 			for index, in := range g.Image {
 				// gif change size between frame.
 				// create a new blank image with size from config.width config.height
@@ -144,12 +143,12 @@ func concatSprites(filepaths []string, sizeScreen, spriteSize constants.Size, sc
 				if err != nil {
 					return board, newPalette, err
 				}
-				defer f.Close()
 				in, err := png.Decode(f)
 				if err != nil {
 					log.GetLogger().Error("Error while reading png file (%s) error %v, skipping\n", v, err)
 					continue
 				}
+				f.Close()
 				var downgraded *image.NRGBA
 				filename := fmt.Sprintf("%.2d", index0)
 				out := ci.Resize(in, export.ScrCfg.Size, export.ScrCfg.Process.ResizingAlgo)

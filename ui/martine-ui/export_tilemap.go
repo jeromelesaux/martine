@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/config"
+	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/compression"
 	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/gfx"
@@ -84,20 +85,20 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 		),
 
 		widget.NewLabel("Compression type:"),
-		widget.NewSelect([]string{"none", "rle", "rle 16bits", "Lz4 Classic", "Lz4 Raw", "zx0 crunch"},
+		widget.NewSelect([]string{constants.NoneLabel, constants.RleLabel, constants.Rle16BitsLabel, constants.Lz4ClassicLabel, constants.Lz4RawLabel, constants.Zx0CrunchLabel},
 			func(s string) {
 				switch s {
-				case "none":
+				case constants.NoneLabel:
 					m.tilemap.Cfg.ScrCfg.Compression = compression.NONE
-				case "rle":
+				case constants.RleLabel:
 					m.tilemap.Cfg.ScrCfg.Compression = compression.RLE
-				case "rle 16bits":
+				case constants.Rle16BitsLabel:
 					m.tilemap.Cfg.ScrCfg.Compression = compression.RLE16
-				case "Lz4 Classic":
+				case constants.Lz4ClassicLabel:
 					m.tilemap.Cfg.ScrCfg.Compression = compression.LZ4
-				case "Lz4 Raw":
+				case constants.Lz4RawLabel:
 					m.tilemap.Cfg.ScrCfg.Compression = compression.RawLZ4
-				case "zx0 crunch":
+				case constants.Zx0CrunchLabel:
 					m.tilemap.Cfg.ScrCfg.Compression = compression.ZX0
 				}
 			}),

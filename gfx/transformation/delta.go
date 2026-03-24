@@ -403,17 +403,20 @@ func Y(offset uint16, lineOctetWidth int) uint16 {
 	return uint16(line)
 }
 
-func CpcCoordinates(address, startingAddress uint16, lineOctetWidth int) (int, int, error) {
+func CpcCoordinates(address, startingAddress uint16, lineOctetWidth int) (xVal, yVal int, err error) {
 	for y := 0; y < constants.Mode0.Height; y++ {
 		for x := 0; x < constants.Mode0.Width; x++ {
 			v := uint16(DeltaAddress(x, y, lineOctetWidth))
 			v += startingAddress
 			if v == address {
-				return x, y, nil
+				xVal = x
+				yVal = y
+				return
 			}
 		}
 	}
-	return 0, 0, errors.ErrorCoordinatesNotFound
+	err = errors.ErrorCoordinatesNotFound
+	return
 }
 
 func Delta(scr1, scr2 []byte, isSprite bool, size constants.Size, mode uint8, x0, y0 uint16, lineOctetWidth int) *DeltaCollection {
@@ -460,7 +463,7 @@ func ExportDelta(filename string, dc *DeltaCollection, mode uint8, cfg *config.M
 	return nil
 }
 
-// nolint:funlen, gocognit
+// nolint:funlen, gocognit, gocyclo
 func ProceedDelta(filespath []string, initialAddress uint16, cfg *config.MartineConfig, mode uint8) error {
 
 	if len(filespath) == 1 {

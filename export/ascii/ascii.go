@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"runtime"
+	"strings"
 
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
@@ -56,16 +57,14 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cg
 	}
 	if cgf.ScrCfg.IsExport(config.JsonExport) {
 		palette := make([]string, len(p))
-		for i := 0; i < len(p); i++ {
+		for i := range p {
 			v, err := constants.FirmwareNumber(p[i])
 			if err == nil {
 				palette[i] = fmt.Sprintf("%.2d", v)
-				// } else {
-				// 	log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 		hardwarepalette := make([]string, len(p))
-		for i := 0; i < len(p); i++ {
+		for i := range p {
 			fcolor, _ := constants.FirmwareNumber(p[i])
 			hardwarepalette[i] = fmt.Sprintf("0x%.2x", fcolor)
 		}
@@ -113,10 +112,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 	h := 0
 	nbValues := 1
 	octetsRead := 0
-	end := 17
-	if (cfg.ScrCfg.Size.Width + 1) < end {
-		end = (cfg.ScrCfg.Size.Width + 1)
-	}
+	end := min((cfg.ScrCfg.Size.Width + 1), 17)
 	for {
 
 		if nbValues == 1 {
@@ -177,12 +173,10 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 			v, err := constants.FirmwareNumber(p[i])
 			if err == nil {
 				palette[i] = fmt.Sprintf("%.2d", v)
-				// } else {
-				// 	log.GetLogger().Error("Error while getting the hardware values for color %v, error :%v\n", p[0], err)
 			}
 		}
 		hardwarepalette := make([]string, len(p))
-		for i := 0; i < len(p); i++ {
+		for i := range p {
 			fcolor, _ := constants.FirmwareNumber(p[i])
 			hardwarepalette[i] = fmt.Sprintf("0x%.2x", fcolor)
 		}
@@ -199,132 +193,101 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 }
 
 func FormatAssemblyString(data []string, eol string) string {
-	var out string
+	var out strings.Builder
 	for i := 0; i < len(data); i += 8 {
-		out += fmt.Sprintf("%s ", ByteToken)
+		fmt.Fprintf(&out, "%s ", ByteToken)
 		if i < len(data) {
-			out += data[i]
+			out.WriteString(data[i])
 		}
-		if i+1 < len(data) {
-			out += fmt.Sprintf(", %s", data[i+1])
+		for j := 1; j < 8; j++ {
+			if i+j < len(data) {
+				fmt.Fprintf(&out, ", %s", data[i+j])
+			}
 		}
-		if i+2 < len(data) {
-			out += fmt.Sprintf(", %s", data[i+2])
-		}
-		if i+3 < len(data) {
-			out += fmt.Sprintf(", %s", data[i+3])
-		}
-		if i+4 < len(data) {
-			out += fmt.Sprintf(", %s", data[i+4])
-		}
-		if i+5 < len(data) {
-			out += fmt.Sprintf(", %s", data[i+5])
-		}
-		if i+6 < len(data) {
-			out += fmt.Sprintf(", %s", data[i+6])
-		}
-		if i+7 < len(data) {
-			out += fmt.Sprintf(", %s", data[i+7])
-		}
-		out += eol
+		out.WriteString(eol)
 	}
-	return out
+	return out.String()
 }
 
 func SpritesHardText(data [][]byte, compressionType compression.CompressionMethod) string {
-	var out string
+	var out strings.Builder
 	for i, v := range data {
-		out += fmt.Sprintf("Sprite_%02d\n", i)
+		fmt.Fprintf(&out, "Sprite_%02d\n", i)
 		compressed, err := compression.Compress(v, compressionType)
 		if err == nil {
-			out += FormatAssemblyDatabyte(compressed, "\n")
+			out.WriteString(FormatAssemblyDatabyte(compressed, "\n"))
 		} else {
-			out += err.Error()
+			out.WriteString(err.Error())
 		}
 
 	}
 
-	return out
+	return out.String()
 }
 
 func FormatAssemblyDatabyte(data []byte, eol string) string {
-	var out string
+	var out strings.Builder
 	for i := 0; i < len(data); i += 8 {
-		out += fmt.Sprintf("%s ", ByteToken)
+		fmt.Fprintf(&out, "%s ", ByteToken)
 		if i < len(data) {
-			out += fmt.Sprintf("#%0.2x", data[i])
+			fmt.Fprintf(&out, "#%0.2x", data[i])
 		}
-		if i+1 < len(data) {
-			out += fmt.Sprintf(", #%0.2x", data[i+1])
+		for j := 1; j < 8; j++ {
+			if i+j < len(data) {
+				fmt.Fprintf(&out, ", #%0.2x", data[i+j])
+			}
 		}
-		if i+2 < len(data) {
-			out += fmt.Sprintf(", #%0.2x", data[i+2])
-		}
-		if i+3 < len(data) {
-			out += fmt.Sprintf(", #%0.2x", data[i+3])
-		}
-		if i+4 < len(data) {
-			out += fmt.Sprintf(", #%0.2x", data[i+4])
-		}
-		if i+5 < len(data) {
-			out += fmt.Sprintf(", #%0.2x", data[i+5])
-		}
-		if i+6 < len(data) {
-			out += fmt.Sprintf(", #%0.2x", data[i+6])
-		}
-		if i+7 < len(data) {
-			out += fmt.Sprintf(", #%0.2x", data[i+7])
-		}
-		out += eol
+
+		out.WriteString(eol)
 	}
-	return out
+	return out.String()
 }
 
 func FormatAssemblyCPCPalette(p color.Palette, eol string) string {
-	var out string
-	for i := 0; i < len(p); i++ {
+	var out strings.Builder
+	for i := range p {
 		v, err := constants.HardwareValues(p[i])
 		if err == nil {
-			out += fmt.Sprintf("#%0.2x", v[0])
+			fmt.Fprintf(&out, "#%0.2x", v[0])
 			if (i+1)%8 == 0 && i+1 < len(p) {
-				out += eol + ByteToken + " "
+				out.WriteString(eol + ByteToken + " ")
 			} else if i+1 < len(p) {
-				out += ", "
+				out.WriteString(", ")
 			}
 		}
 	}
-	return out
+	return out.String()
 }
 
 func FormatAssemblyBasicPalette(p color.Palette, eol string) string {
-	var out string
-	for i := 0; i < len(p); i++ {
+	var out strings.Builder
+	for i := range p {
 		v, err := constants.FirmwareNumber(p[i])
 		if err == nil {
-			out += fmt.Sprintf("%0.2d", v)
+			fmt.Fprintf(&out, "%0.2d", v)
 			if (i+1)%8 == 0 && i+1 < len(p) {
-				out += eol + ByteToken + " "
+				out.WriteString(eol + ByteToken + " ")
 			} else if i+1 < len(p) {
-				out += ", "
+				out.WriteString(", ")
 			}
 		}
 	}
-	return out
+	return out.String()
 }
 
 func FormatAssemblyCPCPlusPalette(p color.Palette, eol string) string {
-	var out string
-	out += ByteToken
-	for i := 0; i < len(p); i++ {
+	var out strings.Builder
+	out.WriteString(ByteToken)
+	for i := range p {
 		cp := constants.NewCpcPlusColor(p[i])
 		v := cp.Value()
-		out += fmt.Sprintf("#%.2x, #%.2x", byte(v), byte(v>>8))
+		fmt.Fprintf(&out, "#%.2x, #%.2x", byte(v), byte(v>>8))
 		if (i+1)%8 == 0 && i+1 < len(p) {
-			out += eol + ByteToken + " "
+			out.WriteString(eol + ByteToken + " ")
 		} else if i+1 < len(p) {
-			out += ", "
+			out.WriteString(", ")
 		}
 
 	}
-	return out
+	return out.String()
 }

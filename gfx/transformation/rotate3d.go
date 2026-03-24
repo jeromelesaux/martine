@@ -98,52 +98,52 @@ func rotateCoordinates(x, y, xc, yc int, angle float64) (int, int) {
 }*/
 
 // source : https://slideplayer.com/slide/9723655/
-func rotateYAxisCoordinates(x, y, xc int, angle float64) (int, int) {
+func rotateYAxisCoordinates(x, y, xc int, angle float64) (x3d, y3d int) {
 	theta := angle * math.Pi / 180.
 	cosTheta := math.Cos(theta)
-	x3d := (float64(x-xc) * cosTheta) + float64(xc)
-	y3d := (float64(y))
+	x3d = int((float64(x-xc) * cosTheta) + float64(xc))
+	y3d = int((float64(y)))
 	return int(x3d), int(y3d)
 }
 
-func rotateXAxisCoordinates(x, y, yc int, angle float64) (int, int) {
+func rotateXAxisCoordinates(x, y, yc int, angle float64) (x3d, y3d int) {
 	theta := angle * math.Pi / 180.
 	cosTheta := math.Cos(theta)
-	x3d := (float64(x))
-	y3d := (float64(y-yc) * cosTheta) + float64(yc)
-	return int(x3d), int(y3d)
+	x3d = int((float64(x)))
+	y3d = int((float64(y-yc) * cosTheta) + float64(yc))
+	return
 }
 
-func rotateLeftToRightYAxisCoordinates(x, y, xc int, angle float64) (int, int) {
+func rotateLeftToRightYAxisCoordinates(x, y, xc int, angle float64) (x3d, y3d int) {
 	theta := angle * math.Pi / 180.
 	sinTheta := math.Sin(theta)
-	x3d := (float64(x-xc) * sinTheta) + float64(xc)
-	y3d := (float64(y))
-	return int(x3d), int(y3d)
+	x3d = int((float64(x-xc) * sinTheta) + float64(xc))
+	y3d = int((float64(y)))
+	return
 }
 
-func rotateToReverseXAxisCoordinates(x, y, yc int, angle float64) (int, int) {
+func rotateToReverseXAxisCoordinates(x, y, yc int, angle float64) (x3d, y3d int) {
 	theta := angle * math.Pi / 180.
 	sinTheta := math.Sin(theta)
-	x3d := (float64(x))
-	y3d := (float64(y-yc) * sinTheta) + float64(yc)
-	return int(x3d), int(y3d)
+	x3d = int((float64(x)))
+	y3d = int((float64(y-yc) * sinTheta) + float64(yc))
+	return
 }
 
-func rotateDiagonalXAxisCoordinates(x, y, xc, yc int, angle float64) (int, int) {
-	theta := angle * math.Pi / 180.
-	sinTheta := math.Sin(theta)
-	cosTheta := math.Cos(theta)
-	x3d := (float64(x-xc) * cosTheta) - (float64(y-yc) * sinTheta) + float64(xc)
-	y3d := (float64(y))
-	return int(x3d), int(y3d)
-}
-
-func rotateDiagonalYAxisCoordinates(x, y, xc, yc int, angle float64) (int, int) {
+func rotateDiagonalXAxisCoordinates(x, y, xc, yc int, angle float64) (x3d, y3d int) {
 	theta := angle * math.Pi / 180.
 	sinTheta := math.Sin(theta)
 	cosTheta := math.Cos(theta)
-	x3d := (float64(x))
-	y3d := (float64(y-yc) * cosTheta) + (float64(x-xc) * sinTheta) + float64(yc)
-	return int(x3d), int(y3d)
+	x3d = int((float64(x-xc) * cosTheta) - (float64(y-yc) * sinTheta) + float64(xc))
+	y3d = int((float64(y)))
+	return
+}
+
+func rotateDiagonalYAxisCoordinates(x, y, xc, yc int, angle float64) (x3d, y3d int) {
+	theta := angle * math.Pi / 180.
+	sinTheta := math.Sin(theta)
+	cosTheta := math.Cos(theta)
+	x3d = int((float64(x)))
+	y3d = int((float64(y-yc) * cosTheta) + (float64(x-xc) * sinTheta) + float64(yc))
+	return
 }

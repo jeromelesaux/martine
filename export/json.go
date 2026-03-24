@@ -18,7 +18,7 @@ type Json struct {
 	HardwarePalette []string `json:"hardwarepalette"`
 }
 
-func NewJson(label string, width int, height int, screen []string, palette []string, hardwarepalette []string) *Json {
+func NewJson(label string, width, height int, screen, palette, hardwarepalette []string) *Json {
 	return &Json{
 		Label:           label,
 		Width:           width,

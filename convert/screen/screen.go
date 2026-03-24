@@ -358,7 +358,7 @@ func ScrToImg(scrPath string, mode uint8, p color.Palette) (*image.NRGBA, error)
 	return out, nil
 }
 
-func ScrToPng(scrPath string, output string, mode uint8, p color.Palette) error {
+func ScrToPng(scrPath, output string, mode uint8, p color.Palette) error {
 
 	out, err := ScrToImg(scrPath, mode, p)
 	if err != nil {

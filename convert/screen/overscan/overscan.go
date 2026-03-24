@@ -136,7 +136,7 @@ func OverscanToImg(scrPath string, mode uint8, p color.Palette) (*image.NRGBA, e
 
 // overscanToPng will convert fullscreen amstrad screen filepath in png file 'output'
 // using the  screen mode  and the palette as arguments
-func OverscanToPng(scrPath string, output string, mode uint8, p color.Palette) error {
+func OverscanToPng(scrPath, output string, mode uint8, p color.Palette) error {
 	out, err := OverscanToImg(scrPath, mode, p)
 	if err != nil {
 		return err

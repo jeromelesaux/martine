@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	w "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/config"
+	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/export/compression"
 	"github.com/jeromelesaux/martine/export/png"
 	"github.com/jeromelesaux/martine/log"
@@ -112,20 +113,20 @@ func (s *SpriteMenu) CmdLine() string {
 		return exec
 	}
 
-	exec += " -in " + s.FilePath
+	exec += constants.InOptionLabel + s.FilePath
 	exec += " -split"
-	exec += " -mode " + strconv.Itoa(int(s.Cfg.ScrCfg.Mode))
+	exec += constants.ModeOptionLabel + strconv.Itoa(int(s.Cfg.ScrCfg.Mode))
 	exec += " -spritesrow " + strconv.Itoa(s.SpriteRows)
 	exec += " -spritescolumn " + strconv.Itoa(s.SpriteColumns)
 	if s.Cfg.ScrCfg.Type.IsSpriteHard() {
-		exec += " -height 16 -width 16"
+		exec += constants.HeightOptionLabel + "16" + constants.WidthOptionLabel + "16"
 	} else {
-		exec += " -height " + strconv.Itoa(s.Cfg.ScrCfg.Size.Height)
-		exec += " -width " + strconv.Itoa(s.Cfg.ScrCfg.Size.Width)
+		exec += constants.HeightOptionLabel + strconv.Itoa(s.Cfg.ScrCfg.Size.Height)
+		exec += constants.WidthOptionLabel + strconv.Itoa(s.Cfg.ScrCfg.Size.Width)
 	}
 
 	if s.Cfg.ScrCfg.IsPlus {
-		exec += " -plus"
+		exec += constants.PlusOptionLabel
 	}
 
 	if s.Cfg.ScrCfg.Compression != compression.NONE {
@@ -157,7 +158,7 @@ func (s *SpriteMenu) CmdLine() string {
 	}
 
 	if s.Cfg.ScrCfg.IsExport(config.SpriteHardExport) {
-		exec += " -spritehard"
+		exec += constants.SpritehardOptionLabel
 	}
 
 	s.CmdLineGenerate = exec

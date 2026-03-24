@@ -67,7 +67,7 @@ func SaveOSFile(filename string, data []byte) error {
 	return fw.Close()
 }
 
-func SaveStringOSFile(filename string, data string) error {
+func SaveStringOSFile(filename, data string) error {
 	fw, err := os.Create(filename)
 	if err != nil {
 		log.GetLogger().Error("Error while creating file (%s) error :%s\n", filename, err)

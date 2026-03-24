@@ -354,7 +354,7 @@ func ToCPCPalette(p, cpcPalette color.Palette) color.Palette {
 	return out
 }
 
-func SplitImage(i image.Image) (*image.NRGBA, *image.NRGBA, error) {
+func SplitImage(i image.Image) (raw1, raw2 *image.NRGBA, err error) {
 	height := i.Bounds().Max.Y / 2
 	width := i.Bounds().Max.X
 	image1, err := cutter.Crop(i, cutter.Config{
@@ -375,11 +375,11 @@ func SplitImage(i image.Image) (*image.NRGBA, *image.NRGBA, error) {
 	}
 
 	b := image1.Bounds()
-	raw1 := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+	raw1 = image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
 	draw.Draw(raw1, raw1.Bounds(), image1, b.Min, draw.Src)
 
 	b = image2.Bounds()
-	raw2 := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+	raw2 = image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
 	draw.Draw(raw2, raw2.Bounds(), image2, b.Min, draw.Src)
 
 	f, _ := os.Create("imageup.png")

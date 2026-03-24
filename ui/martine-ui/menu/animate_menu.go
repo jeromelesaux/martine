@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/widget"
 	w "github.com/jeromelesaux/fyne-io/widget"
+	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/gfx/animate"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 	"github.com/jeromelesaux/martine/log"
@@ -49,43 +50,43 @@ func (i *AnimateMenu) CmdLine() string {
 		return exec
 	}
 	if i.OriginalImagePath() != "" {
-		exec += " -in " + i.OriginalImagePath()
+		exec += constants.InOptionLabel + i.OriginalImagePath()
 	}
 	if i.Cfg.ScrCfg.IsPlus {
-		exec += " -plus"
+		exec += constants.PlusOptionLabel
 	}
 	if i.Cfg.ScrCfg.Type.IsFullScreen() {
-		exec += " -fullscreen"
+		exec += constants.FullscreenOptionLabel
 	}
 	if i.Cfg.ScrCfg.Type.IsSprite() {
 		width, widthText, err := i.GetWidth()
 		if err != nil {
 			log.GetLogger().Error("cannot convert width value :%s error :%v\n", widthText, err)
 		} else {
-			exec += " -width " + strconv.Itoa(width)
+			exec += constants.WidthOptionLabel + strconv.Itoa(width)
 		}
 		height, heightText, err := i.GetHeight()
 		if err != nil {
 			log.GetLogger().Error("cannot convert height value :%s error :%v\n", heightText, err)
 		} else {
-			exec += " -height " + strconv.Itoa(height)
+			exec += constants.HeightOptionLabel + strconv.Itoa(height)
 		}
 	}
 	if i.Cfg.ScrCfg.Type.IsSpriteHard() {
-		exec += " -spritehard"
+		exec += constants.SpritehardOptionLabel
 	}
 	if i.Cfg.ScrCfg.Process.ApplyDithering {
 		if i.Cfg.ScrCfg.Process.Dithering.WithQuantification {
-			exec += " -quantization"
+			exec += constants.QuantizationOptionLabel
 		} else {
-			exec += " -multiplier " + fmt.Sprintf("%.2f", i.Cfg.ScrCfg.Process.Dithering.Multiplier)
+			exec += constants.MultiplierOptionLabel + fmt.Sprintf("%.2f", i.Cfg.ScrCfg.Process.Dithering.Multiplier)
 		}
-		exec += " -dithering " + strconv.Itoa(i.Cfg.ScrCfg.Process.Dithering.Algo)
+		exec += constants.DitheringOptionLabel + strconv.Itoa(i.Cfg.ScrCfg.Process.Dithering.Algo)
 		// stockage du numéro d'algo
 	}
-	exec += " -mode " + strconv.Itoa(int(i.Cfg.ScrCfg.Mode))
+	exec += constants.ModeOptionLabel + strconv.Itoa(int(i.Cfg.ScrCfg.Mode))
 	if i.Cfg.ScrCfg.Process.Reducer != 0 {
-		exec += " -reducer " + strconv.Itoa(i.Cfg.ScrCfg.Process.Reducer)
+		exec += constants.ReducerOptionLabel + strconv.Itoa(i.Cfg.ScrCfg.Process.Reducer)
 	}
 	// resize algo
 	if i.ResizeAlgoNumber != 0 {

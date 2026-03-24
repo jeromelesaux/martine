@@ -319,12 +319,12 @@ func main() {
 			log.GetLogger().Error("Error while opening file %s, error %v\n", *picturePath, err)
 			os.Exit(-2)
 		}
-		defer f.Close()
 		in, _, err = image.Decode(f)
 		if err != nil {
 			log.GetLogger().Error("Cannot decode the image %s error %v", *picturePath, err)
 			os.Exit(-2)
 		}
+		f.Close()
 	}
 
 	// gestion de la taille de l'image en sortie
@@ -400,12 +400,13 @@ func main() {
 			log.GetLogger().Error("Error while opening file %s, error %v\n", *picturePath, err)
 			os.Exit(-2)
 		}
-		defer f.Close()
+
 		in, _, err = image.Decode(f)
 		if err != nil {
 			log.GetLogger().Error("Cannot decode the image %s error %v", *picturePath, err)
 			os.Exit(-2)
 		}
+		f.Close()
 		img := image.NewNRGBA(image.Rect(0, 0, in.Bounds().Max.X, in.Bounds().Max.Y))
 		draw.Draw(img, img.Bounds(), in, in.Bounds().Min, draw.Src)
 		pal, _, err := ci.DowngradingPalette(img, constants.Size{ColorsAvailable: size.ColorsAvailable, Width: img.Bounds().Max.X, Height: img.Bounds().Max.Y}, cfg.ScrCfg.IsPlus)

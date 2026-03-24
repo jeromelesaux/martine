@@ -151,9 +151,9 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 	winFormat := me.NewFormatRadio()
 
 	colorReducerLabel := widget.NewLabel("Color reducer")
-	colorReducer := widget.NewSelect([]string{"none", "Lower", "Medium", "Strong"}, func(s string) {
+	colorReducer := widget.NewSelect([]string{constants.NoneLabel, "Lower", "Medium", "Strong"}, func(s string) {
 		switch s {
-		case "none":
+		case constants.NoneLabel:
 			me.Cfg.ScrCfg.Process.Reducer = 0
 		case "Lower":
 			me.Cfg.ScrCfg.Process.Reducer = 1
@@ -163,7 +163,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 			me.Cfg.ScrCfg.Process.Reducer = 3
 		}
 	})
-	colorReducer.SetSelected("none")
+	colorReducer.SetSelected(constants.NoneLabel)
 
 	resize := w2.NewResizeAlgorithmSelect(me)
 	resizeLabel := widget.NewLabel("Resize algorithm")

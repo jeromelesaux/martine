@@ -60,7 +60,7 @@ func (m *MartineConfig) HasContainerExport(c ContainerFormat) bool {
 	return m.ContainerCfg.HasExport(c)
 }
 
-func MaskIsAllowed(mode uint8, value uint8) bool {
+func MaskIsAllowed(mode, value uint8) bool {
 	values, err := ModeMaskSprite(mode)
 	if err != nil {
 		log.GetLogger().Error("Error with mode %d error :%v\n", mode, err)

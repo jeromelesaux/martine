@@ -81,7 +81,7 @@ func (z *Z80HspNode) internalNextRegister(registers []Z80Register) Z80Register {
 	return A
 }
 
-// nolint: gocognit
+// nolint: gocognit, gocyclo
 func (z *Z80HspNode) InitOpcode() string {
 
 	switch z.register {

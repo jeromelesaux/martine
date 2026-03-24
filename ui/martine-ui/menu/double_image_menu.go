@@ -70,7 +70,7 @@ func (d *DoubleImageMenu) CmdLine() string {
 		return cmd
 	}
 
-	cmd += "\n " + exec + "  -in mode0" + string(filepath.Separator) + scrFilename + " -mode " + fmt.Sprintf("%d", d.LeftImage.Cfg.ScrCfg.Mode)
+	cmd += "\n " + exec + "  -in mode0" + string(filepath.Separator) + scrFilename + constants.ModeOptionLabel + fmt.Sprintf("%d", d.LeftImage.Cfg.ScrCfg.Mode)
 	cmd += " -in2 mode1" + string(filepath.Separator) + scrFilename + " -mode2 " + fmt.Sprintf("%d", d.RightImage.Cfg.ScrCfg.Mode)
 	cmd += " -out egx"
 	if d.ResultImage.EgxType == 1 {
@@ -79,7 +79,7 @@ func (d *DoubleImageMenu) CmdLine() string {
 		cmd += " -egx2"
 	}
 	if d.LeftImage.Cfg.ScrCfg.Type.IsFullScreen() {
-		cmd += " -fullscreen"
+		cmd += constants.FullscreenOptionLabel
 	}
 	return cmd
 }

@@ -144,28 +144,29 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 		return err
 	}
 	for i, v := range tiles {
-		if v.Occurrence > 0 {
-			tile := v.Tile.Image()
-			d, _, _, _, err := ApplyOneImage(tile,
-				cfg,
-				palette,
-				mode)
-			if err != nil {
-				log.GetLogger().Error("Error while transforming sprite error : %v\n", err)
-			}
-			if nbFrames < 255 {
-				data = append(data, d...)
-				scenePath := filepath.Join(cfg.ScrCfg.OutputPath, fmt.Sprintf("%stiles%stile-%.2d.png", string(filepath.Separator), string(filepath.Separator), i))
-				if err := png.Png(scenePath, tile); err != nil {
-					log.GetLogger().Error("Cannot create scene tile-%.2d error %v\n", i, err)
-					return err
-				}
-			} else {
-				log.GetLogger().Infoln("skipping number of frames exceed 255.")
-				break
-			}
-			nbFrames++
+		if v.Occurrence <= 0 {
+			continue
 		}
+		tile := v.Tile.Image()
+		d, _, _, _, err := ApplyOneImage(tile,
+			cfg,
+			palette,
+			mode)
+		if err != nil {
+			log.GetLogger().Error("Error while transforming sprite error : %v\n", err)
+		}
+		if nbFrames < 255 {
+			data = append(data, d...)
+			scenePath := filepath.Join(cfg.ScrCfg.OutputPath, fmt.Sprintf("%stiles%stile-%.2d.png", string(filepath.Separator), string(filepath.Separator), i))
+			if err := png.Png(scenePath, tile); err != nil {
+				log.GetLogger().Error("Cannot create scene tile-%.2d error %v\n", i, err)
+				return err
+			}
+		} else {
+			log.GetLogger().Infoln("skipping number of frames exceed 255.")
+			break
+		}
+		nbFrames++
 	}
 	// save the file sprites
 	finalFile = strings.ReplaceAll(filename, "?", "")
@@ -413,27 +414,28 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 		return err
 	}
 	for i, v := range tiles {
-		if v.Occurrence > 0 {
-			tile := v.Tile.Image()
-			d, _, _, _, err := ApplyOneImage(tile,
-				cfg,
-				palette,
-				mode)
-			if err != nil {
-				log.GetLogger().Error("Error while transforming sprite error : %v\n", err)
-			}
-			data = append(data, d...)
-			scenePath := filepath.Join(cfg.ScrCfg.OutputPath, fmt.Sprintf("%stiles%stile-%.2d.png", string(filepath.Separator), string(filepath.Separator), i))
-			if err := png.Png(scenePath, tile); err != nil {
-				log.GetLogger().Error("Cannot encode in png scene tile-%.2d error %v\n", i, err)
-				return err
-			}
-			if i >= maxTiles {
-				log.GetLogger().Error("Maximum of %d tiles accepted, skipping...\n", maxTiles)
-				break
-			}
-			nbFrames++
+		if v.Occurrence <= 0 {
+			continue
 		}
+		tile := v.Tile.Image()
+		d, _, _, _, err := ApplyOneImage(tile,
+			cfg,
+			palette,
+			mode)
+		if err != nil {
+			log.GetLogger().Error("Error while transforming sprite error : %v\n", err)
+		}
+		data = append(data, d...)
+		scenePath := filepath.Join(cfg.ScrCfg.OutputPath, fmt.Sprintf("%stiles%stile-%.2d.png", string(filepath.Separator), string(filepath.Separator), i))
+		if err := png.Png(scenePath, tile); err != nil {
+			log.GetLogger().Error("Cannot encode in png scene tile-%.2d error %v\n", i, err)
+			return err
+		}
+		if i >= maxTiles {
+			log.GetLogger().Error("Maximum of %d tiles accepted, skipping...\n", maxTiles)
+			break
+		}
+		nbFrames++
 	}
 	// save the file sprites
 	finalFile = strings.ReplaceAll(filename, "?", "")
@@ -710,27 +712,28 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 		return err
 	}
 	for i, v := range tiles {
-		if v.Occurrence > 0 {
-			tile := v.Tile.Image()
-			d, _, _, _, err := ApplyOneImage(tile,
-				cfg,
-				palette,
-				mode)
-			if err != nil {
-				log.GetLogger().Error("Error while transforming sprite error : %v\n", err)
-			}
-			data = append(data, d...)
-			scenePath := filepath.Join(cfg.ScrCfg.OutputPath, fmt.Sprintf("%stiles%stile-%.2d.png", string(filepath.Separator), string(filepath.Separator), i))
-			if err := png.Png(scenePath, tile); err != nil {
-				log.GetLogger().Error("Cannot encode in png scene tile-%.2d error %v\n", i, err)
-				return err
-			}
-			if i >= maxTiles {
-				log.GetLogger().Error("Maximum of %d tiles accepted, skipping...\n", maxTiles)
-				break
-			}
-			nbFrames++
+		if v.Occurrence <= 0 {
+			continue
 		}
+		tile := v.Tile.Image()
+		d, _, _, _, err := ApplyOneImage(tile,
+			cfg,
+			palette,
+			mode)
+		if err != nil {
+			log.GetLogger().Error("Error while transforming sprite error : %v\n", err)
+		}
+		data = append(data, d...)
+		scenePath := filepath.Join(cfg.ScrCfg.OutputPath, fmt.Sprintf("%stiles%stile-%.2d.png", string(filepath.Separator), string(filepath.Separator), i))
+		if err := png.Png(scenePath, tile); err != nil {
+			log.GetLogger().Error("Cannot encode in png scene tile-%.2d error %v\n", i, err)
+			return err
+		}
+		if i >= maxTiles {
+			log.GetLogger().Error("Maximum of %d tiles accepted, skipping...\n", maxTiles)
+			break
+		}
+		nbFrames++
 	}
 	// save the file sprites
 	finalFile = strings.ReplaceAll(filename, "?", "")

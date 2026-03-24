@@ -4,7 +4,7 @@ import "math"
 
 // CpcScreenAddress returns the screen address according the screen mode, the initialAddress (always #C000)
 // x the column number and y the line number on the screen
-func CpcScreenAddress(intialeAddresse int, x, y int, mode uint8, isOverscan, doubleScreen bool) int {
+func CpcScreenAddress(intialeAddresse, x, y int, mode uint8, isOverscan, doubleScreen bool) int {
 	var addr int
 	var adjustMode int
 	switch mode {

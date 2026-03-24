@@ -12,6 +12,25 @@ import (
 const (
 	ScrExtension    = ".SCR"
 	WindowExtension = ".WIN"
+
+	NoneLabel       = "none"
+	Lz4ClassicLabel = "Lz4 Classic"
+	RleLabel        = "rle"
+	Zx0CrunchLabel  = "zx0 crunch"
+	Rle16BitsLabel  = "rle 16bits"
+	Lz4RawLabel     = "Lz4 Raw"
+
+	QuantizationOptionLabel = " -quantization"
+	MultiplierOptionLabel   = " -multiplier "
+	FullscreenOptionLabel   = " -fullscreen"
+	PlusOptionLabel         = " -plus"
+	WidthOptionLabel        = " -width "
+	HeightOptionLabel       = " -height "
+	ModeOptionLabel         = " -mode "
+	DitheringOptionLabel    = " -dithering "
+	ReducerOptionLabel      = " -reducer "
+	SpritehardOptionLabel   = " -spritehard"
+	InOptionLabel           = " -in "
 )
 
 type DitheringType struct {
@@ -322,7 +341,7 @@ func ColorDistance2(c1, c2 color.Color) int64 {
 	return distance
 }
 
-// nolint: funlen
+// nolint: funlen, gocyclo
 func CpcColorFromHardwareNumber(c int) (CpcColor, error) {
 	if White.HardwareNumber == c {
 		return White, nil
@@ -408,7 +427,7 @@ func CpcColorFromHardwareNumber(c int) (CpcColor, error) {
 	return CpcColor{HardwareNumber: -1}, ErrorCpcColorNotFound
 }
 
-// nolint: funlen
+// nolint: funlen, gocyclo
 func ColorFromHardware(c uint8) (color.Color, error) {
 	if HardwareValueAreEquals(White.HardwareValues, c) {
 		return White.Color, nil
@@ -502,7 +521,7 @@ func HardwareValues(c color.Color) ([]uint8, error) {
 	return cc.HardwareValues, nil
 }
 
-// nolint: funlen
+// nolint: funlen, gocyclo
 func selectColor(c color.Color) (CpcColor, error) {
 	if ColorsAreEquals(White.Color, c) {
 		return White, nil
@@ -697,7 +716,7 @@ func (s *SplitRaster) Boundaries() (uint16, uint16) {
 	return s.Offset, s.Offset + uint16(s.Length)
 }
 
-// nolint: funlen
+// nolint: funlen, gocyclo
 func CpcColorStringFromHardwareNumber(c uint8) string {
 	if HardwareValueAreEquals(White.HardwareValues, c) {
 		return "White"

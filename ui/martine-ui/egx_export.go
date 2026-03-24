@@ -68,20 +68,20 @@ func (m *MartineUI) exportEgxDialog(cfg *config.MartineConfig, w fyne.Window) {
 		),
 
 		widget.NewLabel("Compression type:"),
-		widget.NewSelect([]string{"none", "rle", "rle 16bits", "Lz4 Classic", "Lz4 Raw", "zx0 crunch"},
+		widget.NewSelect([]string{constants.NoneLabel, constants.RleLabel, constants.Rle16BitsLabel, constants.Lz4ClassicLabel, constants.Lz4RawLabel, constants.Zx0CrunchLabel},
 			func(s string) {
 				switch s {
-				case "none":
+				case constants.NoneLabel:
 					cfg.ScrCfg.Compression = compression.NONE
-				case "rle":
+				case constants.RleLabel:
 					cfg.ScrCfg.Compression = compression.RLE
-				case "rle 16bits":
+				case constants.Rle16BitsLabel:
 					cfg.ScrCfg.Compression = compression.RLE16
-				case "Lz4 Classic":
+				case constants.Lz4ClassicLabel:
 					cfg.ScrCfg.Compression = compression.LZ4
-				case "Lz4 Raw":
+				case constants.Lz4RawLabel:
 					cfg.ScrCfg.Compression = compression.RawLZ4
-				case "zx0 crunch":
+				case constants.Zx0CrunchLabel:
 					cfg.ScrCfg.Compression = compression.ZX0
 				}
 			}),

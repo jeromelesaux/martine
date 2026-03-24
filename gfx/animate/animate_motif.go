@@ -110,7 +110,7 @@ func DeltaMotif(gitFilepath string, cfg *config.MartineConfig, threshold int, in
 	return exportDeltaMotif(deltas, motifs, customPalette, filepath.Join(cfg.ScrCfg.OutputPath, filename))
 }
 
-func exportDeltaMotif(images [][]byte, motifs [][]byte, p color.Palette, filename string) error {
+func exportDeltaMotif(images, motifs [][]byte, p color.Palette, filename string) error {
 	var deltaCode strings.Builder
 	for i := range images {
 		fmt.Fprintf(&deltaCode, "delta%.2d\n", i)
