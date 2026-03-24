@@ -143,7 +143,7 @@ var (
 	spriteOcpWin        = flag.Bool("ocpwin", false, "Export sprite as OCP win file.")
 	version             = flag.Bool("version", false, "print martine's version")
 	appPrefix           = fmt.Sprintf("Martine (%v)", common.AppVersion)
-	noUI                = flag.Bool("ui", true, "Open Martine UI")
+	noUI                = flag.Bool("noui", false, "Open Martine UI")
 )
 
 func usage() {
