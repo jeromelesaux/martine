@@ -4,13 +4,13 @@ import "testing"
 
 func TestCpcScreenAddress(t *testing.T) {
 	tests := []struct {
-		name          string
-		initial       int
-		x, y          int
-		mode          uint8
-		overscan      bool
-		doubleScreen  bool
-		want          int
+		name         string
+		initial      int
+		x, y         int
+		mode         uint8
+		overscan     bool
+		doubleScreen bool
+		want         int
 	}{
 		{"Mode0NoOverscan", 0, 1, 0, 0, false, false, 1},
 		{"Mode1NoOverscan", 0, 3, 0, 1, false, false, 1},
