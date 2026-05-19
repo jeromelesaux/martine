@@ -10,6 +10,7 @@ The files generated (.win, .scr, .ink) are compatible with [OCP art studio](http
  * [Output files](#Output_files)
  * [Options](#Options)
  * [Installation](#Installation)
+ * [GUI/UI](#GUI)
  * [Usage](#Usage)
  * [Technics](#Technics)
 	* [Screen Conversion](#Screen_conversion)
@@ -19,8 +20,11 @@ The files generated (.win, .scr, .ink) are compatible with [OCP art studio](http
 	* [3D Rotation](#3D_rotation)
 	* [Tilemap](#Tilemap)
 	* [Flash](#flash)
+	* [Split Rasters](#SplitRasters)
 	* [Egx](#Egx)
 	* [Deltapacking](#Deltapacking)
+	* [Animation](#Animation)
+	* [Advanced Features](#Advanced)
 
 ## Introduction 
 Martine tries to accelerate your game, demo animation development by organize and conversion of your graphical data.
@@ -101,6 +105,38 @@ To get binary :
 [https://github.com/jeromelesaux/martine/releases](https://github.com/jeromelesaux/martine/releases)
 <br>OS avaible : Linux, Macos X and Windows  
 
+## GUI/UI
+
+### Overview
+Martine includes a cross-platform graphical user interface (GUI) built with [Fyne](https://fyne.io), a modern Go GUI framework. The GUI provides an intuitive way to access all martine features without using the command line.
+
+### Features
+The GUI includes tabbed interfaces for different operations:
+
+* **Image Tab** - Configure input images, preview settings, and manage image-specific options
+* **Sprite Tab** - Configure sprite generation with width/height, mode selection, and sprite-specific transformations
+* **Tilemap Tab** - Define tilemap parameters and analyze tile-based images
+* **Animation Tab** - Handle GIF and multi-frame processing for animations and rotations
+* **EGX Tab** - Configure EGX mode mixing (modes 0/1 or 1/2) with preview
+* **Palette Management** - Load, apply, and manage color palettes (PAL, INK, KIT formats)
+* **Settings/Preferences** - Configure output directory, theme, and global options
+
+### Running the GUI
+The GUI can be started by running:
+```
+cd ui
+go run ui.go
+```
+
+Or use a compiled binary from the releases.
+
+### GUI Features
+- Real-time image preview with conversion effects
+- Drag-and-drop file loading
+- Batch processing capabilities
+- Live palette visualization
+- Output file browser
+- Process template save/load functionality
 
 ## Usage
 Usage and options : 
@@ -504,6 +540,36 @@ Results: ![samples/sonic_rotate.png](samples/sonic_rotate.gif)
 
 ### flash 
 
+The flash effect creates animated transitions between two CPC screens. This technique simulates a flickering or flashing animation by rapidly switching between two different screens, which was a popular technique on retro systems.
+
+#### Basic Usage
+```martine -mode 1 -flash -in input.png -out test -dsk```
+
+This command automatically generates two complementary images optimized for flashing animation.
+
+#### Manual Two-Screen Mode
+You can provide two pre-generated screens for more control:
+```martine -mode 1 -flash -in input1.scr -pal input1.pal -mode2 0 -in2 input2.scr -pal2 input2.pal -out test -dsk```
+
+#### Features
+- Generates BASIC launcher to test animation on real CPC
+- Compatible with both classic and overscan screens
+- Supports mode mixing (e.g., mode 0 + mode 1)
+- Optional DSK file generation for direct CPC loading
+- Works with SNA snapshot format for emulators
+
+#### Example
+Starting with an image:
+```martine -mode 1 -flash -in samples/lara.png -out flash_output -dsk```
+
+This produces:
+- Two `.SCR` files with complementary color schemes
+- Two `.PAL` palette files
+- `.BAS` BASIC program to display the animation
+- Complete `.DSK` disk image ready for CPC
+
+The resulting animation creates a flickering effect that can simulate transparency or add visual interest to your demo scene.
+
 ### tilemap
 This option allows to create allow tiles and tile map from the input image. If for instance you use the mario level 1 like this : 
 ![samples/mario-level1.png](samples/mario-level1.png)
@@ -585,6 +651,40 @@ And the palette path option -pal.<br>
 You can note that martine allows you to choose you own palette. You can modify your palette to have a different rendering.<br>
 If you want to iterate and gets the results quickly on your own machine, I advise you to add the M4 option and use the sna output. <br>
 Complete your command line with for instance ```-sna -host 192.168.1.100 -autoexec ``` 
+
+### SplitRasters
+
+Split raster mode allows you to create advanced visual effects by splitting the screen into horizontal sections and applying different transformations to each section. This creates smooth scrolling, parallax effects, or rasterized distortions.
+
+#### Basic Usage
+```martine -in image.png -mode 0 -splitrasters -out output -dsk```
+
+#### Features
+- Generates overscan-compatible split raster files
+- Creates `.SPL` file containing raster control data
+- Supports mode 0, 1, and 2
+- Can be combined with fullscreen option
+- Generates BASIC launcher to test on CPC
+
+#### How It Works
+The split raster technique works by:
+1. Dividing the screen into horizontal bands
+2. Applying transformations per band
+3. Generating register control sequences
+4. Creating executable code to update scanlines dynamically
+
+#### Advanced Options
+- **Scanline sequence** (option `-scanlinesequence`) - Reorder display lines for custom effects
+  Example: `martine -in image.png -mode 0 -width 64 -height 64 -scanlinesequence 0,2,1,3`
+
+- **Line rotation** (options `-rra`, `-rla`, `-sra`, `-sla`) - Rotate pixel columns within raster bands
+- **Keep/Lost pixels** - Control which pixels wrap around during rotation
+
+#### Example
+Create a parallax scrolling effect:
+```martine -in background.png -mode 0 -splitrasters -out parallax -dsk```
+
+The resulting `.SPL` file can be integrated into Z80 assembly code to create dynamic raster effects.
 
 ### deltapacking
 
@@ -892,4 +992,162 @@ save'delta.bin',#1000,end-start,DSK,'bomberman.dsk'
 Now you can get the result here : [sna](samples/deltapacking-megaman/megaman.sna) or [dsk](samples/deltapacking-megaman/megaman.dsk)
 
 You will obtain this : 
+
+### Animation
+
+Martine supports advanced animation workflows for creating sprite sequences and frame-based animations.
+
+#### GIF to Animation
+Process animated GIFs into sprite sequences:
+```martine -in animation.gif -mode 0 -width 32 -height 32 -animate -out sprites_folder```
+
+Options:
+- `-animate` - Generate sprite sequence from GIF frames
+- `-iter` - Control number of frames to process
+- `-deltapacking` - Compress animation using delta packing (described above)
+- `-fillout` - Fill missing frames during animation processing
+
+#### Sprite Board Animation
+Create walking/running animations from sprite sheets:
+```martine -in spritesheet.png -tile -width 32 -height 32 -iterx 8 -itery 4 -mode 0 -out animation_output```
+
+This extracts individual sprites from a grid layout.
+
+#### Frame Interpolation
+- Use `-fillout` to automatically generate intermediate frames
+- Useful for smooth motion when original frame count is low
+
+### Advanced Features
+
+#### Hardware Integration (M4 Card)
+For users with an M4 Card (WiFi-enabled CPC interface), martine can directly transfer files:
+
+```martine -in image.png -mode 0 -host 192.168.1.100 -remotepath /mnt/sd -autoexec -dsk```
+
+Options:
+- `-host` - IP address or hostname of M4 Card
+- `-remotepath` - Target directory on M4 Card SD card
+- `-autoexec` - Automatically execute the generated program
+
+#### Palette Management
+Advanced palette operations:
+
+**Ink Swapping** - Remap color indices:
+```martine -in image.png -mode 0 -inkswap "0=3,1=0,2=1,3=2" -out output```
+
+**Palette Application** - Apply existing palette:
+```martine -in image.png -mode 0 -pal reference.pal -out output```
+
+**Brightness & Contrast** (CPC Plus only):
+```martine -in image.png -plus -brightness 50 -contrast 30 -out output```
+
+#### Go Source Code Export
+Export sprite data directly as Go source code:
+```martine -in sprite.png -mode 0 -width 16 -height 16 -out golang_output```
+
+Generates `.go1` and `.go2` files with sprite data encoded as Go byte arrays.
+
+#### Data Format Options
+
+**Column-based Layout** - Export data by columns instead of rows:
+```martine -in image.png -mode 0 -out output -txt -json```
+
+**Zigzag Ordering** - Alternative memory layout for optimized access patterns:
+```martine -in tiles.png -tile -width 8 -height 8 -zigzag -out tiles_output```
+
+**Custom Statement** - Change assembly notation:
+```martine -in sprite.png -mode 0 -statement "defb" -txt -out output```
+
+Choices: `db`, `defb`, `byte`
+
+#### Color Processing
+
+**Dithering Algorithms** - 10 algorithms available:
+- `-dithering 0` - Floyd-Steinberg (default)
+- `-dithering 10` - Bayer 8x8
+- See usage help for all 15 algorithms
+
+Example with Sierra dithering:
+```martine -in photo.jpg -mode 1 -dithering 4 -out output```
+
+**Color Reduction** - Pre-process colors before dithering:
+```martine -in image.png -mode 0 -reducer 2 -dithering 0 -out output```
+
+Levels: 1=lower, 2=medium, 3=strong
+
+**Quantization** - Advanced color quantization:
+```martine -in image.png -mode 0 -quantization -dithering 0 -out output```
+
+Combines K-means clustering with optional dithering for better color mapping.
+
+#### Resize Algorithms
+Choose from 15 resize algorithms:
+- 1: NearestNeighbor (default, fastest)
+- 2: CatmullRom
+- 3: Lanczos (highest quality)
+- 4-15: Various interpolation methods
+
+Example with high-quality resize:
+```martine -in image.jpg -mode 0 -algo 3 -out output```
+
+#### Sprite Masking
+Apply bitwise operations to sprite data:
+
+```martine -in sprite.png -width 16 -height 16 -mask "#AA" -maskand -mode 0 -out output```
+
+This applies an AND operation with mask value 0xAA (binary 10101010).
+
+Alternatives:
+- `-maskand` - AND operation (mask bits that remain)
+- `-maskor` - OR operation (set masked bits)
+
+#### Tilemap Analysis
+Advanced tilemap generation with optimization:
+```martine -in level.png -tilemap -width 16 -height 16 -analyzetilemap -out level_output -dsk```
+
+Features:
+- Automatic tile duplicate detection
+- Generates tilemap schema showing tile positions
+- Creates tile usage statistics
+- Exports ASM format tile maps
+
+#### Process Files
+Save and reuse conversion settings:
+
+Create a process template:
+```martine -initprocess myprocess.json```
+
+Apply saved settings:
+```martine -processfile myprocess.json -in newimage.png -out output```
+
+#### Extended Disk Support
+Generate extended CPC disk formats:
+```martine -in image.png -mode 0 -extendeddsk -out output```
+
+Supports:
+- 80 tracks per face
+- 10 sectors
+- 400 KB per face
+- Ideal for larger projects
+
+#### Sprite Formats
+
+**IMP-Catcher Format** - For Impdraw V2 compatibility:
+```martine -in sprite.png -mode 0 -width 16 -height 16 -imp -out output```
+
+**CPC Plus Sprite Hardware** - 16-bit sprites:
+```martine -in sprite.png -plus -spritehard -width 16 -height 16 -out output```
+
+**Reverse Engineering** - Convert CPC files back to PNG:
+```martine -reverse -win sprite.win -pal sprite.pal -out output.png```
+
+Or:
+```martine -reverse -in screen.scr -pal screen.pal -out screen.png```
+
+#### Address Configuration
+Control memory addressing for sprites:
+```martine -delta -df sprites/*.WIN -address "#C000" -out delta_output```
+
+Use `-linewidth` for custom screen address calculations:
+```martine -delta -df sprites/*.WIN -linewidth "#50" -out delta_output``` 
 ![video emu](samples/deltapacking-megaman/megaman-emulator.gif)
