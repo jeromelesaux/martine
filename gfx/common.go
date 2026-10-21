@@ -263,7 +263,7 @@ func ApplyOneImageAndExport(in image.Image,
 	}
 
 	log.GetLogger().Info("Saving downgraded image into (%s)\n", filename+"_down.png")
-	if err := png.Png(filepath.Join(cfg.ScrCfg.OutputPath, filename+"_down.png"), out); err != nil {
+	if err := png.Png(filepath.Join(cfg.ScrCfg.OutputPath, filename+"_down.png"), resizeMode0(out, mode)); err != nil {
 		os.Exit(-2)
 	}
 
@@ -279,10 +279,10 @@ func ApplyOneImageAndExport(in image.Image,
 		for indice := 0; indice < cfg.RotateCfg.RollIteration; indice++ {
 			img := images[indice]
 			newFilename := cfg.OsFullPath(filename, fmt.Sprintf("%.2d", indice)+".png")
-			if err := png.Png(newFilename, img); err != nil {
+			if err := png.Png(newFilename, resizeMode0(img, mode)); err != nil {
 				log.GetLogger().Error("Cannot create image (%s) error :%v\n", newFilename, err)
 			}
-			if err := sprite.ToSpriteAndExport(img, newPalette, constants.Size{Width: cfg.ScrCfg.Size.Width, Height: cfg.ScrCfg.Size.Height}, mode, newFilename, false, cfg); err != nil {
+			if err := sprite.ToSpriteAndExport(resizeMode0(img, mode), newPalette, constants.Size{Width: cfg.ScrCfg.Size.Width, Height: cfg.ScrCfg.Size.Height}, mode, newFilename, false, cfg); err != nil {
 				log.GetLogger().Error("Cannot create sprite image (%s) error %v\n", newFilename, err)
 			}
 		}
@@ -299,12 +299,12 @@ func ApplyOneImageAndExport(in image.Image,
 			out = transformation.Zigzag(out)
 		}
 		if cfg.ScrCfg.Type != config.SpriteHardFormat {
-			err = sprite.ToSpriteAndExport(out, newPalette, cfg.ScrCfg.Size, mode, filename, false, cfg)
+			err = sprite.ToSpriteAndExport(resizeMode0(out, mode), newPalette, cfg.ScrCfg.Size, mode, filename, false, cfg)
 			if err != nil {
 				return err
 			}
 		} else {
-			err = spritehard.ToSpriteHardAndExport(out, newPalette, cfg.ScrCfg.Size, mode, filename, cfg)
+			err = spritehard.ToSpriteHardAndExport(resizeMode0(out, mode), newPalette, cfg.ScrCfg.Size, mode, filename, cfg)
 			if err != nil {
 				return err
 			}
@@ -460,7 +460,23 @@ func ApplyOneImage(in image.Image,
 			}
 		}
 	}
-	return data, out, newPalette, lineSize, err
+	return data, resizeMode0(out, mode), newPalette, lineSize, err
+}
+
+func resizeMode0(in *image.NRGBA, mode uint8) *image.NRGBA {
+	if mode == 0 {
+		out := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: in.Bounds().Max.X * 2, Y: in.Bounds().Max.Y}})
+		for y := 0; y < in.Bounds().Max.Y; y++ {
+			for x := 0; x < in.Bounds().Max.X; x++ {
+				c := in.At(x, y)
+				out.Set(x*2, y, c)
+				out.Set(x*2+1, y, c)
+			}
+		}
+		return out
+	}
+	// Implementation for resize mode 0
+	return in
 }
 
 func ExportRawImage(in image.Image,

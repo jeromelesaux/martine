@@ -79,8 +79,11 @@ func revertColor(rawColor uint8, index int, isPlus bool) color.Color {
 
 // nolint: funlen, gocognit
 func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlus bool) (*image.NRGBA, error) {
-
-	in := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: width, Y: height}})
+	w := width
+	if mode == 0 {
+		w *= 2
+	}
+	in := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: w, Y: height}})
 	x := 0
 	y := 0
 	for index, val := range data {
@@ -92,7 +95,9 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 			newColor := revertColor(uint8(c1), index, isPlus)
 			in.Set(x, y, newColor)
 			x++
-			if (x % width) == 0 {
+			in.Set(x, y, newColor)
+			x++
+			if (x % w) == 0 {
 				x = 0
 				y++
 			}
@@ -100,7 +105,9 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 			newColor = revertColor(uint8(c2), index, isPlus)
 			in.Set(x, y, newColor)
 			x++
-			if (x % width) == 0 {
+			in.Set(x, y, newColor)
+			x++
+			if (x % w) == 0 {
 				x = 0
 				y++
 			}
@@ -110,7 +117,7 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 			newColor := revertColor(uint8(c1), index, isPlus)
 			in.Set(x, y, newColor)
 			x++
-			if (x % width) == 0 {
+			if (x % w) == 0 {
 				x = 0
 				y++
 			}
@@ -118,7 +125,7 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 			newColor = revertColor(uint8(c2), index, isPlus)
 			in.Set(x, y, newColor)
 			x++
-			if (x % width) == 0 {
+			if (x % w) == 0 {
 				x = 0
 				y++
 			}
@@ -126,7 +133,7 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 			newColor = revertColor(uint8(c3), index, isPlus)
 			in.Set(x, y, newColor)
 			x++
-			if (x % width) == 0 {
+			if (x % w) == 0 {
 				x = 0
 				y++
 			}
@@ -134,7 +141,7 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 			newColor = revertColor(uint8(c4), index, isPlus)
 			in.Set(x, y, newColor)
 			x++
-			if (x % width) == 0 {
+			if (x % w) == 0 {
 				x = 0
 				y++
 			}
@@ -144,7 +151,7 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 			newColor := revertColor(uint8(c1), index, isPlus)
 			in.Set(x, y, newColor)
 			x++
-			if (x % width) == 0 {
+			if (x % w) == 0 {
 				x = 0
 				y++
 			}
@@ -152,7 +159,7 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 			newColor = revertColor(uint8(c2), index, isPlus)
 			in.Set(x, y, newColor)
 			x++
-			if (x % width) == 0 {
+			if (x % w) == 0 {
 				x = 0
 				y++
 			}
@@ -160,7 +167,7 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 			newColor = revertColor(uint8(c3), index, isPlus)
 			in.Set(x, y, newColor)
 			x++
-			if (x % width) == 0 {
+			if (x % w) == 0 {
 				x = 0
 				y++
 			}
@@ -168,7 +175,7 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 			newColor = revertColor(uint8(c4), index, isPlus)
 			in.Set(x, y, newColor)
 			x++
-			if (x % width) == 0 {
+			if (x % w) == 0 {
 				x = 0
 				y++
 			}
@@ -176,7 +183,7 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 			newColor = revertColor(uint8(c5), index, isPlus)
 			in.Set(x, y, newColor)
 			x++
-			if (x % width) == 0 {
+			if (x % w) == 0 {
 				x = 0
 				y++
 			}
@@ -184,7 +191,7 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 			newColor = revertColor(uint8(c6), index, isPlus)
 			in.Set(x, y, newColor)
 			x++
-			if (x % width) == 0 {
+			if (x % w) == 0 {
 				x = 0
 				y++
 			}
@@ -192,7 +199,7 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 			newColor = revertColor(uint8(c7), index, isPlus)
 			in.Set(x, y, newColor)
 			x++
-			if (x % width) == 0 {
+			if (x % w) == 0 {
 				x = 0
 				y++
 			}
@@ -200,7 +207,7 @@ func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlu
 			newColor = revertColor(uint8(c8), index, isPlus)
 			in.Set(x, y, newColor)
 			x++
-			if (x % width) == 0 {
+			if (x % w) == 0 {
 				x = 0
 				y++
 			}
