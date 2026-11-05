@@ -164,7 +164,7 @@ func printVersion() {
 @Todo : add zigzag on sprite and sprite hard.
 */
 
-// nolint: funlen, gocognit
+// nolint: funlen, gocognit, gocyclo
 func main() {
 
 	var filename, extension string
@@ -180,12 +180,12 @@ func main() {
 	}
 
 	if !*noUI {
-		os.Setenv("FYNE_SCALE", "0.7")
+		_ = os.Setenv("FYNE_SCALE", "0.7")
 		/* main application */
-		app := app.NewWithID("Martine @IMPact")
+		application := app.NewWithID("Martine @IMPact")
 		martineUI := ui.NewMartineUI()
-		martineUI.Load(app)
-		app.Run()
+		martineUI.Load(application)
+		application.Run()
 
 		os.Exit(0)
 	}
@@ -300,7 +300,7 @@ func main() {
 			log.GetLogger().Error("Error while parsing (%s) use the starting address #C000, err : %v\n", *initialAddress, err)
 			screenAddress = 0xC000
 		}
-		var exportVersion animate.DeltaExportFormat = animate.DeltaExportV1
+		exportVersion := animate.DeltaExportV1
 
 		if *deltaPacking2 {
 			exportVersion = animate.DeltaExportV2
@@ -325,7 +325,7 @@ func main() {
 			log.GetLogger().Error("Cannot decode the image %s error %v", *picturePath, err)
 			os.Exit(-2)
 		}
-		f.Close()
+		_ = f.Close()
 	}
 
 	// gestion de la taille de l'image en sortie
@@ -407,7 +407,7 @@ func main() {
 			log.GetLogger().Error("Cannot decode the image %s error %v", *picturePath, err)
 			os.Exit(-2)
 		}
-		f.Close()
+		_ = f.Close()
 		img := image.NewNRGBA(image.Rect(0, 0, in.Bounds().Max.X, in.Bounds().Max.Y))
 		draw.Draw(img, img.Bounds(), in, in.Bounds().Min, draw.Src)
 		pal, _, err := ci.DowngradingPalette(img, constants.Size{ColorsAvailable: size.ColorsAvailable, Width: img.Bounds().Max.X, Height: img.Bounds().Max.Y}, cfg.ScrCfg.IsPlus)
@@ -584,7 +584,7 @@ func main() {
 					log.GetLogger().Error("Error while extracting raw content, err:%s\n", err)
 				}
 				sprites = append(sprites, data...)
-				f.Close()
+				_ = f.Close()
 			}
 			finalFile := strings.ReplaceAll(filename, "?", "")
 			if err = tile.Imp(sprites, uint(len(spritesPaths)), uint(cfg.ScrCfg.Size.Width), uint(cfg.ScrCfg.Size.Height), uint(*mode), finalFile, cfg); err != nil {

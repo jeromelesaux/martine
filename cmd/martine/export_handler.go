@@ -13,7 +13,8 @@ import (
 	"github.com/jeromelesaux/martine/log"
 )
 
-// nolint: funlen, gocognit
+// ExportHandler parses CLI flags and returns the martine config and screen size.
+// nolint: funlen, gocognit, gocyclo
 func ExportHandler() (*config.MartineConfig, constants.Size) {
 	var size constants.Size
 	cfg := config.NewMartineConfig(*picturePath, *output)
@@ -57,39 +58,25 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 		}
 	}
 
-	var resizeAlgo imaging.ResampleFilter
-	switch *resizeAlgorithm {
-	case 1:
-		resizeAlgo = imaging.NearestNeighbor
-	case 2:
-		resizeAlgo = imaging.CatmullRom
-	case 3:
-		resizeAlgo = imaging.Lanczos
-	case 4:
-		resizeAlgo = imaging.Linear
-	case 5:
-		resizeAlgo = imaging.Box
-	case 6:
-		resizeAlgo = imaging.Hermite
-	case 7:
-		resizeAlgo = imaging.BSpline
-	case 8:
-		resizeAlgo = imaging.Hamming
-	case 9:
-		resizeAlgo = imaging.Hann
-	case 10:
-		resizeAlgo = imaging.Gaussian
-	case 11:
-		resizeAlgo = imaging.Blackman
-	case 12:
-		resizeAlgo = imaging.Bartlett
-	case 13:
-		resizeAlgo = imaging.Welch
-	case 14:
-		resizeAlgo = imaging.Cosine
-	case 15:
-		resizeAlgo = imaging.MitchellNetravali
-	default:
+	resizeAlgos := map[int]imaging.ResampleFilter{
+		1:  imaging.NearestNeighbor,
+		2:  imaging.CatmullRom,
+		3:  imaging.Lanczos,
+		4:  imaging.Linear,
+		5:  imaging.Box,
+		6:  imaging.Hermite,
+		7:  imaging.BSpline,
+		8:  imaging.Hamming,
+		9:  imaging.Hann,
+		10: imaging.Gaussian,
+		11: imaging.Blackman,
+		12: imaging.Bartlett,
+		13: imaging.Welch,
+		14: imaging.Cosine,
+		15: imaging.MitchellNetravali,
+	}
+	resizeAlgo, ok := resizeAlgos[*resizeAlgorithm]
+	if !ok {
 		resizeAlgo = imaging.NearestNeighbor
 	}
 
@@ -136,7 +123,7 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 		RollMode:            *rollMode,
 		RollIteration:       *iterations,
 		RotationRlaBit:      *rla,
-		RotationSlaBit:      *sla,
+		RotationSLABit:      *sla,
 		RotationRraBit:      *rra,
 		RotationKeephighBit: *keephigh,
 		RotationKeeplowBit:  *keeplow,
@@ -163,7 +150,7 @@ func ExportHandler() (*config.MartineConfig, constants.Size) {
 	cfg.Animate = *doAnimation
 	cfg.ScrCfg.Process.Reducer = *reducer
 	if jsonOutput != nil && *jsonOutput {
-		cfg.ScrCfg.AddExport(config.JsonExport)
+		cfg.ScrCfg.AddExport(config.JSONExport)
 	}
 	if txtOutput != nil && *txtOutput {
 		cfg.ScrCfg.AddExport(config.AssemblyExport)

@@ -1,3 +1,4 @@
+// Package export provides export utilities for martine output files.
 package export
 
 import (
@@ -5,11 +6,12 @@ import (
 	"os"
 )
 
-type JsonSlice struct {
-	Sprites []*Json `json:"sprites"`
+// JSONSlice holds a collection of JSON sprites.
+type JSONSlice struct {
+	Sprites []*JSON `json:"sprites"`
 }
 
-type Json struct {
+type JSON struct {
 	Label           string   `json:"label"`
 	Width           int      `json:"width"`
 	Height          int      `json:"height"`
@@ -18,8 +20,8 @@ type Json struct {
 	HardwarePalette []string `json:"hardwarepalette"`
 }
 
-func NewJson(label string, width, height int, screen, palette, hardwarepalette []string) *Json {
-	return &Json{
+func NewJSON(label string, width, height int, screen, palette, hardwarepalette []string) *JSON {
+	return &JSON{
 		Label:           label,
 		Width:           width,
 		Height:          height,
@@ -29,24 +31,24 @@ func NewJson(label string, width, height int, screen, palette, hardwarepalette [
 	}
 }
 
-func NewJsonSlice() *JsonSlice {
-	return &JsonSlice{Sprites: make([]*Json, 0)}
+func NewJSONSlice() *JSONSlice {
+	return &JSONSlice{Sprites: make([]*JSON, 0)}
 }
 
-func (j *Json) Save(file string) error {
+func (j *JSON) Save(file string) error {
 	fw, err := os.Create(file)
 	if err != nil {
 		return err
 	}
-	defer fw.Close()
+	defer func() { _ = fw.Close() }()
 	return json.NewEncoder(fw).Encode(j)
 }
 
-func (j *JsonSlice) Save(file string) error {
+func (j *JSONSlice) Save(file string) error {
 	fw, err := os.Create(file)
 	if err != nil {
 		return err
 	}
-	defer fw.Close()
+	defer func() { _ = fw.Close() }()
 	return json.NewEncoder(fw).Encode(j)
 }

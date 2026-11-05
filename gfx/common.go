@@ -1,10 +1,10 @@
+// Package gfx provides graphics transformation and conversion utilities.
 package gfx
 
 import (
 	"fmt"
 	"image"
 	"image/color"
-	"os"
 	"path/filepath"
 
 	"github.com/disintegration/imaging"
@@ -19,6 +19,7 @@ import (
 	"github.com/jeromelesaux/martine/gfx/filter"
 	"github.com/jeromelesaux/martine/gfx/transformation"
 	"github.com/jeromelesaux/martine/log"
+	"github.com/jeromelesaux/martine/proc"
 )
 
 func DoDithering(in *image.NRGBA,
@@ -51,6 +52,7 @@ func DoDithering(in *image.NRGBA,
 	return in, p
 }
 
+// DoTransformation applies roll, rotation or 3D rotation to an image.
 // nolint: funlen
 func DoTransformation(in *image.NRGBA,
 	p color.Palette,
@@ -59,7 +61,7 @@ func DoTransformation(in *image.NRGBA,
 	rotationMode,
 	rotation3DMode bool,
 	rotationRlaBit,
-	rotationSlaBit,
+	rotationSLABit,
 	rotationRraBit,
 	rotationSraBit,
 	rotationKeephighBit,
@@ -78,10 +80,10 @@ func DoTransformation(in *image.NRGBA,
 
 	var images []*image.NRGBA
 	if rollMode {
-		if rotationRlaBit != -1 || rotationSlaBit != -1 {
+		if rotationRlaBit != -1 || rotationSLABit != -1 {
 			images = transformation.RollLeft(
 				rotationRlaBit,
-				rotationSlaBit,
+				rotationSLABit,
 				rotationIterations,
 				screenMode,
 				size,
@@ -148,7 +150,53 @@ func DoTransformation(in *image.NRGBA,
 	return images, err
 }
 
-// nolint:funlen, gocognit
+// LoadPalette loads the palette from the config palette path.
+func LoadPalette(cfg *config.MartineConfig) color.Palette {
+	var palette color.Palette
+	switch cfg.PalCfg.Type {
+	case config.PalPalette:
+		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PalCfg.Path)
+		p, _, err := ocpartstudio.OpenPal(cfg.PalCfg.Path)
+		if err != nil {
+			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalCfg.Path)
+		} else {
+			palette = p
+			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
+		}
+	case config.InkPalette:
+		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PalCfg.Path)
+		p, _, err := impPalette.OpenInk(cfg.PalCfg.Path)
+		if err != nil {
+			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalCfg.Path)
+		} else {
+			palette = p
+			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
+		}
+	case config.KitPalette:
+		log.GetLogger().Info("Input plus palette to apply : (%s)\n", cfg.PalCfg.Path)
+		p, _, err := impPalette.OpenKit(cfg.PalCfg.Path)
+		if err != nil {
+			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalCfg.Path)
+		} else {
+			palette = p
+			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
+		}
+	}
+	return palette
+}
+
+func truncateAndSortPalette(p color.Palette, mode uint8) color.Palette {
+	maxColors := constants.NewSizeMode(mode, false).ColorsAvailable
+	truncated := p
+	if len(p) > maxColors {
+		truncated = p[0:maxColors]
+	}
+	truncated = constants.FillColorPalette(truncated)
+	return constants.SortColorsByDistance(truncated)
+}
+
+// ApplyOneImageAndExport converts one image and writes all output files.
+// nolint:funlen, gocognit, gocyclo
 func ApplyOneImageAndExport(in image.Image,
 	cfg *config.MartineConfig,
 	filename, picturePath string,
@@ -170,39 +218,14 @@ func ApplyOneImageAndExport(in image.Image,
 
 	log.GetLogger().Info("Saving resized image into (%s)\n", filename+"_resized.png")
 	if err := png.Png(filepath.Join(cfg.ScrCfg.OutputPath, filename+"_resized.png"), out); err != nil {
-		os.Exit(-2)
+		return err
 	}
-	switch cfg.PalCfg.Type {
-	case config.PalPalette:
-		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PalCfg.Path)
-		palette, _, err = ocpartstudio.OpenPal(cfg.PalCfg.Path)
-		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalCfg.Path)
-		} else {
-			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
-		}
-	case config.InkPalette:
-		log.GetLogger().Info("Input palette to apply : (%s)\n", cfg.PalCfg.Path)
-		palette, _, err = impPalette.OpenInk(cfg.PalCfg.Path)
-		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalCfg.Path)
-		} else {
-			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
-		}
-	case config.KitPalette:
-		log.GetLogger().Info("Input plus palette to apply : (%s)\n", cfg.PalCfg.Path)
-		palette, _, err = impPalette.OpenKit(cfg.PalCfg.Path)
-		if err != nil {
-			log.GetLogger().Error("Palette in file (%s) can not be read skipped\n", cfg.PalCfg.Path)
-		} else {
-			log.GetLogger().Info("Use palette with (%d) colors \n", len(palette))
-		}
-	}
+	palette = LoadPalette(cfg)
 
 	if cfg.ScrCfg.Process.Reducer > 0 {
 		out = ci.Reducer(out, cfg.ScrCfg.Process.Reducer)
 		if err := png.Png(filepath.Join(cfg.ScrCfg.OutputPath, filename+"_resized.png"), out); err != nil {
-			os.Exit(-2)
+			return err
 		}
 	}
 
@@ -214,67 +237,23 @@ func ApplyOneImageAndExport(in image.Image,
 			log.GetLogger().Error("Cannot downgrade colors palette for this image %s\n", picturePath)
 		}
 	}
-	var paletteToSort color.Palette
-	switch mode {
-	case 1:
-		paletteToSort = newPalette[0:4]
-	case 2:
-		paletteToSort = newPalette[0:2]
-	default:
-		paletteToSort = newPalette
-	}
-	paletteToSort = constants.FillColorPalette(paletteToSort)
-	newPalette = constants.SortColorsByDistance(paletteToSort)
+	newPalette = truncateAndSortPalette(newPalette, mode)
 
-	if cfg.ScrCfg.Process.ApplyDithering {
-		out, _ = DoDithering(
-			out,
-			newPalette,
-			cfg.ScrCfg.Process.Dithering.Algo,
-			cfg.ScrCfg.Process.Dithering.Type,
-			cfg.ScrCfg.Process.Dithering.WithQuantification,
-			cfg.ScrCfg.Process.Dithering.Matrix,
-			float32(cfg.ScrCfg.Process.Dithering.Multiplier),
-			cfg.ScrCfg.IsPlus,
-			cfg.ScrCfg.Size)
-	}
-	if cfg.ScrCfg.Process.Saturation > 0 || cfg.ScrCfg.Process.Brightness > 0 {
-		palette = ci.EnhanceBrightness(newPalette, cfg.ScrCfg.Process.Brightness, cfg.ScrCfg.Process.Saturation)
-		newPalette, out = ci.DowngradingWithPalette(out, palette)
-		var paletteToSort color.Palette
-		switch mode {
-		case 1:
-			end := len(newPalette)
-			if len(newPalette) >= 4 {
-				end = 4
-			}
-			paletteToSort = newPalette[0:end]
-		case 2:
-			end := len(newPalette)
-			if len(newPalette) >= 2 {
-				end = 2
-			}
-			paletteToSort = newPalette[0:end]
-		default:
-			paletteToSort = newPalette
-		}
-		paletteToSort = constants.FillColorPalette(paletteToSort)
-		newPalette = constants.SortColorsByDistance(paletteToSort)
-	}
+	out, newPalette = applyDitheringAndBrightness(out, newPalette, mode, cfg)
 
 	log.GetLogger().Info("Saving downgraded image into (%s)\n", filename+"_down.png")
 	if err := png.Png(filepath.Join(cfg.ScrCfg.OutputPath, filename+"_down.png"), resizeMode0(out, mode)); err != nil {
-		os.Exit(-2)
+		return err
 	}
 
 	images, err := DoTransformation(out, newPalette,
 		mode, cfg.RotateCfg.RollMode, cfg.RotateCfg.RotationMode, cfg.RotateCfg.Rotation3DMode,
-		cfg.RotateCfg.RotationRlaBit, cfg.RotateCfg.RotationSlaBit, cfg.RotateCfg.RotationRraBit, cfg.RotateCfg.RotationSraBit,
+		cfg.RotateCfg.RotationRlaBit, cfg.RotateCfg.RotationSLABit, cfg.RotateCfg.RotationRraBit, cfg.RotateCfg.RotationSraBit,
 		cfg.RotateCfg.RotationKeephighBit, cfg.RotateCfg.RotationLosthighBit,
 		cfg.RotateCfg.RotationKeeplowBit, cfg.RotateCfg.RotationLostlowBit, cfg.RotateCfg.RotationIterations,
 		cfg.RotateCfg.RollIteration, cfg.RotateCfg.Rotation3DX0, cfg.RotateCfg.Rotation3DY0, cfg.RotateCfg.Rotation3DType, cfg.ScrCfg.Process.ResizingAlgo, cfg.ScrCfg.Size)
 	if err != nil {
-		os.Exit(-2)
+		return err
 	} else {
 		for indice := 0; indice < cfg.RotateCfg.RollIteration; indice++ {
 			img := images[indice]
@@ -319,29 +298,39 @@ func ApplyImages(
 	palette color.Palette,
 	mode uint8,
 ) ([][]byte, []*image.NRGBA, color.Palette, error) {
+	n := len(in)
+	raw := make([][]byte, n)
+	images := make([]*image.NRGBA, n)
+	errs := make([]error, n)
+
+	proc.Parallel(0, n, func(yc <-chan int) {
+		for i := range yc {
+			v, r, _, _, err := ApplyOneImage(in[i], cfg, palette, mode)
+			raw[i] = v
+			images[i] = r
+			errs[i] = err
+		}
+	})
+
 	var gErr error
-	raw := make([][]byte, 0)
-	images := make([]*image.NRGBA, 0)
-	for _, img := range in {
-		v, r, _, _, err := ApplyOneImage(img, cfg, palette, mode)
+	for _, err := range errs {
 		if err != nil {
 			gErr = err
+			break
 		}
-		raw = append(raw, v)
-		images = append(images, r)
 	}
 	return raw, images, palette, gErr
 }
 
-// nolint: funlen, gocognit
+// ApplyOneImage converts one image and returns the raw bytes and downgraded image.
+// nolint: funlen, gocognit, gocyclo
 func ApplyOneImage(in image.Image,
 	cfg *config.MartineConfig,
 	palette color.Palette,
 	mode uint8,
-) ([]byte, *image.NRGBA, color.Palette, int, error) {
+) (raw []byte, img *image.NRGBA, pal color.Palette, nbColors int, err error) {
 	var newPalette color.Palette
 	var out *image.NRGBA
-	var err error
 	var ownPalette bool
 
 	if len(palette) > 0 {
@@ -370,28 +359,10 @@ func ApplyOneImage(in image.Image,
 		}
 	}
 
-	var paletteToSort color.Palette
-	switch mode {
-	case 1:
-		end := len(newPalette)
-		if len(newPalette) >= 4 {
-			end = 4
-		}
-		paletteToSort = newPalette[0:end]
-	case 2:
-		end := len(newPalette)
-		if len(newPalette) >= 2 {
-			end = 2
-		}
-		paletteToSort = newPalette[0:end]
-	default:
-		paletteToSort = newPalette
-	}
-	paletteToSort = constants.FillColorPalette(paletteToSort)
 	if !ownPalette {
-		newPalette = constants.SortColorsByDistance(paletteToSort)
+		newPalette = truncateAndSortPalette(newPalette, mode)
 	} else {
-		newPalette = paletteToSort
+		newPalette = constants.FillColorPalette(newPalette)
 	}
 	if cfg.ScrCfg.Process.ApplyDithering {
 		out, _ = DoDithering(
@@ -413,20 +384,10 @@ func ApplyOneImage(in image.Image,
 		}
 		palette = ci.ConvertPalette(palette, refPal)
 		newPalette, out = ci.DowngradingWithPalette(out, palette)
-		var paletteToSort color.Palette
-		switch mode {
-		case 1:
-			paletteToSort = newPalette[0:4]
-		case 2:
-			paletteToSort = newPalette[0:2]
-		default:
-			paletteToSort = newPalette
-		}
-		paletteToSort = constants.FillColorPalette(paletteToSort)
 		if !ownPalette {
-			newPalette = constants.SortColorsByDistance(paletteToSort)
+			newPalette = truncateAndSortPalette(newPalette, mode)
 		} else {
-			newPalette = paletteToSort
+			newPalette = constants.FillColorPalette(newPalette)
 		}
 	}
 	var data []byte
@@ -442,7 +403,7 @@ func ApplyOneImage(in image.Image,
 		if cfg.ScrCfg.Type != config.SpriteHardFormat {
 			data, _, lineSize, err = sprite.ToSprite(out, newPalette, cfg.ScrCfg.Size, mode, cfg)
 		} else {
-			data, _ = spritehard.ToSpriteHard(out, newPalette, cfg.ScrCfg.Size, mode, cfg)
+			data = spritehard.ToSpriteHard(out, newPalette, cfg.ScrCfg.Size, mode, cfg)
 			lineSize = 16
 		}
 	}
@@ -461,6 +422,27 @@ func ApplyOneImage(in image.Image,
 		}
 	}
 	return data, resizeMode0(out, mode), newPalette, lineSize, err
+}
+
+func applyDitheringAndBrightness(out *image.NRGBA, newPalette color.Palette, mode uint8, cfg *config.MartineConfig) (*image.NRGBA, color.Palette) {
+	if cfg.ScrCfg.Process.ApplyDithering {
+		out, _ = DoDithering(
+			out,
+			newPalette,
+			cfg.ScrCfg.Process.Dithering.Algo,
+			cfg.ScrCfg.Process.Dithering.Type,
+			cfg.ScrCfg.Process.Dithering.WithQuantification,
+			cfg.ScrCfg.Process.Dithering.Matrix,
+			float32(cfg.ScrCfg.Process.Dithering.Multiplier),
+			cfg.ScrCfg.IsPlus,
+			cfg.ScrCfg.Size)
+	}
+	if cfg.ScrCfg.Process.Saturation > 0 || cfg.ScrCfg.Process.Brightness > 0 {
+		palette := ci.EnhanceBrightness(newPalette, cfg.ScrCfg.Process.Brightness, cfg.ScrCfg.Process.Saturation)
+		newPalette, out = ci.DowngradingWithPalette(out, palette)
+		newPalette = truncateAndSortPalette(newPalette, mode)
+	}
+	return out, newPalette
 }
 
 func resizeMode0(in *image.NRGBA, mode uint8) *image.NRGBA {

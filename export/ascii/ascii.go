@@ -1,3 +1,4 @@
+// Package ascii provides assembly text export utilities.
 package ascii
 
 import (
@@ -17,8 +18,9 @@ import (
 // ByteToken is the token by default
 var ByteToken = "db" // "BYTE"
 
+// ASCII exports screen data as assembly text file.
 // nolint: funlen
-func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cgf *config.MartineConfig) error {
+func ASCII(filePath string, data []byte, p color.Palette, dontImportDsk bool, cgf *config.MartineConfig) error {
 	eol := "\n"
 	if runtime.GOOS == "windows" {
 		eol = "\r\n"
@@ -55,7 +57,7 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cg
 	if !dontImportDsk {
 		cgf.AddFile(osFilepath)
 	}
-	if cgf.ScrCfg.IsExport(config.JsonExport) {
+	if cgf.ScrCfg.IsExport(config.JSONExport) {
 		palette := make([]string, len(p))
 		for i := range p {
 			v, err := constants.FirmwareNumber(p[i])
@@ -72,7 +74,7 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cg
 		for i := 0; i < len(data); i++ {
 			screen[i] = fmt.Sprintf("0x%.2x", data[i])
 		}
-		j := x.NewJson(cgf.Filename(), cgf.ScrCfg.Size.Width, cgf.ScrCfg.Size.Height, screen, palette, hardwarepalette)
+		j := x.NewJSON(cgf.Filename(), cgf.ScrCfg.Size.Width, cgf.ScrCfg.Size.Height, screen, palette, hardwarepalette)
 		log.GetLogger().Info("Filepath:%s\n", filePath)
 		if cgf.TileMode {
 			cgf.Tiles.Sprites = append(cgf.Tiles.Sprites, j)
@@ -83,8 +85,9 @@ func Ascii(filePath string, data []byte, p color.Palette, dontImportDsk bool, cg
 	return nil
 }
 
-// nolint: funlen, gocognit
-func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk bool, mode uint8, cfg *config.MartineConfig) error {
+// ASCIIByColumn exports screen data as assembly text file organized by column.
+// nolint: funlen, gocognit, gocyclo
+func ASCIIByColumn(filePath string, data []byte, p color.Palette, dontImportDsk bool, mode uint8, cfg *config.MartineConfig) error {
 	eol := "\n"
 	if runtime.GOOS == "windows" {
 		eol = "\r\n"
@@ -167,7 +170,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 		cfg.AddFile(osFilepath)
 	}
 
-	if cfg.ScrCfg.IsExport(config.JsonExport) {
+	if cfg.ScrCfg.IsExport(config.JSONExport) {
 		palette := make([]string, len(p))
 		for i := 0; i < len(p); i++ {
 			v, err := constants.FirmwareNumber(p[i])
@@ -181,7 +184,7 @@ func AsciiByColumn(filePath string, data []byte, p color.Palette, dontImportDsk 
 			hardwarepalette[i] = fmt.Sprintf("0x%.2x", fcolor)
 		}
 
-		j := x.NewJson(cfg.Filename(), cfg.ScrCfg.Size.Width, cfg.ScrCfg.Size.Height, jsonData, palette, hardwarepalette)
+		j := x.NewJSON(cfg.Filename(), cfg.ScrCfg.Size.Width, cfg.ScrCfg.Size.Height, jsonData, palette, hardwarepalette)
 		log.GetLogger().Info("Filepath:%s\n", filePath)
 		if cfg.TileMode {
 			cfg.Tiles.Sprites = append(cfg.Tiles.Sprites, j)

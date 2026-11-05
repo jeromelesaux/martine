@@ -13,7 +13,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 	wgt "github.com/jeromelesaux/fyne-io/widget"
 	"github.com/jeromelesaux/martine/config"
-	"github.com/jeromelesaux/martine/log"
 
 	"github.com/jeromelesaux/martine/convert/screen"
 	"github.com/jeromelesaux/martine/convert/screen/overscan"
@@ -31,7 +30,8 @@ func (m *MartineUI) newEgxTab(di *menu.DoubleImageMenu) *container.AppTabs {
 	)
 }
 
-// nolint:funlen
+// MergeImages merges two images into an EGX screen.
+// nolint:funlen, gocyclo
 func (m *MartineUI) MergeImages(di *menu.DoubleImageMenu) {
 	if di.RightImage.Cfg.ScrCfg.Mode == di.LeftImage.Cfg.ScrCfg.Mode {
 		dialog.ShowError(fmt.Errorf("mode between the images must differ"), m.window)
@@ -189,19 +189,7 @@ func (m *MartineUI) newEgxTabItem(di *menu.DoubleImageMenu) *fyne.Container {
 					di.ResultImage.Cfg.ScrCfg.IsPlus = di.LeftImage.Cfg.ScrCfg.IsPlus
 					m.exportEgxDialog(di.ResultImage.Cfg, m.window)
 				}),
-				widget.NewButton("show cmd", func() {
-					e := widget.NewMultiLineEntry()
-					e.SetText(di.CmdLine())
-					d := dialog.NewCustom("Command line generated",
-						"Ok",
-						e,
-						m.window)
-					log.GetLogger().Info("%s\n", di.CmdLine())
-					size := m.window.Content().Size()
-					size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
-					d.Resize(size)
-					d.Show()
-				}),
+				m.newShowCmdButton(di.CmdLine),
 			),
 		),
 		container.New(

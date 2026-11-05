@@ -18,18 +18,16 @@ func Transform(in *image.NRGBA,
 	size constants.Size,
 	filepath string,
 	cfg *config.MartineConfig) error {
-	switch size {
-	case constants.Mode0:
+	mode, ok := size.Mode()
+	if !ok {
+		return errors.ErrorNotYetImplemented
+	}
+	switch mode {
+	case 0:
 		return export.ToMode0AndExport(in, p, size, filepath, cfg)
-	case constants.Mode1:
+	case 1:
 		return export.ToMode1AndExport(in, p, size, filepath, cfg)
-	case constants.Mode2:
-		return export.ToMode2AndExport(in, p, size, filepath, cfg)
-	case constants.OverscanMode0:
-		return export.ToMode0AndExport(in, p, size, filepath, cfg)
-	case constants.OverscanMode1:
-		return export.ToMode1AndExport(in, p, size, filepath, cfg)
-	case constants.OverscanMode2:
+	case 2:
 		return export.ToMode2AndExport(in, p, size, filepath, cfg)
 	default:
 		return errors.ErrorNotYetImplemented
@@ -41,19 +39,16 @@ func InternalTransform(
 	p color.Palette,
 	size constants.Size,
 	cfg *config.MartineConfig) []byte {
-
-	switch size {
-	case constants.Mode0:
+	mode, ok := size.Mode()
+	if !ok {
+		return []byte{}
+	}
+	switch mode {
+	case 0:
 		return screen.ToMode0(in, p, cfg)
-	case constants.Mode1:
+	case 1:
 		return screen.ToMode1(in, p, cfg)
-	case constants.Mode2:
-		return screen.ToMode2(in, p, cfg)
-	case constants.OverscanMode0:
-		return screen.ToMode0(in, p, cfg)
-	case constants.OverscanMode1:
-		return screen.ToMode1(in, p, cfg)
-	case constants.OverscanMode2:
+	case 2:
 		return screen.ToMode2(in, p, cfg)
 	default:
 		return []byte{}
@@ -77,8 +72,9 @@ func revertColor(rawColor uint8, index int, isPlus bool) color.Color {
 	return newColor
 }
 
-// nolint: funlen, gocognit
-func TransformRawCpcData(data, palette []int, width, height int, mode int, isPlus bool) (*image.NRGBA, error) {
+// TransformRawCpcData converts raw CPC data and palette integers into an NRGBA image.
+// nolint: funlen, gocognit, gocyclo
+func TransformRawCpcData(data, palette []int, width, height, mode int, isPlus bool) (*image.NRGBA, error) {
 	w := width
 	if mode == 0 {
 		w *= 2

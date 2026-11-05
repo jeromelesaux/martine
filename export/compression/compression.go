@@ -1,3 +1,4 @@
+// Package compression provides data compression utilities.
 package compression
 
 import (

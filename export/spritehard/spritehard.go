@@ -1,3 +1,4 @@
+// Package spritehard provides hard sprite conversion utilities.
 package spritehard
 
 import (

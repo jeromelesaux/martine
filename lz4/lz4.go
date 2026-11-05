@@ -1,3 +1,4 @@
+// Package lz4 provides LZ4 compression utilities.
 package lz4
 
 import (

@@ -1,3 +1,4 @@
+// Package palette provides palette conversion utilities.
 package palette
 
 import (
@@ -62,7 +63,7 @@ func OpenInk(filePath string) (color.Palette, *InkPalette, error) {
 		log.GetLogger().Error("Error while opening file (%s) error %v\n", filePath, err)
 		return color.Palette{}, &InkPalette{}, err
 	}
-	defer fr.Close()
+	defer func() { _ = fr.Close() }()
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
 		log.GetLogger().Error("Cannot read the Ink Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)

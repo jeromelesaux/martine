@@ -17,6 +17,7 @@ import (
 	"github.com/oliamb/cutter"
 )
 
+// TileMode extracts and exports all tiles from a tile-sheet image.
 // nolint: funlen
 func TileMode(ex *config.MartineConfig, mode uint8, iterationX, iterationY int) error {
 	fr, err := os.Open(ex.ScrCfg.InputPath)
@@ -24,7 +25,7 @@ func TileMode(ex *config.MartineConfig, mode uint8, iterationX, iterationY int) 
 		log.GetLogger().Error("Cannot open (%s),error :%v\n", ex.ScrCfg.InputPath, err)
 		return err
 	}
-	defer fr.Close()
+	defer func() { _ = fr.Close() }()
 
 	in, _, err := image.Decode(fr)
 	if err != nil {

@@ -1,3 +1,4 @@
+// Package splitraster provides split raster export utilities.
 package splitraster
 
 import (

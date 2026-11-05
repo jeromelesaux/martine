@@ -9,7 +9,7 @@ import (
 	"image/gif"
 	"os"
 	"path/filepath"
-	"sync"
+	"strings"
 	"text/template"
 
 	"github.com/jeromelesaux/martine/assembly"
@@ -33,16 +33,45 @@ var (
 	DeltaExportV2 DeltaExportFormat = 2
 )
 
+func computeDeltas(rawImages [][]byte, isSprite bool, cfg *config.MartineConfig, initialAddress uint16, mode uint8) ([]*transformation.DeltaCollection, error) {
+	lineOctetsWidth := cfg.LineWidth
+	x0, y0, err := transformation.CpcCoordinates(initialAddress, 0xC000, lineOctetsWidth)
+	if err != nil {
+		log.GetLogger().Error("error while computing cpc coordinates :%v\n", err)
+	}
+	log.GetLogger().Info("Let's go deltapacking raw images\n")
+	realSize := &constants.Size{Width: cfg.ScrCfg.Size.Width, Height: cfg.ScrCfg.Size.Height}
+	if isSprite {
+		realSize.Width = realSize.ModeWidth(mode)
+	}
+	deltaData := make([]*transformation.DeltaCollection, 0)
+	var lastImage []byte
+	for i := 0; i < len(rawImages)-1; i++ {
+		log.GetLogger().Info("Compare image [%d] with [%d] ", i, i+1)
+		d1 := rawImages[i]
+		d2 := rawImages[i+1]
+		if len(d1) != len(d2) {
+			return nil, errors.ErrorSizeDiffers
+		}
+		lastImage = d2
+		dc := transformation.Delta(d1, d2, isSprite, *realSize, mode, uint16(x0), uint16(y0), lineOctetsWidth)
+		deltaData = append(deltaData, dc)
+		log.GetLogger().Info("%d bytes differ from the both images\n", len(dc.Items))
+	}
+	log.GetLogger().Info("Compare image [%d] with [%d] ", len(rawImages)-1, 0)
+	dc := transformation.Delta(lastImage, rawImages[0], isSprite, *realSize, mode, uint16(x0), uint16(y0), lineOctetsWidth)
+	deltaData = append(deltaData, dc)
+	log.GetLogger().Info("%d bytes differ from the both images\n", len(dc.Items))
+	return deltaData, nil
+}
+
+// DeltaPackingMemory computes delta packing from a slice of images in memory.
 // nolint: funlen
 func DeltaPackingMemory(images []image.Image, cfg *config.MartineConfig, initialAddress uint16, mode uint8) ([]*transformation.DeltaCollection, [][]byte, color.Palette, error) {
-	var isSprite bool = true
+	isSprite := cfg.CustomDimension || cfg.ScrCfg.Type == config.SpriteHardFormat
 	maxImages := 22
-	var pad int = 1
-	var err error
+	pad := 1
 	var palette color.Palette
-	if !cfg.CustomDimension && cfg.ScrCfg.Type != config.SpriteHardFormat {
-		isSprite = false
-	}
 	if len(images) <= 1 {
 		return nil, nil, palette, fmt.Errorf("need more than one image to proceed")
 	}
@@ -50,156 +79,56 @@ func DeltaPackingMemory(images []image.Image, cfg *config.MartineConfig, initial
 		log.GetLogger().Error("Warning gif exceed 30 images. Will corrupt the number of images.")
 		pad = len(images) / maxImages
 	}
-	rawImages := make([][]byte, 0)
-	deltaData := make([]*transformation.DeltaCollection, 0)
-
-	var raw []byte
-
-	// now transform images as win or scr
 	log.GetLogger().Info("Let's go transform images files in win or scr\n")
-
+	var err error
 	_, _, palette, _, err = gfx.ApplyOneImage(images[0], cfg, palette, mode)
 	if err != nil {
 		return nil, nil, palette, err
 	}
+	rawImages := make([][]byte, 0)
 	for i := 0; i < len(images); i += pad {
-		in := images[i]
-		raw, _, _, _, err = gfx.ApplyOneImage(in, cfg, palette, mode)
+		raw, _, _, _, err := gfx.ApplyOneImage(images[i], cfg, palette, mode)
 		if err != nil {
 			return nil, nil, palette, err
 		}
 		rawImages = append(rawImages, raw)
 		log.GetLogger().Info("Image [%d] proceed\n", i)
 	}
-
-	lineOctetsWidth := cfg.LineWidth
-	x0, y0, err := transformation.CpcCoordinates(initialAddress, 0xC000, lineOctetsWidth)
+	deltaData, err := computeDeltas(rawImages, isSprite, cfg, initialAddress, mode)
 	if err != nil {
-		log.GetLogger().Error("error while computing cpc coordinates :%v\n", err)
+		return nil, nil, palette, err
 	}
-
-	log.GetLogger().Info("Let's go deltapacking raw images\n")
-	realSize := &constants.Size{Width: cfg.ScrCfg.Size.Width, Height: cfg.ScrCfg.Size.Height}
-	if isSprite {
-		realSize.Width = realSize.ModeWidth(mode)
-	}
-	var lastImage []byte
-	for i := 0; i < len(rawImages)-1; i++ {
-		log.GetLogger().Info("Compare image [%d] with [%d] ", i, i+1)
-		d1 := rawImages[i]
-		d2 := rawImages[i+1]
-		if len(d1) != len(d2) {
-			return nil, nil, palette, errors.ErrorSizeDiffers
-		}
-		lastImage = d2
-		dc := transformation.Delta(d1, d2, isSprite, *realSize, mode, uint16(x0), uint16(y0), lineOctetsWidth)
-		deltaData = append(deltaData, dc)
-		log.GetLogger().Info("%d bytes differ from the both images\n", len(dc.Items))
-	}
-	log.GetLogger().Info("Compare image [%d] with [%d] ", len(rawImages)-1, 0)
-	d1 := lastImage
-	d2 := rawImages[0]
-	dc := transformation.Delta(d1, d2, isSprite, *realSize, mode, uint16(x0), uint16(y0), lineOctetsWidth)
-	deltaData = append(deltaData, dc)
-	log.GetLogger().Info("%d bytes differ from the both images\n", len(dc.Items))
 	return deltaData, rawImages, palette, nil
 }
 
+// DeltaPacking computes and exports delta packing from a GIF file.
 // nolint: funlen
 func DeltaPacking(gitFilepath string, cfg *config.MartineConfig, initialAddress uint16, mode uint8, exportVersion DeltaExportFormat) error {
-	isSprite := true
-	maxImages := 22
-	if !cfg.CustomDimension && cfg.ScrCfg.Type != config.SpriteHardFormat {
-		isSprite = false
-	}
+	isSprite := cfg.CustomDimension || cfg.ScrCfg.Type == config.SpriteHardFormat
 	fr, err := os.Open(gitFilepath)
 	if err != nil {
 		return err
 	}
-	defer fr.Close()
+	defer func() { _ = fr.Close() }()
 	gifImages, err := gif.DecodeAll(fr)
 	if err != nil {
 		return err
 	}
-	images := ConvertToImage(gifImages)
-	var pad int = 1
-	if len(images) <= 1 {
-		return fmt.Errorf("need more than one image to proceed")
-	}
-	if len(images) > maxImages {
-		log.GetLogger().Error("Warning gif exceed 30 images. Will corrupt the number of images.")
-		pad = len(images) / maxImages
-	}
-	rawImages := make([][]byte, 0)
-	deltaData := make([]*transformation.DeltaCollection, 0)
-	var palette color.Palette
-	var raw []byte
-
-	// now transform images as win or scr
-	log.GetLogger().Info("Let's go transform images files in win or scr\n")
-
+	var images []image.Image
 	if cfg.FilloutGif {
-		imgs := filloutGif(gifImages)
-		_, _, palette, _, err = gfx.ApplyOneImage(imgs[0], cfg, palette, mode)
-		if err != nil {
-			return err
-		}
-		for i := 0; i < len(imgs); i += pad {
-			in := imgs[i]
-			raw, _, _, _, err = gfx.ApplyOneImage(in, cfg, palette, mode)
-			if err != nil {
-				return err
-			}
-			rawImages = append(rawImages, raw)
-			log.GetLogger().Info("Image [%d] proceed\n", i)
-		}
+		images = filloutGif(gifImages)
 	} else {
-		_, _, palette, _, err = gfx.ApplyOneImage(images[0], cfg, palette, mode)
-		if err != nil {
-			return err
-		}
-		for i := 0; i < len(images); i += pad {
-			in := images[i]
-			raw, _, _, _, err = gfx.ApplyOneImage(in, cfg, palette, mode)
-			if err != nil {
+		for i, img := range ConvertToImage(gifImages) {
+			images = append(images, img)
+			if err := png.Png(cfg.ScrCfg.OutputPath+fmt.Sprintf("/%.2d.png", i), img); err != nil {
 				return err
 			}
-			err = png.Png(cfg.ScrCfg.OutputPath+fmt.Sprintf("/%.2d.png", i), in)
-			if err != nil {
-				return err
-			}
-			rawImages = append(rawImages, raw)
-			log.GetLogger().Info("Image [%d] proceed\n", i)
 		}
 	}
-	lineOctetsWidth := cfg.LineWidth
-	x0, y0, err := transformation.CpcCoordinates(initialAddress, 0xC000, lineOctetsWidth)
+	deltaData, rawImages, palette, err := DeltaPackingMemory(images, cfg, initialAddress, mode)
 	if err != nil {
-		log.GetLogger().Error("error while computing cpc coordinates :%v\n", err)
+		return err
 	}
-
-	log.GetLogger().Info("Let's go deltapacking raw images\n")
-	realSize := &constants.Size{Width: cfg.ScrCfg.Size.Width, Height: cfg.ScrCfg.Size.Height}
-	realSize.Width = realSize.ModeWidth(mode)
-	var lastImage []byte
-	for i := 0; i < len(rawImages)-1; i++ {
-		log.GetLogger().Info("Compare image [%d] with [%d] ", i, i+1)
-		d1 := rawImages[i]
-		d2 := rawImages[i+1]
-		if len(d1) != len(d2) {
-			return errors.ErrorSizeDiffers
-		}
-		lastImage = d2
-		dc := transformation.Delta(d1, d2, isSprite, *realSize, mode, uint16(x0), uint16(y0), lineOctetsWidth)
-		deltaData = append(deltaData, dc)
-		log.GetLogger().Info("%d bytes differ from the both images\n", len(dc.Items))
-	}
-	log.GetLogger().Info("Compare image [%d] with [%d] ", len(rawImages)-1, 0)
-	d1 := lastImage
-	d2 := rawImages[0]
-	dc := transformation.Delta(d1, d2, isSprite, *realSize, mode, uint16(x0), uint16(y0), lineOctetsWidth)
-	deltaData = append(deltaData, dc)
-	log.GetLogger().Info("%d bytes differ from the both images\n", len(dc.Items))
 	filename := cfg.OsFilename(".asm")
 	_, err = ExportDeltaAnimate(rawImages[0], deltaData, palette, isSprite, cfg, initialAddress, mode, filepath.Join(cfg.ScrCfg.OutputPath, filename), exportVersion)
 	return err
@@ -241,7 +170,8 @@ func filloutGif(g *gif.GIF) []image.Image {
 	return c
 }
 
-// nolint: funlen, gocognit
+// ExportDeltaAnimate exports the full delta animation data to output files.
+// nolint: funlen, gocognit, gocyclo
 func ExportDeltaAnimate(
 	imageReference []byte,
 	delta []*transformation.DeltaCollection,
@@ -314,7 +244,7 @@ func ExportDeltaAnimate(
 	}
 	var buf bytes.Buffer
 	temp := template.Must(template.New("code").Parse(sourceCode))
-	err := temp.Execute(&buf, an)
+	err := temp.Execute(&buf, &an)
 	if err != nil {
 		return "", err
 	}
@@ -360,49 +290,29 @@ type AnimateValues struct {
 	Palette        color.Palette
 }
 
-func (a AnimateValues) DisplayCode() string {
-	var code string
-	var mu sync.Mutex
+func (a *AnimateValues) DisplayCode() string {
+	var sb strings.Builder
 	if a.Type.Compress {
 		log.GetLogger().Info("Using Zx0 cruncher")
-		d := zx0.Encode(a.Image)
-		mu.Lock()
-		code += "sprite:\n"
-		code += ascii.FormatAssemblyDatabyte(d, "\n")
-		mu.Unlock()
+		sb.WriteString("sprite:\n")
+		sb.WriteString(ascii.FormatAssemblyDatabyte(zx0.Encode(a.Image), "\n"))
 	} else {
-		code += "sprite:\n"
-		code += ascii.FormatAssemblyDatabyte(a.Image, "\n")
+		sb.WriteString("sprite:\n")
+		sb.WriteString(ascii.FormatAssemblyDatabyte(a.Image, "\n"))
 	}
 	ascii.ByteToken = "db"
-	if a.Type.Compress {
-		var wg sync.WaitGroup
-
-		for i, v := range a.Delta {
-			wg.Add(1)
-			go func(indice int, data []byte) {
-				defer wg.Done()
-				log.GetLogger().Info("Using Zx0 cruncher")
-				d := zx0.Encode(data)
-				mu.Lock()
-				code += fmt.Sprintf("delta%.2d:\n", indice) // add semaphore on code string
-				code += ascii.FormatAssemblyDatabyte(d, "\n")
-				mu.Unlock()
-			}(i, v)
-
+	for i, v := range a.Delta {
+		if a.Type.Compress {
+			log.GetLogger().Info("Using Zx0 cruncher")
+			v = zx0.Encode(v)
 		}
-		wg.Wait()
-	} else {
-		for i, v := range a.Delta {
-			code += fmt.Sprintf("delta%.2d:\n", i)
-			code += ascii.FormatAssemblyDatabyte(v, "\n")
-		}
+		fmt.Fprintf(&sb, "delta%.2d:\n", i)
+		sb.WriteString(ascii.FormatAssemblyDatabyte(v, "\n"))
 	}
-
-	return code
+	return sb.String()
 }
 
-func (a AnimateValues) TableDelta() string {
+func (a *AnimateValues) TableDelta() string {
 	var code string
 	deltaIndexes := make([]string, 0)
 	for i := range a.Delta {
@@ -413,7 +323,7 @@ func (a AnimateValues) TableDelta() string {
 	return code
 }
 
-func (a AnimateValues) DisplayPalette() string {
+func (a *AnimateValues) DisplayPalette() string {
 	var code string
 	ascii.ByteToken = "db"
 	code += "db "

@@ -1,3 +1,4 @@
+// Package directory provides directory URI persistence utilities.
 package directory
 
 import (
@@ -10,6 +11,7 @@ import (
 var savedDirectoryPath fyne.URI
 var openDirectoryPath fyne.URI
 
+// ExportDirectoryURI returns the last used export directory URI.
 // nolint: ireturn
 func ExportDirectoryURI() (fyne.ListableURI, error) {
 	if savedDirectoryPath == nil {
@@ -33,6 +35,7 @@ func SetExportDirectoryURI(path fyne.URI) {
 	}
 }
 
+// ImportDirectoryURI returns the last used import directory URI.
 // nolint: ireturn
 func ImportDirectoryURI() (fyne.ListableURI, error) {
 	if openDirectoryPath == nil {

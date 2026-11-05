@@ -1,3 +1,4 @@
+// Package m4 provides M4 card transfer utilities.
 package m4
 
 import (
@@ -12,6 +13,7 @@ import (
 
 var ErrorNoHostDefined = errors.New("no host defined")
 
+// ImportInM4 transfers output files to a CPC via the M4 card over Wi-Fi.
 // nolint:funlen, gocognit, gocyclo
 func ImportInM4(cfg *config.MartineConfig) error {
 	if cfg.M4cfg.Enabled {

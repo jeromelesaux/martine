@@ -1,3 +1,4 @@
+// Package export provides export utilities for martine output files.
 package export
 
 import (
@@ -17,6 +18,40 @@ import (
 	"github.com/jeromelesaux/martine/export/png"
 )
 
+func ExportPalette(filePath string, bw []byte, p color.Palette, screenMode uint8, dontImportDsk bool, cfg *config.MartineConfig) error {
+	if !cfg.ScrCfg.IsPlus {
+		if err := ocpartstudio.Pal(filePath, p, screenMode, dontImportDsk, cfg); err != nil {
+			log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
+			return err
+		}
+		filePath2 := cfg.OsFullPath(filePath, "_palettepal.png")
+		if err := png.PalToPng(filePath2, p); err != nil {
+			log.GetLogger().Error("Error while saving file %s error :%v", filePath2, err)
+			return err
+		}
+		if err := palette.Ink(filePath, p, screenMode, dontImportDsk, cfg); err != nil {
+			log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
+			return err
+		}
+		filePath2 = cfg.OsFullPath(filePath, "_paletteink.png")
+		if err := png.PalToPng(filePath2, p); err != nil {
+			log.GetLogger().Error("Error while saving file %s error :%v", filePath2, err)
+			return err
+		}
+	} else {
+		if err := palette.Kit(filePath, p, screenMode, dontImportDsk, cfg); err != nil {
+			log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
+			return err
+		}
+		filePath2 := cfg.OsFullPath(filePath, "_palettekit.png")
+		if err := png.PalToPng(filePath2, p); err != nil {
+			log.GetLogger().Error("Error while saving file %s error :%v", filePath2, err)
+			return err
+		}
+	}
+	return ascii.ASCII(filePath, bw, p, dontImportDsk, cfg)
+}
+
 func ToMode0AndExport(in *image.NRGBA, p color.Palette, size constants.Size, filePath string, cfg *config.MartineConfig) error {
 	bw := screen.ToMode0(in, p, cfg)
 	return Export(filePath, bw, p, 0, cfg)
@@ -32,6 +67,7 @@ func ToMode2AndExport(in *image.NRGBA, p color.Palette, size constants.Size, fil
 	return Export(filePath, bw, p, 2, cfg)
 }
 
+// Export writes the screen data and palette to the appropriate output files.
 // nolint: funlen, gocognit, gocyclo
 func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, cfg *config.MartineConfig) error {
 	switch cfg.ScrCfg.Type {
@@ -67,35 +103,5 @@ func Export(filePath string, bw []byte, p color.Palette, screenMode uint8, cfg *
 		}
 	}
 
-	if !cfg.ScrCfg.IsPlus {
-		if err := ocpartstudio.Pal(filePath, p, screenMode, false, cfg); err != nil {
-			log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-		filePath2 := cfg.OsFullPath(filePath, "_palettepal.png")
-		if err := png.PalToPng(filePath2, p); err != nil {
-			log.GetLogger().Error("Error while saving file %s error :%v", filePath2, err)
-			return err
-		}
-		if err := palette.Ink(filePath, p, screenMode, false, cfg); err != nil {
-			log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-		filePath2 = cfg.OsFullPath(filePath, "_paletteink.png")
-		if err := png.PalToPng(filePath2, p); err != nil {
-			log.GetLogger().Error("Error while saving file %s error :%v", filePath2, err)
-			return err
-		}
-	} else {
-		if err := palette.Kit(filePath, p, screenMode, false, cfg); err != nil {
-			log.GetLogger().Error("Error while saving file %s error :%v", filePath, err)
-			return err
-		}
-		filePath2 := cfg.OsFullPath(filePath, "_palettekit.png")
-		if err := png.PalToPng(filePath2, p); err != nil {
-			log.GetLogger().Error("Error while saving file %s error :%v", filePath2, err)
-			return err
-		}
-	}
-	return ascii.Ascii(filePath, bw, p, false, cfg)
+	return ExportPalette(filePath, bw, p, screenMode, false, cfg)
 }

@@ -31,6 +31,13 @@ func TestAnimate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	for _, pattern := range []string{"*.INK", "*.PAL", "*.WIN", "*.TXT"} {
+		files, _ := filepath.Glob(pattern)
+		for _, f := range files {
+			_ = os.Remove(f)
+		}
+	}
 }
 
 func TestDeltaMotif(t *testing.T) {
@@ -52,7 +59,7 @@ func TestDeltaMotif(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, v := range files {
-		os.Remove(v)
+		_ = os.Remove(v)
 	}
 }
 
@@ -61,7 +68,7 @@ func TestCompressZx0(t *testing.T) {
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	b, err := io.ReadAll(f)
 	if err != nil {
 		t.Fatalf("%v", err)
@@ -82,7 +89,7 @@ func TestMergeGifImages(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer fr.Close()
+	defer func() { _ = fr.Close() }()
 	gifs, err := gif.DecodeAll(fr)
 	if err != nil {
 		t.Fatal(err)
@@ -116,7 +123,7 @@ func savePng(filename string, img image.Image) error {
 	if err != nil {
 		return err
 	}
-	defer w.Close()
+	defer func() { _ = w.Close() }()
 	if err := png.Encode(w, img); err != nil {
 		return err
 	}

@@ -1,3 +1,4 @@
+// Package proc provides parallel processing utilities.
 package proc
 
 import (
@@ -11,24 +12,17 @@ func Parallel(start, stop int, fn func(<-chan int)) {
 		return
 	}
 
-	procs := runtime.GOMAXPROCS(0)
-	if procs > count {
-		procs = count
-	}
+	procs := min(runtime.GOMAXPROCS(0), count)
 
 	c := make(chan int, count)
-	for i := start; i < stop; i++ {
-		c <- i
+	for i := range stop {
+		c <- start + i
 	}
 	close(c)
 
 	var wg sync.WaitGroup
-	for i := 0; i < procs; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			fn(c)
-		}()
+	for range procs {
+		wg.Go(func() { fn(c) })
 	}
 	wg.Wait()
 }

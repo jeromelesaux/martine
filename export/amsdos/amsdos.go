@@ -1,3 +1,4 @@
+// Package amsdos provides AMSDOS file format utilities.
 package amsdos
 
 import (

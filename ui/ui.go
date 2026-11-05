@@ -4,18 +4,20 @@ import (
 	"os"
 
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
 	ui "github.com/jeromelesaux/martine/ui/martine-ui"
 )
 
-func main() {
+var frPatch = []byte(`{"(Select one)": "(Sélectionner)"}`)
 
-	/* main application */
+func main() {
 	scale := os.Getenv("FYNE_SCALE")
 	if scale == "" {
-		os.Setenv("FYNE_SCALE", "0.7")
+		_ = os.Setenv("FYNE_SCALE", "0.7")
 	}
 	mapp := app.NewWithID("Martine @IMPact")
+	_ = lang.AddTranslationsForLocale(frPatch, "fr")
 	// nolint: staticcheck
 	mapp.Settings().SetTheme(theme.DarkTheme())
 	martineUI := ui.NewMartineUI()

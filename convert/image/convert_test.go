@@ -17,6 +17,6 @@ func TestMask(t *testing.T) {
 	if r > 128 {
 		r ^= 128
 	}
-	fmt.Fprintf(os.Stdout, "%b - %b = %b\n", r, 128, r^128)
-	fmt.Fprintf(os.Stdout, "r:%b,%d\n", r2, r2)
+	_, _ = fmt.Fprintf(os.Stdout, "%b - %b = %b\n", r, 128, r^128)
+	_, _ = fmt.Fprintf(os.Stdout, "r:%b,%d\n", r2, r2)
 }

@@ -1,3 +1,4 @@
+// Package ocpartstudio provides OCP Art Studio file format utilities.
 package ocpartstudio
 
 import (
@@ -1385,6 +1386,7 @@ func Loader(filePath string, p color.Palette, mode uint8, cfg *config.MartineCon
 	return BasicLoader(filePath, p, cfg)
 }
 
+// BasicLoaderCPCPlus generates a BASIC loader for CPC Plus screens.
 // nolint: funlen
 func BasicLoaderCPCPlus(filePath string, p color.Palette, mode uint8, cfg *config.MartineConfig) error {
 	// export de la palette assemblée
@@ -1475,7 +1477,7 @@ func BasicLoader(filePath string, p color.Palette, cfg *config.MartineConfig) er
 
 	}
 
-	var loader []byte = basicLoaderBasic
+	loader := basicLoaderBasic
 	copy(loader[startPaletteValues:], out[0:])
 	basicFile := cfg.AmsdosFullPath(filePath, "")
 	filename := filepath.Base(basicFile)
@@ -1500,6 +1502,7 @@ func BasicLoader(filePath string, p color.Palette, cfg *config.MartineConfig) er
 	return nil
 }
 
+// FlashLoader generates a BASIC loader for flash screen animations.
 // nolint: funlen
 func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, m1, m2 uint8, cfg *config.MartineConfig) error {
 	// modification du binaire flash
@@ -1525,27 +1528,12 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 		index--
 	}
 
-	var flashLoader []byte = flashBinaryLoader
+	flashLoader := flashBinaryLoader
 	copy(flashLoader[flashBinaryPalette1Offset:], pal1)
 	copy(flashLoader[flashBinaryPalette2Offset:], pal2)
 
-	switch m1 {
-	case 0:
-		flashLoader[flashMode1Offset] = 0x8c
-	case 1:
-		flashLoader[flashMode1Offset] = 0x8d
-	case 2:
-		flashLoader[flashMode1Offset] = 0x8e
-	}
-
-	switch m2 {
-	case 0:
-		flashLoader[flashMode2Offset] = 0x8c
-	case 1:
-		flashLoader[flashMode2Offset] = 0x8d
-	case 2:
-		flashLoader[flashMode2Offset] = 0x8e
-	}
+	flashLoader[flashMode1Offset] = egxModeValue(m1)
+	flashLoader[flashMode2Offset] = egxModeValue(m2)
 
 	flashBinPath := filepath.Join(cfg.ScrCfg.OutputPath, "FLASH.BIN")
 
@@ -1562,7 +1550,7 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 	cfg.AddFile(flashBinPath)
 
 	// modification du flash loader en basic
-	var basicLoader []byte = flashBasicLoader
+	basicLoader := flashBasicLoader
 	copy(basicLoader[flashScreen1Offset:], cfg.GetAmsdosFilename(screenFilename2, ""))
 	copy(basicLoader[flashScreen2Offset:], cfg.GetAmsdosFilename(screenFilename1, ""))
 
@@ -1581,7 +1569,12 @@ func FlashLoader(screenFilename1, screenFilename2 string, p1, p2 color.Palette, 
 	return nil
 }
 
-// nolint: funlen, gocognit
+func egxModeValue(mode uint8) byte {
+	return [3]byte{0x8c, 0x8d, 0x8e}[mode]
+}
+
+// EgxLoader generates a BASIC loader for EGX screens.
+// nolint: funlen, gocognit, gocyclo
 func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cfg *config.MartineConfig) error {
 	var out string
 	for i := 0; i < len(p); i++ {
@@ -1644,23 +1637,8 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cfg *config
 			index--
 		}
 		copy(egxLoader[egxBinaryPaletteOffset:], pal)
-		switch mode2 {
-		case 0:
-			egxLoader[egxMode1Offset] = 0x8c
-		case 1:
-			egxLoader[egxMode1Offset] = 0x8d
-		case 2:
-			egxLoader[egxMode1Offset] = 0x8e
-		}
-
-		switch mode1 {
-		case 0:
-			egxLoader[egxMode2Offset] = 0x8c
-		case 1:
-			egxLoader[egxMode2Offset] = 0x8d
-		case 2:
-			egxLoader[egxMode2Offset] = 0x8e
-		}
+		egxLoader[egxMode1Offset] = egxModeValue(mode2)
+		egxLoader[egxMode2Offset] = egxModeValue(mode1)
 		egxHeaderStartAddress = 0x3000
 	} else {
 		egxLoader = egxPlusBinary
@@ -1676,23 +1654,8 @@ func EgxLoader(filePath string, p color.Palette, mode1, mode2 uint8, cfg *config
 		}
 		copy(egxLoader[egxPlusBinaryPaletteOffset:], kit)
 		log.GetLogger().Infoln(kit)
-		switch mode2 {
-		case 0:
-			egxLoader[egxPlusMode1Offset] = 0x8c
-		case 1:
-			egxLoader[egxPlusMode1Offset] = 0x8d
-		case 2:
-			egxLoader[egxPlusMode1Offset] = 0x8e
-		}
-
-		switch mode1 {
-		case 0:
-			egxLoader[egxPlusMode2Offset] = 0x8c
-		case 1:
-			egxLoader[egxPlusMode2Offset] = 0x8d
-		case 2:
-			egxLoader[egxPlusMode2Offset] = 0x8e
-		}
+		egxLoader[egxPlusMode1Offset] = egxModeValue(mode2)
+		egxLoader[egxPlusMode2Offset] = egxModeValue(mode1)
 		egxHeaderStartAddress = 0x8000
 	}
 

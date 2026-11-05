@@ -14,7 +14,7 @@ func TestBoardSprite(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Cannot open file error %v\n", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	im, err := png.Decode(f)
 	if err != nil {
 		t.Fatalf("Cannot decode png file error :%v\n", err)

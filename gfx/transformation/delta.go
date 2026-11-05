@@ -1,3 +1,4 @@
+// Package transformation provides image transformation utilities.
 package transformation
 
 import (
@@ -6,7 +7,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -36,12 +36,12 @@ type DeltaCollection struct {
 	Items             []DeltaItem
 }
 
-func (d *DeltaCollection) ItemsSortByByte() []DeltaItem {
+func (dc *DeltaCollection) ItemsSortByByte() []DeltaItem {
 	var items []DeltaItem
-	items = append(items, d.Items...)
+	items = append(items, dc.Items...)
 
-	for i := 0; i < len(d.Items)-1; i++ {
-		for j := 0; j < len(d.Items)-1-i; j++ {
+	for i := 0; i < len(dc.Items)-1; i++ {
+		for j := 0; j < len(dc.Items)-1-i; j++ {
 			if items[j].Byte > items[j+1].Byte {
 				items[j], items[j+1] = items[j+1], items[j]
 			}
@@ -63,8 +63,8 @@ func (d *DeltaCollection) ItemsSortByByte() []DeltaItem {
 	occ
 */
 
-func (d *DeltaCollection) Occurrences() int {
-	occurrence := len(d.Items)
+func (dc *DeltaCollection) Occurrences() int {
+	occurrence := len(dc.Items)
 	return occurrence
 }
 
@@ -109,15 +109,15 @@ func (dc *DeltaCollection) ToString() string {
 	return out
 }
 
-func (dc *DeltaCollection) Add(b byte, address uint16) {
+func (dc *DeltaCollection) Add(b byte, addr uint16) {
 	for i := 0; i < len(dc.Items); i++ {
 		if dc.Items[i].Byte == b {
-			dc.Items[i].Offsets = append(dc.Items[i].Offsets, address)
+			dc.Items[i].Offsets = append(dc.Items[i].Offsets, addr)
 			return
 		}
 	}
 	item := NewDeltaItem()
-	item.Offsets = append(item.Offsets, address)
+	item.Offsets = append(item.Offsets, addr)
 	item.Byte = b
 	dc.Items = append(dc.Items, item)
 }
@@ -137,24 +137,12 @@ func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.
 			i++
 			c3 := current.At(i, j)
 			c4 := next.At(i, j)
-			p1, err := palette.PalettePosition(c1, currentPalette)
-			if err != nil {
-				p1 = 0
-			}
-			p3, err := palette.PalettePosition(c3, currentPalette)
-			if err != nil {
-				p3 = 0
-			}
+			p1 := palette.PalettePositionOrDefault(c1, currentPalette)
+			p3 := palette.PalettePositionOrDefault(c3, currentPalette)
 			pixel1 := pixel.PixelMode0(p1, p3)
 
-			p2, err := palette.PalettePosition(c2, nextPalette)
-			if err != nil {
-				p2 = 0
-			}
-			p4, err := palette.PalettePosition(c4, nextPalette)
-			if err != nil {
-				p4 = 0
-			}
+			p2 := palette.PalettePositionOrDefault(c2, nextPalette)
+			p4 := palette.PalettePositionOrDefault(c4, nextPalette)
 			pixel2 := pixel.PixelMode0(p2, p4)
 			if pixel1 != pixel2 {
 				addr := address.CpcScreenAddress(0xc000, i, j, 0, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
@@ -165,6 +153,7 @@ func DeltaMode0(current *image.NRGBA, currentPalette color.Palette, next *image.
 	return data, nil
 }
 
+// DeltaMode1 computes the delta collection between two mode 1 images.
 // nolint: funlen, gocognit
 func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, cfg *config.MartineConfig) (*DeltaCollection, error) {
 	data := NewDeltaCollection()
@@ -187,40 +176,16 @@ func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.
 			i++
 			c7 := current.At(i, j)
 			c8 := next.At(i, j)
-			p1, err := palette.PalettePosition(c1, currentPalette)
-			if err != nil {
-				p1 = 0
-			}
-			p3, err := palette.PalettePosition(c3, currentPalette)
-			if err != nil {
-				p3 = 0
-			}
-			p5, err := palette.PalettePosition(c5, currentPalette)
-			if err != nil {
-				p5 = 0
-			}
-			p7, err := palette.PalettePosition(c7, currentPalette)
-			if err != nil {
-				p7 = 0
-			}
+			p1 := palette.PalettePositionOrDefault(c1, currentPalette)
+			p3 := palette.PalettePositionOrDefault(c3, currentPalette)
+			p5 := palette.PalettePositionOrDefault(c5, currentPalette)
+			p7 := palette.PalettePositionOrDefault(c7, currentPalette)
 			pixel1 := pixel.PixelMode1(p1, p3, p5, p7)
 
-			p2, err := palette.PalettePosition(c2, nextPalette)
-			if err != nil {
-				p2 = 0
-			}
-			p4, err := palette.PalettePosition(c4, nextPalette)
-			if err != nil {
-				p4 = 0
-			}
-			p6, err := palette.PalettePosition(c6, nextPalette)
-			if err != nil {
-				p6 = 0
-			}
-			p8, err := palette.PalettePosition(c8, nextPalette)
-			if err != nil {
-				p8 = 0
-			}
+			p2 := palette.PalettePositionOrDefault(c2, nextPalette)
+			p4 := palette.PalettePositionOrDefault(c4, nextPalette)
+			p6 := palette.PalettePositionOrDefault(c6, nextPalette)
+			p8 := palette.PalettePositionOrDefault(c8, nextPalette)
 			pixel2 := pixel.PixelMode1(p2, p4, p6, p8)
 			if pixel1 != pixel2 {
 				addr := address.CpcScreenAddress(0xc000, i, j, 1, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
@@ -231,6 +196,7 @@ func DeltaMode1(current *image.NRGBA, currentPalette color.Palette, next *image.
 	return data, nil
 }
 
+// DeltaMode2 computes the delta collection between two mode 2 images.
 // nolint:funlen, gocognit
 func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.NRGBA, nextPalette color.Palette, cfg *config.MartineConfig) (*DeltaCollection, error) {
 	data := NewDeltaCollection()
@@ -265,72 +231,24 @@ func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.
 			i++
 			c15 := current.At(i, j)
 			c16 := next.At(i, j)
-			p1, err := palette.PalettePosition(c1, currentPalette)
-			if err != nil {
-				p1 = 0
-			}
-			p3, err := palette.PalettePosition(c3, currentPalette)
-			if err != nil {
-				p3 = 0
-			}
-			p5, err := palette.PalettePosition(c5, currentPalette)
-			if err != nil {
-				p5 = 0
-			}
-			p7, err := palette.PalettePosition(c7, currentPalette)
-			if err != nil {
-				p7 = 0
-			}
-			p9, err := palette.PalettePosition(c9, currentPalette)
-			if err != nil {
-				p9 = 0
-			}
-			p11, err := palette.PalettePosition(c11, currentPalette)
-			if err != nil {
-				p11 = 0
-			}
-			p13, err := palette.PalettePosition(c13, currentPalette)
-			if err != nil {
-				p13 = 0
-			}
-			p15, err := palette.PalettePosition(c15, currentPalette)
-			if err != nil {
-				p15 = 0
-			}
+			p1 := palette.PalettePositionOrDefault(c1, currentPalette)
+			p3 := palette.PalettePositionOrDefault(c3, currentPalette)
+			p5 := palette.PalettePositionOrDefault(c5, currentPalette)
+			p7 := palette.PalettePositionOrDefault(c7, currentPalette)
+			p9 := palette.PalettePositionOrDefault(c9, currentPalette)
+			p11 := palette.PalettePositionOrDefault(c11, currentPalette)
+			p13 := palette.PalettePositionOrDefault(c13, currentPalette)
+			p15 := palette.PalettePositionOrDefault(c15, currentPalette)
 			pixel1 := pixel.PixelMode2(p1, p3, p5, p7, p9, p11, p13, p15)
 
-			p2, err := palette.PalettePosition(c2, nextPalette)
-			if err != nil {
-				p2 = 0
-			}
-			p4, err := palette.PalettePosition(c4, nextPalette)
-			if err != nil {
-				p4 = 0
-			}
-			p6, err := palette.PalettePosition(c6, nextPalette)
-			if err != nil {
-				p6 = 0
-			}
-			p8, err := palette.PalettePosition(c8, nextPalette)
-			if err != nil {
-				p8 = 0
-			}
-			p10, err := palette.PalettePosition(c10, nextPalette)
-			if err != nil {
-				p10 = 0
-			}
-			p12, err := palette.PalettePosition(c12, nextPalette)
-			if err != nil {
-				p12 = 0
-			}
-			p14, err := palette.PalettePosition(c14, nextPalette)
-			if err != nil {
-				p14 = 0
-			}
-			p16, err := palette.PalettePosition(c16, nextPalette)
-			if err != nil {
-				p16 = 0
-			}
+			p2 := palette.PalettePositionOrDefault(c2, nextPalette)
+			p4 := palette.PalettePositionOrDefault(c4, nextPalette)
+			p6 := palette.PalettePositionOrDefault(c6, nextPalette)
+			p8 := palette.PalettePositionOrDefault(c8, nextPalette)
+			p10 := palette.PalettePositionOrDefault(c10, nextPalette)
+			p12 := palette.PalettePositionOrDefault(c12, nextPalette)
+			p14 := palette.PalettePositionOrDefault(c14, nextPalette)
+			p16 := palette.PalettePositionOrDefault(c16, nextPalette)
 			pixel2 := pixel.PixelMode2(p2, p4, p6, p8, p10, p12, p14, p16)
 			if pixel1 != pixel2 {
 				addr := address.CpcScreenAddress(0xc000, i, j, 2, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
@@ -341,7 +259,7 @@ func DeltaMode2(current *image.NRGBA, currentPalette color.Palette, next *image.
 	return data, nil
 }
 
-// format byte value, number of occurrence, offsets values.
+// Marshall serializes the delta collection as bytes (byte value, number of occurrences, offsets).
 func (dc *DeltaCollection) Marshall() ([]byte, error) {
 	var b bytes.Buffer
 
@@ -403,12 +321,12 @@ func Y(offset uint16, lineOctetWidth int) uint16 {
 	return uint16(line)
 }
 
-func CpcCoordinates(address, startingAddress uint16, lineOctetWidth int) (xVal, yVal int, err error) {
+func CpcCoordinates(addr, startingAddress uint16, lineOctetWidth int) (xVal, yVal int, err error) {
 	for y := 0; y < constants.Mode0.Height; y++ {
 		for x := 0; x < constants.Mode0.Width; x++ {
 			v := uint16(DeltaAddress(x, y, lineOctetWidth))
 			v += startingAddress
-			if v == address {
+			if v == addr {
 				xVal = x
 				yVal = y
 				return
@@ -451,21 +369,47 @@ func ExportDelta(filename string, dc *DeltaCollection, mode uint8, cfg *config.M
 
 	var emptyPalette []color.Color
 	outFilepath := filepath.Join(cfg.ScrCfg.OutputPath, filename+".txt")
-	if err = ascii.Ascii(outFilepath, data, emptyPalette, false, cfg); err != nil {
+	if err = ascii.ASCII(outFilepath, data, emptyPalette, false, cfg); err != nil {
 		log.GetLogger().Error("Error while exporting data as ascii mode file (%s) error :%v\n", outFilepath, err)
 		return err
 	}
 	outFilepath = filepath.Join(cfg.ScrCfg.OutputPath, filename+"c.txt")
-	if err = ascii.AsciiByColumn(outFilepath, data, emptyPalette, false, mode, cfg); err != nil {
+	if err = ascii.ASCIIByColumn(outFilepath, data, emptyPalette, false, mode, cfg); err != nil {
 		log.GetLogger().Error("Error while exporting data as ascii by column mode file (%s) error :%v\n", outFilepath, err)
 		return err
 	}
 	return nil
 }
 
+func loadRawFile(path string, size *constants.Size, isSprite *bool) ([]byte, error) {
+	switch strings.ToUpper(filepath.Ext(path)) {
+	case constants.WindowExtension:
+		d, err := window.RawWin(path)
+		if err != nil {
+			return nil, err
+		}
+		footer, err := window.OpenWin(path)
+		if err != nil {
+			return nil, err
+		}
+		size.Width = int(footer.Width)
+		size.Height = int(footer.Height)
+		*isSprite = true
+		return d, nil
+	case constants.ScrExtension:
+		_, err := ocpartstudio.RawScr(path)
+		if err != nil {
+			log.GetLogger().Error("File (%s) is not a simple screen.\n", path)
+		}
+		return overscan.RawOverscan(path)
+	default:
+		return nil, errors.ErrorCanNotProceed
+	}
+}
+
+// ProceedDelta computes and exports delta packing for a list of screen files.
 // nolint:funlen, gocognit, gocyclo
 func ProceedDelta(filespath []string, initialAddress uint16, cfg *config.MartineConfig, mode uint8) error {
-
 	if len(filespath) == 1 {
 		var err error
 		filespath, err = cm.WilcardedFiles(filespath)
@@ -476,7 +420,6 @@ func ProceedDelta(filespath []string, initialAddress uint16, cfg *config.Martine
 			return errors.ErrorCanNotProceed
 		}
 	}
-	var d1, d2 []byte
 	var err error
 	var isSprite = false
 	var size constants.Size
@@ -488,58 +431,14 @@ func ProceedDelta(filespath []string, initialAddress uint16, cfg *config.Martine
 	log.GetLogger().Info("%v\n", filespath)
 	log.GetLogger().Info("Cpc coordinates X:%d,Y:%d [#%.4x]\n", x0, y0, initialAddress)
 	for i := 0; i < len(filespath)-1; i++ {
-		switch strings.ToUpper(filepath.Ext(filespath[i])) {
-		case constants.WindowExtension:
-			d1, err = window.RawWin(filespath[i])
-			if err != nil {
-				return err
-			}
-			isSprite = true
-			footer, err := window.OpenWin(filespath[i])
-			if err != nil {
-				return err
-			}
-			size.Width = int(footer.Width)
-			size.Height = int(footer.Height)
-		case constants.ScrExtension:
-			_, err = ocpartstudio.RawScr(filespath[i])
-			if err != nil {
-				log.GetLogger().Error("File (%s) is not a simple screen.\n", filespath[i])
-			}
-			d1, err = overscan.RawOverscan(filespath[i])
-			if err != nil {
-				return err
-			}
-		default:
-			return errors.ErrorCanNotProceed
+		d1, err := loadRawFile(filespath[i], &size, &isSprite)
+		if err != nil {
+			return err
 		}
-
-		switch strings.ToUpper(filepath.Ext(filespath[i+1])) {
-		case constants.WindowExtension:
-			d2, err = window.RawWin(filespath[i+1])
-			if err != nil {
-				return err
-			}
-			isSprite = true
-			footer, err := window.OpenWin(filespath[i+1])
-			if err != nil {
-				return err
-			}
-			size.Width = int(footer.Width)
-			size.Height = int(footer.Height)
-		case constants.ScrExtension:
-			_, err = ocpartstudio.RawScr(filespath[i+1])
-			if err != nil {
-				log.GetLogger().Error("File (%s) is not a simple screen.\n", filespath[i+1])
-			}
-			d2, err = overscan.RawOverscan(filespath[i+1])
-			if err != nil {
-				return err
-			}
-		default:
-			return errors.ErrorCanNotProceed
+		d2, err := loadRawFile(filespath[i+1], &size, &isSprite)
+		if err != nil {
+			return err
 		}
-
 		if len(d1) != len(d2) {
 			return errors.ErrorSizeDiffers
 		}
@@ -556,66 +455,14 @@ func ProceedDelta(filespath []string, initialAddress uint16, cfg *config.Martine
 		}
 	}
 
-	switch strings.ToUpper(filepath.Ext(filespath[len(filespath)-1])) {
-	case constants.WindowExtension:
-		d1, err = window.RawWin(filespath[len(filespath)-1])
-		if err != nil {
-			return err
-		}
-		footer, err := window.OpenWin(filespath[len(filespath)-1])
-		if err != nil {
-			return err
-		}
-		size.Width = int(footer.Width)
-		size.Height = int(footer.Height)
-	case constants.ScrExtension:
-		_, err = ocpartstudio.RawScr(filespath[len(filespath)-1])
-		if err != nil {
-			log.GetLogger().Error("File (%s) is not a simple screen.\n", filespath[len(filespath)-1])
-		}
-		d1, err = overscan.RawOverscan(filespath[len(filespath)-1])
-		if err != nil {
-			return err
-		}
-	default:
-		return errors.ErrorCanNotProceed
-	}
-
-	switch strings.ToUpper(filepath.Ext(filespath[0])) {
-	case constants.WindowExtension:
-		d2, err = window.RawWin(filespath[0])
-		if err != nil {
-			return err
-		}
-		footer, err := window.OpenWin(filespath[0])
-		if err != nil {
-			return err
-		}
-		size.Width = int(footer.Width)
-		size.Height = int(footer.Height)
-	case constants.ScrExtension:
-		_, err = ocpartstudio.RawScr(filespath[0])
-		if err != nil {
-			log.GetLogger().Error("File (%s) is not a simple screen.\n", filespath[0])
-		}
-		d2, err = overscan.RawOverscan(filespath[0])
-		if err != nil {
-			return err
-		}
-	default:
-		return errors.ErrorCanNotProceed
-	}
-
-	f1, err := os.Open(filespath[len(filespath)-1])
+	d1, err := loadRawFile(filespath[len(filespath)-1], &size, &isSprite)
 	if err != nil {
 		return err
 	}
-	defer f1.Close()
-	f2, err := os.Open(filespath[0])
+	d2, err := loadRawFile(filespath[0], &size, &isSprite)
 	if err != nil {
 		return err
 	}
-	defer f2.Close()
 	dc := Delta(d1, d2, isSprite, size, mode, uint16(x0), uint16(y0), lineOctetsWidth)
 	log.GetLogger().Info("files (%s) (%s)", filespath[len(filespath)-1], filespath[0])
 	log.GetLogger().Info("%d bytes differ from the both images\n", len(dc.Items))
@@ -629,6 +476,5 @@ func ProceedDelta(filespath []string, initialAddress uint16, cfg *config.Martine
 	}
 	log.GetLogger().Info("files order : %v\n", filespath)
 	log.GetLogger().Info("Starting address to display delta : #%.4X\n", initialAddress)
-
 	return nil
 }

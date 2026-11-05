@@ -35,12 +35,12 @@ func main() {
 		log.GetLogger().Error("Error while opening file (%s) error %v\n", *sprite, err)
 		os.Exit(-1)
 	}
-	s := &export.Json{}
+	s := &export.JSON{}
 	if err := json.NewDecoder(f).Decode(s); err != nil {
 		log.GetLogger().Error("Cannot decode json file (%s) error :%v\n", *sprite, err)
 		os.Exit(-1)
 	}
-	f.Close()
+	_ = f.Close()
 	out := "sprite\n"
 	for i := 0; i < len(s.Screen); i += 8 {
 		out += fmt.Sprintf("%s ", ascii.ByteToken)
@@ -59,12 +59,12 @@ func main() {
 			log.GetLogger().Error("Error while opening file (%s) error %v\n", v, err)
 			os.Exit(-1)
 		}
-		d := &export.Json{}
+		d := &export.JSON{}
 		if err := json.NewDecoder(f).Decode(d); err != nil {
 			log.GetLogger().Error("Cannot decode json file (%s) error :%v\n", v, err)
 			os.Exit(-1)
 		}
-		f.Close()
+		_ = f.Close()
 		if len(d.Screen) != 1 {
 			out += fmt.Sprintf("delta%.2d\n", index)
 			for i := 0; i < len(d.Screen); i += 8 {
@@ -85,7 +85,7 @@ func main() {
 			log.GetLogger().Error("Error while writing file (%s) error %v\n", *outfile, err)
 			os.Exit(-1)
 		}
-		f.Close()
+		_ = f.Close()
 	} else {
 		log.GetLogger().Infoln(out)
 	}

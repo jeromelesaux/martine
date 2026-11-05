@@ -1,3 +1,4 @@
+// Package window provides OCP window file format utilities.
 package window
 
 import (

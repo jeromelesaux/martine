@@ -1,3 +1,4 @@
+// Package png provides PNG image export utilities.
 package png
 
 import (
@@ -18,11 +19,13 @@ func PngImage(filePath string, in image.Image) error {
 	}
 
 	if err := png.Encode(fwd, in); err != nil {
-		fwd.Close()
+		_ = fwd.Close()
 		log.GetLogger().Error("Cannot create new image (%s) as png error %v\n", filePath, err)
 		return err
 	}
-	fwd.Close()
+	if err := fwd.Close(); err != nil {
+		return err
+	}
 	log.GetLogger().Info("Create output file (%s)\n", filePath)
 	return nil
 }
@@ -35,11 +38,13 @@ func Png(filePath string, im *image.NRGBA) error {
 	}
 
 	if err := png.Encode(fwd, im); err != nil {
-		fwd.Close()
+		_ = fwd.Close()
 		log.GetLogger().Error("Cannot create new image (%s) as png error %v\n", filePath, err)
 		return err
 	}
-	fwd.Close()
+	if err := fwd.Close(); err != nil {
+		return err
+	}
 	log.GetLogger().Info("Create output file (%s)\n", filePath)
 	return nil
 }

@@ -1,3 +1,4 @@
+// Package config provides configuration types and utilities for martine.
 package config
 
 import (
@@ -23,8 +24,8 @@ type ContainerConfig struct {
 	Path string
 }
 
-func (c *ContainerConfig) Reset() {
-	c.Type = c.Type[:0]
+func (cc *ContainerConfig) Reset() {
+	cc.Type = cc.Type[:0]
 }
 
 func (cc *ContainerConfig) AddExport(c ContainerFormat) {
@@ -136,7 +137,7 @@ var (
 	SpriteCompiledExport   ScreenExport = "sprite_compiled"
 	GoImpdrawExport        ScreenExport = "go_impdraw" // deux fichiers .go1 et .go2
 	AssemblyExport         ScreenExport = "asm"        // texte assembleur
-	JsonExport             ScreenExport = "json"       // json
+	JSONExport             ScreenExport = "json"       // json
 	ImpdrawTileExport      ScreenExport = "tile"
 	OcpWindowExport        ScreenExport = "window"
 	SpriteImpCatcherExport ScreenExport = "impcatcher"
@@ -178,7 +179,7 @@ type RotateConfig struct {
 	RotationRraBit      int
 	RotationRlaBit      int
 	RotationSraBit      int
-	RotationSlaBit      int
+	RotationSLABit      int
 	RotationLosthighBit int
 	RotationLostlowBit  int
 	RotationKeephighBit int

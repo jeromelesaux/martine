@@ -1,3 +1,4 @@
+// Package overscan provides overscan screen conversion utilities.
 package overscan
 
 import (
@@ -90,7 +91,7 @@ func setImageMode2(out *image.NRGBA, p color.Palette, d []byte, width, height in
 	return out
 }
 
-// overscanRawToImg will convert fullscreen amstrad screen slice of bytes in image.NRGBA
+// OverscanRawToImg converts a fullscreen amstrad screen slice of bytes into image.NRGBA.
 // using the  screen mode  and the palette as arguments
 func OverscanRawToImg(d []byte, mode uint8, p color.Palette) (*image.NRGBA, error) {
 	m := constants.NewSizeMode(mode, true)
@@ -110,7 +111,7 @@ func OverscanRawToImg(d []byte, mode uint8, p color.Palette) (*image.NRGBA, erro
 	return out, nil
 }
 
-// overscanToImg will convert fullscreen amstrad screen filepath 'srcPath' in image.NRGBA
+// OverscanToImg converts a fullscreen amstrad screen filepath into image.NRGBA.
 // using the  screen mode  and the palette as arguments
 func OverscanToImg(scrPath string, mode uint8, p color.Palette) (*image.NRGBA, error) {
 	m := constants.NewSizeMode(mode, true)
@@ -134,7 +135,7 @@ func OverscanToImg(scrPath string, mode uint8, p color.Palette) (*image.NRGBA, e
 	return out, nil
 }
 
-// overscanToPng will convert fullscreen amstrad screen filepath in png file 'output'
+// OverscanToPng converts a fullscreen amstrad screen filepath into a png file.
 // using the  screen mode  and the palette as arguments
 func OverscanToPng(scrPath, output string, mode uint8, p color.Palette) error {
 	out, err := OverscanToImg(scrPath, mode, p)

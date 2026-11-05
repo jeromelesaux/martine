@@ -10,8 +10,8 @@ import (
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	ci "github.com/jeromelesaux/martine/convert/image"
-
 	"github.com/jeromelesaux/martine/gfx/errors"
+	"github.com/jeromelesaux/martine/proc"
 )
 
 func Rotate3d(in *image.NRGBA,
@@ -24,22 +24,27 @@ func Rotate3d(in *image.NRGBA,
 	rotation3DY0 int,
 	rotation3DType config.Rotation3d,
 ) ([]*image.NRGBA, error) {
-	images := make([]*image.NRGBA, 0)
 	if rollIteration == -1 {
-		return images, errors.ErrorMissingNumberOfImageToGenerate
+		return nil, errors.ErrorMissingNumberOfImageToGenerate
 	}
 
-	var indice int
-	angle := 360. / float64(rollIteration)
-	for i := 0.; i < 360.; i += angle {
-		background := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: size.Width, Y: size.Height}})
-		draw.Draw(background, background.Bounds(), &image.Uniform{p[0]}, image.Point{0, 0}, draw.Src)
-		rin := rotateImage(in, background, i, rotation3DX0, rotation3DY0, rotation3DType)
-		_, rin = ci.DowngradingWithPalette(rin, p)
-		images = append(images, rin)
-		indice++
+	n := rollIteration
+	angle := 360. / float64(n)
+	angles := make([]float64, n)
+	for i := range angles {
+		angles[i] = float64(i) * angle
 	}
 
+	images := make([]*image.NRGBA, n)
+	proc.Parallel(0, n, func(yc <-chan int) {
+		for i := range yc {
+			background := image.NewNRGBA(image.Rectangle{image.Point{X: 0, Y: 0}, image.Point{X: size.Width, Y: size.Height}})
+			draw.Draw(background, background.Bounds(), &image.Uniform{p[0]}, image.Point{0, 0}, draw.Src)
+			rin := rotateImage(in, background, angles[i], rotation3DX0, rotation3DY0, rotation3DType)
+			_, rin = ci.DowngradingWithPalette(rin, p)
+			images[i] = rin
+		}
+	})
 	return images, nil
 }
 
@@ -60,30 +65,33 @@ func rotateImage(in, out *image.NRGBA,
 	} else {
 		yc = out.Bounds().Max.Y / 2
 	}
-	for x := 0; x < in.Bounds().Max.X; x++ {
-		for y := 0; y < in.Bounds().Max.Y; y++ {
-			c := in.At(x, y)
-			var x3d, y3d int
-			switch rotation3DType {
-			case config.RotateXAxis:
-				x3d, y3d = rotateXAxisCoordinates(x, y, yc, angle)
-			case config.RotateYAxis:
-				x3d, y3d = rotateYAxisCoordinates(x, y, xc, angle)
-			case config.ReverseRotateXAxis:
-				x3d, y3d = rotateToReverseXAxisCoordinates(x, y, yc, angle)
-			case config.RotateLeftToRightYAxis:
-				x3d, y3d = rotateLeftToRightYAxisCoordinates(x, y, xc, angle)
-			case config.RotateDiagonalXAxis:
-				x3d, y3d = rotateDiagonalXAxisCoordinates(x, y, xc, yc, angle)
-			case config.RotateDiagonalYAxis:
-				x3d, y3d = rotateDiagonalYAxisCoordinates(x, y, xc, yc, angle)
-			default:
-				x3d, y3d = rotateXAxisCoordinates(x, y, yc, angle)
+	width := in.Bounds().Max.X
+	height := in.Bounds().Max.Y
+	proc.Parallel(0, width, func(xc2 <-chan int) {
+		for x := range xc2 {
+			for y := 0; y < height; y++ {
+				c := in.At(x, y)
+				var x3d, y3d int
+				switch rotation3DType {
+				case config.RotateXAxis:
+					x3d, y3d = rotateXAxisCoordinates(x, y, yc, angle)
+				case config.RotateYAxis:
+					x3d, y3d = rotateYAxisCoordinates(x, y, xc, angle)
+				case config.ReverseRotateXAxis:
+					x3d, y3d = rotateToReverseXAxisCoordinates(x, y, yc, angle)
+				case config.RotateLeftToRightYAxis:
+					x3d, y3d = rotateLeftToRightYAxisCoordinates(x, y, xc, angle)
+				case config.RotateDiagonalXAxis:
+					x3d, y3d = rotateDiagonalXAxisCoordinates(x, y, xc, yc, angle)
+				case config.RotateDiagonalYAxis:
+					x3d, y3d = rotateDiagonalYAxisCoordinates(x, y, xc, yc, angle)
+				default:
+					x3d, y3d = rotateXAxisCoordinates(x, y, yc, angle)
+				}
+				out.Set(x3d, y3d, c)
 			}
-
-			out.Set(x3d, y3d, c)
 		}
-	}
+	})
 	return out
 }
 

@@ -112,8 +112,8 @@ func (m *MartineUI) newImageMenuExportButton(tm *menu.ImageMenu) *widget.Button 
 			}
 
 			paletteExportPath := uc.URI().Path()
-			uc.Close()
-			os.Remove(uc.URI().Path())
+			_ = uc.Close()
+			_ = os.Remove(uc.URI().Path())
 			cfg := config.NewMartineConfig(filepath.Base(paletteExportPath), paletteExportPath)
 			cfg.ScrCfg.NoAmsdosHeader = false
 			if err := impPalette.SaveKit(paletteExportPath+".kit", tm.Palette(), false); err != nil {
@@ -147,10 +147,10 @@ func (m *MartineUI) SetTileImage(newTile image.Image, p color.Palette) {
 	m.window.Content().Refresh()
 }
 
-// nolint: funlen, gocognit
+// nolint: funlen, gocognit, gocyclo
 func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 	tm.Cfg.ScrCfg.Size.ColorsAvailable = constants.Mode0.ColorsAvailable // default value
-	tm.ImageMenu.SetWindow(m.window)
+	tm.SetWindow(m.window)
 	tm.Cfg.ScrCfg.Type = config.SpriteFormat
 	importOpen := newImportButton(m, tm.ImageMenu)
 
@@ -362,20 +362,7 @@ func (m *MartineUI) newTilemapTab(tm *menu.TilemapMenu) *fyne.Container {
 
 					container.New(
 						layout.NewVBoxLayout(),
-						widget.NewButton("show cmd", func() {
-							e := widget.NewMultiLineEntry()
-							e.SetText(tm.CmdLine())
-
-							d := dialog.NewCustom("Command line generated",
-								"Ok",
-								e,
-								m.window)
-							log.GetLogger().Info("%s\n", tm.CmdLine())
-							size := m.window.Content().Size()
-							size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
-							d.Resize(size)
-							d.Show()
-						}),
+						m.newShowCmdButton(tm.CmdLine),
 
 						applyButton,
 						editButton,

@@ -49,16 +49,16 @@ func (m *MartineUI) newGreedings() *fyne.Container {
 			widget.NewLabel("Change  application size "),
 			widget.NewButton("Increase", func() {
 				m.scale += .03
-				theme := myTheme{foregroundColor: m.variant, scale: m.scale}
-				fyne.CurrentApp().Settings().SetTheme(theme)
+				th := myTheme{foregroundColor: m.variant, scale: m.scale}
+				fyne.CurrentApp().Settings().SetTheme(th)
 				canvas.Refresh(m.window.Canvas().Content())
 
 			}),
 			widget.NewButton("Decrease", func() {
 
 				m.scale -= .03
-				theme := myTheme{foregroundColor: m.variant, scale: m.scale}
-				fyne.CurrentApp().Settings().SetTheme(theme)
+				th := myTheme{foregroundColor: m.variant, scale: m.scale}
+				fyne.CurrentApp().Settings().SetTheme(th)
 				canvas.Refresh(m.window.Canvas().Content())
 
 			}),
@@ -69,8 +69,8 @@ func (m *MartineUI) newGreedings() *fyne.Container {
 				} else {
 					m.variant = theme.VariantDark
 				}
-				theme := myTheme{foregroundColor: m.variant, scale: fyne.CurrentApp().Settings().Scale()}
-				fyne.CurrentApp().Settings().SetTheme(theme)
+				th := myTheme{foregroundColor: m.variant, scale: fyne.CurrentApp().Settings().Scale()}
+				fyne.CurrentApp().Settings().SetTheme(th)
 				canvas.Refresh(m.window.Canvas().Content())
 
 			}),

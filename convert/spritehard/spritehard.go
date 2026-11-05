@@ -1,3 +1,4 @@
+// Package spritehard provides hard sprite conversion utilities.
 package spritehard
 
 import (
@@ -17,15 +18,13 @@ import (
 )
 
 func ToSpriteHardAndExport(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, filename string, ex *config.MartineConfig) error {
-	data, firmwareColorUsed := ToSpriteHard(in, p, size, mode, ex)
-	log.GetLogger().Infoln(firmwareColorUsed)
+	data := ToSpriteHard(in, p, size, mode, ex)
 	return sprite.ExportSprite(data, 16, p, size, mode, filename, false, ex)
 }
 
-func ToSpriteHard(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, ex *config.MartineConfig) (data []byte, firmwareColorUsed map[int]int) {
-	firmwareColorUsed = make(map[int]int)
+func ToSpriteHard(in *image.NRGBA, p color.Palette, size constants.Size, mode uint8, ex *config.MartineConfig) []byte {
 	offset := 0
-	data = make([]byte, 256)
+	data := make([]byte, 256)
 	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
 		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
 			c := in.At(x, y)
@@ -33,12 +32,11 @@ func ToSpriteHard(in *image.NRGBA, p color.Palette, size constants.Size, mode ui
 			if err != nil {
 				pp = 0
 			}
-			firmwareColorUsed[pp]++
 			data[offset] = byte(ex.SwapInk(pp))
 			offset++
 		}
 	}
-	return data, firmwareColorUsed
+	return data
 }
 
 func SpriteHardToImg(in string, p color.Palette) (*image.NRGBA, error) {
@@ -70,7 +68,7 @@ func RawSpriteHard(filePath string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	header := &cpc.CpcHead{}
 	if err := binary.Read(f, binary.LittleEndian, header); err != nil {
 		log.GetLogger().Error("Cannot read the RawScr Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)

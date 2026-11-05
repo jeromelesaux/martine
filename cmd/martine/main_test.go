@@ -6,6 +6,31 @@ import (
 	"testing"
 )
 
+const (
+	flagIn           = "-in"
+	flagFullscreen   = "-fullscreen"
+	flagPlus         = "-plus"
+	flagHeight       = "-height"
+	flagIter         = "-iter"
+	flagRla          = "-rla"
+	flagKeephigh     = "-keephigh"
+	flagKeeplow      = "-keeplow"
+	flagMode         = "-mode"
+	flagWidth        = "-width"
+	flagRoll         = "-roll"
+	flagNoUI         = "-noui"
+	flagRra          = "-rra"
+	flagOut          = "-out"
+	exportHandler    = "export_handler.go"
+	sampleBatman     = "../../samples/Batman-Neal-Adams.jpg"
+	sampleRotate     = "../../samples/rotate.png"
+	cmdGo            = "go"
+	cmdRun           = "run"
+	cmdMainGo        = "main.go"
+	cmdProcessGo     = "process.go"
+	errFmt           = "Expected no error and gets :%v"
+)
+
 // mask10000000 = 0xFF
 // mask00000010 = 0x02
 var mask4 = 0x04
@@ -27,309 +52,309 @@ func TestMainBit(t *testing.T) {
 }
 
 func TestNormalScreenMode0(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/Batman-Neal-Adams.jpg", "-mode", "0", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleBatman, flagMode, "0", flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestNormalScreenMode1(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/Batman-Neal-Adams.jpg", "-mode", "1", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleBatman, flagMode, "1", flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestNormalScreenMode1Dsk(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/Batman-Neal-Adams.jpg", "-mode", "1", "-out", output, "-dsk"}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleBatman, flagMode, "1", flagOut, output, "-dsk"}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestNormalScreenMode2(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/Batman-Neal-Adams.jpg", "-mode", "2", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleBatman, flagMode, "2", flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestFullScreenMode0(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/Batman-Neal-Adams.jpg", "-mode", "0", "-fullscreen", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleBatman, flagMode, "0", flagFullscreen, flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestFullScreenMode1(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/Batman-Neal-Adams.jpg", "-mode", "1", "-fullscreen", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleBatman, flagMode, "1", flagFullscreen, flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestFullScreenMode2(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/Batman-Neal-Adams.jpg", "-mode", "2", "-fullscreen", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleBatman, flagMode, "2", flagFullscreen, flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestFullScreenPlusMode0(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/Batman-Neal-Adams.jpg", "-mode", "0", "-fullscreen", "-plus", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleBatman, flagMode, "0", flagFullscreen, flagPlus, flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestFullScreenPlusMode1(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/Batman-Neal-Adams.jpg", "-mode", "1", "-fullscreen", "-plus", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleBatman, flagMode, "1", flagFullscreen, flagPlus, flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestFullScreenPlusMode2(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/Batman-Neal-Adams.jpg", "-mode", "2", "-fullscreen", "-plus", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleBatman, flagMode, "2", flagFullscreen, flagPlus, flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestSpriteMode0(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/rotate.png", "-mode", "0", "-width", "16", "-height", "16", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleRotate, flagMode, "0", flagWidth, "16", flagHeight, "16", flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestSpriteMode1(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/rotate.png", "-mode", "1", "-width", "16", "-height", "16", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleRotate, flagMode, "1", flagWidth, "16", flagHeight, "16", flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestSpriteMode2(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleRotate, flagMode, "2", flagWidth, "16", flagHeight, "16", flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestSpritePlusMode0(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/rotate.png", "-mode", "0", "-width", "16", "-height", "16", "-plus", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleRotate, flagMode, "0", flagWidth, "16", flagHeight, "16", flagPlus, flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestSpritePlusMode1(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/rotate.png", "-mode", "1", "-width", "16", "-height", "16", "-plus", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleRotate, flagMode, "1", flagWidth, "16", flagHeight, "16", flagPlus, flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestSpritePlusMode2(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-plus", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleRotate, flagMode, "2", flagWidth, "16", flagHeight, "16", flagPlus, flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestRollRraMode0(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/rotate.png", "-mode", "0", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-rra", "1", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleRotate, flagMode, "0", flagWidth, "16", flagHeight, "16", flagRoll, flagIter, "16", flagRra, "1", flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestRollRraMode1(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/rotate.png", "-mode", "1", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-rra", "1", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleRotate, flagMode, "1", flagWidth, "16", flagHeight, "16", flagRoll, flagIter, "16", flagRra, "1", flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestRollRraMode2(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-rra", "1", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleRotate, flagMode, "2", flagWidth, "16", flagHeight, "16", flagRoll, flagIter, "16", flagRra, "1", flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestRollRLaMode0(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/rotate.png", "-mode", "0", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-rla", "1", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleRotate, flagMode, "0", flagWidth, "16", flagHeight, "16", flagRoll, flagIter, "16", flagRla, "1", flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestRollRLaMode1(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/rotate.png", "-mode", "1", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-rla", "1", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleRotate, flagMode, "1", flagWidth, "16", flagHeight, "16", flagRoll, flagIter, "16", flagRla, "1", flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestRollRLaMode2(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-rla", "1", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleRotate, flagMode, "2", flagWidth, "16", flagHeight, "16", flagRoll, flagIter, "16", flagRla, "1", flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestRollKeephighMode0(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/rotate.png", "-mode", "0", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keephigh", "1", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleRotate, flagMode, "0", flagWidth, "16", flagHeight, "16", flagRoll, flagIter, "16", flagKeephigh, "1", flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestRollKeephighMode1(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/rotate.png", "-mode", "1", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keephigh", "1", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleRotate, flagMode, "1", flagWidth, "16", flagHeight, "16", flagRoll, flagIter, "16", flagKeephigh, "1", flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestRollKeephighMode2(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keephigh", "1", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleRotate, flagMode, "2", flagWidth, "16", flagHeight, "16", flagRoll, flagIter, "16", flagKeephigh, "1", flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestRollKeeplowMode0(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/rotate.png", "-mode", "0", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keeplow", "1", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleRotate, flagMode, "0", flagWidth, "16", flagHeight, "16", flagRoll, flagIter, "16", flagKeeplow, "1", flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestRollKeeplowMode1(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/rotate.png", "-mode", "1", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keeplow", "1", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleRotate, flagMode, "1", flagWidth, "16", flagHeight, "16", flagRoll, flagIter, "16", flagKeeplow, "1", flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }
 
 func TestRollKeeplowMode2(t *testing.T) {
-	args := []string{"run", "main.go", "process.go", "export_handler.go", "-noui", "-in", "../../samples/rotate.png", "-mode", "2", "-width", "16", "-height", "16", "-roll", "-iter", "16", "-keeplow", "1", "-out", output}
-	cmd := exec.Command("go", args...)
+	args := []string{cmdRun, cmdMainGo, cmdProcessGo, exportHandler, flagNoUI, flagIn, sampleRotate, flagMode, "2", flagWidth, "16", flagHeight, "16", flagRoll, flagIter, "16", flagKeeplow, "1", flagOut, output}
+	cmd := exec.Command(cmdGo, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		t.Fatalf("Expected no error and gets :%v", err)
+		t.Fatalf(errFmt, err)
 	}
 }

@@ -21,7 +21,7 @@ func TestSaveGo(t *testing.T) {
 	_ = os.Mkdir("overscanTests", 0777)
 	file := "../../../samples/lena-512.png"
 	f, _ := os.Open(file)
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	img, _ := png.Decode(f)
 
 	cfg := config.NewMartineConfig(file, "./overscanTests")
@@ -38,5 +38,5 @@ func TestSaveGo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	os.RemoveAll("overscanTests")
+	_ = os.RemoveAll("overscanTests")
 }

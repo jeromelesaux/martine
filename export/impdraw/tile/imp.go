@@ -1,3 +1,4 @@
+// Package tile provides IMP tile export utilities.
 package tile
 
 import (

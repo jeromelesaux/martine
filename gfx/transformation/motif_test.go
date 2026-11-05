@@ -2,7 +2,6 @@ package transformation_test
 
 import (
 	"fmt"
-	"image/color"
 	"image/jpeg"
 	"os"
 	"testing"
@@ -28,12 +27,12 @@ func TestMotifs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
-	defer fr.Close()
+	defer func() { _ = fr.Close() }()
 	in, err := jpeg.Decode(fr)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
-	var p color.Palette = constants.CpcOldPalette
+	p := constants.CpcOldPalette
 	out := image.Resize(in, constants.Size{Width: 320, Height: 200}, imaging.NearestNeighbor)
 	_, out = image.DowngradingWithPalette(out, p)
 	err = png.Png("../test/motifs/orig.png", out)
@@ -48,5 +47,5 @@ func TestMotifs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	os.RemoveAll("../test")
+	_ = os.RemoveAll("../test")
 }

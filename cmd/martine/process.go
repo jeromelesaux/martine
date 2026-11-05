@@ -25,7 +25,7 @@ type Process struct {
 	Rra                 int      `json:"rra"`
 	Rla                 int      `json:"rla"`
 	Sra                 int      `json:"sra"`
-	Sla                 int      `json:"sla"`
+	SLA                 int      `json:"sla"`
 	Losthigh            int      `json:"lostHigh"`
 	Lostlow             int      `json:"lostLow"`
 	Keephigh            int      `json:"keepHigh"`
@@ -75,7 +75,7 @@ func NewProcess() *Process {
 		Rra:                 -1,
 		Rla:                 -1,
 		Sra:                 -1,
-		Sla:                 -1,
+		SLA:                 -1,
 		Losthigh:            -1,
 		Lostlow:             -1,
 		Keephigh:            -1,
@@ -109,7 +109,7 @@ func InitProcess(filePath string) (*Process, error) {
 	if err != nil {
 		return p, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	err = json.NewEncoder(f).Encode(p)
 	return p, err
 }
@@ -119,12 +119,13 @@ func LoadProcessFile(filePath string) (*Process, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	p := NewProcess()
 	err = json.NewDecoder(f).Decode(p)
 	return p, err
 }
 
+// Apply sets all CLI flag values from the process configuration.
 // nolint: funlen
 func (p *Process) Apply() {
 	*byteStatement = p.ByteStatement
@@ -142,7 +143,7 @@ func (p *Process) Apply() {
 	*rra = p.Rra
 	*rla = p.Rla
 	*sra = p.Sra
-	*sla = p.Sla
+	*sla = p.SLA
 	*losthigh = p.Losthigh
 	*lostlow = p.Lostlow
 	*keephigh = p.Keephigh

@@ -31,7 +31,7 @@ func main() {
 		log.GetLogger().Error("error while opening file %s error : %v\n.", *out, err)
 		os.Exit(-1)
 	}
-	f.Close()
+	_ = f.Close()
 	for _, v := range filespath {
 		displaySprite(v, f)
 	}
@@ -44,7 +44,7 @@ func displaySprite(filePath string, out *os.File) {
 		log.GetLogger().Error("Cannot open file (%s) error :%v\n", filePath, err)
 		return
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	base := filepath.Base(filePath)
 	ext := filepath.Ext(base)
 	spriteName := strings.Replace(base, ext, "", 1)

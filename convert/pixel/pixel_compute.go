@@ -1,3 +1,4 @@
+// Package pixel provides pixel encoding utilities for CPC screen modes.
 package pixel
 
 // PixelMode0 converts palette position into byte in  screen mode 0
@@ -60,7 +61,7 @@ func PixelMode1(pp1, pp2, pp3, pp4 int) byte {
 	return pixel
 }
 
-// PixelMode converts palette position into byte in screen mode 2
+// PixelMode2 converts palette positions into a byte in screen mode 2.
 func PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) byte {
 	var pixel byte
 	if uint8(pp1)&1 == 1 {
@@ -91,6 +92,7 @@ func PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) byte {
 }
 
 // RawPixelMode2 converts color  byte in palette position in  screen mode 2
+//nolint:gocritic
 func RawPixelMode2(b byte) (pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8 int) {
 	val := int(b)
 	if val-128 >= 0 {
@@ -209,4 +211,17 @@ func RawPixelMode0(b byte) (pp1, pp2 int) {
 	}
 
 	return
+}
+
+// PixelsPerByte returns the number of pixels encoded in one byte for the given mode.
+func PixelsPerByte(mode uint8) int {
+	switch mode {
+	case 0:
+		return 2
+	case 1:
+		return 4
+	case 2:
+		return 8
+	}
+	return 0
 }

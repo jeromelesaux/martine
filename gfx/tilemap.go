@@ -1,3 +1,4 @@
+// Package gfx provides graphics transformation and conversion utilities.
 package gfx
 
 import (
@@ -14,8 +15,10 @@ import (
 	"github.com/jeromelesaux/martine/config"
 	"github.com/jeromelesaux/martine/constants"
 	"github.com/jeromelesaux/martine/log"
+	"github.com/jeromelesaux/martine/proc"
 
 	ci "github.com/jeromelesaux/martine/convert/image"
+	"github.com/jeromelesaux/martine/convert/pixel"
 	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
 	"github.com/jeromelesaux/martine/export/png"
@@ -33,7 +36,8 @@ var (
 	impTileFlag = true
 )
 
-// nolint: funlen, gocognit
+// AnalyzeTilemap analyses an image and generates tiles, tile map and schema.
+// nolint: funlen, gocognit, gocyclo
 func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in image.Image, cfg *config.MartineConfig, criteria common.AnalyseTilemapOption) error {
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
 	m := ci.Resize(in, mapSize, cfg.ScrCfg.Process.ResizingAlgo)
@@ -56,15 +60,7 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 		return err
 	}
 	size := constants.Size{Width: 2, Height: 8}
-	var sizeIteration int
-	switch mode {
-	case 0:
-		sizeIteration += 2
-	case 1:
-		sizeIteration += 4
-	case 2:
-		sizeIteration += 8
-	}
+	sizeIteration := pixel.PixelsPerByte(mode)
 	boards := make([]*transformation.AnalyzeBoard, 0)
 	if !impTileFlag {
 		for size.Width <= 32 || size.Height <= 32 {
@@ -77,13 +73,18 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 			size.Height += sizeIteration
 		}
 	} else {
-		for _, s := range impTilesSizes {
-			log.GetLogger().Info("Analyze the image for size [width:%d,height:%d]", s.Width, s.Height)
-			board := transformation.AnalyzeTilesBoard(m, s, nil)
-			tilesSize := sizeOctet(board.TileSize, mode) * len(board.BoardTiles)
-			log.GetLogger().Info(" found [%d] tiles full length [#%X]\n", len(board.BoardTiles), tilesSize)
-			boards = append(boards, board)
-		}
+		n := len(impTilesSizes)
+		boards = make([]*transformation.AnalyzeBoard, n)
+		proc.Parallel(0, n, func(yc <-chan int) {
+			for i := range yc {
+				s := impTilesSizes[i]
+				log.GetLogger().Info("Analyze the image for size [width:%d,height:%d]", s.Width, s.Height)
+				board := transformation.AnalyzeTilesBoard(m, s, nil)
+				tilesSize := sizeOctet(board.TileSize, mode) * len(board.BoardTiles)
+				log.GetLogger().Info(" found [%d] tiles full length [#%X]\n", len(board.BoardTiles), tilesSize)
+				boards[i] = board
+			}
+		})
 	}
 	// analyze the results and apply criteria
 	var lowerSizeIndex, numberTilesIndex int
@@ -116,63 +117,18 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 	cfg.ScrCfg.Size.Width = choosenBoard.BoardTiles[0].Tile.Size.Width
 	cfg.ScrCfg.Size.Height = choosenBoard.BoardTiles[0].Tile.Size.Height
 	cfg.CustomDimension = true
-	if err := choosenBoard.SaveSchema(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap_schema.png")); err != nil {
-		log.GetLogger().Error("Cannot save tilemap schema error :%v\n", err)
+	if err := saveTilemapFiles(choosenBoard, cfg); err != nil {
 		return err
 	}
-	if err := choosenBoard.SaveAssemblyTiles(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap.asm")); err != nil {
-		log.GetLogger().Error("Cannot save tilemap csv file error :%v\n", err)
-		return err
-	}
-
-	// applyOneImage
-	// sort tiles
-	// check < 256 tiles
-	// finally export
-	// 20 tiles large 25 tiles height
-	tiles := choosenBoard.Sort()
-	data := make([]byte, 0)
-
 	finalFile := strings.ReplaceAll(filename, "?", "")
 	if err := impPalette.Kit(finalFile, palette, mode, false, cfg); err != nil {
 		log.GetLogger().Error("Error while saving file %s error :%v", finalFile, err)
 		return err
 	}
-	nbFrames := 0
-	err = os.Mkdir(filepath.Join(cfg.ScrCfg.OutputPath, "tiles"), os.ModePerm)
-	if err != nil {
+	if err := exportTilesImp(choosenBoard, filename, palette, mode, 255, picturePath, cfg); err != nil {
 		return err
 	}
-	for i, v := range tiles {
-		if v.Occurrence <= 0 {
-			continue
-		}
-		tile := v.Tile.Image()
-		d, _, _, _, err := ApplyOneImage(tile,
-			cfg,
-			palette,
-			mode)
-		if err != nil {
-			log.GetLogger().Error("Error while transforming sprite error : %v\n", err)
-		}
-		if nbFrames < 255 {
-			data = append(data, d...)
-			scenePath := filepath.Join(cfg.ScrCfg.OutputPath, fmt.Sprintf("%stiles%stile-%.2d.png", string(filepath.Separator), string(filepath.Separator), i))
-			if err := png.Png(scenePath, tile); err != nil {
-				log.GetLogger().Error("Cannot create scene tile-%.2d error %v\n", i, err)
-				return err
-			}
-		} else {
-			log.GetLogger().Infoln("skipping number of frames exceed 255.")
-			break
-		}
-		nbFrames++
-	}
-	// save the file sprites
-	finalFile = strings.ReplaceAll(filename, "?", "")
-	if err := tile.Imp(data, uint(nbFrames), uint(choosenBoard.TileSize.Width), uint(choosenBoard.TileSize.Height), uint(mode), finalFile, cfg); err != nil {
-		log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", picturePath, err)
-	}
+	tiles := choosenBoard.Sort()
 
 	// save the tilemap
 	nbTilePixelLarge := 20
@@ -214,15 +170,9 @@ func AnalyzeTilemap(mode uint8, isCpcPlus bool, filename, picturePath string, in
 
 func ExportTilemapClassical(m image.Image, filename string, palette color.Palette, board *transformation.AnalyzeBoard, size constants.Size, cfg *config.MartineConfig) error {
 	finalFile := strings.ReplaceAll(filename, "?", "")
-	if err := board.SaveSchema(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap_schema.png")); err != nil {
-		log.GetLogger().Error("Cannot save tilemap schema error :%v\n", err)
+	if err := saveTilemapFiles(board, cfg); err != nil {
 		return err
 	}
-	if err := board.SaveAssemblyTiles(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap.asm")); err != nil {
-		log.GetLogger().Error("Cannot save tilemap csv file error :%v\n", err)
-		return err
-	}
-
 	if err := impPalette.Kit(finalFile, palette, cfg.ScrCfg.Mode, false, cfg); err != nil {
 		log.GetLogger().Error("Error while saving file %s error :%v", finalFile, err)
 		return err
@@ -303,19 +253,93 @@ func TilemapClassical(
 	return tilemap, tilesImagesTilemap, palette
 }
 
-func sizeOctet(size constants.Size, mode uint8) int {
-	switch mode {
-	case 0:
-		return size.Height * (size.Width / 2)
-	case 1:
-		return size.Height * (size.Width / 4)
-	case 2:
-		return size.Height * (size.Width / 8)
+func saveTilemapFiles(board *transformation.AnalyzeBoard, cfg *config.MartineConfig) error {
+	if err := board.SaveSchema(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap_schema.png")); err != nil {
+		log.GetLogger().Error("Cannot save tilemap schema error :%v\n", err)
+		return err
 	}
-	return 0
+	if err := board.SaveAssemblyTiles(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap.asm")); err != nil {
+		log.GetLogger().Error("Cannot save tilemap csv file error :%v\n", err)
+		return err
+	}
+	return nil
 }
 
-// nolint: funlen, gocognit
+func exportTilesImp(analyze *transformation.AnalyzeBoard, filename string, palette color.Palette, mode uint8, maxTiles int, picturePath string, cfg *config.MartineConfig) error {
+	data, nbFrames, err := exportTiles(analyze, palette, mode, maxTiles, cfg)
+	if err != nil {
+		return err
+	}
+	finalFile := strings.ReplaceAll(filename, "?", "")
+	if err := tile.Imp(data, uint(nbFrames), uint(analyze.TileSize.Width), uint(analyze.TileSize.Height), uint(mode), finalFile, cfg); err != nil {
+		log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", picturePath, err)
+	}
+	return nil
+}
+
+func exportTiles(analyze *transformation.AnalyzeBoard, palette color.Palette, mode uint8, maxTiles int, cfg *config.MartineConfig) (data []byte, nbFrames int, err error) {
+	tiles := analyze.Sort()
+	if err := os.Mkdir(filepath.Join(cfg.ScrCfg.OutputPath, "tiles"), os.ModePerm); err != nil {
+		return nil, 0, err
+	}
+
+	// filter eligible tiles upfront
+	type indexedTile struct {
+		index int
+		v     transformation.BoardTile
+	}
+	eligible := make([]indexedTile, 0, len(tiles))
+	for i, v := range tiles {
+		if v.Occurrence <= 0 {
+			continue
+		}
+		if len(eligible) >= maxTiles {
+			log.GetLogger().Error("Maximum of %d tiles accepted, skipping...\n", maxTiles)
+			break
+		}
+		eligible = append(eligible, indexedTile{i, v})
+	}
+
+	n := len(eligible)
+	results := make([][]byte, n)
+	errs := make([]error, n)
+
+	proc.Parallel(0, n, func(yc <-chan int) {
+		for j := range yc {
+			it := eligible[j]
+			tileImg := it.v.Tile.Image()
+			d, _, _, _, err := ApplyOneImage(tileImg, cfg, palette, mode)
+			if err != nil {
+				log.GetLogger().Error("Error while transforming sprite error : %v\n", err)
+				errs[j] = err
+				continue
+			}
+			scenePath := filepath.Join(cfg.ScrCfg.OutputPath, fmt.Sprintf("%stiles%stile-%.2d.png", string(filepath.Separator), string(filepath.Separator), it.index))
+			if err := png.Png(scenePath, tileImg); err != nil {
+				log.GetLogger().Error("Cannot encode in png scene tile-%.2d error %v\n", it.index, err)
+				errs[j] = err
+				continue
+			}
+			results[j] = d
+		}
+	})
+
+	data = make([]byte, 0)
+	for j, err := range errs {
+		if err != nil {
+			return nil, 0, err
+		}
+		data = append(data, results[j]...)
+	}
+	return data, n, nil
+}
+
+func sizeOctet(size constants.Size, mode uint8) int {
+	return size.Height * (size.Width / pixel.PixelsPerByte(mode))
+}
+
+// Tilemap converts an image into a tile map and exports the tile sprites.
+// nolint: funlen, gocognit, gocyclo
 func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in image.Image, cfg *config.MartineConfig, tilesHistoric *sprite.TilesHistorical) error {
 	/*
 		8x8 : 40x25
@@ -326,15 +350,8 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 	nbTilePixelLarge := 20
 	nbTilePixelHigh := 25
 	maxTiles := 255
-	nbPixelWidth := 0
-	switch mode {
-	case 0:
-		nbPixelWidth = cfg.ScrCfg.Size.Width / 2
-	case 1:
-		nbPixelWidth = cfg.ScrCfg.Size.Width / 4
-	case 2:
-		nbPixelWidth = cfg.ScrCfg.Size.Width / 8
-	default:
+	nbPixelWidth := cfg.ScrCfg.Size.Width / pixel.PixelsPerByte(mode)
+	if nbPixelWidth == 0 {
 		log.GetLogger().Error("Mode %d  not available\n", mode)
 	}
 
@@ -386,62 +403,18 @@ func Tilemap(mode uint8, filename, picturePath string, size constants.Size, in i
 	analyze := transformation.AnalyzeTilesBoard(m, cfg.ScrCfg.Size, tilesHistoric)
 	tilesSize := sizeOctet(analyze.TileSize, mode) * len(analyze.BoardTiles)
 	log.GetLogger().Info("board with number of tiles [%d] and size [width:%d, height:%d] size:#%X\n", len(analyze.BoardTiles), analyze.TileSize.Width, analyze.TileSize.Height, tilesSize)
-	if err := analyze.SaveSchema(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap_schema.png")); err != nil {
-		log.GetLogger().Error("Cannot save tilemap schema error :%v\n", err)
+	if err := saveTilemapFiles(analyze, cfg); err != nil {
 		return err
 	}
-	if err := analyze.SaveAssemblyTiles(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap.asm")); err != nil {
-		log.GetLogger().Error("Cannot save tilemap csv file error :%v\n", err)
-		return err
-	}
-
-	// applyOneImage
-	// sort tiles
-	// check < 256 tiles
-	// finally export
-	// 20 tiles large 25 tiles height
-	tiles := analyze.Sort()
-	data := make([]byte, 0)
-
 	finalFile := strings.ReplaceAll(filename, "?", "")
 	if err := impPalette.Kit(finalFile, palette, mode, false, cfg); err != nil {
 		log.GetLogger().Error("Error while saving file %s error :%v", finalFile, err)
 		return err
 	}
-	nbFrames := 0
-	err = os.Mkdir(filepath.Join(cfg.ScrCfg.OutputPath, "tiles"), os.ModePerm)
-	if err != nil {
+	if err := exportTilesImp(analyze, filename, palette, mode, maxTiles, picturePath, cfg); err != nil {
 		return err
 	}
-	for i, v := range tiles {
-		if v.Occurrence <= 0 {
-			continue
-		}
-		tile := v.Tile.Image()
-		d, _, _, _, err := ApplyOneImage(tile,
-			cfg,
-			palette,
-			mode)
-		if err != nil {
-			log.GetLogger().Error("Error while transforming sprite error : %v\n", err)
-		}
-		data = append(data, d...)
-		scenePath := filepath.Join(cfg.ScrCfg.OutputPath, fmt.Sprintf("%stiles%stile-%.2d.png", string(filepath.Separator), string(filepath.Separator), i))
-		if err := png.Png(scenePath, tile); err != nil {
-			log.GetLogger().Error("Cannot encode in png scene tile-%.2d error %v\n", i, err)
-			return err
-		}
-		if i >= maxTiles {
-			log.GetLogger().Error("Maximum of %d tiles accepted, skipping...\n", maxTiles)
-			break
-		}
-		nbFrames++
-	}
-	// save the file sprites
-	finalFile = strings.ReplaceAll(filename, "?", "")
-	if err := tile.Imp(data, uint(nbFrames), uint(analyze.TileSize.Width), uint(analyze.TileSize.Height), uint(mode), finalFile, cfg); err != nil {
-		log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", picturePath, err)
-	}
+	tiles := analyze.Sort()
 
 	// save the tilemap
 	scenes := make([]*image.NRGBA, 0)
@@ -501,6 +474,7 @@ func fillImage(m image.Image, scenes []*image.NRGBA, nbTilePixelHigh, nbTilePixe
 	return scenes, nil
 }
 
+// TilemapRaw converts an image into raw tile map data.
 // nolint: funlen
 func TilemapRaw(
 	mode uint8,
@@ -517,16 +491,8 @@ func TilemapRaw(
 	*/
 
 	var tilesImagesTilemap [][]image.Image
-	nbPixelWidth := 0
-
-	switch mode {
-	case 0:
-		nbPixelWidth = cfg.ScrCfg.Size.Width / 2
-	case 1:
-		nbPixelWidth = cfg.ScrCfg.Size.Width / 4
-	case 2:
-		nbPixelWidth = cfg.ScrCfg.Size.Width / 8
-	default:
+	nbPixelWidth := cfg.ScrCfg.Size.Width / pixel.PixelsPerByte(mode)
+	if nbPixelWidth == 0 {
 		log.GetLogger().Error("Mode %d  not available\n", mode)
 	}
 
@@ -586,6 +552,7 @@ func TilemapRaw(
 	return analyze, tilesImagesTilemap, palette, nil
 }
 
+// ExportTilemap exports the analyzed tile map to output files.
 // nolint: funlen
 func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palette color.Palette, mode uint8, in image.Image, flatExport bool, cfg *config.MartineConfig) (err error) {
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: 16}
@@ -647,21 +614,15 @@ func ExportTilemap(analyze *transformation.AnalyzeBoard, filename string, palett
 	return analyze.SaveHistoric(cfg.ScrCfg.OutputPath)
 }
 
+// ExportImpdrawTilemap exports the tile map in Impdraw format.
 // nolint: funlen, gocognit
 func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string, palette color.Palette, mode uint8, size constants.Size, in image.Image, cfg *config.MartineConfig) (err error) {
 	mapSize := constants.Size{Width: in.Bounds().Max.X, Height: in.Bounds().Bounds().Max.Y, ColorsAvailable: cfg.ScrCfg.Size.ColorsAvailable}
 	nbTilePixelLarge := 20
 	nbTilePixelHigh := 25
 	maxTiles := 255
-	nbPixelWidth := 0
-	switch mode {
-	case 0:
-		nbPixelWidth = cfg.ScrCfg.Size.Width / 2
-	case 1:
-		nbPixelWidth = cfg.ScrCfg.Size.Width / 4
-	case 2:
-		nbPixelWidth = cfg.ScrCfg.Size.Width / 8
-	default:
+	nbPixelWidth := cfg.ScrCfg.Size.Width / pixel.PixelsPerByte(mode)
+	if nbPixelWidth == 0 {
 		log.GetLogger().Error("Mode %d  not available\n", mode)
 	}
 
@@ -684,61 +645,16 @@ func ExportImpdrawTilemap(analyze *transformation.AnalyzeBoard, filename string,
 	}
 	tilesSize := sizeOctet(analyze.TileSize, mode) * len(analyze.BoardTiles)
 	log.GetLogger().Info("board with number of tiles [%d] and size [width:%d, height:%d] size:#%X\n", len(analyze.BoardTiles), analyze.TileSize.Width, analyze.TileSize.Height, tilesSize)
-	if err = analyze.SaveSchema(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap_schema.png")); err != nil {
-		log.GetLogger().Error("Cannot save tilemap schema error :%v\n", err)
+	if err := saveTilemapFiles(analyze, cfg); err != nil {
 		return err
 	}
-	if err = analyze.SaveAssemblyTiles(filepath.Join(cfg.ScrCfg.OutputPath, "tilesmap.asm")); err != nil {
-		log.GetLogger().Error("Cannot save tilemap csv file error :%v\n", err)
-		return err
-	}
-
-	// applyOneImage
-	// sort tiles
-	// check < 256 tiles
-	// finally export
-	// 20 tiles large 25 tiles height
-	tiles := analyze.Sort()
-	data := make([]byte, 0)
-
 	finalFile := strings.ReplaceAll(filename, "?", "")
 	if err = impPalette.Kit(finalFile, palette, mode, false, cfg); err != nil {
 		log.GetLogger().Error("Error while saving file %s error :%v", finalFile, err)
 		return err
 	}
-	nbFrames := 0
-	err = os.Mkdir(filepath.Join(cfg.ScrCfg.OutputPath, "tiles"), os.ModePerm)
-	if err != nil {
+	if err := exportTilesImp(analyze, filename, palette, mode, maxTiles, cfg.ScrCfg.OutputPath, cfg); err != nil {
 		return err
-	}
-	for i, v := range tiles {
-		if v.Occurrence <= 0 {
-			continue
-		}
-		tile := v.Tile.Image()
-		d, _, _, _, err := ApplyOneImage(tile,
-			cfg,
-			palette,
-			mode)
-		if err != nil {
-			log.GetLogger().Error("Error while transforming sprite error : %v\n", err)
-		}
-		data = append(data, d...)
-		scenePath := filepath.Join(cfg.ScrCfg.OutputPath, fmt.Sprintf("%stiles%stile-%.2d.png", string(filepath.Separator), string(filepath.Separator), i))
-		if err := png.Png(scenePath, tile); err != nil {
-			log.GetLogger().Error("Cannot encode in png scene tile-%.2d error %v\n", i, err)
-			return err
-		}
-		if i >= maxTiles {
-			log.GetLogger().Error("Maximum of %d tiles accepted, skipping...\n", maxTiles)
-			break
-		}
-		nbFrames++
-	}
-	// save the file sprites
-	finalFile = strings.ReplaceAll(filename, "?", "")
-	if err = tile.Imp(data, uint(nbFrames), uint(analyze.TileSize.Width), uint(analyze.TileSize.Height), uint(mode), finalFile, cfg); err != nil {
-		log.GetLogger().Error("Cannot export to Imp-Catcher the image %s error %v", cfg.ScrCfg.OutputPath, err)
 	}
 	m := ci.Resize(in, mapSize, cfg.ScrCfg.Process.ResizingAlgo)
 	// save the tilemap

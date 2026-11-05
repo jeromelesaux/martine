@@ -1,3 +1,4 @@
+// Package menu provides UI menu components.
 package menu
 
 import (
@@ -42,7 +43,8 @@ func NewAnimateMenu() *AnimateMenu {
 	}
 }
 
-// nolint: funlen
+// CmdLine returns the equivalent martine command line string for the current settings.
+// nolint: funlen, gocyclo
 func (i *AnimateMenu) CmdLine() string {
 	exec, err := os.Executable()
 	if err != nil {

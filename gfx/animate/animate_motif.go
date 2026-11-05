@@ -20,13 +20,14 @@ import (
 	zx0 "github.com/jeromelesaux/zx0/encode"
 )
 
+// DeltaMotif computes delta packing using a motif detection strategy.
 // nolint: funlen
 func DeltaMotif(gitFilepath string, cfg *config.MartineConfig, threshold int, initialAddress uint16, mode uint8) error {
 	fr, err := os.Open(gitFilepath)
 	if err != nil {
 		return err
 	}
-	defer fr.Close()
+	defer func() { _ = fr.Close() }()
 	gifImages, err := gif.DecodeAll(fr)
 	if err != nil {
 		return err
@@ -119,11 +120,11 @@ func exportDeltaMotif(images, motifs [][]byte, p color.Palette, filename string)
 	}
 
 	for i := range motifs {
-		deltaCode.WriteString(fmt.Sprintf("motif%.2d\n", i))
+		fmt.Fprintf(&deltaCode, "motif%.2d\n", i)
 		deltaCode.WriteString(ascii.FormatAssemblyDatabyte(motifs[i], "\n"))
 	}
 
-	deltaCode.WriteString("palette:\n" + ascii.ByteToken + " ")
+	fmt.Fprintf(&deltaCode, "palette:\n%s ", ascii.ByteToken)
 	deltaCode.WriteString(ascii.FormatAssemblyBasicPalette(p, "\n"))
 	return amsdos.SaveStringOSFile(filename, deltaCode.String())
 }

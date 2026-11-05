@@ -1,3 +1,4 @@
+// Package rle provides RLE compression utilities.
 // nolint: misspell
 package rle
 

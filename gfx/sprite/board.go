@@ -1,3 +1,4 @@
+// Package sprite provides sprite conversion and export utilities.
 package sprite
 
 import (

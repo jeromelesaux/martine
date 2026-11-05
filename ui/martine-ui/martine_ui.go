@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jeromelesaux/martine/common"
@@ -98,12 +99,24 @@ func (m *MartineUI) SetImage(img image.Image) {
 	m.tilemap.SetOriginalImage(img)
 }
 
+func (m *MartineUI) newShowCmdButton(cmdLine func() string) *widget.Button {
+	return widget.NewButton("show cmd", func() {
+		e := widget.NewMultiLineEntry()
+		e.SetText(cmdLine())
+		d := dialog.NewCustom("Command line generated", "Ok", e, m.window)
+		log.GetLogger().Info("%s\n", cmdLine())
+		size := m.window.Content().Size()
+		d.Resize(fyne.Size{Width: size.Width / 2, Height: size.Height / 2})
+		d.Show()
+	})
+}
+
 func openImage(path string) (image.Image, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	i, _, err := image.Decode(f)
 	return i, err
 }

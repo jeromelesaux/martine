@@ -1,3 +1,4 @@
+// Package preferences provides UI preferences utilities.
 package preferences
 
 import (
@@ -42,7 +43,7 @@ func Save() error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	if err := json.NewEncoder(f).Encode(&userPreferenceCache); err != nil {
 		return err
 	}
@@ -67,7 +68,7 @@ func OpenPref() (UserPreferences, error) {
 		return UserPreferences{}, err
 	}
 
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	if err := json.NewDecoder(f).Decode(&userPreferenceCache); err != nil {
 		return UserPreferences{}, err

@@ -1,3 +1,4 @@
+// Package address provides CPC screen address computation.
 package address
 
 import "math"

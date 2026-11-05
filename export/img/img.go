@@ -1,3 +1,4 @@
+// Package img provides image export utilities.
 package img
 
 import "image"

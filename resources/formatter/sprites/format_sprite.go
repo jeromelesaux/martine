@@ -60,12 +60,12 @@ func main() {
 				os.Exit(-1)
 			}
 
-			d := &export.Json{}
+			d := &export.JSON{}
 			if err := json.NewDecoder(f).Decode(d); err != nil {
 				log.GetLogger().Error("Cannot decode json file (%s) error :%v\n", v, err)
 				os.Exit(-1)
 			}
-			f.Close()
+			_ = f.Close()
 
 			if len(d.Screen) != 1 {
 				filename := strings.ReplaceAll(filepath.Base(sprite), filepath.Ext(sprite), "")
@@ -112,7 +112,7 @@ func main() {
 			log.GetLogger().Error("Error while writing in file (%s) error %v\n", *outfile, err)
 			os.Exit(-1)
 		}
-		f.Close()
+		_ = f.Close()
 	} else {
 		log.GetLogger().Infoln(out)
 	}

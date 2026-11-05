@@ -1,3 +1,4 @@
+// Package filter provides image filter and dithering utilities.
 package filter
 
 import (
@@ -108,10 +109,10 @@ func QuantizeNoDither(in *image.NRGBA, numColors int, pal color.Palette) *image.
 }
 
 func QuantizeWithDither(input *image.NRGBA, filter [][]float32, numColors int, pal color.Palette) *image.NRGBA {
-	dither := colorquant.Dither{Filter: filter}
+	dith := colorquant.Dither{Filter: filter}
 	bounds := input.Bounds()
 	out := image.NewPaletted(image.Rect(0, 0, bounds.Dx(), bounds.Dy()), pal)
-	dst := dither.Quantize(input, out, numColors, true, true)
+	dst := dith.Quantize(input, out, numColors, true, true)
 	return img.Img2NRGBA(dst)
 }
 
@@ -120,7 +121,8 @@ type MixingPlan struct {
 	Ratio  float32
 }
 
-// https://bisqwit.iki.fi/story/howto/dither/jy/#Algorithms
+// BayerDiphering applies Bayer ordered dithering to the input image.
+// See https://bisqwit.iki.fi/story/howto/dither/jy/#Algorithms
 func BayerDiphering(input *image.NRGBA, filter [][]float32, palette color.Palette) *image.NRGBA {
 	image2 := image.NewNRGBA(image.Rectangle{image.Point{0, 0}, image.Point{input.Bounds().Max.X, input.Bounds().Max.Y}})
 	height := image2.Bounds().Max.Y
@@ -134,19 +136,19 @@ func BayerDiphering(input *image.NRGBA, filter [][]float32, palette color.Palett
 		for y := range yc {
 			for x := 0; x < width; x++ {
 				temp := input.At(x, y)
-				color := qColorToint(temp)
-				plan := DeviseBestMixingPlan(color, pal, uint(filterLenght))
+				qc := qColorToint(temp)
+				plan := DeviseBestMixingPlan(qc, pal, uint(filterLenght))
 				if plan.Ratio == 4.0 { // Tri-tone or quad-tone dithering
-					color := rgbToQColor(plan.Colors[((y&1)*2 + (x & 1))])
-					image2.Set(x, y, color)
+					col := rgbToQColor(plan.Colors[((y&1)*2 + (x & 1))])
+					image2.Set(x, y, col)
 				} else {
 					mapValue := filter[(x & filterRowLenght)][(y&filterRowLenght)] / float32(filterLenght)
 					planIndex := 0
 					if mapValue < plan.Ratio {
 						planIndex = 1
 					}
-					color := rgbToQColor(plan.Colors[planIndex])
-					image2.Set(x, y, color)
+					col := rgbToQColor(plan.Colors[planIndex])
+					image2.Set(x, y, col)
 				}
 			}
 			log.GetLogger().Info(".")
@@ -181,13 +183,14 @@ func InitPalWithPalette(p color.Palette) []uint {
 	return pal
 }
 
+// DeviseBestMixingPlan computes the optimal color mixing plan for dithering.
 // nolint: funlen, gocognit
-func DeviseBestMixingPlan(color uint, pal []uint, matrixLenght uint) MixingPlan {
-	r := color >> 16
-	g := (color >> 8) & 0xFF
-	b := color & 0xFF
+func DeviseBestMixingPlan(qc uint, pal []uint, matrixLenght uint) MixingPlan {
+	r := qc >> 16
+	g := (qc >> 8) & 0xFF
+	b := qc & 0xFF
 	result := MixingPlan{Colors: [4]uint{0, 0, 0, 0}, Ratio: 0.5}
-	var leastPenalty float64 = 1e99
+	var leastPenalty = 1e99
 
 	for index1 := 0; index1 < len(pal); index1++ {
 		for index2 := index1; index2 < len(pal); index2++ {
@@ -289,7 +292,6 @@ func EvaluateMixingError(r, g, b, r0, g0, b0, r1, g1, b1, r2, g2, b2 uint, ratio
 }
 
 func ColorCompare(r1, g1, b1, r2, g2, b2 uint) float64 {
-
 	luma1 := float64((r1*299 + g1*587 + b1*114) / (255.0 * 1000))
 	luma2 := float64((r2*299 + g2*587 + b2*114) / (255.0 * 1000))
 	lumadiff := luma1 - luma2
@@ -298,6 +300,7 @@ func ColorCompare(r1, g1, b1, r2, g2, b2 uint) float64 {
 	diffB := float64(b1-b2) / 255.0
 	return (diffR*diffR*0.299+diffG*diffG*0.587+diffB*diffB*0.114)*0.75 + lumadiff*lumadiff
 }
+
 func rgbToQColor(v uint) color.Color {
 	r := v >> 16
 	g := (v >> 8) & 0xFF

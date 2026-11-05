@@ -1,3 +1,4 @@
+// Package dialog provides UI dialog utilities.
 package dialog
 
 import (

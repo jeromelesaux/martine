@@ -1,3 +1,4 @@
+// Package constants provides CPC color constants and palette utilities.
 package constants
 
 import (
@@ -62,6 +63,20 @@ func NewSize(mode uint8) Size {
 		s = Mode2
 	}
 	return s
+}
+
+// Mode returns the screen mode number (0, 1 or 2) for this Size,
+// regardless of whether it is a normal or overscan size.
+func (s Size) Mode() (uint8, bool) {
+	switch s {
+	case Mode0, OverscanMode0:
+		return 0, true
+	case Mode1, OverscanMode1:
+		return 1, true
+	case Mode2, OverscanMode2:
+		return 2, true
+	}
+	return 0, false
 }
 
 func NewSizeMode(mode uint8, overscan bool) Size {
@@ -295,27 +310,28 @@ func (p *PaletteReducer) OccurencesSort() {
 	sort.Sort(sort.Reverse(ByOccurence(p.Cs)))
 }
 
-func (pr *PaletteReducer) Reduce(nbColors int) color.Palette {
-	var p color.Palette
+func (p *PaletteReducer) Reduce(nbColors int) color.Palette {
+	var pal color.Palette
 
-	pr.ComputeDistances()
-	pr.OccurencesSort()
-	p = append(p, pr.Cs[0].C)
-	for i := 1; i < len(pr.Cs); i++ {
-		if len(p) < nbColors {
-			previous := pr.Cs[i-1]
-			current := pr.Cs[i]
+	p.ComputeDistances()
+	p.OccurencesSort()
+	pal = append(pal, p.Cs[0].C)
+	for i := 1; i < len(p.Cs); i++ {
+		if len(pal) < nbColors {
+			previous := p.Cs[i-1]
+			current := p.Cs[i]
 			if previous.Distances[current.C] > 10. {
-				p = append(p, current.C)
+				pal = append(pal, current.C)
 			}
 		} else {
 			break
 		}
 	}
-	return p
+	return pal
 }
 
-// from website https://www.compuphase.com/cmetric.htm
+// ColorsDistance computes the perceptual distance between two colors.
+// See https://www.compuphase.com/cmetric.htm
 func ColorsDistance(c1, c2 color.Color) float64 {
 	r1, g1, b1, _ := c1.RGBA()
 	r2, g2, b2, _ := c2.RGBA()
@@ -341,6 +357,7 @@ func ColorDistance2(c1, c2 color.Color) int64 {
 	return distance
 }
 
+// CpcColorFromHardwareNumber returns the CpcColor matching the given hardware number.
 // nolint: funlen, gocyclo
 func CpcColorFromHardwareNumber(c int) (CpcColor, error) {
 	if White.HardwareNumber == c {
@@ -427,6 +444,7 @@ func CpcColorFromHardwareNumber(c int) (CpcColor, error) {
 	return CpcColor{HardwareNumber: -1}, ErrorCpcColorNotFound
 }
 
+// ColorFromHardware returns the color.Color matching the given hardware byte value.
 // nolint: funlen, gocyclo
 func ColorFromHardware(c uint8) (color.Color, error) {
 	if HardwareValueAreEquals(White.HardwareValues, c) {
@@ -712,10 +730,11 @@ func NewSpliteRaster(offset uint16, length, occurrence int) SplitRaster {
 	}
 }
 
-func (s *SplitRaster) Boundaries() (uint16, uint16) {
+func (s *SplitRaster) Boundaries() (offset, end uint16) {
 	return s.Offset, s.Offset + uint16(s.Length)
 }
 
+// CpcColorStringFromHardwareNumber returns the color name string for the given hardware byte value.
 // nolint: funlen, gocyclo
 func CpcColorStringFromHardwareNumber(c uint8) string {
 	if HardwareValueAreEquals(White.HardwareValues, c) {

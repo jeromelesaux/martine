@@ -110,9 +110,9 @@ func (a *AnalyzeBoard) SetAddTile(x, y, index int, tl *image.NRGBA, isNew bool) 
 	return len(a.BoardTiles) - 1
 }
 
-func (a *AnalyzeBoard) AddTile(sprite *Tile, x, y int) {
+func (a *AnalyzeBoard) AddTile(spr *Tile, x, y int) {
 	for i, v := range a.BoardTiles {
-		if TilesAreEquals(v.Tile, sprite) {
+		if TilesAreEquals(v.Tile, spr) {
 			a.BoardTiles[i].Occurrence++
 			a.BoardTiles[i].TilePositions = append(a.BoardTiles[i].TilePositions, TilePosition{PixelX: x, PixelY: y})
 			break
@@ -120,12 +120,12 @@ func (a *AnalyzeBoard) AddTile(sprite *Tile, x, y int) {
 	}
 }
 
-func (a *AnalyzeBoard) NewTile(sprite *Tile, x, y, index int) {
+func (a *AnalyzeBoard) NewTile(spr *Tile, x, y, index int) {
 	// get the last index
 	b := BoardTile{
 		New:           true,
 		TilePositions: make([]TilePosition, 0),
-		Tile:          sprite,
+		Tile:          spr,
 		Occurrence:    1,
 		Index:         index}
 	b.TilePositions = append(b.TilePositions, TilePosition{PixelX: x, PixelY: y})
@@ -171,7 +171,7 @@ func (a *AnalyzeBoard) TileIndex(tile *Tile, tiles []BoardTile) int {
 	return 0
 }
 
-// return the image in tiles image
+// TilesImage returns the tile map as a 2D slice of images.
 func (a *AnalyzeBoard) TilesImage() [][]image.Image {
 
 	tiles := make([][]image.Image, len(a.TileMap))
@@ -309,7 +309,7 @@ func NewTile(size constants.Size) *Tile {
 }
 
 func ExtractTile(im image.Image, size constants.Size, posX, posY int) (*Tile, error) {
-	sprite := NewTile(size)
+	sprt := NewTile(size)
 	var xSpr, ySpr int
 	onError := false
 	for y := posY; y < (posY + size.Height); y++ {
@@ -324,15 +324,15 @@ func ExtractTile(im image.Image, size constants.Size, posX, posY int) (*Tile, er
 				break
 			}
 			c := im.At(x, y)
-			sprite.Colors[xSpr][ySpr] = c
+			sprt.Colors[xSpr][ySpr] = c
 			xSpr++
 		}
 		ySpr++
 	}
 	if onError {
-		return sprite, errors.ErrorSizeOverflow
+		return sprt, errors.ErrorSizeOverflow
 	}
-	return sprite, nil
+	return sprt, nil
 }
 
 func GetTile(boards []BoardTile, x, y int) *Tile {
@@ -466,12 +466,12 @@ func (a *AnalyzeBoard) Image(filePath string, bt []BoardTile, size constants.Siz
 			Max: image.Point{X: size.Width, Y: size.Height},
 		})
 	for _, b := range bt {
-		sprite := b.Tile
+		tl := b.Tile
 		for _, tp := range b.TilePositions {
 			var x, y int
-			for i := tp.PixelX; i < tp.PixelX+sprite.Size.Width; i++ {
-				for j := tp.PixelY; j < tp.PixelY+sprite.Size.Height; j++ {
-					c := sprite.Colors[x][y]
+			for i := tp.PixelX; i < tp.PixelX+tl.Size.Width; i++ {
+				for j := tp.PixelY; j < tp.PixelY+tl.Size.Height; j++ {
+					c := tl.Colors[x][y]
 					im.Set(i, j, c)
 					y++
 				}
@@ -528,47 +528,36 @@ func (a *AnalyzeBoard) SaveOcpWindowFile(folderpath string, palette color.Palett
 }
 
 func (a *AnalyzeBoard) SaveTiles(folderpath string, palette color.Palette, mode uint8, cfg *config.MartineConfig) error {
-	var tiles strings.Builder
 	spriteFolder := filepath.Join(folderpath, "sprites")
-	err := os.Mkdir(spriteFolder, os.ModePerm)
-	if err != nil {
+	if err := os.Mkdir(spriteFolder, os.ModePerm); err != nil {
 		return err
 	}
+	return a.saveTilesImpl(folderpath, spriteFolder, palette, mode, cfg)
+}
+
+func (a *AnalyzeBoard) SaveAllTiles(folderpath string, palette color.Palette, mode uint8, cfg *config.MartineConfig) error {
+	return a.saveTilesImpl(folderpath, "", palette, mode, cfg)
+}
+
+func (a *AnalyzeBoard) saveTilesImpl(folderpath, spriteFolder string, palette color.Palette, mode uint8, cfg *config.MartineConfig) error {
+	var tiles strings.Builder
 	for _, v := range a.BoardTiles {
 		if !v.New {
 			continue
 		}
 		fmt.Fprintf(&tiles, "tile_%0.2d\n", v.Index)
-		err := png.Png(filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", v.Index)), v.Tile.Image())
-		if err != nil {
-			return err
+		if spriteFolder != "" {
+			if err := png.Png(filepath.Join(spriteFolder, fmt.Sprintf("%.4d.png", v.Index)), v.Tile.Image()); err != nil {
+				return err
+			}
 		}
 		d, _, _, err := sprite.ToSprite(v.Tile.Image(), palette, a.TileSize, mode, cfg)
 		if err != nil {
 			return err
 		}
 		tiles.WriteString(ascii.FormatAssemblyDatabyte(d, "\n"))
-
 	}
-
 	return amsdos.SaveStringOSFile(filepath.Join(folderpath, "tiles.asm"), tiles.String())
-}
-
-func (a *AnalyzeBoard) SaveAllTiles(folderpath string, palette color.Palette, mode uint8, cfg *config.MartineConfig) error {
-	var (
-		tiles string
-	)
-	for _, v := range a.BoardTiles {
-		if v.New {
-			tiles += fmt.Sprintf("tile_%0.2d\n", v.Index)
-			d, _, _, err := sprite.ToSprite(v.Tile.Image(), palette, a.TileSize, mode, cfg)
-			if err != nil {
-				return err
-			}
-			tiles += ascii.FormatAssemblyDatabyte(d, "\n")
-		}
-	}
-	return amsdos.SaveStringOSFile(filepath.Join(folderpath, "tiles.asm"), tiles)
 }
 
 func (a *AnalyzeBoard) SaveSchema(filePath string) error {
@@ -634,7 +623,7 @@ func (a *AnalyzeBoard) SaveAssemblyTiles(filePath string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	_, err = f.WriteString("tilemap\n")
 	if err != nil {
 		return err

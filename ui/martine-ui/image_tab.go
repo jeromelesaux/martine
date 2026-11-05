@@ -99,7 +99,7 @@ func (m *MartineUI) ApplyOneImage(me *menu.ImageMenu) {
 	me.SetPaletteImage(png.PalToImage(me.Palette()))
 }
 
-// nolint: funlen
+// nolint: funlen, gocyclo
 func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 	me.SetWindow(m.window)
 	importOpen := newImportButton(m, me)
@@ -408,20 +408,7 @@ func (m *MartineUI) newImageTransfertTab(me *menu.ImageMenu) *fyne.Container {
 				),
 				container.New(
 					layout.NewVBoxLayout(),
-					widget.NewButton("show cmd", func() {
-						e := widget.NewMultiLineEntry()
-						e.SetText(me.CmdLine())
-
-						d := dialog.NewCustom("Command line generated",
-							"Ok",
-							e,
-							m.window)
-						log.GetLogger().Info("%s\n", me.CmdLine())
-						size := m.window.Content().Size()
-						size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
-						d.Resize(size)
-						d.Show()
-					}),
+					m.newShowCmdButton(me.CmdLine),
 					applyButton,
 					editButton,
 				),

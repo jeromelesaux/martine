@@ -1,3 +1,4 @@
+// Package ui provides the martine graphical user interface.
 package ui
 
 import (
@@ -187,7 +188,7 @@ func (m *MartineUI) AnimateApply(a *menu.AnimateMenu) {
 // nolint:funlen, gocognit
 func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
 	a.Cfg.ScrCfg.Type = config.OcpScreenFormat
-	a.ImageMenu.SetWindow(m.window)
+	a.SetWindow(m.window)
 	importOpen := newImportButton(m, a.ImageMenu)
 
 	paletteOpen := pal.NewOpenPaletteButton(a.ImageMenu, m.window, nil)
@@ -226,7 +227,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
 					dialog.ShowError(err, m.window)
 					return
 				}
-				defer fr.Close()
+				defer func() { _ = fr.Close() }()
 				gifCfg, err := gif.DecodeConfig(fr)
 				if err != nil {
 					pi.Hide()
@@ -319,10 +320,10 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
 	})
 
 	oneLine := widget.NewCheck("Every other line", func(b bool) {
-		a.ImageMenu.Cfg.ScrCfg.Process.OneLine = b
+		a.Cfg.ScrCfg.Process.OneLine = b
 	})
 	oneRow := widget.NewCheck("Every other row", func(b bool) {
-		a.ImageMenu.Cfg.ScrCfg.Process.OneRow = b
+		a.Cfg.ScrCfg.Process.OneRow = b
 	})
 
 	return container.New(
@@ -403,20 +404,7 @@ func (m *MartineUI) newAnimateTab(a *menu.AnimateMenu) *fyne.Container {
 
 				container.New(
 					layout.NewGridLayoutWithColumns(2),
-					widget.NewButton("show cmd", func() {
-						e := widget.NewMultiLineEntry()
-						e.SetText(a.CmdLine())
-
-						d := dialog.NewCustom("Command line generated",
-							"Ok",
-							e,
-							m.window)
-						log.GetLogger().Info("%s\n", a.CmdLine())
-						size := m.window.Content().Size()
-						size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
-						d.Resize(size)
-						d.Show()
-					}),
+					m.newShowCmdButton(a.CmdLine),
 
 					applyButton,
 				),

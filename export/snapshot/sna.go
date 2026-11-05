@@ -1,3 +1,4 @@
+// Package snapshot provides CPC SNA snapshot utilities.
 package snapshot
 
 import (
@@ -16,7 +17,7 @@ func ImportInSna(filePath, snaPath string, screenMode uint8) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	header := &m.CpcHead{}
 	if err := binary.Read(f, binary.LittleEndian, header); err != nil {
 		return err
@@ -44,7 +45,7 @@ func ImportInSna(filePath, snaPath string, screenMode uint8) error {
 	if err != nil {
 		return err
 	}
-	defer w.Close()
+	defer func() { _ = w.Close() }()
 	if err := binary.Write(w, binary.LittleEndian, sna.Header); err != nil {
 		return err
 	}

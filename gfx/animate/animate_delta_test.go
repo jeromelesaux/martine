@@ -24,7 +24,7 @@ func TestOpenGif(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer fr.Close()
+	defer func() { _ = fr.Close() }()
 
 	g, err := gif.DecodeAll(fr)
 	if err != nil {
@@ -40,7 +40,7 @@ func TestOpenGif(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	os.RemoveAll("tests")
+	_ = os.RemoveAll("tests")
 }
 
 func TestInternalDelta(t *testing.T) {
@@ -62,7 +62,7 @@ func TestInternalDelta(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	os.RemoveAll("InternalDelta")
+	_ = os.RemoveAll("InternalDelta")
 }
 
 func TestHSPSimpleNodes(t *testing.T) {

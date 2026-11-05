@@ -1,3 +1,4 @@
+// Package assembly provides CPC assembly code generation utilities.
 package assembly
 
 const (

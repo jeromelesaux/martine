@@ -6,7 +6,8 @@ import (
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
-// nolint: funlen
+// NewResizeAlgorithmSelect creates the resize algorithm selection widget.
+// nolint: funlen, gocyclo
 func NewResizeAlgorithmSelect(me *menu.ImageMenu) *widget.Select {
 	resize := widget.NewSelect([]string{"NearestNeighbor",
 		"CatmullRom",

@@ -1,3 +1,4 @@
+// Package overscan provides overscan screen conversion utilities.
 package overscan
 
 import (
@@ -15,6 +16,7 @@ import (
 	"github.com/jeromelesaux/martine/log"
 )
 
+// OverscanPalette reads the palette from an overscan screen file.
 // nolint: funlen
 func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 	fr, err := os.Open(filePath)
@@ -22,7 +24,7 @@ func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 		log.GetLogger().Error("Error while opening file (%s) error %v\n", filePath, err)
 		return color.Palette{}, 0xff, err
 	}
-	defer fr.Close()
+	defer func() { _ = fr.Close() }()
 	header := &cpc.CpcHead{}
 	if err := binary.Read(fr, binary.LittleEndian, header); err != nil {
 		log.GetLogger().Error("Cannot read the Overscan Amsdos header (%s) with error :%v, trying to skip it\n", filePath, err)
@@ -47,10 +49,7 @@ func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 	}
 	log.GetLogger().Info("Read (%X)\n", len(b))
 	var mode uint8
-	isPlus := false
-	if b[(0x1ac-0x170)] == 1 {
-		isPlus = true
-	}
+	isPlus := b[(0x1ac-0x170)] == 1
 	pens := 0
 	switch b[0x184-0x170] {
 	case 0x0e:
@@ -96,7 +95,8 @@ func OverscanPalette(filePath string) (color.Palette, uint8, error) {
 	return palette, mode, nil
 }
 
-// nolint:funlen
+// Overscan exports the image data as an overscan CPC screen file.
+// nolint:funlen, gocyclo
 func Overscan(filePath string, data []byte, p color.Palette, screenMode uint8, cfg *config.MartineConfig) error {
 	o := make([]byte, 0x8000-0x80)
 
@@ -204,7 +204,8 @@ func RawOverscan(filePath string) ([]byte, error) {
 	return data, nil
 }
 
-// nolint: funlen
+// EgxOverscan exports EGX image data as an overscan CPC screen file.
+// nolint: funlen, gocyclo
 func EgxOverscan(filePath string, data []byte, p color.Palette, mode1, mode2 uint8, cfg *config.MartineConfig) error {
 	o := make([]byte, 0x8000-0x80)
 	osFilepath := cfg.AmsdosFullPath(filePath, constants.ScrExtension)

@@ -20,7 +20,6 @@ import (
 	"github.com/jeromelesaux/martine/export/compression"
 	"github.com/jeromelesaux/martine/export/diskimage"
 	"github.com/jeromelesaux/martine/export/impdraw/palette"
-	impPalette "github.com/jeromelesaux/martine/export/impdraw/palette"
 	"github.com/jeromelesaux/martine/export/impdraw/tile"
 	"github.com/jeromelesaux/martine/export/ocpartstudio/window"
 	"github.com/jeromelesaux/martine/export/spritehard"
@@ -65,9 +64,9 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 		}),
 		widget.NewCheck("export Json file", func(b bool) {
 			if b {
-				s.Cfg.ScrCfg.AddExport(config.JsonExport)
+				s.Cfg.ScrCfg.AddExport(config.JSONExport)
 			} else {
-				s.Cfg.ScrCfg.RemoveExport(config.JsonExport)
+				s.Cfg.ScrCfg.RemoveExport(config.JSONExport)
 			}
 		}),
 		widget.NewCheck("add amsdos header", func(b bool) {
@@ -123,11 +122,12 @@ func (m *MartineUI) exportSpriteBoard(s *menu.SpriteMenu, w fyne.Window) {
 	d.Show()
 }
 
-// nolint: funlen, gocognit
+// ExportSpriteBoard exports the sprite board to the selected output format.
+// nolint: funlen, gocognit, gocyclo
 func (m *MartineUI) ExportSpriteBoard(s *menu.SpriteMenu) {
 	pi := wgt.NewProgressInfinite("Saving...., Please wait.", m.window)
 	pi.Show()
-	if err := impPalette.SaveKit(
+	if err := palette.SaveKit(
 		filepath.Join(s.Cfg.ScrCfg.OutputPath, "SPRITES.KIT"),
 		s.Palette(),
 		!s.Cfg.ScrCfg.NoAmsdosHeader); err != nil {

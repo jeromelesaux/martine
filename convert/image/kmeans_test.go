@@ -14,7 +14,7 @@ import (
 func TestKmeans(t *testing.T) {
 	fr, err := os.Open("../../samples/lena-512.png")
 	require.NoError(t, err)
-	defer fr.Close()
+	defer func() { _ = fr.Close() }()
 	img, _, err := image.Decode(fr)
 	require.NoError(t, err)
 
@@ -39,5 +39,5 @@ func TestKmeans(t *testing.T) {
 	require.NoError(t, err)
 	err = png.Encode(fw, newImg)
 	require.NoError(t, err)
-	os.Remove("lena.png")
+	_ = os.Remove("lena.png")
 }

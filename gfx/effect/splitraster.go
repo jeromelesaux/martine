@@ -19,7 +19,6 @@ import (
 )
 
 func DoSpliteRaster(in image.Image, screenMode uint8, filename string, cfg *config.MartineConfig) error {
-
 	var p color.Palette
 	var bw []byte
 	var rasters *constants.SplitRasterScreen
@@ -44,9 +43,9 @@ func DoSpliteRaster(in image.Image, screenMode uint8, filename string, cfg *conf
 	return splitraster.ExportSplitRaster(filename, p, rasters, cfg)
 }
 
-// nolint: funlen, gocognit
+// ToSplitRasterCPCOld generates a split-raster screen for CPC old hardware.
+// nolint: funlen, gocognit, gocyclo
 func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg *config.MartineConfig) (color.Palette, []byte, *constants.SplitRasterScreen, error) {
-
 	var bw []byte
 	var notSplitRaster bool
 	srs := constants.NewSplitRasterScreen()
@@ -65,7 +64,8 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 
 	srIm := image.NewNRGBA(image.Rectangle{
 		Min: image.Point{X: out.Bounds().Min.X, Y: out.Bounds().Min.Y},
-		Max: image.Point{X: out.Bounds().Max.X, Y: out.Bounds().Max.Y}})
+		Max: image.Point{X: out.Bounds().Max.X, Y: out.Bounds().Max.Y},
+	})
 
 	log.GetLogger().Info("Informations palette (%d) for image (%d,%d)\n", len(p), newIm.Bounds().Max.X, newIm.Bounds().Max.Y)
 	log.GetLogger().Infoln(in.Bounds())
@@ -90,25 +90,25 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 					switch screenMode {
 					case 0:
 						for i := 0; i < 16; {
-							pixel := pixel.PixelMode0(pp, pp)
+							pix := pixel.PixelMode0(pp, pp)
 							addr := address.CpcScreenAddress(0, x+i, y, 0, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
-							bw[addr] = pixel
+							bw[addr] = pix
 							i += 2
 							firmwareColorUsed[pp] += 2
 						}
 					case 1:
 						for i := 0; i < 16; {
-							pixel := pixel.PixelMode1(pp, pp, pp, pp)
+							pix := pixel.PixelMode1(pp, pp, pp, pp)
 							addr := address.CpcScreenAddress(0, x+i, y, 1, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
-							bw[addr] = pixel
+							bw[addr] = pix
 							i += 4
 							firmwareColorUsed[pp] += 4
 						}
 					case 2:
 						for i := 0; i < 16; {
-							pixel := pixel.PixelMode2(pp, pp, pp, pp, pp, pp, pp, pp)
+							pix := pixel.PixelMode2(pp, pp, pp, pp, pp, pp, pp, pp)
 							addr := address.CpcScreenAddress(0, x+i, y, 2, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
-							bw[addr] = pixel
+							bw[addr] = pix
 							i += 8
 							firmwareColorUsed[pp] += 8
 						}
@@ -120,12 +120,10 @@ func ToSplitRasterCPCOld(in image.Image, screenMode uint8, filename string, cfg 
 				} else {
 					notSplitRaster = true
 				}
-
 			} else {
 				notSplitRaster = true
 			}
 			if notSplitRaster {
-
 				// traitement normal des pixels
 				switch screenMode {
 				case 0:
@@ -187,7 +185,7 @@ func isSplitRaster(in *image.NRGBA, pos, y, length int) bool {
 	return occ >= (length - 1)
 }
 
-func setPixelMode0(in, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cfg *config.MartineConfig) ([]byte, map[int]int) {
+func setPixelMode0(in, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cfg *config.MartineConfig) (outBw []byte, outFirmware map[int]int) {
 	c1 := in.At(x, y)
 	out.Set(x, y, c1)
 	pp1, err := palette.PalettePosition(c1, p)
@@ -206,16 +204,16 @@ func setPixelMode0(in, out *image.NRGBA, p color.Palette, x, y int, bw []byte, f
 
 	firmwareColorUsed[pp2]++
 
-	pixel := pixel.PixelMode0(pp1, pp2)
+	pix := pixel.PixelMode0(pp1, pp2)
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND
 	addr := address.CpcScreenAddress(0, x, y, 0, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
-	bw[addr] = pixel
+	bw[addr] = pix
 	return bw, firmwareColorUsed
 }
 
-func setPixelMode1(in, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cfg *config.MartineConfig) ([]byte, map[int]int) {
+func setPixelMode1(in, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cfg *config.MartineConfig) (outBw []byte, outFirmware map[int]int) {
 	c1 := in.At(x, y)
 	out.Set(x, y, c1)
 	pp1, err := palette.PalettePosition(c1, p)
@@ -249,17 +247,17 @@ func setPixelMode1(in, out *image.NRGBA, p color.Palette, x, y int, bw []byte, f
 	}
 	firmwareColorUsed[pp4]++
 
-	pixel := pixel.PixelMode1(pp1, pp2, pp3, pp4)
+	pix := pixel.PixelMode1(pp1, pp2, pp3, pp4)
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND
 	addr := address.CpcScreenAddress(0, x, y, 1, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
-	bw[addr] = pixel
+	bw[addr] = pix
 	return bw, firmwareColorUsed
 }
 
 // nolint: funlen
-func setPixelMode2(in, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cfg *config.MartineConfig) ([]byte, map[int]int) {
+func setPixelMode2(in, out *image.NRGBA, p color.Palette, x, y int, bw []byte, firmwareColorUsed map[int]int, cfg *config.MartineConfig) (outBw []byte, outFirmware map[int]int) {
 	c1 := in.At(x, y)
 	out.Set(x, y, c1)
 	pp1, err := palette.PalettePosition(c1, p)
@@ -325,11 +323,11 @@ func setPixelMode2(in, out *image.NRGBA, p color.Palette, x, y int, bw []byte, f
 	}
 	firmwareColorUsed[pp8]++
 
-	pixel := pixel.PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
+	pix := pixel.PixelMode2(pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8)
 	// MACRO PIXM0 COL2,COL1
 	// ({COL1}&8)/8 | (({COL1}&4)*4) | (({COL1}&2)*2) | (({COL1}&1)*64) | (({COL2}&8)/4) | (({COL2}&4)*8) | (({COL2}&2)*4) | (({COL2}&1)*128)
 	//	MEND
 	addr := address.CpcScreenAddress(0, x, y, 2, cfg.ScrCfg.Type.IsFullScreen(), cfg.DoubleScreenAddress)
-	bw[addr] = pixel
+	bw[addr] = pix
 	return bw, firmwareColorUsed
 }

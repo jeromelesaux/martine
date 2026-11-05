@@ -35,6 +35,7 @@ import (
 	pal "github.com/jeromelesaux/martine/ui/martine-ui/palette"
 )
 
+// ApplySprite converts and displays the sprite from the sprite menu.
 // nolint: funlen
 func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 	if s.SpriteColumns == 0 || s.SpriteRows == 0 {
@@ -64,21 +65,21 @@ func (m *MartineUI) ApplySprite(s *menu.SpriteMenu) {
 	img := image.NewNRGBA(image.Rect(0, 0, b.Bounds().Max.X, b.Bounds().Max.Y))
 	draw.Draw(img, img.Bounds(), b, b.Bounds().Min, draw.Src)
 	if !s.UsePalette {
-		pal, _, err := ci.DowngradingPalette(img, constants.Size{ColorsAvailable: colorsAvailable, Width: img.Bounds().Max.X, Height: img.Bounds().Max.Y}, s.Cfg.ScrCfg.IsPlus)
+		newPal, _, err := ci.DowngradingPalette(img, constants.Size{ColorsAvailable: colorsAvailable, Width: img.Bounds().Max.X, Height: img.Bounds().Max.Y}, s.Cfg.ScrCfg.IsPlus)
 		if err != nil {
 			pi.Hide()
 			dialog.NewError(err, m.window).Show()
 			return
 		}
-		pal = constants.FillColorPalette(pal)
-		pal = constants.SortColorsByDistance(pal)
-		s.SetPalette(pal)
+		newPal = constants.FillColorPalette(newPal)
+		newPal = constants.SortColorsByDistance(newPal)
+		s.SetPalette(newPal)
 		s.UsePalette = false
 	}
 
 	size := constants.Size{Width: s.Cfg.ScrCfg.Size.Width, Height: s.Cfg.ScrCfg.Size.Height}
-	pal := s.Palette()
-	raw, sprites, err := sprite.SplitBoardToSprite(s.OriginalBoard().Image, pal, s.SpriteColumns, s.SpriteRows, s.Cfg.ScrCfg.Mode, s.Cfg.ScrCfg.Type.IsSpriteHard(), size)
+	currentPal := s.Palette()
+	raw, sprites, err := sprite.SplitBoardToSprite(s.OriginalBoard().Image, currentPal, s.SpriteColumns, s.SpriteRows, s.Cfg.ScrCfg.Mode, s.Cfg.ScrCfg.Type.IsSpriteHard(), size)
 	if err != nil {
 		pi.Hide()
 		dialog.NewError(err, m.window).Show()
@@ -297,27 +298,14 @@ func (m *MartineUI) newSpriteTab(s *menu.SpriteMenu) *fyne.Container {
 			),
 			container.New(
 				layout.NewVBoxLayout(),
-				widget.NewButton("show cmd", func() {
-					e := widget.NewMultiLineEntry()
-					e.SetText(s.CmdLine())
-
-					d := dialog.NewCustom("Command line generated",
-						"Ok",
-						e,
-						m.window)
-					log.GetLogger().Info("%s\n", s.CmdLine())
-					size := m.window.Content().Size()
-					size = fyne.Size{Width: size.Width / 2, Height: size.Height / 2}
-					d.Resize(size)
-					d.Show()
-				}),
+				m.newShowCmdButton(s.CmdLine),
 				applyButton,
 			),
 		),
 	)
 }
 
-// nolint: funlen, gocognit
+// nolint: funlen, gocognit, gocyclo
 func applySpriteBoardFromGif(s *menu.SpriteMenu, m *MartineUI) *widget.Button {
 	return widget.NewButtonWithIcon("From Gif", theme.FileImageIcon(), func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
@@ -400,7 +388,8 @@ func applySpriteBoardFromGif(s *menu.SpriteMenu, m *MartineUI) *widget.Button {
 	})
 }
 
-// nolint: funlen, gocognit
+// ImportSpriteBoard creates the import sprite board button widget.
+// nolint: funlen, gocognit, gocyclo
 func ImportSpriteBoard(m *MartineUI) *widget.Button {
 	return widget.NewButtonWithIcon("Import", theme.FileImageIcon(), func() {
 		d := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {

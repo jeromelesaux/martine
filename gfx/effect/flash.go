@@ -21,7 +21,7 @@ func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, cfg *con
 		if err != nil {
 			return err
 		}
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 		in, _, err := image.Decode(f)
 		if err != nil {
 			return err
@@ -45,6 +45,7 @@ func Flash(filepath1, filepath2, palpath1, palpath2 string, m1, m2 int, cfg *con
 	return ocpartstudio.FlashLoader(filename1, filename2, p1, p2, uint8(m1), uint8(m2), cfg)
 }
 
+// AutoFlash generates a flash screen animation from a single input image.
 // nolint: funlen
 func AutoFlash(in image.Image,
 	cfg *config.MartineConfig,
@@ -118,15 +119,7 @@ func AutoFlash(in image.Image,
 	if flashMode < 0 {
 		flashMode = 2
 	}
-
-	switch flashMode {
-	case 0:
-		cfg.ScrCfg.Size = constants.Mode0
-	case 1:
-		cfg.ScrCfg.Size = constants.Mode1
-	case 2:
-		cfg.ScrCfg.Size = constants.Mode2
-	}
+	cfg.ScrCfg.Size = constants.NewSizeMode(uint8(flashMode), false)
 
 	flashPaletteFilename2 := strings.ToUpper(name)[0:namesize] + "2.PAL"
 	flashPalettePath2 := filepath.Join(cfg.ScrCfg.OutputPath, flashPaletteFilename2)

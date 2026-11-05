@@ -1,3 +1,4 @@
+// Package image provides image conversion utilities.
 package image
 
 import (
@@ -74,6 +75,7 @@ func Min(v0, v1 uint32) uint32 {
 	return v1
 }
 
+// LumSaturation adjusts the luminance and saturation of a color.
 // nolint: funlen
 func LumSaturation(c color.Color, lumi, satur float64) color.Color {
 	var r, g, b float64
@@ -82,15 +84,15 @@ func LumSaturation(c color.Color, lumi, satur float64) color.Color {
 	r = float64(r0 >> 8)
 	g = float64(g0 >> 8)
 	b = float64(b0 >> 8)
-	max := math.Max(r, math.Max(g, b))
-	min := math.Min(r, math.Min(g, b))
-	dif := max - min
+	maxVal := math.Max(r, math.Max(g, b))
+	minVal := math.Min(r, math.Min(g, b))
+	dif := maxVal - minVal
 	hue := 0.0
-	if max > min {
-		if max == 0 {
+	if maxVal > minVal {
+		if maxVal == 0 {
 			g = (b-r)/dif*60. + 120.
 		} else {
-			if b == max {
+			if b == maxVal {
 				g = (r-g)/dif*60. + 240.
 			} else {
 				t := 0.
@@ -106,46 +108,46 @@ func LumSaturation(c color.Color, lumi, satur float64) color.Color {
 		}
 		hue *= 255. / 360.
 	}
-	sat := satur * (dif / max) * 255.
-	bri := lumi * max
+	sat := satur * (dif / maxVal) * 255.
+	bri := lumi * maxVal
 	r = bri
 	g = bri
 	b = bri
 
 	if sat != 0 {
-		max = bri
+		maxVal = bri
 		dif = bri * sat / 255.
-		min = bri - dif
+		minVal = bri - dif
 		h := hue * 360. / 255.
 		if h < 60. {
-			r = max
-			g = h*dif/60. + min
-			b = min
+			r = maxVal
+			g = h*dif/60. + minVal
+			b = minVal
 		} else {
 			if h < 120. {
-				r = -(h-120.)*dif/60. + min
-				g = max
-				b = min
+				r = -(h-120.)*dif/60. + minVal
+				g = maxVal
+				b = minVal
 			} else {
 				if h < 180. {
-					r = min
-					g = max
-					b = (h-120.)*dif/60. + min
+					r = minVal
+					g = maxVal
+					b = (h-120.)*dif/60. + minVal
 				} else {
 					if h < 240. {
-						r = min
-						g = -(h-240.)*dif/60. + min
-						b = max
+						r = minVal
+						g = -(h-240.)*dif/60. + minVal
+						b = maxVal
 					} else {
 						if h < 300. {
-							r = (h-240.)*dif/60. + min
-							g = min
-							b = max
+							r = (h-240.)*dif/60. + minVal
+							g = minVal
+							b = maxVal
 						} else {
 							if h <= 360. {
-								r = max
-								g = min
-								b = -(h-360.)*dif/60 + min
+								r = maxVal
+								g = minVal
+								b = -(h-360.)*dif/60 + minVal
 							} else {
 								r = 0
 								g = 0
@@ -383,8 +385,9 @@ func SplitImage(i image.Image) (raw1, raw2 *image.NRGBA, err error) {
 	if err != nil {
 		return raw1, raw2, err
 	}
-
-	f.Close()
+	if err := f.Close(); err != nil {
+		return raw1, raw2, err
+	}
 
 	f2, err := os.Create("imagedown.png")
 	if err != nil {
@@ -395,6 +398,8 @@ func SplitImage(i image.Image) (raw1, raw2 *image.NRGBA, err error) {
 	if err != nil {
 		return raw1, raw2, err
 	}
-	f2.Close()
+	if err := f2.Close(); err != nil {
+		return raw1, raw2, err
+	}
 	return raw1, raw2, err
 }

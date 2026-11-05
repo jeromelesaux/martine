@@ -20,7 +20,7 @@ import (
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
-// nolint: funlen, gocognit
+// nolint: funlen, gocognit, gocyclo
 func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 	cont := container.NewVBox(
 		container.NewHBox(
@@ -71,9 +71,9 @@ func (m *MartineUI) exportTilemapDialog(w fyne.Window) {
 			}),
 			widget.NewCheck("export Json file", func(b bool) {
 				if b {
-					m.tilemap.Cfg.ScrCfg.AddExport(config.JsonExport)
+					m.tilemap.Cfg.ScrCfg.AddExport(config.JSONExport)
 				} else {
-					m.tilemap.Cfg.ScrCfg.RemoveExport(config.JsonExport)
+					m.tilemap.Cfg.ScrCfg.RemoveExport(config.JSONExport)
 				}
 			}),
 			widget.NewCheck("add amsdos header", func(b bool) {

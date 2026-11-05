@@ -1,3 +1,4 @@
+// Package palette provides palette conversion utilities.
 package palette
 
 import (
@@ -17,4 +18,13 @@ func PalettePosition(c color.Color, p color.Palette) (int, error) {
 		}
 	}
 	return -1, errors.ErrorColorNotFound
+}
+
+// PalettePositionOrDefault returns the palette index of c, or 0 if not found.
+func PalettePositionOrDefault(c color.Color, p color.Palette) int {
+	idx, err := PalettePosition(c, p)
+	if err != nil {
+		return 0
+	}
+	return idx
 }

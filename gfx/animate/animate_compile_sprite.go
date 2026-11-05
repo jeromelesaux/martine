@@ -54,33 +54,27 @@ func (z *Z80HspNode) NextRegister() Z80Register {
 	return z.internalNextRegister(registers)
 }
 
-func (z *Z80HspNode) internalNextRegister(registers []Z80Register) Z80Register {
+var nextRegister = map[Z80Register]Z80Register{
+	NoneRegister: A,
+	A:            B,
+	B:            C,
+	C:            D,
+	D:            E,
+	E:            A,
+}
 
+func (z *Z80HspNode) internalNextRegister(registers []Z80Register) Z80Register {
 	registers = append(registers, z.register)
 	if z.next != nil {
 		return z.next.internalNextRegister(registers)
 	}
-	if registers[len(registers)-1] == NoneRegister {
-		return A
-	}
-	if registers[len(registers)-1] == A {
-		return B
-	}
-	if registers[len(registers)-1] == B {
-		return C
-	}
-	if registers[len(registers)-1] == C {
-		return D
-	}
-	if registers[len(registers)-1] == D {
-		return E
-	}
-	if registers[len(registers)-1] == E {
-		return A
+	if r, ok := nextRegister[registers[len(registers)-1]]; ok {
+		return r
 	}
 	return A
 }
 
+// InitOpcode returns the Z80 opcode string for this node.
 // nolint: gocognit, gocyclo
 func (z *Z80HspNode) InitOpcode() string {
 
@@ -201,22 +195,9 @@ func ExportCompiledSpriteHard(c *transformation.DeltaCollection) string {
 	return code
 }
 
-// sprite width, size to change the line
+// ExportCompiledSprite exports a compiled sprite from a delta collection.
 func ExportCompiledSprite(c *transformation.DeltaCollection) string {
-	items := c.ItemsSortByByte()
-	optim := NewZ80HspNode(0, 0, true, NoneRegister, nil)
-	for _, v := range items {
-		var already = false
-		reg := optim.NextRegister()
-		for _, offset := range v.Offsets {
-			node := NewZ80HspNode(v.Byte, offset, already, reg, nil)
-			optim.SetLastNode(node)
-			already = true
-		}
-	}
-	code := optim.Code()
-	code += "ret\n"
-	return code
+	return ExportCompiledSpriteHard(c)
 }
 
 func AnalyzeSpriteBoard(spr [][]byte) []*transformation.DeltaCollection {

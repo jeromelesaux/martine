@@ -1,3 +1,4 @@
+// Package widget provides custom UI widgets.
 package widget
 
 import (
@@ -7,6 +8,7 @@ import (
 	"github.com/jeromelesaux/martine/ui/martine-ui/menu"
 )
 
+// NewDitheringSelect creates the dithering algorithm selection widget.
 // nolint: funlen
 func NewDitheringSelect(me *menu.ImageMenu) *widget.Select {
 	dithering := widget.NewSelect([]string{

@@ -29,12 +29,12 @@ type TilemapMenu struct {
 	currentTile  transformation.Tile
 }
 
-func (tm *TilemapMenu) CurrentTile() transformation.Tile {
-	return tm.currentTile
+func (me *TilemapMenu) CurrentTile() transformation.Tile {
+	return me.currentTile
 }
 
-func (tm *TilemapMenu) ResetExport() {
-	tm.Cfg.Reset()
+func (me *TilemapMenu) ResetExport() {
+	me.Cfg.Reset()
 }
 
 func NewTilemapMenu() *TilemapMenu {
@@ -49,64 +49,64 @@ func NewTilemapMenu() *TilemapMenu {
 	return t
 }
 
-func (i *TilemapMenu) CmdLine() string {
+func (me *TilemapMenu) CmdLine() string {
 	exec, err := os.Executable()
 	if err != nil {
 		log.GetLogger().Error("error while getting executable path :%v\n", err)
 		return exec
 	}
-	if i.OriginalImagePath() != "" {
-		exec += constants.InOptionLabel + i.OriginalImagePath()
+	if me.OriginalImagePath() != "" {
+		exec += constants.InOptionLabel + me.OriginalImagePath()
 	}
-	if i.Cfg.ScrCfg.IsPlus {
+	if me.Cfg.ScrCfg.IsPlus {
 		exec += constants.PlusOptionLabel
 	}
-	if i.Cfg.ScrCfg.Type.IsFullScreen() {
+	if me.Cfg.ScrCfg.Type.IsFullScreen() {
 		exec += constants.FullscreenOptionLabel
 	}
-	if i.Cfg.ScrCfg.Type.IsSprite() {
-		width, widthText, err := i.GetWidth()
+	if me.Cfg.ScrCfg.Type.IsSprite() {
+		width, widthText, err := me.GetWidth()
 		if err != nil {
 			log.GetLogger().Error("cannot convert width value :%s error :%v\n", widthText, err)
 		} else {
 			exec += constants.WidthOptionLabel + strconv.Itoa(width)
 		}
-		height, heightText, err := i.GetHeight()
+		height, heightText, err := me.GetHeight()
 		if err != nil {
 			log.GetLogger().Error("cannot convert height value :%s error :%v\n", heightText, err)
 		} else {
 			exec += constants.HeightOptionLabel + strconv.Itoa(height)
 		}
 	}
-	if i.Cfg.ScrCfg.Type.IsSpriteHard() {
+	if me.Cfg.ScrCfg.Type.IsSpriteHard() {
 		exec += constants.SpritehardOptionLabel
 	}
-	if i.Cfg.ScrCfg.Process.ApplyDithering {
-		if i.Cfg.ScrCfg.Process.Dithering.WithQuantification {
+	if me.Cfg.ScrCfg.Process.ApplyDithering {
+		if me.Cfg.ScrCfg.Process.Dithering.WithQuantification {
 			exec += constants.QuantizationOptionLabel
 		} else {
-			exec += constants.MultiplierOptionLabel + fmt.Sprintf("%.2f", i.Cfg.ScrCfg.Process.Dithering.Multiplier)
+			exec += constants.MultiplierOptionLabel + fmt.Sprintf("%.2f", me.Cfg.ScrCfg.Process.Dithering.Multiplier)
 		}
-		exec += constants.DitheringOptionLabel + strconv.Itoa(i.Cfg.ScrCfg.Process.Dithering.Algo)
+		exec += constants.DitheringOptionLabel + strconv.Itoa(me.Cfg.ScrCfg.Process.Dithering.Algo)
 		// stockage du numéro d'algo
 	}
-	exec += constants.ModeOptionLabel + strconv.Itoa(int(i.Cfg.ScrCfg.Mode))
-	if i.Cfg.ScrCfg.Process.Reducer != 0 {
-		exec += constants.ReducerOptionLabel + strconv.Itoa(i.Cfg.ScrCfg.Process.Reducer)
+	exec += constants.ModeOptionLabel + strconv.Itoa(int(me.Cfg.ScrCfg.Mode))
+	if me.Cfg.ScrCfg.Process.Reducer != 0 {
+		exec += constants.ReducerOptionLabel + strconv.Itoa(me.Cfg.ScrCfg.Process.Reducer)
 	}
 	// resize algo
-	if i.ResizeAlgoNumber != 0 {
-		exec += " -algo " + strconv.Itoa(i.ResizeAlgoNumber)
+	if me.ResizeAlgoNumber != 0 {
+		exec += " -algo " + strconv.Itoa(me.ResizeAlgoNumber)
 	}
-	if i.Cfg.ScrCfg.Process.Brightness != 0 {
-		exec += " -brightness " + fmt.Sprintf("%.2f", i.Cfg.ScrCfg.Process.Brightness)
+	if me.Cfg.ScrCfg.Process.Brightness != 0 {
+		exec += " -brightness " + fmt.Sprintf("%.2f", me.Cfg.ScrCfg.Process.Brightness)
 	}
-	if i.Cfg.ScrCfg.Process.Saturation != 0 {
-		exec += " -saturation " + fmt.Sprintf("%.2f", i.Cfg.ScrCfg.Process.Saturation)
+	if me.Cfg.ScrCfg.Process.Saturation != 0 {
+		exec += " -saturation " + fmt.Sprintf("%.2f", me.Cfg.ScrCfg.Process.Saturation)
 	}
 
 	exec += " -tilemap"
-	i.CmdLineGenerate = exec
+	me.CmdLineGenerate = exec
 	return exec
 }
 

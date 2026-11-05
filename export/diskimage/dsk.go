@@ -1,3 +1,4 @@
+// Package diskimage provides DSK disk image utilities.
 package diskimage
 
 import (
@@ -8,6 +9,7 @@ import (
 	"github.com/jeromelesaux/martine/log"
 )
 
+// ImportInDsk copies all output files into a new CPC DSK disk image.
 // nolint: gocyclo
 func ImportInDsk(filePath string, cfg *config.MartineConfig) error {
 	var suffix string

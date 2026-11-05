@@ -28,7 +28,7 @@ type MartineConfig struct {
 	TileIterationY  int
 	CustomDimension bool
 	DskFiles        []string
-	Tiles           *export.JsonSlice
+	Tiles           *export.JSONSlice
 	DeltaMode       bool
 
 	Flash                  bool
@@ -51,13 +51,13 @@ type MartineConfig struct {
 	DoubleScreenAddress bool
 }
 
-func (m *MartineConfig) Reset() {
-	m.ScrCfg.Reset()
-	m.ContainerCfg.Reset()
+func (e *MartineConfig) Reset() {
+	e.ScrCfg.Reset()
+	e.ContainerCfg.Reset()
 }
 
-func (m *MartineConfig) HasContainerExport(c ContainerFormat) bool {
-	return m.ContainerCfg.HasExport(c)
+func (e *MartineConfig) HasContainerExport(c ContainerFormat) bool {
+	return e.ContainerCfg.HasExport(c)
 }
 
 func MaskIsAllowed(mode, value uint8) bool {
@@ -103,7 +103,7 @@ func NewMartineConfig(input, output string) *MartineConfig {
 			Rotation3DX0: -1,
 			Rotation3DY0: -1,
 		},
-		Tiles:      export.NewJsonSlice(),
+		Tiles:      export.NewJSONSlice(),
 		InkSwapper: make(map[int]int),
 		LineWidth:  0x50,
 	}

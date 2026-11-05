@@ -135,13 +135,6 @@ func DepackOCP(buf []byte) ([]byte, error) {
 	return bmpCpc, nil
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 func RawScr(filePath string) ([]byte, error) {
 	fr, err := os.Open(filePath)
 	if err != nil {
@@ -169,9 +162,9 @@ func RawScr(filePath string) ([]byte, error) {
 		return nil, err
 	}
 
-	var sz int = min(0x4000, len(bf))
+	sz := min(0x4000, len(bf))
 
-	var rawSrc []byte = make([]byte, sz)
+	rawSrc := make([]byte, sz)
 	for i := 0; i < sz; i++ {
 		rawSrc[i] = bf[i]
 	}

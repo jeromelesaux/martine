@@ -1,3 +1,4 @@
+// Package palette provides palette conversion utilities.
 package palette
 
 import (

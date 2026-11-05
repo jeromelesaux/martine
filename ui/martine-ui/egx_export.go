@@ -49,9 +49,9 @@ func (m *MartineUI) exportEgxDialog(cfg *config.MartineConfig, w fyne.Window) {
 			}),
 			widget.NewCheck("export Json file", func(b bool) {
 				if b {
-					cfg.ScrCfg.AddExport(config.JsonExport)
+					cfg.ScrCfg.AddExport(config.JSONExport)
 				} else {
-					cfg.ScrCfg.RemoveExport(config.JsonExport)
+					cfg.ScrCfg.RemoveExport(config.JSONExport)
 				}
 			}),
 			widget.NewCheck("add amsdos header", func(b bool) {
@@ -119,6 +119,7 @@ func (m *MartineUI) exportEgxDialog(cfg *config.MartineConfig, w fyne.Window) {
 	d.Show()
 }
 
+// ExportEgxImage exports the EGX image from the double image menu.
 // nolint: funlen
 func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	pi := wgt.NewProgressInfinite("Saving...., please wait.", m.window)
@@ -133,7 +134,7 @@ func (m *MartineUI) ExportEgxImage(me *menu.DoubleImageMenu) {
 	cfg.EgxMode2 = me.RightImage.Cfg.ScrCfg.Mode
 
 	// palette export
-	defer os.Remove("temporary_palette.kit")
+	defer func() { _ = os.Remove("temporary_palette.kit") }()
 
 	if err := impPalette.SaveKit("temporary_palette.kit", me.ResultImage.Cfg.PalCfg.Palette, false); err != nil {
 		pi.Hide()

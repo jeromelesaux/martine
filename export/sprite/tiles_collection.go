@@ -1,3 +1,4 @@
+// Package sprite provides sprite conversion and export utilities.
 package sprite
 
 import (
@@ -56,7 +57,7 @@ func (s *TilesHistorical) Save(folderpath string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	return json.NewEncoder(f).Encode(s)
 }
 
