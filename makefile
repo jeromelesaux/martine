@@ -102,12 +102,12 @@ build-windows-i386:
 	(make archive ARCH=386 OS=windows  EXT=.exe)
 
 package-darwin:
-	(make init ARCH=amd64 OS=darwin)
+	(make init ARCH=${ARCHITECTURE} OS=darwin)
 	@echo "Compilation and packaging for darwin"
-	GOARCH=amd64 fyne package -os darwin -icon ../../martine-logo.png --source-dir ${SOURCEDIR} -name martine --app-version $(appversion)
-	mkdir -p ${BINARY}/martine-darwin-amd64/
-	cp -r martine.app ${BINARY}/martine-darwin-amd64/
-	(make archive ARCH=amd64 OS=darwin)
+	GOARCH=${ARCHITECTURE} fyne package -os darwin -icon ../../martine-logo.png --source-dir ${SOURCEDIR} -name martine --app-version $(appversion)
+	mkdir -p ${BINARY}/martine-darwin-${ARCHITECTURE}/
+	cp -r martine.app ${BINARY}/martine-darwin-${ARCHITECTURE}/
+	(make archive ARCH=${ARCHITECTURE} OS=darwin)
 
 package-windows:
 	(make init ARCH=386 OS=windows  EXT=.exe)
